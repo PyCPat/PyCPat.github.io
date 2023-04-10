@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        luinfo = self._load_xml_attributes(luinfo, elt)
+        luinfo["definition"] = ""
+        luinfo["sentenceCount"] = AttrDict()
+        luinfo["lexeme"] = <a id="change">[]</a>
+
+        for sub in elt:
+            if sub.tag.endswith(&quotdefinition&quot):
+                luinfo[&quotdefinition&quot] = self._strip_tags(sub.text)</code></pre><h3>After Change</h3><pre><code class='java'>
+        luinfo[&quotlexemes&quot] = PrettyList()   &#47&#47 multiword LUs have multiple lexemes
+        luinfo[&quotsemTypes&quot] = PrettyList()  &#47&#47 an LU can have multiple semtypes
+
+        for <a id="change">sub</a> in elt:
+            if sub.tag.endswith(&quotdefinition&quot):
+                luinfo[&quotdefinition&quot] = self._strip_tags(sub.text)
+            elif sub.tag.endswith(&quotsentenceCount&quot):
+                luinfo[&quotsentenceCount&quot] = self._load_xml_attributes(
+                    AttrDict(), sub)
+            elif sub.tag.endswith(&quotlexeme&quot):
+                luinfo[&quotlexemes&quot].append(self._load_xml_attributes(AttrDict(), sub))
+            elif sub.tag.endswith(&quotsemType&quot):
+                semtypeinfo<a id="change"> = </a>self._load_xml_attributes(AttrDict(), sub)
+                <a id="change">luinfo[&quotsemTypes&quot].append(</a>self.semtype(semtypeinfo.ID)<a id="change">)</a>
+
+        return luinfo
+
+    def _handle_lexunit_elt(self, elt, ignorekeys):</code></pre>

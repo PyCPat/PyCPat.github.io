@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        try:
+            &#47&#47 Check if the backend requires special preparation / calling
+            &#47&#47   but also ignore non-numpy arrays -&gt; assume user wants same type back
+            <a id="change">if </a>backend in backends.CONVERT_BACKENDS and isinstance(arrays[0], np.ndarray)<a id="change">:
+                </a>return self._convert_contract(arrays, out, backend)
+
+            return self._normal_contract(arrays, out, backend)
+
+        except ValueError as err:
+            original_msg = str(err.args) if err.args else ""
+            msg = ("Internal error while evaluating `ContractExpression`. Note that few checks are performed"
+                   " - the number and rank of the array arguments must match the original expression. "
+                   "The internal error was: &quot%s&quot" % original_msg, )
+            err.args<a id="change"> = </a>msg
+            raise
+
+    def __repr__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        out = kwargs.pop(&quotout&quot, None)
+        backend = kwargs.pop(&quotbackend&quot, &quotnumpy&quot)
+        parse_constants<a id="change"> = </a><a id="change">kwargs.pop(</a>&quotparse_constants&quot, False<a id="change">)</a>
+        if kwargs:
+            raise ValueError("The only valid keyword arguments to a `ContractExpression` "
+                             "call are `out=` or `backend=`. Got: %s." % kwargs)
+</code></pre>

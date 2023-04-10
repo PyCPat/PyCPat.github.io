@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        candidate_ngrams = list(ngrams(candidate, n))
+        c_words = set(candidate_ngrams)
+
+        <a id="change">if </a>not c_words<a id="change">:
+            </a>return 0
+
+        <a id="change">for word</a> in c_words<a id="change">:
+            </a>count_w<a id="change"> = </a>candidate_ngrams.count(word) + 1
+
+            count_max = 0
+            for reference in references:
+                reference_ngrams = list(ngrams(reference, n))
+
+                count = reference_ngrams.count(word) + 1
+                count_max = max(count, count_max)
+
+        &#47&#47 TODO: count_w == candidate_ngrams.count(c_words[-1]) + 1
+        &#47&#47 (even though c_words is a set, so there is no last element, it&quots the last element returned by the iterator.)
+        &#47&#47 Is it the desired behavior?
+        <a id="change">return </a>min(count_w, count_max) / (len(candidate) + len(c_words))
+
+    @staticmethod
+    def brevity_penalty(candidate, references):</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        counts = Counter(ngrams(candidate, n))
+
+        <a id="change">if </a>not counts<a id="change">:
+            </a>return 0
+
+        max_counts = <a id="change">{}</a>
+        for reference in references:
+            reference_counts = Counter(ngrams(reference, n))
+            for ngram in counts:
+                max_counts[ngram] = max(max_counts.get(ngram, 0), reference_counts[ngram])</code></pre>
