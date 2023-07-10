@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 have much of an impact on final performance anyway. See page 8 (https://arxiv.org/pdf/2102.11972.pdf)
+        super().__init__()
+
+        inner_dim = int(dim<a id="change"> * </a>ff_mult)
+        if ffn_type == "GEGLU":
+            self.net = nn.Sequential(
+                GEGLU(dim, inner_dim),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)
+            )
+        elif ffn_type == "standard":
+            self.net = nn.Sequential(
+                nn.Linear(dim, inner_dim),
+                nn.GELU(),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)
+            )
+        elif ffn_type == "bilinear":
+            self.net<a id="change"> = </a><a id="change">nn.Sequential(
+                </a>Bilinear(dim, inner_dim),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)<a id="change">
+            )</a>
+        else:
+            print(f&quotffn_type does not match any available options&quot)
+
+        &#47&#47 despite many varieties of applying layer norms in transformers, pre-norm still seems like the best option</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        all_rows = []
+        for h_ in range(int(heads / 2)):
+            all_rows.append(lower_tri_rows * <a id="change">slopes[h_]</a>)
+            all_rows.append(upper_tri_rows * slopes[h_])
+
+        &#47&#47 The resultant bias applies the Alibi position bias looking forward to half of the heads, and backwards to the</code></pre>

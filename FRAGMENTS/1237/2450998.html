@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        for _ in range(depth):
+            attn = get_attn()
+            parallel_net = get_attn()<a id="change"> if </a>twin_attention<a id="change"> else </a>get_ff()
+
+            f = residual_fn_wrapper(attn)
+            g = residual_fn_wrapper(parallel_net)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for ind in range(depth):
+            layer_num = ind + 1
+            <a id="change">use_pkm</a> = layer_num in cast_tuple(pkm_layers)
+            parallel_net = None
+
+            attn = get_attn()
+
+            <a id="change">if use_pkm</a><a id="change">:
+                </a>parallel_net<a id="change"> = </a>get_pkm()
+            elif <a id="change">twin_attention</a><a id="change">:
+                </a>parallel_net<a id="change"> = </a>get_attn()
+            else:
+                parallel_net<a id="change"> = </a>get_ff()
+
+            f = residual_fn_wrapper(attn)
+            g = residual_fn_wrapper(parallel_net)</code></pre>

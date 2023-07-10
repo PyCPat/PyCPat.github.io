@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                in_chn = out_chn if self.use_fusion else conv_params[-1][1][-1]
+            else:
+                in_chn = fc_params[idx - 1][0]
+            <a id="change">fcs.append(</a>nn.Sequential(nn.Linear(in_chn, channels), nn.ReLU(), nn.Dropout(drop_rate))<a id="change">)</a>
+        fcs.append(nn.Linear(fc_params[-1][0], num_classes))
+        self.fc = nn.Sequential(*fcs)
+
+        self.for_inference = for_inference</code></pre><h3>After Change</h3><pre><code class='java'>
+            out_chn = np.clip((in_chn // 128) * 128, 128, 1024)
+            self.fusion_block = nn.Sequential(nn.Conv1d(in_chn, out_chn, kernel_size=1, bias=False), nn.BatchNorm1d(out_chn), nn.ReLU())
+
+        <a id="change">self.for_segmentation</a> = for_segmentation
+
+        <a id="change">fcs</a> = []
+        for idx, layer_param in enumerate(fc_params):
+            channels, drop_rate = layer_param
+            if idx == 0:
+                in_chn = out_chn if self.use_fusion else conv_params[-1][1][-1]
+            else:
+                in_chn = fc_params[idx - 1][0]
+            <a id="change">if self.for_segmentation</a><a id="change">:
+                fcs.append(nn.Sequential(</a>nn.Conv1d(in_chn, channels, kernel_size=1, bias=False),
+                                         nn.BatchNorm1d(channels), nn.ReLU(), nn.Dropout(drop_rate)<a id="change">)</a><a id="change">)</a>
+            else:
+                <a id="change">fcs.append(</a>nn.Sequential(nn.Linear(in_chn, channels), nn.ReLU(), nn.Dropout(drop_rate))<a id="change">)</a>
+        if self.for_segmentation:
+            fcs.append(nn.Conv1d(fc_params[-1][0], num_classes, kernel_size=1))
+        else:
+            fcs.append(nn.Linear(fc_params[-1][0], num_classes))</code></pre>

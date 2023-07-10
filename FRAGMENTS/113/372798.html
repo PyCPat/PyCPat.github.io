@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Layers
+        backbone = models.resnext50_32x4d(pretrained=True)
+        &#47&#47 Remove softmax layer at the end
+        backbone = nn.Sequential(*<a id="change">list(backbone.children())[:-1]</a>)
+        self.model = Trainable(backbone,
+                               name="backbone",
+                               trainable=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Layers
+        backbone = models.resnext50_32x4d(pretrained=True)
+        self.block0 = Trainable(<a id="change">nn.Sequential(
+                                    </a>backbone.conv1,
+                                    backbone.bn1,
+                                    backbone.relu,
+                                    backbone.maxpool<a id="change">)</a>,
+                                trainable=self.trainable,
+                                name="conv1")
+        self.block1 = Trainable(backbone.layer1,</code></pre>

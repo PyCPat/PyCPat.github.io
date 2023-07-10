@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.bn3 = nn.BatchNorm2d(out_planes)
+
+        self.shortcut = nn.Sequential()
+        if <a id="change">stride == 1 and in_planes != out_planes</a>:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=1,
+                          stride=1, padding=0, bias=False),</code></pre><h3>After Change</h3><pre><code class='java'>
+                               bias=False)
+        self.bn3 = nn.BatchNorm2d(out_planes)
+
+        self.shortcut = <a id="change">(stride == 1) and (in_planes == out_planes)</a>
+
+    def forward(self, x):
+        out = x if self.expand_ratio == 1 else swish(self.bn1(self.conv1(x)))
+        out = swish(self.bn2(self.conv2(out)))</code></pre>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(MergeBlock, self).__init__()
+        self.upsample = nn.Upsample(scale_factor=kernel_size[0])
+        self.conv = nn.Conv1d(in_channels=in_channel, out_channels=out_channel, kernel_size=kernel_size[1], padding=1)
+        self.act = <a id="change">nn.LeakyReLU()</a>
+
+    def forward(self, inputs):
+        x = self.upsample(inputs[0])
+        x = self.conv(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, in_channels):
+        super(Shrinkage, self).__init__()
+        self.gap = nn.AdaptiveAvgPool1d(1)
+        self.fc = <a id="change">nn.Sequential(</a>nn.Linear(in_channels, in_channels),
+                                nn.BatchNorm1d(in_channels),
+                                <a id="change">nn.LeakyReLU()</a>,
+                                <a id="change">nn.Linear(</a>in_channels, in_channels<a id="change">)</a>,
+                                nn.Sigmoid()<a id="change">)</a>
+
+    def forward(self, x):
+        x_raw = x
+        x = torch.abs(x)</code></pre>

@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        up_in_out_slice = slice(1 if not memory_efficient else None, None)
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(reversed(<a id="change">in_out[up_in_out_slice]</a>), *reversed_layer_params)):
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mid_block2 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(reversed(in_out), *reversed_layer_params)):
+            is_last = <a id="change">ind == (len(in_out) - 1)</a>
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            self.ups.append(nn.ModuleList([
+                ResnetBlock(dim_out * 2, dim_in, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(dim_in, dim_in, groups = groups) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = dim_in, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),
+                Upsample(dim_in) if <a id="change">not</a> is_last or memory_efficient else nn.Identity()
+            ]))
+
+        self.final_conv = nn.Sequential(</code></pre>

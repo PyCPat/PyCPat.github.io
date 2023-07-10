@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.processor_names = [processor.name for processor, connections in self.dag]
+        self.fixed_param_names = list(fixed_params.keys())
+        for k, v in fixed_params.items():
+            <a id="change">if v is not None</a><a id="change">:
+                </a>self.register_buffer(k, v)
+            else:
+                setattr(self, k, None)
+        self.processors = nn.ModuleList([]) &#47&#47 register modules for .to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.processor_names = [processor.name for processor in self.processors]
+        self.conditioned_params = list(conditioned)
+        self.dag_summary = {}
+        for processor, connections in <a id="change">zip(</a>self.processors, self.connections<a id="change">)</a>:
+            &#47&#47 parameters that rely on external input and not outputs of other modules and are not conditioned
+            ext_params = [k for k, v in connections.items() if v not in self.processor_names+self.conditioned_params]
+            ext_sizes = {connections[k]: size for k, size in processor.param_sizes.items() if k in ext_params}</code></pre>

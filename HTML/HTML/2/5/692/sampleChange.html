@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.LayerNorm(dim) if dual_patchnorm else None,
+        )
+
+        self.axial_pos_emb = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>2, patch_height_width, dim<a id="change">)</a> * 0.02<a id="change">)</a>
+
+        self.to_pixels = nn.Sequential(
+            LayerNorm(dim),
+            nn.Linear(dim, pixel_patch_dim),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 axial positional embeddings, parameterized by an MLP
+
+        pos_emb_dim = dim<a id="change"> // 2</a>
+
+        self.axial_pos_emb_height_mlp = nn.Sequential(
+            Rearrange(&quot... -&gt; ... 1&quot),
+            nn.Linear(1, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, dim)
+        )
+
+        self.axial_pos_emb_width_mlp = <a id="change">nn.Sequential(
+            </a>Rearrange(&quot... -&gt; ... 1&quot),
+            nn.Linear(1, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, dim)<a id="change">
+        )</a>
+
+        &#47&#47 nn.Parameter(torch.randn(2, patch_height_width, dim) * 0.02)
+
+        self.to_pixels = nn.Sequential(</code></pre>

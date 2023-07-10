@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                Upsample(dim_in)
+            ]))
+
+        final_conv_dim = dim * (2<a id="change"> if not memory_efficient</a><a id="change"> else </a>1)
+
+        self.final_conv = nn.Sequential(
+            ResnetBlock(final_conv_dim, dim, groups = resnet_groups[0]),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mid_block2 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(reversed(in_out), *reversed_layer_params)):
+            is_last = ind == (<a id="change">len(</a>in_out<a id="change">)</a> - 1)
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)</code></pre>

@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.query = nn.Parameter(torch.randn(dim))
+        self.attn_pool = Attention(dim = dim, dim_head = dim_head, heads = heads)
+
+        self.post_layers = nn.ModuleList(<a id="change">[
+            </a><a id="change">PreNorm(dim</a>, Attention(dim = dim, dim_head = dim_head, heads = heads, causal = causal)<a id="change">)</a>,
+            <a id="change">PreNorm(dim</a>, FeedForward(dim = dim, mult = ff_mult)<a id="change">)</a>
+        ])
+
+        self.to_logits = nn.Sequential(
+            Rearrange(&quotb d n -&gt; b n d&quot),</code></pre><h3>After Change</h3><pre><code class='java'>
+                PreNorm(dim, FeedForward(dim = dim, mult = ff_mult, groups = num_streams), groups = num_streams)
+            ]))
+
+        <a id="change">if </a>num_streams &gt; 1<a id="change">:
+            </a>self.query = nn.Parameter(torch.randn(dim))
+            self.attn_pool = Attention(dim = dim, dim_head = dim_head, heads = heads)
+
+        self.to_logits = nn.Sequential(</code></pre>

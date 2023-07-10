@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class FeedForward(nn.Module):
+    def __init__(self, dim, mult = 4):
+        super().__init__()
+        self.net = <a id="change">nn.Sequential(
+            nn.Linear(dim</a>, mult * dim<a id="change">, bias=False)</a>,
+            <a id="change">nn.LeakyReLU(inplace=True)</a>,
+            <a id="change">nn.Linear(</a>dim<a id="change"> * </a>mult, <a id="change">dim</a><a id="change">, bias=False)</a><a id="change">
+        )</a>
+
+    def forward(self, x, **kwargs):
+        return self.net(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        activation = default(activation, GELU)
+
+        self.glu = glu
+        self.w1 = <a id="change">nn.Linear(</a>dim, dim<a id="change"> * </a>mult * (2 if glu else 1)<a id="change">)</a>
+        self.act = activation()
+        self.dropout<a id="change"> = nn</a><a id="change">.Dropout(</a>dropout<a id="change">)</a>
+        self.w2 = <a id="change">nn.Linear(</a>dim<a id="change"> * </a>mult, dim<a id="change">)</a>
+
+    def forward(self, x, **kwargs):
+        if not self.glu:
+            x = self.w1(x)</code></pre>

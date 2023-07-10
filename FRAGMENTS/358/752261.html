@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            cardinality: num of convolution groups.
+            widen_factor: factor to reduce the input dimensionality before convolution.
+        
+        <a id="change">super(ResNeXtBottleneck, self).__init__()</a>
+        D = cardinality * out_channels // widen_factor
+        self.conv_reduce = nn.Conv2d(
+            in_channels, D, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn_reduce = nn.BatchNorm2d(D)</code></pre><h3>After Change</h3><pre><code class='java'>
+    expansion = 2
+
+    def __init__(self, in_planes, cardinality=32, bottleneck_width=4, stride=1):
+        <a id="change">super(Block, self).__init__()</a>
+        group_width = cardinality * bottleneck_width
+        self.conv1 = nn.Conv2d(in_planes, group_width, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(group_width)
+        self.conv2 = nn.Conv2d(group_width, group_width, kernel_size=3, stride=stride, padding=1, groups=cardinality, bias=False)</code></pre>

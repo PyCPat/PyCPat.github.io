@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Initialize gate to 1
+        if self.gate_type == &quotfeatures&quot:
+            self.scale = nn.Parameter(torch.ones((<a id="change">input_shape[-1]</a>,)), requires_grad=True).view(1, 1, <a id="change">input_shape[-1]</a>)
+        elif self.gate_type == &quotheads&quot:
+            self.scale = nn.Parameter(torch.ones((<a id="change">input_shape[1]</a>,)), requires_grad=True).view(1, <a id="change">input_shape[1]</a>, 1, 1)
+            self.scale = self.scale.repeat(1, 1, 1, <a id="change">input_shape[-1]</a>)
+
+        &#47&#47 Prepare streams info
+        self.streams_in_module = {&quotinputs&quot: [[self.input_name, input_shape],</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.input_shape = _streams[self.input_name]
+        assert self.dim_to_scale &gt; 0, f&quotdim_to_scale must be greater than 0!&quot
+        <a id="change">assert </a>self.dim_to_scale &lt;= len(self.input_shape), f&quotdim_to_scale must less than or equal to the number of &quot \
+                                                           f&quotinput dimensions!&quot
+        num_params = self.input_shape[self.dim_to_scale]
+</code></pre>

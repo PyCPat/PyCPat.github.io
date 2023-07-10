@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.cheb_polynomials = cheb_polynomials
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.DEVICE = <a id="change">cheb_polynomials[0]</a>.device
+        self.Theta = nn.ParameterList([nn.Parameter(torch.FloatTensor(in_channels, out_channels).to(self.DEVICE)) for _ in range(K)])
+
+    def forward(self, x, spatial_attention):</code></pre><h3>After Change</h3><pre><code class='java'>
+        W = to_scipy_sparse_matrix(edge_index)
+        assert W.shape[0] == W.shape[1]
+        D = np.diag(np.sum(W, axis=1))
+        L<a id="change"> = </a>np.array(D - W.toarray())
+        lambda_max = eigs(L, k=1, which=&quotLR&quot)[0].real
+        L_tilde = (2 * L) / lambda_max - np.identity(W.shape[0])
+        cheb_polynomials = [np.identity(L_tilde.shape[0]), L_tilde.copy()]
+        for i in range(2, K):
+            cheb_polynomials.append(2 * L_tilde * cheb_polynomials[i - 1] - cheb_polynomials[i - 2])
+        self.cheb_polynomials = <a id="change">[torch.from_numpy(i).type(torch.FloatTensor).to(DEVICE) for i in cheb_polynomials]</a>
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.DEVICE = DEVICE
+        self.Theta = nn.ParameterList([nn.Parameter(torch.FloatTensor(in_channels, out_channels).to(self.DEVICE)) for _ in range(K)])</code></pre>

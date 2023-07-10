@@ -1,0 +1,43 @@
+<html><h3>Pattern ID :1406
+</h3><img src='2665920.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                raise TypeError("Unknown Type:\t{}".format(norm))
+        self.norm0 = norm(out_channels)
+
+        <a id="change">if </a>self.concat<a id="change">:
+            </a>if self.mode == &quotres_mask&quot:
+                k= 2*out_channels + 1
+            else:
+                k = 2*out_channels
+            self.conv1<a id="change"> = </a>conv3x3(k, out_channels)
+            self.norm1<a id="change"> = </a>norm(out_channels)
+        else:
+            self.conv1 = conv3x3(out_channels, out_channels)
+            self.norm1 = norm(out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 residual structure
+        self.conv2 = []
+        self.conv3 = <a id="change">[]</a>
+        for i in range(blocks):
+            self.conv2.append(
+                nn.Sequential(*[
+                    nn.Conv2d(out_channels // 2 + 1, out_channels // 4, 5, 1, 2),
+                    nn.ReLU(True),
+                    nn.Conv2d(out_channels // 4, 1, 5, 1, 2),
+                    nn.Sigmoid()
+                ])
+            )
+            self.conv3.append(conv3x3(out_channels // 2, out_channels))
+        
+        self.bn = []
+        for _ in range(blocks):
+            self.bn.append(norm(out_channels))
+        self.bn = nn.ModuleList(self.bn)
+        self.conv2 = nn.ModuleList(self.conv2)
+        self.conv3 = <a id="change">nn.ModuleList(</a>self.conv3<a id="change">)</a>
+        self.act = act
+
+    def forward(self, from_up, from_down, mask=None):
+        from_up = self.act(self.norm0(self.up_conv(from_up)))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-21665f19cd9acd8db0bae320b79f986ec6a79eabb60d74c4c2e813314554df4aL208' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2665920</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/blocks.py</div><div id='class'> Class Name: MBEBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/b2bf89e72b262002500e8271f984d6f8afac7eb3#diff-fd72c83d7a844cbbdef927405a10ec8803d51b0f46ea91e27f31e7b97e5e3c1cL362' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2665915</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: b2bf89e72b262002500e8271f984d6f8afac7eb3</div><div id='time'> Time: 2022-10-25</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/BaseModule.py</div><div id='class'> Class Name: ResBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/36bdefca0e8670ca42b39236315121b703b9533f#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L1148' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2665921</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: 36bdefca0e8670ca42b39236315121b703b9533f</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='class'> Class Name: Unet</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/c2662a20cb783efd3351936cfabc83131060a2a6#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL546' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2665922</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: c2662a20cb783efd3351936cfabc83131060a2a6</div><div id='time'> Time: 2020-04-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='class'> Class Name: SinkhornTransformer</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

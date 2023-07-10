@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            channels += num_filters * tc_layers[i]
+
+        self.layers.add_module("attention_{}".format(len(att_layers)-1),
+                               AttentionBlock(channels, <a id="change">att_layers[-1]</a>[0], att_layers[-1][1], device))
+        channels += <a id="change">att_layers[-1]</a>[1]
+
+        channels += additional_length
+        fc_layers = list(fc_layers) + [out_channels]</code></pre><h3>After Change</h3><pre><code class='java'>
+        channels += additional_length
+        fc_layers = list(fc_layers) + [out_channels]
+
+        self.layers.add_module("fc_amalgamate", <a id="change">nn.Linear(</a>seq_length, 1<a id="change">)</a>.to(device))
+        for i in range(len(fc_layers)):
+            self.layers.add_module("fc_{}".format(i), nn.Linear(channels, fc_layers[i]).to(device))
+            channels = fc_layers[i]</code></pre>

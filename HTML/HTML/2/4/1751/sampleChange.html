@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        assert &quotdim&quot not in enc_kwargs and &quotdim&quot not in dec_kwargs, &quotdimension of either encoder or decoder must be set with `dim` keyword&quot
+
+        <a id="change">enc_kwargs[&quotdim&quot]</a> = dim
+        dec_kwargs[&quotdim&quot] = dim
+        dec_kwargs[&quotcross_attend&quot] = True
+
+        enc_num_tokens = enc_kwargs.pop(&quotnum_tokens&quot)
+        dec_num_tokens = dec_kwargs.pop(&quotnum_tokens&quot)
+
+        enc_max_seq_len = <a id="change">enc_kwargs.pop(</a>&quotmax_seq_len&quot<a id="change">)</a>
+        dec_max_seq_len = dec_kwargs.pop(&quotmax_seq_len&quot)
+
+        self.encoder = TransformerWrapper(
+            num_tokens = enc_num_tokens,</code></pre><h3>After Change</h3><pre><code class='java'>
+        dec_kwargs, kwargs = group_by_key_prefix_and_trim(&quotdec_&quot, kwargs)
+
+        assert &quotdim&quot not in enc_kwargs and &quotdim&quot not in dec_kwargs, &quotdimension of either encoder or decoder must be set with `dim` keyword&quot
+        enc_transformer_kwargs = pick_and_pop(<a id="change">[</a>&quotnum_tokens&quot, &quotmax_seq_len&quot<a id="change"></a>], enc_kwargs)
+        dec_transformer_kwargs = pick_and_pop([&quotnum_tokens&quot, &quotmax_seq_len&quot], dec_kwargs)
+
+        self.encoder = TransformerWrapper(</code></pre>

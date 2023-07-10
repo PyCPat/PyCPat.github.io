@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.cv3 = nn.Conv2d(c_, c_, 1, 1, bias=False)
+        self.cv4 = Conv(2 * c_, c2, 1, 1)
+        self.bn = nn.BatchNorm2d(2 * c_)  &#47&#47 applied to cat(cv2, cv3)
+        self.act = <a id="change">nn.LeakyReLU(0.1</a><a id="change">, inplace=True)</a>
+        self.m = nn.Sequential(*(Bottleneck(c_, c_, shortcut, g, e=1.0) for _ in range(n)))
+
+    def forward(self, x):
+        y1 = self.cv3(self.m(self.cv1(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.cv3 = nn.Conv2d(c_, c_, 1, 1, bias=False)
+        self.cv4 = Conv(2 * c_, c2, 1, 1)
+        self.bn = nn.BatchNorm2d(2 * c_)  &#47&#47 applied to cat(cv2, cv3)
+        self.act = <a id="change">nn.SiLU()</a>
+        self.m = nn.Sequential(*(Bottleneck(c_, c_, shortcut, g, e=1.0) for _ in range(n)))
+
+    def forward(self, x):
+        y1 = self.cv3(self.m(self.cv1(x)))</code></pre>

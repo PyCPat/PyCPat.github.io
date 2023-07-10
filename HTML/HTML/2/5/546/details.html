@@ -1,0 +1,33 @@
+<html><h3>Pattern ID :546
+</h3><img src='1383127.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            stride=stride, padding=padding, demod=True
+        )
+        self.scale_noise = ScaleNoise()
+        self.activation = <a id="change">FusedLeakyReLU(</a>out_channels<a id="change">)</a>
+
+    def forward(self, x, style, noise=None):
+        if self.upsample:
+            x = self.upsample(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        in_channels, out_channels, style_dim, num_conv=2, up_name=&quotbilinear&quot
+    ):
+        super().__init__()
+        self.block = nn.ModuleList(<a id="change">[
+            </a>Upsample2x(up_name),
+            Blur2d(),
+            ModulatedConv2d(in_channels, out_channels, style_dim, 3),
+            InjectNoise(),
+            nn.LeakyReLU(0.2, inplace=True)<a id="change"></a>
+        ])
+        for _ in range(num_conv-1):
+            <a id="change">self.block.extend(</a>[
+                ModulatedConv2d(out_channels, out_channels, style_dim, 3),
+                InjectNoise(),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>
+            ]<a id="change">)</a>
+    def forward(self, x, y):
+
+        for module in self.block:
+            if isinstance(module, ModulatedConv2d):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L155' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383127</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='class'> Class Name: StyleBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L354' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383138</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='class'> Class Name: Discriminator</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L243' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383133</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='class'> Class Name: ResBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

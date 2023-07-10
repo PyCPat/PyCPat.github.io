@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        for n, m in self.named_modules():
+            if &quotfc&quot in n and isinstance(m, nn.Linear):
+                <a id="change">nn.init.zeros_(</a>m.weight<a id="change">)</a>
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.Conv2d):
+                &#47&#47 as per discussion with paper authors, original in haiku is</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for n, m in self.named_modules():
+            if &quotfc&quot in n and isinstance(m, nn.Linear):
+                <a id="change">if </a>cfg.zero_init_fc<a id="change">:
+                    </a><a id="change">nn.init.zeros_(</a>m.weight<a id="change">)</a>
+                else:
+                    nn.init.normal_(m.weight, 0., .01)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)</code></pre>

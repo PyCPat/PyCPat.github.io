@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.instance_norm = nn.InstanceNorm2d(channels, eps=eps, affine=False)
+        self.layer_norm    = nn.LayerNorm((channels, resl, resl), eps=eps, elementwise_affine=False)
+
+        self.gamma = <a id="change">nn.Parameter(</a>torch.Tensor(1, channels, 1, 1)<a id="change">)</a>
+        self.beta  = nn.Parameter(torch.Tensor(1, channels, 1, 1))
+        self.gamma.data.fill_(1.)
+        self.beta.data.fill_(0.)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.layer_norm = get_normalization(&quotln&quot, channels, affine=False)
+        self.instance_norm = get_normalization(&quotin&quot, channels, affine=False)
+        self.rho   = <a id="change">nn.Parameter(</a>torch.ones(1, channels, 1, 1)<a id="change"> * 0.5</a><a id="change">)</a>
+        if affine:
+            self.affine = True
+            self.gamma = nn.Parameter(torch.ones(1, channels, 1, 1))
+            self.beta  = <a id="change">nn.Parameter(</a>torch.zeros(1, channels, 1, 1)<a id="change">)</a>
+        else: self.affine = False
+
+    def forward(self, x):
+        layer_norm = self.layer_norm(x)</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv_4 = Conv2dBlockELU(in_ch=filters[1], out_ch=filters[1], kernel_size=(1, kernel_window), padding=(0,conv_4_dilation-1), dilation=(1,conv_4_dilation), w_in=self.conv_3.w_out)
+        self.conv_classifier = nn.Conv2d(filters[1], num_classes, kernel_size=(1, self.conv_4.w_out))
+
+        self.dropout<a id="change"> = </a><a id="change">nn.Dropout(p=0.5)</a>
+
+    def forward(self, x):
+        x = torch.unsqueeze(x,1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, num_channel=10, num_classes=4, signal_length=1000, filters_n1=4, kernel_window_ssvep=59, kernel_window=19, conv_3_dilation=4, conv_4_dilation=4):
+        super().__init__()
+        self.base = MultitaskSSVEP(num_channel, num_classes, signal_length, filters_n1, kernel_window_ssvep, kernel_window, conv_3_dilation, conv_4_dilation)
+        self.fc = <a id="change">nn.Linear(</a>num_classes*2<a id="change">, out_features=num_classes)</a>
+
+    def forward(self, x):
+        x = self.base(x)
+        x = torch.flatten(x, start_dim=1)</code></pre>

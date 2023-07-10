@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            dropout = vit_dropout
+        )
+
+        for <a id="change">ind</a>, (dim_in, dim_out) in enumerate(reversed(in_out)):
+            is_last = ind == (len(in_out) - 1)
+
+            self.ups.append(nn.ModuleList([
+                resnet_block(dim_out + dim_in, dim_out, time_emb_dim = time_dim),
+                resnet_block(dim_out + dim_in, dim_out, time_emb_dim = time_dim),
+                LinearAttention(dim_out),
+                <a id="change">Upsample(</a>dim_out, dim_in<a id="change">) if </a>not is_last<a id="change"> else  </a>nn.Conv2d(dim_out, dim_in, 3, padding = 1)
+            ]))
+
+        default_out_dim = input_channels</code></pre><h3>After Change</h3><pre><code class='java'>
+            is_last = ind == (len(in_out) - 1)
+
+            self.ups.append(nn.ModuleList([
+                <a id="change">Upsample(</a>dim_out, dim_in<a id="change">, factor = factor)</a>,
+                resnet_block(dim_in * 2, dim_in, time_emb_dim = time_dim),
+                resnet_block(dim_in * 2, dim_in, time_emb_dim = time_dim),
+                LinearAttention(dim_in),</code></pre>

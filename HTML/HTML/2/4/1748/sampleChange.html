@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_dim, hidden_dim, n_classes):
+        super(Classifier, self).__init__()
+
+        self.layers = nn.ModuleList(<a id="change">[
+            </a>GCN(in_dim, hidden_dim, F.relu),
+            GCN(hidden_dim, hidden_dim, F.relu)<a id="change"></a>])
+        self.classify = nn.Linear(hidden_dim, n_classes)
+
+    def forward(self, g):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for i, (name, param) in enumerate(self.config):
+            if name is &quotlinear&quot:
+                w = <a id="change">nn.Parameter(</a>torch.ones(*param)<a id="change">)</a>
+                &#47&#47 gain=1 according to cbfinn&quots implementation
+                init.kaiming_normal_(w)
+                self.vars.append(w)
+                &#47&#47 [ch_out]
+                self.vars.append(nn.Parameter(torch.zeros(param[0])))
+            if name is &quotGraphConv&quot:
+                &#47&#47 param: in_dim, hidden_dim
+                w = nn.Parameter(torch.Tensor(param[0], param[1]))
+                init.xavier_uniform_(w)
+                self.vars.append(w)
+                self.vars.append(<a id="change">nn.Parameter(</a>torch.zeros(param[1])<a id="change">)</a>)
+                self.graph_conv.append(GraphConv(param[0], param[1], activation = F.relu))
+       
+    def forward(self, g, vars = None):</code></pre>

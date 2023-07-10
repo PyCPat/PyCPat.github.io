@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        squeezed_channels = make_divisible(int(channels * ratio), 8)
+        gating_fn = gating_fn if gating_fn else _SE_GATING_FN
+
+        self.se = nn.Sequential(<a id="change">OrderedDict(</a>[
+            (&quotpooling&quot, nn.AdaptiveAvgPool2d((1, 1))),
+            (&quotreduce&quot, Conv2d1x1(channels, squeezed_channels, bias=True)),
+            (&quotrelu&quot, inner_activation_fn(inplace=True)),
+            (<a id="change">&quotexpand&quot</a><a id="change">, Conv2d1x1(squeezed_channels, channels, bias=True)</a>),
+            (<a id="change">&quotsigmoid&quot</a><a id="change">, gating_fn()</a>),
+        ]<a id="change">)</a>)
+
+    def forward(self, x):
+        return x * self.se(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        squeezed_channels = make_divisible(int(channels * ratio), _SE_DIVISOR)
+        gating_fn = gating_fn if gating_fn else _SE_GATING_FN
+
+        layers = <a id="change">OrderedDict(</a>[]<a id="change">)</a>
+
+        layers[&quotpooling&quot] = nn.AdaptiveAvgPool2d((1, 1))
+        layers[&quotreduce&quot] = Conv2d1x1(channels, squeezed_channels, bias=True)
+        if _SE_USE_NORM:
+            layers[&quotnorm&quot] = nn.BatchNorm2d(squeezed_channels)
+        layers[&quotrelu&quot] = inner_activation_fn(inplace=True)
+        layers[&quotexpand&quot] = Conv2d1x1(squeezed_channels, channels, bias=True)
+        layers[&quotsigmoid&quot] = gating_fn()
+
+        self.se = <a id="change">nn.Sequential(</a>layers<a id="change">)</a>
+
+    def forward(self, x):
+        return x * self.se(x)
+</code></pre>

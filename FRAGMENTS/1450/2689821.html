@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                           d_model, 
+                                           scale_embedding)
+            
+        self.dropout = <a id="change">Dropout(</a>dropout<a id="change">)</a>
+        self.pos_embedding = PositionEmbedding(trg_max_len, d_model)
+        
+        if share_layer_params == False:
+            self.layers = nn.ModuleList([</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.share_layer_params = share_layer_params
+        self.n_share_across_layers = n_share_across_layers
+        self.scale_embedding = scale_embedding
+        self.norm_before_pred<a id="change"> = </a>norm_before_pred
+        self.norm_after_embedding = norm_after_embedding
+        
+        if share_src_trg_emb == False:
+            self.trg_embedding = Embedding(trg_vocab_size, 
+                                           d_model, 
+                                           scale_embedding)
+            
+        self.emb_dropout = Dropout(emb_dropout)
+        self.pos_embedding = PositionEmbedding(trg_max_len, 
+                                               d_model, 
+                                               pos_need_train)
+        
+        <a id="change">if self.norm_after_embedding == True</a><a id="change">:
+            </a>self.norm_emb<a id="change"> = </a><a id="change">LayerNorm(</a>self.d_model<a id="change">)</a>
+        
+        if share_layer_params == False:
+            self.layers = nn.ModuleList([
+                    DecoderLayer(n_heads, 
+                                 d_model, 
+                                 d_ff, 
+                                 d_qk, 
+                                 d_v,
+                                 dropout=dropout,
+                                 attn_dropout=attn_dropout,
+                                 ln_eps=ln_eps,
+                                 use_pre_norm=use_pre_norm,
+                                 activation=activation)
+                    for _ in range(n_layers)])
+        else:
+            layers = []
+            for i in range(n_layers):
+                if i % n_share_across_layers == 0:
+                    layer = DecoderLayer(n_heads,
+                                         d_model, 
+                                         d_ff, 
+                                         d_qk, 
+                                         d_v,
+                                         dropout=dropout,
+                                         attn_dropout=attn_dropout,
+                                         ln_eps=ln_eps,
+                                         use_pre_norm=use_pre_norm,
+                                         activation=activation)
+                    layers.append(layer)
+            self.layers = nn.ModuleList(layers)
+    
+        self.share_emb_out_proj = share_emb_out_proj
+        if share_emb_out_proj == False: 
+            self.W = nn.Parameter(torch.Tensor(trg_vocab_size, d_model))
+        self.use_proj_bias<a id="change"> = </a>use_proj_bias
+        <a id="change">if </a><a id="change">use_proj_bias == True:
+            </a>self.b = nn.Parameter(torch.Tensor(trg_vocab_size))
+
+        <a id="change">if </a><a id="change">self.norm_before_pred == True:
+            </a>self.norm<a id="change"> = </a><a id="change">LayerNorm(</a>d_model<a id="change">)</a>
+        
+        self.reset_parameters()
+    
+    </code></pre>

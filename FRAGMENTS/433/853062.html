@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        shared_network_layers.append(nn.Flatten())
+        for ind, layer_spec in enumerate(dense_arch[:-1]):
+            in_dim, out_dim = layer_spec.get(&quotin_dim&quot), layer_spec.get(&quotout_dim&quot)
+            shared_network_layers.append(<a id="change">nn.Linear(</a>in_dim, out_dim<a id="change">)</a>)
+            shared_network_layers.append(nn.ReLU())
+
+        self.shared_network = nn.Sequential(*shared_network_layers)</code></pre><h3>After Change</h3><pre><code class='java'>
+            shared_network_layers.append(nn.Linear(layer_spec[&quotin_dim&quot], layer_spec[&quotout_dim&quot]))
+            shared_network_layers.append(nn.ReLU())
+        &#47&#47 no ReLU after last layer
+        <a id="change">last_layer_spec</a> = dense_arch[-1]
+        shared_network_layers.append(
+            nn.Linear(<a id="change">last_layer_spec[&quotin_dim&quot]</a>, <a id="change">last_layer_spec[&quotout_dim&quot]</a>))
+
+        self.shared_network = nn.Sequential(*shared_network_layers)
+</code></pre>

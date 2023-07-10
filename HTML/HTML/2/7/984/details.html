@@ -1,0 +1,26 @@
+<html><h3>Pattern ID :984
+</h3><img src='2053230.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        steps (int): The total number of convs in this module, 1 conv 1x1 and (steps - 1) conv3x3.
+    
+    def __init__(self, in_channels: int, out_channels: int, steps: int, stride: int = 1):
+        <a id="change">super(STDCBlock, self).__init__()</a>
+        assert steps in [2, 3, 4], f"only 2, 3, 4 steps number are supported, found: {steps}"
+
+        self.stride = stride
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 build first step conv 1x1.
+        self.conv_list.append(ConvBNReLU(in_channels, out_channels // 2, kernel_size=1, bias=False))
+        &#47&#47 build skip connection after first convolution.
+        <a id="change">if stride == 1</a><a id="change">:
+            </a>self.skip_step1 = nn.Identity()
+        elif stdc_downsample_mode == "avg_pool":
+            self.skip_step1 = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        elif stdc_downsample_mode == "dw_conv":
+            self.skip_step1<a id="change"> = </a>ConvBNReLU(
+                out_channels // 2, out_channels<a id="change"> // </a>2, kernel_size=3, stride=2, padding=1, bias=False, groups=out_channels // 2, use_activation=False
+            )
+        else:
+            raise ValueError(f"stdc_downsample mode is not supported: found {stdc_downsample_mode}," f" must be in [avg_pool, dw_conv]")</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/deci-ai/super-gradients/commit/98083d4303f887cb29f39029871612fe5e2e4753#diff-8f12293ee8d59da4f2d8522208a7f27d9b4f90502789d26e213681b949e5a90cL29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2053230</div><div id='project'> Project Name: deci-ai/super-gradients</div><div id='commit'> Commit Name: 98083d4303f887cb29f39029871612fe5e2e4753</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: 88616312+lkdci@users.noreply.github.com</div><div id='file'> File Name: src/super_gradients/training/models/segmentation_models/stdc.py</div><div id='class'> Class Name: STDCBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/tvs-ai/pytorch_rppgs/commit/d661a9c587676745f7ee0702c4a1dd2e1d4692f6#diff-91eed8464547842f2d079df86449902f0d5fd580466ca2bb27b98984fa166584L74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2053237</div><div id='project'> Project Name: tvs-ai/pytorch_rppgs</div><div id='commit'> Commit Name: d661a9c587676745f7ee0702c4a1dd2e1d4692f6</div><div id='time'> Time: 2022-12-29</div><div id='author'> Author: 57242033+najy97@users.noreply.github.com</div><div id='file'> File Name: vid2bp/nets/modules/MultiResUNet1D.py</div><div id='class'> Class Name: Respath</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/tuttelikz/farabio/commit/1e781dfbb0f4b2a6cae790f04cab2d6c8a4074bc#diff-c230c0eed67919cafed64bca1e0d7c06766a463bb1021f8f86faa866809d8548L12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2053233</div><div id='project'> Project Name: tuttelikz/farabio</div><div id='commit'> Commit Name: 1e781dfbb0f4b2a6cae790f04cab2d6c8a4074bc</div><div id='time'> Time: 2021-05-10</div><div id='author'> Author: s.askaruly@gmail.com</div><div id='file'> File Name: farabio/models/classification/arch/resnext.py</div><div id='class'> Class Name: ResNeXtBottleneck</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

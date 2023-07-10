@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.id = id
+        self.rank = rank
+
+        <a id="change">if len(empty_idx) == 0</a><a id="change">:
+            </a>empty_idx = [self.rank + 1]  &#47&#47 jit doesn&quott seem to like empty lists
+        self.empty_idx = empty_idx
+
+        self.param_rank = len([i for i in range(self.rank) if i not in self.empty_idx])</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.param_rank = self.rank - len(empty_idx)
+        mask = torch.zeros((self.rank, self.param_rank))
+        c = 0
+        <a id="change">for r</a> in range(self.rank)<a id="change">:
+            </a>if r not in empty_idx:
+                mask[r, c]<a id="change"> = </a>1.
+                c += 1
+        self.register_buffer(&quotmask&quot, mask)
+</code></pre>

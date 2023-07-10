@@ -1,0 +1,31 @@
+<html><h3>Pattern ID :443
+</h3><img src='855021.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 setting the device
+
+        <a id="change">if </a>not exists(accelerator) and not exists(device)<a id="change">:
+            </a>diffusion_prior_device<a id="change"> = </a>next(diffusion_prior.parameters()).device
+            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
+            self.device = diffusion_prior_device
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 mixed precision checks
+
+        if <a id="change">(
+            exists(self.accelerator) 
+            and self.accelerator.distributed_type == DistributedType.DEEPSPEED 
+            and self.diffusion_prior.clip is not None
+            )</a>:
+            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
+            cast_type_map<a id="change"> = {
+                </a>"fp16": torch.half,
+                "bf16": torch.bfloat16,
+                "no": torch.float<a id="change">
+            }</a>
+            precision_type = cast_type_map[accelerator.mixed_precision]
+            assert precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
+            self.diffusion_prior.clip.to(precision_type)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/f9423d308b6f36e51152c2c45045ff4ebb308287#diff-617450527162fa367141dbf45e8b201673573479820af0ffc56ba93b7f70947fL177' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 855021</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: f9423d308b6f36e51152c2c45045ff4ebb308287</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: 51308183+nousr@users.noreply.github.com</div><div id='file'> File Name: dalle2_pytorch/trainer.py</div><div id='class'> Class Name: DiffusionPriorTrainer</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/7d74ab01c5cba3921b0c91bdd1354b85daa8c2f8#diff-466f09dc94a8d0261c5affeb35283ea929f8f99c0560176aff78070c963baf18L342' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 855023</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 7d74ab01c5cba3921b0c91bdd1354b85daa8c2f8</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/jasper/blocks.py</div><div id='class'> Class Name: JasperBlock</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/0ff34ea8f75b108dc69542658d39b70118bf01ca#diff-a7c3190f943cb09b3b7e0b688790f61f6e5e838546dec54468346ae1c2be7e08L449' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 855034</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 0ff34ea8f75b108dc69542658d39b70118bf01ca</div><div id='time'> Time: 2020-03-31</div><div id='author'> Author: plantinga.peter@gmail.com</div><div id='file'> File Name: speechbrain/nnet/architectures.py</div><div id='class'> Class Name: conv</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

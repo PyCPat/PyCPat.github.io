@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(512, num_classes)
+
+        self.act = nn.ReLU(inplace=True)
+        self.maxpool = <a id="change">nn.MaxPool2d(kernel_size=(2, 2))</a>
+
+    def forward(self, x):
+        x = self.act(self.conv1(x))
+        x = self.maxpool(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+class FedAvgCNN(nn.Module):
+    def __init__(self, in_features=1, num_classes=10, dim=1024):
+        super().__init__()
+        self.conv1 = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(in_features,
+                        32,
+                        kernel_size=5,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            <a id="change">nn.ReLU(inplace=True)</a>, 
+            <a id="change">nn.MaxPool2d(kernel_size=(2, 2))
+        )</a>
+        self.conv2 = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(32,
+                        64,
+                        kernel_size=5,
+                        padding=0,
+                        stride=1,
+                        bias=True),
+            <a id="change">nn.ReLU(inplace=True)</a>, 
+            <a id="change">nn.MaxPool2d(kernel_size=(2, 2))</a><a id="change">
+        )</a>
+        self.fc1 = <a id="change">nn.Sequential(
+            </a>nn.Linear(dim, 512), 
+            nn.ReLU(inplace=True)<a id="change">
+        )</a>
+        self.fc = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        out = self.conv1(x)</code></pre>

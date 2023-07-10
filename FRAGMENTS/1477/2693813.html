@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.shortcut = nn.Sequential()
+        if stride != 1 or in_planes != self.expansion*planes:
+            self.shortcut = nn.Sequential(
+                <a id="change">BinarizeConv2d(</a>in_planes, self.expansion*planes<a id="change">, kernel_size=1, stride=stride, bias=False)</a>,
+                nn.BatchNorm2d(self.expansion*planes)
+            )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        pad = 0 if planes == self.expansion*in_planes else planes // 4
+        if stride != 1 or in_planes != self.expansion*planes:
+            self.shortcut = nn.Sequential(
+                        nn.AvgPool2d((<a id="change">2</a><a id="change">,2</a>)), 
+                        LambdaLayer(lambda x:
+                        F.pad(x, (0, 0, 0, 0, pad, pad), "constant", 0)))
+</code></pre>

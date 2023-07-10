@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList()
+
+        for i in range(num_layers):
+            <a id="change">if i != num_layers - 1</a><a id="change">:
+                </a>self.layers.append(
+                    TAGraphConvolution(num_features[i], <a id="change">num_features[i + 1]</a>, k, activation=F.leaky_relu, dropout=True))
+            else:
+                self.layers.append(TAGraphConvolution(num_features[i], num_features[i + 1], k))
+        self.reset_parameters()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.layers = nn.ModuleList()
+        self.layers.append(TAGConv(in_features, hidden_features[0], k, activation=activation, dropout=dropout))
+        for i in range(<a id="change">len(</a>hidden_features<a id="change">)</a> - 1):
+            self.layers.append(
+                TAGConv(hidden_features[i], hidden_features[i + 1], k, activation=activation, dropout=dropout))
+        self.layers.append(TAGConv(hidden_features[-1], out_features, k))</code></pre>

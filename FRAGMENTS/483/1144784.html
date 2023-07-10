@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ),
+            nn.LeakyReLU(0.2),
+            &#47&#47 _block(in_channels, out_channels, kernel_size, stride, padding)
+            <a id="change">self._block(</a>features_d, features_d * 2, 4, 2, <a id="change">1</a><a id="change">)</a>,
+            self._block(features_d * 2, features_d * 4, 4, 2, 1),
+            self._block(features_d * 4, features_d * 8, 4, 2, 1),
+            &#47&#47 After all _block img output is 4x4 (Conv2d below makes into 1x1)</code></pre><h3>After Change</h3><pre><code class='java'>
+class Discriminator(nn.Module):
+    def __init__(self, channels_img, features_d):
+        super(Discriminator, self).__init__()
+        self.disc = nn.Sequential(OrderedDict(<a id="change">[
+            &#47&#47 input: N x channels_img x 64 x 64
+            </a>(&quotconv_in&quot, nn.Conv2d(
+                channels_img, features_d, kernel_size=4, stride=2, padding=1
+            )),
+            (&quotleaky_relu&quot, nn.LeakyReLU(0.2)),
+            &#47&#47 _block(in_channels, out_channels, kernel_size, stride, padding)
+            (&quotblock1&quot, <a id="change">self._block(</a>features_d, features_d * 2, 4, 2, <a id="change">1</a><a id="change">)</a>),
+            (&quotblock2&quot, self._block(features_d * 2, features_d * 4, 4, 2, 1)),
+            (&quotblock3&quot, self._block(features_d * 4, features_d * 8, 4, 2, 1)),
+            &#47&#47 After all _block img output is 4x4 (Conv2d below makes into 1x1)
+            (&quotconv_out&quot, nn.Conv2d(features_d * 8, 1, kernel_size=4, stride=2, padding=0)),
+            (&quotsigmoid&quot, nn.Sigmoid())<a id="change"></a>,
+            ]))
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):</code></pre>

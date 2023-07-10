@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_channels, growth_rate, kernel_size, stride=(1,1), hidden_channels=128):
+        super().__init__()
+
+        self.kernel_size, self.stride = kernel_size<a id="change">, stride</a>
+
+        self.bottleneck_conv2d = nn.Conv2d(in_channels, hidden_channels, kernel_size=(1,1), stride=(1,1))
+        self.conv2d = nn.Conv2d(hidden_channels, growth_rate, kernel_size=kernel_size, stride=stride)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, in_channels, out_channels, growth_rate, kernel_size, stride=(1,1), hidden_channels=128, num_layers=3, eps=EPS):
+        super().__init__()
+
+        net = <a id="change">[]</a>
+
+        num_features = in_channels
+
+        <a id="change">for </a><a id="change">idx</a> in <a id="change">range(</a>num_layers<a id="change">):
+            </a><a id="change">net.append(</a>DenseLayer(num_features, growth_rate, kernel_size, stride=stride, hidden_channels=hidden_channels, eps=eps)<a id="change">)</a>
+            num_features += growth_rate
+
+        self.net = nn.Sequential(*net)
+        self.transition2d = Transition2d(num_features, out_channels, eps)</code></pre>

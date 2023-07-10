@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=nheads)
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_encoder_layers)
+
+        self.mlp_head = <a id="change">nn.Sequential(
+            </a>nn.Linear(hidden_dim<a id="change"> * </a>projection_dim, mlp_head_dims[0]),
+            nn.BatchNorm1d(mlp_head_dims[0]),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(mlp_head_dims[0], mlp_head_dims[1]),
+            nn.BatchNorm1d(mlp_head_dims[1]),
+            nn.GELU(),
+            nn.Dropout(dropout)<a id="change">
+        )</a>
+
+        self.dropout = nn.Dropout(dropout)
+        self.classifier = nn.Linear(mlp_head_dims[1], num_classes)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 self.signal_encoder = SignalEncoderConv(hidden_dim, projection_dim, learnable=False)
+
+        encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=nheads, dropout=dropout, dim_feedforward=1024, activation=&quotgelu&quot)
+        encoder_norm = <a id="change">nn.LayerNorm(</a>hidden_dim<a id="change">)</a>
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
+
+        self.mlp_head = nn.Sequential(
+            nn.Dropout(dropout),</code></pre>

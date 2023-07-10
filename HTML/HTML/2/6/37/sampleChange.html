@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self,ch_in,ch_out):
+        super(conv_block,self).__init__()
+        self.conv = nn.Sequential(
+            <a id="change">nn.Conv2d(</a>ch_in, ch_out<a id="change">, kernel_size=3,stride=1,padding=1,bias=True)</a>,
+            nn.BatchNorm2d(ch_out),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(ch_out, ch_out, kernel_size=3,stride=1,padding=1,bias=True),</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Upsample(scale_factor=2),
+            nn.Conv2d(in_channels, out_channels, 3, 1, 1)
+        )
+        self.resblocks<a id="change"> = </a><a id="change">nn.ModuleList([ResNetBlock(in_channels, num_groups, skip_connection_scale, swish, skip_path=skip_path) for i in range(numResNetBlocks)]</a><a id="change">)</a>
+
+    def forward(self, x):
+        for resblock in self.resblocks:
+            x = resblock(x) </code></pre>

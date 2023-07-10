@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 mixup args
+        assert mix_mode in [
+            "mixup", "manifoldmix", "cutmix", "saliencymix", "resizemix", "fmix"]
+        if mix_mode in <a id="change">[</a>"manifoldmix"<a id="change"></a>]:
+            assert 0 == min(mix_args[mix_mode]["layer"]) and max(mix_args[mix_mode]["layer"]) &lt; 4
+        if mix_mode == "resizemix":
+            assert 0 &lt;= min(mix_args[mix_mode]["scope"]) and max(mix_args[mix_mode]["scope"]) &lt;= 1</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert len(self.alpha) == len(self.mix_mode) and len(self.mix_mode) &lt; 6
+        self.idx_list = [i for i in range(len(self.mix_mode))]
+        self.mix_args = mix_args
+        <a id="change">self.mix_prob</a> = mix_prob if isinstance(mix_prob, list) else None
+        if self.mix_prob is not None:
+            assert len(self.mix_prob) == len(self.alpha) and abs(sum(self.mix_prob)-1e-10) &lt;= 1, \
+                "mix_prob={}, sum={}, alpha={}".format(self.mix_prob, sum(self.mix_prob), self.alpha)
+            <a id="change">for i</a> in <a id="change">range(</a>1, <a id="change">len(</a>self.mix_prob<a id="change">)</a><a id="change">):
+                </a>self.mix_prob[i]<a id="change"> = self.mix_prob[i]</a><a id="change"> + </a>self.mix_prob[i-1]
+        assert label_rescale in [&quotlabeled&quot, &quotunlabeled&quot, &quotboth&quot, &quotnone&quot]
+        self.label_rescale = label_rescale
+        assert lam_bias in [&quotlabeled&quot, &quotunlabeled&quot, &quotrand&quot]</code></pre>

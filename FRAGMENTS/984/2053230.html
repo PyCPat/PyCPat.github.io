@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        steps (int): The total number of convs in this module, 1 conv 1x1 and (steps - 1) conv3x3.
+    
+    def __init__(self, in_channels: int, out_channels: int, steps: int, stride: int = 1):
+        <a id="change">super(STDCBlock, self).__init__()</a>
+        assert steps in [2, 3, 4], f"only 2, 3, 4 steps number are supported, found: {steps}"
+
+        self.stride = stride
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 build first step conv 1x1.
+        self.conv_list.append(ConvBNReLU(in_channels, out_channels // 2, kernel_size=1, bias=False))
+        &#47&#47 build skip connection after first convolution.
+        <a id="change">if stride == 1</a><a id="change">:
+            </a>self.skip_step1 = nn.Identity()
+        elif stdc_downsample_mode == "avg_pool":
+            self.skip_step1 = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        elif stdc_downsample_mode == "dw_conv":
+            self.skip_step1<a id="change"> = </a>ConvBNReLU(
+                out_channels // 2, out_channels<a id="change"> // </a>2, kernel_size=3, stride=2, padding=1, bias=False, groups=out_channels // 2, use_activation=False
+            )
+        else:
+            raise ValueError(f"stdc_downsample mode is not supported: found {stdc_downsample_mode}," f" must be in [avg_pool, dw_conv]")</code></pre>

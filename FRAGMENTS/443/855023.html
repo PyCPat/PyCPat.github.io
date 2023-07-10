@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise ValueError("currently only &quotsame&quot padding is supported")
+
+        kernel_size_factor = float(kernel_size_factor)
+        <a id="change">if </a>type(kernel_size) in (list, tuple)<a id="change">:
+            </a>kernel_size = [
+                compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
+            ]
+        else:
+            kernel_size<a id="change"> = </a>compute_new_kernel_size(kernel_size, kernel_size_factor)
+
+        padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
+        self.conv_mask = conv_mask</code></pre><h3>After Change</h3><pre><code class='java'>
+        stride_last: bool = False,
+    ):
+        super().__init__()
+        if <a id="change">separable and heads != -1</a>:
+            raise ValueError(
+                "Separable convolutions are not compatible with multiple heads"
+            )
+
+        kernel_size_factor = float(kernel_size_factor)
+        kernel_size = [
+            compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
+        ]
+        padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
+
+        self.residual_mode = residual_mode
+
+        inplanes_loop = inplanes
+        conv<a id="change"> = []</a>
+
+        for _ in range(repeat - 1):
+            &#47&#47 Stride last means only the last convolution in block will have stride
+            if stride_last:</code></pre>

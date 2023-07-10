@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self):
+        super().__init__()
+        self.model = models.alexnet(pretrained=True)
+        <a id="change">for </a>param in self.model.parameters()<a id="change">:
+            </a>param.requires_grad = False
+        self.model.classifier[6] = nn.Linear(4096, 2)
+        self.params = {
+            "head": list(self.model.classifier.parameters())</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.model = models.alexnet(pretrained=True)
+        n = self.model.classifier[6].in_features
+        <a id="change">self.model.classifier[6]</a> = nn.Linear(n, NUM_CLASSES)
+        self.params = {
+            "head": list(self.model.classifier.parameters())
+        }</code></pre>

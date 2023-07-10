@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                nn.Linear(inner_dim, dim)
+            )
+        else:
+            <a id="change">print(</a>f&quotffn_type does not match any available options&quot<a id="change">)</a>
+
+        &#47&#47 despite many varieties of applying layer norms in transformers, pre-norm still seems like the best option
+        self.input_norm = nn.LayerNorm(dim)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.heads = heads
+
+        rows = <a id="change">[]</a>
+        for i in range(max_length):  &#47&#47 build the full Alibi relative position bias matrix
+            rows.append(torch.LongTensor([x for x in range(0 - i, max_length - i)]).view(1, -1).abs())
+
+        &#47&#47 This implementation alternates between upper triangular and lower triangular biases. Using the full matrix
+        &#47&#47 doesn&quott seem to work as well - likely since the forward and backward biases would be identical (i.e. attention
+        &#47&#47 wouldn&quott be able to tell the difference between a token X spots after or X spots before). However, the lead
+        &#47&#47 author of Alibi claims that using different biases on forward vs backward positions may work.
+
+        lower_tri_rows = -torch.cat(rows, 0).tril()
+        upper_tri_rows = -torch.cat(rows, 0).triu()
+
+        lower_tri_rows<a id="change"> = </a>rearrange(lower_tri_rows, &quoti j -&gt; () i j&quot)
+        upper_tri_rows = rearrange(upper_tri_rows, &quoti j -&gt; () i j&quot)
+        slopes = self._get_slopes(heads=int(heads / 2))
+</code></pre>

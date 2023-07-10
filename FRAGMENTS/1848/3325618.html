@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        w = width
+        conv_out_dim = 64 * w
+        conv_layers = <a id="change">[
+            &#47&#47 at input: (96, 96) (assuming MAGICAL; for other domains it will
+            &#47&#47 be 84x84)
+            </a>*conv_block(observation_space.shape[0], 32 * w, kernel_size=5, stride=1, padding=2),
+            &#47&#47 now: (96, 96)
+            *conv_block(32 * w, 64 * w, kernel_size=3, stride=2, padding=1),
+            &#47&#47 now: (48, 48)
+            *conv_block(64 * w, 64 * w, kernel_size=3, stride=2, padding=1),
+            &#47&#47 now: (24, 24)
+            *conv_block(64 * w, 64 * w, kernel_size=3, stride=2, padding=1),
+            &#47&#47 now: (12, 12)
+            *conv_block(64 * w, conv_out_dim, kernel_size=3, stride=2, padding=1),
+            &#47&#47 now (6,6)
+            nn.Flatten()<a id="change"></a>
+        ]
+
+        &#47&#47 another FC layer to make feature maps the right size
+        fc_in_size, = compute_output_shape(observation_space, conv_layers)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.architecture_definition = NETWORK_ARCHITECTURE_DEFINITIONS[&quotMAGICALCNN&quot]
+        conv_layers = []
+        in_dim = observation_space.shape[0]
+        <a id="change">for i</a> in <a id="change">range(len(self.architecture_definition</a><a id="change">)</a><a id="change">):
+            </a>conv_layers += conv_block(in_dim,
+                                      self.architecture_definition[i][&quotout_dim&quot]*w,
+                                      kernel_size=self.architecture_definition[i][&quotkernel_size&quot],
+                                      stride=self.architecture_definition[i][&quotstride&quot],
+                                      padding=self.architecture_definition[i][&quotpadding&quot])
+            in_dim<a id="change"> = self.architecture_definition[i][&quotout_dim&quot]</a><a id="change">*</a>w
+        conv_layers.append(nn.Flatten())
+
+        &#47&#47 another FC layer to make feature maps the right size</code></pre>

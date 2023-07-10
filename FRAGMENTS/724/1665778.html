@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if required_arg == "img_shape":
+                self.img_h, self.img_w, self.img_c = self.img_shape
+            elif required_arg == "tensor_value_range":
+                <a id="change">assert </a>isinstance(self.tensor_value_range, list) or isinstance(self.tensor_value_range, tuple)
+                assert len(self.tensor_value_range) == 2
+
+        &#47&#47 set optional parameters</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 set required parameters
+        self.device = device
+        for required_arg in self.REQUIRED_ARGS:
+            <a id="change">if required_arg not in model_args.keys()</a><a id="change">:
+                </a>raise ValueError(f"model {self.NAME} requires parameter &quot{required_arg}&quot")
+            required_val = model_args[required_arg]
+
+            &#47&#47 pre-setattr checks
+            if required_arg == "tensor_value_range":
+                <a id="change">if </a><a id="change">type(required_val) not in [tuple, list] or len(required_val) != 2:
+                    raise ValueError("value for argument &quottensor_value_range&quot needs to be tuple or list with 2 elems"</a><a id="change">)</a>
+
+            &#47&#47 set parameter
+            setattr(self, required_arg, required_val)
+</code></pre>

@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            d_in = input_dim if i == 0 else hidden_dim
+            d_out = embed_dim if i == num_layers - 1 else hidden_dim
+            self.module_list.append(nn.Linear(d_in, d_out, bias=bias))
+            <a id="change">if </a>end_up_with_fc<a id="change">:
+                </a>continue
+            if bn:
+                self.module_list.append(nn.BatchNorm1d(d_out))
+            self.module_list.append(getattr(nn, act)(True))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.output_dim = output_dim
+        self.num_layers = num_layers
+
+        self.lins<a id="change"> = </a>nn.ModuleList()
+        self.bns = nn.ModuleList()
+
+        self.lins.append(nn.Linear(input_dim, hidden_dim))
+        self.bns.append(nn.BatchNorm1d(hidden_dim))
+
+        <a id="change">for i</a> in <a id="change">range(</a>self.num_layers - 2<a id="change">):
+            self.lins.append(</a>nn.Linear(hidden_dim, hidden_dim)<a id="change">)</a>
+            self.bns.append(nn.BatchNorm1d(hidden_dim))
+
+        self.lins.append(nn.Linear(hidden_dim, output_dim))
+</code></pre>

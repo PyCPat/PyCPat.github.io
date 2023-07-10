@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, config):
+        super().__init__()
+        if config.hidden_size % config.num_attention_heads != 0:
+            <a id="change">raise </a><a id="change">ValueError(
+                </a>"The hidden size (%d) is not a multiple of the number of attention "
+                "heads (%d)" %
+                (config.hidden_size, config.num_attention_heads)<a id="change">)</a>
+        self.output_attentions = config.output_attentions
+
+        self.num_attention_heads = config.num_attention_heads
+        self.attention_head_size = int(config.hidden_size /</code></pre><h3>After Change</h3><pre><code class='java'>
+class RoFormerSelfAttention(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        if config.hidden_size % config.num_attention_heads != 0 and <a id="change">not</a> hasattr(config, "embedding_size"):
+            <a id="change">raise ValueError(
+                f"The hidden size ({config.hidden_size}) is not a multiple of the number of attention "
+                f"heads ({config.num_attention_heads})"</a><a id="change">
+            )</a>
+
+        self.num_attention_heads = config.num_attention_heads
+        self.attention_head_size = int(config.hidden_size / config.num_attention_heads)
+        self.all_head_size = self.num_attention_heads * self.attention_head_size</code></pre>

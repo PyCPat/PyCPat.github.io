@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 head conv
+        self.head = conv(opt.n_colors, n_feats)
+        &#47&#47 CA Dense net
+        self.body = <a id="change">[common.CADensenet(SphereConv2D, n_feats, n_CADenseBlocks=n_blocks) for _ in range(self.level+1)]</a>
+        self.body = nn.ModuleList(self.body)
+        &#47&#47 Texture transformer (tt)
+        self.tt = [NONLocalBlock2D(n_feats) for _ in range(self.level)]
+        self.tt<a id="change"> = </a><a id="change">nn.ModuleList(</a>self.body<a id="change">)</a>
+        &#47&#47 bypass network
+        self.bypass = [common.Resnet(conv, n_feats, kernel_size=3, num=5, depth=5) for _ in range(self.level)]
+        self.bypass = nn.ModuleList(self.bypass)
+        &#47&#47 upsample blocks</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.body = nn.ModuleList(self.body)
+        &#47&#47 upsample blocks
+        self.up_blocks = [common.Upsampler(common.default_conv, 2, n_feats, act=False) for _ in range(2*self.level-1)]
+        self.up_blocks += [common.Upsampler(common.default_conv, 2**i, 3, act=False) for i in <a id="change">range(</a>self.level-1,0,-1<a id="change">)</a>]
+        self.up_blocks = nn.ModuleList(self.up_blocks)
+        &#47&#47 tail conv that output sr ODIs
+        self.tail = [conv(n_feats, opt.n_colors) for _ in range(self.level+1)]</code></pre>

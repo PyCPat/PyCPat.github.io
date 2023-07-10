@@ -1,0 +1,21 @@
+<html><h3>Pattern ID :708
+</h3><img src='1658795.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Create model
+        if memory_saving_sd_config:
+            self.vae = AutoencoderKL.from_pretrained(model_key, subfolder="vae", torch_dtype=torch.float16).to(self.device)
+            self.tokenizer = <a id="change">CLIPTokenizer.from_pretrained(</a>model_key<a id="change">, subfolder="tokenizer", torch_dtype=torch.float16)</a>
+            self.text_encoder = CLIPTextModel.from_pretrained(model_key, subfolder="text_encoder", torch_dtype=torch.float16).to(self.device)
+            self.unet = UNet2DConditionModel.from_pretrained(model_key, subfolder="unet", torch_dtype=torch.float16).to(self.device)
+            self.unet.set_attention_slice("auto")
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Create model
+        if vram_O &gt; 0:
+            pipe = StableDiffusionPipeline.from_pretrained(model_key, torch_dtype=torch.float16)
+            <a id="change">if vram_O &gt; 1</a><a id="change">:
+                </a>pipe.enable_sequential_cpu_offload()
+            pipe.enable_attention_slicing(1)
+            self.vae = pipe.vae
+            self.tokenizer = pipe.tokenizer</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ashawkey/stable-dreamfusion/commit/97fc370fc729823548a248b6bd93e8b87d01c74f#diff-b559cf4cd081295937f30f49ff2eb20a58fce731b37f52e6bdf1884e22eee0f2L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1658795</div><div id='project'> Project Name: ashawkey/stable-dreamfusion</div><div id='commit'> Commit Name: 97fc370fc729823548a248b6bd93e8b87d01c74f</div><div id='time'> Time: 2023-03-21</div><div id='author'> Author: tobben@fastmail.fm</div><div id='file'> File Name: sd.py</div><div id='class'> Class Name: StableDiffusion</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/kamino666/video-captioning-transformer/commit/8d6f9ff2e965ba00bd44e7d9dd808ccf01251eee#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L739' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1658799</div><div id='project'> Project Name: kamino666/video-captioning-transformer</div><div id='commit'> Commit Name: 8d6f9ff2e965ba00bd44e7d9dd808ccf01251eee</div><div id='time'> Time: 2021-09-25</div><div id='author'> Author: 516015417@qq.com</div><div id='file'> File Name: model.py</div><div id='class'> Class Name: VideoCaptionSwinTransformer</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/allenai/embeddingrecycling/commit/c95fafa4254200574e7ae2f1fe15134b9b301dd9#diff-12e41abdf60fc3caafa5a98d28e44da28cba19f698fed890c00ceecc14b813a8L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1658802</div><div id='project'> Project Name: allenai/embeddingrecycling</div><div id='commit'> Commit Name: c95fafa4254200574e7ae2f1fe15134b9b301dd9</div><div id='time'> Time: 2022-03-22</div><div id='author'> Author: jonsaadfalcon@gmail.com</div><div id='file'> File Name: General_BiLSTM+LinearClassifer.py</div><div id='class'> Class Name: CustomBERTModel</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

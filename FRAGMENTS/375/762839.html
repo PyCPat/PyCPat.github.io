@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.block_dim = self.lbmgr.get_block_dim(self.rank)
+        self.comm_func = all_reduce
+
+        if <a id="change">blk_embed is not None</a>:
+            weights = blk_embed.get_weights(detach=True)
+            base_embedding_dim = blk_embed.get_base_embedding_dim()
+            assert weights[0].size() == (sum([self.field_dims[i] for i in self.group]), self.block_dim), \
+                &quotpassed embedding layer dimensions are wrong: {x1} vs {x2} \
+                    &quot.format(x1=weights[0].size(), x2=(sum([self.field_dims[i] for i in self.group]), self.block_dim))
+            if self.block_dim != self.embedding_dim:
+                assert weights[1].size() == (self.embedding_dim, self.block_dim), \
+                    &quotpassed linear layer dimensions are wrong: {x1} vs {x2} \
+                    &quot.format(x1=weights[1].size(), x2=(self.embedding_dim, self.block_dim))
+            if base_embedding_dim != self.embedding_dim:
+                logger.warning(&quotBase embedding dimension provided by blk_embed is different from \
+                    default or manually passed. Will overwrite by blk_embed.base_embedding_dim&quot, ranks=[0])
+                self.embedding_dim = base_embedding_dim
+            self.embed = BlockEmbeddingBag.from_pretrained(
+                                                weights=weights,
+                                                base_embedding_dim=base_embedding_dim,
+                                                freeze=freeze)
+        else:
+            self.embed = BlockEmbeddingBag(
+                                    <a id="change">sum([self.field_dims[i] for i in self.group]</a><a id="change">)</a>, 
+                                    block_embedding_dim=self.block_dim,
+                                    base_embedding_dim=self.embedding_dim,
+                                    mode=mode,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.group = self.lbmgr.get_group(self.rank)
+        self.block_dim = self.lbmgr.get_block_dim(self.rank)
+        self.qr_bucket_size<a id="change"> = </a><a id="change">self.lbmgr.get_qr_bucket_size(</a>self.rank<a id="change">)</a>
+        self.offsets = torch.tensor((0,*np.cumsum(np.array( \
+            self.field_dims, dtype=np.long)[self.group])[:-1]), device=self.device)
+        
+        self.comm_func = all_reduce</code></pre>

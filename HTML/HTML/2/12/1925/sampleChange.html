@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        print(f"input dimentsions: {self.hidden_units}")
+        self.fc1 = nn.Linear(self.pose, self.hidden_units[0])
+        self.fc2 = nn.Linear(self.hidden_units[0], self.hidden_units[1])
+        self.fc3<a id="change"> = nn</a><a id="change">.Linear(</a>self.hidden_units[1], self.hidden_units[2]<a id="change">)</a>
+        self.fc4 = nn.Linear(self.hidden_units[2], self.hidden_units[3])
+        self.fc5<a id="change"> = </a><a id="change">nn.Linear(</a>self.hidden_units[3], self.hidden_units[4]<a id="change">)</a>
+        self.fc6 = <a id="change">nn.Linear(</a>self.hidden_units[4], self.dof<a id="change">)</a>
+
+    def forward(self, x):
+        for layer in [self.fc1, self.fc2, self.fc3, self.fc4, self.fc5]:
+            x = F.relu(layer(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+        print(f"input dimentsions: {self.hidden_units}")
+        layers = []
+        input_dim = self.pose
+        <a id="change">for </a>output_dim in self.hidden_units<a id="change">:
+            </a>layers.append(<a id="change">nn.Linear(</a>input_dim, output_dim<a id="change">)</a>)
+            layers.append(<a id="change">nn.ReLU()</a>)
+            input_dim = output_dim
+        layers.append(<a id="change">nn.Linear(</a>input_dim, self.dof<a id="change">)</a>)
+        self.layers = <a id="change">nn.Sequential(</a>*<a id="change">layers)</a>
+
+    def forward(self, x):
+        return self.layers(x)
+</code></pre>

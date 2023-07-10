@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, backbone, num_classes, use_bottleneck=True, bottleneck_dim=1024, head_bottleneck_dim=1024):
+        super(Classifier, self).__init__()
+        self.backbone = backbone
+        <a id="change">if </a>use_bottleneck<a id="change">:
+            </a>self.bottleneck = nn.Sequential(
+                nn.Linear(backbone.out_features, bottleneck_dim),
+                nn.BatchNorm1d(bottleneck_dim),
+                nn.ReLU(),</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Linear(bottleneck_dim, width),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            <a id="change">nn.Linear(</a>width, num_classes<a id="change">)</a>
+        )
+        &#47&#47 The adversarial classifier head
+        self.adv_head<a id="change"> = </a>nn.Sequential(
+            nn.Linear(bottleneck_dim, width),
+            nn.ReLU(),
+            <a id="change">nn.Dropout(</a>0.5<a id="change">)</a>,
+            nn.Linear(width, num_classes)
+        )
+        for dep in range(2):</code></pre>

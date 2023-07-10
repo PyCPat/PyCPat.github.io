@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if impl not in self.implementations:
+            raise ValueError(f"Expected one of {self.implementations} for impl, got {impl}")
+        has_torch_scatter = self.has_torch_scatter()
+        <a id="change">if impl is None</a><a id="change">:
+            </a>if not has_torch_scatter:
+                pt_scatter<a id="change"> = </a>"https://github.com/rusty1s/pytorch_scatter"
+                warn(f"ContrastiveLoss: using pure pytorch implementation. Install {pt_scatter} for memory efficiency.")
+            self.impl = "scatter" if has_torch_scatter else "expand"
+        else:
+            <a id="change">if impl == "scatter"</a> and not has_torch_scatter<a id="change">:
+                </a>raise ValueError()
+            self.impl<a id="change"> = </a>impl
+
+    def __str__(self):
+        return super().__str__() + f"\ndelta_var: {self.delta_var}\ndelta_dist: {self.delta_dist}" \</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, delta_var, delta_dist,
+                 norm="fro", alpha=1., beta=1., gamma=0.001, unlabeled_push_weight=0.0,
+                 instance_term_weight=1.0, impl=None):
+        <a id="change">assert </a>scatter_mean is not None, "Spoco loss requires pytorch_scatter"
+        super().__init__()
+        self.delta_var = delta_var
+        self.delta_dist = delta_dist</code></pre>

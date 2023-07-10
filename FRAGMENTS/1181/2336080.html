@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 whether to do a final residual from initial conv to the final resnet block out
+
+        self.init_conv_to_final_conv_residual = init_conv_to_final_conv_residual
+        final_conv_dim = dim * (2<a id="change"> if </a>init_conv_to_final_conv_residual<a id="change"> else </a>1)
+
+        &#47&#47 final optional resnet block and convolution out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 upsampling layers
+
+        upsample_fmap_dims<a id="change"> = []</a>
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_attn_depth, layer_cross_attn) in enumerate(zip(reversed(in_out), *reversed_layer_params)):
+            is_last = ind == (len(in_out) - 1)
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else Identity)
+
+            skip_connect_dim = skip_connect_dims.pop()
+
+            <a id="change">upsample_fmap_dims.append(</a>dim_out<a id="change">)</a>
+
+            self.ups.append(nn.ModuleList([
+                resnet_klass(dim_out + skip_connect_dim, dim_out, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(dim_out + skip_connect_dim, dim_out, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),</code></pre>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.output_tokens = output_tokens
+        self.image_size = to_2tuple(image_size)
+        self.patch_size = to_2tuple(patch_size)
+        self.grid_size = (self.image_size[0] // self.patch_size[0]<a id="change">, self.image_size[1] // self.patch_size[1]</a>)
+        self.output_dim = output_dim
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 to patches related hyperparameters and projections
+        self.dual_patchnorm = dual_patchnorm
+
+        <a id="change">if dual_patchnorm</a><a id="change">:
+            </a>patch_input_dim<a id="change"> = </a>patch_height * patch_width * 3
+            self.patchnorm_pre_ln = LayerNorm(patch_input_dim)
+            self.conv1 = nn.Linear(patch_input_dim, width)
+        else:
+            self.patchnorm_pre_ln<a id="change"> = </a>nn.Identity()
+            self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+
+        &#47&#47 class embeddings and positional embeddings</code></pre>

@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        input_dim = self.obs_size
+
+        &#47&#47 Create layers 0 to second-last.
+        <a id="change">for </a>out_dim in self.encoder_layer_dim<a id="change">:
+            </a>layers.append(
+                SlimFC(in_size=input_dim,
+                       out_size=out_dim,
+                       initializer=normc_initializer(1.0),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 encoder
+        layers = []
+        <a id="change">if "fc_layer" in self.custom_config["model_arch_args"]</a><a id="change">:
+            </a>if "encode_layer" in self.custom_config["model_arch_args"]:
+                encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+                encoder_layer_dim = encode_layer.split("-")
+                encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+            else:  &#47&#47 default config
+                encoder_layer_dim = []
+                for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                    out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                    encoder_layer_dim.append(out_dim)
+
+            self.encoder_layer_dim = encoder_layer_dim
+            self.obs_size = self.full_obs_space[&quotobs&quot].shape[0]
+            input_dim = self.obs_size
+            <a id="change">for </a>out_dim in self.encoder_layer_dim<a id="change">:
+                </a>layers.append(
+                    SlimFC(in_size=input_dim,
+                           out_size=out_dim,
+                           initializer=normc_initializer(1.0),
+                           activation_fn=self.activation))
+                input_dim = out_dim
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size<a id="change"> = </a>self.full_obs_space[&quotobs&quot].shape
+            input_dim<a id="change"> = </a>self.obs_size[2]
+            for i in range(<a id="change">self.custom_config["model_arch_args"]["conv_layer"]</a>):
+                layers.append(
+                    SlimConv2d(
+                        in_channels=input_dim,</code></pre>

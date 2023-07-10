@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU(True),
+            &#47&#47 state size. 16 x 16
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            <a id="change">nn.BatchNorm2d(</a>ngf * 2<a id="change">)</a>,
+            nn.ReLU(True),
+            &#47&#47 state size. 32 x 32
+            nn.ConvTranspose2d(ngf * 2, ngf, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            nn.BatchNorm2d(ngf),
+            nn.ReLU(True),
+            &#47&#47 state size. 64 x 64
+            <a id="change">nn.Conv2d(</a>ngf, nc<a id="change">, kernel_size=3, stride=1, padding=1, bias=bias)</a>, &#47&#47h=h
+            nn.Tanh()
+            &#47&#47 state size. (nc) x 64 x 64
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47&#47&#47&#47&#47 add label to the first conv
+        self.linear = nn.Linear(nz, 4 * 4 * ngf * 8) &#47&#474*4*512
+        self.conv1 = <a id="change">nn.Sequential(
+            &#47&#47 state size: 4 x 4
+            </a>nn.ConvTranspose2d(ngf * 8, ngf * 8, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            nn.BatchNorm2d(ngf * 8),
+            nn.ReLU(True)<a id="change">,
+            &#47&#47 state size. 8 x 8
+        )</a>
+        self.conv2<a id="change"> = </a>nn.Sequential(
+            nn.ConvTranspose2d(ngf * 8, ngf * 4, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            nn.BatchNorm2d(ngf * 4),
+            nn.ReLU(True),
+            &#47&#47 state size. 16 x 16
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            <a id="change">nn.BatchNorm2d(</a>ngf * 2<a id="change">)</a>,
+            nn.ReLU(True),
+            &#47&#47 state size. 32 x 32
+            nn.ConvTranspose2d(ngf * 2, ngf, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=2h
+            nn.BatchNorm2d(ngf),
+            nn.ReLU(True),
+            &#47&#47 state size. 64 x 64
+            <a id="change">nn.Conv2d(</a>ngf, nc<a id="change">, kernel_size=3, stride=1, padding=1, bias=bias)</a>, &#47&#47h=h
+            nn.Tanh()
+            &#47&#47 state size. (nc) x 64 x 64
+        )</code></pre>

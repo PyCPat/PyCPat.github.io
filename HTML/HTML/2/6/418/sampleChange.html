@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if idx == 0:
+                num_features.append(in_channels)
+            else:
+                num_features.append(<a id="change">growth_rate[idx-1]</a>)
+            net.append(MultiDilatedConvBlock(num_features, growth_rate[idx], kernel_size=kernel_size, norm=norm, nonlinear=nonlinear, eps=eps))
+        self.net = nn.Sequential(*net)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        _in_channels = in_channels
+
+        for idx in range(depth):
+            _out_channels<a id="change"> = </a><a id="change">sum(growth_rate[idx:]</a><a id="change">)</a>
+            dilation = 2**idx
+            conv_block = ConvBlock2d(_in_channels, _out_channels, kernel_size=kernel_size, stride=1, dilation=dilation, eps=eps)
+            net.append(conv_block)
+            _in_channels<a id="change"> = growth_rate[idx]</a>
+
+        self.net = nn.ModuleList(net)
+    
+    def forward(self, input):</code></pre>

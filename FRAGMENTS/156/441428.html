@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(ResNet50M, self).__init__()
+        self.loss = loss
+        resnet50 = torchvision.models.resnet50(pretrained=True)
+        <a id="change">base</a> = nn.Sequential(*list(resnet50.children())[:-2])
+        self.layers1 = nn.Sequential(base[0], base[1], base[2])
+        self.layers2 = nn.Sequential(base[3], <a id="change">base[4]</a>)
+        self.layers3 = base[5]
+        self.layers4 = base[6]
+        self.layers5a = <a id="change">base[7]</a>[0]
+        self.layers5b = <a id="change">base[7]</a>[1]
+        self.layers5c = base[7][2]
+        self.fc_fuse = nn.Sequential(nn.Linear(4096, 1024), nn.BatchNorm1d(1024), nn.ReLU())
+        self.classifier = nn.Linear(3072, num_classes)</code></pre><h3>After Change</h3><pre><code class='java'>
+                 fc_dims=None,
+                 **kwargs):
+        self.inplanes = 64
+        <a id="change">super(</a>ResNet, self<a id="change">)</a>.__init__()
+        self.loss = loss
+        self.feature_dim = 512 * block.expansion
+        </code></pre>

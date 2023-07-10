@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.pool = pool
+        self.to_latent = nn.Identity()
+
+        self.mlp_head = <a id="change">nn.Sequential(</a>nn.LayerNorm(dim), <a id="change">nn.Linear(</a>dim, num_classes<a id="change">))</a>
+
+    def forward(self, img):
+        x = self.to_patch_embedding(img)
+        b, n, _ = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        num_patches = (image_height // patch_height) * (image_width // patch_width)
+        patch_dim = channels * patch_height * patch_width
+        <a id="change">assert </a>pool in {&quotcls&quot, &quotmean&quot}, &quotpool type must be either cls (cls token) or mean (mean pooling)&quot
+
+        self.to_patch_embedding = nn.Sequential(
+            Rearrange(&quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1 = patch_height, p2 = patch_width),</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                self.decoder.add_module(f&quotconv{i+1:d}&quot, conv)
+                self.decoder.add_module(f&quotbn{i+1:d}&quot, bn)
+                self.decoder.add_module(f&quot{activation}{i+1:d}&quot, activation_fn)
+            elif <a id="change"></a>layer == &quotmax&quot or <a id="change">layer == &quotaverage&quot</a><a id="change">:
+                </a>pool = nn.Upsample(scale_factor=(2, 2))
+        conv = Conv2d_SAME(structure[0], channel, kernel_size=(3, 3))
+        bn = nn.BatchNorm2d(channel)
+        self.decoder.add_module(&quotconv&quot, conv)</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                assert isinstance(layer, str)
+                module = nn.MaxPool2d(kernel_size=(2, 2)) if layer == &quotmax&quot else nn.AvgPool2d(kernel_size=(2, 2))
+                <a id="change">self.encoder.add_module(&quotpool&quot</a>, module<a id="change">)</a>
+
+        for i, layer in enumerate(reversed(structure)):
+            if isinstance(layer, int):
+                conv = Conv2d_SAME(in_channels=in_channels, out_channels=structure[i], kernel_size=(3, 3))</code></pre>

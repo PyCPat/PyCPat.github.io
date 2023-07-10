@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            in_dim, out_dim = layer_spec.get(&quotin_dim&quot), layer_spec.get(&quotout_dim&quot)
+            if out_dim is None:
+                &#47&#47 For the final layer, we don&quott have an out_dim because it is specified by representation_dim
+                <a id="change">assert </a>ind == len(architecture[&quotDENSE&quot]) - 1, "Non-final dense layers require an out_dim"
+                out_dim = representation_dim
+            self.dense_layers.append(nn.Linear(in_dim, out_dim))
+        self.dense_layers = nn.ModuleList(self.dense_layers)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for ind, layer_spec in enumerate(architecture[&quotDENSE&quot][:-1]):
+            in_dim, out_dim = layer_spec.get(&quotin_dim&quot), layer_spec.get(&quotout_dim&quot)
+            self.dense_layers.append(nn.Linear(in_dim, out_dim))
+        self.mean_layer = nn.Linear(<a id="change">architecture[&quotDENSE&quot]</a>[-1][&quotin_dim&quot], representation_dim)
+        if learn_stddev:
+            self.stddev_layer = nn.Linear(<a id="change">architecture[&quotDENSE&quot]</a>[-1][&quotin_dim&quot], representation_dim)
+        else:
+            self.stddev_layer = None
+</code></pre>

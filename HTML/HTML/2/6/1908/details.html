@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :1908
+</h3><img src='3466081.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            task_per_metric = 1
+            self._tasks_iter = self._unfused_tasks_iter
+
+        self._metrics_computations: nn.ModuleList = <a id="change">nn.ModuleList(
+            [
+                &#47&#47 This Pyre error seems to be Pyre&quots bug as it can be inferred by mypy
+                &#47&#47 according to https://github.com/python/mypy/issues/3048.
+                &#47&#47 pyre-fixme[45]: Cannot instantiate abstract class `RecMetricCoputation`.
+                self._computation_class(
+                    my_rank,
+                    batch_size,
+                    task_per_metric,
+                    self._window_size,
+                    compute_on_all_ranks,
+                    self._should_validate_update,
+                    process_group,
+                    **{**kwargs, **self._get_task_kwargs(task_config)},
+                )
+                for task_config in (
+                    [self._tasks]
+                    if compute_mode == RecComputeMode.FUSED_TASKS_COMPUTATION
+                    else self._tasks
+                )
+            ]</a><a id="change">
+        )</a>
+
+    def _get_task_kwargs(
+        self, task_config: Union[RecTaskInfo, List[RecTaskInfo]]
+    ) -&gt; Dict[str, Any]:</code></pre><h3>After Change</h3><pre><code class='java'>
+            task_per_metric = 1
+            self._tasks_iter = self._unfused_tasks_iter
+
+        <a id="change">for </a>task_config in (
+            [self._tasks]
+            if compute_mode == RecComputeMode.FUSED_TASKS_COMPUTATION
+            else self._tasks
+        )<a id="change">:
+            &#47&#47 This Pyre error seems to be Pyre&quots bug as it can be inferred by mypy
+            &#47&#47 according to https://github.com/python/mypy/issues/3048.
+            &#47&#47 pyre-fixme[45]: Cannot instantiate abstract class `RecMetricCoputation`.
+            </a>metric_computation = self._computation_class(
+                my_rank,
+                batch_size,
+                task_per_metric,
+                self._window_size,
+                compute_on_all_ranks,
+                self._should_validate_update,
+                process_group,
+                **{**kwargs, **self._get_task_kwargs(task_config)},
+            )
+            required_inputs<a id="change"> = </a>self._get_task_required_inputs(task_config)
+
+            self._metrics_computations.append(metric_computation)
+            self._required_inputs.update(required_inputs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/facebookresearch/torchrec/commit/f6708dac83f9a6a6b1023a8e5742bb2c2d4aa7fd#diff-8f19ee6ca4c7d2eb284cd2c52a079d632673037210013346b229f0ba6023b11aL323' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3466081</div><div id='project'> Project Name: facebookresearch/torchrec</div><div id='commit'> Commit Name: f6708dac83f9a6a6b1023a8e5742bb2c2d4aa7fd</div><div id='time'> Time: 2022-11-17</div><div id='author'> Author: stellaya@meta.com</div><div id='file'> File Name: torchrec/metrics/rec_metric.py</div><div id='class'> Class Name: RecMetric</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module,abc.ABC</div><BR><BR><div id='link'><a href='https://github.com/pytorch/torchrec/commit/f6708dac83f9a6a6b1023a8e5742bb2c2d4aa7fd#diff-8f19ee6ca4c7d2eb284cd2c52a079d632673037210013346b229f0ba6023b11aL323' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3466082</div><div id='project'> Project Name: pytorch/torchrec</div><div id='commit'> Commit Name: f6708dac83f9a6a6b1023a8e5742bb2c2d4aa7fd</div><div id='time'> Time: 2022-11-17</div><div id='author'> Author: stellaya@meta.com</div><div id='file'> File Name: torchrec/metrics/rec_metric.py</div><div id='class'> Class Name: RecMetric</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module,abc.ABC</div><BR><BR><div id='link'><a href='https://github.com/r9y9/nnsvs/commit/3a55678dd65a885ab71d052024dc329e00007bb0#diff-aefb6929ae385d2bcb25b4501314b187ebaa34d7d0284a89596377ba7781fcefL105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3466083</div><div id='project'> Project Name: r9y9/nnsvs</div><div id='commit'> Commit Name: 3a55678dd65a885ab71d052024dc329e00007bb0</div><div id='time'> Time: 2020-09-30</div><div id='author'> Author: taroushirani@gmail.com</div><div id='file'> File Name: nnsvs/model.py</div><div id='class'> Class Name: MDN</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

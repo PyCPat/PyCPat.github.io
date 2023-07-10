@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if use_batch_norm:
+                self.networks.extend([curr_network, act_cls()])
+            else:
+                bn_layer = torch.nn.BatchNorm1d(<a id="change">hidden_dims[i+1]</a>)
+                self.networks.extend([curr_network, act_cls(), bn_layer])
+        final_network = get_network([hidden_dims[-1],out_dim])
+        self.networks.extend([final_network, out_act_cls()])</code></pre><h3>After Change</h3><pre><code class='java'>
+
+class QNetwork(nn.Module):
+    def __init__(self,input_dim, out_dim, hidden_dims, act_fn="relu", out_act_fn="identity", **kwargs):
+        <a id="change">print(</a><a id="change">"redundant parameters for Q network: {}".format(</a>kwargs<a id="change">))</a>
+        super(QNetwork, self).__init__()
+        if type(hidden_dims) == int:
+            hidden_dims = [hidden_dims]
+        hidden_dims = [input_dim] + hidden_dims </code></pre>

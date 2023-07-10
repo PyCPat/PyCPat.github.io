@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, backbone, num_classes, use_bottleneck=True, bottleneck_dim=1024, head_bottleneck_dim=1024):
+        super(Classifier, self).__init__()
+        self.backbone = backbone
+        <a id="change">if use_bottleneck</a><a id="change">:
+            </a>self.bottleneck = nn.Sequential(
+                nn.Linear(backbone.out_features, bottleneck_dim),
+                nn.BatchNorm1d(bottleneck_dim),
+                nn.ReLU(),
+                nn.Dropout(0.5)
+            )
+            self.bottleneck[0].weight.data.normal_(0, 0.005)
+            self.bottleneck[0].bias.data.fill_(0.1)
+            in_features<a id="change"> = </a>bottleneck_dim
+        else:
+            self.bottleneck<a id="change"> = </a>nn.Identity()
+            in_features = backbone.out_features
+        self.head = ClassifierHead(in_features, num_classes, use_bottleneck=True, bottleneck_dim=head_bottleneck_dim)
+        self.use_bottleneck = use_bottleneck</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.bottleneck[0].weight.data.normal_(0, 0.005)
+        self.bottleneck[0].bias.data.fill_(0.1)
+        &#47&#47 The classifier head used for final predictions.
+        self.head = <a id="change">nn.Sequential(
+            </a>nn.Linear(bottleneck_dim, width),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(width, num_classes)<a id="change">
+        )</a>
+        &#47&#47 The adversarial classifier head
+        self.adv_head = nn.Sequential(
+            nn.Linear(bottleneck_dim, width),
+            nn.ReLU(),</code></pre>

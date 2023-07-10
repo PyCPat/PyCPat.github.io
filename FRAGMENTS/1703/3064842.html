@@ -1,0 +1,69 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.num_class = num_class
+        self.layers_neurons_encoder = [self.feature_dim, *ae_hidden_neurons]
+        self.layers_neurons_decoder = self.layers_neurons_encoder[::-1]
+        self.cl_hidden_neurons = <a id="change">[</a>*cl_hidden_neurons, self.num_class<a id="change"></a>]
+        self.drop_rate = drop_rate
+        self.batch_norm = batch_norm
+        self.hidden_activation = nn.ReLU()
+        self.output_activation = nn.Sigmoid()
+        self.encoder = nn.Sequential()
+        self.decoder = nn.Sequential()
+        self.classifier = nn.Sequential()
+
+        &#47&#47create encoder model
+        for idx, layer in enumerate(self.layers_neurons_encoder[:-1]):
+            self.encoder.add_module("linear" + str(idx),
+                                    nn.Linear(self.layers_neurons_encoder[idx],
+                                            self.layers_neurons_encoder[idx + 1]))
+            self.encoder.add_module("batch_norm" + str(idx),
+                                    nn.BatchNorm1d(self.layers_neurons_encoder[idx + 1]))
+            self.encoder.add_module("dropout" + str(idx),
+                                    nn.Dropout(self.drop_rate))
+            self.encoder.add_module(hidden_activation + str(idx),
+                                    self.hidden_activation)
+        &#47&#47create decoder model
+        for idx, layer in enumerate(self.layers_neurons_decoder[:-1]):
+            self.encoder.add_module("linear" + str(idx),
+                                    nn.Linear(self.layers_neurons_encoder[idx],
+                                            self.layers_neurons_encoder[idx + 1]))
+            self.encoder.add_module("batch_norm" + str(idx),
+                                    nn.BatchNorm1d(self.layers_neurons_encoder[idx + 1]))
+            self.encoder.add_module("dropout" + str(idx),
+                                    nn.Dropout(self.drop_rate))
+            if idx == len(self.layers_neurons_decoder) - 2:
+                self.encoder.add_module(output_activation + str(idx),
+                                        self.output_activation)
+            else:
+                self.encoder.add_module(hidden_activation + str(idx),
+                                        self.hidden_activation)
+        
+        &#47&#47create classifier
+        for idx, layer in enumerate(self.cl_hidden_neurons[:-1]):
+            self.classifier.add_module("linear" + str(idx),
+                                    nn.Linear(self.cl_hidden_neurons[idx],
+                                            self.cl_hidden_neurons[idx + 1]))
+            self.classifier.add_module("batch_norm" + str(idx),
+                                    nn.BatchNorm1d(self.cl_hidden_neurons[idx + 1]))
+            self.classifier.add_module("dropout" + str(idx),
+                                    nn.Dropout(self.drop_rate))
+            if idx == len(self.cl_hidden_neurons) - 2:
+                <a id="change">self.classifier.add_module(</a>output_activation + str(idx),
+                                        self.output_activation<a id="change">)</a>
+            else:
+                self.classifier.add_module(hidden_activation + str(idx),
+                                        self.hidden_activation)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.classifier.add_module(hidden_activation + str(idx),
+                                    self.hidden_activation)
+        idx += 1
+        <a id="change">self.classifier.add_module(</a>"linear" + str(idx),
+                                    nn.Linear(self.cl_hidden_neurons[idx],
+                                            self.cl_hidden_neurons[idx + 1])<a id="change">)</a>
+
+
+    def forward(self,x):
+        feature_vector = self.encoder(x)</code></pre>

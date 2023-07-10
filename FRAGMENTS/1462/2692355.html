@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for _ in range(depth):
+            layers.extend([
+                Residual(PreNorm(dim, SelfAttention(dim, heads))),
+                <a id="change">Residual(PreNorm(</a>dim, FeedForward(dim)<a id="change">)</a><a id="change">)</a>
+            ])
+        self.layers = nn.Sequential(*layers)
+
+    def forward(self, x):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.to_logits = nn.Linear(dim, num_tokens)
+
+        self.attn_layers = nn.ModuleList([Residual(PreNorm(dim, SelfAttention(dim, heads))) for _ in range(depth)])
+        self.ff_layers = nn.ModuleList([<a id="change">Residual(PreNorm(</a>dim, FeedForward(dim)<a id="change">)</a><a id="change">)</a> for _ in range(depth)])
+
+    def forward(self, x, mem = None):
+        x = self.token_emb(x)</code></pre>

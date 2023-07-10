@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 has the same result as self.anchors = anchors but, it&quots a way to register a buffer (make
+        &#47&#47 a variable available in runtime) that should not be considered a model parameter
+        &#47&#47self.anchors = torch.tensor(anchors, device=config.DEVICE).float().view(self.nl, -1, 2)  &#47&#47 shape(nl,na,2)
+        self.register_buffer(&quotanchors&quot, <a id="change">torch.tensor(anchors).float().view(</a>self.nl, <a id="change">-1</a>, <a id="change">2</a><a id="change">)</a>)  &#47&#47 shape(nl,na,2)
+
+        self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.naxs, 1) for x in ch)  &#47&#47 output conv
+        self.inference = inference</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 a variable available in runtime) that should not be considered a model parameter
+        &#47&#47self.anchors = torch.tensor(anchors, device=config.DEVICE).float().view(self.nl, -1, 2)  &#47&#47 shape(nl,na,2)
+        self.stride = [8, 16, 32]
+        anchors_ = <a id="change">torch.tensor(anchors).float().view(</a>self.nl, <a id="change">-1</a>, <a id="change">2</a><a id="change">)</a> / torch.tensor(self.stride).repeat(6, 1).T.reshape(3, 3, 2)
+        self.register_buffer(&quotanchors&quot, anchors_)  &#47&#47 shape(nl,na,2)
+
+        self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.naxs, 1) for x in ch)  &#47&#47 output conv</code></pre>

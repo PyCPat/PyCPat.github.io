@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 During pretraining dropout might be set to 0. However, we might want
+        &#47&#47 to apply dropout when fine-tuning on a downstream task. Hence we need
+        &#47&#47 to modify the fairseq cfg to activate dropout (if requested).
+        <a id="change">if </a>not freeze and dropout is not None<a id="change">:
+            </a>overrides<a id="change"> = </a>{
+                "model": {
+                    "dropout": dropout,
+                    "encoder_layerdrop": dropout,</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.model.train()
+            for param in self.model.parameters():
+                param.requires_grad = True
+            <a id="change">if </a>self.freeze_feature_extractor<a id="change">:
+                </a><a id="change">logger.warning(
+                    "speechbrain.lobes.models.fairseq_wav2vec - wav2vec 2.0 feature extractor is frozen."</a><a id="change">
+                )</a>
+                for param in self.model.feature_extractor.parameters():
+                    param.requires_grad<a id="change"> = </a>False
+
+        &#47&#47 Randomly initialized layers if pretrain is False
+        if not (pretrain):</code></pre>

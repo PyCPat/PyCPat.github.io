@@ -1,0 +1,119 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if type(growth_rate) is int:
+            assert depth is not None, "Specify `depth`"
+            <a id="change">growth_rate</a> = [growth_rate] * depth
+        elif type(growth_rate) is list:
+            if depth is not None:
+                assert depth == len(growth_rate), "`depth` is different from `len(growth_rate)`"
+            depth = len(growth_rate)
+        else:
+            raise ValueError("Not support growth_rate={}".format(growth_rate))
+        
+        if type(dilated) is bool:
+            assert depth is not None, "Specify `depth`"
+            dilated = [dilated] * depth
+        elif type(dilated) is list:
+            if depth is not None:
+                assert depth == len(dilated), "`depth` is different from `len(dilated)`"
+            depth = len(dilated)
+        else:
+            raise ValueError("Not support dilated={}".format(dilated))
+        
+        if type(norm) is bool:
+            assert depth is not None, "Specify `depth`"
+            norm = [norm] * depth
+        elif type(norm) is list:
+            if depth is not None:
+                assert depth == len(norm), "`depth` is different from `len(norm)`"
+            depth = len(norm)
+        else:
+            raise ValueError("Not support norm={}".format(norm))
+
+        if type(nonlinear) is bool or type(nonlinear) is str:
+            assert depth is not None, "Specify `depth`"
+            nonlinear = [nonlinear] * depth
+        elif type(nonlinear) is list:
+            if depth is not None:
+                assert depth == len(nonlinear), "`depth` is different from `len(nonlinear)`"
+            depth = len(nonlinear)
+        else:
+            raise ValueError("Not support nonlinear={}".format(nonlinear))
+        
+        self.growth_rate = growth_rate
+        self.depth = depth
+
+        net = []
+        _in_channels = in_channels
+
+        for idx in range(depth):
+            _out_channels = sum(growth_rate[idx:])
+            if dilated[idx]:
+                dilation = 2**idx
+            else:
+                dilation = 1
+            conv_block = ConvBlock2d(_in_channels, _out_channels, kernel_size=kernel_size, stride=1, dilation=dilation, norm=norm[idx], nonlinear=nonlinear[idx], eps=eps)
+            net.append(conv_block)
+            _in_channels = <a id="change">growth_rate[idx]</a>
+
+        self.net = nn.ModuleList(net)
+    
+    def forward(self, input):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if type(growth_rate) is int:
+            assert depth is not None, "Specify `depth`"
+            <a id="change">growth_rate</a> = [growth_rate] * depth
+        elif type(growth_rate) is list:
+            if depth is not None:
+                assert depth == len(growth_rate), "`depth` is different from `len(growth_rate)`"
+            depth = len(growth_rate)
+        else:
+            raise ValueError("Not support growth_rate={}".format(growth_rate))
+        
+        if type(dilated) is bool:
+            assert depth is not None, "Specify `depth`"
+            dilated = [dilated] * depth
+        elif type(dilated) is list:
+            if depth is not None:
+                assert depth == len(dilated), "`depth` is different from `len(dilated)`"
+            depth = len(dilated)
+        else:
+            raise ValueError("Not support dilated={}".format(dilated))
+        
+        if type(norm) is bool:
+            assert depth is not None, "Specify `depth`"
+            norm = [norm] * depth
+        elif type(norm) is list:
+            if depth is not None:
+                assert depth == len(norm), "`depth` is different from `len(norm)`"
+            depth = len(norm)
+        else:
+            raise ValueError("Not support norm={}".format(norm))
+
+        if type(nonlinear) is bool or type(nonlinear) is str:
+            assert depth is not None, "Specify `depth`"
+            nonlinear = [nonlinear] * depth
+        elif type(nonlinear) is list:
+            if depth is not None:
+                assert depth == len(nonlinear), "`depth` is different from `len(nonlinear)`"
+            depth = len(nonlinear)
+        else:
+            raise ValueError("Not support nonlinear={}".format(nonlinear))
+        
+        self.growth_rate = growth_rate
+        self.depth = depth
+
+        net = []
+        _in_channels<a id="change"> = </a>in_channels - <a id="change">sum(</a>growth_rate<a id="change">)</a>
+
+        for idx in range(depth):
+            if idx == 0:
+                _in_channels = in_channels
+            else:
+                _in_channels<a id="change"> = </a>growth_rate[idx - 1]
+            _out_channels = sum(growth_rate[idx:])
+            
+            if dilated[idx]:</code></pre>

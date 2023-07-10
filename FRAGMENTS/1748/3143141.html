@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.crossnet = nn.ModuleList([CrossNetComp(config) for _ in range(self.depth)])
+        self.linear = nn.Linear(config["feature_num"] * config["embedding_size"], 1)
+        nn.init.normal_(self.linear.weight)
+        self.backbone = <a id="change">[</a>&quotcrossnet&quot, &quotlinear&quot, &quotembedding_layer&quot<a id="change"></a>]
+        self.loss_fn = nn.BCELoss()
+        if torch.cuda.is_available():
+            self.device = torch.device(&quotcuda&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.feature_num = config["feature_num"]
+        self.in_feature_num = self.feature_num * self.embedding_size
+        self.cross_layer_w = nn.ParameterList(
+            <a id="change">nn.Parameter(</a>torch.randn(self.in_feature_num, self.in_feature_num)<a id="change">)</a> for _ in range(self.depth)
+        )
+        self.bias = nn.ParameterList(<a id="change">nn.Parameter(</a>torch.zeros(self.in_feature_num, 1)<a id="change">)</a> for _ in range(self.depth))
+        self.linear = nn.Linear(self.in_feature_num, 1)
+        nn.init.normal_(self.linear.weight)
+</code></pre>

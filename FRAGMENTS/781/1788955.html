@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU(),
+            nn.AvgPool2d(kernel_size=(1,16), stride=(1,16)))
+        
+        self.Sception1 = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(num_T, num_S, kernel_size=(int(input_size[0]),1), stride=1, padding=0),
+            <a id="change">nn.ReLU()</a>,
+            nn.AvgPool2d(kernel_size=(1,8), stride=(1,8))<a id="change">)</a>
+        self.Sception2 = nn.Sequential(
+            nn.Conv2d(num_T, num_S, kernel_size=(int(input_size[0]*0.5),1), stride=(int(input_size[0]*0.5),1), padding=0),
+            nn.ReLU(),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.Tception2 = self.conv_block(1, num_T, (1, int(self.inception_window[1] * sampling_rate)), 1, self.pool)
+        self.Tception3 = self.conv_block(1, num_T, (1, int(self.inception_window[2] * sampling_rate)), 1, self.pool)
+
+        self.Sception1 = self.conv_block(num_T, num_S, (int(input_size[1])<a id="change">, 1</a>), 1, int(self.pool*0.25))
+        self.Sception2 = self.conv_block(num_T, num_S, (int(input_size[1] * 0.5), 1), (int(input_size[1] * 0.5), 1),
+                                         int(self.pool*0.25))
+        self.BN_t = nn.BatchNorm2d(num_T)</code></pre>

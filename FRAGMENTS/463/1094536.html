@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if in_channels != out_channels:
+            self.shortcut.add_module(&quotshortcut_conv&quot, nn.Conv2d(
+                in_channels, out_channels, kernel_size=1, stride=stride, padding=0, bias=False))
+            <a id="change">self.shortcut.add_module(
+                &quotshortcut_bn&quot</a>, nn.BatchNorm2d(out_channels)<a id="change">)</a>
+
+    def forward(self, x):
+        bottleneck = self.conv_reduce.forward(x)
+        bottleneck = F.relu(self.bn_reduce.forward(bottleneck), inplace=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.bn3 = nn.BatchNorm2d(self.expansion*group_width)
+
+        self.shortcut = nn.Sequential()
+        if <a id="change">stride != 1 or in_planes != self.expansion*group_width</a>:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, self.expansion*group_width, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(self.expansion*group_width)</code></pre>

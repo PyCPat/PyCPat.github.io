@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        head_layers = OrderedDict()
+
+        <a id="change">if feature_ndim == 2</a><a id="change">:
+            </a>assert pool, &quotpooling layer needed for 2d feature output&quot
+            if pool == &quotabs_attn&quot:
+                assert feature_ndim == 2
+                head_layers[&quotpool&quot] = AbsAttentionPool2d(prev_chs, feat_size=feat_size, out_features=embed_dim)
+                prev_chs = embed_dim
+            elif pool == &quotrot_attn&quot:
+                assert feature_ndim == 2
+                head_layers[&quotpool&quot] = RotAttentionPool2d(prev_chs, out_features=embed_dim)
+                prev_chs = embed_dim
+            elif pool == &quotavg&quot:
+                assert proj, &quotprojection layer needed if avg pooling used&quot
+                head_layers[&quotpool&quot] = nn.AdaptiveAvgPool2d(1)
+        else:
+            &#47&#47 NOTE timm transformers will be changed in the future to return unpooled
+            &#47&#47 outputs when head is disabled, this is not he case right now and code be needed
+            &#47&#47 here for token extraction or pooling
+            <a id="change">pass</a>
+
+        &#47&#47 NOTE attention pool ends with a projection layer, so proj should usually be set to &quot&quot if such pooling is used
+        if proj == &quotlinear&quot:
+            head_layers[&quotdrop&quot] = nn.Dropout(drop)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.trunk = timm.create_model(model_name, pretrained=pretrained)
+        feat_size = self.trunk.default_cfg.get(&quotpool_size&quot, None)
+        feature_ndim = 1 if not feat_size else 2
+        <a id="change">if pool in (&quotabs_attn&quot, &quotrot_attn&quot)</a><a id="change">:
+            </a>assert feature_ndim == 2
+            &#47&#47 if attn pooling used, remove both classifier and default pool
+            self.trunk.reset_classifier(0, global_pool=&quot&quot)
+        else:</code></pre>
