@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv1 = SpectralConv2d(self.width, self.width, self.modes1, self.modes2)
+        self.conv2 = SpectralConv2d(self.width, self.width, self.modes1, self.modes2)
+        self.conv3 = SpectralConv2d(self.width, self.width, self.modes1, self.modes2)
+        self.w0 = <a id="change">nn.Conv2d(</a>self.width, self.width, <a id="change">1</a><a id="change">)</a>
+        self.w1 = <a id="change">nn.Conv2d(</a>self.width, self.width, <a id="change">1</a><a id="change">)</a>
+        self.w2 = nn.Conv2d(self.width, self.width, 1)
+        self.w3 = nn.Conv2d(self.width, self.width, 1)
+
+        self.fc1 = nn.Linear(self.width, 128)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fc0 = nn.Linear(4, self.width)  &#47&#47 input channel is 3: (a(x, y), x, y)
+        self.n_layers = n_layers
+
+        self.convs = <a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
+        self.ws = nn.ModuleList([])
+        <a id="change">for _</a> in range(n_layers)<a id="change">:
+            </a>conv = SpectralConv2d(self.width, self.width, self.modes1, self.modes2)
+            <a id="change">self.convs.append(</a>conv<a id="change">)</a>
+
+            w = nn.Conv2d(self.width, self.width, 1)
+            self.ws.append(w)
+</code></pre>

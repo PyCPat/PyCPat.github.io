@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.to_q = nn.Sequential(
+            nn.Conv1d(dim, inner_dim, 1, bias = False),
+            <a id="change">nn.Conv1d(</a>inner_dim, inner_dim, 3<a id="change">, bias = False, groups = inner_dim)</a>
+        )
+
+        self.to_k = nn.Sequential(
+            nn.Conv1d(dim, inner_dim, 1, bias = False),</code></pre><h3>After Change</h3><pre><code class='java'>
+            ds_convs = nn.ModuleList([])
+
+            for kernel_size in ds_conv_kernel_sizes:
+                if <a id="change">kernel_size == 0</a>:
+                    ds_convs.append(<a id="change">nn.Identity()</a>)
+                    continue
+
+                ds_convs.append(CausalDepthwiseConv1d(inner_dim, kernel_size))</code></pre>

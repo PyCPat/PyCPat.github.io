@@ -1,0 +1,81 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                 loss_mask=dict(
+                     type=&quotCrossEntropyLoss&quot, use_mask=True, loss_weight=1.0)):
+        super(FCNMaskHead, self).__init__()
+        <a id="change">if upsample_method</a><a id="change"> not in [None, &quotdeconv&quot, &quotnearest&quot, &quotbilinear&quot]:
+            </a><a id="change">raise ValueError(
+                &quotInvalid upsample method {}, accepted methods &quot
+                &quotare "deconv", "nearest", "bilinear"&quot.format(upsample_method</a><a id="change">)</a><a id="change">)</a>
+        self.num_convs = num_convs
+        &#47&#47 WARN: roi_feat_size is reserved and not used
+        self.roi_feat_size = _pair(roi_feat_size)
+        self.in_channels = in_channels
+        self.conv_kernel_size = conv_kernel_size
+        self.conv_out_channels = conv_out_channels
+        self.upsample_method = upsample_method
+        self.upsample_ratio = upsample_ratio
+        self.num_classes = num_classes
+        self.class_agnostic = class_agnostic
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.fp16_enabled = False
+        self.loss_mask = build_loss(loss_mask)
+
+        self.convs = nn.ModuleList()
+        for i in range(self.num_convs):
+            in_channels = (
+                self.in_channels if i == 0 else self.conv_out_channels)
+            padding = (self.conv_kernel_size - 1) // 2
+            self.convs.append(
+                ConvModule(
+                    in_channels,
+                    self.conv_out_channels,
+                    self.conv_kernel_size,
+                    padding=padding,
+                    conv_cfg=conv_cfg,
+                    norm_cfg=norm_cfg))
+        upsample_in_channels = (
+            self.conv_out_channels if self.num_convs &gt; 0 else in_channels)
+        if self.upsample_method is None:
+            self.upsample = None
+        elif self.upsample_method == &quotdeconv&quot:
+            self.upsample = nn.ConvTranspose2d(
+                upsample_in_channels,
+                self.conv_out_channels,
+                self.upsample_ratio,
+                stride=self.upsample_ratio)
+        else:
+            self.upsample<a id="change"> = </a>nn.Upsample(
+                scale_factor=self.upsample_ratio, mode=self.upsample_method)
+
+        out_channels = 1 if self.class_agnostic else self.num_classes</code></pre><h3>After Change</h3><pre><code class='java'>
+                    norm_cfg=norm_cfg))
+        upsample_in_channels = (
+            self.conv_out_channels if self.num_convs &gt; 0 else in_channels)
+        upsample_cfg_<a id="change"> = </a><a id="change">self.upsample_cfg.copy()</a>
+        if self.upsample_method is None:
+            self.upsample = None
+        elif self.upsample_method == &quotdeconv&quot:
+            upsample_cfg_.update(
+                in_channels=upsample_in_channels,
+                out_channels=self.conv_out_channels,
+                kernel_size=self.scale_factor,
+                stride=self.scale_factor)
+        elif self.upsample_method == &quotcarafe&quot:
+            upsample_cfg_.update(
+                channels=upsample_in_channels, scale_factor=self.scale_factor)
+        else:
+            &#47&#47 suppress warnings
+            align_corners = (None
+                             if self.upsample_method == &quotnearest&quot else False)
+            upsample_cfg_.update(
+                scale_factor=self.scale_factor,
+                mode=self.upsample_method,
+                align_corners=align_corners)
+        self.upsample<a id="change"> = </a>build_upsample_layer(upsample_cfg_)
+
+        out_channels = 1 if self.class_agnostic else self.num_classes
+        logits_in_channel = (</code></pre>

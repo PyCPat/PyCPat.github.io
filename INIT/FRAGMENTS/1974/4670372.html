@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        super().__init__()
+        &#47&#47 Initialize parameters
+        <a id="change">self.embedding_dim</a> = embedding_dim
+        self.dropout = dropout
+        self.activation_dropout = activation_dropout
+        self.normalize_before = encoder_normalize_before
+
+        &#47&#47 Initialize blocks
+        self.activation_fn = gelu if use_gelu else F.relu
+        self.self_attn = MultiheadAttention(
+            self.embedding_dim,
+            num_attention_heads,
+            dropout=attention_dropout,
+            add_bias_kv=add_bias_kv,
+            add_zero_attn=add_zero_attn,
+        )
+
+        &#47&#47 layer norm associated with the self attention layer
+        self.self_attn_layer_norm = (
+            <a id="change">BertLayerNorm(</a>self.embedding_dim<a id="change">)
+            if use_bert_layer_norm</a><a id="change">
+            else </a><a id="change">LayerNorm(</a>self.embedding_dim<a id="change">, eps=1e-12)</a>
+        )
+        self.fc1 = nn.Linear(self.embedding_dim, ffn_embedding_dim)
+        self.fc2 = nn.Linear(ffn_embedding_dim, self.embedding_dim)
+
+        &#47&#47 layer norm associated with the position wise feed-forward NN
+        self.final_layer_norm = (
+            <a id="change">BertLayerNorm(</a>self.embedding_dim<a id="change">)</a><a id="change">
+            if use_bert_layer_norm</a><a id="change">
+            else </a><a id="change">LayerNorm(</a>self.embedding_dim<a id="change">, eps=1e-12)</a>
+        )
+
+    def _maybe_layer_norm(
+        self,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        super().__init__()
+        &#47&#47 Initialize parameters
+        <a id="change">self.embedding_dim</a> = embedding_dim
+        self.dropout = dropout
+        self.activation_dropout = activation_dropout
+
+        &#47&#47 Initialize blocks
+        self.activation_fn = utils.get_activation_fn(activation_fn)
+        self.self_attn = MultiheadAttention(
+            self.embedding_dim,
+            num_attention_heads,
+            dropout=attention_dropout,
+            add_bias_kv=add_bias_kv,
+            add_zero_attn=add_zero_attn,
+        )
+
+        &#47&#47 layer norm associated with the self attention layer
+        self.self_attn_layer_norm = <a id="change">LayerNorm(</a>self.embedding_dim<a id="change">)</a>
+        self.fc1 = nn.Linear(self.embedding_dim, ffn_embedding_dim)
+        self.fc2 = nn.Linear(ffn_embedding_dim, self.embedding_dim)
+
+        &#47&#47 layer norm associated with the position wise feed-forward NN
+        self.final_layer_norm = <a id="change">LayerNorm(</a>self.embedding_dim<a id="change">)</a>
+
+    def forward(
+        self,
+        x: torch.Tensor,</code></pre>

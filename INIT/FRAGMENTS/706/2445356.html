@@ -1,0 +1,77 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 self.linear2 = nn.Linear(label_width_d, ndf*8*4*4, bias=bias)
+        &#47&#47 self.sigmoid = nn.Sigmoid()
+
+        self.linear = <a id="change">nn.Sequential(
+            nn.Linear(</a>ndf*8*4*4, <a id="change">1</a><a id="change">, bias=bias)</a>,
+            nn.Sigmoid()<a id="change">
+        )</a>
+
+    def forward(self, x, y):
+        y = y.view(-1,1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 input is (nc) x 128 x 128
+                nn.Conv2d(nc, ndf, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=h/2
+                nn.BatchNorm2d(ndf),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
+                &#47&#47 input is ndf x 64 x 64
+                nn.Conv2d(ndf, ndf, kernel_size=3, stride=1, padding=1, bias=bias), &#47&#47h=h
+                nn.BatchNorm2d(ndf),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
+
+                &#47&#47 input is ndf x 64 x 64
+                nn.Conv2d(ndf, ndf, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=h/2
+                nn.BatchNorm2d(ndf),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
+                &#47&#47 input is ndf x 32 x 32
+                nn.Conv2d(ndf, ndf, kernel_size=3, stride=1, padding=1, bias=bias), &#47&#47h=h
+                nn.BatchNorm2d(ndf),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
+            )
+
+
+
+        self.discblock1 = nn.Sequential(
+            nn.Conv2d(ndf, ndf*2, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=h/2
+            nn.BatchNorm2d(ndf*2),
+            nn.LeakyReLU(0.2, inplace=True),
+            &#47&#47 input is (ndf*2) x 16 x 16
+
+            nn.Conv2d(ndf*2, ndf*2, kernel_size=3, stride=1, padding=1, bias=bias), &#47&#47h=h
+            nn.BatchNorm2d(ndf*2),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        self.discblock2 = nn.Sequential(
+            nn.Conv2d(ndf*2, ndf*4, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=h/2
+            nn.BatchNorm2d(ndf*4),
+            nn.LeakyReLU(0.2, inplace=True),
+            &#47&#47 input is (ndf*4) x 8 x 8
+
+            nn.Conv2d(ndf*4, ndf*4, kernel_size=3, stride=1, padding=1, bias=bias), &#47&#47h=h
+            nn.BatchNorm2d(ndf*4),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        self.discblock3 = nn.Sequential(
+            nn.Conv2d(ndf*4, ndf*8, kernel_size=4, stride=2, padding=1, bias=bias), &#47&#47h=h/2
+            nn.BatchNorm2d(ndf*8),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(ndf*8, ndf*8, kernel_size=3, stride=1, padding=1, bias=bias), &#47&#47h=h
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        &#47&#47 self.linear1 = nn.Linear(ndf*8*4*4, 1, bias=bias)
+        &#47&#47 self.linear2 = nn.Linear(label_width_d, 1, bias=bias)
+        &#47&#47 self.sigmoid = nn.Sigmoid()
+
+        self.linear1 = <a id="change">nn.Linear(</a>ndf*8*4*4, <a id="change">1</a><a id="change">, bias=bias)</a>
+        self.linear2 = <a id="change">nn.Linear(</a>label_width_d, ndf*8<a id="change">, bias=bias)</a>
+        &#47&#47&#47&#47 self.linear2 = nn.Linear(label_width_d, ndf*8*4*4, bias=bias)
+        self.sigmoid = nn.Sigmoid()
+
+        &#47&#47 self.linear = nn.Sequential(</code></pre>

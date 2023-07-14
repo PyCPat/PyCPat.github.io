@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                             kernel_size=hparams.postnet_kernel_size, stride=1,
+                             padding=int((hparams.postnet_kernel_size - 1) / 2),
+                             dilation=1, w_init_gain=&quottanh&quot),
+                    <a id="change">nn.BatchNorm1d(</a>hparams.postnet_embedding_dim<a id="change">)</a>)
+            )
+
+        self.convolutions.append(</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(Postnet, self).__init__()
+
+        activations = [torch.tanh] * (num_convs - 1) + [None]
+        conv_channels = <a id="change">[</a>conv_channels<a id="change"></a>] * (num_convs - 1) + [mel_dim]
+        self.conv1ds<a id="change"> = </a>BatchNormConv1dStack(mel_dim, conv_channels, kernel_size=conv_kernel_size,
+                                            stride=1, padding=(conv_kernel_size -1) // 2,
+                                            activations=activations, dropout=conv_dropout)
+</code></pre>

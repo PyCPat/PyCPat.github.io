@@ -1,0 +1,86 @@
+<html><h3>Pattern ID :169
+</h3><img src='772379.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.gcb = gcb
+        self.with_gcb = gcb is not None
+        self.gen_attention = gen_attention
+        self.with_gen_attention = <a id="change">gen_attention is not None</a>
+
+        if self.style == &quotpytorch&quot:
+            self.conv1_stride = 1
+            self.conv2_stride = stride
+        else:
+            self.conv1_stride = stride
+            self.conv2_stride = 1
+
+        self.norm1_name, norm1 = build_norm_layer(norm_cfg, planes, postfix=1)
+        self.norm2_name, norm2 = build_norm_layer(norm_cfg, planes, postfix=2)
+        self.norm3_name, norm3 = build_norm_layer(
+            norm_cfg, planes * self.expansion, postfix=3)
+
+        self.conv1 = build_conv_layer(
+            conv_cfg,
+            inplanes,
+            planes,
+            kernel_size=1,
+            stride=self.conv1_stride,
+            bias=False)
+        self.add_module(self.norm1_name, norm1)
+        fallback_on_stride = False
+        if self.with_dcn:
+            fallback_on_stride = dcn.pop(&quotfallback_on_stride&quot, False)
+        if not self.with_dcn or fallback_on_stride:
+            self.conv2 = build_conv_layer(
+                conv_cfg,
+                planes,
+                planes,
+                kernel_size=3,
+                stride=self.conv2_stride,
+                padding=dilation,
+                dilation=dilation,
+                bias=False)
+        else:
+            assert self.conv_cfg is None, &quotconv_cfg must be None for DCN&quot
+            self.conv2 = build_conv_layer(
+                dcn,
+                planes,
+                planes,
+                kernel_size=3,
+                stride=self.conv2_stride,
+                padding=dilation,
+                dilation=dilation,
+                bias=False)
+
+        self.add_module(self.norm2_name, norm2)
+        self.conv3 = build_conv_layer(
+            conv_cfg,
+            planes,
+            planes * self.expansion,
+            kernel_size=1,
+            bias=False)
+        self.add_module(self.norm3_name, norm3)
+
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+
+        if self.with_gcb:
+            gcb_inplanes = planes * self.expansion
+            self.context_block = ContextBlock(inplanes=gcb_inplanes, **gcb)
+
+        &#47&#47 gen_attention
+        <a id="change">if </a>self.with_gen_attention<a id="change">:
+            </a>self.gen_attention_block<a id="change"> = </a>GeneralizedAttention(
+                planes, **gen_attention)
+
+    @property</code></pre><h3>After Change</h3><pre><code class='java'>
+                if plugin[&quotposition&quot] == &quotafter_conv1&quot
+            ]
+            self.after_conv2_plugins = [
+                <a id="change">plugin[&quotcfg&quot]</a> for plugin in plugins
+                if <a id="change">plugin[&quotposition&quot] == &quotafter_conv2&quot</a>
+            ]
+            self.after_conv3_plugins = [
+                plugin[&quotcfg&quot] for plugin in plugins
+                if plugin[&quotposition&quot] == &quotafter_conv3&quot</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/1cccda2d0bf06094229075828030a8228d71fd28#diff-9e74a787bb65349ba8132ef6e75391c75732620feb72f0ec0283e9913e7afc80L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 772379</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: 1cccda2d0bf06094229075828030a8228d71fd28</div><div id='time'> Time: 2020-03-31</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/backbones/resnet.py</div><div id='class'> Class Name: Bottleneck</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/1cccda2d0bf06094229075828030a8228d71fd28#diff-9e74a787bb65349ba8132ef6e75391c75732620feb72f0ec0283e9913e7afc80L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 772377</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: 1cccda2d0bf06094229075828030a8228d71fd28</div><div id='time'> Time: 2020-03-31</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/backbones/resnet.py</div><div id='class'> Class Name: Bottleneck</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/saic-vul/iterdet/commit/b5431092505f7dcd7de616c8a79eba4d2532fbc8#diff-82a2ab843e4fc204629926964b43e16f568eee55dbebb2a9832e4f310aad05c6L23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 772376</div><div id='project'> Project Name: saic-vul/iterdet</div><div id='commit'> Commit Name: b5431092505f7dcd7de616c8a79eba4d2532fbc8</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: 1155098160@link.cuhk.edu.hk</div><div id='file'> File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='class'> Class Name: FCNMaskHead</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

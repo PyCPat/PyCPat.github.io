@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.to_q = nn.Conv2d(dim, dim_k * heads, 1, bias = False)
+        self.to_k = nn.Conv2d(dim, dim_k * dim_u, 1, bias = False)
+        self.to_v = nn.Conv2d(dim, dim_v * dim_u, 1, bias = False)
+        self.pos_emb = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>n, m, dim_k, dim_u<a id="change">))</a>
+
+        self.norm_q = nn.BatchNorm2d(dim_k * heads)
+        self.norm_v = nn.BatchNorm2d(dim_v * dim_u)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.local_contexts = exists(r)
+        if exists(r):
+            assert (r % 2) == 1, &quotReceptive kernel size should be odd&quot
+            self.padding = r<a id="change"> // </a>2
+            self.R<a id="change"> = </a><a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>dim_k, dim_u, 1, r, r<a id="change">))</a>
+        else:
+            assert exists(n), &quotYou must specify the total sequence length (h x w)&quot
+            self.pos_emb = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>n, n, dim_k, dim_u<a id="change">))</a>
+
+
+    def forward(self, x):
+        b, c, hh, ww, u, h = *x.shape, self.u, self.heads</code></pre>

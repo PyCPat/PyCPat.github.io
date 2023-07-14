@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.rank = rank
+
+        if len(empty_idx) == 0:
+            empty_idx = <a id="change">[</a>self.rank + 1<a id="change"></a>]  &#47&#47 jit doesn&quott seem to like empty lists
+        self.empty_idx = empty_idx
+
+        self.param_rank = len([i for i in range(self.rank) if i not in self.empty_idx])</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        empty_idx = set(empty_idx)
+        assert all(isinstance(x, int) for x in empty_idx)
+        self.param_rank = self.rank<a id="change"> - </a>len(empty_idx)
+        mask = torch.zeros((self.rank, self.param_rank))
+        c = 0
+        for r in range(self.rank):
+            if r not in empty_idx:
+                mask[r, c] = 1.
+                c += 1
+        <a id="change">self.register_buffer(&quotmask&quot</a>, mask<a id="change">)</a>
+
+        self._set_params(method, init_diag_multi)
+
+        self.var_predict_module = predict_variance</code></pre>

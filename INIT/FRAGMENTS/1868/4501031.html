@@ -1,0 +1,65 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif self.config[&quotglobal_pool&quot] == &quotsum&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise </a><a id="change">ValueError(</a>&quot{} pooling is not supported&quot<a id="change"> )</a>
+
+    def forward(self, positions):
+        batch_size = positions.size(0)
+        n_vertices = positions.size(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, out_size, config={}):
+        super().__init__()
+
+        <a id="change">self.config</a> = {
+            &quotconv_depth&quot: 3, 
+            &quotk_neighbors&quot: 10, 
+            &quotEConv_hidden&quot: 64, 
+            &quotEConv_hidden_depth&quot : 2, 
+            &quotEConv_feature&quot: 64, 
+            &quotEConv_aggr&quot: &quotmax&quot, 
+            &quotglobal_pool&quot: &quotmax&quot, 
+            &quotskip_connections&quot: True, 
+            &quotgraph_pooling&quot: True,
+            &quotpool_ratio&quot: 0.5  &#47&#47 only used when the graph pooling is enabled
+            }  &#47&#47 defaults for this net
+        self.config.update(config)  &#47&#47 from input
+
+        &#47&#47 MLP Schemes
+        first_layer_mpl = [2 * 3] + [self.config[&quotEConv_hidden&quot] for _ in range(self.config[&quotEConv_hidden_depth&quot])] + [self.config[&quotEConv_feature&quot]]
+        other_layers_mpl = ([2 * self.config[&quotEConv_feature&quot]] 
+            + [self.config[&quotEConv_hidden&quot] for _ in range(self.config[&quotEConv_hidden_depth&quot])] + [self.config[&quotEConv_feature&quot]])
+
+        &#47&#47 Contruct the net
+        &#47&#47 Conv layers
+        self.conv_layers = nn.ModuleList()
+        &#47&#47 first is always there
+        self.conv_layers.append(
+            geometric.DynamicEdgeConv(_MLP(first_layer_mpl), k=self.config[&quotk_neighbors&quot], aggr=self.config[&quotEConv_aggr&quot]))
+
+        for _ in range(1, self.config[&quotconv_depth&quot]):
+            self.conv_layers.append(
+                geometric.DynamicEdgeConv(_MLP(other_layers_mpl), k=self.config[&quotk_neighbors&quot], aggr=self.config[&quotEConv_aggr&quot]))
+
+        &#47&#47 pooling layers
+        if self.config[&quotgraph_pooling&quot]:
+            self.gpool_layers = nn.ModuleList()
+            for _ in range(0, self.config[&quotconv_depth&quot]):
+                self.gpool_layers.append(
+                    DynamicTopKPool(<a id="change">self.config[&quotEConv_feature&quot]</a>, k=self.config[&quotk_neighbors&quot], pool_ratio=self.config[&quotpool_ratio&quot]))
+
+        &#47&#47 global pooling layer based on config
+        if self.config[&quotglobal_pool&quot] == &quotmax&quot:
+            self.global_pool = geometric.global_max_pool
+        elif self.config[&quotglobal_pool&quot] == &quotmean&quot:
+            self.global_pool = geometric.global_mean_pool
+        elif self.config[&quotglobal_pool&quot] == &quotadd&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a><a id="change">&quot{} pooling is not supported&quot.format(</a><a id="change">self.config[&quotglobal_pool&quot]))</a>
+            
+        &#47&#47 Output linear layer
+        out_features = self.config[&quotEConv_feature&quot] * self.config[&quotconv_depth&quot] if self.config[&quotskip_connections&quot] else self.config[&quotEConv_feature&quot]
+        self.lin = nn.Linear(out_features, out_size)</code></pre>

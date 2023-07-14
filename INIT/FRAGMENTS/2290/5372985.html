@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        layers.append(DepthwiseBlock(inp * t, inp * t, kernel_size, stride=self.stride, padding=self.padding,
+                                     bn_momentum=bn_momentum, norm_layer=norm_layer, activation_layer=activation_layer))
+
+        <a id="change">if </a><a id="change">(se_ratio is not None) and (se_ratio &gt; 0) and (se_ratio &lt;= 1):
+            </a>layers.append(SEBlock(inp * t, se_ratio / t))
+
+        layers.append(Conv2d1x1BN(
+            inp * t, oup, bn_momentum=bn_momentum, norm_layer=norm_layer))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+        self.padding = padding if padding is not None else (kernel_size // 2)
+        self.apply_residual = (self.stride == 1) and (self.inp == self.oup)
+        self.se_ratio = se_ratio<a id="change"> if </a>se_ind<a id="change"> or se_ratio is None else </a>(se_ratio / t)
+        self.has_se = (self.se_ratio is not None) and (self.se_ratio &gt; 0) and (self.se_ratio &lt;= 1)
+
+        layers = []</code></pre>

@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(DiscOptBlock, self).__init__()
+        self.d_spectral_norm = d_spectral_norm
+
+        <a id="change">if d_spectral_norm</a><a id="change">:
+            </a>self.conv2d0<a id="change"> = </a><a id="change">snconv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, stride=1, padding=0)</a>
+            self.conv2d1<a id="change"> = </a><a id="change">snconv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)</a>
+            self.conv2d2<a id="change"> = </a><a id="change">snconv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)</a>
+        else:
+            self.conv2d0 = conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=1, stride=1, padding=0)
+            self.conv2d1 = conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)
+            self.conv2d2 = conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1)
+
+            self.bn0<a id="change"> = </a>batchnorm_2d(in_features=in_channels)
+            self.bn1<a id="change"> = </a>batchnorm_2d(in_features=out_channels)
+
+        if activation_fn == "ReLU":
+            self.activation = nn.ReLU(inplace=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+                                        stride=1,
+                                        padding=1)
+
+        <a id="change">if not apply_d_sn</a><a id="change">:
+            </a>self.bn0<a id="change"> = </a>MODULES.d_bn(in_features=in_channels)
+            self.bn1<a id="change"> = </a>MODULES.d_bn(in_features=out_channels)
+
+        self.activation = MODULES.d_act_fn
+</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if config.use_se:
+            block.append(SEUnit(inter_channel))
+
+        block.append(<a id="change">ConvBNAct(</a>inter_channel, config.out_ch, <a id="change">1</a>, <a id="change">1</a>, <a id="change">1</a>, config.norm_layer, nn.Identity<a id="change">)</a>)
+        self.block = nn.Sequential(*block)
+        self.use_skip_connection = config.stride == 1 and config.in_ch == config.out_ch
+        self.stochastic_path = StochasticDepth(sd_prob, "row")</code></pre><h3>After Change</h3><pre><code class='java'>
+            block.append((&quotlinear_bottleneck&quot, ConvBNAct(config.in_ch, inter_channel, 1, 1, 1, config.norm_layer, config.act)))
+            block.append((&quotdepth_wise&quot, ConvBNAct(inter_channel, inter_channel, config.kernel, config.stride, inter_channel, config.norm_layer, config.act)))
+            block.append((&quotse&quot, SEUnit(inter_channel, 4 * config.expand_ratio)))
+            block.append((&quotpoint_wise&quot, <a id="change">ConvBNAct(</a>inter_channel, config.out_ch, <a id="change">1</a>, <a id="change">1</a>, <a id="change">1</a>, config.norm_layer, nn.Identity<a id="change">)</a>))
+
+        self.block = nn.Sequential(OrderedDict(block))
+        self.use_skip_connection = config.stride == 1 and config.in_ch == config.out_ch</code></pre>

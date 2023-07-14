@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(CEM, self).__init__()
+        self.cv1 = BasicConv(channels[0], fea_channel, kernel_size=1, padding=0)
+        self.cv2 = BasicConv(channels[1], fea_channel, kernel_size=1, padding=0, scale_factor=2)
+        self.gap = <a id="change">nn.AdaptiveAvgPool2d(1</a><a id="change">)</a>
+        self.cv3 = BasicConv(channels[1], fea_channel, kernel_size=1, padding=0)
+
+    def forward(self, inputs):
+        C4_lat = self.cv1(inputs[0])</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, channels, fea_channel):
+        super(CEM, self).__init__()
+        self.conv1 = BasicConv(channels[0], fea_channel, kernel_size=1, padding=0, relu=False)
+        self.conv2 = <a id="change">nn.Sequential(
+            </a>BasicConv(channels[1], fea_channel, kernel_size=1, padding=0, relu=False),
+            <a id="change">nn.Upsample(scale_factor=2, mode=&quotnearest&quot)</a><a id="change">,
+            )</a>
+        self.conv3 = <a id="change">nn.Sequential(
+            </a><a id="change">nn.AdaptiveAvgPool2d(1</a><a id="change">)</a>,
+            BasicConv(channels[1], fea_channel, kernel_size=1, padding=0, relu=False)<a id="change">,
+            )</a>
+        self.relu = <a id="change">nn.ReLU(inplace=True)</a>
+
+    def forward(self, inputs):
+        C4_lat = self.conv1(inputs[0])
+        C5_lat = self.conv2(inputs[1])</code></pre>

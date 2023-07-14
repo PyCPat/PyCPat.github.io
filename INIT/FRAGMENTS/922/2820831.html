@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.fc2 = nn.Linear(256, 256)
+
+        if use_batch_norm:
+            self.bn1 = <a id="change">nn.BatchNorm1d(</a>256<a id="change">)</a>
+            self.bn2 = nn.BatchNorm1d(256)
+
+    def forward(self, x):
+        h = torch.relu(self.fc1(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        in_units = [observation_shape[0]] + hidden_units[:-1]
+        self.fcs = nn.ModuleList()
+        self.bns<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        for in_unit, out_unit in zip(in_units, hidden_units):
+            self.fcs.append(nn.Linear(in_unit, out_unit))
+            if use_batch_norm:
+                <a id="change">self.bns.append(</a>nn.BatchNorm1d(out_unit)<a id="change">)</a>
+
+    def forward(self, x):
+        h = x
+        for i in range(len(self.fcs)):</code></pre>

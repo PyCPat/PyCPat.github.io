@@ -1,0 +1,32 @@
+<html><h3>Pattern ID :1977
+</h3><img src='4679559.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_channels, out_channels, noise_channel, stride=1, dropout=0, use_affine_level=False):
+        super(ResBlockUp, self).__init__()
+        self.use_affine_level = use_affine_level
+        <a id="change">if </a>self.use_affine_level<a id="change">:
+            </a>self.noise_func = Conv1dWithInitialization(
+                in_channels=noise_channel,
+                out_channels=out_channels*2,
+                kernel_size=3,
+                stride=1,
+                padding=1
+            )
+        else:
+            self.noise_func<a id="change"> = </a>Conv1dWithInitialization(
+                in_channels=noise_channel,
+                out_channels=out_channels,
+                kernel_size=3,</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
+            nn.Conv2d(out_channels, out_channels, 3, 1, padding=1)
+        )
+        self.bypass = <a id="change">nn.Sequential(
+            </a>nn.Upsample(scale_factor=2) if stride &gt; 1 else nn.Identity(),
+            <a id="change">nn.Conv2d(</a>in_channels, out_channels, <a id="change">1</a>, <a id="change">1</a><a id="change">)
+        )</a>
+
+    def forward(self, x_in, noise_embed):
+        x = self.model1(x_in)
+        x = self.noise_func(x, noise_embed)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/6424546b8d11bea9ffa4165b94c8c16c56a1de62#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4679559</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 6424546b8d11bea9ffa4165b94c8c16c56a1de62</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='class'> Class Name: ResBlockUp</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/nju-jet/sr_framework/commit/3afc43123c8c1fb499c6746cc856620bb8548109#diff-560fe202d8d0d4ce5e0b4af1f2a717a9acdcc349a4393f34168af764c9ad3b92L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4679557</div><div id='project'> Project Name: nju-jet/sr_framework</div><div id='commit'> Commit Name: 3afc43123c8c1fb499c6746cc856620bb8548109</div><div id='time'> Time: 2020-09-21</div><div id='author'> Author: 151220022@smail.nju.edu.cn</div><div id='file'> File Name: sr_framework/solvers/networks/IDN.py</div><div id='class'> Class Name: IDN</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4679560</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='class'> Class Name: ResBlockUp</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

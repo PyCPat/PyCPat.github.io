@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            out_channels = out_channels // num_paths
+        groups = min(out_channels, groups)
+
+        self.paths = <a id="change">nn.ModuleList()</a>
+        for k, d in zip(kernel_size, dilation):
+            p = _get_padding(k, stride, d)
+            <a id="change">self.paths.append(</a>nn.Sequential(OrderedDict([
+                (&quotconv&quot, nn.Conv2d(
+                    in_channels, out_channels, kernel_size=k, stride=stride, padding=p,
+                    dilation=d, groups=groups, bias=False)),
+                (&quotbn&quot, norm_layer(out_channels)),
+                (&quotact&quot, act_layer(inplace=True))
+            ]))<a id="change">)</a>
+
+        attn_channels = max(int(out_channels / attn_reduction), min_attn_channels)
+        self.attn = SelectiveKernelAttn(out_channels, num_paths, attn_channels)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            out_channels = out_channels // num_paths
+        groups = min(out_channels, groups)
+
+        conv_kwargs<a id="change"> = </a><a id="change">dict(
+            stride=stride, groups=groups, drop_block=drop_block, act_layer=act_layer, norm_layer=norm_layer)</a>
+        self.paths = nn.ModuleList([
+            ConvBnAct(in_channels, out_channels, kernel_size=k, dilation=d, **conv_kwargs)
+            for k, d in zip(kernel_size, dilation)])
+</code></pre>

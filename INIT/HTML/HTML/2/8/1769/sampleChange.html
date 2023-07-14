@@ -1,0 +1,112 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        curr_fmap_size = image_size
+
+        for ind, (dim_in, dim_out) in enumerate(<a id="change">in_out</a>):
+            is_last = ind &gt;= (num_resolutions - 1)
+
+            self.conditioners.append(conditioning_klass(curr_fmap_size, dim_in))
+
+            self.downs.append(nn.ModuleList([
+                block_klass(dim_in, dim_in, time_emb_dim = time_dim),
+                block_klass(dim_in, dim_in, time_emb_dim = time_dim),
+                Residual(LinearAttention(dim_in)),
+                Downsample(dim_in, dim_out) if not is_last else nn.Conv2d(dim_in, dim_out, 3, padding = 1)
+            ]))
+
+            if not is_last:
+                curr_fmap_size //= 2
+
+        &#47&#47 middle blocks
+
+        mid_dim = dims[-1]
+        self.mid_block1 = block_klass(mid_dim, mid_dim, time_emb_dim = time_dim)
+        self.mid_attn = Residual(Attention(mid_dim))
+        self.mid_block2 = block_klass(mid_dim, mid_dim, time_emb_dim = time_dim)
+
+        &#47&#47 condition encoding path will be the same as the main encoding path
+
+        self.cond_downs = copy.deepcopy(self.downs)
+        self.cond_mid_block1 = copy.deepcopy(self.mid_block1)
+
+        &#47&#47 upsampling decoding blocks
+
+        self.ups = nn.ModuleList([])
+
+        for ind, (dim_in, dim_out) in enumerate(<a id="change">reversed(in_out</a><a id="change">)</a>):
+            is_last = ind == (len(in_out) - 1)
+
+            skip_connect_dim = dim_in * (2 if self.skip_connect_condition_fmaps else 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.cond_init_conv = nn.Conv2d(channels, init_dim, 7, padding = 3)
+
+        dims = [init_dim, *map(lambda m: dim * m, dim_mults)]
+        <a id="change">in_out</a> = list(zip(dims[:-1], dims[1:]))
+
+        block_klass = partial(ResnetBlock, groups = resnet_block_groups)
+
+        &#47&#47 time embeddings
+
+        time_dim = dim * 4
+
+        self.time_mlp = nn.Sequential(
+            SinusoidalPosEmb(dim),
+            nn.Linear(dim, time_dim),
+            nn.GELU(),
+            nn.Linear(time_dim, time_dim)
+        )
+
+        &#47&#47 layers
+
+        num_resolutions = len(in_out)
+        assert len(full_self_attn) == num_resolutions
+
+        self.conditioners = nn.ModuleList([])
+
+        self.skip_connect_condition_fmaps = skip_connect_condition_fmaps
+
+        &#47&#47 downsampling encoding blocks
+
+        self.downs = nn.ModuleList([])
+
+        curr_fmap_size = image_size
+
+        for ind, ((dim_in, dim_out), full_attn) in enumerate(<a id="change">zip(in_out</a>, <a id="change">full_self_attn</a><a id="change">)</a>):
+            is_last = ind &gt;= (num_resolutions - 1)
+            attn_klass = Attention if full_attn else LinearAttention
+
+            self.conditioners.append(conditioning_klass(curr_fmap_size, dim_in))
+
+
+            self.downs.append(nn.ModuleList([
+                block_klass(dim_in, dim_in, time_emb_dim = time_dim),
+                block_klass(dim_in, dim_in, time_emb_dim = time_dim),
+                Residual(attn_klass(dim_in)),
+                Downsample(dim_in, dim_out) if not is_last else nn.Conv2d(dim_in, dim_out, 3, padding = 1)
+            ]))
+
+            if not is_last:
+                curr_fmap_size //= 2
+
+        &#47&#47 middle blocks
+
+        mid_dim = dims[-1]
+        self.mid_block1 = block_klass(mid_dim, mid_dim, time_emb_dim = time_dim)
+        self.mid_attn = Residual(Attention(mid_dim))
+        self.mid_block2 = block_klass(mid_dim, mid_dim, time_emb_dim = time_dim)
+
+        &#47&#47 condition encoding path will be the same as the main encoding path
+
+        self.cond_downs = copy.deepcopy(self.downs)
+        self.cond_mid_block1 = copy.deepcopy(self.mid_block1)
+
+        &#47&#47 upsampling decoding blocks
+
+        self.ups = nn.ModuleList([])
+
+        for ind, ((dim_in, dim_out), full_attn) in enumerate(<a id="change">zip(</a><a id="change">reversed(in_out</a><a id="change">)</a>, <a id="change">reversed(full_self_attn</a><a id="change">))</a>):
+            is_last = ind == (len(in_out) - 1)
+            attn_klass = Attention if full_attn else LinearAttention
+</code></pre>

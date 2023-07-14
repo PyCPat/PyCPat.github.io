@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_planes, out_planes, kernel_size=3, double=True):
+        super().__init__()
+        if double:
+            self.conv_block = <a id="change">nn.Sequential(
+                </a>nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=((kernel_size - 1) // 2)),
+                nn.BatchNorm3d(out_planes),
+                nn.ReLU(inplace=True),
+                nn.Conv3d(out_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=((kernel_size - 1) // 2)),
+                nn.BatchNorm3d(out_planes),
+                nn.ReLU(inplace=True)<a id="change">
+            )</a>
+        else:
+            self.conv_block = nn.Sequential(
+                nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=((kernel_size - 1) // 2)),</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, in_planes, out_planes, kernel_size=3, double=True, norm=nn.BatchNorm3d, skip=True):
+        super().__init__()
+        self.skip = skip
+        self.downsample = <a id="change">in_planes != out_planes</a>
+        self.final_activation = nn.LeakyReLU(negative_slope=0.01,inplace=True) 
+        padding = (kernel_size - 1) // 2
+        if double:
+            self.conv_block = nn.Sequential(
+                nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=padding),
+                norm(out_planes),
+                nn.LeakyReLU(negative_slope=0.01,inplace=True),
+                nn.Conv3d(out_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=padding),
+                norm(out_planes))
+        else:
+            self.conv_block = nn.Sequential(
+                nn.Conv3d(in_planes, out_planes, kernel_size=kernel_size, stride=1,
+                          padding=padding),
+                norm(out_planes))
+
+        if <a id="change">self.skip and self.downsample</a>:
+            self.conv_down = nn.Sequential(
+                nn.Conv3d(in_planes, out_planes, kernel_size=1, stride=1,
+                          padding=0),</code></pre>

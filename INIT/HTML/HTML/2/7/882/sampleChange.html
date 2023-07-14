@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class ResNetBlock(nn.Module):
+    def __init__(self, dim):
+        super(ResNetBlock, self).__init__()
+        self.main = <a id="change">nn.Sequential(
+            </a>nn.ReflectionPad2d(1),
+            nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=0, bias=False),
+            nn.InstanceNorm2d(dim),
+            nn.ReLU(True),
+
+            nn.ReflectionPad2d(1),
+            <a id="change">nn.Conv2d(</a>dim, dim<a id="change">, kernel_size=3, stride=1, padding=0, bias=False)</a>,
+            <a id="change">nn.InstanceNorm2d(</a>dim<a id="change">)
+        )</a>
+
+    def forward(self, x):
+        out = x + self.main(x)
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+                       nn.ReLU(True)]
+
+        conv_block += [nn.ReflectionPad2d(1),
+                       <a id="change">nn.Conv2d(</a>dim, dim, 3, 1, 0<a id="change">, bias=False)</a>,
+                       <a id="change">nn.InstanceNorm2d(</a>dim<a id="change">)</a>]
+
+        self.conv_block = nn.Sequential(*conv_block)
+</code></pre>

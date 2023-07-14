@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(GHMC, self).__init__()
+        self.bins = bins
+        self.momentum = momentum
+        self.edges = <a id="change">torch.arange(bins + 1).float().cuda()</a> / bins
+        self.edges[-1] += 1e-6
+        if momentum &gt; 0:
+            self.acc_sum = torch.zeros(bins).cuda()</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(GHMC, self).__init__()
+        self.bins = bins
+        self.momentum = momentum
+        edges = <a id="change">torch.arange(bins + 1).float()</a> / bins
+        <a id="change">self.register_buffer(&quotedges&quot</a>, edges<a id="change">)</a>
+        self.edges[-1] += 1e-6
+        if momentum &gt; 0:
+            acc_sum = torch.zeros(bins)
+            <a id="change">self.register_buffer(&quotacc_sum&quot</a>, acc_sum<a id="change">)</a>
+        self.use_sigmoid = use_sigmoid
+        if not self.use_sigmoid:
+            raise NotImplementedError
+        self.loss_weight = loss_weight</code></pre>

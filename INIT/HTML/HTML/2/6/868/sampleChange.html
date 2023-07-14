@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(RelTemporalEncoding, self).__init__()
+        self.drop = nn.Dropout(dropout)
+        position = torch.arange(0., max_len).unsqueeze(1)
+        div_term = 1 / (10000 ** (<a id="change">torch.arange(</a>0., n_hid * 2, 2.<a id="change">)) / </a>n_hid / 2)
+        self.emb = nn.Embedding(max_len, n_hid * 2)
+        self.emb.weight.data[:, 0::2] = torch.sin(position * div_term) / math.sqrt(n_hid)
+        self.emb.weight.data[:, 1::2] = torch.cos(position * div_term) / math.sqrt(n_hid)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, n_hid, max_len = 240, dropout = 0.2):
+        super(RelTemporalEncoding, self).__init__()
+        position = torch.arange(0., max_len).unsqueeze(1)
+        div_term = torch.exp(<a id="change">torch.arange(</a>0, <a id="change">n_hid</a>, 2<a id="change">) *
+                             </a>-(math.log(10000.0)<a id="change"> / n_hid</a>))
+        emb = nn.Embedding(max_len, n_hid)
+        emb.weight.data[:, 0::2] = torch.sin(position * div_term) / math.sqrt(n_hid)
+        emb.weight.data[:, 1::2] = torch.cos(position * div_term) / math.sqrt(n_hid)</code></pre>

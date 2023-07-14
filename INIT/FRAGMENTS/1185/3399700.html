@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.input_path = nn.ModuleList([
+            LinearBlock(in_features=latent_dimensions, out_features=256, feature_size=365),
+            LinearBlock(in_features=256, out_features=256, feature_size=4096),
+            nn.Sequential(spectral_norm(<a id="change">nn.Linear(in_features=256, out_features=int(512 // channels_factor) * 4 * 4)</a>),
+                          nn.LeakyReLU(negative_slope=0.2))
+        ])
+        &#47&#47 Init main residual path
+        self.main_path = nn.ModuleList([
+            GeneratorResidualBlock(in_channels=int(512 // channels_factor), out_channels=int(512 // channels_factor),
+                                   feature_channels=513, number_of_classes=number_of_classes),
+            GeneratorResidualBlock(in_channels=int(512 // channels_factor), out_channels=int(512 // channels_factor),
+                                   feature_channels=513, number_of_classes=number_of_classes),
+            GeneratorResidualBlock(in_channels=int(512 // channels_factor), out_channels=int(256 // channels_factor),
+                                   feature_channels=257, number_of_classes=number_of_classes),
+            SelfAttention(channels=int(256 // channels_factor)),
+            GeneratorResidualBlock(in_channels=int(256 // channels_factor), out_channels=int(128 // channels_factor),
+                                   feature_channels=129, number_of_classes=number_of_classes),
+            GeneratorResidualBlock(in_channels=int(128 // channels_factor), out_channels=int(64 // channels_factor),
+                                   feature_channels=65, number_of_classes=number_of_classes)
+        ])
+        &#47&#47 Init final block
+        self.final_block = nn.Sequential(
+            nn.UpsamplingBilinear2d(scale_factor=2),
+            spectral_norm(nn.BatchNorm2d(int(64 // channels_factor))),
+            spectral_norm(nn.Conv2d(in_channels=int(64 // channels_factor), out_channels=int(64 // channels_factor),
+                                    kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)),
+            nn.LeakyReLU(negative_slope=0.2),
+            spectral_norm(
+                nn.Conv2d(in_channels=int(64 // channels_factor), out_channels=out_channels, kernel_size=(1, 1),
+                          stride=(1, 1), padding=(0, 0), bias=False))
+        )
+        &#47&#47 Init embedding layer for label
+        self.embedding<a id="change"> = </a><a id="change">nn.Embedding(num_embeddings=number_of_classes, embedding_dim=number_of_classes)</a>
+
+    def forward(self, input: torch.Tensor, features: List[torch.Tensor],
+                masks: List[torch.Tensor] = None, class_id: torch.Tensor = None) -&gt; torch.Tensor:
+        &quot&quot&quot</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.linear_block_1 = LinearBlock(in_features=latent_dimensions, out_features=365, feature_size=365)
+        self.linear_block_2 = LinearBlock(in_features=365, out_features=2048, feature_size=4096)
+        self.convolution_layer = spectral_norm(
+            <a id="change">nn.Conv2d(in_channels=128, out_channels=int(512 // channels_factor), kernel_size=(1, 1), padding=(0, 0),
+                      stride=(1, 1), bias=True)</a>)
+        &#47&#47 Init main residual path
+        self.main_path = nn.ModuleList([
+            GeneratorResidualBlock(in_channels=int(512 // channels_factor), out_channels=int(512 // channels_factor),</code></pre>

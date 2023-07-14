@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w d -&gt; b d w h&quot),
+            <a id="change">nn.Conv2d(</a>dim, hidden_dim, <a id="change">1</a><a id="change">)</a>,
+            Rearrange(&quotb d w h -&gt; b (d w) h&quot),
+            nn.Conv1d(hidden_dim * w, w * w, 1, groups=segment),
+            Rearrange(&quotb (w1 w2) h -&gt; b h w1 w2&quot, w1 = w),</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Softmax(dim = -1),
+        )
+        self.recover = Rearrange(&quotb h s w d -&gt; b h w (s d)&quot, s = segment)
+        self.proc<a id="change"> = </a><a id="change">nn.Linear(</a>dim, dim<a id="change">)</a>
+
+    def forward(self, x):
+        &#47&#47 b h w d = X.shape
+        input = x</code></pre>

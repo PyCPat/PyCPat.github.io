@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, number_class_symbols, in_channels=3, rnn_size=128):
+        super().__init__()
+        self.maxpooling_22 = nn.MaxPool2d(2, 2)
+        self.maxpooling_21 = nn.MaxPool2d((2, 2), (2, 1), (0<a id="change">, 1</a>))
+        self.layer1 = self._make_layer(in_channels, 64, 3, 1, 1)
+        self.layer2 = self._make_layer(64, 128, 3, 1, 1)
+        self.layer3 = self._make_layer(128, 256, 3, 1, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.avg_pool = nn.AdaptiveAvgPool2d(
+            (time_feature_count, time_feature_count))
+        self.bilstm = BiLSTM(time_feature_count, lstm_hidden, lstm_len)
+        self.classifier = <a id="change">nn.Sequential(
+            </a>nn.Linear(lstm_hidden * 2, time_feature_count),
+            nn.GELU(),
+            <a id="change">nn.Dropout(</a>0.1<a id="change">)</a>,
+            nn.Linear(time_feature_count, number_class_symbols)<a id="change">
+        )</a>
+
+    def forward(self, x):
+        x = self.feature_extractor(x)
+        b, c, h, w = x.size()</code></pre>

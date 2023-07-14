@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.to_embed = nn.Embedding(num_tokens, dim) if exists(num_tokens) else nn.Identity()
+
+        self.layers = nn.ModuleList(<a id="change">[Residual(PreNorm(dim, gMLPBlock(dim = dim, dim_ff = dim_ff, seq_len = seq_len, heads = heads, window = window))) for i in range(depth)]</a>)
+
+        self.to_logits = nn.Sequential(
+            nn.LayerNorm(dim),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.to_embed = nn.Embedding(num_tokens, dim)
+
+        window = cast_tuple(window, depth)
+        layers = <a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
+
+        for ind, w in zip(range(depth), window):
+            layer_blocks = nn.ModuleList([
+                PreNorm(dim, gMLPBlock(dim = dim, dim_ff = dim_ff, seq_len = seq_len, heads = heads, window = w))
+            ])
+
+            if reversible:
+                layer_blocks.append(PreNorm(dim, gMLPBlock(dim = dim, dim_ff = dim_ff, seq_len = seq_len, heads = heads, window = w)))
+
+            layers.append(layer_blocks)
+
+        execute_klass = SequentialSequence if not reversible else ReversibleSequence
+        self.net<a id="change"> = </a>execute_klass(layers)
+
+        self.to_logits = nn.Sequential(
+            nn.LayerNorm(dim),</code></pre>

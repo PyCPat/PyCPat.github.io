@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+               ]  &#47&#47 stochastic depth decay rule
+        self.use_rel_pos_bias = use_rel_pos_bias
+        self.use_checkpoint = use_checkpoint
+        self.blocks<a id="change"> = nn.ModuleList(</a><a id="change">[
+            Block(
+                dim=embed_dim,
+                num_heads=num_heads,
+                mlp_ratio=mlp_ratio,
+                qkv_bias=qkv_bias,
+                qk_scale=qk_scale,
+                drop=drop_rate,
+                attn_drop=attn_drop_rate,
+                drop_path=dpr[i],
+                norm_layer=norm_layer,
+                init_values=init_values,
+                window_size=(14, 14) if
+                ((i + 1) % interval != 0
+                 or aggregation != &quotattn&quot) else self.patch_embed.patch_shape,
+                window=((i + 1) % interval != 0),
+                aggregation=aggregation) for i in range(depth)
+        ])</a>
+
+        if self.pos_embed is not None:
+            trunc_normal_(self.pos_embed, std=.02)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 stochastic depth decay rule
+        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]
+
+        self.blocks<a id="change"> = nn.ModuleList()</a>
+        <a id="change">for i</a> in range(depth)<a id="change">:
+            </a>block<a id="change"> = </a>Block(
+                dim=embed_dim,
+                num_heads=num_heads,
+                mlp_ratio=mlp_ratio,
+                qkv_bias=qkv_bias,
+                drop_path=dpr[i],
+                norm_layer=norm_layer,
+                act_layer=act_layer,
+                use_rel_pos=use_rel_pos,
+                rel_pos_zero_init=rel_pos_zero_init,
+                window_size=window_size if i in window_block_indexes else 0,
+                use_residual_block=i in residual_block_indexes,
+                input_size=(img_size // patch_size, img_size // patch_size),
+            )
+            <a id="change">self.blocks.append(</a>block<a id="change">)</a>
+
+        if self.pos_embed is not None:
+            trunc_normal_(self.pos_embed, std=0.02)
+</code></pre>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Please `pip install transformers` to use pre-trained HuggingFace models")
+        if config is None:
+            self.config = AutoConfig.from_pretrained(model_name_or_path)
+            <a id="change">if pretrained</a><a id="change">:
+                &#47&#47 TODO: do all model configs have this attribute? PretrainedConfig does so yes??
+                </a>if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                    self.transformer = AutoModel.from_pretrained(model_name_or_path)
+                    self.transformer<a id="change"> = </a>self.transformer.encoder
+                else:
+                    self.transformer<a id="change"> = </a>AutoModel.from_pretrained(model_name_or_path, add_pooling_layer=uses_transformer_pooler)
+            else:
+                if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                    self.transformer = AutoModel.from_config(self.config)</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise RuntimeError("Please `pip install transformers` to use pre-trained HuggingFace models")
+        if config is None:
+            self.config = AutoConfig.from_pretrained(model_name_or_path)
+            create_func, model_args = (AutoModel.from_pretrained, model_name_or_path)<a id="change"> if </a>pretrained<a id="change"> else </a>(AutoModel.from_config, self.config)
+            &#47&#47 TODO: do all model configs have this attribute? PretrainedConfig does so yes??
+            if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                self.transformer = create_func(model_args)</code></pre>

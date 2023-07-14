@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    padding=1,
+                    bias=False,
+                    indice_key=&quotsubm1&quot),
+                build_norm_layer(norm_cfg, self.base_channels)[1], <a id="change">nn.ReLU()</a>)
+            make_block = self.post_act_block
+
+        encoder_out_channels = self.make_encoder_layers(
+            make_block, norm_cfg, self.base_channels)
+        self.make_decoder_layers(make_block, norm_cfg, encoder_out_channels)
+
+        self.conv_out = spconv.SparseSequential(
+            &#47&#47 [200, 176, 5] -&gt; [200, 176, 2]
+            spconv.SparseConv3d(
+                encoder_out_channels,
+                self.output_channels, (3, 1, 1),
+                stride=(2, 1, 1),
+                padding=0,
+                bias=False,
+                indice_key=&quotspconv_down2&quot),
+            build_norm_layer(norm_cfg, self.output_channels)[1],
+            <a id="change">nn.ReLU()</a>)
+
+    def forward(self, voxel_features, coors, batch_size):
+        Forward of SparseUNet</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stage_num = len(self.encoder_channels)
+        &#47&#47 Spconv init all weight on its own
+
+        <a id="change">assert </a>isinstance(order, tuple) and len(order) == 3
+        assert set(order) == {&quotconv&quot, &quotnorm&quot, &quotact&quot}
+
+        if self.order[0] != &quotconv&quot:  &#47&#47 pre activate</code></pre>

@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 have much of an impact on final performance anyway. See page 8 (https://arxiv.org/pdf/2102.11972.pdf)
+        super().__init__()
+
+        inner_dim = <a id="change">int(</a>dim<a id="change"> * </a>ff_mult<a id="change">)</a>
+        if ffn_type == "GEGLU":
+            self.net = nn.Sequential(
+                GEGLU(dim, inner_dim),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)
+            )
+        elif ffn_type == "standard":
+            self.net = nn.Sequential(
+                nn.Linear(dim, inner_dim),
+                nn.GELU(),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)
+            )
+        elif ffn_type == "bilinear":
+            self.net<a id="change"> = </a>nn.Sequential(
+                Bilinear(dim, inner_dim),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        rows = []
+        for i in range(max_length):  &#47&#47 build the full Alibi relative position bias matrix
+            rows.append(torch.LongTensor([x for x in <a id="change">range(</a>0 - i, max_length - i<a id="change">)</a>]).view(1, -1).abs())
+
+        &#47&#47 This implementation alternates between upper triangular and lower triangular biases. Using the full matrix
+        &#47&#47 doesn&quott seem to work as well - likely since the forward and backward biases would be identical (i.e. attention</code></pre>

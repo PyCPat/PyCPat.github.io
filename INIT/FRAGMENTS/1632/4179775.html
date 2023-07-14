@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+class OutputLayer(nn.Module):
+    def __init__(self, task="binary", use_bias=True):
+        <a id="change">if task not in ["binary", "multiclass", "regression"]</a><a id="change">:
+            </a><a id="change">raise ValueError(</a>"task must be binary, multiclass or regression"<a id="change">)</a>
+
+        super(OutputLayer, self).__init__()
+        self.use_bias = use_bias
+        self.task<a id="change"> = </a>task
+        if self.use_bias:
+            self.bias = nn.Parameter(torch.zeros((1,)))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+class OutputLayer(nn.Module):
+    def __init__(self, output_fn=None, output_fn_args=None, use_bias=True):
+        super(OutputLayer, self).__init__()
+        <a id="change">if </a>not output_fn<a id="change">:
+            raise ValueError(</a>"Arg output_fn must be givin"<a id="change">)</a>
+        <a id="change">if </a>not output_fn_args<a id="change">:
+            </a>output_fn_args = dict()
+
+        self.use_bias = use_bias
+        self.output_fn<a id="change"> = </a>output_fn
+        self.output_fn_args<a id="change"> = </a>output_fn_args
+        if self.use_bias:
+            self.bias = nn.Parameter(torch.zeros((1,)))
+</code></pre>

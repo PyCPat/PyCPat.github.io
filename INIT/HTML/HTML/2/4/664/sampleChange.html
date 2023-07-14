@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    ):
+        super().__init__()
+
+        self.upsample = UpsampleBlur()<a id="change"> if </a>upsample<a id="change"> else </a>upsample
+        self.conv = EqualizedModulatedConv2d(
+            in_channels, out_channels, kernel_size, style_dim,
+            stride=stride, padding=padding, demod=True</code></pre><h3>After Change</h3><pre><code class='java'>
+        in_channels, out_channels, style_dim, num_conv=2, up_name=&quotbilinear&quot
+    ):
+        super().__init__()
+        self.block = nn.ModuleList(<a id="change">[
+            </a>Upsample2x(up_name),
+            Blur2d(),
+            ModulatedConv2d(in_channels, out_channels, style_dim, 3),
+            InjectNoise(),
+            <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>
+        ])
+        for _ in range(num_conv-1):
+            self.block.extend([
+                ModulatedConv2d(out_channels, out_channels, style_dim, 3),</code></pre>

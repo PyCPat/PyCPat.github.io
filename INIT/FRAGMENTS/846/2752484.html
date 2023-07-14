@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        get_attn = lambda: LSHSelfAttention(dim, heads, bucket_size, n_hashes, causal = causal, dropout = lsh_dropout, post_attn_dropout = post_attn_dropout, attn_chunks = attn_chunks, allow_duplicate_attention = lsh_allow_duplicate_attention, attend_across_buckets = lsh_attend_across_buckets, random_rotations_per_head = random_rotations_per_head, num_mem_kv = num_mem_kv, use_full_attn = use_full_attn, full_attn_thres = full_attn_thres, one_value_head = one_value_head, n_local_attn_heads = n_local_attn_heads)
+        get_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, activation = ff_activation, mult = ff_mult, glu = ff_glu), along_dim = -2)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>get_attn = cache_fn(get_attn)
+            get_ff<a id="change"> = </a>cache_fn(get_ff)
+
+        blocks = []
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        get_attn = lambda: LSHSelfAttention(dim, heads, bucket_size, n_hashes, causal = causal, dropout = lsh_dropout, post_attn_dropout = post_attn_dropout, attn_chunks = attn_chunks, allow_duplicate_attention = lsh_allow_duplicate_attention, attend_across_buckets = lsh_attend_across_buckets, random_rotations_per_head = random_rotations_per_head, num_mem_kv = num_mem_kv, use_full_attn = use_full_attn, full_attn_thres = full_attn_thres, one_value_head = one_value_head, n_local_attn_heads = n_local_attn_heads)
+        get_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, activation = ff_activation, mult = ff_mult, glu = ff_glu), along_dim = -2)
+        <a id="change">get_pkm</a><a id="change"> = </a>lambda: PKM(dim, num_keys = pkm_num_keys)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>get_attn<a id="change">, get_ff, get_pkm = </a><a id="change">map(</a>cache_fn, (get_attn<a id="change">, get_ff, get_pkm</a>)<a id="change">)</a>
+
+        blocks = []
+
+        norm_type = ScaleNorm if use_scale_norm else nn.LayerNorm</code></pre>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.nl = len(anchors)  &#47&#47 number of detection layers
+        self.na = len(anchors[0]) // 2  &#47&#47 number of anchors
+        self.grid = [torch.zeros(1)] * self.nl  &#47&#47 init grid
+        <a id="change">a</a> = <a id="change">torch.tensor(anchors).float().view(self.nl</a>, <a id="change">-1</a>, <a id="change">2</a><a id="change">)</a>
+        <a id="change">self.register_buffer(&quotanchors&quot</a>, <a id="change">a</a><a id="change">)</a>  &#47&#47 shape(nl,na,2)
+        self.register_buffer(&quotanchor_grid&quot, <a id="change">a.clone().view(self.nl</a>, <a id="change">1</a>, <a id="change">-1</a>, <a id="change">1</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>)  &#47&#47 shape(nl,1,na,1,1,2)
+        self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  &#47&#47 output conv
+        self.inplace = inplace  &#47&#47 use in-place ops (e.g. slice assignment)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.nc = nc  &#47&#47 number of classes
+        self.no = nc + 5  &#47&#47 number of outputs per anchor
+        <a id="change">self.nl</a> = len(anchors)  &#47&#47 number of detection layers
+        self.na = len(anchors[0]) // 2  &#47&#47 number of anchors
+        self.grid = [torch.zeros(1)] * self.nl  &#47&#47 init grid
+        self.anchor_grid = <a id="change">[torch.zeros(1</a><a id="change">)</a>]<a id="change"> * self.nl</a>  &#47&#47 init anchor grid
+        self.register_buffer(&quotanchors&quot, <a id="change">torch.tensor(anchors).float().view(self.nl</a>, <a id="change">-1</a>, <a id="change">2</a><a id="change">)</a>)  &#47&#47 shape(nl,na,2)
+        self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  &#47&#47 output conv
+        self.inplace = inplace  &#47&#47 use in-place ops (e.g. slice assignment)
+</code></pre>

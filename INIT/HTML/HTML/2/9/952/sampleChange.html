@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ]
+
+        elif stride == 2:
+            blocks = <a id="change">[
+                </a>nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(channel // 2, channel, 3, padding=1)<a id="change"></a>,
+            ]
+
+        for i in range(n_res_block):</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+
+        blocks = []
+        strides<a id="change"> = </a><a id="change">int(</a><a id="change">math.log2(</a>stride<a id="change">))</a>
+
+        if strides == 0:
+            blocks.append(nn.Conv2d(in_channel, channel // 2, 3, padding=1))
+            blocks.append(nn.ReLU(inplace=True))
+
+        <a id="change">for i</a> in <a id="change">range(</a>strides<a id="change">):
+            &#47&#47 first stride
+            </a>if i == 0:
+                blocks.append(nn.Conv2d(in_channel, channel // 2, 4, stride=2, padding=1))
+            &#47&#47 last stride
+            elif i + 1 == strides:
+                blocks.append(nn.Conv2d(channel // 2, channel, 4, stride=2, padding=1))
+            &#47&#47 middle stride
+            else:
+                blocks.append(nn.Conv2d(channel // 2, channel<a id="change"> // 2</a>, 4, stride=2, padding=1))
+            blocks.append(nn.ReLU(inplace=True))
+
+        if strides &lt;= 1:</code></pre>

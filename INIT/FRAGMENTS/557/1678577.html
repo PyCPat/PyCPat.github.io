@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+			self.query = [nn.Linear(args[&quothidden_size&quot], args[&quotkey_size_input&quot] * args[&quotnum_input_heads&quot]).to(device) for _ in range(args[&quotnum_units&quot])]
+		self.query_ = [nn.Linear(args[&quothidden_size&quot], args[&quotquery_size_comm&quot] * args[&quotnum_comm_heads&quot]).to(self.device) for _ in range(args[&quotnum_units&quot])]
+		self.key_ = [nn.Linear(args[&quothidden_size&quot], args[&quotkey_size_comm&quot] * args[&quotnum_comm_heads&quot]).to(self.device) for _ in range(args[&quotnum_units&quot])]
+		self.value_ = <a id="change">[nn.Linear(args[&quothidden_size&quot], args[&quotvalue_size_comm&quot] * args[&quotnum_comm_heads&quot]).to(self.device) for _ in range(args[&quotnum_units&quot])]</a>
+
+
+	def transpose_for_scores(self, x, num_attention_heads, attention_head_size):
+	    new_x_shape = x.size()[:-1] + (num_attention_heads, attention_head_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+			self.query = nn.ModuleList([nn.Linear(args[&quothidden_size&quot], args[&quotkey_size_input&quot] * args[&quotnum_input_heads&quot]) for _ in range(args[&quotnum_units&quot])])
+		self.query_ = nn.ModuleList([nn.Linear(args[&quothidden_size&quot], args[&quotquery_size_comm&quot] * args[&quotnum_comm_heads&quot]) for _ in range(args[&quotnum_units&quot])])
+		self.key_ = nn.ModuleList([nn.Linear(args[&quothidden_size&quot], args[&quotkey_size_comm&quot] * args[&quotnum_comm_heads&quot]) for _ in range(args[&quotnum_units&quot])])
+		self.value_ = <a id="change">nn.ModuleList(</a><a id="change">[nn.Linear(args[&quothidden_size&quot], args[&quotvalue_size_comm&quot] * args[&quotnum_comm_heads&quot]) for _ in range(args[&quotnum_units&quot])])</a>
+		self.comm_attention_output = nn.ModuleList([nn.Linear(args[&quotnum_comm_heads&quot] * args[&quotvalue_size_comm&quot], args[&quotvalue_size_comm&quot]) for _ in range(args[&quotnum_units&quot])])
+		self.comm_dropout = nn.Dropout(p =0.1)
+		self.input_dropout = nn.Dropout(p =0.1)
+</code></pre>

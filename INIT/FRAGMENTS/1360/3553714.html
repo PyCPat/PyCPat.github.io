@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        blocks = []
+        for _ in range(depth):
+            attn = LSHSelfAttention(emb, heads, bucket_size, n_hashes, causal = causal)
+            ff_net = <a id="change">FeedForward(</a>emb<a id="change">)</a>
+
+            f = WithLayerNorm(emb, attn)
+            g = Chunk(ff_chunks, WithLayerNorm(emb, ff_net), along_dim = -2)
+            blocks.append(ReversibleBlock(f, g, split_along_dim=-1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_attn = lambda: LSHSelfAttention(emb, heads, bucket_size, n_hashes, causal = causal)
+        get_ff = lambda: FeedForward(emb)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>get_attn = cache_fn(get_attn)
+            get_ff<a id="change"> = </a>cache_fn(get_ff)
+
+        blocks = []
+</code></pre>

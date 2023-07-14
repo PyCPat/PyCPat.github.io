@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.temporal_conv = nn.Conv1d(dim_out, dim_out, kernel_size = temporal_kernel_size, padding = temporal_kernel_size // 2)
+
+        nn.init.dirac_(self.temporal_conv.weight.data) &#47&#47 initialized to be identity
+        <a id="change">nn.init.zeros_(</a>self.temporal_conv.bias.data<a id="change">)</a>
+
+    def forward(
+        self,
+        x,</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.spatial_conv = nn.Conv2d(dim, dim_out, kernel_size = kernel_size, padding = kernel_size // 2)
+        self.temporal_conv = nn.Conv1d(dim_out, dim_out, kernel_size = temporal_kernel_size, padding = temporal_kernel_size // 2) if kernel_size &gt; 1 else None
+
+        <a id="change">if </a>exists(self.temporal_conv)<a id="change">:
+            </a>nn.init.dirac_(self.temporal_conv.weight.data) &#47&#47 initialized to be identity
+            <a id="change">nn.init.zeros_(</a>self.temporal_conv.bias.data<a id="change">)</a>
+
+    def forward(
+        self,
+        x,</code></pre>

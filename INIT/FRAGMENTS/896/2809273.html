@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            shared_kv_proj = default(shared_kv_proj, attn.to_kv)
+            attn.to_kv = shared_kv_proj
+
+            self.layers.append(nn.ModuleList(<a id="change">[
+                </a>Residual(PreNorm(dim, attn)),
+                Residual(PreNorm(dim, ff))<a id="change"></a>
+            ]))
+
+        &#47&#47 memory parameters
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            shared_kv_proj = default(shared_kv_proj, attn.to_kv)
+            attn.to_kv = shared_kv_proj
+
+            attn<a id="change">, ff = </a><a id="change">map(</a>lambda fn: Residual(PreNorm(dim, fn)), (attn<a id="change">, ff</a>)<a id="change">)</a>
+
+            if seq_len == 1:
+                memory_is_empty = lambda *args, **kwargs: not exists(kwargs[&quotmemory&quot])
+                attn = SkipIf(memory_is_empty, attn)</code></pre>

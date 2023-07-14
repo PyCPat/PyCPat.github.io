@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            f_dim, t_dim = self.get_shape(fstride, tstride, input_fdim, input_tdim)
+            num_patches = f_dim * t_dim
+            self.v.patch_embed.num_patches = num_patches
+            <a id="change">print(</a>&quotfrequncey stride={:d}, time stride={:d}&quot.format(fstride, tstride)<a id="change">)</a>
+            print(&quotnumber of patches={:d}&quot.format(num_patches))
+
+            new_pos_embed = self.v.pos_embed[:, 2:, :].detach().reshape(1, 1212, 768).transpose(1, 2).reshape(1, 768, 12, 101)
+            &#47&#47 if the input sequence length is larger than the original audioset (10s), then cut the positional embedding</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif audioset_pretrain == True:
+            if audioset_pretrain == True and imagenet_pretrain == False:
+                raise ValueError(&quotcurrently model pretrained on only audioset is not supported, please set imagenet_pretrain = True to use audioset pretrained model.&quot)
+            <a id="change">if model_size != &quotbase384&quot</a><a id="change">:
+                </a>raise ValueError(&quotcurrently only has base384 AudioSet pretrained model.&quot)
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            if os.path.exists(&quot../../pretrained_models/ast_audioset.pth&quot) == False:
+                &#47&#47 this model performs 0.4593 mAP on the audioset eval set
+                audioset_mdl_url = &quothttps://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1&quot
+                wget.download(audioset_mdl_url, out=&quot../../pretrained_models/ast_audioset.pth&quot)
+            sd = torch.load(&quot../../pretrained_models/ast_audioset.pth&quot, map_location=device)
+            audio_model = ASTModel(label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=False, audioset_pretrain=False, model_size=&quotbase384&quot, verbose=False)
+            audio_model = torch.nn.DataParallel(audio_model)
+            audio_model.load_state_dict(sd, strict=False)
+            self.v = audio_model.module.v
+            self.original_embedding_dim = self.v.pos_embed.shape[2]
+            self.mlp_head = nn.Sequential(nn.LayerNorm(self.original_embedding_dim), nn.Linear(self.original_embedding_dim, label_dim))
+
+            f_dim, t_dim = self.get_shape(fstride, tstride, input_fdim, input_tdim)
+            num_patches = f_dim * t_dim
+            self.v.patch_embed.num_patches = num_patches
+            if verbose == True:
+                <a id="change">print(</a>&quotfrequncey stride={:d}, time stride={:d}&quot.format(fstride, tstride)<a id="change">)</a>
+                print(&quotnumber of patches={:d}&quot.format(num_patches))
+
+            new_pos_embed = self.v.pos_embed[:, 2:, :].detach().reshape(1, 1212, 768).transpose(1, 2).reshape(1, 768, 12, 101)
+            &#47&#47 if the input sequence length is larger than the original audioset (10s), then cut the positional embedding</code></pre>

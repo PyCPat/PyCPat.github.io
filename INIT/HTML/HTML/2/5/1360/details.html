@@ -1,0 +1,21 @@
+<html><h3>Pattern ID :1360
+</h3><img src='3553716.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                continue
+
+            context_attn = SelfAttention(dim, depth, max_seq_len, heads, 0, window_size, local_attn_window_size = local_attn_window_size, attn_dropout = attn_dropout, dropout = attn_layer_dropout, kmeans_ema_decay = kmeans_ema_decay, commitment_factor = commitment_factor, receives_context = True, context_window_size = context_window_size)
+            context_ff = Chunk(ff_chunks, <a id="change">FeedForward(</a>dim<a id="change">, dropout = ff_dropout, glu = ff_glu)</a>, along_dim=1)
+            layers.append(nn.ModuleList([context_attn, context_ff]))
+
+        execute_type = ReversibleSequence if reversible else SequentialSequence</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_context_attn = lambda: SelfAttention(dim, depth, max_seq_len, heads, 0, window_size, local_attn_window_size = local_attn_window_size, attn_dropout = attn_dropout, dropout = attn_layer_dropout, kmeans_ema_decay = kmeans_ema_decay, commitment_factor = commitment_factor, receives_context = True, context_window_size = context_window_size)
+        get_context_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, glu = ff_glu), along_dim=1)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>assert len(set(n_local_attn_heads)) == 1, &quotyou can only weight tie if number of local attention heads for all layers is the same&quot
+            get_attn<a id="change">, get_ff, get_context_attn, get_context_ff = </a>map(cache_fn, (get_attn, get_ff, get_context_attn, get_context_ff))
+
+        for ind, local_heads in zip(range(depth), n_local_attn_heads):
+            attn = get_attn(local_heads)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/899fbf85db9b5f734283552132c7b77265f64d2f#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL588' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3553716</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 899fbf85db9b5f734283552132c7b77265f64d2f</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='class'> Class Name: RoutingTransformer</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/f83b19cd7b4c7dc0179b5b4fd86103c619420662#diff-777a08056194cc0ee6fd61062317c84e7162c2735a40d98372f35214eec961d4L309' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3553714</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: f83b19cd7b4c7dc0179b5b4fd86103c619420662</div><div id='time'> Time: 2020-01-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer.py</div><div id='class'> Class Name: Reformer</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/f0455b6ff59331de8151bf659b62ddf97ac802bd#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3553710</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: f0455b6ff59331de8151bf659b62ddf97ac802bd</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='class'> Class Name: Perceiver</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>

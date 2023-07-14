@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.out_channels  =out_channels
+        self.dim = dim
+
+        <a id="change">if self.dim ==2</a><a id="change">:
+            </a>make_conv<a id="change"> = </a>ConvNormActive2D
+        elif dim ==3:
+            make_conv<a id="change"> = </a>ConvNormActive3D
+        else:
+            <a id="change">raise ValueError(</a>&quotdim should be 2 or 3&quot<a id="change">)</a>
+
+        &#47&#47 构建projection
+        if self.out_channels != self.in_channels: &#47&#47 输入输出channel不一样，则添加projection改变输入通道,用于不同stage的过渡处
+            self.projection = make_conv(in_channels=self.in_channels,out_channels=self.out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+
+        &#47&#47 build list
+        <a id="change">if self.type == &quot33&quot</a><a id="change">:
+            </a>self.conv_list = nn.ModuleList([])
+            self.conv_list.append(ConvNormActive(in_channels, out_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(out_channels, out_channels, kernel_size=3, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim))
+        elif self.type == &quot131&quot:
+            self.conv_list<a id="change"> = </a>nn.ModuleList([])
+            self.conv_list.append(ConvNormActive(in_channels, middle_channels, kernel_size=1, norm=norm, active=active, gn_c = gn_c, dim = dim, padding=0))
+            self.conv_list.append(ConvNormActive(middle_channels, middle_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(middle_channels, out_channels, kernel_size=1, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim, padding=0))
+        else:
+            <a id="change">raise </a><a id="change">ValueError(</a>&quottype of ResBlock must be 131 or 33,&quot+type+&quot is not acceptable&quot<a id="change">)</a>
+
+        &#47&#47 out activation
+        self.activation = MakeActive(active)
+</code></pre>

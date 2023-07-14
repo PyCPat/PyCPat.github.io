@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                continue
+
+            context_attn = SelfAttention(dim, depth, max_seq_len, heads, 0, window_size, local_attn_window_size = local_attn_window_size, attn_dropout = attn_dropout, dropout = attn_layer_dropout, kmeans_ema_decay = kmeans_ema_decay, commitment_factor = commitment_factor, receives_context = True, context_window_size = context_window_size)
+            context_ff = Chunk(ff_chunks, <a id="change">FeedForward(</a>dim<a id="change">, dropout = ff_dropout, glu = ff_glu)</a>, along_dim=1)
+            layers.append(nn.ModuleList([context_attn, context_ff]))
+
+        execute_type = ReversibleSequence if reversible else SequentialSequence</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_context_attn = lambda: SelfAttention(dim, depth, max_seq_len, heads, 0, window_size, local_attn_window_size = local_attn_window_size, attn_dropout = attn_dropout, dropout = attn_layer_dropout, kmeans_ema_decay = kmeans_ema_decay, commitment_factor = commitment_factor, receives_context = True, context_window_size = context_window_size)
+        get_context_ff = lambda: Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, glu = ff_glu), along_dim=1)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>assert len(set(n_local_attn_heads)) == 1, &quotyou can only weight tie if number of local attention heads for all layers is the same&quot
+            get_attn<a id="change">, get_ff, get_context_attn, get_context_ff = </a>map(cache_fn, (get_attn, get_ff, get_context_attn, get_context_ff))
+
+        for ind, local_heads in zip(range(depth), n_local_attn_heads):
+            attn = get_attn(local_heads)</code></pre>

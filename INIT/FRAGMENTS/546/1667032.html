@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        channel_index = 0
+
+        for i in range(layer_num):
+            setattr(self, &quotlayer%d&quot % i, SelfDistillationModule(input_channel[i], <a id="change">input_channel[i+1]</a>))
+
+        self.register_hook()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.layer_num = layer_num
+        self.total_feature_maps = {}
+        output_channel = <a id="change">int(</a>input_channel / 2<a id="change">)</a>
+
+        for i in range(layer_num):
+            setattr(self, &quotlayer%d&quot % i, SelfDistillationModule(input_channel, output_channel))
+            input_channel = output_channel
+            output_channel<a id="change"> = </a>int(input_channel<a id="change"> / 2</a>)
+
+        self.register_hook()
+</code></pre>

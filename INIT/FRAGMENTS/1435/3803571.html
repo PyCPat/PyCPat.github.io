@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            self.downs.append(nn.ModuleList([
+                downsample_klass(dim_in)<a id="change"> if </a>memory_efficient<a id="change"> else </a>None,
+                ResnetBlock(dim_in, dim_out, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(dim_out, dim_out, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = dim_out, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 downsampling layers
+
+        skip_connect_dims<a id="change"> = []</a> &#47&#47 keep track of skip connection dimensions
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(in_out, *layer_params)):
+            is_last = ind &gt;= (num_resolutions - 1)
+
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            current_dim = dim_in
+
+            &#47&#47 whether to pre-downsample, from memory efficient unet
+
+            pre_downsample = None
+
+            if memory_efficient:
+                pre_downsample = downsample_klass(dim_in, dim_out)
+                current_dim = dim_out
+
+            <a id="change">skip_connect_dims.append(</a>current_dim<a id="change">)</a>
+
+            self.downs.append(nn.ModuleList([
+                pre_downsample,
+                ResnetBlock(current_dim, current_dim, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),</code></pre>

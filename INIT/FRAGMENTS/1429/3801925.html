@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.BatchNorm1d(args.head_latent_size),
+            nn.ReLU(),
+            nn.Linear(args.head_latent_size, nce_logits_output_size),
+            <a id="change">nn.BatchNorm1d(</a>nce_logits_output_size<a id="change">)</a>
+        )
+
+        &#47&#47 The linear classifer head which we will stop-grad to
+        self.linear_classifier = nn.Linear(base_network_output_size, classifier_output_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.ReLU(),
+            nn.Linear(args.head_latent_size, projection_output_size),
+        )
+        self.predictor<a id="change"> = </a>nn.Sequential(
+            nn.Linear(projection_output_size, args.head_latent_size),
+            <a id="change">nn.BatchNorm1d(</a>args.head_latent_size<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Linear(args.head_latent_size, projection_output_size),
+        )</code></pre>

@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def __init__(self, dim, heads=8, dim_head=64, dropout=0.):
+        super().__init__()
+        inner_dim = dim_head<a id="change"> * </a>heads
+        project_out = not (heads == 1 and dim_head == dim)
+
+        self.heads = heads
+        self.scale = dim_head ** -0.5
+
+        self.attend = nn.Softmax(dim=-1)
+        self.to_qkv = nn.Linear(dim, inner_dim * 3, bias=False)
+
+        self.to_out = <a id="change">nn.Sequential(
+            </a>nn.Linear(inner_dim, dim),
+            nn.Dropout(dropout)<a id="change">
+        )</a> if project_out else nn.Identity()
+
+    def forward(self, x):
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+            channel_mlp = token_channels
+        self.AddPosEmb2Value = AddPosEmb2Value
+
+        self.norm1 = <a id="change">nn.LayerNorm(</a>token_channels<a id="change">)</a>
+        self.Attention = MultiHeadAttention(token_channels, heads, dim_head, dropout)
+        self.norm2 = nn.LayerNorm(token_channels)
+        self.FFN = FeedForward(token_channels, channel_mlp, dropout=dropout)
+</code></pre>

@@ -1,0 +1,31 @@
+<html><h3>Pattern ID :589
+</h3><img src='2117600.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 _block(in_channels, out_channels, kernel_size, stride, padding)
+            self._block(features_d, features_d * 2, 4, 2, 1),
+            self._block(features_d * 2, features_d * 4, 4, 2, 1),
+            <a id="change">self._block(</a>features_d * 4, features_d * 8, 4, 2, <a id="change">1</a><a id="change">)</a>,
+            &#47&#47 After all _block img output is 4x4 (Conv2d below makes into 1x1)
+            nn.Conv2d(features_d * 8, 1, kernel_size=4, stride=2, padding=0),
+            nn.Sigmoid(),</code></pre><h3>After Change</h3><pre><code class='java'>
+class Discriminator(nn.Module):
+    def __init__(self, channels_img, features_d):
+        super(Discriminator, self).__init__()
+        self.disc = nn.Sequential(OrderedDict(<a id="change">[
+            &#47&#47 input: N x channels_img x 64 x 64
+            </a>(&quotconv_in&quot, nn.Conv2d(
+                channels_img, features_d, kernel_size=4, stride=2, padding=1
+            )),
+            (&quotleaky_relu&quot, nn.LeakyReLU(0.2)),
+            &#47&#47 _block(in_channels, out_channels, kernel_size, stride, padding)
+            (&quotblock1&quot, self._block(features_d, features_d * 2, 4, 2, 1)),
+            (&quotblock2&quot, self._block(features_d * 2, features_d * 4, 4, 2, 1)),
+            (&quotblock3&quot, <a id="change">self._block(</a>features_d * 4, features_d * 8, 4, 2, <a id="change">1</a><a id="change">)</a>),
+            &#47&#47 After all _block img output is 4x4 (Conv2d below makes into 1x1)
+            (&quotconv_out&quot, nn.Conv2d(features_d * 8, 1, kernel_size=4, stride=2, padding=0)),
+            (&quotsigmoid&quot, nn.Sigmoid())<a id="change"></a>,
+            ]))
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/d0ec14e8cc60da7db50ea8e713b7b383c1d2a315#diff-8a1fd3318fb754c3363c0f4c4e099b0c608ef1603f807f1d91107e9225e3ab85L10' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2117600</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: d0ec14e8cc60da7db50ea8e713b7b383c1d2a315</div><div id='time'> Time: 2021-01-15</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/networks.py</div><div id='class'> Class Name: Discriminator</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/1d681697b401ba1e5d909535f57653d61b848928#diff-8a1fd3318fb754c3363c0f4c4e099b0c608ef1603f807f1d91107e9225e3ab85L46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2117632</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: 1d681697b401ba1e5d909535f57653d61b848928</div><div id='time'> Time: 2021-01-15</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/networks.py</div><div id='class'> Class Name: Generator</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/33cb57daa95823255bd830c1a9686d2515df75af#diff-13843d1af9a61aa08d2fb6ae82bb335bbf8d79060ea9cbab84a4ddf574240466L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2117612</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: 33cb57daa95823255bd830c1a9686d2515df75af</div><div id='time'> Time: 2021-04-22</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/models/standard_networks.py</div><div id='class'> Class Name: Generator</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>
