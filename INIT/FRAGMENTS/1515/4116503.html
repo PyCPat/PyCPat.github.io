@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            layers.append(nn.LeakyReLU(0.2, inplace=True))
+            return layers
+
+        self.model = <a id="change">nn.Sequential(
+            </a>*block(latent_dim, 128, normalize=False),
+            *block(128, 256),
+            *block(256, 512),
+            *block(512, 1024),
+            <a id="change">nn.Linear(1024</a>, <a id="change">int(</a><a id="change">np.prod(</a>img_shape<a id="change">)))</a>,
+            <a id="change">nn.Tanh()</a><a id="change">
+        )</a>
+
+    def forward(self, z):
+        img = self.model(z)
+        img = img.view(img.size(0), *self.img_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+class Generator(nn.Module):
+    def __init__(self, latent_dim, img_shape, hidden_dim=256):
+        super().__init__()
+        feats<a id="change"> = </a><a id="change">int(</a><a id="change">np.prod(</a>img_shape<a id="change">))</a>
+        self.img_shape = img_shape
+        self.fc1<a id="change"> = </a><a id="change">nn.Linear(</a>latent_dim, hidden_dim<a id="change">)</a>
+        self.fc2 = <a id="change">nn.Linear(</a>self.fc1.out_features, self.fc1.out_features<a id="change"> * 2</a><a id="change">)</a>
+        self.fc3<a id="change"> = nn.Linear(</a>self.fc2.out_features, self.fc2.out_features<a id="change"> * 2)</a>
+        self.fc4<a id="change"> = nn.Linear(</a>self.fc3.out_features, feats<a id="change">)</a>
+
+    &#47&#47 forward method
+    def forward(self, z):
+        z = F.leaky_relu(self.fc1(z), 0.2)</code></pre>

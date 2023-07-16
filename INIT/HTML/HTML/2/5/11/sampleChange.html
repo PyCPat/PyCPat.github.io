@@ -2,22 +2,19 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        channel_in = self.backbone.out_plane
-        self.bitlayer = BitLayer(bit)
-    
-        self.cls_head = <a id="change">nn.Sequential(
-            </a>self.cls_block(channel_in, 256, dropout),
-            self.cls_block(256, 128, dropout),
-            nn.Linear(128, num_classes)<a id="change">)</a>
-        
-        self.ranking_head = nn.Sequential(
-            self.cls_block(channel_in, 256, dropout),
-            self.cls_block(256, 128, dropout),</code></pre><h3>After Change</h3><pre><code class='java'>
-            nn.Linear(256, latent_dim),
-            nn.InstanceNorm1d(latent_dim))
-        
-        self.pool = <a id="change">nn.AdaptiveAvgPool2d(</a>(<a id="change">1</a><a id="change">, 1</a>)<a id="change">)</a>
-        self.prototypes = nn.Embedding(num_classes * num_prototypes, latent_dim)
-        self.num_classes = num_classes
-    
-    def cls_block(self, channel_in, channel_out, p):</code></pre>
+        &#47&#47 Layers
+        backbone = models.resnext50_32x4d(pretrained=True)
+        &#47&#47 Remove softmax layer at the end
+        backbone = <a id="change">nn.Sequential(</a>*<a id="change">list(backbone.children())[:-1])</a>
+        self.model = Trainable(backbone,
+                               name="backbone",
+                               trainable=True)
+        self.logits = Trainable(nn.Linear(2048, n_classes),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.block4 = Trainable(backbone.layer4,
+                                trainable=True,
+                                name="block4")
+        self.avg_pool = <a id="change">nn.AdaptiveAvgPool2d(</a>(<a id="change">1</a><a id="change">, 1</a>)<a id="change">)</a>
+        self.logits = Trainable(nn.Linear(2048, n_classes),
+                                name="logits",
+                                trainable=True)
+</code></pre>

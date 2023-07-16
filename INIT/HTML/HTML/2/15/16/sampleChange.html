@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.P4_size = P4_size
+        self.P5_size = P5_size
+        self.inner_p3 = self.channels_out[&quotinner_p3&quot]
+        self.inner_p4 = <a id="change">self.channels_out[&quotinner_p4&quot]</a>
+        self.inner_p5 = self.channels_out[&quotinner_p5&quot]
+        self.P3 = C3(self.P3_size, self.inner_p3, self.get_depth(3), False)
+        self.convP3 = Conv(self.inner_p3, self.inner_p3, 3, 2)
+        self.P4 = C3(self.P4_size + self.inner_p3, self.inner_p4, self.get_depth(3), False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.P5_size = P5_size
+
+        self.convP3 = Conv(self.P3_size, self.P3_size, 3, 2)
+        self.P4 = C3(self.P3_size + self.P4_size, <a id="change">self.channels_outs[0]</a>, self.get_depth(3), False)
+
+        self.convP4 = Conv(self.channels_outs[0], self.channels_outs[0], 3, 2)
+        self.P5 = C3(<a id="change">self.channels_outs[0]</a> + self.P5_size, self.channels_outs[1], self.get_depth(3), False)
+
+        self.concat = Concat()
+        self.out_shape = [self.P3_size, <a id="change">self.channels_outs[0]</a>, <a id="change">self.channels_outs[1]</a>]
+        print("PAN input channel size: P3 {}, P4 {}, P5 {}".format(self.P3_size, self.P4_size, self.P5_size))
+        print("PAN output channel size: PP3 {}, PP4 {}, PP5 {}".format(self.P3_size, <a id="change">self.channels_outs[0]</a>, <a id="change">self.channels_outs[1]</a>))
+
+    def get_depth(self, n):
+        return max(round(n * self.gd), 1) if n &gt; 1 else n</code></pre>

@@ -1,24 +1,26 @@
 <html><h3>Pattern ID :1051
-</h3><img src='3230129.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='3302227.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-class CRNN(nn.Module):
-    def __init__(self, number_class_symbols, in_channels=3, rnn_size=128):
         super().__init__()
-        self.maxpooling_22 = <a id="change">nn.MaxPool2d(</a>2, 2<a id="change">)</a>
-        self.maxpooling_21 = nn.MaxPool2d((2, 2), (2, 1), (0, 1))
-        self.layer1 = self._make_layer(in_channels, 64, 3, 1, 1)
-        self.layer2 = self._make_layer(64, 128, 3, 1, 1)
-        self.layer3 = self._make_layer(128, 256, 3, 1, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
-            (time_feature_count, time_feature_count))
-        self.bilstm = BiLSTM(time_feature_count, lstm_hidden, lstm_len)
-        self.classifier = nn.Sequential(
-            <a id="change">nn.Linear(</a>lstm_hidden * 2, time_feature_count<a id="change">)</a>,
-            nn.GELU(),
-            nn.Dropout(0.1),
-            <a id="change">nn.Linear(</a>time_feature_count, number_class_symbols<a id="change">)</a>
-        )
+        self.W = nn.Parameter(default_init(scale=init_scale)(
+            (in_dim, num_units)), requires_grad=True)
+        self.b<a id="change"> = </a><a id="change">nn.Parameter(</a><a id="change">torch.zeros(</a>num_units<a id="change">), requires_grad=True)</a>
 
     def forward(self, x):
-        x = self.feature_extractor(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ai-forever/ocr-model/commit/db55ee227e236d8da2dc2323804c42dd7f6b14b4#diff-3933b3717f2f3bfa2b469436efc9b1b93a276a541f5a2a9a72c7c9b0662b71f3L23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3230129</div><div id='project'> Project Name: ai-forever/ocr-model</div><div id='commit'> Commit Name: db55ee227e236d8da2dc2323804c42dd7f6b14b4</div><div id='time'> Time: 2021-09-28</div><div id='author'> Author: kalinin@sent.com</div><div id='file'> File Name: ocr/src/models.py</div><div id='class'> Class Name: CRNN</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/sberbank-ai/ocr-model/commit/db55ee227e236d8da2dc2323804c42dd7f6b14b4#diff-3933b3717f2f3bfa2b469436efc9b1b93a276a541f5a2a9a72c7c9b0662b71f3L23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3230128</div><div id='project'> Project Name: sberbank-ai/ocr-model</div><div id='commit'> Commit Name: db55ee227e236d8da2dc2323804c42dd7f6b14b4</div><div id='time'> Time: 2021-09-28</div><div id='author'> Author: kalinin@sent.com</div><div id='file'> File Name: ocr/src/models.py</div><div id='class'> Class Name: CRNN</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR><BR><div id='link'><a href='https://github.com/ki-ljl/cnn-dogs-vs-cats/commit/8377a6a38f25ba56195c2396838201aa05b2f5cd#diff-de0479bd04b1f73fbcde39b68cea26fe84b34dab7a5788fc2a0f641f2b9bb861L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3230135</div><div id='project'> Project Name: ki-ljl/cnn-dogs-vs-cats</div><div id='commit'> Commit Name: 8377a6a38f25ba56195c2396838201aa05b2f5cd</div><div id='time'> Time: 2022-03-26</div><div id='author'> Author: lijunliang.ki@gmail.com</div><div id='file'> File Name: CNN.py</div><div id='class'> Class Name: cnn</div><div id='method'> Method Name: __init__</div><div id='parent_class'> Parent Class: nn.Module</div><BR>
+        x = x.permute(0, 2, 3, 1)
+        y = contract_inner(x, self.W) + self.b</code></pre><h3>After Change</h3><pre><code class='java'>
+class Block(nn.Module):
+    def __init__(self, dim, dim_out, groups=32, dropout=0):
+        super().__init__()
+        self.block = <a id="change">nn.Sequential(
+            </a>nn.GroupNorm(groups, dim),
+            Swish(),
+            nn.Dropout(dropout) if dropout != 0 else nn.Identity(),
+            nn.Conv2d(dim, dim_out, 3, padding=1)<a id="change">
+        )</a>
+
+    def forward(self, x):
+        return self.block(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/1a5a8bc409a8b8e072eb2bf25330d4662fd279c4#diff-8f5ccf6b45f0af5991c777ec4c13895ab7943f03df8982ff0e1edd6b462d8d35L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3302227</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 1a5a8bc409a8b8e072eb2bf25330d4662fd279c4</div><div id='time'> Time: 2021-08-09</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/ddpm_modules/unet.py</div><div id='m_class'> M Class Name: Block</div><div id='n_method'> N Class Name: NIN</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/ddpm_modules/unet.py</div><div id='n_file'> N File Name: model/ddpm_modules/unet.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 65</div><div id='n_end'> N End Line: 72</div><BR><BR><div id='link'><a href='https://github.com/lucidrains/aoa-pytorch/commit/97d99d0fce4683fdba7b8fc05ff64aa69cdcf37a#diff-c18fe4708e2a88fadace8b9d34204ab559fa61cd6bffa9b7839d96720fc85f5bL14' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3302230</div><div id='project'> Project Name: lucidrains/aoa-pytorch</div><div id='commit'> Commit Name: 97d99d0fce4683fdba7b8fc05ff64aa69cdcf37a</div><div id='time'> Time: 2020-11-07</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: aoa_pytorch/aoa_pytorch.py</div><div id='m_class'> M Class Name: AttentionOnAttention</div><div id='n_method'> N Class Name: AttentionOnAttention</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: aoa_pytorch/aoa_pytorch.py</div><div id='n_file'> N File Name: aoa_pytorch/aoa_pytorch.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 35</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 37</div><BR><BR><div id='link'><a href='https://github.com/deligentfool/dqn_zoo/commit/beeb053dfd1a07721e593f9e0f12dee89dae9641#diff-a5a92ef31bf1afb993745360549437cad2ce48e2ce93e945727b781faf63284eL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3302228</div><div id='project'> Project Name: deligentfool/dqn_zoo</div><div id='commit'> Commit Name: beeb053dfd1a07721e593f9e0f12dee89dae9641</div><div id='time'> Time: 2020-09-18</div><div id='author'> Author: 1027660817@qq.com</div><div id='file'> File Name: FQF/fqf.py</div><div id='m_class'> M Class Name: fqf_net</div><div id='n_method'> N Class Name: fqf_net</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: FQF/fqf.py</div><div id='n_file'> N File Name: FQF/fqf.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 59</div><BR>

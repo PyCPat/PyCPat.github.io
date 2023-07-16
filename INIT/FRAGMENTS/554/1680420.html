@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+class BaseGCN(nn.Module):
+    def __init__(self, original_features_num, in_features, out_features, **kwargs):
+        <a id="change">super(</a>BaseGCN, self<a id="change">)</a>.__init__()
+        self.conv1 = GraphConv(original_features_num, in_features)
+        self.conv2 = GraphConv(in_features, out_features)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self,n_layers=20,original_features_num=1,in_features=20,out_features=20):
+        super().__init__()
+        self.conv_start = GraphConv(original_features_num, in_features)
+        self.layers = <a id="change">nn.ModuleList()</a>
+        for _ in range(n_layers-2):
+            layer = GraphConv(in_features, in_features)
+            <a id="change">self.layers.append(</a>layer<a id="change">)</a>
+        self.conv_final = GraphConv(in_features, out_features)
+    
+    def forward(self,g):
+        g = dgl.add_self_loop(g)</code></pre>

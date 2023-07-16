@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        assert not (nearest_neighbor_upsample and bilinear_upsample)
+
+        <a id="change">if </a>bilinear_upsample<a id="change">:
+            </a>upsample_klass<a id="change"> = </a>partial(InterpolateUpsample, mode = &quotbilinear&quot)
+        elif nearest_neighbor_upsample:
+            upsample_klass = partial(InterpolateUpsample, mode = &quotnearest&quot)
+        else:
+            upsample_klass<a id="change"> = </a>Upsample
+
+        &#47&#47 upsampling layers
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            skip_connect_dims.append(current_dim)
+
+            self.downs.append(<a id="change">nn.ModuleList([
+                </a>pre_downsample,
+                ResnetBlock(current_dim, current_dim, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(current_dim, current_dim, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = current_dim, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),
+                downsample_klass(current_dim, dim_out) if not memory_efficient and not is_last else None<a id="change"></a>,
+            ]<a id="change">)</a>)
+
+        &#47&#47 middle layers
+</code></pre>

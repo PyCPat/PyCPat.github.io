@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU(),
+            self.bn1,
+            self.conv1,
+            <a id="change">nn.ReLU()</a>,
+            self.bn2,
+            self.conv2
+        )
+
+        self.bypass = nn.Sequential()
+        if stride == 1:
+            self.model = self.model_base
+        else:
+            self.model = <a id="change">nn.Sequential(
+                </a>self.model_base,
+                nn.AvgPool2d(2, stride=stride, padding=0)<a id="change">
+            )</a>
+            &#47&#47 add Bypass
+            self.bypass_conv = nn.Conv2d(
+                in_channels, out_channels, 1, 1, padding=0)
+            self.bypass = nn.Sequential(</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.model1 = nn.Sequential(
+            self.bn1,
+            <a id="change">nn.ReLU()</a>,
+            nn.Upsample(scale_factor=2) if stride &gt; 1 else nn.Identity(),
+            self.conv1,
+        )
+        self.model2<a id="change"> = </a>nn.Sequential(
+            self.bn2,
+            nn.ReLU(),
+            nn.Dropout(dropout) if dropout &gt; 0 else <a id="change">nn.Identity()</a>,
+            self.conv2
+        )
+        self.bypass = nn.Sequential()</code></pre>

@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                 final_process=None,
+                 device="cuda:0"):
+        super(TCDNNet, self).__init__()
+        <a id="change">if </a>len(att_layers) != len(tc_layers) + 1<a id="change">:
+            </a>raise RuntimeError("There must be one more attention layer than that of temporal convolution layers.")
+        num_filters = int(m.ceil(m.log(seq_length, 2)))
+
+        self.layers = nn.ModuleDict()
+        channels = in_channels
+
+        for i in range(len(tc_layers)):
+            self.layers.add_module("attention_{}".format(i),
+                                   AttentionBlock(channels, att_layers[i][0], att_layers[i][1], device))
+            channels<a id="change"> += </a>att_layers[i][1]
+            self.layers.add_module("tconv_{}".format(i),
+                                   TCBlock(channels, seq_length, tc_layers[i], device))
+            channels += num_filters * tc_layers[i]</code></pre><h3>After Change</h3><pre><code class='java'>
+        channels += additional_length
+        fc_layers = list(fc_layers) + [out_channels]
+
+        self.layers.add_module("fc_amalgamate", <a id="change">nn.Linear(seq_length, 1).to(</a>device<a id="change">)</a>)
+        for i in range(len(fc_layers)):
+            self.layers.add_module("fc_{}".format(i), nn.Linear(channels, fc_layers[i]).to(device))
+            channels = fc_layers[i]</code></pre>

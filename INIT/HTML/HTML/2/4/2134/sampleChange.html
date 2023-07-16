@@ -3,16 +3,21 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        for _, (enc_dim_in, enc_dim_out), (dec_dim_in, dec_dim_out) in zip(range(num_layers), enc_dim_pairs, dec_dim_pairs):
-            self.encoders.append(nn.Conv2d(enc_dim_in, enc_dim_out, 4, stride = 2, padding = 1))
-            self.decoders.append(<a id="change">nn.ConvTranspose2d(</a>dec_dim_in, dec_dim_out, 4<a id="change">, stride = 2, padding = 1)</a>)
+        assert &quotdim&quot not in enc_kwargs and &quotdim&quot not in dec_kwargs, &quotdimension of either encoder or decoder must be set with `dim` keyword&quot
 
-        self.encoders.insert(0, nn.Conv2d(channels, dim, 3, padding = 1))
-        self.decoders.append(nn.Conv2d(dim, channels, 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        <a id="change">enc_kwargs[&quotdim&quot]</a> = dim
+        dec_kwargs[&quotdim&quot] = dim
+        dec_kwargs[&quotcross_attend&quot] = True
 
-        for _, (enc_dim_in, enc_dim_out), (dec_dim_in, dec_dim_out) in zip(range(num_layers), enc_dim_pairs, dec_dim_pairs):
-            self.encoders.append(nn.Sequential(nn.Conv2d(enc_dim_in, enc_dim_out, 4, stride = 2, padding = 1), nn.ReLU()))
-            self.decoders.append(<a id="change">nn.Sequential(</a><a id="change">nn.ConvTranspose2d(</a>dec_dim_in, dec_dim_out, 4<a id="change">, stride = 2, padding = 1)</a>, nn.ReLU()<a id="change">)</a>)
+        enc_num_tokens = <a id="change">enc_kwargs.pop(</a>&quotnum_tokens&quot<a id="change">)</a>
+        dec_num_tokens = dec_kwargs.pop(&quotnum_tokens&quot)
 
-        for _ in range(num_resnet_blocks):
-            self.encoders.append(ResBlock(dims[-1]))</code></pre>
+        enc_max_seq_len = enc_kwargs.pop(&quotmax_seq_len&quot)
+        dec_max_seq_len = dec_kwargs.pop(&quotmax_seq_len&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dec_kwargs, kwargs = group_by_key_prefix_and_trim(&quotdec_&quot, kwargs)
+
+        assert &quotdim&quot not in enc_kwargs and &quotdim&quot not in dec_kwargs, &quotdimension of either encoder or decoder must be set with `dim` keyword&quot
+        enc_transformer_kwargs = pick_and_pop(<a id="change">[</a>&quotnum_tokens&quot, &quotmax_seq_len&quot<a id="change"></a>], enc_kwargs)
+        dec_transformer_kwargs = pick_and_pop([&quotnum_tokens&quot, &quotmax_seq_len&quot], dec_kwargs)
+
+        self.encoder = TransformerWrapper(</code></pre>

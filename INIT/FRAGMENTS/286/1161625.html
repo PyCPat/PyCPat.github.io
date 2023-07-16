@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.out_format = out_format
+
+        assert 1 &lt;= self.mfcc_order and self.mfcc_order &lt; n_channel
+        <a id="change">assert </a>is_in(self.out_format, ["y", "yE", "yc", "y,E", "y,c"])
+
+        self.fbank = MelFilterBankAnalysis(
+            n_channel, fft_length, sample_rate, out_format="y,E", **fbank_kwargs</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        assert 1 &lt;= self.mfcc_order and self.mfcc_order &lt; n_channel
+
+        <a id="change">if out_format == 0</a> or out_format == "y"<a id="change">:
+            </a>self.format_func = lambda y, c, E: y
+        elif out_format == 1 or out_format == "yE":
+            self.format_func<a id="change"> = </a>lambda y, c, E: torch.cat((y, E), dim=-1)
+        elif out_format == 2 or out_format == "yc":
+            self.format_func<a id="change"> = </a>lambda y, c, E: torch.cat((y, c), dim=-1)
+        elif out_format == 3 or out_format == "ycE":
+            self.format_func<a id="change"> = </a>lambda y, c, E: torch.cat((y, c, E), dim=-1)
+        else:
+            <a id="change">raise ValueError(f"out_format {out_format} is not supported"</a><a id="change">)</a>
+
+        self.fbank = MelFilterBankAnalysis(
+            n_channel, fft_length, sample_rate, out_format="y,E", **fbank_kwargs
+        )</code></pre>

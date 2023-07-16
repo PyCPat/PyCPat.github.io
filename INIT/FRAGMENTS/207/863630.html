@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, n_in, num_filters=(128,), filter_size=(7,), pool_size=(1,), dilation=1, dropout_rate=0.0):
+        super(CNNLayer, self).__init__()
+        conv = []
+        pool<a id="change"> = []</a>
+        for n_out, ksize, p in zip(num_filters, filter_size, pool_size):
+            conv.append(nn.Conv1d(n_in, n_out, kernel_size=ksize, dilation=2**dilation, padding=2**dilation*(ksize//2)))
+            if p &gt; 1:
+                <a id="change">pool.append(</a>nn.MaxPool1d(p, stride=1, padding=p//2)<a id="change">)</a>
+            else:
+                pool.append(nn.Identity())
+            n_in = n_out
+        self.conv = nn.ModuleList(conv)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for n_out, ksize, p in zip(num_filters, filter_size, pool_size):
+            l += [ 
+                nn.Conv1d(n_in, n_out, kernel_size=ksize, dilation=2**dilation, padding=2**dilation*(ksize//2)),
+                nn.MaxPool1d(p, stride=1, padding=p//2)<a id="change"> if </a>p &gt; 1<a id="change"> else </a>nn.Identity(),
+                nn.GroupNorm(1, n_out), &#47&#47 same as LayerNorm?
+                nn.ELU(), 
+                nn.Dropout(p=dropout_rate) ]</code></pre>

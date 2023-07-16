@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.config = config
+
+		layers = []
+		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotstyle_encoder&quot][&quotn_layers&quot]<a id="change">)</a><a id="change">:
+			</a>in_channels = self.config[&quotstyle_encoder&quot][&quotfilters&quot]<a id="change"> * </a>(2 ** (i<a id="change"> - 1</a>)) if i &gt; 0 else 3
+			out_channels = 2 * in_channels if i &gt; 0 else self.config[&quotstyle_encoder&quot][&quotfilters&quot]
+
+			layers += [</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.config = config
+		img_size = config[&quotimg_shape&quot][0]
+
+		dim_in<a id="change"> = </a>2**14 // img_size
+		blocks = []
+		blocks += [nn.Conv2d(3, dim_in, 3, 1, 1)]
+
+		repeat_num = int(np.log2(img_size)) - 2
+		<a id="change">for </a><a id="change">_</a> in range(repeat_num)<a id="change">:
+			</a>dim_out = <a id="change">min(</a>dim_in<a id="change">*</a>2, max_conv_dim<a id="change">)</a>
+			blocks += [ResBlk(dim_in, dim_out, downsample=True)]
+			dim_in = dim_out
+
+		blocks += [nn.LeakyReLU(0.2)]</code></pre>

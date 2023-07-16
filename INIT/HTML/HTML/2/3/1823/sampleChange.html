@@ -2,20 +2,21 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        self.eps = eps
-        self.bias = bias
-        self.g = nn.Parameter(torch.ones(1, channels, 1))
-        self.b = nn.Parameter(torch.zeros(1, channels, 1))<a id="change"> if </a>bias<a id="change"> else </a>None
-
-    def forward(self, x: Tensor) -&gt; Tensor:
-        var = torch.var(x, dim=1, unbiased=False, keepdim=True)</code></pre><h3>After Change</h3><pre><code class='java'>
-        super().__init__()
-
-        self.groupnorm = (
-            nn.GroupNorm(num_groups=num_groups, num_channels=in_channels)<a id="change">
-            if </a>use_norm<a id="change">
-            else </a><a id="change">nn.Identity()</a>
-        )
-        self.activation = nn.SiLU()
-        self.project = Conv1d(
-            in_channels=in_channels,</code></pre>
+            ConvBNReLU(hidden_dim, oup, kernel_size=1, stride=1, groups=1, norm_layer=norm_layer),
+            &#47&#47 dw-linear
+            nn.Conv2d(oup, oup, kernel_size=3, stride=stride, groups=oup, padding=1, bias=False),
+            <a id="change">norm_layer(</a>oup<a id="change">)</a>,
+        ])
+        self.conv = nn.Sequential(*layers)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 pw
+            ConvBNReLU(hidden_dim, oup, kernel_size=1, stride=1, groups=1, norm_layer=norm_layer),
+        ])
+        <a id="change">if </a>expand_ratio == 2 or inp==oup or keep_3x3 or stride==2<a id="change">:
+            </a>layers.extend([
+            &#47&#47 dw-linear
+            nn.Conv2d(oup, oup, kernel_size=3, stride=stride, groups=oup, padding=1, bias=False),
+            <a id="change">norm_layer(</a>oup<a id="change">)</a>,
+        ])
+        self.conv = nn.Sequential(*layers)
+</code></pre>

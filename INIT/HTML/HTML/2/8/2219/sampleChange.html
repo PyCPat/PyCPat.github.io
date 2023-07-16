@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.stochastic_depth = stochastic_depth
+
+        self.features = nn.Sequential(
+            <a id="change">ConvBNAct(3</a>, self.in_channel, <a id="change">3</a>, 2, <a id="change">1</a>, self.norm_layer, self.act<a id="change">)</a>,
+            *self.make_stages(layer_infos, block),
+            ConvBNAct(self.last_channels, self.out_channels, 1, 1, 1, self.norm_layer, self.act)
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.num_block = sum(stage.num_layers for stage in layer_infos)
+        self.stochastic_depth = stochastic_depth
+
+        self.stem = <a id="change">ConvBNAct(3</a>, self.in_channel, <a id="change">3</a>, 2, <a id="change">1</a>, self.norm_layer, self.act<a id="change">)</a>
+        self.blocks = nn.Sequential(*self.make_stages(layer_infos, block))
+        self.head = ConvBNAct(self.final_stage_channel, last_channel, 1, 1, 1, self.norm_layer, self.act)
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.dropout = nn.Dropout(p=dropout)</code></pre>

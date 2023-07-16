@@ -1,0 +1,39 @@
+<html><h3>Pattern ID :624
+</h3><img src='2198209.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 figure out how big the convolution output will be
+        conv_arch = DEFAULT_CNN_ARCHITECTURE[&quotCONV&quot]
+        dense_arch = DEFAULT_CNN_ARCHITECTURE[&quotDENSE&quot].copy()  &#47&#47 copy to mutate
+        dense_in_dim = np.prod(sb_conv_arch_output_size(<a id="change">obs_space.shape[1:]</a>,
+                                                        conv_arch))
+        dense_arch[0][&quotin_dim&quot] = dense_in_dim
+
+        for layer_spec in conv_arch:
+            shared_network_layers.append(nn.Conv2d(self.input_channel, layer_spec[&quotout_dim&quot],
+                                                   kernel_size=layer_spec[&quotkernel_size&quot], stride=layer_spec[&quotstride&quot]))
+            shared_network_layers.append(nn.ReLU())
+            self.input_channel = layer_spec[&quotout_dim&quot]
+
+        shared_network_layers.append(nn.Flatten())
+        for ind, layer_spec in enumerate(dense_arch[:-1]):
+            in_dim, out_dim = layer_spec.get(&quotin_dim&quot), layer_spec.get(&quotout_dim&quot)
+            shared_network_layers.append(nn.Linear(in_dim, out_dim))
+            shared_network_layers.append(nn.ReLU())
+
+        self.shared_network = nn.Sequential(*shared_network_layers)
+        self.mean_layer = nn.Linear(dense_arch[-1][&quotin_dim&quot], self.representation_dim)
+        self.scale_layer<a id="change"> = </a>nn.Linear(dense_arch[-1][&quotin_dim&quot], self.representation_dim)
+
+    def forward(self, x):
+        shared_repr = self.shared_network(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        shared_network_layers = []
+
+        &#47&#47 first apply convolution layers + flattening
+        conv_arch<a id="change"> = </a>[
+            <a id="change">{</a>&quotout_dim&quot: 32, &quotkernel_size&quot: 8, &quotstride&quot: 4<a id="change">}</a>,
+            <a id="change">{</a>&quotout_dim&quot: 64, &quotkernel_size&quot: 4, &quotstride&quot: 2<a id="change">}</a>,
+            {&quotout_dim&quot: 64, &quotkernel_size&quot: 3, &quotstride&quot: 1},
+        ]
+        for layer_spec in conv_arch:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/humancompatibleai/eirli/commit/c81e5c51ddb9f9ef758200547e175ef1cdeadc92#diff-7b6cc32084df7e0a6941bc1a899e44b49b70998170146371889b15f6324f629dL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2198209</div><div id='project'> Project Name: humancompatibleai/eirli</div><div id='commit'> Commit Name: c81e5c51ddb9f9ef758200547e175ef1cdeadc92</div><div id='time'> Time: 2020-08-21</div><div id='author'> Author: sam@qxcv.net</div><div id='file'> File Name: src/il_representations/algos/encoders.py</div><div id='m_class'> M Class Name: BasicCNN</div><div id='n_method'> N Class Name: DefaultStochasticCNN</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/il_representations/algos/encoders.py</div><div id='n_file'> N File Name: src/il_representations/algos/encoders.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 95</div><BR><BR><div id='link'><a href='https://github.com/lorenmt/shape-adaptor/commit/080b6fdad63f71e54ed0fdaa379c604463d0bcb7#diff-9a49c191ec94d5bcdc914132c39d4635bed4c7ab8d19c3c5b24a726913c9b79cL65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2198197</div><div id='project'> Project Name: lorenmt/shape-adaptor</div><div id='commit'> Commit Name: 080b6fdad63f71e54ed0fdaa379c604463d0bcb7</div><div id='time'> Time: 2020-07-31</div><div id='author'> Author: sk.lorenmt@gmail.com</div><div id='file'> File Name: model_list.py</div><div id='m_class'> M Class Name: VGG</div><div id='n_method'> N Class Name: VGG</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model_list.py</div><div id='n_file'> N File Name: model_list.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 146</div><BR><BR><div id='link'><a href='https://github.com/humancompatibleai/eirli/commit/fab9035a007fdec23d6e152d31b2c429670aecf3#diff-7b6cc32084df7e0a6941bc1a899e44b49b70998170146371889b15f6324f629dL71' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2198215</div><div id='project'> Project Name: humancompatibleai/eirli</div><div id='commit'> Commit Name: fab9035a007fdec23d6e152d31b2c429670aecf3</div><div id='time'> Time: 2020-08-21</div><div id='author'> Author: sam@qxcv.net</div><div id='file'> File Name: src/il_representations/algos/encoders.py</div><div id='m_class'> M Class Name: BasicCNN</div><div id='n_method'> N Class Name: DefaultStochasticCNN</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/il_representations/algos/encoders.py</div><div id='n_file'> N File Name: src/il_representations/algos/encoders.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 95</div><BR>

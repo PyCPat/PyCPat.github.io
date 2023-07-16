@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert self.gate_type == &quotfeatures&quot or self.gate_type == &quotheads&quot, f&quotGate type must be "features" or "heads"!&quot
+
+        &#47&#47 Initialize gate to 1
+        <a id="change">if self.gate_type == &quotfeatures&quot</a><a id="change">:
+            </a>self.scale = nn.Parameter(torch.ones((input_shape[-1],)), requires_grad=True).view(1, 1, input_shape[-1])
+        elif self.gate_type == &quotheads&quot:
+            self.scale = nn.Parameter(torch.ones((input_shape[1]<a id="change"></a>,)), requires_grad=True).view(1, input_shape[1], 1, 1)
+            self.scale = self.scale.repeat(1, 1, 1, input_shape[-1])
+
+        &#47&#47 Prepare streams info</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Built einsum input strings
+        self.einsum_in_1 = &quotabcdef&quot
+        self.einsum_in_1 = self.einsum_in_1[:<a id="change">len(</a>self.input_shape<a id="change">)</a>]
+        self.einsum_in_2 = self.einsum_in_1[self.dim_to_scale]
+
+        print(f"{self.einsum_in_1},{self.einsum_in_2}-&gt;{self.einsum_in_1}")</code></pre>

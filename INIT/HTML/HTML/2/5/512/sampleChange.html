@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if not receives_context:
+                continue
+
+            layer<a id="change"> = </a>nn.ModuleList([
+                PreNorm(dim, SelfAttention(dim, heads, one_kv_head = one_kv_head, psi_fn = psi_fn, receives_context = True)),
+                PreNorm(dim, Chunk(ff_chunks, FeedForward(dim), along_dim = 1))
+            ])
+            <a id="change">layers.append(</a>layer<a id="change">)</a>
+
+        execute_type = ReversibleSequence if reversible else SequentialSequence
+
+        attn_context_layer = ((True, False),) if receives_context else tuple()</code></pre><h3>After Change</h3><pre><code class='java'>
+            ]))
+
+            if attend_axially:
+                layers.append(nn.ModuleList(<a id="change">[
+                    </a>PreNorm(dim, FoldAxially(local_attn_window_size, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head, psi_fn = psi_fn))),
+                    <a id="change">PreNorm(</a>dim, Chunk(ff_chunks, <a id="change">FeedForward(</a>dim<a id="change">)</a>, along_dim = 1)<a id="change">)</a>
+                ]))
+
+            if receives_context:
+                layers.append(nn.ModuleList([</code></pre>

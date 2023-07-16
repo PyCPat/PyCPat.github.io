@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.b_c_ner = nn.Parameter(torch.rand(config.num_token_type))
+
+        self.U_head = nn.Parameter(torch.rand((self.layer_size, self.hidden_dim * 2 + self.config.token_type_dim)))
+        self.W_head = <a id="change">nn.Parameter(</a>torch.rand((self.layer_size, self.hidden_dim * 2 + self.config.token_type_dim))<a id="change">)</a>
+        self.V_head = nn.Parameter(torch.rand(self.layer_size, len(self.config.relations)))
+        self.b_s_head = nn.Parameter(torch.rand(self.layer_size))
+        &#47&#47self.b_c_head = nn.Parameter(torch.rand(config.num_relations))
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        self.selection_u = nn.Linear(self.hidden_dim * 2 + self.config.token_type_dim, config.rel_emb_size)
+        self.selection_v = nn.Linear(self.hidden_dim * 2 + self.config.token_type_dim, config.rel_emb_size)
+        self.selection_uv = <a id="change">nn.Linear(</a>2<a id="change">*</a>config.rel_emb_size, config.rel_emb_size<a id="change">)</a>
+        
+        &#47&#47 self.weights_loss = [100 for i in range(config.num_relations)]
+        &#47&#47 self.weights_loss[0] = 1
+        &#47&#47 self.focal_loss = Focal_loss(alpha=self.weights_loss, gamma=4, num_classes=config.num_relations)</code></pre>

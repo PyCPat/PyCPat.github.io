@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        net = []
+        num_features = []
+
+        for <a id="change">idx</a> in range(self.depth):
+            <a id="change">if idx == 0</a><a id="change">:
+                </a>num_features.append(in_channels)
+            else:
+                num_features.append(<a id="change">growth_rate[idx-1]</a>)
+            net.append(MultiDilatedConvBlock(num_features, growth_rate[idx], kernel_size=kernel_size, norm=norm, nonlinear=nonlinear, eps=eps))
+        self.net = nn.Sequential(*net)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if type(growth_rate) is int:
+            assert depth is not None, "Specify `depth`"
+            growth_rate = <a id="change">[</a>growth_rate<a id="change"></a>] * depth
+        elif type(growth_rate) is list:
+            if depth is not None:
+                assert depth == len(growth_rate), "`depth` is different from `len(growth_rate)`"
+            depth = len(growth_rate)
+        else:
+            raise ValueError("Not support growth_rate={}".format(growth_rate))
+        
+        self.growth_rate = growth_rate
+        self.depth = depth
+
+        net = []
+        _in_channels = in_channels
+
+        for idx in range(depth):
+            _out_channels<a id="change"> = </a>sum(growth_rate[idx:])
+            dilation = 2**idx
+            conv_block = ConvBlock2d(_in_channels, _out_channels, kernel_size=kernel_size, stride=1, dilation=dilation, eps=eps)
+            <a id="change">net.append(</a>conv_block<a id="change">)</a>
+            _in_channels = growth_rate[idx]
+
+        self.net = nn.ModuleList(net)
+    </code></pre>

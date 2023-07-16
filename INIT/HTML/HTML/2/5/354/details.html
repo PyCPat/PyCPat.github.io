@@ -1,0 +1,35 @@
+<html><h3>Pattern ID :354
+</h3><img src='1256690.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for stripe_id, stripe in enumerate(stripes):
+            branch = nn.Sequential()
+            branch.add_module(&quotbranch_backbone&quot, nn.Sequential(copy.deepcopy(res_conv4), copy.deepcopy(resnet.layer4)))
+            <a id="change">branch.add_module(</a>&quotbranch_pool&quot, pool2d(kernel_size=(24 // stripe, 8))<a id="change">)</a>
+            branch_reduces, branch_stripe_fc = nn.Sequential(), nn.Sequential()
+            for i in range(stripe + 1): &#47&#47 global + local
+                branch_reduces.add_module(str(i), copy.deepcopy(reduction))
+                branch_stripe_fc.add_module(str(i), copy.deepcopy(fc_layer))
+            branch.add_module(&quotbranch_reduce&quot, branch_reduces)
+            <a id="change">branch.add_module(</a>&quotbranch_fc&quot,branch_stripe_fc<a id="change">)</a>
+            self.branches.add_module(str(stripe_id), branch)
+        &#47&#47 self.branches = nn.Sequential(*self.branches)
+
+    @staticmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+        fc_layer = nn.Sequential(nn.Dropout(), nn.Linear(256, num_classes))
+        self._init_fc(fc_layer)
+
+        branches = <a id="change">[]</a>
+        for stripe_id, stripe in enumerate(stripes):
+            embedding_layers = nn.ModuleList([copy.deepcopy(reduction) for _ in range(stripe+1)])
+            fc_layers = nn.ModuleList([copy.deepcopy(fc_layer) for _ in range(stripe+1)])
+            <a id="change">branches.append(
+                </a>nn.ModuleList([
+                    nn.Sequential(copy.deepcopy(res_conv4), copy.deepcopy(resnet.layer4)),
+                    embedding_layers, fc_layers])<a id="change">
+            )</a>
+        self.branches = nn.ModuleList(branches)
+
+    @staticmethod
+    def _init_reduction(reduction):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tencentyouturesearch/personreid-youreid/commit/c08b75174cf03f3eb1fd83052bcd9e8d292b2dda#diff-23647276f92e56f9f7b0bd6358d24f034726328a25c3f09c6ee504412c8036c5L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1256690</div><div id='project'> Project Name: tencentyouturesearch/personreid-youreid</div><div id='commit'> Commit Name: c08b75174cf03f3eb1fd83052bcd9e8d292b2dda</div><div id='time'> Time: 2020-05-17</div><div id='author'> Author: fufuyu@tencent.com</div><div id='file'> File Name: models/mgn.py</div><div id='m_class'> M Class Name: MGN</div><div id='n_method'> N Class Name: MGN</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mgn.py</div><div id='n_file'> N File Name: models/mgn.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 45</div><BR><BR><div id='link'><a href='https://github.com/lornatang/srgan-pytorch/commit/acd467b89c7ccd5ca556b43a505b5745feda6b21#diff-a953b33cee07c104980e771037f7c50ac9861f73e6e07e04b2990ed8b8585403L78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1256689</div><div id='project'> Project Name: lornatang/srgan-pytorch</div><div id='commit'> Commit Name: acd467b89c7ccd5ca556b43a505b5745feda6b21</div><div id='time'> Time: 2020-09-21</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: srgan_pytorch/model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: srgan_pytorch/model.py</div><div id='n_file'> N File Name: srgan_pytorch/model.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 60</div><BR><BR><div id='link'><a href='https://github.com/tencentyouturesearch/personreid-cacenet/commit/c08b75174cf03f3eb1fd83052bcd9e8d292b2dda#diff-23647276f92e56f9f7b0bd6358d24f034726328a25c3f09c6ee504412c8036c5L12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1256688</div><div id='project'> Project Name: tencentyouturesearch/personreid-cacenet</div><div id='commit'> Commit Name: c08b75174cf03f3eb1fd83052bcd9e8d292b2dda</div><div id='time'> Time: 2020-05-17</div><div id='author'> Author: fufuyu@tencent.com</div><div id='file'> File Name: models/mgn.py</div><div id='m_class'> M Class Name: MGN</div><div id='n_method'> N Class Name: MGN</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mgn.py</div><div id='n_file'> N File Name: models/mgn.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 45</div><BR>

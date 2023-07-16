@@ -1,0 +1,47 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class FCPairedLayer(nn.Module):
+    def __init__(self, n_in, n_out=1, layers=(), dropout_rate=0.0, context=1, n_in_base=4, mix_base=0, join=&quotcat&quot):
+        super(FCPairedLayer, self).__init__()
+        self.dropout<a id="change"> = </a><a id="change">nn.Dropout(p=dropout_rate)</a>
+        self.context = context
+        self.mix_base = mix_base
+        self.join = join
+        if len(layers)&gt;0 and layers[0]==0:
+            layers = ()
+
+        if join==&quotcat&quot:
+            n = n_in*context*2 &#47&#47 concat
+        else:
+            n = n_in*context &#47&#47 add or mul
+        n += n_in_base*mix_base*2
+        
+        <a id="change">linears</a><a id="change"> = </a><a id="change">[]</a>
+        for m in layers:
+            <a id="change">linears.append(nn.Linear(</a>n, <a id="change">m</a><a id="change">)</a><a id="change">)</a>
+            n = m
+        <a id="change">linears.append(nn.Linear(</a>n, n_out<a id="change">)</a><a id="change">)</a>
+        self.fc<a id="change"> = nn.ModuleList(linears</a><a id="change">)</a>
+
+
+    def pairing(self, x_l, x_r, join, context):
+        assert(x_l.shape == x_r.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            n = n_in*context &#47&#47 add or mul
+        n += n_in_base*mix_base*2
+
+        l<a id="change"> = </a><a id="change">[]</a>
+        for <a id="change">m</a> in layers:
+            l<a id="change"> += </a><a id="change">[ 
+                nn.Linear(</a>n, <a id="change">m</a><a id="change">)</a>, 
+                <a id="change">nn.LayerNorm(m</a><a id="change">)</a>,
+                <a id="change">nn.ELU()</a>, 
+                <a id="change">nn.Dropout(p=dropout_rate)</a> ]
+            n = m
+        l<a id="change"> += [ nn.Linear(</a>n, n_out<a id="change">)</a> ] &#47&#47, nn.LayerNorm(n_out) ]
+        self.net<a id="change"> = nn</a><a id="change">.Sequential(</a>*<a id="change">l)</a>
+
+
+    def pairing(self, x_l, x_r, join, context):
+        assert(x_l.shape == x_r.shape)</code></pre>

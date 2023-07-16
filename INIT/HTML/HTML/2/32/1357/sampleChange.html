@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            stage_with_gcb_list = map(int, stage_with_gcb_str.split(&quot,&quot))
+            for n in stage_with_gcb_list:
+                stage_with_gcb[n] = True
+        <a id="change">if num_layers in [50, 101, &quot101_32x8d&quot]</a><a id="change">:
+            </a><a id="change">if num_layers == 50</a><a id="change">:
+                </a>resnet_fn<a id="change"> = </a>resnet50
+            elif <a id="change">num_layers == 101:
+                </a>resnet_fn<a id="change"> = </a>resnet101
+            elif <a id="change">num_layers == &quot101_32x8d&quot:
+                </a>resnet_fn<a id="change"> = </a>resnext101_32x8d
+            self.resnet<a id="change"> = </a>resnet_fn(pretrained=True,
+                                    gcb=gcb,
+                                    with_ibn=with_ibn,
+                                    stage_with_gcb=stage_with_gcb)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.bn = nn.Sequential(nn.BatchNorm2d(reduce_dim))
+        self._init_bn(self.bn)
+
+        <a id="change">self.loss_type = </a>loss_type
+        <a id="change">if &quotsoftmax&quot</a><a id="change"> in self.loss_type:
+            </a>self.fc_layer = nn.Sequential(nn.Dropout(), nn.Linear(reduce_dim, num_classes))
+            self._init_fc(self.fc_layer)
+            <a id="change">if &quotlabelsmooth&quot in self.loss_type</a><a id="change">:
+                </a>self.ce_loss<a id="change"> = </a><a id="change">CrossEntropyLabelSmooth(</a>num_classes<a id="change">)</a>
+            else:
+                self.ce_loss<a id="change"> = </a><a id="change">nn.CrossEntropyLoss()</a>  &#47&#47 .cuda()
+        elif &quotarcface&quot in self.loss_type:
+            pass
+        elif &quotcircle&quot in self.loss_type:
+            self.fc_layer = Circle(num_classes, reduce_dim)
+
+        <a id="change">if &quottriplet&quot</a><a id="change"> in self.loss_type:
+            </a>self.tri_loss<a id="change"> = </a><a id="change">TripletLoss(</a>margin<a id="change">, normalize_feature=not &quotcircle&quot in self.loss_type)</a> &#47&#47.cuda()
+
+    @staticmethod
+    def _init_bn(bn):</code></pre>

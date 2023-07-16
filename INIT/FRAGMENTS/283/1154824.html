@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                ])
+            self.blocks.append(nn.Sequential(*cur_layers))
+            if len(upsample_strides) &gt; 0:
+                <a id="change">self.deblocks.append(</a>nn.Sequential(
+                    nn.ConvTranspose2d(
+                        num_filters[idx], num_upsample_filters[idx],
+                        upsample_strides[idx],
+                        stride=upsample_strides[idx], bias=False
+                    ),
+                    nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                    nn.ReLU()
+                )<a id="change">)</a>
+
+        c_in = sum(num_upsample_filters)
+        if len(upsample_strides) &gt; num_levels:
+            self.deblocks.append(nn.Sequential(</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.blocks.append(nn.Sequential(*cur_layers))
+            if len(upsample_strides) &gt; 0:
+                stride = upsample_strides[idx]
+                <a id="change">if stride &gt; 1</a><a id="change">:
+                    </a><a id="change">self.deblocks.append(</a>nn.Sequential(
+                        nn.ConvTranspose2d(
+                            num_filters[idx], num_upsample_filters[idx],
+                            upsample_strides[idx],
+                            stride=upsample_strides[idx], bias=False
+                        ),
+                        nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                        nn.ReLU()
+                    )<a id="change">)</a>
+                else:
+                    stride = np.round(1<a id="change"> / </a>stride).astype(np.int)
+                    <a id="change">self.deblocks.append(</a>nn.Sequential(
+                        nn.Conv2d(
+                            num_filters[idx], num_upsample_filters[idx],
+                            stride,
+                            stride=stride, bias=False
+                        ),
+                        nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                        nn.ReLU()
+                    )<a id="change">)</a>
+
+        c_in = sum(num_upsample_filters)
+        if len(upsample_strides) &gt; num_levels:
+            self.deblocks.append(nn.Sequential(</code></pre>

@@ -3,34 +3,19 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        self.from_rgb = nn.Sequential(
-            EqualizedConv2d(3, resl2ch[128], 1, bias=False),
-            <a id="change">FusedLeakyReLU(</a>resl2ch[128]<a id="change">)</a>
-        )
+        self.to_q = nn.Parameter(torch.randn(dim, dim))
+        self.to_kv = nn.Parameter(torch.randn(dim, 2 * dim))
+        self.to_out = <a id="change">nn.Parameter(</a>torch.randn(dim, dim)<a id="change">)</a>
 
-        layers = []
-        for resl in list(resl2ch.keys())[::-1]:</code></pre><h3>After Change</h3><pre><code class='java'>
-            nn.LeakyReLU(0.2, inplace=True)
-        )
-        resl = image_size
-        blocks = <a id="change">[]</a>
-        while resl &gt; 4:
-            resl = resl // 2
-            channels *= 2
-            ichannels, ochannels = ochannels, check_c(channels)
-            blocks.append(
-                DBlock(ichannels, ochannels, block_num_conv)
-            )
-        blocks.append(MiniBatchStdDev(mbsd_groups))
-        <a id="change">blocks.extend(</a>[
-            Conv2d(&quotelr&quot, ochannels+1, ochannels, 3, padding=1),
-            nn.LeakyReLU(0.2, inplace=True),
-            Flatten(),
-            Linear(&quotelr&quot, ochannels*(resl**2), ochannels),
-            <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
-            Linear(&quotelr&quot, ochannels, 1)
-        ]<a id="change">)</a>
-        self.blocks = nn.Sequential(*blocks)
-    def forward(self, x):
-        x = self.from_rgb(x)
-        x = self.blocks(x)</code></pre>
+        self.rezero_g<a id="change"> = nn</a><a id="change">.Parameter(</a>torch.tensor(0.)<a id="change">)</a>
+
+    def forward(self, lmem, smem, hiddens):
+        hiddens = hiddens.detach()
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.norm = nn.LayerNorm(dim, elementwise_affine = False)
+
+        self.to_q = init_parameter((num_memory_depth<a id="change">, dim, dim</a>), dim)
+        self.to_kv = init_parameter((num_memory_depth, dim, 2 * dim), dim)
+        self.to_out = init_parameter((num_memory_depth, dim, dim * 2), dim)
+</code></pre>

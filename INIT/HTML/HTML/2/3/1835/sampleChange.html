@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    ):
+        super().__init__()
+        dim_out = default(dim_out, dim)
+        temporal_kernel_size<a id="change"> = </a><a id="change">default(</a>temporal_kernel_size, kernel_size<a id="change">)</a>
+
+        self.spatial_conv = nn.Conv2d(dim, dim_out, kernel_size = kernel_size, padding = kernel_size // 2)
+        self.temporal_conv = nn.Conv1d(dim_out, dim_out, kernel_size = temporal_kernel_size, padding = temporal_kernel_size // 2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.time_mlp = None
+
+        if exists(time_cond_dim):
+            self.time_mlp = <a id="change">nn.Sequential(
+                </a>nn.SiLU(),
+                nn.Linear(time_cond_dim, dim_out * 2)<a id="change">
+            )</a>
+
+        self.block1 = Block(dim, dim_out, groups = groups)
+        self.block2 = Block(dim_out, dim_out, groups = groups)
+        self.res_conv = PseudoConv3d(dim, dim_out, 1) if dim != dim_out else nn.Identity()</code></pre>

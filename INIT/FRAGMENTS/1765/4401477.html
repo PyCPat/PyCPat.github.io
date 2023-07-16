@@ -1,0 +1,77 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                                     d_model)
+
+        self.pos_embedding = PositionEmbedding(src_max_len, d_model)
+        self.dropout = <a id="change">Dropout(</a>dropout<a id="change">)</a>
+        
+        if share_layer_params == False:
+            self.layers = nn.ModuleList([
+                    EncoderLayer(n_heads, d_model, d_ff, d_qk, d_v,</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.share_layer_params = share_layer_params
+        self.n_share_across_layers = n_share_across_layers
+        self.scale_embedding = scale_embedding
+        self.norm_before_pred<a id="change"> = </a>norm_before_pred
+        self.norm_after_embedding = norm_after_embedding
+        
+        if embedding_size is None:
+            self.src_embedding = Embedding(src_vocab_size, 
+                                           d_model, 
+                                           scale_embedding)
+        else:
+            self.src_embedding = FactorizedEmbedding(src_vocab_size, 
+                                                     embedding_size,
+                                                     d_model)
+
+        self.pos_embedding = PositionEmbedding(src_max_len, 
+                                               d_model, 
+                                               pos_need_train)
+        
+        self.add_segment_embedding<a id="change"> = </a>add_segment_embedding
+        self.n_types = n_types
+        <a id="change">if </a><a id="change">add_segment_embedding == True:
+            </a>self.type_embedding = Embedding(self.n_types, self.d_model)
+        
+        <a id="change">if </a><a id="change">self.norm_after_embedding == True:
+            </a>self.norm_emb<a id="change"> = </a><a id="change">LayerNorm(</a>self.d_model<a id="change">)</a>
+        
+        self.emb_dropout = Dropout(emb_dropout)
+        
+        if share_layer_params == False:
+            self.layers = nn.ModuleList([
+                    EncoderLayer(n_heads, 
+                                 d_model, 
+                                 d_ff, 
+                                 d_qk, 
+                                 d_v,
+                                 dropout=dropout,
+                                 attn_dropout=attn_dropout,
+                                 ln_eps=ln_eps,
+                                 use_pre_norm=use_pre_norm,                                 
+                                 activation=activation)
+                    for _ in range(n_layers)])
+        else:
+            layers = []
+            for i in range(n_layers):
+                if i % n_share_across_layers == 0:
+                    layer = EncoderLayer(n_heads,
+                                         d_model, 
+                                         d_ff, 
+                                         d_qk, 
+                                         d_v,
+                                         dropout=dropout, 
+                                         attn_dropout=attn_dropout,
+                                         ln_eps=ln_eps,
+                                         use_pre_norm=use_pre_norm,
+                                         activation=activation)
+                    layers.append(layer)
+            self.layers = nn.ModuleList(layers)
+    
+        <a id="change">if self.norm_before_pred == True</a><a id="change">:
+            </a>self.norm<a id="change"> = </a><a id="change">LayerNorm(</a>self.d_model<a id="change">)</a>
+    
+    
+    def forward(self, x, attn_mask, x_type=None, return_states=False):
+        </code></pre>

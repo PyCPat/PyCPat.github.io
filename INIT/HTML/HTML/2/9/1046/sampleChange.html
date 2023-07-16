@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            SqueezeExcitation(embed_dim, embed_dim // 4),
+            nn.Conv2d(embed_dim, embed_dim, 1)
+        )
+        self.layer_scale = nn.Parameter(torch.ones((embed_dim<a id="change">,1,1</a>)) * layer_scale_init)
+        self.drop_path = StochasticDepth(drop_path, &quotrow&quot) if drop_path &gt; 0 else nn.Identity()
+
+    def forward(self, x: torch.Tensor):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if norm_type == &quotln&quot:
+            &#47&#47 LayerNorm version. Primary format is (N, H, W, C)
+            &#47&#47 follow this approach https://github.com/pytorch/vision/blob/main/torchvision/models/convnext.py
+            self.layers = <a id="change">nn.Sequential(
+                </a>nn.LayerNorm(embed_dim),
+                <a id="change">nn.Linear(embed_dim</a>, <a id="change">embed_dim</a><a id="change">)</a>,
+                <a id="change">nn.GELU()</a>,
+                Permute(0, 3, 1, 2),        &#47&#47 (N, H, W, C) -&gt; (N, C, H, W)
+                nn.Conv2d(embed_dim, embed_dim, 3, padding=1, groups=embed_dim),    &#47&#47 dw-conv
+                nn.GELU(),
+                SqueezeExcitation(embed_dim, embed_dim // 4),
+                Permute(0, 2, 3, 1),        &#47&#47 (N, C, H, W) -&gt; (N, H, W, C)
+                <a id="change">nn.Linear(embed_dim</a>, <a id="change">embed_dim</a><a id="change">)
+            )</a>
+            self.layer_scale = nn.Parameter(torch.ones(embed_dim) * layer_scale_init)
+
+        else:
+            &#47&#47 BatchNorm version. Primary format is (N, C, H, W)</code></pre>

@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+			AdainResBlk(dim_in=256, dim_out=128, style_dim=config[&quotstyle_dim&quot], upsample=True)
+		)
+
+		self.to_rgb = <a id="change">nn.Sequential(
+			</a>nn.InstanceNorm2d(num_features=128, affine=True),
+			nn.LeakyReLU(negative_slope=0.2),
+			nn.Conv2d(in_channels=128, out_channels=3, kernel_size=1, stride=1, padding=0)<a id="change">
+		)</a>
+
+	def forward(self, content_code, style_code):
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(content_code)</code></pre><h3>After Change</h3><pre><code class='java'>
+			nn.ReflectionPad2d(padding=2),
+			nn.Conv2d(in_channels=512, out_channels=256, kernel_size=5, stride=1),
+			nn.InstanceNorm2d(num_features=256),
+			<a id="change">nn.ReLU()</a>,
+
+			<a id="change">nn.Upsample(scale_factor=2)</a>,
+			nn.ReflectionPad2d(padding=2),
+			nn.Conv2d(in_channels=256, out_channels=128, kernel_size=5, stride=1),
+			nn.InstanceNorm2d(num_features=128),
+			nn.ReLU(),
+
+			<a id="change">nn.Upsample(scale_factor=2)</a>,
+			nn.ReflectionPad2d(padding=2),
+			nn.Conv2d(in_channels=128, out_channels=64, kernel_size=5, stride=1),
+			nn.InstanceNorm2d(num_features=64),</code></pre>

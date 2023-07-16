@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.norm = nn.LayerNorm(dim, elementwise_affine = False)
+
+        self.to_q = nn.Parameter(torch.randn(dim, dim))
+        self.to_kv = <a id="change">nn.Parameter(</a>torch.randn(dim, 2 * dim)<a id="change">)</a>
+        self.to_out = nn.Parameter(torch.randn(dim, dim))
+
+        self.rezero_g<a id="change"> = </a><a id="change">nn.Parameter(</a>torch.tensor(0.)<a id="change">)</a>
+
+    def forward(self, lmem, smem, hiddens):
+        hiddens = hiddens.detach()
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.norm = nn.LayerNorm(dim, elementwise_affine = False)
+
+        self.to_q = init_parameter((num_memory_depth<a id="change">, dim, dim</a>), dim)
+        self.to_kv = init_parameter((num_memory_depth, dim, 2 * dim), dim)
+        self.to_out = init_parameter((num_memory_depth, dim, dim * 2), dim)
+</code></pre>

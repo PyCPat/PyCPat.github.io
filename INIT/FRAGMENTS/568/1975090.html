@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            norm_layer: Optional[Callable[..., nn.Module]] = None
+    ) -&gt; None:
+        super(Bottleneck, self).__init__()
+        <a id="change">if </a>norm_layer is None<a id="change">:
+            </a>norm_layer = nn.BatchNorm2d
+        width = int(planes * (base_width / 64.)) * groups
+        &#47&#47 Both self.conv2 and self.downsample layers downsample the input when stride != 1
+        self.conv1 = conv1x1(inplanes, width)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.shortcut = nn.Sequential()
+        if in_channels != out_channels:
+            self.shortcut.add_module(&quotshortcut_conv&quot,
+                                     <a id="change">nn.Conv2d(</a>in_channels, out_channels<a id="change">,
+                                               kernel_size=1,
+                                               stride=stride,
+                                               padding=0,
+                                               bias=False)</a>)
+            self.shortcut.add_module(
+                &quotshortcut_bn&quot, <a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">, momentum=0.001)</a>)
+
+    def forward(self, x):
+        bottleneck = self.conv_reduce.forward(x)</code></pre>

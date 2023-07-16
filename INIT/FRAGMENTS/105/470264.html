@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        m.append(nn.ReLU(True))
+        m.append(nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True))
+        m.append(nn.Sigmoid())
+        m.append(<a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)</a>)
+        self.body<a id="change"> = </a><a id="change">nn.Sequential(</a>*<a id="change">m)</a>
+
+    def forward(self, x):
+        res = self.body(x)
+        if res.shape != x.shape:</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    def __init__(self, n_feats, reduction=4, stride=8):
+        super(AttentionBlock, self).__init__()
+        self.body = <a id="change">nn.Sequential(
+            </a>nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
+            nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True),
+            nn.Sigmoid(),
+            <a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)
+        )</a>
+
+    def forward(self, x):
+        res = self.body(x)
+        if res.shape != x.shape:</code></pre>

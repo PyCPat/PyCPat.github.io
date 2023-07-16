@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        self.conv2 = blocks.DepthwiseConv2d(
+            num_classes, num_classes, 7, padding=0)
+        self.fc = <a id="change">nn.Linear(</a>filters<a id="change"> * </a>16, num_classes<a id="change">)</a>
+
+    def forward(self, x):
+        x = self.features(x)
+        x1, x2 = torch.chunk(x, 2, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        self.conv2 = blocks.DepthwiseConv2d(
+            num_classes, num_classes, 7, padding=0)
+        self.classifier = <a id="change">nn.Sequential(
+            nn.Dropout(0.2</a><a id="change">)</a>,
+            <a id="change">nn.Linear(</a>filters<a id="change"> * </a>16, num_classes<a id="change">)
+        )</a>
+
+    def forward(self, x):
+        x = self.features(x)
+        x1, x2 = torch.chunk(x, 2, dim=1)</code></pre>

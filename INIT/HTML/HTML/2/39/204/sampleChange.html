@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.adj_norm_func = adj_norm_func
+
+        if type(hidden_features) is int:
+            <a id="change">hidden_features</a> = <a id="change">[</a>hidden_features<a id="change"></a>]
+
+        self.layers = nn.ModuleList()
+        <a id="change">if layer_norm</a><a id="change">:
+            self.layers</a><a id="change">.append(nn.LayerNorm(</a>in_features<a id="change">)</a><a id="change">)</a>
+        <a id="change">self.layers.append(</a>SAGEConv(in_features=in_features,
+                                    pool_features=in_features,
+                                    out_features=hidden_features[0],
+                                    activation=activation,
+                                    mu=mu,
+                                    dropout=dropout)<a id="change">)</a>
+        for i in range(<a id="change">len(hidden_features</a><a id="change">)</a><a id="change"> - 1</a>):
+            if layer_norm:
+                <a id="change">self.layers.append(nn.LayerNorm(hidden_features[i]</a><a id="change">)</a><a id="change">)</a>
+            self.layers.append(SAGEConv(in_features=hidden_features[i],
+                                        pool_features=hidden_features[i],
+                                        out_features=hidden_features[i + 1],
+                                        activation=activation,
+                                        mu=mu,
+                                        dropout=dropout))
+        <a id="change">self.layers.append(</a>SAGEConv(in_features=hidden_features[-1],
+                                    pool_features=hidden_features[-1],
+                                    out_features=out_features,
+                                    activation=None,
+                                    mu=mu,
+                                    dropout=0.0)<a id="change">)</a>
+
+    @property
+    def model_type(self):
+        Indicate type of implementation.</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.feat_norm = feat_norm
+        self.adj_norm_func = adj_norm_func
+        if type(hidden_features) is int:
+            <a id="change">hidden_features</a> = <a id="change">[hidden_features</a>]<a id="change"> * </a>(n_layers<a id="change"> - 1</a>)
+        elif <a id="change">type(hidden_features) is list or type(hidden_features) is tuple</a><a id="change">:
+            assert </a>len(hidden_features) == (n_layers - 1), "Incompatible sizes between hidden_features and n_layers."
+        <a id="change">n_features</a><a id="change"> = </a><a id="change">[</a><a id="change">in_features] + hidden_features + [</a>out_features<a id="change"></a>]
+
+        self.layers = nn.ModuleList()
+        for i in range(n_layers):
+            if layer_norm:
+                <a id="change">self.layers.append(</a><a id="change">nn.LayerNorm(n_features[i]</a><a id="change">))</a>
+            self.layers.append(SAGEConv(in_features=n_features[i],
+                                        pool_features=n_features[i],
+                                        out_features=n_features[i + 1],
+                                        activation=activation if i != n_layers - 1 else None,</code></pre>
