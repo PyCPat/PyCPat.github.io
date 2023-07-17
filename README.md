@@ -1,8 +1,18 @@
 # Python code change patterns
 
-On this page, you will find code change patterns that were extracted from open source Python repositories. Each pattern consists of several instances of similar code changes. The "[JSON](https://github.com/PyCPat/PyCPat.github.io/tree/master/JSON)" directory includes pattern information in `JSON` format, while the "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" directory contains code changes associated with each pattern. To access code changes in the "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" folder, you can use the Pattern "ID" and "FRAGMENT_ID" fields. The folders in "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" are named according to the "PATTERN_ID," while the code change files are named after the "FRAGMENT_ID."
+On this page, you will find code change patterns that were extracted from open source Python repositories. Each pattern consists of several instances of similar code changes. Following links contain the code change pattenrs extracted using various staturgies.
 
-You can access the code change pattern in HTML format through this link (https://pycpat.github.io/HTML/2/directory.html) by using the pattern ID, which is also the name of the corresponding JSON file. The JSON file contain information of the pattern as Jsons. Here is some information about the contents of the JSON file:
+* [Link1](https://github.com/PyCPat/PyCPat.github.io/tree/master/INIT) provides an extensive collection of code change patterns found in the `__init__` functions of classes that inherit from the parent class "nn.Module." These patterns are presented in various formats as below.
+
+    * In [HTML Format](https://pycpat.github.io/INIT/HTML/HTML/2/directory.html) format, the link leads to a comprehensive resource for accessing all the patterns in HTML format. It first directs you to the main page, which is a table summarizing the patterns. The table includes columns such as "ID" for the pattern ID, "Pattern size" indicating the number of repeated nodes, and "Details" which provides a direct link to all the instances of each pattern. Within each instance link, you will find a graphical representation of the repeated graph present in the pattern instances. Additionally, there is further information about each change instance, as well as a highlighted code snippet for reference. This allows for a clear visualization and understanding of the code change patterns in the init functions of classes inheriting from "nn.Module".
+
+    * In "[JSON]([https://github.com/PyCPat/PyCPat.github.io/tree/master/JSON](https://github.com/PyCPat/PyCPat.github.io/tree/master/INIT/JSON))" format, the directory includes pattern information in `JSON` format, while the
+    * The "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" directory contains code changes associated with each pattern in HTML format. To access code changes in the "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" folder, you can use the Pattern "ID" and "FRAGMENT_ID" fields. The folders in "[FRAGMENTS](https://github.com/PyCPat/PyCPat.github.io/tree/master/FRAGMENTS)" are named according to the "PATTERN_ID," while the code change files are named after the "FRAGMENT_ID."
+
+`Note: In both the Json and HTML formats, certain fields are prefixed with either "M" or "N". Fields prefixed with "M" are relevant to the code before the change, while those prefixed with "N" are relevant to the code after the change.
+      
+
+The JSON file contains information of the pattern as Jsons. Here is some information about the contents of the JSON file:
 
 ```json
 {
@@ -20,8 +30,10 @@ You can access the code change pattern in HTML format through this link (https:/
       "COMMIT_NAME" : "Commit hex"
       "TIME" : "The git commit time"
       "AUTHOR_NAME" : "Author of the commit"
-      "FILE_NAME" : "The file in which the change is made"
-      "CLASS_NAME" : "The class in which the change is made"
+      "M FILE_NAME" : "The file of the before code in which the change is made"
+      "M CLASS_NAME" : "The class of the before code change in which the change is made"
+      "N FILE_NAME" : "The file of the after code in which the change is made"
+      "N CLASS_NAME" : "The class of the after in which the change is made"
       "AUTHOR_NAME" : "Author email address"
       "COMMITTER_EMAIL" : "Commiter email address"
       "NODE_INFO" : "The information of the repeated nodes of the fragment"
