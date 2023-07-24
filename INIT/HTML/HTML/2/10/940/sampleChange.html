@@ -22,6 +22,10 @@
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
         out = F.relu(self.bn2(self.conv2(out)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, dim))
+        self.patch_to_embedding = nn.Linear(patch_dim, dim)
+        self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
+        self.dropout = <a id="change">nn.Dropout(</a>emb_dropout<a id="change">)</a>
 
         self.transformer = Transformer(dim, depth, heads, mlp_dim, dropout)
 
@@ -29,9 +33,4 @@
 
         self.mlp_head = nn.Sequential(
             nn.LayerNorm(dim),
-            nn.Linear(dim, mlp_dim),
-            nn.GELU(),
-            <a id="change">nn.Dropout(</a>dropout<a id="change">)</a>,
-            nn.Linear(mlp_dim, num_classes)
-        )
-</code></pre>
+            nn.Linear(dim, mlp_dim),</code></pre>

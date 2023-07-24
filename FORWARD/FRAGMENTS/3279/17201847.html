@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		img: torch.FloatTensor,
+		source_mask: torch.BoolTensor
+		) :
+		feats<a id="change"> = </a><a id="change">self.backbone(</a>img<a id="change">)</a>
+		feats = torch.einsum(&quotn e h s -&gt; s n e&quot, feats)
+		feats = self.pe(feats)
+		feats = self.encoders(feats, src_key_padding_mask = source_mask)
+		feats = torch.einsum(&quots n e -&gt; n s e&quot, feats)
+		pred_char_logits = self.char_pred(feats)
+		pred_color_values<a id="change"> = </a>self.color_pred1(feats)
+		<a id="change">return </a>pred_char_logits, pred_color_values
+
+	def decode(self, img: torch.Tensor, img_widths: List[int], blank) -&gt; List[List[Tuple[str, float, int, int, int, int, int, int]]] :
+		N, C, H, W = img.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+		recurrent, _ = self.rnn(input)  &#47&#47 batch_size x T x input_size -&gt; batch_size x T x (2*hidden_size)
+		recurrent, _ = torch.nn.utils.rnn.pad_packed_sequence(recurrent, batch_first=True)
+		output = self.linear(recurrent)  &#47&#47 batch_size x T x output_size
+		<a id="change">return </a>output
+
+class ResNet(nn.Module):
+	def __init__(self, input_channel, output_channel, block, layers):</code></pre>

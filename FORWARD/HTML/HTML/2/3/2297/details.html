@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :2297
+</h3><img src='14300838.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            mol_vecs = torch.stack(mol_vecs, dim=0)  &#47&#47 num_molecules x hidden
+
+        <a id="change">return </a>mol_vecs  &#47&#47 num_molecules x hidden
+
+
+class MPN(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            mol_vecs = torch.stack(mol_vecs, dim=0)  &#47&#47 (num_molecules, hidden_size)
+        
+        semiF_features = np.stack(semiF_features).todense()
+        semiF_features<a id="change"> = </a><a id="change">torch.from_numpy(semiF_features).cuda()</a>
+        print(semiF_features.size())
+        import pdb; pdb.set_trace()
+        return torch.cat(mol_vecs, semiF_features, dim=1)  &#47&#47 (num_molecules, hidden_size)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/6cf88ed5105a9529f637bb1e562c94c80e4947a3#diff-91b4e1ef89fbd915183928818e07287d60ba2d013478779025955bb686f6410dL114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14300838</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: 6cf88ed5105a9529f637bb1e562c94c80e4947a3</div><div id='time'> Time: 2018-10-16</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: mpn.py</div><div id='m_class'> M Class Name: MPNEncoder</div><div id='n_method'> N Class Name: MPNEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpn.py</div><div id='n_file'> N File Name: mpn.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 287</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 292</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        loss_conf   = torch.mean(self.BCELoss(conf, tobj))
+
+        loss        += loss_conf * self.balance[l] * self.obj_ratio
+        <a id="change">return </a>loss
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.cuda:
+            y_true          = y_true.cuda()
+            noobj_mask      = noobj_mask.cuda()
+            box_loss_scale<a id="change">  = </a><a id="change">box_loss_scale.cuda()</a>
+        &#47&#47-----------------------------------------------------------&#47&#47
+        &#47&#47   reshape_y_true[...,2:3]和reshape_y_true[...,3:4]
+        &#47&#47   表示真实框的宽高，二者均在0-1之间
+        &#47&#47   真实框越大，比重越小，小框的比重更大。</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/yolov5-pytorch/commit/d49e041b6f4ef50c5d94ce88d33d147f3227bc77#diff-25623619f282444dafcdada7a0706865483da83457ebd0cd33af314f6adcfca9L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14300836</div><div id='project'> Project Name: bubbliiiing/yolov5-pytorch</div><div id='commit'> Commit Name: d49e041b6f4ef50c5d94ce88d33d147f3227bc77</div><div id='time'> Time: 2022-01-15</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/yolo_training.py</div><div id='m_class'> M Class Name: YOLOLoss</div><div id='n_method'> N Class Name: YOLOLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/yolo_training.py</div><div id='n_file'> N File Name: nets/yolo_training.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 156</div><div id='n_end'> N End Line: 200</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pred_segmentation = self.segmentation(out_block2, out_block3, out_block4, out_block5)
+        pred_eventspotting = self.events_spotting(global_features, local_features)
+
+        <a id="change">return </a>pred_ball_global, pred_ball_local, pred_segmentation, pred_eventspotting
+
+    def crop_original_batch(self, original_batch_input, pred_ball_global):
+        &#47&#47 Process input for local stage based on output of the global one</code></pre><h3>After Change</h3><pre><code class='java'>
+            resize_batch_input)
+
+        input_ball_local = self.crop_original_batch(original_batch_input, resize_batch_input, pred_ball_global)
+        input_ball_local<a id="change"> = </a><a id="change">input_ball_local.cuda()</a>
+        pred_ball_local, local_features, _, _, _, _ = self.ball_local_stage(input_ball_local)
+
+        pred_eventspotting = self.events_spotting(global_features, local_features)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch/commit/8370e84b743075197d1f04fff115233959d82a29#diff-db9d3049ac0b9fa9cd33b3c6643e81186bb7b6e4e1dc4168d95a83a4b04d7900L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14300837</div><div id='project'> Project Name: maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch</div><div id='commit'> Commit Name: 8370e84b743075197d1f04fff115233959d82a29</div><div id='time'> Time: 2020-05-17</div><div id='author'> Author: nguyenmaudung93.kstn@gmail.com</div><div id='file'> File Name: src/models/TTNet.py</div><div id='m_class'> M Class Name: TTNet</div><div id='n_method'> N Class Name: TTNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/TTNet.py</div><div id='n_file'> N File Name: src/models/TTNet.py</div><div id='m_start'> M Start Line: 165</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 172</div><BR>

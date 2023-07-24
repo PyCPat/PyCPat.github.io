@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :205
+</h3><img src='841356.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        device = x.device
+        half_dim = self.dim<a id="change"> // </a>2
+        emb = <a id="change">math.log(</a>10000<a id="change">) / </a>(half_dim<a id="change"> - </a>1)
+        emb = torch.exp(torch.arange(half_dim, device=device)<a id="change"> * </a>-emb)
+        emb<a id="change"> = </a>x[:, None] * emb[None, :]
+        emb = torch.cat((emb.sin()<a id="change">, emb.cos()</a>), dim=-1)
+        <a id="change">return </a>emb
+
+
+class Mish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        sinusoid_in = torch.ger(input.view(-1).float(), self.inv_freq)
+        pos_emb = torch.cat([sinusoid_in.sin(), sinusoid_in.cos()], dim=-1)
+        pos_emb = pos_emb.view(*shape, self.dim)
+        <a id="change">return </a>pos_emb
+
+
+class Swish(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/a843610e321ec7e1898e97dd495f8991182b8b87#diff-0a0ed53caec8154b10aaf8cff729d26235fc883552cd766726dd8aaf9df50808L32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 841356</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: a843610e321ec7e1898e97dd495f8991182b8b87</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/unet.py</div><div id='m_class'> M Class Name: SinusoidalPosEmb</div><div id='n_method'> N Class Name: TimeEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/unet.py</div><div id='n_file'> N File Name: model/unet.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        device = x.device
+        half_dim = self.dim<a id="change"> // </a>2
+        emb = <a id="change">math.log(</a>10000<a id="change">)</a> / (half_dim<a id="change"> - </a>1)
+        emb = torch.exp(torch.arange(half_dim, device=device)<a id="change"> * </a>-emb)
+        emb<a id="change"> = </a>x[:, None]<a id="change"> * </a>emb[None, :]
+        emb = torch.cat((emb.sin()<a id="change">, emb.cos()</a>), dim=-1)
+        <a id="change">return </a>emb
+
+
+class Mish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        sinusoid_in = torch.ger(input.view(-1).float(), self.inv_freq)
+        pos_emb = torch.cat([sinusoid_in.sin(), sinusoid_in.cos()], dim=-1)
+        pos_emb = pos_emb.view(*shape, self.dim)
+        <a id="change">return </a>pos_emb
+
+
+class Swish(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/519d366759ea639a68262c20661fa8af7e85cfc6#diff-0a0ed53caec8154b10aaf8cff729d26235fc883552cd766726dd8aaf9df50808L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 841357</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 519d366759ea639a68262c20661fa8af7e85cfc6</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/unet.py</div><div id='m_class'> M Class Name: SinusoidalPosEmb</div><div id='n_method'> N Class Name: TimeEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/unet.py</div><div id='n_file'> N File Name: model/unet.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mean, scale = z.chunk(2, 1)
+        std = nn.functional.softplus(scale) + 1e-4
+        var = std * std
+        logvar = <a id="change">torch.log(</a>var<a id="change">)</a>
+
+        z = torch.randn_like(mean) * std + mean
+
+        kl<a id="change"> = </a>(mean<a id="change"> * mean + var - logvar - </a>1).sum(1).mean()
+
+        <a id="change">return </a>z<a id="change">, kl</a>
+
+
+@gin.register
+class DiscreteEncoder(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor):
+        z = self.encoder(x)
+        <a id="change">return </a>z
+
+
+@gin.register</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/acids-ircam/rave/commit/4ae97a330ef49e22db7a71751da91973ff59ff78#diff-2ec9f36787f2fbc81526d9241c09a293c2ba31639b497d73cc3f1046d0f278c5L318' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 841355</div><div id='project'> Project Name: acids-ircam/rave</div><div id='commit'> Commit Name: 4ae97a330ef49e22db7a71751da91973ff59ff78</div><div id='time'> Time: 2022-05-31</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/blocks.py</div><div id='m_class'> M Class Name: VariationalEncoder</div><div id='n_method'> N Class Name: VariationalEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/blocks.py</div><div id='n_file'> N File Name: rave/blocks.py</div><div id='m_start'> M Start Line: 319</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 339</div><div id='n_end'> N End Line: 340</div><BR>

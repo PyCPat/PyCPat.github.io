@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :929
+</h3><img src='3322674.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        weight, bias = self.weight, self.bias
+        weight, bias = weight[:, :n, :n], <a id="change">bias[:, :n]</a>
+
+        mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+        weight = weight.masked_fill(mask[..., None], 0.)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        res, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+
+        gate = <a id="change">F.pad(</a>gate, (0<a id="change">, 0, 0, 0, 1, 0</a>)<a id="change">, value = 0.)</a>
+        gate = torch.cat((gate[:, :-1], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3322674</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y = self.avg_pool(x)
+        
+        &#47&#47manually implement circular padding
+        y = torch.cat((y[:,:self.padding,:,:], y, <a id="change">y[:,-self.padding:,:,:]</a>),dim=1)
+        
+
+        &#47&#47 Two different branches of ECA module</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.avg_pool(x)
+        
+        &#47&#47manually implement circular padding, F.pad does not seemed to be bugged
+        y = <a id="change">F.pad(</a>y.view(x.shape[0],1,-1),(self.padding<a id="change">,self.padding</a>)<a id="change">,mode=&quotcircular&quot)</a>
+
+        &#47&#47 Two different branches of ECA module
+        y = self.conv(y)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/d63ae121d52463d86116021e9ee9160a4628e46a#diff-7b332a79021d6d3e187651f8059e56e93159fb4e1a6b70688d60addd524a6ffaL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3322676</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: d63ae121d52463d86116021e9ee9160a4628e46a</div><div id='time'> Time: 2020-02-06</div><div id='author'> Author: 15088501+VRandme@users.noreply.github.com</div><div id='file'> File Name: timm/models/eca_module.py</div><div id='m_class'> M Class Name: ceca_layer</div><div id='n_method'> N Class Name: ceca_layer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/eca_module.py</div><div id='n_file'> N File Name: timm/models/eca_module.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            if flattened_dim:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = <a id="change">logits[:, :seq_len]</a>
+
+            return logits
+
+        logits = logits[..., :-1, :]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 bump space by one to account for a boundary case
+
+        ids = <a id="change">F.pad(</a>ids, (0<a id="change">, 0, 0, 1</a>)<a id="change">)</a>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= (self.max_spatial_seq_len + 1), &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        assert depth == self.depth_seq_len, &quotdepth dimension must be equal to depth_seq_len&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/2a7448ae1a81a9da7b26d5e7e637098d2b829492#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L196' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3322667</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 2a7448ae1a81a9da7b26d5e7e637098d2b829492</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 198</div><div id='m_end'> M End Line: 257</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 269</div><BR>

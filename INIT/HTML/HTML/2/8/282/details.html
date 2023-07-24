@@ -1,0 +1,117 @@
+<html><h3>Pattern ID :282
+</h3><img src='1147347.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList()
+        for i in range(n_layers):
+            if layer_norm:
+                <a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i])<a id="change">)</a>
+            self.layers.append(GATConv(in_feats=n_features[i] * n_heads if i != 0 else n_features[i],
+                                       out_feats=n_features[i + 1],
+                                       num_heads=n_heads if i != n_layers - 1 else 1,
+                                       feat_drop=feat_dropout if i != n_layers - 1 else 0.0,</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList()
+        for i in range(n_layers):
+            if layer_norm:
+                <a id="change">if i == 0</a><a id="change">:
+                    </a><a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i])<a id="change">)</a>
+                else:
+                    <a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i]<a id="change"> * </a>n_heads)<a id="change">)</a>
+            self.layers.append(GATConv(in_feats=n_features[i] * n_heads if i != 0 else n_features[i],
+                                       out_feats=n_features[i + 1],
+                                       num_heads=n_heads if i != n_layers - 1 else 1,
+                                       feat_drop=feat_dropout if i != n_layers - 1 else 0.0,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thudm/grb/commit/66f7826f1b6014fe8f4ef9bcaae46f71fd0a0b89#diff-10a0c730ceb31b5de455dbee82b6421c6e0cc6c969d26107dad0b4d08aa5d76bL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1147347</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: 66f7826f1b6014fe8f4ef9bcaae46f71fd0a0b89</div><div id='time'> Time: 2021-08-19</div><div id='author'> Author: 2363471925@qq.com</div><div id='file'> File Name: grb/model/dgl/gat.py</div><div id='m_class'> M Class Name: GAT</div><div id='n_method'> N Class Name: GAT</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/dgl/gat.py</div><div id='n_file'> N File Name: grb/model/dgl/gat.py</div><div id='m_start'> M Start Line: 72</div><div id='m_end'> M End Line: 72</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                ])
+            self.blocks.append(nn.Sequential(*cur_layers))
+            if len(upsample_strides) &gt; 0:
+                <a id="change">self.deblocks.append(</a>nn.Sequential(
+                    nn.ConvTranspose2d(
+                        num_filters[idx], num_upsample_filters[idx],
+                        upsample_strides[idx],
+                        stride=upsample_strides[idx], bias=False
+                    ),
+                    nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                    nn.ReLU()
+                )<a id="change">)</a>
+
+        c_in = sum(num_upsample_filters)
+        if len(upsample_strides) &gt; num_levels:
+            self.deblocks.append(nn.Sequential(</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_levels = len(layer_nums)
+        c_in_list = [input_channels, *num_filters[:-1]]
+        self.blocks = nn.ModuleList()
+        <a id="change">self.deblocks</a> = nn.ModuleList()
+        for idx in range(num_levels):
+            cur_layers = [
+                nn.ZeroPad2d(1),
+                nn.Conv2d(
+                    c_in_list[idx], num_filters[idx], kernel_size=3,
+                    stride=layer_strides[idx], padding=0, bias=False
+                ),
+                nn.BatchNorm2d(num_filters[idx], eps=1e-3, momentum=0.01),
+                nn.ReLU()
+            ]
+            for k in range(layer_nums[idx]):
+                cur_layers.extend([
+                    nn.Conv2d(num_filters[idx], num_filters[idx], kernel_size=3, padding=1, bias=False),
+                    nn.BatchNorm2d(num_filters[idx], eps=1e-3, momentum=0.01),
+                    nn.ReLU()
+                ])
+            self.blocks.append(nn.Sequential(*cur_layers))
+            if len(upsample_strides) &gt; 0:
+                stride = upsample_strides[idx]
+                <a id="change">if stride &gt; 1</a><a id="change">:
+                    </a><a id="change">self.deblocks.append(</a>nn.Sequential(
+                        nn.ConvTranspose2d(
+                            num_filters[idx], num_upsample_filters[idx],
+                            upsample_strides[idx],
+                            stride=upsample_strides[idx], bias=False
+                        ),
+                        nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                        nn.ReLU()
+                    )<a id="change">)</a>
+                else:
+                    stride = np.round(1<a id="change"> / </a>stride).astype(np.int)
+                    <a id="change">self.deblocks.append(</a>nn.Sequential(
+                        nn.Conv2d(
+                            num_filters[idx], num_upsample_filters[idx],
+                            stride,
+                            stride=stride, bias=False
+                        ),
+                        nn.BatchNorm2d(num_upsample_filters[idx], eps=1e-3, momentum=0.01),
+                        nn.ReLU()
+                    )<a id="change">)</a>
+
+        c_in = sum(num_upsample_filters)
+        if len(upsample_strides) &gt; num_levels:
+            self.deblocks.append(nn.Sequential(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/openpcdet/commit/1bc21f70aa9499b562e76b3204c0eca419d1bc4e#diff-c9d43f3190c2291c259aefb0f4c64b7cf98c29cd5811129d6ecb0ca800d8d8faL6' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1147348</div><div id='project'> Project Name: open-mmlab/openpcdet</div><div id='commit'> Commit Name: 1bc21f70aa9499b562e76b3204c0eca419d1bc4e</div><div id='time'> Time: 2020-07-08</div><div id='author'> Author: shaoshuaics@gmail.com</div><div id='file'> File Name: pcdet/models/backbones_2d/base_bev_backbone.py</div><div id='m_class'> M Class Name: BaseBEVBackbone</div><div id='n_method'> N Class Name: BaseBEVBackbone</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pcdet/models/backbones_2d/base_bev_backbone.py</div><div id='n_file'> N File Name: pcdet/models/backbones_2d/base_bev_backbone.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 29</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47     modules.append(nn.ReLU())
+        &#47&#47     if self.batch_normalization:
+        &#47&#47         modules.append(nn.BatchNorm1d(dim))
+        <a id="change">modules.append(</a>nn.Linear(100, dims[-1] * prediction_length)<a id="change">)</a>
+        modules.append(
+            LambdaLayer(lambda o: torch.reshape(o, (-1, prediction_length, dims[-1])))
+        )
+        self.mlp = nn.Sequential(*modules)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mean_scaling = mean_scaling
+        self.distr_output = distr_output
+
+        <a id="change">modules</a> = []
+        dims = self.num_hidden_dimensions
+        for i, units in enumerate(dims[:-1]):
+            if i == 0:
+                input_size = context_length
+            else:
+                input_size = dims[i-1]
+            modules += [nn.Linear(input_size, units), nn.ReLU()]
+            if self.batch_normalization:
+                modules.append(nn.BatchNorm1d(units))
+        <a id="change">if len(dims) == 1</a><a id="change">:
+            </a><a id="change">modules.append(</a>nn.Linear(context_length, dims[-1] * prediction_length)<a id="change">)</a>
+        else:
+            <a id="change">modules.append(</a>nn.Linear(dims[-2], dims[-1]<a id="change"> * </a>prediction_length)<a id="change">)</a>
+        modules.append(
+            LambdaLayer(lambda o: torch.reshape(o, (-1, prediction_length, dims[-1])))
+        )
+        self.mlp = nn.Sequential(*modules)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zalandoresearch/pytorch-ts/commit/99e144fd0473138ec8c974471073c0250dad901b#diff-36f8dfcae159858b1e1cccbf6c152a0332d6fb2c1c1f5eb0d41a902ccf4425d4L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1147343</div><div id='project'> Project Name: zalandoresearch/pytorch-ts</div><div id='commit'> Commit Name: 99e144fd0473138ec8c974471073c0250dad901b</div><div id='time'> Time: 2020-02-10</div><div id='author'> Author: kashif.rasul@gmail.com</div><div id='file'> File Name: pts/model/simple_feedforward/simple_feedforward_network.py</div><div id='m_class'> M Class Name: SimpleFeedForwardNetworkBase</div><div id='n_method'> N Class Name: SimpleFeedForwardNetworkBase</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pts/model/simple_feedforward/simple_feedforward_network.py</div><div id='n_file'> N File Name: pts/model/simple_feedforward/simple_feedforward_network.py</div><div id='m_start'> M Start Line: 66</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 73</div><BR>

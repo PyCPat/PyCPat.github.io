@@ -2,17 +2,17 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        :param channels: The last dimension of the tensor you want to apply pos emb to.
-        
-        super(PositionalEncoding2D, self).__init__()
-        channels = int(<a id="change">np.ceil(</a>channels/2<a id="change">)</a>)
-        self.channels = channels
-        inv_freq = 1. / (10000 ** (torch.arange(0, channels, 2).float() / channels))
-        self.register_buffer(&quotinv_freq&quot, inv_freq)</code></pre><h3>After Change</h3><pre><code class='java'>
-        :param channels: The last dimension of the tensor you want to apply pos emb to.
-        
-        super(PositionalEncoding2D, self).__init__()
-        channels = int(<a id="change">np.ceil(</a>channels/4<a id="change">)*</a>2)
-        self.channels = channels
-        inv_freq = 1. / (10000 ** (torch.arange(0, channels, 2).float() / channels))
-        self.register_buffer(&quotinv_freq&quot, inv_freq)</code></pre>
+        self.d_v = d_v
+        self.n_heads = n_heads
+
+        self.d_k_s = int(<a id="change">math.ceil(</a>d_k / n_heads<a id="change">)</a>)
+        self.d_v_s = int(math.ceil(d_v / n_heads))
+        d_k_p = self.d_k_s * n_heads
+        d_v_p = self.d_v_s * n_heads</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.n_heads = n_heads
+
+        &#47&#47 make sure that dimension of vectors is divisible by n_heads
+        d_k_p = int(<a id="change">math.ceil(</a>d_k / n_heads<a id="change">)</a>)<a id="change"> * </a>n_heads
+        d_v_p = int(math.ceil(d_v / n_heads)) * n_heads
+
+        self.q_projector = nn.Linear(d_k, d_k_p)</code></pre>

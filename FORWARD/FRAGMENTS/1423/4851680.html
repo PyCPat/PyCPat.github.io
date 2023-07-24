@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mask: shape of (N, seq_len)
+        
+        item_sum = logits.shape[0]*logits.shape[1]  &#47&#47 N * seq_len
+        target, mask = <a id="change">target[:, 1:]</a>, mask[:, 1:]
+        &#47&#47 loss [N*seq_len]
+        loss = self.loss_fn(logits.contiguous().view(item_sum, -1),
+                            target.contiguous().view(-1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.weight is not None:
+            self.weight = self.weight.to(preds.device)
+
+        n = <a id="change">preds.size(-1</a><a id="change">)</a>
+        log_preds = F.log_softmax(preds, dim=-1)
+        loss = self.reduce_loss(-log_preds.sum(dim=-1))
+        nll = F.nll_loss(
+            log_preds, target, reduction=self.reduction, weight=self.weight
+        )
+        return self.linear_combination(loss<a id="change"> / </a>n, nll)
+
+
+class EarlyStopping:</code></pre>

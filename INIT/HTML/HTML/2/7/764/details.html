@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :764
+</h3><img src='2485989.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert image_height % patch_size == 0 and image_width % patch_size == 0, &quotImage dimensions must be divisible by the patch size.&quot
+        num_patches = (image_height // patch_size) * (image_width // patch_size)
+        patch_dim = channels * patch_size * patch_size
+        self.to_patch_embedding<a id="change"> = </a>nn.Sequential(
+            Rearrange(&quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1=patch_size, p2=patch_size),
+            <a id="change">nn.Linear(</a>patch_dim, emb_dim<a id="change">)</a>,
+        )
+        &#47&#47Embedding
+        self.cls_token = nn.Parameter(torch.randn(1, 1, emb_dim))</code></pre><h3>After Change</h3><pre><code class='java'>
+        if type == "full":
+            self.head_depth = HeadDepth(resample_dim)
+            self.head_segmentation = HeadSeg(resample_dim, nclasses=nclasses)
+        elif <a id="change">type == "depth"</a><a id="change">:
+            </a>self.head_depth = HeadDepth(resample_dim)
+            self.head_segmentation<a id="change"> = </a>None
+        else:
+            self.head_depth = None
+            self.head_segmentation<a id="change"> = </a>HeadSeg(resample_dim, nclasses=nclasses)
+
+    def forward(self, img):
+        &#47&#47 x = self.to_patch_embedding(img)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/antocad/focusondepth/commit/705d8789c4e66dbdbfdd3aeb7f20666f019481dd#diff-941ba600a0201cf159de01531ff7e943fc0434587165f1ce11d65e14346b32b6L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2485989</div><div id='project'> Project Name: antocad/focusondepth</div><div id='commit'> Commit Name: 705d8789c4e66dbdbfdd3aeb7f20666f019481dd</div><div id='time'> Time: 2022-01-03</div><div id='author'> Author: antoine.cadiou@icloud.com</div><div id='file'> File Name: FOD/FocusOnDepth.py</div><div id='m_class'> M Class Name: FocusOnDepth</div><div id='n_method'> N Class Name: FocusOnDepth</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: FOD/FocusOnDepth.py</div><div id='n_file'> N File Name: FOD/FocusOnDepth.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 69</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 81</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            input_dim = self.obs_size
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                fc_layer<a id="change"> = </a><a id="change">nn.Linear(</a>input_dim, out_dim<a id="change">)</a>
+                layers.append(fc_layer)
+                input_dim = out_dim
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space[&quotobs&quot].shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.full_obs_space = getattr(obs_space, "original_space", obs_space)
+        self.n_agents = self.custom_config["num_agents"]
+
+        <a id="change">if "encode_layer" in self.custom_config["model_arch_args"]</a><a id="change">:
+            </a>encode_layer = self.custom_config["model_arch_args"]["encode_layer"]
+            encoder_layer_dim<a id="change"> = </a>encode_layer.split("-")
+            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+        else:  &#47&#47 default config
+            encoder_layer_dim<a id="change"> = </a>[]
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                encoder_layer_dim.append(out_dim)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/229bfd1c9db33d2ff0761dbdbe21e47a47a9b87c#diff-e310323240be446aa2287d549762141aae57452d84612f7b2056cac71cf28a4eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2486050</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: 229bfd1c9db33d2ff0761dbdbe21e47a47a9b87c</div><div id='time'> Time: 2023-02-23</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='m_class'> M Class Name: Base_RNN</div><div id='n_method'> N Class Name: Base_RNN</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: TorchRNN,nn.Module</div><div id='n_parent_class'> N Parent Class: TorchRNN,nn.Module</div><div id='m_file'> M File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='n_file'> N File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        io_size = ch * freqs
+        self.gru = nn.GRU(io_size, hidden_size, *args, **kwargs)
+        self.norm = nn.LayerNorm(hidden_size)
+        self.fc<a id="change"> = </a><a id="change">nn.Linear(</a>hidden_size, io_size<a id="change">)</a>
+
+    def forward(self, x: Tensor, h: Optional[Tensor] = None) -&gt; Tuple[Tensor, Tensor]:
+        GRU transposing [B, C, T, F] input shape to [B, T, C*F].
+        _, _, _, f = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.conv = Conv2dNormAct(in_ch, out_ch, kernel_size=kernel, fstride=fstride)
+        assert gru_mode in ("skip", "scale")
+        <a id="change">if gru_mode == "skip"</a><a id="change">:
+            </a>skip = nn.Identity
+            scale<a id="change"> = </a>None
+        else:
+            skip = None
+            scale<a id="change"> = </a>nn.Sigmoid
+        self.gru = GruSE(out_ch, gru_dim, groups=gru_groups, skip=skip, scale_activation=scale)
+
+    def forward(self, input: Tensor, h=None) -&gt; Tuple[Tensor, Tensor]:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/29ca309dcc54dd9da42b84a8c2a658b009f143a1#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L248' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2486079</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 29ca309dcc54dd9da42b84a8c2a658b009f143a1</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: GruMlp</div><div id='n_method'> N Class Name: EncLayer</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 250</div><div id='m_end'> M End Line: 256</div><div id='n_start'> N Start Line: 211</div><div id='n_end'> N End Line: 228</div><BR>

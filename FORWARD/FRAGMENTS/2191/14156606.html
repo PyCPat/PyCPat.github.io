@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">return </a>out<a id="change"> + </a>residual
+
+&#47&#47 Gated State Spaces LM
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.to_out = nn.Linear(dim_hidden, dim)
+
+    def forward(self, x):
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>x<a id="change"> = torch</a><a id="change">.flip(</a>x<a id="change">, dims = (1,))</a>
+
+        residual, x = x.clone(), self.norm(x)
+
+        u = self.to_u(x)
+        v = self.to_v(x)
+
+        v = self.dss(v)
+
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">out</a><a id="change"> = </a>out<a id="change"> + </a>residual
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>out<a id="change"> = torch</a><a id="change">.flip(out</a><a id="change">, dims = (1,))</a>
+
+        <a id="change">return out</a>
+
+&#47&#47 Gated State Spaces LM
+
+class GatedStateSpacesLM(nn.Module):</code></pre>

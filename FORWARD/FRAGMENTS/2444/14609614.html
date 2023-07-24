@@ -1,0 +1,101 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        stage3_img = self.tail(x3_cat)
+
+        <a id="change">return </a>[stage3_img+x3_img]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Original-resolution Image for Stage 3
+        ori_H = x3_img.size(2)
+        ori_W = x3_img.size(3)
+        x3_img<a id="change"> = </a>self.check_image_size(x3_img)
+        H = x3_img.size(2)
+        W = x3_img.size(3)
+
+        &#47&#47 Multi-Patch Hierarchy: Split Image into four non-overlapping patches
+
+        &#47&#47 Two Patches for Stage 2
+        x2top_img  = x3_img[:,:,0:int(H/2),:]
+        x2bot_img  = x3_img[:,:,int(H/2):H,:]
+
+        &#47&#47 Four Patches for Stage 1
+        x1ltop_img = x2top_img[:,:,:,0:int(W/2)]
+        x1rtop_img = x2top_img[:,:,:,int(W/2):W]
+        x1lbot_img = x2bot_img[:,:,:,0:int(W/2)]
+        x1rbot_img = x2bot_img[:,:,:,int(W/2):W]
+
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47-------------- Stage 1---------------------
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47 Compute Shallow Features
+        x1ltop = self.shallow_feat1(x1ltop_img)
+        x1rtop = self.shallow_feat1(x1rtop_img)
+        x1lbot = self.shallow_feat1(x1lbot_img)
+        x1rbot = self.shallow_feat1(x1rbot_img)
+        
+        &#47&#47&#47&#47 Process features of all 4 patches with Encoder of Stage 1
+        feat1_ltop = self.stage1_encoder(x1ltop)
+        feat1_rtop = self.stage1_encoder(x1rtop)
+        feat1_lbot = self.stage1_encoder(x1lbot)
+        feat1_rbot = self.stage1_encoder(x1rbot)
+        
+        &#47&#47&#47&#47 Concat deep features
+        feat1_top = [torch.cat((k,v), 3) for k,v in zip(feat1_ltop,feat1_rtop)]
+        feat1_bot = [torch.cat((k,v), 3) for k,v in zip(feat1_lbot,feat1_rbot)]
+        
+        &#47&#47&#47&#47 Pass features through Decoder of Stage 1
+        res1_top = self.stage1_decoder(feat1_top)
+        res1_bot = self.stage1_decoder(feat1_bot)
+
+        &#47&#47&#47&#47 Apply Supervised Attention Module (SAM)
+        x2top_samfeats, stage1_img_top = self.sam12(res1_top[0], x2top_img)
+        x2bot_samfeats, stage1_img_bot = self.sam12(res1_bot[0], x2bot_img)
+
+        &#47&#47&#47&#47 Output image at Stage 1
+        &#47&#47 stage1_img = torch.cat([stage1_img_top, stage1_img_bot],2) 
+
+        del stage1_img_top, stage1_img_bot, feat1_ltop, feat1_rtop, feat1_lbot, feat1_rbot, x1ltop, x1rtop, x1lbot, x1rbot
+        torch.cuda.empty_cache()
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47-------------- Stage 2---------------------
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47 Compute Shallow Features
+        x2top  = self.shallow_feat2(x2top_img)
+        x2bot  = self.shallow_feat2(x2bot_img)
+
+        &#47&#47&#47&#47 Concatenate SAM features of Stage 1 with shallow features of Stage 2
+        x2top_cat = self.concat12(torch.cat([x2top, x2top_samfeats], 1))
+        x2bot_cat = self.concat12(torch.cat([x2bot, x2bot_samfeats], 1))
+
+        &#47&#47&#47&#47 Process features of both patches with Encoder of Stage 2
+        feat2_top = self.stage2_encoder(x2top_cat, feat1_top, res1_top)
+        feat2_bot = self.stage2_encoder(x2bot_cat, feat1_bot, res1_bot)
+
+        &#47&#47&#47&#47 Concat deep features
+        feat2 = [torch.cat((k,v), 2) for k,v in zip(feat2_top,feat2_bot)]
+
+        &#47&#47&#47&#47 Pass features through Decoder of Stage 2
+        res2 = self.stage2_decoder(feat2)
+
+        &#47&#47&#47&#47 Apply SAM
+        x3_samfeats, stage2_img = self.sam23(res2[0], x3_img)
+
+        del stage2_img, x2top, x2bot, x2top_cat, x2bot_cat, feat2_top, feat2_bot
+        torch.cuda.empty_cache()
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47-------------- Stage 3---------------------
+        &#47&#47&#47&#47-------------------------------------------
+        &#47&#47&#47&#47 Compute Shallow Features
+        x3     = self.shallow_feat3(x3_img)
+
+        &#47&#47&#47&#47 Concatenate SAM features of Stage 2 with shallow features of Stage 3
+        x3_cat = self.concat23(torch.cat([x3, x3_samfeats], 1))
+        
+        x3_cat = self.stage3_orsnet(x3_cat, feat2, res2)
+
+        stage3_img = self.tail(x3_cat)
+
+        <a id="change">out</a> = stage3_img+x3_img
+        out<a id="change"> = out[:, :, :ori_H, :ori_W]</a>
+        <a id="change">return </a>[out]</code></pre>

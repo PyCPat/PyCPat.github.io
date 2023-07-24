@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            init.zeros_(self.bias)
+
+    def forward(self, x):
+        batch_size<a id="change">, c_in, T, n_vertex</a> = x.shape
+
+        x_first_mul = torch.mm(<a id="change">x.reshape(-1</a>, c_in<a id="change">)</a>, self.weight).view(n_vertex, -1)
+        x_second_mul<a id="change"> = </a>torch.mm(self.gcnconv_matrix, x_first_mul).view(-1, self.c_out)
+
+        if self.bias is not None:
+            x_gcnconv = x_second_mul + self.bias</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47bs, c_in, ts, n_vertex = x.shape
+        x = torch.permute(x, (0, 2, 3, 1))
+
+        first_mul = <a id="change">torch.einsum(&quothi,btij-&gt;bthj&quot</a>, self.gso, x<a id="change">)</a>
+        second_mul = torch.einsum(&quotbthi,ij-&gt;bthj&quot, first_mul, self.weight)
+
+        if self.bias is not None:</code></pre>

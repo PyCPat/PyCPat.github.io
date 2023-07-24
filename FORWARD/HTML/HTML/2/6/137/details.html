@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :137
+</h3><img src='494951.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t<a id="change">, domain_acc_t</a> = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g<a id="change"> = </a>F.softmax(g,dim=1).detach()
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label = torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight = 1.0 + <a id="change">torch.exp(-entropy(g)</a><a id="change">)</a>
+        batch_size = f.size(0)
+        weight<a id="change"> = </a>weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 494951</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+
+        return z_q<a id="change">, loss, (None, None, encoding_indices)</a>
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)
+        avg_probs<a id="change"> = </a>torch.mean(encodings, dim=0)
+        perplexity<a id="change"> = </a><a id="change">torch.exp(</a>-torch.sum(avg_probs<a id="change"> * </a>torch.log(avg_probs + 1e-10))<a id="change">)</a>
+
+        <a id="change">return </a>z_q, loss, (perplexity, encodings, encoding_indices)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/39e8b24fa405a4320d7c683e7054ae18ef4563f4#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 494950</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 39e8b24fa405a4320d7c683e7054ae18ef4563f4</div><div id='time'> Time: 2021-07-28</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: GumbelQuantizer</div><div id='n_method'> N Class Name: GumbelQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t<a id="change">, domain_acc_t</a> = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g<a id="change"> = </a>F.softmax(g,dim=1).detach()
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label = torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight<a id="change"> = </a>1.0 + <a id="change">torch.exp(-entropy(g)</a><a id="change">)</a>
+        batch_size = f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 494977</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>

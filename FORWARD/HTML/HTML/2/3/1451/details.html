@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1451
+</h3><img src='4966233.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            assert y_anchor != None
+            assert x_anchor != None
+
+            <a id="change">if </a>self.collection_mode<a id="change">:
+                </a>self.collection(instance_means=x_mean, instnace_stds=x_std, y_anchors=y_anchor, x_anchors=x_anchor)
+
+            else:
+                assert x.shape[0] == 1 &#47&#47 currently, could support batch size = 1 for kernelized instance normalization
+                top, down, left, right = self.query_neighbors(y_anchor=y_anchor, x_anchor=x_anchor, padding=padding)
+                mean_matrix = self.mean_table[top:down + 1, left:right + 1, :]
+                std_matrix = self.std_table[top:down + 1, left:right + 1, :]
+                x_mean<a id="change"> = </a>mean_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel *  &#47&#47 should deal with the boundary
+                x_std = std_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel * 
+                &#47&#47x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                &#47&#47x_std = x_std.unsqueeze(-1).unsqueeze(-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                assert self.kernel.shape == x.mean.shape
+                x_mean = x_mean * self.kernel &#47&#47 1, C, H, W
+                x_std = x_std * self.kernel &#47&#47 1, C, H, W
+                x_mean = <a id="change">x_mean.flatten(start_dim=2)</a>.sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_std = x_std.flatten(start_dim=2).sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaminyou/urust/commit/63159b688ad053bad7fd41015170f131d547439d#diff-a975422337f96b3fbd8d66278ef6f8ddcf4a1907e7f6fec6d44ff39c9836145eL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4966233</div><div id='project'> Project Name: kaminyou/urust</div><div id='commit'> Commit Name: 63159b688ad053bad7fd41015170f131d547439d</div><div id='time'> Time: 2022-01-27</div><div id='author'> Author: kaminyouho@aetherai.com</div><div id='file'> File Name: models/kin.py</div><div id='m_class'> M Class Name: KernelizedInstanceNorm</div><div id='n_method'> N Class Name: KernelizedInstanceNorm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/kin.py</div><div id='n_file'> N File Name: models/kin.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 115</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Ph, Pw = self.patch_size
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        <a id="change">if </a>self.flatten_channels_last<a id="change">:
+            &#47&#47 flatten patches with channels last like the paper (likely using TF)
+            </a>x<a id="change"> = </a>x.unfold(2, Ph, Ph).unfold(3, Pw, Pw).permute(0, 2, 3, 4, 5, 1).reshape(B, -1, Ph * Pw * C)
+        else:
+            x = x.permute(0, 2, 3, 1).unfold(1, Ph, Ph).unfold(2, Pw, Pw).reshape(B, -1, C * Ph * Pw)
+        x = self.proj(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 FIXME look at relaxing size constraints
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(x).flatten(</a>2<a id="change">)</a>.transpose(1, 2)
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/736f209e7d7ebe9a6ac9acf9967a7aba0a86aa4e#diff-a457ded0c066f18843cce88854130edb587dffef98fef0189c9442093ac110abL158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4966242</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 736f209e7d7ebe9a6ac9acf9967a7aba0a86aa4e</div><div id='time'> Time: 2020-10-26</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/vision_transformer.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/vision_transformer.py</div><div id='n_file'> N File Name: timm/models/vision_transformer.py</div><div id='m_start'> M Start Line: 160</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if W != self.img_size[1]:
+            raise ValueError(f"PatchEmbed module. Input image width ({W}) doesn&quott match model ({self.img_size[1]}).")
+        x = self.proj(x)
+        <a id="change">if </a>self.flatten<a id="change">:
+            </a>x<a id="change"> = </a>x.flatten(2).transpose(1, 2)  &#47&#47 BCHW -&gt; BNC
+        x = self.norm(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 FIXME look at relaxing size constraints
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(x).flatten(</a>2<a id="change">)</a>.transpose(1, 2)  &#47&#47 B Ph*Pw C
+        if self.norm is not None:
+            x = self.norm(x)
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/ab2534f05b48a529d03f8c28af2579245772f4e0#diff-8ea48274a2159a0abc4b0425f2fb246399f29a78d6a46d98cdbda118b48a4195L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4966240</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: ab2534f05b48a529d03f8c28af2579245772f4e0</div><div id='time'> Time: 2022-07-11</div><div id='author'> Author: rashit.bayazitov.1995@gmail.com</div><div id='file'> File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/modules/blocks/patch_embedding.py</div><div id='n_file'> N File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            <a id="change">if </a>t == 0<a id="change">:
+                </a>gru_output<a id="change">, h_n = </a>self.rnn(x.unsqueeze(1))
+            else:
+                gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(gru_output.size(0)):
+            hr = self.gru_fc_out(gru_output[i, :, :])
+        &#47&#47     &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(<a id="change">hr.flatten()</a>)
+
+        output_seq = torch.stack(hr_per_clip, dim=0).permute(1,0)
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/0f9fc9b96933c04f723fbfa5b80cdf1a398828c3#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4966244</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: 0f9fc9b96933c04f723fbfa5b80cdf1a398828c3</div><div id='time'> Time: 2021-03-14</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 64</div><BR>

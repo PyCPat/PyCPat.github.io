@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mask_value = max_neg_value(q)
+        mask = torch.zeros((b * h, buckets, buckets), device=device).bool()
+        i, j = torch.triu_indices(buckets, buckets)
+        <a id="change">mask[:, 0, :]</a> = True
+        mask[:, i, j] = True
+        R.masked_fill_(mask, mask_value)
+        R = R.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        merge_batch_head = lambda x: x.reshape(b * h, t, d_h)
+        q, k, v = <a id="change">map(</a>merge_batch_head, (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 bucket qkv
+
+        bucket_fn = partial(bucket, buckets)</code></pre>

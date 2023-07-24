@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor):
+        z = self.encoder(x)
+        mean, scale = z.chunk(2, 1)
+        std<a id="change"> = </a>nn.functional.softplus(scale) + 1e-4
+        var = std * std
+        logvar = torch.log(var)
+
+        z<a id="change"> = </a>torch<a id="change">.randn_like(mean) * std + </a>mean
+
+        kl<a id="change"> = </a><a id="change">(mean * mean + var - logvar - 1).sum(1).mean()</a>
+
+        <a id="change">return </a>z<a id="change">, kl</a>
+
+
+@gin.register
+class DiscreteEncoder(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor):
+        z = self.encoder(x)
+        <a id="change">return </a>z
+
+
+@gin.register</code></pre>

@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :387
+</h3><img src='1498132.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, preds: Tensor, targets: Tensor) -&gt; Tensor:
+        &#47&#47 preds in shape [B, C, H, W] and targets in shape [B, C, H, W]
+        if <a id="change">preds.shape[2:] != targets.shape[2:]</a>:
+            preds<a id="change"> = </a>F.interpolate(preds, size=targets.shape[2:], mode=&quotbilinear&quot, align_corners=False)
+
+        tp = torch.sum(targets*preds, dim=(2, 3))
+        fn = torch.sum(targets*(1-preds), dim=(2, 3))
+        fp = torch.sum((1-targets)*preds, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp + self.delta * fn + (1 - self.delta) * fp + 1e-6)
+        dice_score<a id="change"> = </a>torch.sum(1-dice_score, dim=-1)
+
+        &#47&#47 adjust loss to account for number of classes
+        dice_score = dice_score / targets.shape[1]
+        <a id="change">return </a>dice_score.mean()
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, targets: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a><a id="change">sum([w * self._forward(pred, targets) for (pred, w) in zip(preds, self.aux_weights)]</a><a id="change">)</a>
+        return self._forward(preds, targets)
+
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 11</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1498132</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: Dice</div><div id='n_method'> N Class Name: Dice</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 80</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, preds: Tensor, labels: Tensor) -&gt; Tensor:
+        &#47&#47 preds in shape [B, C, H, W] and labels in shape [B, H, W]
+        if <a id="change">preds.shape[2:] != labels.shape[1:]</a>:
+            preds<a id="change"> = </a>F.interpolate(preds, size=labels.shape[1:], mode=&quotbilinear&quot, align_corners=False)
+
+        n_min = labels[labels != self.ignore_label].numel() // 16
+        loss<a id="change"> = </a>self.criterion(preds, labels).view(-1)
+        loss_hard = loss[loss &gt; self.thresh]
+
+        if loss_hard.numel() &lt; n_min:
+            loss_hard, _ = loss.topk(n_min)
+
+        <a id="change">return </a>torch.mean(loss_hard)
+
+
+class Dice(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a><a id="change">sum([w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)]</a><a id="change">)</a>
+        return self._forward(preds, labels)
+
+
+class Dice(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1498133</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: OhemCrossEntropy</div><div id='n_method'> N Class Name: OhemCrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 49</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, score, target):
+        ph, pw = score.size(2), score.size(3)
+        h, w = target.size(1), target.size(2)
+        if ph != h or <a id="change">pw != w</a>:
+            score<a id="change"> = </a>F.upsample(
+                    input=score, size=(h, w), mode=&quotbilinear&quot)
+
+        loss<a id="change"> = </a>self.criterion(score, target)
+
+        <a id="change">return </a>loss
+
+class OhemCrossEntropy(nn.Module): 
+    def __init__(self, ignore_label=-1, thres=0.7, </code></pre><h3>After Change</h3><pre><code class='java'>
+        weights = config.LOSS.BALANCE_WEIGHTS
+        assert len(weights) == len(score)
+
+        <a id="change">return </a><a id="change">sum([w * self._forward(x, target) for (w, x) in zip(weights, score)]</a><a id="change">)</a>
+
+
+class OhemCrossEntropy(nn.Module):
+    def __init__(self, ignore_label=-1, thres=0.7,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/chenjun2hao/ddrnet.pytorch/commit/3ce340bc520946fb220e83075f6e015bbe87cfe5#diff-87de9e9894a51d531879f3422570eeeb987506cd19d44cd28cf06d1dc4537642L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1498146</div><div id='project'> Project Name: chenjun2hao/ddrnet.pytorch</div><div id='commit'> Commit Name: 3ce340bc520946fb220e83075f6e015bbe87cfe5</div><div id='time'> Time: 2019-12-12</div><div id='author'> Author: hsfzxjy@gmail.com</div><div id='file'> File Name: lib/core/criterion.py</div><div id='m_class'> M Class Name: CrossEntropy</div><div id='n_method'> N Class Name: CrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/core/criterion.py</div><div id='n_file'> N File Name: lib/core/criterion.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 42</div><BR>

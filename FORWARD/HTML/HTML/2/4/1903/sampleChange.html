@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.l_relu(self.conv3(x))
+        x = self.multiMaxPooling3(x)
+
+        x = self.l_relu(<a id="change">self.conv4(</a>x<a id="change">)</a>)
+        x<a id="change"> = </a>self.l_relu(self.conv5(x))
+
+        x = self.unwrapPrepare(x)
+        x = self.unwrapPool3(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, _, _, _ = x.size()
+        y = torch.zeros(b, self.outChans, self.imH, self.imW)
+        for i in range(self.imH):
+            <a id="change">for </a>j in <a id="change">range(</a>self.imW<a id="change">):
+                </a>y[:, :, i, j] = self.base_net(x[:, :, i:i+self.pH, j:j+self.pW])
+        return y
+
+</code></pre>

@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :548
+</h3><img src='1900876.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            outs.append(self.__getattr__(f&quotout_block_{i}&quot)(x))
+            if i &gt; 0:
+                x = self.__getattr__(f&quotup_block_{i}&quot)(x)
+        return <a id="change">outs[::-1]</a>
+
+    def init_weights(self):
+        pass
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask, loss = self._prune(score, inputs[i - 1], gt_bboxes, gt_labels, img_metas)
+                x = self.pruning(x, mask)
+                losses += loss
+        outs<a id="change"> = </a><a id="change">outs[::-1]</a>
+        if len(losses) == 0:  &#47&#47 training
+            return outs
+        return outs, dict(loss_pruning=torch.mean(torch.cat(losses)))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/samsunglabs/fcaf3d/commit/6a4e496a76ea4637975adb5bb5ff787914321607#diff-7ed98de75a3f0d7a65c735648ac7b69ed81fe9c8823453327099ed0b777f0e1cL17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900876</div><div id='project'> Project Name: samsunglabs/fcaf3d</div><div id='commit'> Commit Name: 6a4e496a76ea4637975adb5bb5ff787914321607</div><div id='time'> Time: 2021-08-06</div><div id='author'> Author: danrukh@gmail.com</div><div id='file'> File Name: mmdet3d/models/necks/me_fpn.py</div><div id='m_class'> M Class Name: MEFPN3D</div><div id='n_method'> N Class Name: MEFPN3D</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet3d/models/necks/me_fpn.py</div><div id='n_file'> N File Name: mmdet3d/models/necks/me_fpn.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 26</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if len(modalities) == 1:
+            return modalities[0]
+
+        nonfeature_size = <a id="change">modalities[0].shape[:-1]</a>
+
+        m = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(modalities[0].dtype), requires_grad=False), modalities[0]), dim=-1)
+        for mod in modalities[1:]:
+            mod = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod.dtype), requires_grad=False), mod), dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            return modalities[0]
+
+        mod0 = modalities[0]
+        nonfeature_size<a id="change"> = </a><a id="change">mod0.shape[:-1]</a>
+
+        m = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod0.dtype).to(mod0.device), requires_grad=False), mod0), dim=-1)
+        for mod in modalities[1:]:
+            mod = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod.dtype).to(mod.device), requires_grad=False), mod), dim=-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/275f7cb24947b74b367f4fe09c39421555723e21#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L179' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900878</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 275f7cb24947b74b367f4fe09c39421555723e21</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: sfanxiang@gmail.com</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: TensorFusion</div><div id='n_method'> N Class Name: TensorFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 183</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 188</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    @auto_fp16()
+    def forward(self, x):
+        return <a id="change">self.model.forward(x)[::-1]</a>
+
+    def init_weights(self):
+        pass
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @auto_fp16()
+    def forward(self, x):
+        x<a id="change"> = </a><a id="change">self.model.forward(x)[::-1]</a>
+        return [self.conv_blocks[i](x[i]) for i in range(len(x))]
+
+    def init_weights(self):
+        pass</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saic-vul/imvoxelnet/commit/740ff7c796162de274a6908c1f93fe0b3f477e6d#diff-90dc34daf134c4cdd90d04ebf03d26461ff481ed846c197859ea3ada3a98efa7L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900872</div><div id='project'> Project Name: saic-vul/imvoxelnet</div><div id='commit'> Commit Name: 740ff7c796162de274a6908c1f93fe0b3f477e6d</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: danrukh@gmail.com</div><div id='file'> File Name: mmdet3d/models/necks/atlas.py</div><div id='m_class'> M Class Name: AtlasNeck</div><div id='n_method'> N Class Name: AtlasNeck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet3d/models/necks/atlas.py</div><div id='n_file'> N File Name: mmdet3d/models/necks/atlas.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 19</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            atom_hiddens = self.W_s2s_b(atom_hiddens)
+
+        if self.bert_pretraining:
+            return <a id="change">self.W_v(atom_hiddens)[1:]</a>  &#47&#47 num_atoms x vocab/output size (leave out atom padding)
+
+        &#47&#47 Readout
+        if self.set2set:</code></pre><h3>After Change</h3><pre><code class='java'>
+            atom_hiddens = self.W_s2s_b(atom_hiddens)
+
+        if self.bert_pretraining:
+            atom_preds<a id="change"> = </a><a id="change">self.W_v(atom_hiddens)[1:]</a>  &#47&#47 num_atoms x vocab/output size (leave out atom padding)
+
+        &#47&#47 Readout
+        if self.set2set:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/0b4286d51da7a4d711141ac651a90856db76dfcb#diff-b333f29d146f5212f8107b81c5ef9b8f8a7de1229ced3970b13768045a6c862fL121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900875</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: 0b4286d51da7a4d711141ac651a90856db76dfcb</div><div id='time'> Time: 2018-12-18</div><div id='author'> Author: swansonk.14@gmail.com</div><div id='file'> File Name: chemprop/models/mpn.py</div><div id='m_class'> M Class Name: MPNEncoder</div><div id='n_method'> N Class Name: MPNEncoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: chemprop/models/mpn.py</div><div id='n_file'> N File Name: chemprop/models/mpn.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 344</div><div id='n_start'> N Start Line: 274</div><div id='n_end'> N End Line: 357</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if len(modalities) == 1:
+            return modalities[0]
+
+        nonfeature_size = <a id="change">modalities[0].shape[:-1]</a>
+
+        m = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(modalities[0].dtype), requires_grad=False), modalities[0]), dim=-1)
+        for mod in modalities[1:]:
+            mod = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod.dtype), requires_grad=False), mod), dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            return modalities[0]
+
+        mod0 = modalities[0]
+        nonfeature_size<a id="change"> = </a><a id="change">mod0.shape[:-1]</a>
+
+        m = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod0.dtype).to(mod0.device), requires_grad=False), mod0), dim=-1)
+        for mod in modalities[1:]:
+            mod = torch.cat((Variable(torch.ones(*nonfeature_size, 1).type(mod.dtype).to(mod.device), requires_grad=False), mod), dim=-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/628cbd197ea0acf4b91e7745035d8560b9859a7e#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L179' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900874</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 628cbd197ea0acf4b91e7745035d8560b9859a7e</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: sfanxiang@gmail.com</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: TensorFusion</div><div id='n_method'> N Class Name: TensorFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 183</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 188</div><BR>

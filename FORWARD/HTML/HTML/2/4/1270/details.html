@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :1270
+</h3><img src='4481348.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            regs.append(reg)
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+        regs = list()
+
+        n, h, w, k = <a id="change">logits[0]</a>.shape
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w])
+        for code, logit, freqMap in zip(codes.permute(1, 0, 2, 3), logits, codeFreqMap):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3b419aa2f7b4286b6ae991022fe7469650db4bbd#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4481348</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3b419aa2f7b4286b6ae991022fe7469650db4bbd</div><div id='time'> Time: 2021-08-01</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+
+        if self.combining_operation == "mean":
+            e<a id="change"> = </a><a id="change">iid_embeddings.mean(dim=1)</a>
+        elif self.combining_operation == "sum":
+            e = iid_embeddings.sum(dim=1)
+        else:
+            raise ValueError("combining_operation must be in [&quotsum&quot, &quotmean&quot].")</code></pre><h3>After Change</h3><pre><code class='java'>
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = <a id="change">valid_x.shape[0]</a>
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                combined_embedding.append(
+                    self.combining_function(trial_embeddings, dim=0)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/1352e77bdbc47aa4a4130679903b57672e48218c#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L262' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4481344</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 1352e77bdbc47aa4a4130679903b57672e48218c</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 304</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        out = self.backbone(x)
+        if out.size(-1) != 1:
+            out<a id="change"> = </a><a id="change">F.relu(out, inplace=True).mean(</a>[2, 3]<a id="change">)</a>
+        else:
+            out = out.squeeze()
+        out = self.dropout(out)
+        return self.fc(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, *x):
+        x = list(x)
+        input_shape = x[0].shape[-2:]
+        out = self.bacbone(<a id="change">x[0]</a>)
+        x[0] = out
+        out = self.classifer(*x)
+        if out.dim() != 5:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/ded678ac1ebc9480abda4b2edf1614501d3242db#diff-97bc3b1cc271fb8b5a084eb7cb7ac1bd24a50dfd46dd7e740c75c4a5feca4527L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4481345</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: ded678ac1ebc9480abda4b2edf1614501d3242db</div><div id='time'> Time: 2021-02-08</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/nbsnet.py</div><div id='m_class'> M Class Name: GeneralConvNet</div><div id='n_method'> N Class Name: SegNet</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/nbsnet.py</div><div id='n_file'> N File Name: models/nbsnet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            &#47&#47 [n, h, w, k]
+            &#47&#47 weight = (-logit).detach().softmax(-1)
+            &#47&#47 oneHot = F.one_hot(code, num_classes=logit.shape[-1]).float()
+            &#47&#47 [n, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+
+        regs = list()
+        n, h, w, k = <a id="change">logits[0]</a>.shape
+        
+        &#47&#47 ths = torch.tensor(float(h * w) / k, device=device).clamp(1.0, h * w)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/889502a9674fd8fd3545cccd565e3adaf3aacc5c#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4481342</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 889502a9674fd8fd3545cccd565e3adaf3aacc5c</div><div id='time'> Time: 2021-08-30</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 124</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 124</div><BR>

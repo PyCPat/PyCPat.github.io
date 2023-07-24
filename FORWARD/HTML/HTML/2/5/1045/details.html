@@ -1,0 +1,151 @@
+<html><h3>Pattern ID :1045
+</h3><img src='3786297.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        output = []
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(<a id="change">input[:, step, :, :, :]</a>, hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_len = len(cur_layer_input)
+
+        layer_output_list = []
+        last_state_list<a id="change"> = </a><a id="change">[]</a>
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)
+            last_state_list.append(h)
+
+        layer_output = torch.stack(output_inner, dim=int(self.batch_first))
+        last_state_list<a id="change"> = </a>torch.stack(last_state_list, dim=0)
+        return layer_output, last_state_list
+
+    def reset_parameters(self):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L196' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3786297</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Multiply relevant Fourier modes
+        &#47&#47 For the most important modes, we multiply them by
+        out_ft[:, :, :self.modes1] = compl_mul1d(
+            <a id="change">x_ft[:, :, :self.modes1]</a>, self.weights1)
+
+        &#47&#47 Return to physical space
+        x = torch.irfft(out_ft, 1, normalized=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_ft = torch.fft.rfft(x, n=N, dim=-1, norm=&quotortho&quot)
+        &#47&#47 x_ft.shape == [batch_size, in_dim, n_steps // 2 + 1]
+
+        x_ft = torch.stack(<a id="change">[</a>x_ft.real, x_ft.imag<a id="change"></a>], dim=3)
+        &#47&#47 x_ft.shape == [batch_size, in_dim, n_steps // 2 + 1, 2]
+
+        &#47&#47 Step 1: Zero out all modes less than top k
+        out_ft = torch.zeros(B, I, N // 2 + 1, 2, device=x.device)
+        &#47&#47 out_ft.shape == [batch_size, in_dim, n_steps // 2 + 1, 2]
+
+        &#47&#47 Multiply relevant Fourier modes
+        out_ft[:, :, :self.n_modes] = self.complex_matmul_1d(
+            x_ft[:, :, :self.n_modes], self.fourier_weight)
+
+        out_ft<a id="change"> = </a>torch.complex(out_ft[..., 0], out_ft[..., 1])
+
+        x<a id="change"> = </a>torch.fft.irfft(out_ft, n=N, dim=-1, norm=&quotortho&quot)
+
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alasdairtran/fourierflow/commit/b89f4d2e30f60caabc38fe3b5ec45c02deca3495#diff-6c4b64710df6393750ff67b91e2250d8c82dee309af60a4490c1c818619061cbL41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3786296</div><div id='project'> Project Name: alasdairtran/fourierflow</div><div id='commit'> Commit Name: b89f4d2e30f60caabc38fe3b5ec45c02deca3495</div><div id='time'> Time: 2021-04-15</div><div id='author'> Author: alasdair.tran@gmail.com</div><div id='file'> File Name: rivernet/modules/fourier.py</div><div id='m_class'> M Class Name: SpectralConv1d</div><div id='n_method'> N Class Name: SpectralConv1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rivernet/modules/fourier.py</div><div id='n_file'> N File Name: rivernet/modules/fourier.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 64</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47Step2:SE weight
+        SE_out=torch.zeros_like(SPC_out)
+        for idx,se in enumerate(self.se_blocks):
+            <a id="change">SE_out[:,idx,:,:,:]</a>=se(SPC_out[:,idx,:,:,:])
+        
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre><h3>After Change</h3><pre><code class='java'>
+            SPC_out[:,idx,:,:,:]=conv(SPC_out[:,idx,:,:,:])
+
+        &#47&#47Step2:SE weight
+        se_out=<a id="change">[]</a>
+        for idx,se in enumerate(self.se_blocks):
+            se_out.append(se(SPC_out[:,idx,:,:,:]))
+        SE_out<a id="change">=</a>torch.stack(se_out,dim=1)
+        SE_out<a id="change">=</a>SE_out.expand_as(SPC_out)
+
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xmu-xiaoma666/external-attention-pytorch/commit/34af00a5c7b83c174aca31c1b137a2b58ac21659#diff-a3a27992b2c2add6b7edb037abac1105d6ab3ce5d2cb98f8e0db13edabd218b7L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3786232</div><div id='project'> Project Name: xmu-xiaoma666/external-attention-pytorch</div><div id='commit'> Commit Name: 34af00a5c7b83c174aca31c1b137a2b58ac21659</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: 775629340@qq.com</div><div id='file'> File Name: fightingcv/attention/PSA.py</div><div id='m_class'> M Class Name: PSA</div><div id='n_method'> N Class Name: PSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fightingcv/attention/PSA.py</div><div id='n_file'> N File Name: fightingcv/attention/PSA.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        base_shape = x.shape  &#47&#47 x -&gt; B x T x (H x W) x C
+        if self.pos_encodings:
+            x = x + self.spatial_positional_encoding + <a id="change">self.temporal_positional_encoding[:, :x.shape[1]]</a>
+        if self.spatial_first:
+            x = self._spatial_attn(x, base_shape)
+            x = self._temporal_attn(x, base_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, s=None, encoder=True, i=None):
+        res = x
+        if s is not None:
+            x = torch.cat(<a id="change">[</a>x, s<a id="change"></a>], dim=1)
+        x<a id="change"> = </a>res + self.resblock(x)
+        &#47&#47 x = self.l1(x)
+        &#47&#47 x = self.l2(x)
+        &#47&#47 x = self.l3(x)
+        &#47&#47 x = self.ref(x)
+        &#47&#47 x = self.l5(x)
+        &#47&#47 x = self.l6(x)
+        &#47&#47 x = self.l7(x)
+        &#47&#47 x += res
+        if self.scaler is not None:
+            if encoder:
+                x = x.permute(0, 2, 1, 3, 4)
+                x = self.scaler(x)
+                x<a id="change"> = </a>x.permute(0, 2, 1, 3, 4)
+            else:
+                x = self.scaler(x)
+                if i == 1:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3786237</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: TemporalSpatialAttention</div><div id='n_method'> N Class Name: ResBlockvq</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 48</div><div id='n_start'> N Start Line: 29</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq = torch.stack(batched_output_per_clip, dim=0).transpose_(0, 1)
+        gru_output, h_n = self.rnn(<a id="change">output_seq.unsqueeze(1)[:, :, :config.GRU_TEMPORAL_WINDOW]</a>)
+
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, st_maps, target):
+        batched_output_per_clip = []
+        hr_per_clip<a id="change"> = </a><a id="change">[]</a>
+
+        &#47&#47 Need to have so as to reflect a batch_size = 1 // if batched then comment out
+        st_maps = st_maps.unsqueeze(0)
+        for t in range(st_maps.size(1)):
+            &#47&#47 with torch.no_grad():
+            x = self.resnet18(st_maps[:, t, :, :, :])
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            &#47&#47 if t == 0:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1))
+            &#47&#47 else:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            &#47&#47 x = self.fc_resnet(gru_output.squeeze(1))
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL
+            &#47&#47 x = x*25.0
+            batched_output_per_clip.append(x.squeeze(0))
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        &#47&#47 the features extracted from the backbone CNN are fed to a one-layer GRU structure.
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        for i in range(gru_output.size(0)):
+            hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr)
+
+        output_seq<a id="change"> = </a>torch.stack(hr_per_clip, dim=0).permute(1,0)
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out
+        return output_seq, output_seq.squeeze(0)[:6]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/deed748087f19356d297fe57e439b967a6a3e617#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3786196</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: deed748087f19356d297fe57e439b967a6a3e617</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 66</div><BR>

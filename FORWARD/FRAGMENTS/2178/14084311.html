@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss () or (batch_size,)
+        
+        batch_size, embedded_dims, n_bins, n_frames = input.size()
+        batch_size, n_sources, n_bins, n_frames = <a id="change">target.size()</a>
+
+        input = input.view(batch_size, embedded_dims, n_bins * n_frames)
+        target = target.view(batch_size, n_sources, n_bins * n_frames)
+        input_transposed = input.permute(0, 2, 1).contiguous() &#47&#47 (batch_size, n_bins * n_frames, embedded_dims)</code></pre><h3>After Change</h3><pre><code class='java'>
+        YY1 = YY.sum(dim=-1) &#47&#47 (batch_size, n_samples)
+        D = torch.diag_embed(1 / torch.sqrt(YY1 + eps)) &#47&#47 (batch_size, n_samples, n_samples)
+        VD, YD = torch.bmm(trans_V, D), torch.bmm(trans_Y, D) &#47&#47 (batch_size, embed_dim1, n_samples), (batch_size, embed_dim2, n_samples)
+        VDV, YDY = torch.bmm(VD, V), <a id="change">torch.bmm(</a>YD, Y<a id="change">)</a> &#47&#47 (batch_size, embed_dim1, embed_dim1), (batch_size, embed_dim2, embed_dim2)
+        VDY = <a id="change">torch.bmm(</a>VD, Y<a id="change">)</a> &#47&#47 (batch_size, embed_dim, embed_dim2)
+
+        loss = torch.sum(VDV**2, dim=(1, 2)) + torch.sum(YDY**2, dim=(1, 2)) - 2 * torch.sum(VDY**2, dim=(1, 2)) &#47&#47 (batch_size,)
+        </code></pre>

@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            m, mask=msa_mask, chunk_size=chunk_size,
+        )
+        z = z + self.ps_dropout_row_layer(self.tri_mul_out(z, mask=pair_mask))
+        z = z + self.ps_dropout_row_layer(<a id="change">self.tri_mul_in(</a>z<a id="change">, mask=pair_mask)</a>)
+        z = z + <a id="change">self.ps_dropout_row_layer(
+            </a>self.tri_att_start(
+                z, 
+                mask=pair_mask, 
+                chunk_size=chunk_size, 
+                use_lma=use_lma
+            )<a id="change">
+        )</a>
+        z = z + self.ps_dropout_col_layer(
+            self.tri_att_end(
+                z, 
+                mask=pair_mask, </code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        del tmu_update
+
+        tmu_update = <a id="change">self.tri_mul_in(
+            </a>z<a id="change">,
+            mask=pair_mask,
+            _inplace=inplace_safe,
+            _add_with_inplace=True,
+        )</a>
+        if(not inplace_safe):
+            z = z + self.ps_dropout_row_layer(tmu_update)
+        else:
+            z = tmu_update
+       
+        del tmu_update
+
+        z = add(z, 
+            <a id="change">self.ps_dropout_row_layer(
+                </a>self.tri_att_start(
+                    z, 
+                    mask=pair_mask, 
+                    chunk_size=chunk_size, 
+                    use_lma=use_lma
+                )<a id="change">
+            )</a>,
+            inplace=inplace_safe,
+        )
+        z = add(z, </code></pre>

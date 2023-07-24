@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            h = conv(g, h)
+        g.ndata[&quoth&quot] = h
+        hg = dgl.mean_nodes(g, &quoth&quot)
+        <a id="change">return </a>self.classify(hg)
+
+&quot&quot&quot
+class GCN(torch.nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        h = g.in_degrees().view(-1, 1).float()
+        
+        <a id="change">for </a>name, <a id="change">param</a> in self.config<a id="change">:
+            </a>if name is &quotGraphConv&quot:
+                w, b = vars[idx], vars[idx + 1]
+                conv = self.graph_conv[idx_gcn]
+                h = <a id="change">conv(</a>g, h, w, b<a id="change">)</a>
+                g.ndata[&quoth&quot] = h
+
+                idx += 2 
+                idx_gcn += 1
+                
+                if idx_gcn == len(self.graph_conv):
+                    hg = dgl.mean_nodes(g, &quoth&quot)
+                            
+            if name is &quotlinear&quot:
+                w, b = vars[idx], vars[idx + 1]
+                h<a id="change"> = </a>F.linear(h, w, b)
+                idx += 2
+
+        
+        <a id="change">return </a>h
+        
+    def zero_grad(self, vars=None):
+        </code></pre>

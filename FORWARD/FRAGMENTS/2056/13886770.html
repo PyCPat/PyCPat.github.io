@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, offsets=None):
+        if offsets is not None:
+            x<a id="change"> = </a>x<a id="change"> + </a><a id="change">x.new_tensor(offsets).unsqueeze(0</a><a id="change">)</a>
+
+        &#47&#47 Get the quotient index.
+        quotient_index = torch.div(x, self.num_buckets, rounding_mode=&quotfloor&quot)
+
+        &#47&#47 Get the reminder index.
+        remainder_index = torch.remainder(x, self.num_buckets)
+
+        &#47&#47 Lookup the quotient_embedding using the quotient_index.
+        quotient_embedding = self.q_embeddings(quotient_index)
+
+        &#47&#47 Lookup the remainder_embedding using the remainder_index.
+        remainder_embedding = self.r_embeddings(remainder_index)
+
+        &#47&#47 Use multiplication as a combiner operation
+        <a id="change">return </a>quotient_embedding<a id="change"> * </a>remainder_embedding
+
+    @property
+    def weight(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+                                **kwargs)
+    
+    def forward(self, x, offsets=None):
+        <a id="change">assert </a>offsets is None, "offsets have been handled internally.\n Users shouldn&quott manually input offsets"
+        x_parallel = self._lbmgr.put_tensor_on_rank(x, self.rank)
+        output_parallel = self.embed(x_parallel)
+        output_gather = self.comm_func(output_parallel, self.parallel_mode, reduce_op=self.mode)</code></pre>

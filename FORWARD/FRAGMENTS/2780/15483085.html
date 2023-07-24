@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            and F the number of output channels (= `num_output_channels`)
+        
+        if attn_mask is not None:
+            <a id="change">raise </a><a id="change">NotImplementedError(</a>"attention masks not supported yet"<a id="change">)</a>
+
+        q = self.q_proj(x_q)
+        k = self.k_proj(x_kv)
+        v = self.v_proj(x_kv)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.causal_attention:
+            i = q.shape[2]
+            j = <a id="change">k.shape[2]</a>
+
+            causal_mask = torch.ones((i, j), device=x_q.device, dtype=torch.bool).triu(j - i + 1)
+            attn.masked_fill_(causal_mask, attn_max_neg)
+</code></pre>

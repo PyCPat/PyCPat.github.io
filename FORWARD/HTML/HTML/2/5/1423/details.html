@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1423
+</h3><img src='4851690.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x: B x C x T
+            noise_level: B
+        
+        return (x + <a id="change">self.encoding(noise_level)[:, :, None]</a>)
+
+    def encoding(self, noise_level):
+        step = torch.arange(</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, noise_level):
+        if x.shape[2] &gt; self.pe.shape[1]:
+            self.init_pe_matrix(x.shape[1] ,x.shape[2], x)
+        return x<a id="change"> + noise_level[..., None, None] + </a>self.pe[:, :<a id="change">x.size(2</a><a id="change">)</a>].repeat(x.shape[0], 1, 1) / self.C
+
+    def init_pe_matrix(self, n_channels, max_len, x):
+        pe = torch.zeros(max_len, n_channels)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/14c2381207c5972359b2af450a233730ff877ee1#diff-af9292879c3a7a8a64c67ffc65c52eb8aa035086869e26cd55f540bab75055a4L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851690</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 14c2381207c5972359b2af450a233730ff877ee1</div><div id='time'> Time: 2020-10-29</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: TTS/vocoder/layers/wavegrad.py</div><div id='m_class'> M Class Name: PositionalEncoding</div><div id='n_method'> N Class Name: PositionalEncoding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/vocoder/layers/wavegrad.py</div><div id='n_file'> N File Name: TTS/vocoder/layers/wavegrad.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask: shape of (N, seq_len)
+        
+        item_sum = logits.shape[0]*logits.shape[1]  &#47&#47 N * seq_len
+        target, mask = <a id="change">target[:, 1:]</a>, mask[:, 1:]
+        &#47&#47 loss [N*seq_len]
+        loss = self.loss_fn(logits.contiguous().view(item_sum, -1),
+                            target.contiguous().view(-1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.weight is not None:
+            self.weight = self.weight.to(preds.device)
+
+        n = <a id="change">preds.size(-1</a><a id="change">)</a>
+        log_preds = F.log_softmax(preds, dim=-1)
+        loss = self.reduce_loss(-log_preds.sum(dim=-1))
+        nll = F.nll_loss(
+            log_preds, target, reduction=self.reduction, weight=self.weight
+        )
+        return self.linear_combination(loss<a id="change"> / </a>n, nll)
+
+
+class EarlyStopping:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kamino666/video-captioning-transformer/commit/59fb852e1db8d0ce392de20b20bc8c177c84798c#diff-09d0cbaf891d623ac245ccf84485a687b554217349ca55557c60b33234b969aeL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851680</div><div id='project'> Project Name: kamino666/video-captioning-transformer</div><div id='commit'> Commit Name: 59fb852e1db8d0ce392de20b20bc8c177c84798c</div><div id='time'> Time: 2021-10-10</div><div id='author'> Author: 516015417@qq.com</div><div id='file'> File Name: utils.py</div><div id='m_class'> M Class Name: MaskCriterion</div><div id='n_method'> N Class Name: LabelSmoothingLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils.py</div><div id='n_file'> N File Name: utils.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 106</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    if i == 0:
+                        rec_features.append(rec_feature[:, :inputs[i].size(1)])
+                    else:
+                        rec_features.append(<a id="change">rec_feature[:, \
+                            inputs[i-1].size(1):inputs[i-1].size(1)+inputs[i].size(1)]</a>)
+            &quot&quot&quot
+            if i == 0:
+                rec_features.append(rec_feature[:, :outs[i].size(-1)])</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        fuse = self.fuse(outs, training=training)
+        logit = self.head(fuse, training=training)
+        sizes = [<a id="change">torch.flatten(ii,start_dim=1).size(1</a><a id="change">)</a> for ii in inputs]
+        rec_features = []
+        if training:
+            rec_feature = self.refiner(fuse, training=training)
+            curr=0
+            for i in range(input_num):
+                if self.has_padding:
+                    if i == 0:
+                        rec_features.append(rec_feature[:, :inputs[0][i].size(1)])
+                    else:
+                        rec_features.append(rec_feature[:, \
+                            inputs[0][i-1].size(1):inputs[0][i-1].size(1)+inputs[i].size(1)])
+                else:
+                    if i == 0:
+                        rec_features.append(rec_feature[:, :sizes[0]])
+                        curr = sizes[0]
+                    else:
+                        rec_features.append(rec_feature[:, \
+                                curr:curr<a id="change">+</a>sizes[i]])
+                        curr += sizes[i]
+            &quot&quot&quot
+            if i == 0:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/72e3344b766884b9160fd383b13945be06819481#diff-d18b23b61842526d6956b06a29d725aed1c3962fa548edca68f628dea2178c2dL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851685</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 72e3344b766884b9160fd383b13945be06819481</div><div id='time'> Time: 2021-06-05</div><div id='author'> Author: blairc@andrew.cmu.edu</div><div id='file'> File Name: training_structures/Contrastive_Learning.py</div><div id='m_class'> M Class Name: MMDL</div><div id='n_method'> N Class Name: MMDL</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: training_structures/Contrastive_Learning.py</div><div id='n_file'> N File Name: training_structures/Contrastive_Learning.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 56</div><BR>

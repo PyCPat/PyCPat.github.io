@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 下面是使用CFR
+        crf_model = CRF(self.num_token_type, batch_first=True)
+        if USE_CUDA:
+            crf_model = <a id="change">crf_model.cuda()</a>
+        if not is_test:
+            log_likelihood = crf_model(ner_score, data_item[&quottoken_type_list&quot].to(torch.int64),
+                                       mask=data_item[&quotmask_tokens&quot])
+            loss_ner = -log_likelihood</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 这样计算交叉熵有问题吗
+            &#47&#47 交叉熵计算不适用 rel_score_prob， 应该是rel_score_matrix
+            loss_rel = F.cross_entropy(rel_score_prob.permute(0, 3, 1, 2), data_item[&quotpred_rel_matrix&quot], self.weights_rel)  &#47&#47 要把分类放在第二维度
+            loss_rel *= <a id="change">rel_score_prob.shape[1]</a>
+        rel_score_prob = rel_score_prob - (self.config.threshold_rel - 0.5)  &#47&#47 超过了一定阈值之后才能判断关系
+        pred_rel = torch.round(rel_score_prob).to(torch.int64)
+        &#47&#47 print("hello2")
+        if is_test:</code></pre>

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 "embedding": EmbeddingDropout(embedding_dropout, vocab_size, device),
+            "layer": [
+                VariationalDropout(layer_dropout, hidden_size, device)
+                <a id="change">for</a> _ in <a id="change">range(</a>num_layers<a id="change">)</a>
+            ],
+            "time": [
+                VariationalDropout(time_dropout, hidden_size, device)
+                for _ in range(num_layers)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.dropout_modules = {
+            "layer": [
+                VariationalDropout(dropout, size, device)
+                for dropout, size in <a id="change">zip(
+                    </a>[embedding_dropout]
+                    + [layer_dropout]
+                    * num_layers,  &#47&#47 Use different rate after embeddings
+                    [hidden_size * 4] * num_layers
+                    + [hidden_size]<a id="change">,  &#47&#47 We don&quott have gates in the last layer
+                )</a>
+            ],
+            "time": [
+                VariationalDropout(time_dropout, hidden_size * 4, device)
+                for _ in range(num_layers)</code></pre>

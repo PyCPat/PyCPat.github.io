@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = attn(x, mask = mask) + x
+            x = ff(x) + x
+
+        <a id="change">if </a>self.num_streams &gt; 1<a id="change">:
+            </a>x = reduce(x, &quotb (s d) n -&gt; b d n&quot, &quotmean&quot, s = self.num_streams)
+
+        return self.to_logits(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = ff(x) + x
+            layers.append(x)
+
+        layers<a id="change"> = </a><a id="change">list(map(</a>lambda t: rearrange(t, &quotb (s d) n -&gt; (b n) d s&quot, d = dim), layers<a id="change">)</a><a id="change">)</a>
+        layer_tokens = torch.cat(layers, dim = -1)
+
+        query = repeat(self.query, &quotd -&gt; b d ()&quot, b = layer_tokens.shape[0])
+        x = self.attn_pool(query, context = layer_tokens)</code></pre>

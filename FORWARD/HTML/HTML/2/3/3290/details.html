@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :3290
+</h3><img src='17218788.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+        C4_lat = self.conv1(inputs[0])
+        C5_lat<a id="change"> = </a><a id="change">self.conv2(</a>inputs[1]<a id="change">)</a>
+        Cglb_lat = self.conv3(inputs[1])
+        return self.relu(C4_lat + C5_lat + Cglb_lat)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = layer(x)
+            out = x if out is None else x+out
+        layer = getattr(self, f&quotconv{i+2}&quot)
+        Cglb_lat = layer(<a id="change">inputs[-1]</a>)
+        return self.relu(out + Cglb_lat)
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zhanghengdev/mutualguide/commit/77156267d218aaa468e504be0ed373179fc281ee#diff-82f55adf2ae6906fcf8de98581ec0096c67b7949b37c5a59b4e824581f6cb546L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218788</div><div id='project'> Project Name: zhanghengdev/mutualguide</div><div id='commit'> Commit Name: 77156267d218aaa468e504be0ed373179fc281ee</div><div id='time'> Time: 2021-11-26</div><div id='author'> Author: zhangheng19931123@gmail.com</div><div id='file'> File Name: models/neck/ssd_neck.py</div><div id='m_class'> M Class Name: CEM</div><div id='n_method'> N Class Name: CEM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/neck/ssd_neck.py</div><div id='n_file'> N File Name: models/neck/ssd_neck.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 41</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                            
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(<a id="change">self.conv2(</a>x<a id="change">)</a>))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x<a id="change"> = </a>F.log_softmax(x, dim=1)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.dropout(out)
+
+        &#47&#47 The last hidden state is taken
+        out = torch.relu_(self.fc1(<a id="change">out[:,-1,:]</a>))
+        out = self.dropout(out)
+        out = torch.sigmoid(self.fc2(out))
+            </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/2166a81ffe05bb2c68c8b457df8c2e1fd6a8be02#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL193' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218787</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: 2166a81ffe05bb2c68c8b457df8c2e1fd6a8be02</div><div id='time'> Time: 2021-07-01</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: CNNCifar</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 194</div><div id='m_end'> M End Line: 201</div><div id='n_start'> N Start Line: 388</div><div id='n_end'> N End Line: 417</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.l_relu(self.conv1(x))
+        x = self.multiMaxPooling1(x)
+
+        x = self.l_relu(<a id="change">self.conv2(</a>x<a id="change">)</a>)
+        x = self.multiMaxPooling2(x)
+
+        x = self.l_relu(self.conv3(x))
+        x = self.multiMaxPooling3(x)
+
+        x<a id="change"> = </a>self.l_relu(self.conv4(x))
+        x = self.l_relu(self.conv5(x))
+
+        x = self.unwrapPrepare(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = torch.zeros(b, self.outChans, self.imH, self.imW)
+        for i in range(self.imH):
+            for j in range(self.imW):
+                <a id="change">y[:, :, i, j]</a> = self.base_net(x[:, :, i:i+self.pH, j:j+self.pW])
+        return y
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/denguir/student-teacher-anomaly-detection/commit/c090d9290f3f98f7ae8d50ec88c203d90b253fb5#diff-8c53207c34b6a7ad93a4ee089693b4371ae02e1dbe7b8ad6154b3808db44fedbL39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218816</div><div id='project'> Project Name: denguir/student-teacher-anomaly-detection</div><div id='commit'> Commit Name: c090d9290f3f98f7ae8d50ec88c203d90b253fb5</div><div id='time'> Time: 2020-10-01</div><div id='author'> Author: anass.den@gmail.com</div><div id='file'> File Name: src/ExtendedAnomalyNet.py</div><div id='m_class'> M Class Name: ExtendedAnomalyNet</div><div id='n_method'> N Class Name: ExtendedAnomalyNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/ExtendedAnomalyNet.py</div><div id='n_file'> N File Name: src/ExtendedAnomalyNet.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 27</div><BR>

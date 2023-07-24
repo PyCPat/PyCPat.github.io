@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :2278
+</h3><img src='14290554.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            samples = [s.argmax(-1).permute(1, 0).reshape(n, h, w) for s in samples]
+            logits = <a id="change">[l.permute(1, 0, 2).reshape(n, h, w, k) for l in logits]</a>
+            &#47&#47 codes.append(samples.argmax(-1).permute(1, 0).reshape(n, h, w))
+            &#47&#47 logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))
+        return quantizeds, codes, logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [k, 1, c]
+            codebook = <a id="change">getattr(self, "codebook")[:, None, :]</a>
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/a4a40624c11a9779699f4a37cccb5b5ed8bc5048#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L271' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14290554</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: a4a40624c11a9779699f4a37cccb5b5ed8bc5048</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 298</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 534</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.revert_projs.append(nn.Sequential(*tmp))
+
+    def forward(self, x):
+        outs_b = <a id="change">[block(x_) for x_, block in zip(x, self.blocks)]</a>
+        &#47&#47 only take the cls token out
+        proj_cls_token = [proj(x[:, 0:1]) for x, proj in zip(outs_b, self.projs)]
+        &#47&#47 cross attention
+        outs = []</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 only take the cls token out
+        proj_cls_token = torch.jit.annotate(List[torch.Tensor], [])
+        for i, proj in enumerate(self.projs):
+            proj_cls_token.append(proj(<a id="change">outs_b[i][:, 0:1, ...]</a>))
+
+        &#47&#47 cross attention
+        outs = []</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bb50b69a57229a3ee30bbd460539c9a45e508532#diff-dfa58a86c2e5f14a2a2f186a74a7cbe9fd5379f38b9baadfecf799fc5e96bf55L213' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14290556</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bb50b69a57229a3ee30bbd460539c9a45e508532</div><div id='time'> Time: 2021-09-08</div><div id='author'> Author: chenrich@us.ibm.com</div><div id='file'> File Name: timm/models/crossvit.py</div><div id='m_class'> M Class Name: MultiScaleBlock</div><div id='n_method'> N Class Name: MultiScaleBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/crossvit.py</div><div id='n_file'> N File Name: timm/models/crossvit.py</div><div id='m_start'> M Start Line: 213</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 220</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		hs = [torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(self.device) for _ in range(self.args[&quotnum_units&quot])]
+		cs = None
+		if self.args[&quotrnn_cell&quot] == &quotLSTM&quot:
+			cs = <a id="change">[torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(self.device) for _ in range(self.args[&quotnum_units&quot])]</a>
+
+		xs = torch.split(x, 1, 1)
+		&#47&#47print(xs[0].size())
+		&#47&#47xs = [torch.squeeze(k) for k in xs]</code></pre><h3>After Change</h3><pre><code class='java'>
+			preds = self.Linear(hs.contiguous().view(x.size(0), -1))
+			preds_.append(preds)
+			if y is not None:
+				loss+=self.Loss(preds, <a id="change">y[:,i]</a>.squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=len(xs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14290557</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>

@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.weight is not None:
+            self.weight = move_to(self.weight, device)
+
+        <a id="change">if self.ignore_index is not None</a><a id="change">:
+            </a>target = torch.argmax(target, dim=1)
+            loss = nn.functional.cross_entropy(pred, target, weight=self.weight, ignore_index=self.ignore_index)
+        else:
+            loss<a id="change"> = </a>nn.functional.cross_entropy(pred, target, weight=self.weight)
+            
+        loss_dict = {"CE": loss.item()}
+        return loss, loss_dict</code></pre><h3>After Change</h3><pre><code class='java'>
+        targets = move_to(batch["targets"], device)
+        
+        batch_size, num_classes = pred.shape[:2]
+        y_hot<a id="change"> = </a>move_to(torch.zeros(pred.shape), device).scatter_(1, <a id="change">targets.unsqueeze(1</a><a id="change">)</a> , 1.0)
+        y_smooth = (1 - self.alpha) * y_hot + self.alpha / num_classes
+        loss = torch.sum(-<a id="change"> y_smooth * </a>torch.nn.functional.log_softmax(pred, -1), -1).sum()
+
+        if self.reduction == "mean":
+            loss<a id="change"> /= </a>batch_size
+
+        loss_dict = {"CE": loss.item()}
+        return loss, loss_dict</code></pre>

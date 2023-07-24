@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        z = x
+        &#47&#47 self.ss = torch.cat((s_i.view(1, -1), s_o.view(1, -1), gamma * Dk_i.view(1, -1), gamma * Dk_o.view(1, -1)), dim=0)
+        <a id="change">return </a><a id="change">dict(z=z, h=h)</a>
+
+    def compute_loss(self, output_dict, y):
+        pred = output_dict[&quotpred&quot]</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, adj, adj_knn=None):
+
+        if adj_knn is None:
+            adj_knn<a id="change"> = </a>self._adj_knn
+        else:
+            self._adj_knn = adj_knn
+
+        gamma = self.gamma
+        h = None
+
+        for ix, (layer, act) in enumerate(zip(self.layers, self.act_layers)):
+            s = torch.sigmoid(x @ self.scores[ix] + self.bias[ix])
+            Dk = x @ self.D_k[ix] + self.D_bias[ix]
+            x = s * act(layer(x, adj)) + (1 - s) * act(layer(x, adj_knn)) + gamma * Dk * act(layer(x))
+
+            if ix &lt; len(self.layers) - 1:
+                x = self.dropout(x)
+
+            if ix == len(self.layers) - 2:
+                h = x.clone()
+
+        z = x
+        &#47&#47 self.ss = torch.cat((s_i.view(1, -1), s_o.view(1, -1), gamma * Dk_i.view(1, -1), gamma * Dk_o.view(1, -1)), dim=0)
+        if self.training:
+            <a id="change">return </a>z, h
+        else:
+            return z
+</code></pre>

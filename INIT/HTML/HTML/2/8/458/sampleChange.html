@@ -6,10 +6,10 @@
 
         self.mlp_head = nn.Sequential(
             nn.Linear(hidden_dim * projection_dim, <a id="change">mlp_head_dims[0]</a>),
-            nn.BatchNorm1d(<a id="change">mlp_head_dims[0]</a>),
+            nn.BatchNorm1d(mlp_head_dims[0]),
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(mlp_head_dims[0], mlp_head_dims[1]),
+            nn.Linear(mlp_head_dims[0], <a id="change">mlp_head_dims[1]</a>),
             nn.BatchNorm1d(mlp_head_dims[1]),
             nn.GELU(),
             nn.Dropout(dropout)
@@ -20,14 +20,14 @@
 
     def forward(self, inputs):
         x = self.signal_encoder(inputs)</code></pre><h3>After Change</h3><pre><code class='java'>
-        encoder_norm = nn.LayerNorm(hidden_dim)
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
-
-        self.mlp_head = <a id="change">nn.Sequential(
-            </a>nn.Dropout(dropout),
-            nn.Linear(hidden_dim, num_classes)<a id="change">
-        )</a>
+        )
 
         if prediction:
-            self.mlp_head = nn.Sequential(
-            nn.Dropout(dropout),</code></pre>
+            self.mlp_head = <a id="change">nn.Sequential(
+            </a>nn.Dropout(dropout),
+            nn.Linear(hidden_dim, 6)<a id="change">,
+            )</a>
+
+    def forward(self, inputs):
+        x = self.signal_encoder(inputs)
+        x = x.squeeze(1).permute(0, 2, 1)</code></pre>

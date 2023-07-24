@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x):
+        out = <a id="change">F.relu(self.bn1(</a><a id="change">self.conv1(</a>x<a id="change">))</a><a id="change">)</a>
+        out = self.bn2(self.conv2(out))
+        out<a id="change"> += </a><a id="change">self.shortcut(</a>x<a id="change">)</a>
+        out = F.relu(out)
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: Tensor) -&gt; Tensor:
+        identity = x
+
+        out = <a id="change">self.conv1(</a>x<a id="change">)</a>
+        out<a id="change"> = self.bn1(</a>out<a id="change">)</a>
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out<a id="change"> = </a>self.bn2(out)
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = self.downsample(</a>x<a id="change">)</a>
+
+        out<a id="change"> += </a>identity
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+
+        return out
+
+</code></pre>

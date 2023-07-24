@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :1619
+</h3><img src='5547894.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.valley_transformer(x)
+
+        x = <a id="change">repeat(</a>x, <a id="change">&quotb n d -&gt; b (n r) d&quot</a><a id="change">, r = shorten_factor)</a>
+
+        x = x[:, :n]
+        x = x + x_residual
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 pre-valley "attention resampling" - they have the pooled token in each bucket attend to the tokens pre-pooled
+
+        <a id="change">if </a><a id="change">exists(</a>self.attn_resampling_pre_valley<a id="change">):
+            </a>x<a id="change"> = </a>self.attn_resampling_pre_valley(
+                <a id="change">rearrange(</a>x, &quotb n d -&gt; (b n) () d&quot<a id="change">)</a>,
+                rearrange(x_residual, &quotb (n s) d -&gt; (b n) s d&quot, s = s)
+            )
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/hourglass-transformer-pytorch/commit/44ad24d1a9673a2d953ffc39afe455d42d56fbb1#diff-2ad25fce867cbbc4b5c9b8826f8be84c94e4f3654138256031bd2a247c91e715L183' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5547894</div><div id='project'> Project Name: lucidrains/hourglass-transformer-pytorch</div><div id='commit'> Commit Name: 44ad24d1a9673a2d953ffc39afe455d42d56fbb1</div><div id='time'> Time: 2021-11-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_class'> M Class Name: HourglassTransformer</div><div id='n_method'> N Class Name: HourglassTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='n_file'> N File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_start'> M Start Line: 183</div><div id='m_end'> M End Line: 200</div><div id='n_start'> N Start Line: 192</div><div id='n_end'> N End Line: 252</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            rel_dist = fourier_encode_dist(rel_dist, num_encodings = fourier_features)
+            rel_dist = rearrange(rel_dist, &quotb i j () d -&gt; b i j d&quot)
+
+        feats_i = <a id="change">repeat(</a>feats, <a id="change">&quotb i d -&gt; b i n d&quot</a><a id="change">, n = n)</a>
+        feats_j = repeat(feats, &quotb j d -&gt; b n j d&quot, n = n)
+        edge_input = torch.cat((feats_i, feats_j, rel_dist), dim = -1)
+
+        if exists(edges):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.norm_rel_coors:
+            rel_coors = F.normalize(rel_coors, dim = -1) * self.rel_coors_scale
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>if use_nearest:
+                mask = batched_index_select(mask, nbhd_indices, dim = 1)
+            else:
+                mask<a id="change"> = </a><a id="change">rearrange(</a>mask, &quotb j -&gt; b () j&quot<a id="change">)</a>
+
+            coor_weights.masked_fill_(~mask, 0.)
+
+        coors_out = einsum(&quotb i j, b i j c -&gt; b i c&quot, coor_weights, rel_coors) + coors</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/egnn-pytorch/commit/f9dd0bb101e885b6a912e8a400b9cc8a95c57495#diff-bc5f0b587e39386590599ccefaeb0776a2edb29856099faa2ece667dd370ec4cL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5547889</div><div id='project'> Project Name: lucidrains/egnn-pytorch</div><div id='commit'> Commit Name: f9dd0bb101e885b6a912e8a400b9cc8a95c57495</div><div id='time'> Time: 2021-03-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_class'> M Class Name: EGNN</div><div id='n_method'> N Class Name: EGNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: egnn_pytorch/egnn_pytorch.py</div><div id='n_file'> N File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 146</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.col_attn:
+            w_x = rearrange(x, &quotb h w d -&gt; (b w) h d&quot)
+            if exists(attn_bias):
+                attn_bias = <a id="change">repeat(</a>attn_bias, <a id="change">&quotb h i j -&gt; (b x) h i j&quot</a><a id="change">, x = w)</a>
+
+            tie_dim = w if self.global_query_attn else None
+            w_out = self.attn(w_x, mask = w_mask, attn_bias = attn_bias, tie_dim = tie_dim)
+            w_out = rearrange(w_out, &quot(b w) h d -&gt; b h w d&quot, h = h, w = w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = rearrange(x, input_fold_eq)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = </a><a id="change">rearrange(</a>mask, mask_fold_axial_eq<a id="change">)</a>
+
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):
+            attn_bias = self.edges_to_attn_bias(edges)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5547900</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>

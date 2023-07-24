@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :848
+</h3><img src='3119151.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+
+    def forward(self, x):
+        <a id="change">return </a>self.act(self.bn(<a id="change">self.conv(</a>x<a id="change">)</a>))
+
+    def fuseforward(self, x):
+        return self.act(self.conv(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+
+    def forward(self, x):
+        out<a id="change"> = </a><a id="change">self.conv(</a>x<a id="change">)</a>
+        if self.norm is not None:
+            if self.norm_type == &quotHIN&quot:
+                out1, out2 = torch.chunk(out, 2, dim = 1)
+                out2 = self.norm(out2)
+                out = torch.cat((out1, out2), dim = 1)
+            else:
+                out<a id="change"> = </a>self.norm(out)
+        out = self.act(out)
+        <a id="change">return </a>out
+
+    def fuseforward(self, x):
+        return self.act(self.conv(x))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liudakai2/unsupdis-pytorch/commit/e4802740d986fb6830ac0b78d31eea7ce8e6afd4#diff-cfb1ff087a99a34369673c9f34bdcd22f2d429ab3599a89f386c5de1fd9a2566L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119151</div><div id='project'> Project Name: liudakai2/unsupdis-pytorch</div><div id='commit'> Commit Name: e4802740d986fb6830ac0b78d31eea7ce8e6afd4</div><div id='time'> Time: 2022-06-02</div><div id='author'> Author: 35397867+tgjjj@users.noreply.github.com</div><div id='file'> File Name: models/common.py</div><div id='m_class'> M Class Name: Conv</div><div id='n_method'> N Class Name: Conv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/common.py</div><div id='n_file'> N File Name: models/common.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        if self.identity:
+            <a id="change">return </a>x + <a id="change">self.conv(</a>x<a id="change">)</a>
+        else:
+            return self.conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x):
+        out<a id="change"> = </a><a id="change">self.conv(</a>x<a id="change">)</a>
+
+        if self.identity:
+            out<a id="change"> = </a>out + x
+        <a id="change">return </a>out
+
+class MobileViTBlock(nn.Module):
+    def __init__(self, dim, depth, channel, kernel_size, patch_size, mlp_dim, dropout=0.):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/b983bbee390bf2a9b677de5ba1e91b3327f8cfc8#diff-180c1535c305da16bf6b05e1db96f9ac1e4ee6fb798bd3da9f10e336cf10ddbaL138' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119147</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: b983bbee390bf2a9b677de5ba1e91b3327f8cfc8</div><div id='time'> Time: 2021-12-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/mobile_vit.py</div><div id='m_class'> M Class Name: MV2Block</div><div id='n_method'> N Class Name: MV2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mobile_vit.py</div><div id='n_file'> N File Name: vit_pytorch/mobile_vit.py</div><div id='m_start'> M Start Line: 140</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 138</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        if self.use_res_connect:
+            <a id="change">return </a>x + <a id="change">self.conv(</a>x<a id="change">)</a>
+        else:
+            return self.conv(x)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv = nn.Sequential(*layers)
+
+    def forward(self, x):
+        out<a id="change"> = </a><a id="change">self.conv(</a>x<a id="change">)</a>
+        if self.use_res_connect:
+            if self.use_identity:
+                identity_tensor<a id="change">= </a>x[:,:self.identity_tensor_channels,:,:] + out[:,:self.identity_tensor_channels,:,:]
+                out = torch.cat([identity_tensor, out[:,self.identity_tensor_channels:,:,:]], dim=1)
+                &#47&#47 out[:,:self.identity_tensor_channels,:,:] += x[:,:self.identity_tensor_channels,:,:]
+            else:
+                out = x + out
+            <a id="change">return </a>out
+        else:
+            return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rangilyu/mobilenext/commit/1ffacbddc22eda8ff5f1c74bdae030bb1f7720bc#diff-73413f940c0f3a8d6d16c811fd256cb7be48915d6bd50d24e1ae1227b6467c60L77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119140</div><div id='project'> Project Name: rangilyu/mobilenext</div><div id='commit'> Commit Name: 1ffacbddc22eda8ff5f1c74bdae030bb1f7720bc</div><div id='time'> Time: 2020-07-07</div><div id='author'> Author: lyuchqi@gmail.com</div><div id='file'> File Name: mobilenext.py</div><div id='m_class'> M Class Name: SandGlass</div><div id='n_method'> N Class Name: SandGlass</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mobilenext.py</div><div id='n_file'> N File Name: mobilenext.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 84</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 93</div><BR>

@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        <a id="change">return </a>(x - x_mean) / x_std
+
+
+class DitherAudio(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_elements = mask.sum(dim=2, keepdim=True).detach()
+        x_mean = x.sum(dim=2, keepdim=True).detach() / num_elements
+        numerator = (x - x_mean).pow(2).sum(dim=2, keepdim=True).detach()
+        x_std<a id="change"> = </a><a id="change">(numerator / num_elements).sqrt()</a>
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        result<a id="change"> = </a>(x - x_mean) / x_std
+        <a id="change">return </a>torch.masked_fill(result, ~mask, 0.0)
+
+
+class DitherAudio(nn.Module):</code></pre>

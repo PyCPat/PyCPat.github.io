@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :698
+</h3><img src='2695689.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                          discretized_target.dtype)
+        target_label = torch.sum(bin_mask * discretized_target, -1)
+        predicted_patches = predicted_patches[mask]
+        target_label<a id="change"> = </a>target_label[mask]
+        loss = <a id="change">F.cross_entropy(</a>predicted_patches, target_label<a id="change">)</a>
+        return loss
+
+
+&#47&#47 main class</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        target_label = torch.sum(bin_mask * discretized_target, dim = -1)
+
+        loss = <a id="change">F.cross_entropy(</a>predicted_patches[mask], target_label[mask]<a id="change">)</a>
+        return loss
+
+
+&#47&#47 main class</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/64a2ef6462bde61db4dd8f0887ee71192b273692#diff-6b502c3fca9000d4ac485e72a6b6cb51b335fed8a8e158013b955ffed39c59abL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2695689</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 64a2ef6462bde61db4dd8f0887ee71192b273692</div><div id='time'> Time: 2021-06-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp.py</div><div id='n_file'> N File Name: vit_pytorch/mpp.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, **kwargs):
+        xi = x[:, :-1]
+        xo<a id="change"> = </a>x[:, 1:]
+
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask = mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+
+        out = self.net(xi, **kwargs)
+        loss = <a id="change">F.cross_entropy(</a>out.transpose(1, 2), xo<a id="change">, ignore_index = self.ignore_index)</a>
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        out = out.transpose(1, 2)
+
+        loss = <a id="change">F.cross_entropy(
+            </a>out,
+            target<a id="change">,
+            ignore_index = ignore_index
+        )</a>
+
+        return loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2695680</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text_latents, image_latents = map(lambda t: F.normalize(t, p = 2, dim = -1), (text_latents, image_latents))
+        labels = torch.arange(input.size(0), device = image_latents.device)
+        sim_i_2_t = torch.matmul(torch.mul(logit_scale, image_latents), torch.t(text_latents))
+        sim_t_2_i<a id="change"> = </a>torch.matmul(torch.mul(logit_scale, text_latents), torch.t(image_latents))
+        
+        loss_t_2_i = <a id="change">F.cross_entropy(</a>sim_t_2_i, labels<a id="change">)</a>
+        loss_i_2_t = F.cross_entropy(sim_i_2_t, labels)
+        
+        return sim_i_2_t, sim_t_2_i, loss_i_2_t, loss_t_2_i</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        if return_loss:
+            assert image.size(0) == input.size(0), "Not Support for unbalanced image-text pair"
+            loss_t_2_i = <a id="change">F.cross_entropy(</a>sim_t_2_i, torch.arange(input.size(0), device = image_latents.device)<a id="change">)</a>
+            loss_i_2_t = F.cross_entropy(sim_i_2_t, torch.arange(image.size(0), device = image_latents.device))
+            return sim_i_2_t, sim_t_2_i, loss_i_2_t, loss_t_2_i
+        else:
+            return sim_i_2_t, sim_t_2_i</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/weiyx16/clip-pytorch/commit/6cd0a84a4b3df54d9b248294556800a0ec49c09d#diff-dabcaa5452d0c0467649383c17e51bc092c7e3e58f73e3d2fe16902ac2e09496L240' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2695683</div><div id='project'> Project Name: weiyx16/clip-pytorch</div><div id='commit'> Commit Name: 6cd0a84a4b3df54d9b248294556800a0ec49c09d</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: weason1998@gmail.com</div><div id='file'> File Name: CLIP.py</div><div id='m_class'> M Class Name: CLIP</div><div id='n_method'> N Class Name: CLIP</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: CLIP.py</div><div id='n_file'> N File Name: CLIP.py</div><div id='m_start'> M Start Line: 241</div><div id='m_end'> M End Line: 254</div><div id='n_start'> N Start Line: 252</div><div id='n_end'> N End Line: 268</div><BR>

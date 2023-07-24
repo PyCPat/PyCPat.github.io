@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1850
+</h3><img src='13132051.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        with torch.no_grad():
+            means, buckets, dists = kmeans(x, means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+            indices = <a id="change">indices.contiguous().view(</a>*indices.size()[:2], -1<a id="change">)</a>
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            dists, buckets = dists_and_buckets(x, means)
+
+        if update_means:
+            <a id="change">with torch.no_grad()</a><a id="change">:
+                </a>means = kmeans_iter(x, means, buckets)
+            self.new_means = means
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL367' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13132051</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: Kmeans</div><div id='n_method'> N Class Name: Kmeans</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 396</div><div id='m_end'> M End Line: 410</div><div id='n_start'> N Start Line: 367</div><div id='n_end'> N End Line: 384</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = self.trans3(self.dense3(out))
+        out = self.dense4(out)
+        out = F.avg_pool2d(F.relu(self.bn(out)), 4)
+        e = <a id="change">out.view(</a>out.size(0), -1<a id="change">)</a>
+        out = self.linear(w)
+        if last:
+            return out, e
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, last=False, freeze=False):
+        if freeze:
+            <a id="change">with torch.no_grad()</a><a id="change">:
+                </a>features = self.features(x)
+                out = F.relu(features, inplace=True)
+                e = F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0), -1)
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/decile-team/distil/commit/4108c7fe8b81f9f198410bb6b2598f6833329a5e#diff-e5225ab8b342831d17e107f666cc43ea082647e4929bae2e9a86579b97fcec3dL75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13132052</div><div id='project'> Project Name: decile-team/distil</div><div id='commit'> Commit Name: 4108c7fe8b81f9f198410bb6b2598f6833329a5e</div><div id='time'> Time: 2021-04-29</div><div id='author'> Author: you@example.com</div><div id='file'> File Name: distil/utils/models/densenet.py</div><div id='m_class'> M Class Name: DenseNet</div><div id='n_method'> N Class Name: DenseNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: distil/utils/models/densenet.py</div><div id='n_file'> N File Name: distil/utils/models/densenet.py</div><div id='m_start'> M Start Line: 76</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 131</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                self.running_var = (self.momentum * self.running_var) + (1.0-self.momentum) * (x.shape[0]/(x.shape[0]-1)*var)
+            else:
+                var = self.running_var
+            sigma = <a id="change">var.view(</a>[1, self.insize, 1, 1]<a id="change">)</a>.expand_as(x)
+            if self.non_linear:
+                den = torch.max(sigma, self.v * x + instance_std(x))
+                return x / den * self.gamma + self.beta</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.training:
+                var = x.var([0, 2, 3], unbiased=False)
+                n = x.numel() / x.size(1)
+                <a id="change">with torch.no_grad()</a><a id="change">:
+                    </a>self.running_var = exponential_average_factor * var * n / (n - 1)\
+                        + (1 - exponential_average_factor) * self.running_var
+            else:
+                var = self.running_var</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/digantamisra98/evonorm/commit/e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef#diff-3e603d8ee6e954d92d8ca2340dc887ad739428240f8c52b56be403bbc30e64e6L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13132053</div><div id='project'> Project Name: digantamisra98/evonorm</div><div id='commit'> Commit Name: e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef</div><div id='time'> Time: 2020-04-08</div><div id='author'> Author: mishradiganta91@gmail.com</div><div id='file'> File Name: evonorm2d.py</div><div id='m_class'> M Class Name: EvoNorm2D</div><div id='n_method'> N Class Name: EvoNorm2D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: evonorm2d.py</div><div id='n_file'> N File Name: evonorm2d.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 60</div><BR>

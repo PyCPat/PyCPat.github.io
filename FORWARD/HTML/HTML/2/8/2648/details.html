@@ -1,0 +1,143 @@
+<html><h3>Pattern ID :2648
+</h3><img src='15089222.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x += self.b.expand_as(x)
+        pred = F.sigmoid(x)
+
+        <a id="change">return </a>pred
+
+if __name__ == &quot__main__&quot:
+    config = dict()</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, batch, labels):
+        batch_size = batch.shape[0]
+
+        heads = <a id="change">batch[:, 0:1]</a>
+        relations<a id="change"> = </a>batch[:, 1:2]
+        tails = batch[:, 2:3]
+
+        &#47&#47 batch_size, num_input_channels, width, height
+        heads_embs = self.entity_embeddings(heads).view(-1, 1, self.img_height, self.img_width)
+        relation_embs = self.relation_embeddings(relations).view(-1, 1, self.img_height, self.img_width)
+        tails_embs<a id="change"> = </a>self.entity_embeddings(tails).view(-1, self.embedding_dim)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = torch.cat([heads_embs, relation_embs], 2)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        scores = torch.sum(torch.mm(x, tails_embs.transpose(1, 0)), dim=1)
+
+        predictions = F.sigmoid(scores)
+        loss = self.compute_loss(predictions, labels)
+
+        <a id="change">return </a>loss
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pykeen/pykeen/commit/e310dc04ccd0763bef25540fb0a19a7423a27a94#diff-ca7a8f13b7b28764529fdd6068fb9b1f73dab80a9636b4e70393393c8141e014L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15089222</div><div id='project'> Project Name: pykeen/pykeen</div><div id='commit'> Commit Name: e310dc04ccd0763bef25540fb0a19a7423a27a94</div><div id='time'> Time: 2018-09-19</div><div id='author'> Author: ali-mehdi@live.de</div><div id='file'> File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_class'> M Class Name: ConvE</div><div id='n_method'> N Class Name: ConvE</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/kg_embeddings_model/conv_e.py</div><div id='n_file'> N File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 153</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        A = x[:, ::2, :, :]
+        B = x[:, 1::2, :, :]
+
+        A<a id="change"> = </a>A.view(N, 1, ord_num * H * W)
+        B = B.view(N, 1, ord_num * H * W)
+        concat_feats = torch.cat((A, B), dim=1).contiguous()
+
+        if self.training:
+            ord_prob = F.log_softmax(concat_feats, dim=1)
+            <a id="change">return </a>ord_prob.view(-1, ord_num, H, W)
+
+        ord_prob = F.softmax(C, dim=1)[:, 1, ::]
+        ord_prob = ord_prob.view(-1, ord_num, H, W)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.training:
+            prob = F.log_softmax(concat_feats, dim=1)
+            ord_prob = x.clone()
+            <a id="change">ord_prob[:, 0::2, :, :]</a> = prob[:, 0, :, :, :]
+            ord_prob[:, 1::2, :, :]<a id="change"> = </a>prob[:, 1, :, :, :]
+            <a id="change">return </a>ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1).reshape((N, 1, H, W))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/07fe1714fc568b25bd80debe8dd3ab800ff576a8#diff-4113dbf82d3c85db8d660e5485c3df3048dd9c7cefb1a9060e9e80ba9a7c2cc5L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15089188</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: 07fe1714fc568b25bd80debe8dd3ab800ff576a8</div><div id='time'> Time: 2020-05-02</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_class'> M Class Name: OrdinalRegressionLayer</div><div id='n_method'> N Class Name: OrdinalRegressionLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='n_file'> N File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x10 = self.Conv_9(x9)
+
+        <a id="change">return </a>x10
+
+
+class DRPNN(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        lms = inp[:, :-1, 2::self.ratio, 2::self.ratio]
+        pan = torch.unsqueeze(inp[:, -1, :, :], dim=1)
+
+        lms_hp<a id="change"> = </a>lms - self.dephtconv_ms(lms)
+        pan_hp<a id="change"> = </a>pan - self.dephtconv_pan(pan)
+
+        x = self.Conv2d_transpose(lms_hp)
+        net_inp = torch.cat((x, pan_hp), dim=1)
+
+        x1 = F.relu(self.Conv(net_inp))
+
+        x2 = F.relu(self.Conv_1(x1))
+        x3 = self.Conv_2(x2) + x1
+
+        x4 = F.relu(self.Conv_3(x3))
+        x5 = self.Conv_4(x4) + x3
+
+        x6 = F.relu(self.Conv_5(x5))
+        x7 = self.Conv_6(x6) + x5
+
+        x8 = F.relu(self.Conv_7(x7))
+        x9 = self.Conv_8(x8) + x7
+
+        x10 = self.Conv_9(x9)
+
+        x11 = <a id="change">inp[:, :-1, :, :]</a> + x10
+
+        <a id="change">return </a>x11
+
+
+class DRPNN(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/matciotola/z-pnn/commit/b0c47bdabc552adc06d3b1a9a67412bd1a632f9b#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15089205</div><div id='project'> Project Name: matciotola/z-pnn</div><div id='commit'> Commit Name: b0c47bdabc552adc06d3b1a9a67412bd1a632f9b</div><div id='time'> Time: 2022-05-26</div><div id='author'> Author: Matt171018Cot!</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: PanNet</div><div id='n_method'> N Class Name: PanNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        block_forecasts = torch.stack(block_forecasts)
+        block_forecasts = block_forecasts.permute(1, 0, 2)
+
+        <a id="change">return </a>forecast, block_forecasts
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        encoder_mask = encoder_mask.unsqueeze(-1)
+
+        level = encoder_y[:, -1:].repeat(1, decoder_x_t.size(1), 1)  &#47&#47 Level with Naive1
+        block_forecasts<a id="change"> = </a>[level]
+        block_backcasts = [<a id="change">encoder_y[:, -1:]</a>.repeat(1, encoder_y.size(1), 1)]
+
+        forecast = level
+        for block in self.blocks:
+            block_backcast, block_forecast = block(
+                encoder_y=residuals, encoder_x_t=encoder_x_t, decoder_x_t=decoder_x_t, x_s=x_s
+            )
+            residuals = (residuals - block_backcast) * encoder_mask
+
+            forecast = forecast + block_forecast
+            block_forecasts.append(block_forecast)
+            block_backcasts.append(block_backcast)
+
+        &#47&#47 (n_batch, n_t, n_outputs, n_blocks)
+        block_forecasts = torch.stack(block_forecasts, dim=-1)
+        block_backcasts = torch.stack(block_backcasts, dim=-1)
+        backcast<a id="change"> = </a>residuals
+
+        <a id="change">return </a>forecast, backcast, block_forecasts, block_backcasts
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/a60fea51988c95548f47dd9fb76fa57258201160#diff-e15aa407f75975260ffed738d20639620726fe06ff7533b115426860e6eea826L334' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15089212</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: a60fea51988c95548f47dd9fb76fa57258201160</div><div id='time'> Time: 2022-03-20</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_class'> M Class Name: NHiTS</div><div id='n_method'> N Class Name: NHiTS</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_start'> M Start Line: 343</div><div id='m_end'> M End Line: 363</div><div id='n_start'> N Start Line: 353</div><div id='n_end'> N End Line: 379</div><BR>

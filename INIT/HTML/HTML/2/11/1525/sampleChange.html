@@ -2,24 +2,22 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-
-        &#47&#47 Upsampling convolutional layer.
-        self.upsampling = nn.Sequential(
-            <a id="change">nn.Conv2d(64</a>, <a id="change">64</a>, (3, 3), (1, 1), (1, 1)<a id="change">)</a>,
-            <a id="change">nn.LeakyReLU(0.2</a>, True<a id="change">)</a>
-        )
-
-        &#47&#47 Reconnect a layer of convolution block after upsampling.
-        self.conv3 = nn.Sequential(
-            <a id="change">nn.Conv2d(64</a>, <a id="change">64</a>, (3, 3), (1, 1), (1, 1)<a id="change">)</a>,
-            nn.LeakyReLU(0.2, True)
-        )
+                nn.BatchNorm2d(128), nn.LeakyReLU(0.2)))
+        self.conv_blocks.append(
+            nn.Sequential(
+                <a id="change">nn.Conv2d(128</a>, <a id="change">256</a>, 5<a id="change">, stride=2, padding=2)</a>,
+                nn.BatchNorm2d(256), <a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>))
+        self.conv_blocks.append(
+            nn.Sequential(
+                <a id="change">nn.Conv2d(256</a>, <a id="change">512</a>, 5<a id="change">, stride=2, padding=2)</a>,
+                nn.BatchNorm2d(512), nn.LeakyReLU(0.2)))
+        self.decision = nn.Sequential(nn.Linear(7 * 7 * 512, 1), nn.Sigmoid())
 </code></pre><h3>After Change</h3><pre><code class='java'>
 
-        &#47&#47 Upscale block
-        upsampling = []
-        <a id="change">for </a>_ in <a id="change">range(</a>2<a id="change">):
-            </a>upsampling.append(UpsampleBlock(64))
-        self.upsampling = nn.Sequential(*upsampling)
-
-        &#47&#47 Output layer.</code></pre>
+        &#47&#47 build up downsampling backbone (excluding the output layer)
+        curr_channels = base_channels
+        <a id="change">for </a>_ in <a id="change">range(</a>self.num_downsamples<a id="change">):
+            </a>self.conv_blocks.append(
+                ConvModule(
+                    curr_channels,
+                    curr_channels * 2,</code></pre>

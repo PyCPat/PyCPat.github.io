@@ -1,0 +1,113 @@
+<html><h3>Pattern ID :287
+</h3><img src='947631.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        i, j = dots_image.shape[-2:]
+        img_seq = torch.arange(img_seq_len, device = device)
+        k_img_indices = rearrange(img_seq.float(), &quot(h w) -&gt; () () h w&quot, h = img_size)
+        k_img_indices = F.pad(k_img_indices, (padding<a id="change"></a>,) * 4, value = img_seq_len) &#47&#47 padding set to be max, so it is never attended to
+        k_img_indices = F.unfold(k_img_indices, kernel_size, dilation = dilation)
+        k_img_indices = rearrange(k_img_indices, &quotb j i -&gt; b i j&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.pad(t, causal_padding), (k_img, v_img))
+        <a id="change">k_img</a><a id="change">, v_img = </a><a id="change">map(</a>lambda t: F.unfold(t, kernel_size, dilation = dilation), (<a id="change">k_img</a><a id="change">, v_img</a>)<a id="change">)</a>
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        &#47&#47 let image attend to all of text
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/3064403976ee2fadacef934e789cdd9f4de118ec#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL129' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947631</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: 3064403976ee2fadacef934e789cdd9f4de118ec</div><div id='time'> Time: 2022-03-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 191</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            embed_normalized = (embed_sum / bins.unsqueeze(0)).t()
+            embed_normalized = l2norm(embed_normalized)
+            embed_normalized = torch.where(zero_mask[...<a id="change">, None</a>], embed,
+                                           embed_normalized)
+            ema_inplace(self.embed, embed_normalized, self.decay)
+            self.expire_codes_(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dist = einsum(&quoth n d, h c d -&gt; h n c&quot, flatten, embed)
+        embed_ind = gumbel_sample(dist, dim = -1, temperature = self.sample_codebook_temp)
+        embed_onehot = F.one_hot(embed_ind, self.codebook_size).type(dtype)
+        <a id="change">embed_ind</a> = embed_ind.view(*shape[:-1])
+
+        <a id="change">quantize</a> = batched_embedding(embed_ind, self.embed)
+
+        if self.training:
+            bins = embed_onehot.sum(dim = 1)
+            self.all_reduce_fn(bins)
+
+            ema_inplace(self.cluster_size, bins, self.decay)
+
+            zero_mask = (bins == 0)
+            bins = bins.masked_fill(zero_mask, 1.)
+
+            embed_sum = einsum(&quoth n d, h n c -&gt; h c d&quot, flatten, embed_onehot)
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = embed_sum / rearrange(bins, &quot... -&gt; ... 1&quot)
+            embed_normalized = l2norm(embed_normalized)
+
+            embed_normalized = torch.where(
+                rearrange(zero_mask, &quot... -&gt; ... 1&quot),
+                embed,
+                embed_normalized
+            )
+
+            ema_inplace(self.embed, embed_normalized, self.decay)
+            self.expire_codes_(x)
+
+        if needs_codebook_dim:
+            quantize<a id="change">, embed_ind = </a><a id="change">map(</a>lambda t: rearrange(t, &quot1 ... -&gt; ...&quot), (quantize<a id="change">, embed_ind</a>)<a id="change">)</a>
+
+        return quantize, embed_ind
+
+&#47&#47 main class</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL325' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947629</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: CosineSimCodebook</div><div id='n_method'> N Class Name: CosineSimCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 330</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 397</div><div id='n_end'> N End Line: 448</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        kv_x = rearrange(kv_x, &quotb (n a) d -&gt; b n a d&quot, n = n)
+
+        &#47&#47 derive query, key, value
+        q, k, v = self.to_q(x)<a id="change">, *self.to_kv(kv_x).chunk(2, dim = -1)</a>
+        q = rearrange(q, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        k, v = map(lambda t: rearrange(t, &quotb n a (h d) -&gt; b h n a d&quot,  h = h), (k, v))
+
+        &#47&#47 add null key / value, so a node can attend to nothing</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 derive query, key, value
+        q, k, v = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q<a id="change">, k, v</a>))
+
+        &#47&#47 gather keys and values according to adjacency matrix
+        k<a id="change">, v = </a><a id="change">map(</a>lambda t: rearrange(t, &quotb h n d -&gt; (b h) n d&quot), (k<a id="change">, v</a>)<a id="change">)</a>
+        k = batched_index_select(k, flat_indices)
+        v = batched_index_select(v, flat_indices)
+        k, v = map(lambda t: rearrange(t, &quot(b h) (n a) d -&gt; b h n a d&quot, h = h, n = n), (k, v))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/adjacent-attention-network/commit/3cf88ab92090fcbd2ab52d98b83172b5e8e4b3fe#diff-71f2ddd08dfbd4dae492be6a13060eb54c6e79f8b54246b5f612c2e7c269ab4fL72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947627</div><div id='project'> Project Name: lucidrains/adjacent-attention-network</div><div id='commit'> Commit Name: 3cf88ab92090fcbd2ab52d98b83172b5e8e4b3fe</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='m_class'> M Class Name: AdjacentAttention</div><div id='n_method'> N Class Name: AdjacentAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='n_file'> N File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.norm(x)
+        x = rearrange(x, &quotb n d -&gt; b d n&quot)
+        x = F.pad(x, (2<a id="change">, 0</a>))
+
+        q, k, v = self.to_q(x), self.to_k(x), self.to_v(x)
+        q, k, v = rearrange_many((q, k, v), &quotb (h d) n -&gt; b h n d&quot, h = self.heads)</code></pre><h3>After Change</h3><pre><code class='java'>
+            conv_out = map(lambda t: rearrange(t, &quot(b h) d n -&gt; b h d n&quot, b = batch), conv_out)
+            return torch.cat(tuple(conv_out), dim = 1)
+
+        q<a id="change">, k, v = </a><a id="change">map(</a>apply_causal_ds_conv_to_grouped_heads, zip((q<a id="change">, k, v</a>), self.qkv_ds_convs)<a id="change">)</a>
+
+        &#47&#47 scale and similarity
+
+        q = q * self.scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/tranception-pytorch/commit/b2eaf893294394093839a66effb621645d54cd6c#diff-18b0a7fd74d6ed16b8ebef089a2a63eb9b5ff5662fc464204330a63b2b4466c1L113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947620</div><div id='project'> Project Name: lucidrains/tranception-pytorch</div><div id='commit'> Commit Name: b2eaf893294394093839a66effb621645d54cd6c</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: tranception_pytorch/tranception_pytorch.py</div><div id='m_class'> M Class Name: CausalAttention</div><div id='n_method'> N Class Name: CausalAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tranception_pytorch/tranception_pytorch.py</div><div id='n_file'> N File Name: tranception_pytorch/tranception_pytorch.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        i, j = dots_image.shape[-2:]
+        img_seq = torch.arange(img_seq_len, device = device)
+        k_img_indices = rearrange(img_seq.float(), &quot(h w) -&gt; () () h w&quot, h = img_size)
+        k_img_indices = F.pad(k_img_indices, (padding<a id="change"></a>,) * 4, value = img_seq_len) &#47&#47 padding set to be max, so it is never attended to
+        k_img_indices = F.unfold(k_img_indices, kernel_size, dilation = dilation)
+        k_img_indices = rearrange(k_img_indices, &quotb j i -&gt; b i j&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.pad(t, causal_padding), (k_img, v_img))
+        k_img<a id="change">, v_img = </a><a id="change">map(</a>lambda t: F.unfold(t, kernel_size, dilation = dilation), (k_img<a id="change">, v_img</a>)<a id="change">)</a>
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        &#47&#47 let image attend to all of text
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/3064403976ee2fadacef934e789cdd9f4de118ec#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL125' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947634</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: 3064403976ee2fadacef934e789cdd9f4de118ec</div><div id='time'> Time: 2022-03-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 191</div><BR>

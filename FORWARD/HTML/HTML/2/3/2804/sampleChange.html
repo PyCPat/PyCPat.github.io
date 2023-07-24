@@ -1,0 +1,88 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 attention softmax, but normalizing keys is needed so that similarity for
+        &#47&#47 the purposes of attention correctly corresponds to hash locality.
+        bq = bqk
+        bk = <a id="change">F.normalize(</a>bqk<a id="change">, p=2, dim=-1)</a>
+
+        &#47&#47 Allow each chunk to attend within itself, and also one chunk back. Chunk
+        &#47&#47 boundaries might occur in the middle of a sequence of items from the
+        &#47&#47 same bucket, so this increases the chances of attending to relevant items.</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 attention softmax, but normalizing keys is needed so that similarity for
+        &#47&#47 the purposes of attention correctly corresponds to hash locality.
+        bq = bqk
+        bk = <a id="change">F.normalize(</a>bqk<a id="change">, p=2, dim=-1)</a>.type(bq.type())
+
+        &#47&#47 Allow each chunk to attend within itself, and also one chunk back. Chunk
+        &#47&#47 boundaries might occur in the middle of a sequence of items from the
+        &#47&#47 same bucket, so this increases the chances of attending to relevant items.
+        def look_one_back(x):
+            x_extra = torch.cat([x[:, -1:, ...], x[:, :-1, ...]], dim=1)
+            return torch.cat([x, x_extra], dim=2)
+
+        bk = look_one_back(bk)
+        bv = look_one_back(bv)
+        bkv_t = look_one_back(bkv_t)
+        bkv_buckets = look_one_back(bkv_buckets)
+
+        &#47&#47 Dot-product attention.
+        dots = torch.einsum(&quotbhie,bhje-&gt;bhij&quot, bq, bk) * (dim ** -0.5)
+
+        &#47&#47 Causal masking
+        if self.causal:
+            mask = bq_t[:, :, :, None] &lt; bkv_t[:, :, None, :].clamp(max=query_len - 1)
+            dots.masked_fill_(mask, float(&quot-inf&quot))
+            del mask
+
+        &#47&#47 Mask out attention to self except when no other targets are available.
+        self_mask = bq_t[:, :, :, None] == bkv_t[:, :, None, :]
+        dots.masked_fill_(self_mask, TOKEN_SELF_MASK_VALUE)
+        del self_mask
+
+        &#47&#47 Mask out attention to other hash buckets.
+        if not self._attend_across_buckets:
+            bucket_mask = bq_buckets[:, :, :, None] != bkv_buckets[:, :, None, :]
+            dots.masked_fill_(bucket_mask, float(&quot-inf&quot))
+            del bucket_mask
+
+        &#47&#47 Don&quott double-count query-key pairs across multiple rounds of hashing.
+        &#47&#47 There are two possible strategies here. (1) The default is to count how
+        &#47&#47 many times a query-key pair is repeated, and to lower its log-prob
+        &#47&#47 correspondingly at each repetition. (2) When hard_k is set, the code
+        &#47&#47 instead masks all but the first occurence of each query-key pair.
+        if not self._allow_duplicate_attention:
+            locs1 = undo_sort // bq_t.shape[-1]
+            locs2 = (locs1 + 1) % chunk_size
+            if not self._attend_across_buckets:
+                locs1 = buckets * chunk_size + locs1
+                locs2 = buckets * chunk_size + locs2
+            locs = torch.cat([
+                torch.reshape(locs1, (batch_size, self.n_hashes, seqlen)),
+                torch.reshape(locs2, (batch_size, self.n_hashes, seqlen)),
+            ], 1).permute((0, 2, 1))
+
+            slocs = batched_index_select(locs, st)
+            b_locs = torch.reshape(slocs, (batch_size, chunk_size, -1, 2 * self.n_hashes))
+
+            b_locs1 = b_locs[:, :, :, None, :self.n_hashes]
+
+            bq_locs = b_locs1.expand(b_locs.shape[:3] + (2, self.n_hashes))
+            bq_locs = torch.reshape(bq_locs, b_locs.shape)
+            bkv_locs = look_one_back(b_locs)
+
+            dup_counts = (bq_locs[:, :, :, None, :] == bkv_locs[:, :, None, :, :])
+            &#47&#47 for memory considerations, chunk summation of last dimension for counting duplicates
+            dup_counts = chunked_sum(dup_counts, chunks=(self.n_hashes * batch_size))
+            dup_counts = dup_counts.detach()
+            assert dup_counts.shape == dots.shape
+            dots = dots - torch.log(dup_counts + 1e-9)
+            del dup_counts
+
+        &#47&#47 Softmax.
+        dots_logsumexp = torch.logsumexp(dots, dim=-1, keepdim=True)
+        dots = torch.exp(dots - dots_logsumexp).type(<a id="change">dots.type()</a>)
+        dots = self.dropout(dots)
+
+        bo = torch.einsum(&quotbuij,buje-&gt;buie&quot, dots, bv)</code></pre>

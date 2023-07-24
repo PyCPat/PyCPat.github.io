@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, pred, target, mask=None):
+
+        pred = pred.contiguous().view(pred.size()[0], -1)
+        target = <a id="change">target.contiguous().view(</a>target.size()[0], <a id="change">-1</a><a id="change">)</a>
+
+        if mask is not None:
+            mask = mask.contiguous().view(mask.size()[0], -1)
+            pred = pred * mask
+            target = target * mask
+
+        a<a id="change"> = </a>torch.sum(pred<a id="change"> * </a>target)
+        b = torch.sum(pred)
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert mask.size() == gt.size()
+
+        pred = pred.contiguous().view(pred.size(0), -1)
+        gt = <a id="change">gt.contiguous()</a>.view(gt.size(0), -1)
+
+        mask = mask.contiguous().view(mask.size(0), -1)
+        pred = pred * mask
+        gt<a id="change"> = </a>gt * mask
+
+        dice_coeff = (2 * (pred * gt).sum()) / (
+            pred.sum() + gt.sum() + self.eps)</code></pre>

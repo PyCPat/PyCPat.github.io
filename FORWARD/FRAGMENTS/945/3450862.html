@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        y_pred = self.lr(data)  &#47&#47 Batch,1
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        senet_emb = self.senet_layer(feature_emb)
+        bilinear_p = self.bilinear_interaction(feature_emb)
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)
+
+        dense_input<a id="change"> = </a><a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+        comb_out = torch.cat(<a id="change">[</a>comb_out, dense_input<a id="change"></a>],dim=1)
+        y_pred += self.dnn(comb_out)
+        y_pred = y_pred.sigmoid()
+</code></pre>

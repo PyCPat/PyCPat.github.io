@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.mem_updater = Attention(dim, heads = heads)
+
+    def forward(self, src, tgt, mems = None):
+        b = <a id="change">src.shape[0]</a>
+        mems = default(mems, self.memory_slots)
+
+        if mems.ndim == 2:
+            mems = repeat(mems, &quotn d -&gt; b n d&quot, b = b)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.decoder(tgt, context = enc)
+
+        &#47&#47 update memory with attention
+        mem_mask = <a id="change">torch.eye(num_mem, num_mem, device = device).bool()</a>
+        mem_mask<a id="change"> = </a>F.pad(mem_mask, (0, n), value = True)
+        mems = self.mem_updater(mems, enc, mask = mem_mask, attend_self = True)
+
+        return out, mems</code></pre>

@@ -1,0 +1,89 @@
+<html><h3>Pattern ID :1889
+</h3><img src='4691011.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.embed_dim = embed_dim
+        self.ape = ape
+        self.patch_norm = patch_norm
+        self.num_features = <a id="change">int(</a>embed_dim<a id="change"> * </a>2 ** (self.num_layers - 1)<a id="change">)</a>
+        self.mlp_ratio = mlp_ratio
+
+        &#47&#47 split image into non-overlapping patches
+        self.patch_embed = PatchEmbed(
+            img_size=img_size, patch_size=patch_size, in_chans=in_chans, embed_dim=embed_dim,
+            norm_layer=norm_layer if self.patch_norm else None)
+        num_patches = self.patch_embed.num_patches
+        patches_resolution = self.patch_embed.patches_resolution
+        self.patches_resolution = patches_resolution
+
+        &#47&#47 absolute position embedding
+        if self.ape:
+            self.absolute_pos_embed = nn.Parameter(torch.zeros(1, num_patches, embed_dim))
+            trunc_normal_(self.absolute_pos_embed, std=.02)
+
+        self.pos_drop = nn.Dropout(p=drop_rate)
+
+        &#47&#47 stochastic depth
+        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  &#47&#47 stochastic depth decay rule
+
+        &#47&#47 build layers
+        self.layers = nn.ModuleList()
+        for i_layer in range(self.num_layers):
+            layer = BasicLayer(dim=int(embed_dim * 2 ** i_layer),
+                               input_resolution=(patches_resolution[0] // (2 ** i_layer),
+                                                 patches_resolution[1] // (2 ** i_layer)),
+                               depth=depths[i_layer],
+                               num_heads=num_heads[i_layer],
+                               window_size=window_size,
+                               mlp_ratio=self.mlp_ratio,
+                               qkv_bias=qkv_bias, qk_scale=qk_scale,
+                               drop=drop_rate, attn_drop=attn_drop_rate,
+                               drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
+                               norm_layer=norm_layer,
+                               downsample=PatchMerging if (i_layer &lt; self.num_layers - 1) else None,
+                               use_checkpoint=use_checkpoint)
+            self.layers.append(layer)
+
+        self.norm<a id="change"> = </a>norm_layer(self.num_features)
+        self.avgpool = nn.AdaptiveAvgPool1d(1)
+        self.head = nn.Linear(self.num_features, num_classes) if num_classes &gt; 0 else nn.Identity()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                use_checkpoint=use_checkpoint)
+            self.layers.append(layer)
+
+        num_features = [int(embed_dim * 2 ** i) for i in <a id="change">range(</a>self.num_layers<a id="change">)</a>]
+        self.num_features = num_features
+
+        &#47&#47 add a norm layer for each output</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/12b05eaf235665fc6d1f89a9055b84d7cdfec923#diff-bfa9144b84aa2908523fe6e28d0f355d5701af250801acefca0ffbeed05bc3dfL483' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4691011</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 12b05eaf235665fc6d1f89a9055b84d7cdfec923</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/backbones/SwinTransformer.py</div><div id='m_class'> M Class Name: SwinTransformer</div><div id='n_method'> N Class Name: SwinTransformer</div><div id='m_method'> M Method Name: __init__(20)</div><div id='n_method'> N Method Name: __init__(19)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/backbones/SwinTransformer.py</div><div id='n_file'> N File Name: lib/backbones/SwinTransformer.py</div><div id='m_start'> M Start Line: 483</div><div id='m_end'> M End Line: 539</div><div id='n_start'> N Start Line: 489</div><div id='n_end'> N End Line: 549</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 have much of an impact on final performance anyway. See page 8 (https://arxiv.org/pdf/2102.11972.pdf)
+        super().__init__()
+
+        inner_dim = <a id="change">int(</a>dim<a id="change"> * </a>ff_mult<a id="change">)</a>
+        if ffn_type == "GEGLU":
+            self.net<a id="change"> = </a>nn.Sequential(
+                GEGLU(dim, inner_dim),
+                nn.Dropout(dropout),
+                nn.Linear(inner_dim, dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        rows = []
+        for i in range(max_length):  &#47&#47 build the full Alibi relative position bias matrix
+            rows.append(torch.LongTensor([x for x in <a id="change">range(</a>0 - i, max_length - i<a id="change">)</a>]).view(1, -1).abs())
+
+        &#47&#47 This implementation alternates between upper triangular and lower triangular biases. Using the full matrix
+        &#47&#47 doesn&quott seem to work as well - likely since the forward and backward biases would be identical (i.e. attention</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/antofuller/configaformers/commit/f2fa8c59ce1537b400a3288f9c556e84ca993807#diff-fcf59ce11a888c8312fa1547129217a783407a793109b95d67b265e47d08375bL58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4690991</div><div id='project'> Project Name: antofuller/configaformers</div><div id='commit'> Commit Name: f2fa8c59ce1537b400a3288f9c556e84ca993807</div><div id='time'> Time: 2021-09-04</div><div id='author'> Author: afuller187187@gmail.com</div><div id='file'> File Name: building_blocks.py</div><div id='m_class'> M Class Name: FeedForward</div><div id='n_method'> N Class Name: Alibi</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: building_blocks.py</div><div id='n_file'> N File Name: building_blocks.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 57</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.conv_subnet = nn.Sequential(*conv_layers)
+
+        &#47&#47 construct fully connected layers
+        input_dim_fc<a id="change"> = </a>out_channels_cnn_2 * (<a id="change">int(</a>input_dim<a id="change"> / </a>out_channels_cnn_2<a id="change">))</a>
+
+        self.fc_subnet = FCEmbedding(
+            input_dim=input_dim_fc,
+            output_dim=output_dim,</code></pre><h3>After Change</h3><pre><code class='java'>
+        cnn_output_size = input_shape
+        stride = 1
+        padding = 1
+        for ii in <a id="change">range(</a>num_conv_layers<a id="change">)</a>:
+            &#47&#47 Defining another 2D convolution layer
+            conv_layer = conv_module(
+                in_channels=in_channels if ii == 0 else out_channels_per_layer[ii - 1],</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/aeca010c91564a71c6e5a8b7952f479779c1b49e#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4691000</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: aeca010c91564a71c6e5a8b7952f479779c1b49e</div><div id='time'> Time: 2022-11-03</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: CNNEmbedding</div><div id='n_method'> N Class Name: CNNEmbedding</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 220</div><BR>

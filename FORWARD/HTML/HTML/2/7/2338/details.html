@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :2338
+</h3><img src='14426844.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, feat_maps, smap, lmap=None, shape=None):
+        assert not xor(self.lmap_in is True, lmap is not None)
+        for i, f in enumerate(feat_maps):
+            if <a id="change">f.shape[-2:]</a> != shape:
+                feat_maps[i] = self.upsample(f, shape)
+        x = torch.cat(feat_maps, dim=1)
+        b, c, h, w = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        context = torch.bmm(sim, value).permute(0, 2, 1).contiguous().view(b, -1, h, w)
+        context = self.conv_out1(context)
+        
+        x = torch.cat(<a id="change">[</a>x, context<a id="change"></a>], dim=1)
+        x = self.conv_out2(x)
+        x<a id="change"> = </a>self.conv_out3(x)
+        out<a id="change"> = </a>self.conv_out4(x)
+
+        <a id="change">return </a>x, out</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/c355ab0cc90c9a3d27726822c1223d2f98cd0f0c#diff-28958d122b29eab3fc1387f31469a5b4e62962cb186585d136905133ef0975afL81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14426844</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: c355ab0cc90c9a3d27726822c1223d2f98cd0f0c</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/attention_module.py</div><div id='m_class'> M Class Name: ASCA</div><div id='n_method'> N Class Name: ASCA</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/attention_module.py</div><div id='n_file'> N File Name: lib/modules/attention_module.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 136</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            inters.append(conv(out))                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            
+        &#47&#47 bottom-up
+        inters = <a id="change">inters[::-1]</a>           &#47&#47 feature maps from bottom to top, same order as input x
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+        &#47&#47 top-down
+        tds<a id="change"> = </a><a id="change">[</a>None<a id="change"></a>] * self.num_levels
+        tds[-1] = x[-1]
+        for i in range(self.num_levels - 2, -1 , -1):
+            tds[i]<a id="change"> = </a>self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(tds[-2])])                &#47&#47 P7in + resize(P6td)
+
+        <a id="change">return </a>outs
+
+
+class WeightedFeatureFusion(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14426845</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = <a id="change">self.blocks[:1]</a> if len(blocks) == 0 else blocks
+
+        block_args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, block_args))
+        return _ReversibleFunction.apply(x, blocks, block_args)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x, **kwargs):
+        x<a id="change"> = </a>torch.cat(<a id="change">[</a>x, x<a id="change"></a>], dim=-1)
+
+        blocks = self.blocks
+        args = route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out<a id="change"> =  </a>_ReversibleFunction.apply(x, blocks, args)
+        <a id="change">return </a>torch.stack(out.chunk(2, dim=-1)).sum(dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/d5b9c649e59290b15c15f85d0bb182cb20b699fb#diff-27d52caf7b4f725ff9fe7d9e57172c62a7c8744ebafb23663512e7990a5ed131L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14426847</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: d5b9c649e59290b15c15f85d0bb182cb20b699fb</div><div id='time'> Time: 2020-04-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/reversible.py</div><div id='n_file'> N File Name: sinkhorn_transformer/reversible.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>

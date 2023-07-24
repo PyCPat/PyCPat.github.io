@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.use_bottleneck:
+            f = self.bottleneck(f)
+        y = self.fc(f)
+        <a id="change">if </a>keep_features<a id="change">:
+            </a>return y, f
+        else:
+            return y
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, f_s, f_t, alpha=1.):
+        d_s = self.domain_discriminator(f_s, alpha)
+        d_label_s = <a id="change">torch.ones(</a>(f_s.size(0)<a id="change">, 1</a>)<a id="change">)</a>.cuda()
+        d_t = self.domain_discriminator(f_t, alpha)
+        d_label_t = torch.zeros((f_t.size(0), 1)).cuda()
+        return 0.5 * (self.bce(d_s, d_label_s) + self.bce(d_t, d_label_t))</code></pre>

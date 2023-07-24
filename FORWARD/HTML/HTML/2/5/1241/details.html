@@ -1,0 +1,93 @@
+<html><h3>Pattern ID :1241
+</h3><img src='4405682.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            n = torch.sum(self.ema_count, dim=-1, keepdim=True)
+            self.ema_count = (self.ema_count + self.epsilon) / (n + M * self.epsilon) * n
+
+            dw = torch.bmm(<a id="change">encodings.transpose(1</a>, <a id="change">2</a><a id="change">)</a>, x_flat)
+            self.ema_weight = self.decay * self.ema_weight + (1 - self.decay) * dw
+
+            self.embedding = self.ema_weight / self.ema_count.unsqueeze(-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        M, D = self.embedding.size()
+        x_flat = x.detach().reshape(-1, D)
+
+        distances = torch.addmm(torch.sum(self.embedding ** 2, dim=1)<a id="change"> +
+                                </a>torch.sum(x_flat ** 2, dim=1, keepdim=True),
+                                x_flat, self.embedding.t(),
+                                alpha=-2.0, beta=1.0)
+
+        indices = torch.argmin(distances.float(), dim=-1)
+        encodings = F.one_hot(indices, M).float()
+        quantized = F.embedding(indices, self.embedding)
+        quantized = quantized.view_as(x)
+
+        if self.training:
+            self.ema_count = self.decay * self.ema_count + (1 - self.decay) * torch.sum(encodings, dim=0)
+
+            n = torch.sum(self.ema_count)
+            self.ema_count = (self.ema_count + self.epsilon) / (n + M * self.epsilon) * n
+
+            dw = torch.matmul(<a id="change">encodings.t()</a>, x_flat)
+            self.ema_weight = self.decay * self.ema_weight + (1 - self.decay) * dw
+
+            self.embedding = self.ema_weight / self.ema_count.unsqueeze(-1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bshall/vectorquantizedcpc/commit/535c95415d62ececde085e376f451b3b76e1b624#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4405682</div><div id='project'> Project Name: bshall/vectorquantizedcpc</div><div id='commit'> Commit Name: 535c95415d62ececde085e376f451b3b76e1b624</div><div id='time'> Time: 2020-05-01</div><div id='author'> Author: benji.l.shall@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: VQEmbeddingEMA</div><div id='n_method'> N Class Name: VQEmbeddingEMA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 112</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum = <a id="change">z_flattened.transpose(0</a>, <a id="change">1</a><a id="change">)</a> @ encodings
+            &#47&#47EMA cluster size
+            self.embedding.cluster_size.data.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+            &#47&#47EMA embedding average</code></pre><h3>After Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+
+        d = torch<a id="change">.sum(z_flattened.pow(2), dim=1, keepdim=True) + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - </a>2 * \
+            torch.einsum(&quotbd,dn-&gt;bn&quot, z_flattened, self.embedding.weight.permute(1,0)) &#47&#47 &quotn d -&gt; d n&quot
+
+        encoding_indices = torch.argmin(d, dim=1)
+        z_q = self.embedding(encoding_indices).view(z.shape)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)     
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            &#47&#47EMA cluster size
+            self.cluster_size.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+
+            embed_sum = torch.matmul(<a id="change">encodings.t()</a>, z_flattened)
+            &#47&#47EMA embedding average
+            self.embed_avg.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/e387b61c8c640b56c7cbd241d8ec60ab1f022611#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L183' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4405675</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: e387b61c8c640b56c7cbd241d8ec60ab1f022611</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: SonnetEMAVectorQuantizer</div><div id='n_method'> N Class Name: LegacyEMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 184</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum = <a id="change">z_flattened.transpose(0</a>, <a id="change">1</a><a id="change">)</a> @ encodings
+            &#47&#47EMA cluster size
+            self.embedding.cluster_size.data.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+            &#47&#47EMA embedding average</code></pre><h3>After Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+
+        d = torch<a id="change">.sum(z_flattened.pow(2), dim=1, keepdim=True) + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - </a>2 * \
+            torch.einsum(&quotbd,dn-&gt;bn&quot, z_flattened, self.embedding.weight.permute(1,0)) &#47&#47 &quotn d -&gt; d n&quot
+
+        encoding_indices = torch.argmin(d, dim=1)
+        z_q = self.embedding(encoding_indices).view(z.shape)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)     
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            &#47&#47EMA cluster size
+            self.cluster_size.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+
+            embed_sum = torch.matmul(<a id="change">encodings.t()</a>, z_flattened)
+            &#47&#47EMA embedding average
+            self.embed_avg.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4405673</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 164</div><BR>

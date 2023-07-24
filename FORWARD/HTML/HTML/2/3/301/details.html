@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :301
+</h3><img src='970126.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        W = x.data.size(3)
+        ws = stride
+        hs = stride
+        x = <a id="change">x.view(B, C, H, 1, W, 1).expand(</a>B, C, H, stride, W, stride<a id="change">)</a>.contiguous().view(B, C, H * stride, W * stride)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert (x.data.dim() == 4)
+        
+        x = x.view(x.size(0), x.size(1), x.size(2), 1, x.size(3), 1).\
+            expand(x.size(0), x.size(1), <a id="change">x.size(2</a><a id="change">)</a>, self.stride, x.size(3), self.stride).contiguous().\
+            view(x.size(0), x.size(1), x.size(2) * self.stride, x.size(3) * self.stride)
+
+        return x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tianxiaomo/pytorch-yolov4/commit/1ff5a1085ce0c1b35c2ea45b707166ac404e0b66#diff-979f6319c5a776a402674142f7f50a37662aa40399498541a9248a78a7a1ee51L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 970126</div><div id='project'> Project Name: tianxiaomo/pytorch-yolov4</div><div id='commit'> Commit Name: 1ff5a1085ce0c1b35c2ea45b707166ac404e0b66</div><div id='time'> Time: 2020-08-11</div><div id='author'> Author: ersheng@nvidia.com</div><div id='file'> File Name: tool/darknet2pytorch.py</div><div id='m_class'> M Class Name: Upsample_expand</div><div id='n_method'> N Class Name: Upsample_expand</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tool/darknet2pytorch.py</div><div id='n_file'> N File Name: tool/darknet2pytorch.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 60</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        dist = pairwise_euclidean_distance(inputs_col, inputs_row)
+
+        &#47&#47 split the positive and negative pairs
+        pos_mask = <a id="change">targets_col.expand(
+            </a>targets_row.shape[0], n<a id="change">
+        )</a>.t() == targets_row.expand(n, targets_row.shape[0])
+        neg_mask = ~pos_mask
+        &#47&#47 For each anchor, find the hardest positive and negative
+        dist_ap, dist_an = [], []</code></pre><h3>After Change</h3><pre><code class='java'>
+        dist_mat = pairwise_euclidean_distance(f, xbm_f)
+
+        &#47&#47 hard examples mining
+        n, m = <a id="change">f.size(0</a><a id="change">)</a>, xbm_f.size(0)
+        identity_mat = labels.expand(m, n).t().eq(xbm_labels.expand(n, m)).float()
+        dist_ap, dist_an = hard_examples_mining(dist_mat, identity_mat)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/0f8f51c4b2fac78edf87e29764e4da3deec6f65f#diff-3c0e5198c319a0e747e4dc4314623e2dc945e7d839f08f78d25f06f5b7a692a0L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 970124</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 0f8f51c4b2fac78edf87e29764e4da3deec6f65f</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: 57670068+tsingcbx99@users.noreply.github.com</div><div id='file'> File Name: common/vision/models/reid/loss.py</div><div id='m_class'> M Class Name: TripletLossXBM</div><div id='n_method'> N Class Name: TripletLossXBM</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: common/vision/models/reid/loss.py</div><div id='n_file'> N File Name: common/vision/models/reid/loss.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 154</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            H = x.data.size(2)
+            W = x.data.size(3)
+
+            return <a id="change">x.view(B, C, H, 1, W, 1).expand(</a>B, C, H, tH // H, W, tW // W<a id="change">)</a>.contiguous().view(B, C, tH, tW)
+        else:
+            return F.interpolate(x, size=(tH, tW), mode=&quotnearest&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            return x.view(x.size(0), x.size(1), x.size(2), 1, x.size(3), 1).\
+                    expand(x.size(0), x.size(1), x.size(2), target_size[2] // x.size(2), x.size(3), target_size[3] // x.size(3)).\
+                    contiguous().view(x.size(0), <a id="change">x.size(1</a><a id="change">)</a>, target_size[2], target_size[3])
+        else:
+            return F.interpolate(x, size=(target_size[2], target_size[3]), mode=&quotnearest&quot)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tianxiaomo/pytorch-yolov4/commit/1ff5a1085ce0c1b35c2ea45b707166ac404e0b66#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 970123</div><div id='project'> Project Name: tianxiaomo/pytorch-yolov4</div><div id='commit'> Commit Name: 1ff5a1085ce0c1b35c2ea45b707166ac404e0b66</div><div id='time'> Time: 2020-08-11</div><div id='author'> Author: ersheng@nvidia.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: Upsample</div><div id='n_method'> N Class Name: Upsample</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 39</div><BR>

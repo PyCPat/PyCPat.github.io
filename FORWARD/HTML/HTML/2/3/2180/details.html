@@ -1,0 +1,62 @@
+<html><h3>Pattern ID :2180
+</h3><img src='14085230.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if padding_mask is not None:
+            x = x * (1.0 - padding_mask.unsqueeze(1).type_as(x))
+
+        <a id="change">assert </a>not self.bidirectional or state is None, &quotBidirectional EMA does not support incremental state&quot
+        if state is not None:
+            saved_state = self._get_input_buffer(state)
+            if &quotprev_state&quot in saved_state:</code></pre><h3>After Change</h3><pre><code class='java'>
+            u_f = torch.fft.rfft(u_.float(), n=2 * l_fft)
+            y = torch.fft.irfft(u_f * k_f, n=2 * l_fft)[..., s:s + L]  &#47&#47 (B H L)
+            y = y.type_as(u)
+            y = y + u * <a id="change">self.omega.unsqueeze(-1</a><a id="change">)</a>  &#47&#47 (B H L)
+            y = y.transpose(-1, -2)
+
+        return y, None  &#47&#47 empty state</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hazyresearch/state-spaces/commit/b766e8779997046a5b3bad674e89625e8963b0d2#diff-d7b58df235ff1945808734565a8bcc0d8d84e0aa307811ab1720b7d09adb23aaL112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14085230</div><div id='project'> Project Name: hazyresearch/state-spaces</div><div id='commit'> Commit Name: b766e8779997046a5b3bad674e89625e8963b0d2</div><div id='time'> Time: 2022-11-18</div><div id='author'> Author: albertfgu@gmail.com</div><div id='file'> File Name: src/models/sequence/ss/ema.py</div><div id='m_class'> M Class Name: MultiHeadEMA</div><div id='n_method'> N Class Name: MultiHeadEMA</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/ss/ema.py</div><div id='n_file'> N File Name: src/models/sequence/ss/ema.py</div><div id='m_start'> M Start Line: 166</div><div id='m_end'> M End Line: 223</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.mode == &quotmean&quot:
+            output_gather = output_gather / self.num_groups
+
+        <a id="change">assert </a>output_gather.shape == (x.size(0), self.embedding_dim)
+        return output_gather
+
+    @classmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, offsets=None):
+        if offsets is not None:
+            x = x + <a id="change">x.new_tensor(offsets).unsqueeze(0</a><a id="change">)</a>
+
+        &#47&#47 Get the quotient index.
+        quotient_index = torch.div(x, self.num_buckets, rounding_mode=&quotfloor&quot)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hpcaitech/freqcacheembedding/commit/75d72b0e5f06fab8de506a7d037007b3b7c1a45f#diff-d6c9824fef810cc69d79a2e0113e776c592913467f2f2eede5f595d36a10fd6cL711' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14085228</div><div id='project'> Project Name: hpcaitech/freqcacheembedding</div><div id='commit'> Commit Name: 75d72b0e5f06fab8de506a7d037007b3b7c1a45f</div><div id='time'> Time: 2022-07-29</div><div id='author'> Author: e0496101@u.nus.edu</div><div id='file'> File Name: recsys/modules/embeddings/parallel_embeddings.py</div><div id='m_class'> M Class Name: ParallelMixVocabEmbeddingBag</div><div id='n_method'> N Class Name: ParallelQREmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: recsys/modules/embeddings/parallel_embeddings.py</div><div id='n_file'> N File Name: recsys/modules/embeddings/parallel_embeddings.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 721</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 322</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs = inputs.reshape(B, inputs.size(1) // self.r, -1)
+            <a id="change">assert </a>inputs.size(-1) == self.mel_dim * self.r
+            T_decoder = inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14085229</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    break
+
+        &#47&#47 Validation check
+        <a id="change">assert </a>greedy or len(mel_outputs) == T_decoder
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14085227</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

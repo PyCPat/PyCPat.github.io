@@ -1,18 +1,0 @@
-<link rel="stylesheet" href="../default.css">
-<script src="../highlight.pack.js"></script> 
-<script>hljs.initHighlightingOnLoad();</script>
-<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        &#47&#47 assert hidden_size % num_attention_heads == 0  &#47&#47 旧逻辑，t5_pegasus_small中不可以整除
-        &#47&#47 兼容t5_pegasus_small
-        if kwargs.get(&quotattention_head_size&quot):
-            self.attention_head_size = <a id="change">kwargs.get(&quotattention_head_size&quot</a><a id="change">)</a>
-        else:
-            self.attention_head_size = int(hidden_size / num_attention_heads)
-</code></pre><h3>After Change</h3><pre><code class='java'>
-        &#47&#47 t5_pegasus_small中hidden_size/num_attention_heads != 0
-        &#47&#47 苏神的roberta small中qk的维度和v不同
-        self.attention_head_size = kwargs.get(&quotattention_head_size&quot, int(hidden_size/num_attention_heads))
-        self.attention_key_size = <a id="change">kwargs.get(&quotattention_key_size&quot</a>, self.attention_head_size<a id="change">)</a>
-        self.qk_inner_dim = self.attention_key_size * self.num_attention_heads
-        self.v_inner_dim = self.attention_head_size * self.num_attention_heads
-</code></pre>

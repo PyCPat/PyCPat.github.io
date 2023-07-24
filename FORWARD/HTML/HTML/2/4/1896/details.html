@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :1896
+</h3><img src='13332906.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        :return: (torch.Tensor) Normalized output tensor
+        
+        &#47&#47 Perform normalization
+        output = (input - input.mean(dim=(0, 2, 3), keepdim=True))<a id="change"> / </a>(<a id="change">input.std(dim=(0, 2, 3), keepdim=True) + </a>1e-08)
+        &#47&#47 Get affine parameters
+        scale = self.linear_scale(class_id)
+        bias = self.linear_bias(class_id)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Perform normalization
+        output = self.batch_norm(input)
+        &#47&#47 Get affine parameters
+        scale<a id="change">, bias</a> = self.embedding(class_id.argmax(dim=-1, keepdim=False)).chunk(chunks=2, dim=1)
+        scale = scale.view(scale.shape[0], scale.shape[-1], 1, 1)
+        bias = bias.view(bias.shape[0], bias.shape[-1], 1, 1)
+        &#47&#47 Apply affine parameters</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/christophreich1996/semantic_pyramid_for_image_generation/commit/8d56a34edd21d5874a8d45af97eba926a6f171c0#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL446' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13332906</div><div id='project'> Project Name: christophreich1996/semantic_pyramid_for_image_generation</div><div id='commit'> Commit Name: 8d56a34edd21d5874a8d45af97eba926a6f171c0</div><div id='time'> Time: 2021-03-29</div><div id='author'> Author: 34400551+ChristophReich1996@users.noreply.github.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: ConditionalBatchNorm</div><div id='n_method'> N Class Name: ConditionalBatchNorm</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 446</div><div id='m_end'> M End Line: 449</div><div id='n_start'> N Start Line: 496</div><div id='n_end'> N End Line: 498</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                mask = self.max_pooling_1d(mask.unsqueeze(dim=1))
+            &#47&#47 Normalize features
+            union = torch.cat((feature_real, feature_fake), dim=0)
+            feature_real = (feature_real - union.mean())<a id="change"> / </a>(<a id="change">union.std() + </a>1e-08)
+            feature_fake = (feature_fake - union.mean()) / (union.std() + 1e-08)
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask = self.max_pooling_1d(mask.unsqueeze(dim=1))
+            &#47&#47 Normalize features
+            union = torch.cat((feature_real, feature_fake), dim=0)
+            feature_real<a id="change">, feature_fake</a> = kornia.normalize_min_max(union).split(split_size=feature_fake.shape[0], dim=0)
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))
+        return loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/christophreich1996/semantic_pyramid_for_image_generation/commit/0a8e0e5794c79bd5af543642790ac24568160288#diff-522b878e6c6320760247a3dfcdd4cc8c07e403a856a57a7f3c5b0309c21a295cL30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13332904</div><div id='project'> Project Name: christophreich1996/semantic_pyramid_for_image_generation</div><div id='commit'> Commit Name: 0a8e0e5794c79bd5af543642790ac24568160288</div><div id='time'> Time: 2021-03-20</div><div id='author'> Author: 34400551+ChristophReich1996@users.noreply.github.com</div><div id='file'> File Name: lossfunction.py</div><div id='m_class'> M Class Name: SemanticReconstructionLoss</div><div id='n_method'> N Class Name: SemanticReconstructionLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lossfunction.py</div><div id='n_file'> N File Name: lossfunction.py</div><div id='m_start'> M Start Line: 46</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            logit = self._select(x)
+
+            logit = logit - logit.mean(1, keepdim=True)
+            logit = logit / <a id="change">logit.std(</a>1<a id="change">, keepdim=True)</a>
+
+            meanLogit = logit.detach().mean(1)
+
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)
+            randomFalseMask *= -1e9
+            bernoulli = Bernoulli(logits=-meanLogit - 3.0)
+            randomTrueMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)
+            randomTrueMask *= 1e9
+            maskedLogit = logit<a id="change"> + randomFalseMask + </a>randomTrueMask
+
+            sample = F.gumbel_softmax(maskedLogit, temp, True)
+            &#47&#47 [1, k, c]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [k]
+            bernoulli = Bernoulli(probs=maskProb)
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n<a id="change">, h*w</a>, )).bool()
+
+            maskedLogit = logit.masked_fill(randomFalseMask, -1e9)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/ff056abb47b531e42496967adda543c562e1cefd#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L504' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13332898</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: ff056abb47b531e42496967adda543c562e1cefd</div><div id='time'> Time: 2021-05-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 505</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 508</div><div id='n_end'> N End Line: 554</div><BR>

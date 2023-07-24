@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, target: Dict[str, torch.Tensor]):
+        class_out, box_out = self.model(x)
+        cls_targets, box_targets, num_positives = self.anchor_labeler.batch_label_anchors(
+            <a id="change">x.shape[0]</a>, target[&quotbbox&quot], target[&quotcls&quot])
+        loss, class_loss, box_loss = self.loss_fn(class_out, box_out, cls_targets, box_targets, num_positives)
+        output = dict(loss=loss, class_loss=class_loss, box_loss=box_loss)
+        if not self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, target: Dict[str, torch.Tensor]):
+        class_out, box_out = self.model(x)
+        <a id="change">if </a>self.anchor_labeler is None<a id="change">:
+            &#47&#47 target should contain pre-computed anchor labels
+            </a>assert &quotlabel_num_positives&quot in target
+            cls_targets<a id="change"> = </a><a id="change">[target[f&quotlabel_cls_{l}&quot] for l in range(self.config.num_levels)]</a>
+            box_targets = [target[f&quotlabel_bbox_{l}&quot] for l in range(self.config.num_levels)]
+            num_positives<a id="change"> = target[&quotlabel_num_positives&quot]</a>
+        else:
+            cls_targets, box_targets, num_positives = self.anchor_labeler.batch_label_anchors(
+                target[&quotbbox&quot], target[&quotcls&quot])
+</code></pre>

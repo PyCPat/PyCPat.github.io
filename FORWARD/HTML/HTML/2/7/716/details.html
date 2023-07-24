@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :716
+</h3><img src='2714824.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 use 0 as bos
+
+        seq = F.pad(seq, (1<a id="change">, 0</a>), value = 0)
+
+        &#47&#47 if training, derive labels
+
+        if return_loss:
+            seq, labels = seq[:, :-1], seq[:, 1:]
+
+        &#47&#47 embed both sequence and retrieved chunks
+
+        embed = self.token_emb(seq)
+        retrieved = self.token_emb(retrieved)
+
+        &#47&#47 get positional embedding
+
+        pos_emb = self.pos_emb(torch.arange(n, device = device))
+        pos_emb = rearrange(pos_emb, &quotn d -&gt; 1 n d&quot)
+        embed<a id="change"> = </a>embed + pos_emb
+
+        logits<a id="change"> = </a>self.to_logits(embed)
+
+        if not return_loss:
+            return logits
+
+        loss<a id="change"> = </a><a id="change">F.cross_entropy(</a>rearrange(logits, &quotb n c -&gt; b c n&quot), labels<a id="change">)</a>
+        <a id="change">return </a>loss
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/e737b0c407799969e66abe02d9071e6459c629a0#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2714824</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: e737b0c407799969e66abe02d9071e6459c629a0</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: RETRO</div><div id='n_method'> N Class Name: RETRO</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 15</div><div id='m_end'> M End Line: 16</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mask = F.pad(mask, (0, self.image_seq_len), value = True)
+
+        out = self.transformer(tokens, mask = mask)
+        <a id="change">return </a>self.to_logits(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            return out
+
+        offsetted_image = image + self.num_text_tokens
+        labels<a id="change"> = </a>torch.cat((text<a id="change">, offsetted_image</a>), dim = 1)
+        labels<a id="change"> = </a>F.pad(labels, (0, 1), value = (self.total_tokens - 1)) &#47&#47 last token predicts EOS
+        loss<a id="change"> = </a><a id="change">F.cross_entropy(</a>out.transpose(1, 2), labels[:, 1:]<a id="change">)</a>
+        <a id="change">return </a>loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/fa7ab5506002acc0704b3ea6e85fdfc2d5f9a2d4#diff-7fee3463af42e34e03d754e24fa9b24e3cde98aae198d2cb45f200d6da301016L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2714826</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: fa7ab5506002acc0704b3ea6e85fdfc2d5f9a2d4</div><div id='time'> Time: 2021-01-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/dalle_pytorch.py</div><div id='m_class'> M Class Name: DALLE</div><div id='n_method'> N Class Name: DALLE</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/dalle_pytorch.py</div><div id='n_file'> N File Name: dalle_pytorch/dalle_pytorch.py</div><div id='m_start'> M Start Line: 172</div><div id='m_end'> M End Line: 173</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 188</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        tokens = tokens + rearrange(pos_emb, &quotn d -&gt; 1 n d&quot)
+
+        text_embeds = self.text_transformer(tokens, mask = text_mask)
+        <a id="change">return </a>text_embeds
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        frame_embeddings = self.video_pos_emb(frame_embeddings) + frame_embeddings
+
+        bos = repeat(self.video_bos, &quotd -&gt; b 1 d&quot, b = batch)
+        frame_embeddings = torch.cat((bos<a id="change">, frame_embeddings</a>), dim = 1)
+        frame_embeddings<a id="change"> = </a>self.video_transformer(frame_embeddings)
+
+        logits<a id="change"> = </a>self.to_logits(frame_embeddings)
+
+        if not return_loss:
+            return logits
+
+        loss<a id="change"> = </a><a id="change">F.cross_entropy(</a>rearrange(logits, &quotb n c -&gt; b c n&quot), frame_indices<a id="change">)</a>
+        <a id="change">return </a>loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/daeefa2be5de809f9003a5333dad62183cf819f7#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL210' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2714796</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: daeefa2be5de809f9003a5333dad62183cf819f7</div><div id='time'> Time: 2021-12-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: NUWA</div><div id='n_method'> N Class Name: NUWA</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 227</div><div id='n_start'> N Start Line: 270</div><div id='n_end'> N End Line: 296</div><BR>

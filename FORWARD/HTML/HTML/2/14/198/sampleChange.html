@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        uc = uc1 + uc3
+        uc = F.gelu(uc)
+
+        uc1<a id="change"> = </a>self.conv1(uc)
+        uc2 = self.w1(uc)
+        uc3 = self.b1(grid)
+        uc<a id="change"> = </a>uc1<a id="change"> + uc2 + </a>uc3
+        uc<a id="change"> = </a><a id="change">F.gelu(</a>uc<a id="change">)</a>
+
+        uc1<a id="change"> = </a>self.conv2(uc)
+        uc2<a id="change"> = </a>self.w2(uc)
+        uc3 = self.b2(grid)
+        uc = uc1<a id="change"> + uc2 + </a>uc3
+        uc = F.gelu(uc)
+
+        uc1 = self.conv3(uc)
+        uc2<a id="change"> = </a>self.w3(uc)
+        uc3 = self.b3(grid)
+        uc = uc1 + uc2 + uc3
+        uc = F.gelu(uc)</code></pre><h3>After Change</h3><pre><code class='java'>
+        uc = uc1 + uc3
+        uc = F.gelu(uc)
+
+        <a id="change">for i</a> in <a id="change">range(</a>1, self.n_layers<a id="change">)</a><a id="change">:
+            </a>uc1<a id="change"> = </a>self.convs[i](uc)
+            uc2 = self.ws[i-1](uc)
+            uc3 = self.bs[i](grid)
+            uc = uc1 + uc2 + uc3</code></pre>

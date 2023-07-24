@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        embeddings = self.embedding(encoded_captions)  &#47&#47 (batch_size, max_caption_length, embed_dim)
+
+        &#47&#47 初始化LSTM状态
+        h<a id="change">, c</a> = self.init_hidden_state(encoder_out)  &#47&#47 (batch_size, decoder_dim)
+
+        &#47&#47 我们一旦生成了&lt;end&gt;就已经完成了解码
+        &#47&#47 因此需要解码的长度实际是 lengths - 1</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47     torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+            &#47&#47     (h[:batch_size_t], c[:batch_size_t]))  &#47&#47 (batch_size_t, decoder_dim)
+            &#47&#47teahcer forcing
+            <a id="change">if t==1</a><a id="change"> or (np.random.rand() &lt; self.p) :
+                </a>h = self.decode_step(
+                    torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            else:
+                h<a id="change"> = </a>self.decode_step(
+                    torch.cat([self.embedding(torch.argmax(predictions[:batch_size_t, t, :],dim = 1)), attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)</code></pre>

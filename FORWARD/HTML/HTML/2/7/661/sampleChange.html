@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        block_forecasts = torch.stack(block_forecasts)
+        block_forecasts = block_forecasts.permute(1, 0, 2)
+
+        <a id="change">return </a>forecast, block_forecasts
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        encoder_mask = encoder_mask.unsqueeze(-1)
+
+        level = encoder_y[:, -1:].repeat(1, decoder_x_t.size(1), 1)  &#47&#47 Level with Naive1
+        block_forecasts<a id="change"> = </a>[level]
+        block_backcasts = [<a id="change">encoder_y[:, -1:]</a>.repeat(1, encoder_y.size(1), 1)]
+
+        forecast = level
+        for block in self.blocks:
+            block_backcast, block_forecast = block(
+                encoder_y=residuals, encoder_x_t=encoder_x_t, decoder_x_t=decoder_x_t, x_s=x_s
+            )
+            residuals = (residuals - block_backcast) * encoder_mask
+
+            forecast = forecast + block_forecast
+            block_forecasts.append(block_forecast)
+            block_backcasts.append(block_backcast)
+
+        &#47&#47 (n_batch, n_t, n_outputs, n_blocks)
+        block_forecasts = torch.stack(block_forecasts, dim=-1)
+        block_backcasts = torch.stack(block_backcasts, dim=-1)
+        backcast<a id="change"> = </a>residuals
+
+        <a id="change">return </a>forecast<a id="change">, backcast, block_forecasts, block_backcasts</a>
+</code></pre>

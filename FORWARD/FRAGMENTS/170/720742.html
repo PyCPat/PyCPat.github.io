@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.dense_block(input)
+        x = self.bottleneck_conv2d(x)
+        x = x.squeeze(dim=1)
+        x<a id="change"> = </a><a id="change">x.permute(0, 2, 1).contiguous()</a>
+        x, _ = self.rnn(x)
+        x = self.linear(x)
+        x = x.view(batch_size, W, out_channels, H)
+        output = x.permute(0, 2, 3, 1).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_rnn = x_rnn.view(batch_size, W, 1, H)
+        x_rnn = x_rnn.permute(0, 2, 3, 1).contiguous()
+
+        output = <a id="change">torch.cat(</a>[x, x_rnn]<a id="change">, dim=1)</a>
+
+        return output
+
+class RNNBeforeDenseBlock(nn.Module):</code></pre>

@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = torch.matmul(w.transpose(1, 2), encoder_outputs)
+
+        <a id="change">return </a>out, w
+
+
+class DurationPredictor(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        c = c.unsqueeze(2)
+        s = self.range_param_predictor(encoder_outputs, duration, mask).unsqueeze(-1)
+
+        g = <a id="change">torch.distributions.normal.Normal(loc=c, scale=s)</a>
+
+        w = self.get_alignment_energies(g, t)  &#47&#47 [B, L, T]
+
+        if mask is not None:
+            w = w.masked_fill(mask.unsqueeze(-1), 0.0)
+
+        attn = w / (torch.sum(w, dim=1).unsqueeze(1) + 1e-8)  &#47&#47 [B, L, T]
+        out = torch.bmm(attn.transpose(1, 2), encoder_outputs)
+
+        <a id="change">return </a>out, attn
+
+
+class DurationPredictor(nn.Module):</code></pre>

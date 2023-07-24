@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = laplace_smoothing(self.cluster_size, self.codebook_size, self.eps) * self.cluster_size.sum()
+            embed_normalized = self.embed_avg / <a id="change">cluster_size.unsqueeze(1</a><a id="change">)</a>
+            self.embed.data.copy_(embed_normalized)
+            self.expire_codes_(x)
+
+        return quantize, embed_ind</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+
+        embed = <a id="change">rearrange(</a>embed, <a id="change">&quot... n d -&gt; ... d n&quot</a><a id="change">)</a>
+
+        dist = -(
+            (flatten ** 2).sum(dim = -1, keepdim=True)
+            - 2 * flatten @ embed</code></pre>

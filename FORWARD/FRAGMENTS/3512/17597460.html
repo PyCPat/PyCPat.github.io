@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            video = torch.cat([image.unsqueeze(2), video], dim=2)  &#47&#47 1 x 64 x 21 x 16 x 16
+        else:
+            video = image.unsqueeze(2)
+        video = video.view(*<a id="change">video.shape[:3]</a>, -1).permute(0, 2, 3, 1)  &#47&#47 B x T x (H x W) x C -&gt; 1 x 21 x (16*16) x 64
+        video = self.attention(video)  &#47&#47 1 x 21 x 256 x 64
+        return video
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        video = torch.cat([self.learned_frame.unsqueeze(0), image.unsqueeze(2), video], dim=2)
+        video = self.stem(video)
+        s = None
+        if <a id="change">len(</a>self.encoder<a id="change">)</a> &gt; 0:
+            for block, remapper in zip(self.encoder, self.remapper):
+                if block.scaler is not None:
+                    prev_s = nn.functional.interpolate(video, scale_factor=(1, 0.5, 0.5), recompute_scale_factor=False)</code></pre>

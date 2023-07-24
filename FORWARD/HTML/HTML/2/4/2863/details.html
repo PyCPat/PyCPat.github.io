@@ -1,0 +1,111 @@
+<html><h3>Pattern ID :2863
+</h3><img src='15757252.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding<a id="change"> = </a>[]
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                <a id="change">combined_embedding.append(
+                    </a>self.combining_function(trial_embeddings, dim=0)<a id="change">
+                )</a>
+
+            combined_embedding = torch.stack(combined_embedding, dim=0)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(</a>-1<a id="change">)</a>[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1)  &#47&#47 make it (batch, 1) to match embeddings below
+        )
+        &#47&#47 number of non-nan trials
+        trial_counts = max_num_trials - nan_counts
+
+        &#47&#47 get nan entries
+        is_nan = torch.isnan(x)
+        &#47&#47 apply trial net with nan entries replaced with 0
+        masked_x = torch.nan_to_num(x, nan=0.0)
+        trial_embeddings = self.trial_net(masked_x)
+        &#47&#47 replace previous nan entries with zeros
+        trial_embeddings = trial_embeddings * (~is_nan.all(-1, keepdim=True)).float()
+
+        &#47&#47 Take mean over permutation dimension divide by number of trials
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding<a id="change"> = </a>(
+                trial_embeddings.sum(dim=self.aggregation_dim) / trial_counts
+            )
+        else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L274' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15757252</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, latents, coeff, transform):
+        quantizeds = list()
+        codes = list()
+        logits<a id="change"> = </a>list()
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            if True:
+                encoderIn = self._position(encoderIn).reshape(-1, n, c)
+                &#47&#47 encoderIn = encoderIn.reshape(-1, n, c)
+                &#47&#47 [h*w, n, c]
+                x = self._encoder(encoderIn)
+            else:
+                x = encoderIn.reshape(-1, n ,c)
+            &#47&#47 similar to scaled dot-product attention
+            &#47&#47 [h*w, N, c]
+            quantized, sample, logit = self._attention(x, i, False)
+            if True:
+                &#47&#47 [h*w, n, c]
+                posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+                deTransformed = self._decoder(posistedQuantized, posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed = quantized.reshape(h, w, n, c).permute(2, 3, 0, 1)
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            <a id="change">logits.append(</a>logit.permute(1, 0, 2).reshape(n, h, w, k)<a id="change">)</a>
+        return quantizeds, codes, logits
+
+
+class TransformerQuantizerRein(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            samples<a id="change"> = </a>[<a id="change">s.argmax(-1).permute(1, 0).reshape(</a>n, h, w<a id="change">)</a> for s in samples]
+            logits = [l.permute(1, 0, 2).reshape(n, h, w, k) for l in logits]
+            &#47&#47 codes.append(samples.argmax(-1).permute(1, 0).reshape(n, h, w))
+            &#47&#47 logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/36075d9c06641e76ffab1b363262368618d53912#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15757256</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 36075d9c06641e76ffab1b363262368618d53912</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, num_of_vertices, in_channels, num_of_timesteps = x.shape
+        data = Data(edge_index=edge_index, edge_attr=None, num_nodes=num_nodes)
+        lambda_max = LaplacianLambdaMax()(data).lambda_max
+        outputs<a id="change"> = </a>[]
+        for time_step in range(num_of_timesteps):
+            <a id="change">outputs.append(</a>torch.unsqueeze(self.cheb_conv(x=x[:,:,:,time_step], edge_index=edge_index,
+                batch = batch_size, lambda_max=lambda_max), -1)<a id="change">)</a>
+
+        spatial_gcn = F.relu(torch.cat(outputs, dim=-1)) &#47&#47 (b,N,F,T)
+
+        &#47&#47 convolution along the time axis</code></pre><h3>After Change</h3><pre><code class='java'>
+        tmp = tmp.permute(2,0,1) &#47&#47 (B*T_in, N_nodes, F_in)
+        output = F.relu(self.cheb_conv(x=tmp, edge_index=edge_index,
+                batch = batch_size*num_of_timesteps, lambda_max=lambda_max))
+        spatial_gcn<a id="change"> = </a><a id="change">output.permute(1,2,0).reshape(</a>num_of_vertices,self.nb_time_filter,batch_size,num_of_timesteps<a id="change">)</a>.permute(2,0,1,3) &#47&#47 (B,N_nodes,F_out,T_in)
+
+        &#47&#47 convolution along the time axis
+        time_conv_output = self.time_conv(spatial_gcn.permute(0, 2, 1, 3))  &#47&#47 (b,F,N,T)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/509a541a01913f5b45859b801c48b5fd264bd94a#diff-21666376be83b64a4fa768847ddfc3e4e7076772ef843870e346158dd7205045L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15757257</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 509a541a01913f5b45859b801c48b5fd264bd94a</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: He_YX@outlook.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='m_class'> M Class Name: MSTGCN_block</div><div id='n_method'> N Class Name: MSTGCN_block</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 48</div><BR>

@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :223
+</h3><img src='849805.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                             f&quotlarger than num_joints ({num_joints}).&quot)
+        heatmaps_pred = output.reshape(
+            (batch_size, num_joints, -1)).split(1, 1)
+        heatmaps_gt = <a id="change">target.reshape((batch_size, num_joints, -1)).split(</a>1, <a id="change">1</a><a id="change">)</a>
+
+        losses = []
+        for idx in range(num_joints):
+            heatmap_pred = heatmaps_pred[idx].squeeze(1)
+            heatmap_gt = <a id="change">heatmaps_gt[idx].squeeze(1</a><a id="change">)</a>
+            if self.use_target_weight:
+                target_weight = target_weights[:, idx, None]
+                losses.append(
+                    self.criterion(heatmap_pred * target_weight,</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.criterion(output[:, idx] * target_weight,
+                                   target[:, idx] * target_weight))
+            else:
+                losses.append(self.criterion(output[:, idx], <a id="change">target[:, idx]</a>))
+
+        losses = [loss.mean(dim=(1, 2)).unsqueeze(dim=1) for loss in losses]
+        losses = torch.cat(losses, dim=1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmpose/commit/23954dab675977d9762e61680a0b4a02ee2479f9#diff-6f7db4195f9b076c0397f3e806a1d54846e879457f4c56d5ba72f47b550dfcdfL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 849805</div><div id='project'> Project Name: open-mmlab/mmpose</div><div id='commit'> Commit Name: 23954dab675977d9762e61680a0b4a02ee2479f9</div><div id='time'> Time: 2022-08-02</div><div id='author'> Author: 87690686+liqikai9@users.noreply.github.com</div><div id='file'> File Name: mmpose/models/losses/mse_loss.py</div><div id='m_class'> M Class Name: KeypointOHKMMSELoss</div><div id='n_method'> N Class Name: KeypointOHKMMSELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmpose/models/losses/mse_loss.py</div><div id='n_file'> N File Name: mmpose/models/losses/mse_loss.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 209</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size = output.size(0)
+        num_joints = output.size(1)
+
+        heatmaps_pred = <a id="change">output.reshape(
+            (batch_size, num_joints, -1)).split(1</a>, 1<a id="change">)</a>
+        heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+
+        loss = 0.
+
+        for idx in range(num_joints):
+            heatmap_pred = <a id="change">heatmaps_pred[idx].squeeze(1</a><a id="change">)</a>
+            heatmap_gt = heatmaps_gt[idx].squeeze(1)
+            target_weight = target_weights[:, idx, None]
+            if self.use_target_weight:
+                loss += self.criterion(heatmap_pred * target_weight,</code></pre><h3>After Change</h3><pre><code class='java'>
+            Tensor: The calculated loss.
+        
+        if self.use_target_weight:
+            loss = self.criterion(output * <a id="change">target_weights[..., None, None]</a>,
+                                  target * target_weights[..., None, None])
+        else:
+            loss = self.criterion(output, target)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmpose/commit/23954dab675977d9762e61680a0b4a02ee2479f9#diff-6f7db4195f9b076c0397f3e806a1d54846e879457f4c56d5ba72f47b550dfcdfL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 849797</div><div id='project'> Project Name: open-mmlab/mmpose</div><div id='commit'> Commit Name: 23954dab675977d9762e61680a0b4a02ee2479f9</div><div id='time'> Time: 2022-08-02</div><div id='author'> Author: 87690686+liqikai9@users.noreply.github.com</div><div id='file'> File Name: mmpose/models/losses/mse_loss.py</div><div id='m_class'> M Class Name: KeypointMSELoss</div><div id='n_method'> N Class Name: KeypointMSELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmpose/models/losses/mse_loss.py</div><div id='n_file'> N File Name: mmpose/models/losses/mse_loss.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        g = g.local_var()
+        if self.use_weight:
+            weight = self.basis() if self.use_basis else self.weight
+            wdict = {self.rel_names[i]: {&quotweight&quot: <a id="change">w.squeeze(0</a><a id="change">)</a>}
+                     for i, w in enumerate(<a id="change">th.split(</a>weight, <a id="change">1</a><a id="change">, dim=0)</a>)}
+        else:
+            wdict = {}
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        h_dict = self.conv(g, h_dict)
+        out_put = {}
+        for n_type, h in h_dict.items():
+            <a id="change">out_put[n_type]</a> = h.squeeze()
+        return out_put</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/2b130ff0cd0fbbebda2e07166b048edfc9a63ed2#diff-479e9e5e220b1988d7aba6fec6d6ca5f50a1556fbb4efa423ebf6c1510641a84L95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 849799</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 2b130ff0cd0fbbebda2e07166b048edfc9a63ed2</div><div id='time'> Time: 2021-09-11</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/models/RGAT.py</div><div id='m_class'> M Class Name: RGATLayer</div><div id='n_method'> N Class Name: RGATLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/RGAT.py</div><div id='n_file'> N File Name: openhgnn/models/RGAT.py</div><div id='m_start'> M Start Line: 108</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 68</div><BR>

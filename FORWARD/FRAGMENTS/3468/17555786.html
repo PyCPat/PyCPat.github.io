@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        elif derivative == 2:
+
+            dr = <a id="change">self.extract_tri_up(self.edist(
+                pos, derivative=1)).view(</a>nbatch, <a id="change">3</a>, <a id="change">-1</a><a id="change">)</a>
+            d2r = self.extract_tri_up(self.edist(
+                pos, derivative=2)).view(nbatch, 3, -1)
+
+            return self._jastrow_second_derivative(r, dr, d2r, jast)</code></pre><h3>After Change</h3><pre><code class='java'>
+            dr = self.edist(pos, derivative=1)
+            d2r = self.edist(pos, derivative=2).view(nbatch, 3, -1)
+
+            return(<a id="change">jast.prod(-1).prod(-1).unsqueeze(-1</a><a id="change">)</a>,
+                   self._jastrow_derivative(r, dr, jast, jacobian),
+                   self._jastrow_second_derivative(r, dr, d2r, jast))
+</code></pre>

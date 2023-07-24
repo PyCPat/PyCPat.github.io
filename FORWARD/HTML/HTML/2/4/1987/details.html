@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1987
+</h3><img src='13676454.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, n, device):
+        t = torch.arange(n, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = <a id="change">torch.cat(</a>(sinusoid_inp.sin()<a id="change">, sinusoid_inp.cos()</a>)<a id="change">, dim=-1)</a>
+        return rearrange(emb, &quoti j -&gt; () i j&quot)
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, n, device):
+        seq = torch.arange(n, device = device).type_as(self.inv_freq)
+        freqs = einsum(&quoti , j -&gt; i j&quot, seq, self.inv_freq)
+        freqs = <a id="change">repeat(</a>freqs, <a id="change">&quoti j -&gt; () i (j r)&quot</a><a id="change">, r = 2)</a>
+        return [freqs.sin(), freqs.cos()]
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/9be6fd958ff5432932845aa3f1f9a23f4b203199#diff-46753fec5461ebc4d150c2c0a150758924540bc61b06a15759dbf2721ce48677L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13676454</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 9be6fd958ff5432932845aa3f1f9a23f4b203199</div><div id='time'> Time: 2021-04-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/rotary.py</div><div id='m_class'> M Class Name: FixedPositionalEmbedding</div><div id='n_method'> N Class Name: FixedPositionalEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/rotary.py</div><div id='n_file'> N File Name: alphafold2_pytorch/rotary.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, t):
+        freqs = t[..., None].float() * self.inv_freq[None, :]
+        emb = <a id="change">torch.cat(</a>(freqs<a id="change">, freqs</a>)<a id="change">, dim = -1)</a>
+        return emb
+
+def rotate_half(x):
+    x = rearrange(x, &quot... (j d) m -&gt; ... j d m&quot, j = 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, t):
+        freqs = t[..., None].float() * self.inv_freq[None, :]
+        return <a id="change">repeat(</a>freqs, <a id="change">&quot... d -&gt; ... (d r)&quot</a><a id="change">, r = 2)</a>
+
+def rotate_half(x):
+    x = rearrange(x, &quot... (d j) m -&gt; ... d j m&quot, j = 2)
+    x1, x2 = x.unbind(dim = -2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/se3-transformer-pytorch/commit/d73d49946156b5a0d5a7b1314d6ed9238349f087#diff-975b6d5436065c949249c0fbb23710b3fe5e7a2267fe3d55c441db645bcfd803L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13676455</div><div id='project'> Project Name: lucidrains/se3-transformer-pytorch</div><div id='commit'> Commit Name: d73d49946156b5a0d5a7b1314d6ed9238349f087</div><div id='time'> Time: 2021-05-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: se3_transformer_pytorch/rotary.py</div><div id='m_class'> M Class Name: SinusoidalEmbeddings</div><div id='n_method'> N Class Name: SinusoidalEmbeddings</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: se3_transformer_pytorch/rotary.py</div><div id='n_file'> N File Name: se3_transformer_pytorch/rotary.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 14</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 13</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, seq_len):
+        pos = torch.arange(seq_len, dtype=self.inv_freq.dtype, device=self.inv_freq.device)
+        pos_enc = torch.outer(pos, self.inv_freq)
+        return <a id="change">torch.cat(</a>(pos_enc<a id="change">, pos_enc</a>)<a id="change">, dim=-1)</a>
+
+
+class FourierPositionEncoding(nn.Module):
+    def __init__(self, input_shape: Tuple[int, ...], num_frequency_bands: int):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 outer product of positions and inverse frequencies
+        pos_enc = torch.einsum("p, f -&gt; p f", pos, self.inv_freq)
+        &#47&#47 for a single position p: [pf_1, pf_2, ..., pf_dim/2] -&gt; [pf_1, pf1, pf_2, pf_2..., pf_dim/2, pf_dim/2]
+        pos_enc = <a id="change">repeat(</a>pos_enc, <a id="change">"... pf -&gt; ... (pf r)"</a><a id="change">, r=2)</a>
+        &#47&#47 pos_enc.shape == (seq_len, dim)
+        return pos_enc
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/krasserm/perceiver-io/commit/93ff585454f4cc636112d9887a55633044edd3c1#diff-55daf9994723aa972364bd22f5354459171c899f449c08e1689d54c597f29943L46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13676456</div><div id='project'> Project Name: krasserm/perceiver-io</div><div id='commit'> Commit Name: 93ff585454f4cc636112d9887a55633044edd3c1</div><div id='time'> Time: 2022-12-11</div><div id='author'> Author: krasserm@googlemail.com</div><div id='file'> File Name: perceiver/model/core/position.py</div><div id='m_class'> M Class Name: FrequencyPositionEncoding</div><div id='n_method'> N Class Name: FrequencyPositionEncoding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver/model/core/position.py</div><div id='n_file'> N File Name: perceiver/model/core/position.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 63</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        q = repeat(q, &quotb h i d -&gt; b h i n d&quot, n = j)
+
+        edge_input = <a id="change">torch.cat(</a>(q<a id="change">, k, rel_dist</a>)<a id="change">, dim = -1)</a>
+
+        if exists(edges):
+            if exists(nbhd_indices):
+                edges = batched_index_select(edges, nbhd_indices, dim = 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+            rel_coors = batched_index_select(rel_coors, nbhd_indices, dim = 2)
+        else:
+            k = repeat(k, &quotb h j d -&gt; b h n j d&quot, n = n)
+            v = <a id="change">repeat(</a>v, <a id="change">&quotb h j d -&gt; b h n j d&quot</a><a id="change">, n = n)</a>
+
+        rel_dist_pos_emb = self.to_pos_emb(rel_dist)
+
+        &#47&#47 inject position into values</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/a8449dd45f8b7b872705db7a4053d3470ee4739b#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L152' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13676457</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: a8449dd45f8b7b872705db7a4053d3470ee4739b</div><div id='time'> Time: 2021-03-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EquivariantAttention</div><div id='n_method'> N Class Name: EquivariantAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 164</div><div id='m_end'> M End Line: 254</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 256</div><BR>

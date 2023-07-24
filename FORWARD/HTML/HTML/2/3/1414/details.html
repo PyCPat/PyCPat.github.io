@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1414
+</h3><img src='4842601.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mean_entity = mean_entity / (real_number)
+            tensor_list.append(mean_entity.reshape(1, -1))
+        tensor_mean = torch.cat(tensor_list, dim=0)
+        <a id="change">print(</a>&quottensor_mean:&quot, tensor_mean<a id="change">)</a> if debug else None
+
+        &#47&#47 print(&quotout.shape:&quot, out.shape) if debug else None
+        &#47&#47 out = out[:, :self.real_entities_size, :]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z = <a id="change">masked_out.sum(dim=1, keepdim=False)</a>
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>z / entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L716' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4842601</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 get the x,y,z, distance component of each point from each RBF center
+        &#47&#47 -&gt; (Nbatch,Nelec,Nrbf,Ndim)
+        xyz =  (input.view(-1,self.nelec,1,self.ndim) - self.bas_coords[None,...])
+        <a id="change">print(</a>xyz.shape<a id="change">)</a>
+
+        &#47&#47 compute the distance
+        &#47&#47 -&gt; (Nbatch,Nelec,Nrbf)
+        R = torch.sqrt((xyz**2).sum(3))</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.basis == &quotdz&quot:
+            nrbf = XY.shape[-1]
+            norb = int(nrbf/2)
+            XY<a id="change"> = </a><a id="change">XY.view(-1,self.nelec,2,norb).sum(</a>2<a id="change">)</a>
+
+        return XY
+
+if __name__ == "__main__":</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/ce1377a8a2603d0b0eb0889b5a292d77d0ea8bdc#diff-c4b696bab0338843e20e1b077a934f2c51ac9f11e89bdcc8c82af04b072cd569L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4842617</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: ce1377a8a2603d0b0eb0889b5a292d77d0ea8bdc</div><div id='time'> Time: 2019-07-11</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_class'> M Class Name: STO_SZ</div><div id='n_method'> N Class Name: STO</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='n_file'> N File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 93</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            dtype=torch.long,
+        )
+        print(sequence_length)
+        <a id="change">print(</a>torch_mask_time_indices.shape<a id="change">)</a>
+        print(negative_sample_indices.shape)
+
+        return (
+            self.model(</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Hence, if the number of required samples is higher than half of the
+        &#47&#47 total number of masked indices, we enforce it to become 50% of this
+        &#47&#47 value.
+        max_number_negative<a id="change"> = </a>(
+            <a id="change">torch_mask_time_indices.sum(dim=-1)</a>.min() // self.negative_threshold
+        )
+        if self.config.num_negatives &gt; max_number_negative:
+            dynamic_num_negatives = max_number_negative</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/fc71dfc14d8e7b570ed4bf77c9b6ca3d2684d706#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4842589</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: fc71dfc14d8e7b570ed4bf77c9b6ca3d2684d706</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 352</div><div id='m_end'> M End Line: 393</div><div id='n_start'> N Start Line: 362</div><div id='n_end'> N End Line: 382</div><BR>

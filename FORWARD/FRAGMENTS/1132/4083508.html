@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47----------------------------------------------------------------&#47&#47
+        giou        = self.box_giou(pred_boxes[y_true[..., 4] == 1], y_true[..., :4][y_true[..., 4] == 1])
+
+        loss_loc    = torch.sum((1 - giou)<a id="change"> * </a>box_loss_scale[y_true[..., 4] == 1])
+        &#47&#47-----------------------------------------------------------&#47&#47
+        &#47&#47   计算置信度的loss
+        &#47&#47-----------------------------------------------------------&#47&#47
+        loss_conf   = torch.sum(self.BCELoss(conf[y_true[..., 4] == 1], giou.detach().clamp(0)))<a id="change"> + \
+                      </a>torch.sum(self.BCELoss(conf, y_true[..., 4])<a id="change"> * </a>noobj_mask)
+        loss_cls    = torch.sum(self.BCELoss(pred_cls[y_true[..., 4] == 1], self.smooth_labels(y_true[..., 5:][y_true[..., 4] == 1], self.label_smoothing, self.num_classes)))
+
+        loss<a id="change">        = </a>loss_loc<a id="change"> * self.box_ratio + loss_conf * self.balance[l] </a>* self.obj_ratio + loss_cls * self.cls_ratio
+        num_pos = torch.sum(y_true[..., 4])
+        num_pos = torch.max(num_pos, <a id="change">torch.ones_like(</a>num_pos<a id="change">)</a>)
+        <a id="change">return </a>loss, num_pos
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre><h3>After Change</h3><pre><code class='java'>
+        if n != 0:
+            print(loss_loc * self.box_ratio, loss_cls * self.cls_ratio, loss_conf * self.balance[l] * self.obj_ratio)
+        loss        += loss_conf * self.balance[l] * self.obj_ratio
+        <a id="change">return </a>loss
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre>

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            assert y_anchor != None
+            assert x_anchor != None
+
+            <a id="change">if </a>self.collection_mode<a id="change">:
+                </a>self.collection(instance_means=x_mean, instnace_stds=x_std, y_anchors=y_anchor, x_anchors=x_anchor)
+
+            else:
+                assert x.shape[0] == 1 &#47&#47 currently, could support batch size = 1 for kernelized instance normalization
+                top, down, left, right = self.query_neighbors(y_anchor=y_anchor, x_anchor=x_anchor, padding=padding)
+                mean_matrix = self.mean_table[top:down + 1, left:right + 1, :]
+                std_matrix = self.std_table[top:down + 1, left:right + 1, :]
+                x_mean<a id="change"> = </a>mean_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel *  &#47&#47 should deal with the boundary
+                x_std = std_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel * 
+                &#47&#47x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                &#47&#47x_std = x_std.unsqueeze(-1).unsqueeze(-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                assert self.kernel.shape == x.mean.shape
+                x_mean = x_mean * self.kernel &#47&#47 1, C, H, W
+                x_std = x_std * self.kernel &#47&#47 1, C, H, W
+                x_mean = <a id="change">x_mean.flatten(start_dim=2)</a>.sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_std = x_std.flatten(start_dim=2).sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]</code></pre>

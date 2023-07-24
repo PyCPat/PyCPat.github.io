@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        scene_1 = self.convScene_1(scene)
+        scene_2 = self.convScene_2(scene_1)
+
+        <a id="change">for i</a> in range(dim_batch)<a id="change">:
+            </a>weight_read[i]<a id="change"> = </a>self.similarity(self.memory_past, state_past[:, i]).unsqueeze(0)
+
+        &#47&#47 weight_read[torch.arange(dim_batch)] = self.similarity(self.memory_past, state_past[:,torch.arange(dim_batch)]).unsqueeze(0)
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Cosine similarity
+        past_normalized = F.normalize(self.memory_past, p=2, dim=1)
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        weight_read<a id="change"> = </a>torch.matmul(past_normalized, <a id="change">state_normalized.transpose(0</a>,<a id="change">1</a><a id="change">)</a>).transpose(0,1)
+
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()
+</code></pre>

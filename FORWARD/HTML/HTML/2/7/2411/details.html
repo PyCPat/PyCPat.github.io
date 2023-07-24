@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :2411
+</h3><img src='14540125.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            batch, permutation_dim, -1
+        )
+
+        <a id="change">if self.combining_operation == "mean"</a><a id="change">:
+            </a>e<a id="change"> = </a>iid_embeddings.mean(dim=1)
+        elif self.combining_operation == "sum":
+            e = iid_embeddings.sum(dim=1)
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            combined_embedding = []
+            trial_counts = torch.zeros(batch, 1)
+            <a id="change">for </a>i in <a id="change">range(</a>batch<a id="change">):
+                &#47&#47 remove NaNs
+                </a>valid_x = x[i, ~torch.isnan(<a id="change">x[i, :, 0]</a>), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings<a id="change"> = </a>self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                combined_embedding.append(
+                    self.combining_function(trial_embeddings, dim=0)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/1352e77bdbc47aa4a4130679903b57672e48218c#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L271' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14540125</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 1352e77bdbc47aa4a4130679903b57672e48218c</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 304</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            <a id="change">if t == 0</a><a id="change">:
+                </a>gru_output<a id="change">, h_n = </a>self.rnn(x.unsqueeze(1))
+            else:
+                gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        &#47&#47 gru_output = gru_output.squeeze(1)
+        <a id="change">for </a>i in <a id="change">range(</a>gru_output.size(0)<a id="change">):
+            </a>hr<a id="change"> = </a>self.gru_fc_out(<a id="change">gru_output[i, :, :]</a>)
+        &#47&#47     &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr.flatten())
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/0f9fc9b96933c04f723fbfa5b80cdf1a398828c3#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14540108</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: 0f9fc9b96933c04f723fbfa5b80cdf1a398828c3</div><div id='time'> Time: 2021-03-14</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = (x - 0.5) / 0.5
+        shape = x.shape
+        n, c, h, w = shape
+        <a id="change">if c == 1</a><a id="change">:
+            </a>x<a id="change"> = </a>x.expand(1, 3, 1, 1)
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for </a>i in <a id="change">range(</a>self._levels<a id="change">):
+            </a>head = <a id="change">self._heads[i]</a>
+            z = head(latent)
+            if i &lt; self._levels - 1:
+                mapper<a id="change"> = </a>self._mappers[i]
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14540090</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            <a id="change">if i &lt; len(self.output_convs) - 1</a><a id="change">:
+                </a>out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out<a id="change"> = </a>self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)
+            outputs.append(conv(out))                                           &#47&#47 P4out = conv(P4in + P4td + resize(P3td))
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for </a>i in <a id="change">range(</a>self.num_levels - 2, -1 , -1<a id="change">):
+            </a>tds[i]<a id="change"> = </a>self.td_fuses[i]([<a id="change">x[i]</a>, self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14540114</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Reverse order, so if we stack MAFs, correct things happen.
+        z = z.flip(dims=(1,)) if self.parity else z
+        log_det = torch.sum(s, dim=1)
+        return z<a id="change">, log_det</a>
+
+    def inverse(self, z):
+        &#47&#47 we have to decode the x one at a time, sequentially
+        x = torch.zeros_like(z)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = torch.zeros_like(z)
+        log_det = torch.zeros(z.size(0))
+        z = z.flip(dims=(1,)) if self.parity else z
+        <a id="change">for i</a> in <a id="change">range(</a>self.dim<a id="change">):
+            </a>st = self.net(x.clone())  &#47&#47 clone to avoid in-place op errors if using IAF
+            s, t = st.split(self.dim, dim=1)
+            <a id="change">x[:, i]</a> = (z[:, i] - t[:, i]) * torch.exp(-<a id="change">s[:, i]</a>)
+            log_det<a id="change"> += </a>-s[:, i]
+        return x, log_det
+
+</code></pre>

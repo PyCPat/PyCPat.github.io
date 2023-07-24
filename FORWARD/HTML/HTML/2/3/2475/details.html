@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2475
+</h3><img src='14717088.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.emb = self.embedding(x)
+        if self.drop &lt; 1:
+            self.emb<a id="change"> = </a><a id="change">self.dropout(</a>self.emb<a id="change">)</a>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        for i, att_timesteps in enumerate(count):</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = torch.zeros((batch_size, time_steps, self.hidden_dim))
+
+        for cur_time in range(time_steps):
+            cur_x = <a id="change">x[:, : cur_time + 1, :]</a>
+            out[:, cur_time, :] = self.retain_encoder(cur_x)
+        return out
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14717088</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                x = self.activation(x)
+                &#47&#47 average pooling layer
+                x = self.avgpool(x)
+                x<a id="change"> = </a><a id="change">self.dropout(</a>x<a id="change">)</a>
+                &#47&#47 flatten for input to fully-connected layer
+                e = x.view(x.size(0), -1)
+        else:
+            x = self.conv1(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 assert x.shape[1:] == torch.Size([1280,8,8])
+            &#47&#47 global pooling and fc (in place of conv 1x1 in paper)
+            x = F.adaptive_avg_pool2d(x, 1)
+            e = x.view(<a id="change">x.shape[0]</a>, -1)
+        x = self.fc(e)
+
+        if last:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/decile-team/cords/commit/8e7f9f1d840988cde6e0b5035ab6f9ba404f5485#diff-962b04c425700900ec47721136585a812886c33a48b76feb284dc77dd883a7f3L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14717107</div><div id='project'> Project Name: decile-team/cords</div><div id='commit'> Commit Name: 8e7f9f1d840988cde6e0b5035ab6f9ba404f5485</div><div id='time'> Time: 2021-03-25</div><div id='author'> Author: krishnatejakillamsetty@gmail.com</div><div id='file'> File Name: cords/utils/models/mobilenetv2tf.py</div><div id='m_class'> M Class Name: MobileNet2</div><div id='n_method'> N Class Name: MobileNet2</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cords/utils/models/mobilenetv2tf.py</div><div id='n_file'> N File Name: cords/utils/models/mobilenetv2tf.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 99</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47     return {&quoth&quot: accum}
+
+        if self.dropout:
+            h<a id="change"> = </a><a id="change">self.dropout(</a>h<a id="change">)</a>
+        self.g.ndata[&quoth&quot] = torch.mm(h, self.weight)
+        self.g.update_all(gcn_msg, gcn_reduce, self.node_update)
+        h = self.g.ndata.pop(&quoth&quot)
+        return h</code></pre><h3>After Change</h3><pre><code class='java'>
+            accum = torch.sum(node.mailbox[&quotm&quot], 1)
+            return {&quoth&quot: accum}
+
+        <a id="change">graph.ndata[&quoth&quot]</a> = torch.mm(h, self.weight)
+        graph.update_all(gcn_msg, gcn_reduce)
+        h = graph.ndata.pop(&quoth&quot)
+        return h</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yukewang96/tcgnn-pytorch/commit/d00ae2c7938d59aa62cf50d384decc4134983867#diff-a058ed38424dd1806d17c7bab16ecd7605b9fc0401f381be9dfbc68df0a6233bL75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14717116</div><div id='project'> Project Name: yukewang96/tcgnn-pytorch</div><div id='commit'> Commit Name: d00ae2c7938d59aa62cf50d384decc4134983867</div><div id='time'> Time: 2021-02-07</div><div id='author'> Author: 505008605@qq.com</div><div id='file'> File Name: dgl_baselines/gat.py</div><div id='m_class'> M Class Name: GATLayer</div><div id='n_method'> N Class Name: GATLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dgl_baselines/gat.py</div><div id='n_file'> N File Name: dgl_baselines/gat.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 81</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        embed_out = self.embedding(x)
+        lstm_out, self.hidden = self.lstm(embed_out, self.hidden)
+        lstm_out = <a id="change">self.dropout(</a>lstm_out<a id="change">)</a>
+        lstm_out<a id="change"> = </a>lstm_out.contiguous().view(-1, self.hidden_dim)
+        fc_out = self.fc(lstm_out)
+
+        return fc_out</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        _, (hidden, cell) = self.lstm(packed_embed_out)
+
+        hidden = self.dropout(torch.cat((hidden[-2, :, :], <a id="change">hidden[-1, :, :]</a>), dim=1))
+        fc_out = self.fc(hidden)
+
+        return fc_out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8#diff-7dbb295508efd990fc66851d3b00d01a8e3b3d09d0e339f9e740d64e599e9c7dL57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14717101</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 31511755+avishreekh@users.noreply.github.com</div><div id='file'> File Name: KD_Lib/models/lstm.py</div><div id='m_class'> M Class Name: LSTMNet</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/models/lstm.py</div><div id='n_file'> N File Name: KD_Lib/models/lstm.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 55</div><BR>

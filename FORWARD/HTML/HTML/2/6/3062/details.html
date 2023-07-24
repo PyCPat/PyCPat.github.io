@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :3062
+</h3><img src='16451079.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return x
+
+    def forward(self, x):
+        x = <a id="change">self.forward_features(x).flatten(1</a><a id="change">)</a>
+        if self.drop_rate &gt; 0.:
+            x = F.dropout(x, p=self.drop_rate, training=self.training)
+        return self.classifier(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.forward_features(x)
+        <a id="change">if </a>not self.global_pool.is_identity()<a id="change">:
+            </a>x<a id="change"> = x.flatten(1</a><a id="change">)</a>
+        if self.drop_rate &gt; 0.:
+            x = F.dropout(x, p=self.drop_rate, training=self.training)
+        return self.classifier(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/470220b1f4c61ad7deb16dbfb8917089e842cd2a#diff-d1225d46b3dcd022eff1f120924576878304adbc7baf2d218f6924c00867cefaL139' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451079</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 470220b1f4c61ad7deb16dbfb8917089e842cd2a</div><div id='time'> Time: 2020-08-18</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/mobilenetv3.py</div><div id='m_class'> M Class Name: MobileNetV3</div><div id='n_method'> N Class Name: MobileNetV3</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/mobilenetv3.py</div><div id='n_file'> N File Name: timm/models/mobilenetv3.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 139</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.drop_rate &gt; 0.:
+            x = F.dropout(x, p=self.drop_rate, training=self.training)
+        out = self.classifier(x)
+        return <a id="change">out.flatten(1</a><a id="change">)</a>
+
+
+def _create_dpn(variant, pretrained=False, **kwargs):
+    return build_model_with_cfg(</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.drop_rate &gt; 0.:
+            x = F.dropout(x, p=self.drop_rate, training=self.training)
+        x = self.classifier(x)
+        <a id="change">if </a>not self.global_pool.is_identity()<a id="change">:
+            </a>x<a id="change"> = x.flatten(1</a><a id="change">)</a>  &#47&#47 conv classifier, flatten if pooling isn&quott pass-through (disabled)
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/b1f1a54de92ef8629eb486f2b14035a8cb314766#diff-05b9b12eb42494cbd206c638b73862f07ddabdcb156571e52201f11d8b63aec9L259' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451078</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: b1f1a54de92ef8629eb486f2b14035a8cb314766</div><div id='time'> Time: 2020-08-03</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/dpn.py</div><div id='m_class'> M Class Name: DPN</div><div id='n_method'> N Class Name: DPN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/dpn.py</div><div id='n_file'> N File Name: timm/models/dpn.py</div><div id='m_start'> M Start Line: 264</div><div id='m_end'> M End Line: 265</div><div id='n_start'> N Start Line: 259</div><div id='n_end'> N End Line: 262</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        B, C, H, W = x.shape
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(x).flatten(2</a><a id="change">)</a>.transpose(1, 2)
+        x = self.norm(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = self.proj(x)
+        <a id="change">if </a>self.flatten<a id="change">:
+            </a>x<a id="change"> = x.flatten(2</a><a id="change">)</a>.transpose(1, 2)  &#47&#47 BCHW -&gt; BNC
+        x = self.norm(x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/ecc7552c5c5ab1d177705774e8e4efd16939852c#diff-65959474d3816c5eb9737a2e8bfdbdad5fcde39ae3f023ec9756d444af0dfd54L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451077</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: ecc7552c5c5ab1d177705774e8e4efd16939852c</div><div id='time'> Time: 2021-05-14</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/layers/patch_embed.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/patch_embed.py</div><div id='n_file'> N File Name: timm/models/layers/patch_embed.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 38</div><BR>

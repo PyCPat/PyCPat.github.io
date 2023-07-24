@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    pass
+                labels = [torch.cat([shared_label, item], 1) for item in zs[1:]]
+            else:
+                labels<a id="change"> = </a><a id="change">[</a>None<a id="change"></a>]*self.chunk_size
+
+            act = self.linear0(z)
+            act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)</code></pre><h3>After Change</h3><pre><code class='java'>
+        with torch.cuda.amp.autocast() if self.mixed_precision and not eval else misc.dummy_context_mgr() as mp:
+            if self.MODEL.info_type != "N/A":
+                if self.MODEL.g_info_injection == "concat":
+                    z<a id="change"> = </a>self.info_mix_linear(z)
+                elif self.MODEL.g_info_injection == "cBN":
+                    z, z_info = z[:, :self.z_dim], z[:, self.z_dim:]
+                    affine_list.append(self.info_proj_linear(z_info))
+
+            zs = torch.split(z, self.chunk_size, 1)
+            z = zs[0]
+            if self.g_cond_mtd != "W/O":
+                if shared_label is None:
+                    shared_label = self.shared(label)
+                affine_list.append(shared_label)
+            if len(affine_list) == 0:
+                affines = [item for item in zs[1:]]
+            else:
+                affines = <a id="change">[torch.cat(affine_list + [item], 1) for item in zs[1:]]</a>
+
+            act = self.linear0(z)
+            act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)
+            counter = 0</code></pre>

@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2002
+</h3><img src='13680465.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b, m, d = z.shape
+        b, c, h, w = x.shape
+        &#47&#47 b l c -&gt; b l h*c -&gt; b h l c
+        x = <a id="change">x.view(b, h * w, c).repeat(1</a>, <a id="change">1</a>, self.heads<a id="change">)</a>.view(b, self.heads, h * w, c)
+        k, v = x, x
+        &#47&#47 b m d -&gt; b m h*c -&gt; b h m c
+        q = self.to_q(z).view(b, self.heads, m, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, c, h, w = x.shape
+        &#47&#47 b l c -&gt; b l h*c -&gt; b h l c
+        x = x.contiguous().view(b, h * w, c).repeat(1, 1, self.heads)
+        x<a id="change"> = </a><a id="change">x.contiguous().view(</a>b, self.heads, h * w, c<a id="change">)</a>
+        k, v = x, x
+        &#47&#47 b m d -&gt; b m h*c -&gt; b h m c
+        q = self.to_q(z).view(b, self.heads, m, c)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/acheun9/pytorch-implementation-of-mobile-former/commit/5861f65a0a79dab8d131a8ab00d762d05a6b1711#diff-23c7e28d14d23a06b7adfd7497ec890f8df07225e5bd7ca3288fbf5d8d29ea1fL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13680465</div><div id='project'> Project Name: acheun9/pytorch-implementation-of-mobile-former</div><div id='commit'> Commit Name: 5861f65a0a79dab8d131a8ab00d762d05a6b1711</div><div id='time'> Time: 2021-08-16</div><div id='author'> Author: 50159673+ACheun9@users.noreply.github.com</div><div id='file'> File Name: bridge.py</div><div id='m_class'> M Class Name: Mobile2Former</div><div id='n_method'> N Class Name: Mobile2Former</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bridge.py</div><div id='n_file'> N File Name: bridge.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 25</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 26</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 compute context vectors
+        &#47&#47 [B*nhead, 1, L] X [B*nhead, L, F]
+        context = torch.bmm(
+            attn.unsqueeze(1), <a id="change">enc_states.repeat(</a>self.nhead, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        ).squeeze(1)
+        context = context.view(B, self.nhead * self.enc_dim)
+        context = self.mlp_out(context)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 value: [B, T, enc_dim] -&gt; [B, T, nhead*enc_dim] -&gt; [B*nhead, T, enc_dim]
+            self.value = torch.tanh(self.mlp_v(enc_states))
+            self.value<a id="change"> = </a><a id="change">self.value.view(
+                </a>B, L, self.nhead, self.enc_dim<a id="change">
+            )</a>.permute(0, 2, 1, 3)
+            self.value = self.value.contiguous().view(
+                B * self.nhead, L, self.enc_dim
+            )</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/738c597173da2360b8ee3ae0fe006ab77b82b391#diff-ba941ab5f3c41e7d0056b338bc724719aa3f6e5b2a79973d81af6212a75a3e94L472' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13680466</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 738c597173da2360b8ee3ae0fe006ab77b82b391</div><div id='time'> Time: 2020-09-02</div><div id='author'> Author: ff936tw@gmail.com</div><div id='file'> File Name: speechbrain/nnet/attention.py</div><div id='m_class'> M Class Name: MultiheadLocAttention</div><div id='n_method'> N Class Name: MultiheadLocAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/nnet/attention.py</div><div id='n_file'> N File Name: speechbrain/nnet/attention.py</div><div id='m_start'> M Start Line: 499</div><div id='m_end'> M End Line: 550</div><div id='n_start'> N Start Line: 499</div><div id='n_end'> N End Line: 555</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, z):
+        b, m, d = z.shape
+        b, c, h, w = x.shape
+        x_ = <a id="change">x.view(b, h * w, c).repeat(1</a>, <a id="change">1</a>, self.heads<a id="change">)</a>.view(b, self.heads, h * w, c)
+        q = x_
+        k = self.to_k(z).view(b, self.heads, m, c)
+        v = self.to_v(z).view(b, self.heads, m, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, m, d = z.shape
+        b, c, h, w = x.shape
+        x_ = x.contiguous().view(b, h * w, c).repeat(1, 1, self.heads)
+        x_<a id="change"> = </a><a id="change">x_.contiguous().view(</a>b, self.heads, h * w, c<a id="change">)</a>
+        q = x_
+        k = self.to_k(z).view(b, self.heads, m, c)
+        v = self.to_v(z).view(b, self.heads, m, c)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/acheun9/pytorch-implementation-of-mobile-former/commit/5861f65a0a79dab8d131a8ab00d762d05a6b1711#diff-23c7e28d14d23a06b7adfd7497ec890f8df07225e5bd7ca3288fbf5d8d29ea1fL54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13680470</div><div id='project'> Project Name: acheun9/pytorch-implementation-of-mobile-former</div><div id='commit'> Commit Name: 5861f65a0a79dab8d131a8ab00d762d05a6b1711</div><div id='time'> Time: 2021-08-16</div><div id='author'> Author: 50159673+ACheun9@users.noreply.github.com</div><div id='file'> File Name: bridge.py</div><div id='m_class'> M Class Name: Former2Mobile</div><div id='n_method'> N Class Name: Former2Mobile</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bridge.py</div><div id='n_file'> N File Name: bridge.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 59</div><BR>

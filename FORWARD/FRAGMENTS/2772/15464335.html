@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &quot&quot&quot
+            &#47&#47 conv for compare
+            escape_NaN = torch.Tensor([1e-4])
+            escape_NaN<a id="change"> = </a><a id="change">escape_NaN.to(</a>device<a id="change">)</a>
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+            max_wi = torch.sqrt(
+                torch.sum(torch.pow(wi, 2) + escape_NaN, dim=[1, 2, 3], keepdim=True))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                yi = F.conv2d(yi, fuse_weight, stride=1)
+                &#47&#47 (B=1, 32, 32, 32, 32)
+                yi = yi.contiguous().view(1, int_bs[2], int_bs[3], int_fs[2], int_fs[3])
+                yi = <a id="change">yi.permute(0, 2, 1, 4, 3).contiguous()</a>
+
+                yi = yi.view(1, 1, int_bs[2]*int_bs[3], int_fs[2]*int_fs[3])
+                yi = same_padding(yi, [k, k], [1, 1], [1, 1])
+                yi = F.conv2d(yi, fuse_weight, stride=1)</code></pre>

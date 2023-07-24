@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = z.detach().permute(0, 2, 3, 1)
+            k<a id="change"> = </a>l.shape[-1]
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()
+            hard = oneHot @ c
+            hardQE = F.mse_loss(hard, z)
+            loss += <a id="change">(softQE + hardQE + 0.1 * F.mse_loss(hard, soft)).mean()</a>
+        return loss
+
+class CompressionLoss(nn.Module):
+    def forward(self, images, restored, codes, latents, logits, quantizeds, cv):</code></pre><h3>After Change</h3><pre><code class='java'>
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = <a id="change">F.mse_loss(</a>z, soft.detach()<a id="change">, reduction=&quotnone&quot)</a>.mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss += qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)
+        return loss</code></pre>

@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding = <a id="change">[]</a>
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                combined_embedding.append(
+                    self.combining_function(trial_embeddings, dim=0)
+                )
+
+            combined_embedding<a id="change"> = </a><a id="change">torch.stack(</a>combined_embedding<a id="change">, dim=0)</a>
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."
+
+        &#47&#47 add number of trials as additional input</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0]<a id="change">, x.shape[self.aggregation_dim]</a>
+        nan_counts = (
+            torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]  &#47&#47 counts are the same across data dims</code></pre>

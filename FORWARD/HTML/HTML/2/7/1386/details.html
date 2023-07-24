@@ -1,0 +1,104 @@
+<html><h3>Pattern ID :1386
+</h3><img src='4769752.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        block_forecasts = torch.stack(block_forecasts)
+        block_forecasts = block_forecasts.permute(1, 0, 2)
+
+        <a id="change">return </a>forecast<a id="change">, block_forecasts</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        level = encoder_y[:, -1:].repeat(1, decoder_x_t.size(1), 1)  &#47&#47 Level with Naive1
+        block_forecasts = [level]
+        block_backcasts = [<a id="change">encoder_y[:, -1:]</a>.repeat(1, encoder_y.size(1), 1)]
+
+        forecast = level
+        for block in self.blocks:
+            block_backcast, block_forecast = block(
+                encoder_y=residuals, encoder_x_t=encoder_x_t, decoder_x_t=decoder_x_t, x_s=x_s
+            )
+            residuals = (residuals - block_backcast) * encoder_mask
+
+            forecast = forecast + block_forecast
+            block_forecasts.append(block_forecast)
+            block_backcasts.append(block_backcast)
+
+        &#47&#47 (n_batch, n_t, n_outputs, n_blocks)
+        block_forecasts = torch.stack(block_forecasts, dim=-1)
+        block_backcasts = torch.stack(block_backcasts, dim=-1)
+        backcast = residuals
+
+        <a id="change">return </a>forecast<a id="change">, backcast, block_forecasts, block_backcasts</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/a60fea51988c95548f47dd9fb76fa57258201160#diff-e15aa407f75975260ffed738d20639620726fe06ff7533b115426860e6eea826L343' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4769752</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: a60fea51988c95548f47dd9fb76fa57258201160</div><div id='time'> Time: 2022-03-20</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_class'> M Class Name: NHiTS</div><div id='n_method'> N Class Name: NHiTS</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_start'> M Start Line: 343</div><div id='m_end'> M End Line: 363</div><div id='n_start'> N Start Line: 353</div><div id='n_end'> N End Line: 379</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        f3 = self.conv4(f3)
+        out = self.conv5(f3)
+
+        <a id="change">return </a>f3<a id="change">, out</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, f1, f2, f3):
+        f3 = self.upsample(f3, f1.shape[-2:])
+        f2 = self.upsample(f2, <a id="change">f1.shape[-2:]</a>)
+        f1 = torch.cat([f1, f2, f3], dim=1)
+        f1 = self.conv1(f1)
+
+        Hf1 = self.Hattn(f1)
+        Wf1 = self.Wattn(f1)
+
+        f1 = self.conv2(Hf1 + Wf1)
+        f1 = self.conv3(f1)
+        f1 = self.conv4(f1)
+        out = self.conv5(f1)
+
+        <a id="change">return </a>f1<a id="change">, out</a></code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/f38e9f6e03c7521b7a8ff0f9f06bfce8c132dca1#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL123' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4769745</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: f38e9f6e03c7521b7a8ff0f9f06bfce8c132dca1</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d2</div><div id='n_method'> N Class Name: PAA_d2</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 124</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 146</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        <a id="change">return </a>context<a id="change">, alignment</a>
+
+
+class Postnet(nn.Module):
+    def __init__(self, mel_dim, num_convs=5):</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        if self.forward_attn:
+            &#47&#47 forward attention
+            prev_alpha = F.pad(<a id="change">self.alpha[:, :-1]</a>.clone(), (1, 0, 0, 0)).to(inputs.device)
+            self.alpha = (((1-self.u) * self.alpha.clone().to(inputs.device) + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm = self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context
+            context = torch.bmm(alpha_norm.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            <a id="change">return </a>context<a id="change">, alpha_norm, alignment</a>
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            return context, alignment, alignment</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/961af0f5cdefbb5f267671f6847cf05659962d6c#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL145' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4769749</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 961af0f5cdefbb5f267671f6847cf05659962d6c</div><div id='time'> Time: 2019-04-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 208</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.conv4(x)
+        out = self.conv5(x)
+
+        <a id="change">return </a>x<a id="change">, out</a>
+
+class PAA_d2(nn.Module):
+    def __init__(self, channel):
+        super(PAA_d2, self).__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+    def forward(self, f1, f2, f3):
+        f1 = self.upsample(f1, f3.shape[-2:])
+        f2 = self.upsample(f2, <a id="change">f3.shape[-2:]</a>)
+        f3 = torch.cat([f1, f2, f3], dim=1)
+        f3 = self.conv1(f3)
+
+        Hf3 = self.Hattn(f3)
+        Wf3 = self.Wattn(f3)
+
+        f3 = self.conv2(Hf3 + Wf3)
+        f3 = self.conv3(f3)
+        f3 = self.conv4(f3)
+        out = self.conv5(f3)
+
+        <a id="change">return </a>f3<a id="change">, out</a>
+
+class PAA_d2(nn.Module):
+    def __init__(self, channel):
+        super(PAA_d2, self).__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/c355ab0cc90c9a3d27726822c1223d2f98cd0f0c#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4769751</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: c355ab0cc90c9a3d27726822c1223d2f98cd0f0c</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d</div><div id='n_method'> N Class Name: PAA_d</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 99</div><BR>

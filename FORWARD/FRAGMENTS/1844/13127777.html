@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        
+        X = torch.fft.rfft(x, n=self.fft_length)
+        y = torch.square(<a id="change">torch.abs(</a>X<a id="change">)</a>) + self.eps
+        y = self.convert(y)
+        return y
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        X = torch.abs(torch.fft.rfft(b, n=self.fft_length))
+
+        <a id="change">if </a>a is not None<a id="change">:
+            </a>K, a1 = torch.split(a, [1, a.size(-1) - 1], dim=-1)
+            a<a id="change"> = </a>torch.cat((K * 0 + 1, a1), dim=-1)
+            X /= torch.abs(torch.fft.rfft(a, n=self.fft_length))
+            X *= K
+</code></pre>

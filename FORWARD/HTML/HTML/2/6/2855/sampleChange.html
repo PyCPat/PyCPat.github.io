@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        eps = self.eps
+
+        loss = - target * torch.log(input + eps) - (1 - target) * torch.log(1<a id="change"> - input + </a>eps)
+        loss = <a id="change">loss.squeeze(dim=1).mean(dim=1)</a>
+        
+        if batch_mean:
+            loss = loss.mean(dim=0)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        eps = self.eps
+
+        loss = - target * torch.log(input + eps)
+        loss<a id="change"> = </a>loss.sum(dim=self.class_dim)
+
+        n_dims = loss.dim()
+        dim = tuple(range(1, n_dims))
+
+        if reduction == "mean":
+            loss<a id="change"> = </a><a id="change">loss.mean(dim=dim)</a>
+        elif reduction == "sum":
+            loss = loss.sum(dim=dim)
+        
+        if batch_mean:</code></pre>

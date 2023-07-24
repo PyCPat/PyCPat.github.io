@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :952
+</h3><img src='3478583.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [n, m, h, w, k]
+        posterior = OneHotCategoricalStraightThrough(logits=logit.reshape(n, self._m, self._k, h, w).permute(0, 1, 3, 4, 2))
+        &#47&#47 [n, m, h, w, k]
+        quantized = posterior.rsample(<a id="change">()</a>)
+        &#47&#47 [n, m, h, w]
+        code = quantized.argmax(-1)
+        &#47&#47      [n, m * k, h, w]
+        <a id="change">return </a>quantized.permute(0, 1, 4, 2, 3).reshape(n, -1, h, w), code, logit
+
+
+class _multiCodebookDeQuantization(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        n, _, h, w = x.shape
+        sample, logit = self._sample(x)
+        &#47&#47 [n, m, h, w]
+        code = <a id="change">sample.argmax(-1</a><a id="change">)</a>
+        &#47&#47      [n, m, h, w, k]
+        return sample, code, logit
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/c8472b7771fcce1ada6c08536b30f4bd47138bff#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3478583</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: c8472b7771fcce1ada6c08536b30f4bd47138bff</div><div id='time'> Time: 2021-12-27</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: _multiCodebookQuantization</div><div id='n_method'> N Class Name: _multiCodebookQuantization</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47     soft = hard
+
+        &#47&#47 [n, c, h, w], [n, h, w], [n, h, w, k], [n, c, h, w], [k, c]
+        <a id="change">return </a>hard<a id="change">, trueCode, logit</a>
+
+
+class AttentiveQuantizer(nn.Module):
+    def __init__(self, k: int, cin: int, cout: int, dropout: bool = True, deterministic: bool = False, additionWeight: bool = True, ema: float = 0.8):</code></pre><h3>After Change</h3><pre><code class='java'>
+        logit = self.getLogit(q, k)
+        trueCode = logit.argmax(-1)
+        sample = F.gumbel_softmax(logit, temperature, True)
+        code = <a id="change">sample.argmax(-1</a><a id="change">)</a>
+        target = self._codebook
+        hard = sample @ target
+        hard = hard.permute(0, 3, 1, 2)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/7a148c81efefedeb8e926140f617b48395d1ca79#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L246' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3478582</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 7a148c81efefedeb8e926140f617b48395d1ca79</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: L2Quantizer</div><div id='n_method'> N Class Name: L2Quantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 250</div><div id='m_end'> M End Line: 265</div><div id='n_start'> N Start Line: 250</div><div id='n_end'> N End Line: 266</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+            logit = x @ codewords
+            soft = (logit / temperature).softmax(-1)
+            if hard:
+                hard = <a id="change">logit.argmax(-1</a><a id="change">)</a>
+                hard = F.one_hot(hard, k)
+                sample = (hard - soft).detach() + soft
+            else:
+                sample = soft</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/96e69f8763c2cf2c9cf0695159db17ddf4e0c857#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L279' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3478584</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 96e69f8763c2cf2c9cf0695159db17ddf4e0c857</div><div id='time'> Time: 2021-02-15</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 335</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 339</div><BR>

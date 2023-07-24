@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :1448
+</h3><img src='4959071.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.apply(self.weights_init)
+
+	def forward(self, content_img_id, style_img_id, class_id):
+		batch_size = <a id="change">content_img_id.shape[0]</a>
+
+		content_code = self.content_embedding(content_img_id)
+		style_code = self.style_embedding(style_img_id)
+		class_code = self.class_embedding(class_id)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+			style_code = style_code + noise
+
+		<a id="change">for block</a> in self.decoder<a id="change">:
+			</a>x = <a id="change">block(</a>x, style_code<a id="change">)</a>
+
+		return {
+			&quotimg&quot: self.to_rgb(x),
+			&quotcontent_code&quot: content_code.reshape(x.shape[0], -1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/fa020664bf0dcbd11e72953117146be2cdbc3b48#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4959071</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: fa020664bf0dcbd11e72953117146be2cdbc3b48</div><div id='time'> Time: 2020-05-29</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 67</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            video = torch.cat([image.unsqueeze(2), video], dim=2)  &#47&#47 1 x 64 x 21 x 16 x 16
+        else:
+            video = image.unsqueeze(2)
+        video = video.view(*<a id="change">video.shape[:3]</a>, -1).permute(0, 2, 3, 1)  &#47&#47 B x T x (H x W) x C -&gt; 1 x 21 x (16*16) x 64
+        video = self.attention(video)  &#47&#47 1 x 21 x 256 x 64
+        return video
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        video = self.stem(video)
+        s = None
+        if len(self.encoder) &gt; 0:
+            <a id="change">for </a>block, <a id="change">remapper</a> in zip(self.encoder, self.remapper)<a id="change">:
+                </a>if block.scaler is not None:
+                    prev_s = nn.functional.interpolate(video, scale_factor=(1, 0.5, 0.5), recompute_scale_factor=False)
+                else:
+                    prev_s = video
+                video = <a id="change">block(</a>video, s<a id="change">)</a>
+                if block.scaler is not None:
+                    video = remapper(video)
+                s = prev_s</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4959070</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 104</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        outs_b = [block(x_) for x_, block in zip(x, self.blocks)]
+        &#47&#47 only take the cls token out
+        proj_cls_token = [proj(<a id="change">x[:, 0:1]</a>) for x, proj in zip(outs_b, self.projs)]
+        &#47&#47 cross attention
+        outs = []
+        for i in range(self.num_branches):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+
+        outs_b = []
+        <a id="change">for </a>i, <a id="change">block</a> in enumerate(self.blocks)<a id="change">:
+            </a>outs_b.append(<a id="change">block(</a>x[i]<a id="change">)</a>)
+
+        &#47&#47 only take the cls token out
+        proj_cls_token = torch.jit.annotate(List[torch.Tensor], [])</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bb50b69a57229a3ee30bbd460539c9a45e508532#diff-dfa58a86c2e5f14a2a2f186a74a7cbe9fd5379f38b9baadfecf799fc5e96bf55L213' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4959069</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bb50b69a57229a3ee30bbd460539c9a45e508532</div><div id='time'> Time: 2021-09-08</div><div id='author'> Author: chenrich@us.ibm.com</div><div id='file'> File Name: timm/models/crossvit.py</div><div id='m_class'> M Class Name: MultiScaleBlock</div><div id='n_method'> N Class Name: MultiScaleBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/crossvit.py</div><div id='n_file'> N File Name: timm/models/crossvit.py</div><div id='m_start'> M Start Line: 213</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 220</div><BR>

@@ -1,0 +1,138 @@
+<html><h3>Pattern ID :2636
+</h3><img src='15024224.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+
+        attn = (q<a id="change"> @ </a><a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = (attn<a id="change"> @ </a>v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+
+        attn = <a id="change">torch.matmul(</a>q, <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">))</a> * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = <a id="change">torch.matmul(</a>attn, v<a id="change">)</a>.transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-8ede3a681726f4d79967777f768e0878ae9a658b1c6206426a3d966aed2dd4acL181' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024224</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/convit.py</div><div id='m_class'> M Class Name: MHSA</div><div id='n_method'> N Class Name: MHSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/convit.py</div><div id='n_file'> N File Name: timm/models/convit.py</div><div id='m_start'> M Start Line: 181</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 187</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0] * self.scale, qkv[1], qkv[2]
+
+        attn = (q<a id="change"> @ </a><a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>)
+
+        attn = self.proj_l(attn.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+
+        attn = attn.softmax(dim=-1)
+
+        attn = self.proj_w(attn.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+        attn = self.attn_drop(attn)
+
+        x = (attn<a id="change"> @ </a>v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0] * self.scale, qkv[1], qkv[2]
+
+        attn = <a id="change">torch.matmul(</a>q, <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">))</a>
+
+        attn = self.proj_l(attn.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+
+        attn = attn.softmax(dim=-1)
+
+        attn = self.proj_w(attn.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+        attn = self.attn_drop(attn)
+
+        x = <a id="change">torch.matmul(</a>attn, v<a id="change">)</a>.transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-183264fdc3b6699b129a6ba6dd228b2e211f47e843fd73d09898bbbae4a9ee0eL156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024196</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/cait.py</div><div id='m_class'> M Class Name: TalkingHeadAttn</div><div id='n_method'> N Class Name: TalkingHeadAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/cait.py</div><div id='n_file'> N File Name: timm/models/cait.py</div><div id='m_start'> M Start Line: 161</div><div id='m_end'> M End Line: 170</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 170</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q = torch.nn.functional.normalize(q, dim=-1)
+        k = torch.nn.functional.normalize(k, dim=-1)
+
+        attn = (q<a id="change"> @ </a><a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>) * self.temperature
+        attn = attn.softmax(dim=-1)
+
+        out = (attn<a id="change"> @ </a>v)
+
+        out = rearrange(out, &quotb head c (h w) -&gt; b (head c) h w&quot, head=self.num_heads, h=h, w=w)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v = v.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1), F.normalize(k, dim=-1)
+
+        attn = torch.softmax(<a id="change">torch.matmul(</a>q, <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">))</a> * self.temperature, dim=-1)
+        out = self.project_out(<a id="change">torch.matmul(</a>attn, v<a id="change">)</a>.view(b, -1, h * w).view(b, -1, h, w))
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/leftthomas/restormer/commit/b68437812320f378e8cfaa3c4fc1f59342dda9b0#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024198</div><div id='project'> Project Name: leftthomas/restormer</div><div id='commit'> Commit Name: b68437812320f378e8cfaa3c4fc1f59342dda9b0</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: leftthomas@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: MDTA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 122</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 26</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Factorized attention.
+        k_softmax = k.softmax(dim=2)
+        factor_att = <a id="change">k_softmax.transpose(-1</a>, <a id="change">-2</a><a id="change">) @ </a>v
+        factor_att = q<a id="change"> @ </a>factor_att
+
+        &#47&#47 Convolutional relative position encoding.
+        crpe = self.crpe(q, v, size=size)  &#47&#47 [B, h, N, Ch]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Factorized attention.
+        k_softmax = k.softmax(dim=2)
+        factor_att = <a id="change">torch.matmul(</a><a id="change">k_softmax.transpose(-1</a>, <a id="change">-2</a><a id="change">)</a>, v<a id="change">)</a>
+        factor_att = <a id="change">torch.matmul(</a>q, factor_att<a id="change">)</a>
+
+        &#47&#47 Convolutional relative position encoding.
+        crpe = self.crpe(q, v, size=size)  &#47&#47 [B, h, N, Ch]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L143' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024189</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: FactorAtt_ConvRelPosEnc</div><div id='n_method'> N Class Name: FactorAtt_ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 152</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 152</div><div id='n_end'> N End Line: 153</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q = q * self.scale
+        v = self.v(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+
+        attn = (q<a id="change"> @ </a><a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>)
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x_cls = (attn<a id="change"> @ </a>v).transpose(1, 2).reshape(B, 1, C)
+        x_cls = self.proj(x_cls)
+        x_cls = self.proj_drop(x_cls)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = q * self.scale
+        v = self.v(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+
+        attn = <a id="change">torch.matmul(</a>q, <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">))</a>
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x_cls = <a id="change">torch.matmul(</a>attn, v<a id="change">)</a>.transpose(1, 2).reshape(B, 1, C)
+        x_cls = self.proj(x_cls)
+        x_cls = self.proj_drop(x_cls)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-183264fdc3b6699b129a6ba6dd228b2e211f47e843fd73d09898bbbae4a9ee0eL90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024206</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/cait.py</div><div id='m_class'> M Class Name: ClassAttn</div><div id='n_method'> N Class Name: ClassAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/cait.py</div><div id='n_file'> N File Name: timm/models/cait.py</div><div id='m_start'> M Start Line: 95</div><div id='m_end'> M End Line: 102</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 102</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+
+        attn = (q<a id="change"> @ </a><a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = (attn<a id="change"> @ </a>v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+
+        attn = <a id="change">torch.matmul(</a>q, <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">))</a> * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = <a id="change">torch.matmul(</a>attn, v<a id="change">)</a>.transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-8ede3a681726f4d79967777f768e0878ae9a658b1c6206426a3d966aed2dd4acL176' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15024187</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/convit.py</div><div id='m_class'> M Class Name: MHSA</div><div id='n_method'> N Class Name: MHSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/convit.py</div><div id='n_file'> N File Name: timm/models/convit.py</div><div id='m_start'> M Start Line: 181</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 187</div><BR>

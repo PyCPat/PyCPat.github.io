@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, features, num_voxels, coors=None):
+        points_mean = features[:, :, : self.C_in].sum(
+            dim=1, keepdim=False
+        ) / <a id="change">num_voxels.type_as(</a>features<a id="change">)</a>.view(-1, 1)
+        return points_mean.contiguous()
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :feature FloatTensor of shape (N, K, C)
+        :return FloatTensor of shape (N, C)
+        
+        denominator<a id="change"> = </a>occupancy.type_as(feature).view(-1, 1)
+        feature<a id="change"> = </a>(feature.sum(1)<a id="change"> / </a>denominator).contiguous()
+        <a id="change">return </a>feature
+
+
+class SparseCNN(nn.Module):</code></pre>

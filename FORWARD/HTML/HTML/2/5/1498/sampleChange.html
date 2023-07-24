@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            soft = (logit / temperature).softmax(-1)
+            <a id="change">if hard</a><a id="change">:
+                </a>hard = logit.argmax(-1)
+                hard<a id="change"> = </a>F.one_hot(hard, k)
+                sample = (hard - soft).detach() + soft
+            else:
+                sample = soft</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47       sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47      sample = soft
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temperature, hard<a id="change">)</a>
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 quantized += torch.randn_like(quantized)</code></pre>

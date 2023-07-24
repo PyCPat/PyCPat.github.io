@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 some of the encoder model doesnt output the pooler output. It has to be made from hidden state
+        &#47&#47ouputs in those cases
+        sequenceOutput = outputs[0]
+        pooledOutput = outputs[1]<a id="change"> if </a>len(outputs) &gt;1<a id="change"> else </a>self.make_pooler_output(sequenceOutput)
+
+        taskType = self.taskParams.taskTypeMap[self.taskParams.taskIdNameMap[taskId]]
+        if taskType == TaskType.Span:</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(outputs) &gt; 1:
+            pooledOutput = outputs[1]
+        else:
+            pooledOutput = nn.ReLU()(self.poolerLayer(<a id="change">sequenceOutput[:, 0]</a>))
+
+        &#47&#47pooledOutput = outputs[1] if len(outputs) &gt;1 else self.make_pooler_output(sequenceOutput)
+</code></pre>

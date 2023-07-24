@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            w_u = torch.triu(x_paired[:, 1:, 1:], diagonal=1)
+            w_l = torch.tril(x_paired[:, 1:, 1:], diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            w = (w<a id="change"> + </a>w.transpose(1, 2))<a id="change"> / </a>2
+            if self.do_sampling:
+                w = w + self.gumbel_sampling(w.shape).to(w.device)
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            x_paired[:, 1:, 1:] = torch.triu(w, diagonal=1)<a id="change"> + </a><a id="change">torch.tril(</a>w<a id="change">, diagonal=-1)</a>
+        return x_paired, x_unpaired
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            w_u = torch.triu(w, diagonal=1)
+            w_l = w_u.transpose(1, 2) &#47&#47 torch.tril(w, diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            <a id="change">if </a>self.do_sampling<a id="change">:
+                </a>r = self.gumbel_sampling(w.shape).to(w.device)
+                r = torch.triu(r, diagonal=0)
+                r = (r + r.transpose(1, 2)) / 2
+                w = w + r</code></pre>

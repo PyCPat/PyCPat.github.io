@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 the cell output is concatenate, so need a convolution to learn best combination
+        s0 = self.preprocess0(s0)
+        s1 = self.preprocess1(s1)
+        states<a id="change"> = [</a>s0, s1<a id="change"></a>]
+        offset = 0
+
+        for i in range(self.n_nodes):
+            &#47&#47 handle the un-consistent dimension
+            tmp_list = []
+            for j, h in enumerate(states):
+                tmp_list += [self._ops[offset+j](h, weight1[offset+j], weight2[offset+j])]
+            s = sum(consistent_dim(tmp_list))&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47 !!!
+            &#47&#47s = sum(self._ops[offset+j](h, weight1[offset+j], weight2[offset+j]) for j, h in enumerate(states))
+            offset<a id="change"> += </a>len(states)        
+            <a id="change">states.append(</a>s<a id="change">)</a>
+
+        return torch.cat(states[-self.n_nodes:], dim=1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            for i, input_i in enumerate(inputs):
+                i_w += i
+                outputs.append(self._ops[i_w](input_i, w1[i_w], w2[i_w]))
+            inputs.append(<a id="change">sum(</a>consistent_dim(outputs)<a id="change">)</a>)
+        return torch.cat(inputs[-self.n_nodes:], dim=1)
+            
+       </code></pre>

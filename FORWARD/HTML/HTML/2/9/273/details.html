@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :273
+</h3><img src='923548.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        hidden_states = outputs[&quotdecoder_hidden_states&quot][-1]
+        eos_mask = source_ids.eq(self.config.eos_token_id)
+
+        <a id="change">if len(torch.unique(eos_mask.sum(1))) &gt; 1</a><a id="change">:
+            </a><a id="change">raise </a><a id="change">ValueError("All examples must have the same number of &lt;eos&gt; tokens."</a><a id="change">)</a>
+        vec<a id="change"> = hidden_states[eos_mask, :].view(hidden_states.size(0), -1,
+                                              hidden_states.size(-1))[:, -1, :]</a>
+
+        logits = self.classifier(vec)
+        prob = F.softmax(logits)
+        if labels is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, source_ids=None, labels=None):
+        source_ids = source_ids.view(-1, self.args.max_source_length)
+
+        <a id="change">if </a>self.args.model_type == &quotcodet5&quot<a id="change">:
+            </a>vec = self.get_t5_vec(source_ids)
+        elif self.args.model_type == &quotbart&quot:
+            vec = self.get_bart_vec(source_ids)
+        elif self.args.model_type == &quotroberta&quot:
+            vec<a id="change"> = </a>self.get_roberta_vec(source_ids)
+
+        logits = self.classifier(vec)
+        prob = nn.functional.softmax(logits)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/salesforce/codet5/commit/0bf3c0c43e92fcf54d9df68c793ac22f2b60aad4#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL103' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 923548</div><div id='project'> Project Name: salesforce/codet5</div><div id='commit'> Commit Name: 0bf3c0c43e92fcf54d9df68c793ac22f2b60aad4</div><div id='time'> Time: 2021-10-29</div><div id='author'> Author: 337111657@qq.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: CloneModel</div><div id='n_method'> N Class Name: CloneModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 111</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 103</div><div id='n_end'> N End Line: 116</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        <a id="change">if self._pooling_func_name == &quotmax&quot</a><a id="change">:
+            </a>out<a id="change"> = torch.max(out, -1, keepdim=True)[0]</a>
+        elif self._pooling_func_name == &quotmean&quot:
+            out = torch.mean(out, keepdim=True, dim=-1)
+        elif self._pooling_func_name == &quotsum&quot:
+            out = torch.sum(out, keepdim=True, dim=-1)
+        else:
+            <a id="change">raise </a><a id="change">ValueError(f"Pooling function {self._pooling_func_name} is not yet supported!"</a><a id="change">)</a>
+
+        &#47&#47 out: (BB, embedding_dim, 1)
+        out = torch.flatten(out, start_dim=-2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        masking_input = {&quotin_tensor&quot: out.transpose(2, 1)}
+        <a id="change">if </a>self.use_masking<a id="change">:
+            </a>masking_input[&quotmask_tensor&quot]<a id="change"> = </a>masking_tensor
+        out = self.pooling_block(masking_input)[&quotmasking_out&quot]
+        &#47&#47 output_tensor: (BB, embedding_dim)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/enlite-ai/maze/commit/53a9f4e4997b8a5451f14fb57dd6c5cb9becd110#diff-a18d0890711efadf10cc7ee9bb175629d673020f907726acc13ab53e8a7f2617L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 923544</div><div id='project'> Project Name: enlite-ai/maze</div><div id='commit'> Commit Name: 53a9f4e4997b8a5451f14fb57dd6c5cb9becd110</div><div id='time'> Time: 2021-04-15</div><div id='author'> Author: office@enlite.ai</div><div id='file'> File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_class'> M Class Name: PointNetFeatureTransformNet</div><div id='n_method'> N Class Name: PointNetFeatureTransformNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='n_file'> N File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            batch, permutation_dim, -1
+        )
+
+        <a id="change">if self.combining_operation == "mean"</a><a id="change">:
+            </a>e<a id="change"> = </a>iid_embeddings.mean(dim=1)
+        elif self.combining_operation == "sum":
+            e = iid_embeddings.sum(dim=1)
+        else:
+            <a id="change">raise </a><a id="change">ValueError("combining_operation must be in [&quotsum&quot, &quotmean&quot]."</a><a id="change">)</a>
+
+        embedding = self.fc_subnet(e)
+
+        return embedding</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch, permutation_dim, _ = x.shape
+
+        &#47&#47 if no NaNs for padding varying trial lengths we can batch the computation
+        <a id="change">if </a>not torch.isnan(x).any()<a id="change">:
+            </a>trial_embeddings = self.trial_net(x.view(batch * permutation_dim, -1)).view(
+                batch, permutation_dim, -1
+            )
+            combined_embedding = self.combining_function(trial_embeddings, dim=1)
+            trial_counts = torch.ones(batch, 1, dtype=torch.float32) * permutation_dim
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding = []
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x<a id="change"> = x[i, ~torch.isnan(x[i, :, 0]), :]</a>
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                combined_embedding.append(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/1352e77bdbc47aa4a4130679903b57672e48218c#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L262' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 923541</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 1352e77bdbc47aa4a4130679903b57672e48218c</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 304</div><BR>

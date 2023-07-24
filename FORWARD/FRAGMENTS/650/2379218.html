@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        xs, xb = <a id="change">x.chunk(2</a><a id="change">, dim=1)</a>
+        xb = self.blocks(xb)
+        out = self.conv_transition(torch.cat([xs, self.conv_transition_b(xb)], dim=1))
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        split = <a id="change">x.shape[1]</a> // 2
+        xs, xb = x[:, :split], x[:, split:]
+        xb = self.blocks(xb)
+        xb = self.conv_transition_b(xb).contiguous()</code></pre>

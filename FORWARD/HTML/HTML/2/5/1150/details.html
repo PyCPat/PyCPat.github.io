@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :1150
+</h3><img src='4104478.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum = <a id="change">z_flattened.transpose(0</a>, <a id="change">1</a><a id="change">) @ </a>encodings
+            &#47&#47EMA cluster size
+            self.embedding.cluster_size.data.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+            &#47&#47EMA embedding average</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47EMA cluster size
+            self.cluster_size.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+
+            embed_sum = <a id="change">torch.matmul(</a>encodings.t(), z_flattened<a id="change">)</a>
+            &#47&#47EMA embedding average
+            self.embed_avg.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+
+            &#47&#47cluster size Laplace smoothing </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4104478</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		self.head = SVDHead(args=args)
+
+	def forward(self, src, tgt, T_gt=None, prefix="train"):
+		feat1 = <a id="change">src[..., :3].transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+		feat2 = tgt[..., :3].transpose(1, 2)
+		src = src[..., :3]
+		tgt = tgt[..., :3]
+
+		src_embedding = self.emb_nn(feat1)
+		tgt_embedding = self.emb_nn(feat2)
+		src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores = torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding)<a id="change"> / </a>math.sqrt(self.emb_dims)
+		scores = torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()
+            translation_ba = -<a id="change">torch.matmul(</a>rotation_ba, translation_ab.unsqueeze(2)<a id="change">)</a>.squeeze(2)
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L269' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4104477</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum = <a id="change">z_flattened.transpose(0</a>, <a id="change">1</a><a id="change">) @ </a>encodings
+            &#47&#47EMA cluster size
+            self.embedding.cluster_size.data.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+            &#47&#47EMA embedding average</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47EMA cluster size
+            self.cluster_size.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+
+            embed_sum = <a id="change">torch.matmul(</a>encodings.t(), z_flattened<a id="change">)</a>
+            &#47&#47EMA embedding average
+            self.embed_avg.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+
+            &#47&#47cluster size Laplace smoothing </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/e387b61c8c640b56c7cbd241d8ec60ab1f022611#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L183' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4104473</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: e387b61c8c640b56c7cbd241d8ec60ab1f022611</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: SonnetEMAVectorQuantizer</div><div id='n_method'> N Class Name: LegacyEMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 184</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 118</div><BR>

@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.layer1(x)
+        x<a id="change"> = </a>self.maxpooling_22(x)
+        x = self.layer2(x)
+        x = self.maxpooling_22(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.maxpooling_21(x)
+        x = self.layer5(x)
+        x = self.maxpooling_21(x)
+        x<a id="change"> = </a>self.layer6(x)
+        x = self.maxpooling_21(x)
+
+        b, c, h, w = x.size()
+        assert h == 1, "The height of conv must be 1"
+        x = x.squeeze(2)
+        x<a id="change"> = </a>x.permute(2, 0, 1)
+
+        output = self.rnn(x)
+        output = <a id="change">nn.functional.log_softmax(</a>output<a id="change">, dim=2)</a>
+        <a id="change">return </a>output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.transpose(1, 2)
+        x = self.bilstm(x)
+        x = self.classifier(x)
+        x = <a id="change">nn.functional.log_softmax(</a>x<a id="change">, dim=2)</a>.permute(1, 0, 2)
+        <a id="change">return </a>x
+</code></pre>

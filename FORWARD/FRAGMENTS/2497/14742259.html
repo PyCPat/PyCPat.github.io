@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        segmented_x = [list(torch.split(x, x.shape[2] // self.split_block, dim=2)) for x in X]
+        for x in segmented_x:
+            if len(x) &gt; self.split_block:
+                x[-2] = torch.cat(<a id="change">x[-2:]</a>, dim=2)
+
+        ret_segments = []
+        for i in range(self.split_block):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 by default N=1, does not split
+        segment_shapes = [[x.shape[2] // self.split_block] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            seg_shape[-1] += <a id="change">x.shape[2]</a> % self.split_block
+        segmented_x = [torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]
+
+        &#47&#47 apply MSAF</code></pre>

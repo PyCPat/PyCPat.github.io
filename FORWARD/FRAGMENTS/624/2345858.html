@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        u_hat = torch.einsum(&quotijk, jkl -&gt; ijl&quot, x, self.route_weights)
+
+        &#47&#47 Dynamic route
+        b = torch.zeros(<a id="change">x.shape[1]</a>, self.num_capsules, requires_grad=True)
+        for it in range(self.num_iterations):
+            c = b.softmax(dim=-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+        u_hat = torch.einsum(&quotijk, jlkm -&gt; iljm&quot, x, self.route_weights)
+        &#47&#47 Detatch u_hat during routing iterations
+        u_hat_temp = <a id="change">u_hat.detach()</a>
+
+        &#47&#47 Dynamic route
+        &#47&#47 b: (batch_size, num_capsules, num_route_nodes)
+        b = torch.zeros(batch_size, self.num_capsules, self.num_route_nodes).to(device)
+        for it in range(self.num_iterations - 1):
+            c = b.softmax(dim=1)
+
+            &#47&#47 c: (batch_size, num_capsules, num_route_nodes)
+            &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+            &#47&#47 s: (batch_size, num_capsules, out_channels)
+            s = torch.einsum(&quotijk, ijkl -&gt; ijl&quot, c, u_hat_temp)
+            v = squash(s)
+
+            &#47&#47 Update b
+            &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+            &#47&#47 v: (batch_size, num_capsules, out_channels)
+            &#47&#47 Shape of b: (batch_size, num_capsules, num_route_nodes)
+            uv = torch.einsum(&quotijkl, ijl -&gt; ijk&quot, u_hat_temp, v)
+            b<a id="change"> += </a>uv
+
+        &#47&#47 Last iteration with original u_hat to pass gradient
+        c = b.softmax(dim=1)</code></pre>

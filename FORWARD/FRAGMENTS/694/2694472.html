@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        src_ids = torch.zeros(self.B * (self.window_size - 1), dtype=torch.int64)    &#47&#47 B*(window - 1)
+        &#47&#47 loop for each batch
+        for i in range(self.B):
+            win_ids = <a id="change">torch.arange(</a>i * self.window_size + 1, i * self.window_size + self.window_size<a id="change">)</a>
+            tgt_desc = keypoint_desc[win_ids]  &#47&#47 (window - 1) x C x N
+            tgt_desc = F.normalize(tgt_desc, dim=1)
+            match_vals = torch.matmul(tgt_desc.transpose(2, 1), src_desc_unrolled[i:i+1])  &#47&#47 (window - 1) x N x HW
+            soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 (window - 1) x N x HW</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_ids = torch.zeros(self.B * (self.window_size - 1), dtype=torch.int64, device=self.gpuid)    &#47&#47 B*(window - 1)
+        &#47&#47 loop for each batch
+        for i in range(self.B):
+            win_ids = <a id="change">torch.arange(i * self.window_size + 1, i * self.window_size + self.window_size).to(</a>self.gpuid<a id="change">)</a>
+            tgt_desc = keypoint_desc[win_ids]  &#47&#47 (window - 1) x C x N
+            tgt_desc = F.normalize(tgt_desc, dim=1)
+            match_vals = torch.matmul(tgt_desc.transpose(2, 1), src_desc_unrolled[i:i+1])  &#47&#47 (window - 1) x N x HW
+            soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 (window - 1) x N x HW</code></pre>

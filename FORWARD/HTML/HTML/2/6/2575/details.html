@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :2575
+</h3><img src='14932059.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = nn.MaxPool2d(2, 1)(x)
+        x = self.dropout2(x)
+        x = torch.flatten(x, 1)
+        x = <a id="change">self.fc1(</a>x<a id="change">)</a>
+        x = nn.ReLU()(x)
+        x = <a id="change">self.fc2(</a>x<a id="change">)</a>
+        output = F.log_softmax(x, dim=1)
+        return output
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.dropout(out)
+
+        &#47&#47 The last hidden state is taken
+        out = torch.relu_(<a id="change">self.fc1(</a>out[:,-1,:]<a id="change">)</a>)
+        out = self.dropout(out)
+        out = torch.sigmoid(<a id="change">self.fc2(</a>out<a id="change">)</a>)
+            
+        return out
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/2166a81ffe05bb2c68c8b457df8c2e1fd6a8be02#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14932059</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: 2166a81ffe05bb2c68c8b457df8c2e1fd6a8be02</div><div id='time'> Time: 2021-07-01</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: Net</div><div id='n_method'> N Class Name: LSTMNetBase</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 30</div><div id='n_start'> N Start Line: 435</div><div id='n_end'> N End Line: 461</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(x.shape[0], -1)  &#47&#47 flatten all dimensions except batch
+        x = F.relu(<a id="change">self.fc1(</a>x<a id="change">)</a>)
+        x = F.relu(<a id="change">self.fc2(</a>x<a id="change">)</a>)
+        x = self.fc3(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.flatten(x)
+
+        x = <a id="change">self.fc1(</a>x<a id="change">)</a>
+        x = self.activation(x)
+
+        x = <a id="change">self.fc2(</a>x<a id="change">)</a>
+        x = self.activation(x)
+
+        x = self.fc3(x)
+        x = self.activation(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/karhoutam/per-fedavg/commit/da144237e380cb79658ed6a5634cd20f909b0b7f#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14932058</div><div id='project'> Project Name: karhoutam/per-fedavg</div><div id='commit'> Commit Name: da144237e380cb79658ed6a5634cd20f909b0b7f</div><div id='time'> Time: 2022-06-07</div><div id='author'> Author: 787992532@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: CNN_CIFAR10</div><div id='n_method'> N Class Name: MLP_MNIST</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 87</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(<a id="change">self.fc1(</a>x<a id="change">)</a>)
+        x = F.relu(<a id="change">self.fc2(</a>x<a id="change">)</a>)
+        x = self.fc3(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.pool(F.relu(self.bn1(self.conv1(x))))
+        x = self.pool(F.relu(self.bn2(self.conv2(x))))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.bn3(<a id="change">self.fc1(</a>x<a id="change">)</a>))
+        x = F.relu(self.bn4(<a id="change">self.fc2(</a>x<a id="change">)</a>))
+        x = self.fc3(x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/adap/flower/commit/812627e58bb501392214b6b1e99d3a5c97eb2386#diff-dad28bfd8026b902969cebb1f67297036c4f5ad160c209814b9c15450235d828L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14932057</div><div id='project'> Project Name: adap/flower</div><div id='commit'> Commit Name: 812627e58bb501392214b6b1e99d3a5c97eb2386</div><div id='time'> Time: 2021-04-19</div><div id='author'> Author: 31134669+MeiruiJiang@users.noreply.github.com</div><div id='file'> File Name: examples/pytorch_from_centralized_to_federated/cifar.py</div><div id='m_class'> M Class Name: Net</div><div id='n_method'> N Class Name: Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: examples/pytorch_from_centralized_to_federated/cifar.py</div><div id='n_file'> N File Name: examples/pytorch_from_centralized_to_federated/cifar.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 50</div><BR>

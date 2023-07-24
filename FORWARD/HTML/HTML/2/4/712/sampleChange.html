@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        mean, var = self.running_mean, self.running_var
+        weight, bias = self.weight, self.bias
+        <a id="change">if </a><a id="change">x.dim()</a> == 4<a id="change">:
+            </a>mean, var = mean[:, None, None], var[:, None, None]
+            weight, bias = weight[:, None, None], bias[:, None, None]
+        return (x - mean) * torch.rsqrt(var + self.eps) * weight + bias
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer(&quotnum_batches_tracked&quot, torch.tensor(0, dtype=torch.long))  &#47&#47 Prevent load errors
+
+    def forward(self, x):
+        <a id="change">if </a><a id="change">x.dim()</a> != 4<a id="change">:
+            </a>raise ValueError("expected 4D input (got %dD input)" % x.dim())
+        mean, var = self.running_mean, self.running_var
+        weight, bias = self.weight, self.bias
+</code></pre>

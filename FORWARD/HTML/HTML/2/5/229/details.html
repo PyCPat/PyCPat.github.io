@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :229
+</h3><img src='854717.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        source_alphas = [-self.mahalanobis_metric(encodings, 
+                            self.domain_encs[i], i)
+                            for i in source_ids]
+        source_alphas<a id="change"> = </a><a id="change">F.softmax(</a>source_alphas<a id="change">)</a>
+
+        output_moe = sum([ alpha.unsqueeze(1).repeat(1, 1) *
+                                F.softmax(classifier_outputs[id], dim=1)
+                        for alpha, id in zip(source_alphas, source_ids)])</code></pre><h3>After Change</h3><pre><code class='java'>
+        classifier_outputs = [self.classifiers[i](encodings) for i in range(self.num_sources)]
+
+        source_ids = range(self.num_sources)
+        source_alphas = [-<a id="change">self.mahalanobis_metric(encodings, 
+                            self.domain_encs[i], i).unsqueeze(0</a><a id="change">)</a>
+                            for i in source_ids]
+        source_alphas = F.softmax(torch.cat(source_alphas, dim=0), dim=0) &#47&#47 n_source x bs
+        output_moe = sum([ source_alphas[j].unsqueeze(1).repeat(1, 1)<a id="change"> *
+                            </a>classifier_outputs[j] for j in source_ids])
+        return output_moe
+    
+    def compute_domain_encs(self, all_train_smiles):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/cf8ea2e781c32716964835d39a9cc4562c75b677#diff-eee12f70990be22455041e206b0ab84ff5903fea7888f4b78e4089cf96e59988L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854717</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: cf8ea2e781c32716964835d39a9cc4562c75b677</div><div id='time'> Time: 2018-10-28</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: moe.py</div><div id='m_class'> M Class Name: MOE</div><div id='n_method'> N Class Name: MOE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: moe.py</div><div id='n_file'> N File Name: moe.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores = torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding) / math.sqrt(self.emb_dims)
+		scores<a id="change"> = </a><a id="change">torch.softmax(</a>scores<a id="change">, dim=2)</a>
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()
+            translation_ba = <a id="change">-torch.matmul(rotation_ba, translation_ab.unsqueeze(2)).squeeze(2)</a>
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))
+
+        if T_gt == None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L269' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854725</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Update the window
+        self.win_idx = torch.argmax(alignment,1).long()[0].item()
+        &#47&#47 Normalize context weight
+        alignment<a id="change"> = </a><a id="change">F.softmax(</a>alignment<a id="change">, dim=-1)</a>
+        &#47&#47 alignment = 5 * alignment
+        &#47&#47 alignment = torch.sigmoid(alignment) / torch.sigmoid(alignment).sum(dim=1).unsqueeze(1)
+        &#47&#47 Attention context vector
+        &#47&#47 (batch, 1, dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Normalize context weight
+        &#47&#47 alignment = F.softmax(alignment, dim=-1)
+        &#47&#47 alignment = 5 * alignment
+        alignment = torch.sigmoid(alignment)<a id="change"> / </a><a id="change">torch.sigmoid(alignment).sum(dim=1).unsqueeze(1</a><a id="change">)</a>
+        &#47&#47 Attention context vector
+        &#47&#47 (batch, 1, dim)
+        &#47&#47 c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+        context = torch.bmm(alignment.unsqueeze(1), annots)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/4431e04b482238eee5d581eb2c9ca6789ac0ff12#diff-d280da42b761c3f70383c398535500cfb7dcb7e40c79196cc732c1f2bd12bf39L136' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854720</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 4431e04b482238eee5d581eb2c9ca6789ac0ff12</div><div id='time'> Time: 2019-01-16</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/attention.py</div><div id='m_class'> M Class Name: AttentionRNNCell</div><div id='n_method'> N Class Name: AttentionRNNCell</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/attention.py</div><div id='n_file'> N File Name: layers/attention.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 173</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 175</div><BR>

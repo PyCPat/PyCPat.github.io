@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            human_box_idx = torch.nonzero(labels == self.human_idx).squeeze(1).tolist()
+            &#47&#47 Skip image when there are no detected human or object instances
+            if n == 0 or <a id="change">len(human_box_idx) == 0</a>:
+                continue
+            &#47&#47 Permute the boxes so that humans are on the top
+            permutation<a id="change"> = </a>torch.cat([
+                torch.as_tensor(human_box_idx, device=device),
+                torch.as_tensor([i for i in range(n) if i not in human_box_idx], device=device)
+            ])
+            coords<a id="change"> = </a>coords[permutation]
+            labels<a id="change"> = </a>labels[permutation]
+            scores<a id="change"> = </a>scores[permutation]
+            node_encodings<a id="change"> = </a>box_features[counter: counter+n][permutation]
+
+            n_h<a id="change"> = </a>len(human_box_idx)
+            &#47&#47 Duplicate human nodes
+            h_node_encodings = node_encodings[:n_h]
+            &#47&#47 Get the pairwise index between every human and object instance</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.training:
+            assert targets is not None, "Targets should be passed during training"
+
+        <a id="change">box_features</a> = self.box_head(box_features)
+
+        num_boxes = [len(boxes_per_image) for boxes_per_image in box_coords]
+        
+        <a id="change">counter</a> = 0
+        all_boxes_h = []; all_boxes_o = []
+        all_labels = []; all_prior = []
+        all_box_pair_features = []
+        for b_idx, (coords, labels, scores) in enumerate(zip(box_coords, box_labels, box_scores)):
+            <a id="change">n</a> = num_boxes[b_idx]
+            device = box_features.device
+
+            human_box_idx = torch.nonzero(labels == self.human_idx).squeeze(1).tolist()
+            <a id="change">n_h = </a>len(human_box_idx)
+            &#47&#47 Skip image when there are no detected human or object instances
+            if <a id="change">n_h == 0</a> or n == 0:
+                continue
+            <a id="change">if n_h == n</a><a id="change">:
+                </a>node_encodings<a id="change"> = box_features[counter: counter+n]</a>
+            else:
+                &#47&#47 Permute the boxes so that humans are on the top
+                permutation<a id="change"> = </a>torch.cat([
+                    torch.as_tensor(human_box_idx, device=device),
+                    torch.as_tensor([i for i in range(n) if i not in human_box_idx], device=device)
+                ])
+                coords<a id="change"> = </a>coords[permutation]
+                labels<a id="change"> = </a>labels[permutation]
+                scores<a id="change"> = </a>scores[permutation]
+                node_encodings<a id="change"> = </a>box_features[counter: counter+n][permutation]
+
+            &#47&#47 Duplicate human nodes
+            h_node_encodings = node_encodings[:n_h]</code></pre>

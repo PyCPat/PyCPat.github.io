@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        backcast = theta[:, :self.backcast_size]
+        knots = theta[:, self.backcast_size:]
+
+        <a id="change">if </a>self.interpolation_mode==&quotnearest&quot<a id="change">:
+            </a>knots<a id="change"> = </a>knots[:,None,:]
+            forecast = F.interpolate(knots, size=self.forecast_size, mode=self.interpolation_mode)
+            forecast = forecast[:,0,:]
+        elif self.interpolation_mode==&quotlinear&quot:
+            knots<a id="change"> = knots[:,None,:]</a>
+            forecast = F.interpolate(knots, size=self.forecast_size, mode=self.interpolation_mode)
+            forecast = forecast[:,0,:]
+        elif &quotcubic&quot in self.interpolation_mode:
+            batch_size = len(backcast)</code></pre><h3>After Change</h3><pre><code class='java'>
+        knots = theta[:, self.backcast_size:]
+
+        &#47&#47 Interpolation is performed on default dim=-1
+        knots = knots.reshape(<a id="change">len(</a>knots<a id="change">)</a>, self.out_features, -1)
+        if self.interpolation_mode in [&quotnearest&quot, &quotlinear&quot]:
+            &#47&#47knots = knots[:,None,:]
+            forecast = F.interpolate(knots, size=self.forecast_size, mode=self.interpolation_mode)</code></pre>

@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :2282
+</h3><img src='14292650.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if random.random() &lt; 0.2:
+            audio_mask = (torch.arange(audio.shape[1], device=audio.device)[None, :, None] &lt; audio_len[:, None, None]).float()
+            x = torch.exp(audio - 1e-6) * audio_mask
+            y = torch.cat([x[1:], <a id="change">x[:1]</a>])
+            return torch.log(0.9 * x + 0.1 * y + 1e-6) * audio_mask, audio_len
+        return audio, audio_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @torch.no_grad()
+    def forward(self, audio, audio_len):
+        <a id="change">assert </a>len(audio.shape) == 3
+
+        if self.do_timestretch and random.random() &lt; AUGUMENT_RATE:
+            audio, audio_len = self.timestretch(audio, audio_len)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaiidams/voice100/commit/dfe0234fcc858357cb2a91bcba1da06792eabab7#diff-45ca1489e7a6bb94fd69ca7ad1bd30c3de58adc27fb2b6c0b31cafc1bf90ceffL73' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14292650</div><div id='project'> Project Name: kaiidams/voice100</div><div id='commit'> Commit Name: dfe0234fcc858357cb2a91bcba1da06792eabab7</div><div id='time'> Time: 2021-06-25</div><div id='author'> Author: katsuya.iida@gmail.com</div><div id='file'> File Name: voice100/audio.py</div><div id='m_class'> M Class Name: BatchSpectrogramAugumentation</div><div id='n_method'> N Class Name: BatchSpectrogramAugumentation</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: voice100/audio.py</div><div id='n_file'> N File Name: voice100/audio.py</div><div id='m_start'> M Start Line: 73</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 95</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        scales = self.hyper_synthesis(noisy_hyper_latent)
+
+        if scales.shape != latent.shape:
+            scales = _resize(scales, <a id="change">latent.shape[2:]</a>)
+
+        noisy_latent, latent_likelihoods = self.image_bottleneck(latent, scales)
+        reconstruction = self.image_synthesis(noisy_latent)</code></pre><h3>After Change</h3><pre><code class='java'>
+        reconstruction = self.image_synthesis(noisy_latent)
+
+        if not self.training:
+            <a id="change">assert </a>images_shape is not None, "image_shape not found"
+            h, w = images_shape
+            reconstruction = reconstruction[..., :h, :w]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/facebookresearch/neuralcompression/commit/6c201298781b40cbc9d1206c1b81e4a6c4669de3#diff-5f641627c2c533ee4abdf6644d277d9562ce19dd33555d075ebeb47ac9020b8bL325' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14292651</div><div id='project'> Project Name: facebookresearch/neuralcompression</div><div id='commit'> Commit Name: 6c201298781b40cbc9d1206c1b81e4a6c4669de3</div><div id='time'> Time: 2022-12-08</div><div id='author'> Author: desi.r.ivanova@gmail.com</div><div id='file'> File Name: neuralcompression/models/scale_hyperprior.py</div><div id='m_class'> M Class Name: ScaleHyperprior</div><div id='n_method'> N Class Name: ScaleHyperprior</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralcompression/models/scale_hyperprior.py</div><div id='n_file'> N File Name: neuralcompression/models/scale_hyperprior.py</div><div id='m_start'> M Start Line: 353</div><div id='m_end'> M End Line: 367</div><div id='n_start'> N Start Line: 336</div><div id='n_end'> N End Line: 355</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask: shape of (N, seq_len)
+        
+        item_sum = logits.shape[0]*logits.shape[1]  &#47&#47 N * seq_len
+        target, mask = <a id="change">target[:, 1:]</a>, mask[:, 1:]
+        &#47&#47 loss [N*seq_len]
+        loss = self.loss_fn(logits.contiguous().view(item_sum, -1),
+                            target.contiguous().view(-1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        return self.smoothing * x + (1 - self.smoothing) * y
+
+    def forward(self, preds, target):
+        <a id="change">assert </a>0 &lt;= self.smoothing &lt; 1
+
+        if self.weight is not None:
+            self.weight = self.weight.to(preds.device)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kamino666/video-captioning-transformer/commit/59fb852e1db8d0ce392de20b20bc8c177c84798c#diff-09d0cbaf891d623ac245ccf84485a687b554217349ca55557c60b33234b969aeL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14292648</div><div id='project'> Project Name: kamino666/video-captioning-transformer</div><div id='commit'> Commit Name: 59fb852e1db8d0ce392de20b20bc8c177c84798c</div><div id='time'> Time: 2021-10-10</div><div id='author'> Author: 516015417@qq.com</div><div id='file'> File Name: utils.py</div><div id='m_class'> M Class Name: MaskCriterion</div><div id='n_method'> N Class Name: LabelSmoothingLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils.py</div><div id='n_file'> N File Name: utils.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 106</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans = x.new_ones(<a id="change">x.shape[:-1]</a>+(1,)) / x.shape[1]
+
+        for t in range(seq_len):
+            inputs = x[:, t]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47
+        L = u.size(-1)
+        if lengths is not None:
+            <a id="change">assert </a>isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = torch.where(torch.arange(L, device=lengths.device) &lt; lengths[:, None, None], 1., 0.)
+            u = u * mask
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14292652</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>

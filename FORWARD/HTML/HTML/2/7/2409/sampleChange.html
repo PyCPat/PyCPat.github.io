@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+            logits = logits[:, :seq_len]
+
+        <a id="change">if </a>not return_loss<a id="change">:
+            </a>return logits
+
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb ... -&gt; b (...)&quot)
+        labels = <a id="change">labels[:, :preds.shape[-1]]</a>
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            return logits
+
+        logits = <a id="change">logits[..., :-1, :]</a>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+        labels = rearrange(ids, &quotb ... -&gt; b (...)&quot)
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)</code></pre>

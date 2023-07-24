@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 process in chunks of heads
+
+        out = <a id="change">[]</a>
+
+        max_heads = self.max_heads_process
+
+        for q_chunk, k_chunk, v_chunk in zip(q.split(max_heads, dim = 1), k.split(max_heads, dim = 1), v.split(max_heads, dim = 1)):
+            sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q_chunk, k_chunk)
+
+            if exists(context_mask):
+                sim = sim.masked_fill(~context_mask, mask_value)
+
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+            attn = sim.softmax(dim = -1)
+            attn = self.dropout(attn)
+
+            out_chunk = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v_chunk)
+            out.append(out_chunk)
+
+        &#47&#47 concat all the heads together
+
+        out<a id="change"> = </a><a id="change">torch.cat(</a>out<a id="change">, dim = 1)</a>
+
+        &#47&#47 merge heads and then combine with linear
+
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)</code></pre>

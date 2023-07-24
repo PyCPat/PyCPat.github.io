@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :694
+</h3><img src='2694472.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        src_ids = torch.zeros(self.B * (self.window_size - 1), dtype=torch.int64)    &#47&#47 B*(window - 1)
+        &#47&#47 loop for each batch
+        for i in range(self.B):
+            win_ids = <a id="change">torch.arange(</a>i * self.window_size + 1, i * self.window_size + self.window_size<a id="change">)</a>
+            tgt_desc = keypoint_desc[win_ids]  &#47&#47 (window - 1) x C x N
+            tgt_desc = F.normalize(tgt_desc, dim=1)
+            match_vals = torch.matmul(tgt_desc.transpose(2, 1), src_desc_unrolled[i:i+1])  &#47&#47 (window - 1) x N x HW
+            soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 (window - 1) x N x HW</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_ids = torch.zeros(self.B * (self.window_size - 1), dtype=torch.int64, device=self.gpuid)    &#47&#47 B*(window - 1)
+        &#47&#47 loop for each batch
+        for i in range(self.B):
+            win_ids = <a id="change">torch.arange(i * self.window_size + 1, i * self.window_size + self.window_size).to(</a>self.gpuid<a id="change">)</a>
+            tgt_desc = keypoint_desc[win_ids]  &#47&#47 (window - 1) x C x N
+            tgt_desc = F.normalize(tgt_desc, dim=1)
+            match_vals = torch.matmul(tgt_desc.transpose(2, 1), src_desc_unrolled[i:i+1])  &#47&#47 (window - 1) x N x HW
+            soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 (window - 1) x N x HW</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/utiasasrl/hero_radar_odometry/commit/f2b4852af09f7b5f26009b68933c71f7a5bf84e7#diff-e1b0418361a8ddece193d70590b4a8318282ec99b811a6aaa46783c1d8acd2e1L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2694472</div><div id='project'> Project Name: utiasasrl/hero_radar_odometry</div><div id='commit'> Commit Name: f2b4852af09f7b5f26009b68933c71f7a5bf84e7</div><div id='time'> Time: 2021-03-17</div><div id='author'> Author: keenburn2004@gmail.com</div><div id='file'> File Name: networks/softmax_ref_matcher.py</div><div id='m_class'> M Class Name: SoftmaxRefMatcher</div><div id='n_method'> N Class Name: SoftmaxRefMatcher</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks/softmax_ref_matcher.py</div><div id='n_file'> N File Name: networks/softmax_ref_matcher.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 39</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        with torch.cuda.device_of(x):
+
+            disp_u = torch.reshape(
+                <a id="change">torch.arange(
+                    </a>-self.max_u,
+                    self.max_u + 1<a id="change">,
+                    dtype=torch.float32,
+                )</a>,
+                [1, sizeU, 1, 1, 1],
+            )
+            disp_u = disp_u.expand(B, -1, sizeV, H, W).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.squeeze(1)
+        B, _, _, H, W = x.shape
+
+        disp_u = <a id="change">torch.reshape(
+            torch.arange(
+                -self.max_u,
+                self.max_u + 1,
+                dtype=torch.float32,
+            ),
+            [1, sizeU, 1, 1, 1],
+        ).to(</a>x.device<a id="change">)</a>
+        disp_u = disp_u.expand(B, -1, sizeV, H, W).contiguous()
+        disp_u = disp_u.view(B, sizeU * sizeV, H, W)
+
+        disp_v = torch.reshape(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/neu-vig/ezflow/commit/223fb230b02e3bb5782c91cd92007b611e0b78e9#diff-89247c5a40dc2da7fc448b10b640effa7f87618643f72b47f337659994ac66c6L46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2694477</div><div id='project'> Project Name: neu-vig/ezflow</div><div id='commit'> Commit Name: 223fb230b02e3bb5782c91cd92007b611e0b78e9</div><div id='time'> Time: 2021-12-06</div><div id='author'> Author: shahnh19@gmail.com</div><div id='file'> File Name: ezflow/decoder/noniterative/soft_regression.py</div><div id='m_class'> M Class Name: SoftArg2DFlowRegression</div><div id='n_method'> N Class Name: SoftArg2DFlowRegression</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ezflow/decoder/noniterative/soft_regression.py</div><div id='n_file'> N File Name: ezflow/decoder/noniterative/soft_regression.py</div><div id='m_start'> M Start Line: 63</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.safe_radius = safe_radius
+
+    def forward(self, anchor, positive, dist_keypts):
+        pids = torch.FloatTensor(<a id="change">np.arange(</a>len(anchor)<a id="change">)</a>)
+        if torch.cuda.is_available():
+            pids = pids.cuda()
+        &#47&#47 if self.metric == &quoteuclidean&quot:</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.safe_radius = safe_radius
+
+    def forward(self, anchor, positive, dist_keypts):
+        pids = <a id="change">torch.FloatTensor(np.arange(len(anchor))).to(</a>anchor.device<a id="change">)</a>
+        dist = cdist(anchor, positive, metric=self.metric)
+        dist_keypts = np.eye(dist_keypts.shape[0]) * 10 + dist_keypts.detach().cpu().numpy()
+        add_matrix = torch.zeros_like(dist)
+        add_matrix[np.where(dist_keypts &lt; self.safe_radius)] += 10</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/41b6b76a3d240e1e6d59970c4f243051f37d6233#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2694467</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: 41b6b76a3d240e1e6d59970c4f243051f37d6233</div><div id='time'> Time: 2020-05-24</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: ContrastiveLoss</div><div id='n_method'> N Class Name: ContrastiveLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 66</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 73</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        avg_target = target.mean(dim=3)
+
+        bin_size = self.max_pixel_val / self.output_channel_bits
+        channel_bins = <a id="change">torch.arange(</a>bin_size, self.max_pixel_val, bin_size<a id="change">)</a>
+        discretized_target = torch.bucketize(avg_target, channel_bins)
+        discretized_target = F.one_hot(discretized_target,
+                                       self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits</code></pre><h3>After Change</h3><pre><code class='java'>
+        avg_target = target.mean(dim=3)
+
+        bin_size = self.max_pixel_val / self.output_channel_bits
+        channel_bins = <a id="change">torch.arange(bin_size, self.max_pixel_val, bin_size).to(</a>avg_target.device<a id="change">)</a>
+        discretized_target = torch.bucketize(avg_target, channel_bins)
+        discretized_target = F.one_hot(discretized_target,
+                                       self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/e75b6d025102216e9cce7fa9d9db2568cff985d7#diff-6b502c3fca9000d4ac485e72a6b6cb51b335fed8a8e158013b955ffed39c59abL42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2694469</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: e75b6d025102216e9cce7fa9d9db2568cff985d7</div><div id='time'> Time: 2021-05-16</div><div id='author'> Author: loctruong96@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp.py</div><div id='n_file'> N File Name: vit_pytorch/mpp.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input_tensor):
+        &#47&#47 TODO: apply sin - cos functions as stated in `Attention is all you need`
+        sentence_size = input_tensor.size(-1)
+        pos_tensor = <a id="change">torch.arange(</a>sentence_size<a id="change">, dtype=torch.long)</a>
+        pos_tensor = pos_tensor.expand_as(input_tensor)
+
+        segment_tensor = torch.zeros_like(input_tensor)
+        segment_tensor[:, sentence_size // 2 + 1:] = 1</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input_tensor):
+        &#47&#47 TODO: apply sin - cos functions as stated in `Attention is all you need`
+        sentence_size = input_tensor.size(-1)
+        pos_tensor = <a id="change">torch.arange(sentence_size, dtype=torch.long).to(</a>device<a id="change">)</a>
+        pos_tensor = pos_tensor.expand_as(input_tensor)
+
+        segment_tensor = torch.zeros_like(input_tensor).to(device)
+        segment_tensor[:, sentence_size // 2 + 1:] = 1</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coaxsoft/pytorch_bert/commit/e6ecc6f3056c43a636e7b10573e9856e8a2fe471#diff-39f7bf01acb8036591a4f9a7d06fd2effb41691e54e41aee40af33ebee8c01ceL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2694471</div><div id='project'> Project Name: coaxsoft/pytorch_bert</div><div id='commit'> Commit Name: e6ecc6f3056c43a636e7b10573e9856e8a2fe471</div><div id='time'> Time: 2022-01-14</div><div id='author'> Author: michkravets@gmail.com</div><div id='file'> File Name: bert/model.py</div><div id='m_class'> M Class Name: JointEmbedding</div><div id='n_method'> N Class Name: JointEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert/model.py</div><div id='n_file'> N File Name: bert/model.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 23</div><div id='n_end'> N End Line: 27</div><BR>

@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :2696
+</h3><img src='15153719.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        cond_drop_prob = 0.2,   &#47&#47 for the classifier free guidance
+        text_embed = None       &#47&#47 in paper, text embedding was optional for conditioning decoder
+    ):
+        <a id="change">return </a>image
+
+&#47&#47 main class
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        return loss
+
+    def forward(self, image, *args, **kwargs):
+        <a id="change">b</a><a id="change">, device, img_size</a>, = image.shape[0], image.device, self.image_size
+        check_shape(image, &quotb c h w&quot, h = img_size, w = img_size, c = self.channels)
+
+        times<a id="change"> = </a><a id="change">torch.randint(0</a>, self.num_timesteps, (<a id="change">b</a>,)<a id="change">, device = device, dtype = torch.long)</a>
+        image_embed = self.get_image_embed(image)
+
+        loss = <a id="change">self.p_losses(</a>x, times, image_embed = image_embed, *<a id="change">args, **kwargs)</a>
+        <a id="change">return </a>loss
+
+&#47&#47 main class
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/33d69d3859461f6cdc824a20b8d2fcfdb7e19549#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL465' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15153719</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 33d69d3859461f6cdc824a20b8d2fcfdb7e19549</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 465</div><div id='m_end'> M End Line: 465</div><div id='n_start'> N Start Line: 618</div><div id='n_end'> N End Line: 625</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text,
+        image = None
+    ):
+        <a id="change">return </a>image_embed
+
+&#47&#47 decoder
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        return loss
+
+    def forward(self, text, image, *args, **kwargs):
+        b<a id="change">, device, img_size</a>, = image.shape[0], image.device, self.image_size
+        check_shape(image, &quotb c h w&quot, h = img_size, w = img_size, c = self.channels)
+
+        times<a id="change"> = </a><a id="change">torch.randint(0</a>, self.num_timesteps, (b<a id="change"></a>,)<a id="change">, device = device, dtype = torch.long)</a>
+        image_embed = self.get_image_embed(image)
+        text_cond = self.get_text_cond(text)
+
+        loss = <a id="change">self.p_losses(</a>x, times, image_embed = image_embed, text_cond = text_cond, *<a id="change">args, **kwargs)</a>
+        <a id="change">return </a>loss
+
+&#47&#47 decoder
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/791d27326a894ce6d6873b77b51ce23e0cf53851#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15153718</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 791d27326a894ce6d6873b77b51ce23e0cf53851</div><div id='time'> Time: 2022-04-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: DiffusionPrior</div><div id='n_method'> N Class Name: DiffusionPrior</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 288</div><div id='m_end'> M End Line: 288</div><div id='n_start'> N Start Line: 428</div><div id='n_end'> N End Line: 436</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        return loss.mean()
+
+    def forward(self, img, *args, **kwargs):
+        b<a id="change">, c, h, w, device, img_size</a>, = *img.shape, img.device, self.image_size
+        assert h == img_size and w == img_size, f&quotheight and width of image must be {img_size}&quot
+        t<a id="change"> = </a><a id="change">torch.randint(0</a>, self.num_timesteps, (b<a id="change"></a>,)<a id="change">, device=device)</a>.long()
+
+        img = normalize_to_neg_one_to_one(img)
+        <a id="change">return self.p_losses(</a>img, t, *<a id="change">args, **kwargs)</a>
+
+&#47&#47 dataset classes
+
+class Dataset(Dataset):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/med-seg-diff-pytorch/commit/e37e2110c991bb233438542af9b766b3e3b00739#diff-844b38754380e73816a9a883698d0be58ade3c98292bfe9b915c180f02596398L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15153717</div><div id='project'> Project Name: lucidrains/med-seg-diff-pytorch</div><div id='commit'> Commit Name: e37e2110c991bb233438542af9b766b3e3b00739</div><div id='time'> Time: 2022-11-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: med_seg_diff_pytorch/med_seg_diff_pytorch.py</div><div id='m_class'> M Class Name: MedSegDiff</div><div id='n_method'> N Class Name: MedSegDiff</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: med_seg_diff_pytorch/med_seg_diff_pytorch.py</div><div id='n_file'> N File Name: med_seg_diff_pytorch/med_seg_diff_pytorch.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 12</div><div id='n_start'> N Start Line: 646</div><div id='n_end'> N End Line: 651</div><BR>

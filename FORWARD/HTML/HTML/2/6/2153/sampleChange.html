@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, coefs: Tensor) -&gt; Tensor:
+        &#47&#47 [B, T, F, O*2] -&gt; [B, O, T, F, 2]
+        coefs = coefs.view(*<a id="change">coefs.shape[:-1]</a>, -1, 2)
+        coefs = coefs.permute(0, 3, 1, 2, 4)
+        return coefs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, coefs: Tensor) -&gt; Tensor:
+        &#47&#47 [B, T, F, O*2] -&gt; [B, O, T, F, 2]
+        coefs = <a id="change">coefs.unflatten(-1, (-1, 2)).permute(</a>0, 3, <a id="change">1</a>, <a id="change">2</a>, 4<a id="change">)</a>
+        return coefs
+
+
+class DfDecoder(nn.Module):</code></pre>

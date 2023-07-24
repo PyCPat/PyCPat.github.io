@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 compute projections of output from previous layer and the memory
+        q = self.w_q(x).reshape(batch_size, -1, seg_len, embed_dim)
+        k = self.w_ke(h).reshape(batch_size, -1, total_len, embed_dim)
+        v = <a id="change">self.w_v(h).reshape(</a>batch_size, -1, total_len, embed_dim<a id="change">)</a>
+        r = self.w_kr(self.pos).reshape(-1, total_len, embed_dim)
+        
+        &#47&#47 compute relative positional encodings
+        b = q @ r.transpose(1, 2)
+        b = self.circulant_shift(b, -seg_len+1)
+        
+        &#47&#47 this is the XL specific way of computing the attention score
+        k = k.transpose(2, 3)
+        att = q @ k + b + self.u @ k + self.v @ r.transpose(1, 2)
+        att = att.tril(mem_len) / embed_dim**0.5
+        att = torch.softmax(att, dim=-1)
+        
+        &#47&#47 compute the output of the layer and save to memory
+        out<a id="change"> = </a>self.layer_norm(self.mlp(att @ v) + x)
+        out = self.pos_ff(out)
+        self.save_to_memory(out)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 compute projections of input and memory embeddings
+        q = self.w_q(x).view(batch_size, -1, seg_len, embed_dim)
+        kv = self.w_kv(h).view(2*batch_size, -1, total_len, embed_dim)
+        k, v = <a id="change">kv.chunk(2</a><a id="change">, dim=0)</a>
+        k = k.transpose(2, 3) &#47&#47 only using transposed k below
+        
+        &#47&#47 relative distance between two tokens is max total_len
+        pos = self.pos[-total_len:]</code></pre>

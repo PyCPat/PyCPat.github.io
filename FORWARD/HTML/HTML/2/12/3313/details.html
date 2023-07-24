@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :3313
+</h3><img src='17230085.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = F.relu(fc(x))
+            x = self.dropout(x)
+        x = self.fc[-1](x) &#47&#47 (B*N, 1)
+        x = <a id="change">torch.reshape(</a>x, (B, N)<a id="change">)</a> &#47&#47 (B, N)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+
+        <a id="change">if self.context &gt; 1</a><a id="change">:
+            </a>z<a id="change"> = </a><a id="change">[</a>x<a id="change"></a>]
+            <a id="change">for d</a> in <a id="change">range(1</a>, self.context // 2 + 1<a id="change">)</a><a id="change">:
+                </a>z_u = torch.zeros_like(x)
+                z_u[:, d:, :] = x[:, :<a id="change">-d</a>, :] &#47&#47 i-d
+                z.append(z_u)
+                z_d = torch.zeros_like(x)
+                z_d[:, :<a id="change">-d</a>, :] = x[:, d:, :] &#47&#47 i+d
+                z.append(z_d)
+            x = torch.cat(z, dim=2) &#47&#47 (B, N, C*width)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keio-bioinformatics/mxfold2/commit/c37c09d1ad2940a13dd4c82253c8607c8175115a#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL117' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17230085</div><div id='project'> Project Name: keio-bioinformatics/mxfold2</div><div id='commit'> Commit Name: c37c09d1ad2940a13dd4c82253c8607c8175115a</div><div id='time'> Time: 2019-11-06</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCUnpairedLayer</div><div id='n_method'> N Class Name: FCUnpairedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 117</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, c_in, T, n_vertex = x.shape
+
+        x_first_mul = torch.mm(x.reshape(-1, c_in), self.weight.reshape(c_in, -1)).reshape(n_vertex * self.Ks, -1)
+        x_second_mul = <a id="change">torch.mm(self.chebconv_matrix_list, x_first_mul).reshape(</a>-1, self.c_out<a id="change">)</a>
+
+        if self.bias is not None:
+            x_chebconv = x_second_mul + self.bias</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.reshape(n_vertex, -1)
+        x_0 = x
+        x_1 = torch.mm(self.chebconv_matrix, x)
+        <a id="change">if self.Ks - 1 == 0</a><a id="change">:
+            </a>x_list<a id="change"> = </a><a id="change">[</a>x_0<a id="change"></a>]
+        elif self.Ks - 1 == 1:
+            x_list = [x_0]
+            x_list.append(x_1)
+        else:
+            x_list = [x_0, x_1]
+            <a id="change">for k</a> in <a id="change">range(2</a>, self.Ks<a id="change">)</a><a id="change">:
+                </a>x_list.append(torch.mm(2 * self.chebconv_matrix, x_list[k<a id="change"> - </a>1]) - x_list[k<a id="change"> - </a>2])
+        x_tensor = torch.stack(x_list, dim=0)
+
+        x_mul = torch.mm(x_tensor.reshape(-1, self.Ks * c_in), self.weight.reshape(self.Ks * c_in, -1)).reshape(-1, self.c_out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hazdzz/stgcn/commit/cbe49f3295a8e608a3891688060d7da6b1f83801#diff-db69bbef9e404fa5af08d5bc209ae131c092e0ce285d496efe5f46170b20add9L208' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17230117</div><div id='project'> Project Name: hazdzz/stgcn</div><div id='commit'> Commit Name: cbe49f3295a8e608a3891688060d7da6b1f83801</div><div id='time'> Time: 2021-03-10</div><div id='author'> Author: raphaelpeo@gmail.com</div><div id='file'> File Name: model/layers.py</div><div id='m_class'> M Class Name: ChebConv</div><div id='n_method'> N Class Name: ChebConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/layers.py</div><div id='n_file'> N File Name: model/layers.py</div><div id='m_start'> M Start Line: 211</div><div id='m_end'> M End Line: 212</div><div id='n_start'> N Start Line: 213</div><div id='n_end'> N End Line: 227</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = F.relu(fc(x))
+            x = self.dropout(x)
+        x = self.fc[-1](x) &#47&#47 (B*N, 1)
+        x = <a id="change">torch.reshape(</a>x, (B, N)<a id="change">)</a> &#47&#47 (B, N)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+
+        <a id="change">if self.context &gt; 1</a><a id="change">:
+            </a>z<a id="change"> = </a><a id="change">[</a>x<a id="change"></a>]
+            <a id="change">for d</a> in <a id="change">range(1</a>, self.context // 2 + 1<a id="change">)</a><a id="change">:
+                </a>z_u = torch.zeros_like(x)
+                z_u[:, d:, :] = x[:, :<a id="change">-d</a>, :] &#47&#47 i-d
+                z.append(z_u)
+                z_d = torch.zeros_like(x)
+                z_d[:, :<a id="change">-d</a>, :] = x[:, d:, :] &#47&#47 i+d
+                z.append(z_d)
+            x = torch.cat(z, dim=2) &#47&#47 (B, N, C*width)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mxfold/mxfold2/commit/c37c09d1ad2940a13dd4c82253c8607c8175115a#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17230113</div><div id='project'> Project Name: mxfold/mxfold2</div><div id='commit'> Commit Name: c37c09d1ad2940a13dd4c82253c8607c8175115a</div><div id='time'> Time: 2019-11-06</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCUnpairedLayer</div><div id='n_method'> N Class Name: FCUnpairedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 117</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 137</div><BR>

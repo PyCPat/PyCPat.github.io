@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        input: [N, C]
+        target: [N, ]
+        
+        logpt = <a id="change">F.log_softmax(</a>input<a id="change">, dim=1)</a>
+        pt = torch.exp(logpt)
+        logpt = (1-pt)**self.gamma * logpt
+        loss = F.nll_loss(logpt, target, self.weight,ignore_index=self.ignore_index)
+        return loss</code></pre><h3>After Change</h3><pre><code class='java'>
+        ce_loss = F.cross_entropy(inputs, targets, weight=self.weight, reduction="none")
+        p_t = torch.exp(-ce_loss)
+        loss = (1 - p_t)**self.gamma * ce_loss
+        <a id="change">if </a>self.reduction == "mean"<a id="change">:
+            </a>loss<a id="change"> = </a>loss.mean()
+        elif self.reduction == "sum":
+            loss<a id="change"> = </a>loss.sum()
+        return loss
+
+</code></pre>

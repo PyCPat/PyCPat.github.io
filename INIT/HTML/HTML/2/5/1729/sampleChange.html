@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.bn3 = nn.BatchNorm2d(out_planes)
+
+        self.shortcut = nn.Sequential()
+        <a id="change">if </a>stride == 1 and <a id="change">in_planes != out_planes</a><a id="change">:
+            </a>self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.BatchNorm2d(out_planes),
+            )</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        layers: List[nn.Module] = []
+        if expand_ratio != 1:
+            <a id="change">layers.append(</a>ConvBNReLU(inp, hidden_dim, kernel_size=1)<a id="change">)</a>
+        <a id="change">layers.extend(</a>[
+            ConvBNReLU(hidden_dim, hidden_dim,
+                       stride=stride, groups=hidden_dim),
+            nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+            norm_layer(oup),
+        ]<a id="change">)</a>
+        self.conv = nn.Sequential(*layers)
+        self.out_channels = oup
+
+    def forward(self, x: Tensor) -&gt; Tensor:</code></pre>

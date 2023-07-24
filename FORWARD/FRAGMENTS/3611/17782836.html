@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hidden_state=None):
+        output = []
+        for step in range(<a id="change">input.size(1</a><a id="change">)</a>):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(input[:, step, :, :, :], hidden_state)
+            output.append(hidden_state)</code></pre><h3>After Change</h3><pre><code class='java'>
+        layer_output_list = []
+        last_state_list = []
+
+        <a id="change">for l</a>, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps))<a id="change">:
+            </a>h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input<a id="change"> = </a>hid_dp(cur_layer_input)
+            last_state_list.append(h)
+
+        layer_output = torch.stack(output_inner, dim=int(self.batch_first))</code></pre>

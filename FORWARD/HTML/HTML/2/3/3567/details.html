@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :3567
+</h3><img src='17657087.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        edge_index = radius_graph(pos, r=self.cutoff_upper, batch=batch)
+        row, col = edge_index
+        edge_weight<a id="change"> = </a><a id="change">(pos[row] - pos[col]).norm(dim=-1)</a>
+        edge_attr = self.distance_expansion(edge_weight)
+
+        if self.neighbor_embedding:
+            x = self.neighbor_embedding(z, x, edge_index, edge_weight, edge_attr)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, z, pos, batch=None):
+        x = self.embedding(z)
+
+        edge_index<a id="change">, edge_weight</a> = self.distance(pos, batch)
+        edge_attr = self.distance_expansion(edge_weight)
+
+        if self.neighbor_embedding:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/d6516afdd992b10536d3f20d06cdf978c4ec8bc2#diff-41fd77dbca1e928d027707bbb314eea394ba89b00249c2051b698902aeceea50L99' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17657087</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: d6516afdd992b10536d3f20d06cdf978c4ec8bc2</div><div id='time'> Time: 2021-05-21</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/torchmd_t.py</div><div id='m_class'> M Class Name: TorchMD_T</div><div id='n_method'> N Class Name: TorchMD_T</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/torchmd_t.py</div><div id='n_file'> N File Name: torchmdnet/models/torchmd_t.py</div><div id='m_start'> M Start Line: 99</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        edge_index = radius_graph(pos, r=self.cutoff_upper, batch=batch)
+        row, col = edge_index
+        edge_weight<a id="change"> = </a><a id="change">(pos[row] - pos[col]).norm(dim=-1)</a>
+        edge_attr = self.distance_expansion(edge_weight)
+
+        if self.neighbor_embedding:
+            x = self.neighbor_embedding(z, x, edge_index, edge_weight, edge_attr)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, z, pos, batch=None):
+        x = self.embedding(z)
+
+        edge_index<a id="change">, edge_weight</a> = self.distance(pos, batch)
+        edge_attr = self.distance_expansion(edge_weight)
+
+        if self.neighbor_embedding:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/d6516afdd992b10536d3f20d06cdf978c4ec8bc2#diff-ec27ffac25aff25f5f73a0c55e7f1aae7f0f69fb31bd0b07ffca625968703986L93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17657095</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: d6516afdd992b10536d3f20d06cdf978c4ec8bc2</div><div id='time'> Time: 2021-05-21</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/torchmd_gn.py</div><div id='m_class'> M Class Name: TorchMD_GN</div><div id='n_method'> N Class Name: TorchMD_GN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/torchmd_gn.py</div><div id='n_file'> N File Name: torchmdnet/models/torchmd_gn.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 97</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Confidence Loss(cosine distance to classes center)
+        &#47&#47 pos [num, num_priors]
+        &#47&#47 conf_data [num, num_priors, feature_dim]
+        conf_data<a id="change"> = </a>conf_data / <a id="change">torch.norm(</a>conf_data<a id="change">, dim=2, keepdim=True)</a>  &#47&#47 [num, num_priors, feature_dim]
+        batch_conf = conf_data.view(-1, self.num_classes).mm(self.imprinted_matrix.t()) * self.scale  &#47&#47 [n_way, num_classes]
+
+        &#47&#47 Compute max conf across batch for hard negative mining (logit-combined)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 conf_data [num, num_priors, feature_dim]
+        features = [conf_data.view(-1, self.num_classes)]
+        for i in range(3):
+            new_features = (self.denselayer1<a id="change">, self.denselayer2, self.denselayer3</a>)[i](*features)
+            features.append(new_features)
+        batch_conf = new_features * self.scale  &#47&#47 [n_way, num_classes]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ze-yang/context-transformer/commit/fdad2f0570a1a57d0925ef2ff8b6a15611f910b5#diff-a2028be8bfd0e5e51d2fcfa0d360dd245f11ea1008b0e31fc76492ecac77f420L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17657094</div><div id='project'> Project Name: ze-yang/context-transformer</div><div id='commit'> Commit Name: fdad2f0570a1a57d0925ef2ff8b6a15611f910b5</div><div id='time'> Time: 2019-03-08</div><div id='author'> Author: 981435961@qq.com</div><div id='file'> File Name: layers/modules/multibox_loss_combined_imprinted.py</div><div id='m_class'> M Class Name: MultiBoxLoss_combined</div><div id='n_method'> N Class Name: MultiBoxLoss_combined</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/modules/multibox_loss_combined_imprinted.py</div><div id='n_file'> N File Name: layers/modules/multibox_loss_combined_imprinted.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 107</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 112</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                out = out + self.mean
+
+        if self.dipole:
+            out<a id="change"> = </a><a id="change">torch.norm(</a>out<a id="change">, dim=-1, keepdim=True)</a>
+
+        if self.derivative:
+            dy = -grad(out, pos, grad_outputs=torch.ones_like(out),
+                    create_graph=True, retain_graph=True)[0]</code></pre><h3>After Change</h3><pre><code class='java'>
+        representation = self.representation_model(z, pos, batch=batch)
+
+        if len(representation) == 5:
+            x<a id="change">, v, z, pos, batch</a> = representation
+        else:
+            v = None
+            x, z, pos, batch = representation</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/bd6d4b9640f3d2fafec28736c88fe1f2d0e0dda7#diff-7ada1dab8926e58f70c1a2dd001ffd355effe94d817223ac6e2537edea4f9798L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17657088</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: bd6d4b9640f3d2fafec28736c88fe1f2d0e0dda7</div><div id='time'> Time: 2021-07-14</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/output_modules.py</div><div id='m_class'> M Class Name: OutputNetwork</div><div id='n_method'> N Class Name: TorchMD_Net</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/output_modules.py</div><div id='n_file'> N File Name: torchmdnet/models/output_modules.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 84</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 162</div><BR>

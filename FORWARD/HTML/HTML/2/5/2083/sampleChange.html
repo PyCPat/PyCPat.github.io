@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        skipxdo = self.do2(skipx)
+        out = self.relu(self.bn(self.up_conv(out)))
+        xcat = torch.cat((out, skipxdo), 1)
+        xcat = self.relu(<a id="change">self.bn(</a>self.conv(xcat)<a id="change">)</a>)
+        out = self.ops(xcat)
+        &#47&#47 print(out.shape, xcat.shape)
+        &#47&#47 assert 1&gt;3
+        out = <a id="change">self.relu(</a>torch.add(out, xcat)<a id="change">)</a>
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, skipx):
+        out = self.relu(self.drop(self.bn(self.up_conv(x))))
+        xcat = torch.cat((out, skipx), 1)
+        xcat = <a id="change">self.relu(</a>self.drop(<a id="change">self.bn(</a>self.conv(xcat)<a id="change">)</a>)<a id="change">)</a>
+        out = self.ops(xcat)
+        &#47&#47 print(out.shape, xcat.shape)
+        &#47&#47 assert 1&gt;3</code></pre>

@@ -1,0 +1,82 @@
+<html><h3>Pattern ID :1765
+</h3><img src='12948471.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        l1Loss = 0.0 &#47&#47 F.l1_loss(restored, images)
+        ssimLoss = 1 - self._msssim(restored + 1, images + 1)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        contextLoss = <a id="change">F.cross_entropy(</a>predict, c1<a id="change">)</a>
+        &#47&#47 [n, m, h, w, k] -&gt; [n, k, m, h, w]
+        &#47&#47 l1, l2 = l1.permute(0, 4, 1, 2, 3), l2.permute(0, 4, 1, 2, 3)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        &#47&#47 sum(-logP) / ()
+        &#47&#47 bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)
+
+        l1 = l1.mean((2,3))
+        l2 = l2.mean((2,3))
+
+        posterior1 = torch.distributions.Categorical(logits=l1)
+        posterior2 = torch.distributions.Categorical(logits=l2)
+
+        prior1 = torch.distributions.Categorical(logits=torch.zeros_like(l1))
+        prior2 = torch.distributions.Categorical(logits=torch.zeros_like(l2))
+
+        reg = torch.distributions.kl_divergence(posterior1, prior1).mean() + torch.distributions.kl_divergence(posterior2, prior2).mean()
+
+        <a id="change">return </a>ssimLoss, contextLoss, reg
+
+
+class CompressionLossQ(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            regs.append(reg)
+
+        <a id="change">return </a>ssimLoss, contextLoss, sum(regs)
+
+
+class CompressionLossQ(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/290ac3b044e8dcee03a63e86c2356c47628be8a6#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12948471</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 290ac3b044e8dcee03a63e86c2356c47628be8a6</div><div id='time'> Time: 2021-09-16</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 137</div><div id='m_end'> M End Line: 164</div><div id='n_start'> N Start Line: 140</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        l1, l2 = l1.permute(0, 4, 1, 2, 3), l2.permute(0, 4, 1, 2, 3)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        &#47&#47 sum(-logP) / ()
+        bppLoss = (<a id="change">F.cross_entropy(</a>l1, c1<a id="change">, reduction="mean")</a> + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)
+
+        <a id="change">return </a>ssimLoss, contextLoss, -bppLoss
+
+
+class CompressionLossQ(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        reg = torch.distributions.kl_divergence(posterior1, prior1).mean() + torch.distributions.kl_divergence(posterior2, prior2).mean()
+
+        <a id="change">return </a>ssimLoss, contextLoss, reg
+
+
+class CompressionLossQ(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12948470</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef</div><div id='time'> Time: 2021-09-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 144</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            label_mask[input[&quotlabel_split&quot]] = 1
+            out = out.masked_fill(label_mask == 0, 0)
+        output[&quotscore&quot] = out
+        output[&quotloss&quot] = <a id="change">F.cross_entropy(</a>output[&quotscore&quot], input[&quotlabel&quot]<a id="change">)</a>
+        <a id="change">return </a>output
+
+
+def resnet18(model_rate=1, track=False):</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = F.adaptive_avg_pool2d(out, 1)
+        out = out.view(out.size(0), -1)
+        out = self.linear(out)
+        <a id="change">return </a>out
+
+
+def resnet18(model_rate=1, track=False):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/symbioticlab/fedscale/commit/85c3e7f2e360d3da9920627f32fa83a8fe510107#diff-82117a408b57e60b1cf8de6f4f1408a624830dc345171c093c2dcc061fc54e56L154' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12948473</div><div id='project'> Project Name: symbioticlab/fedscale</div><div id='commit'> Commit Name: 85c3e7f2e360d3da9920627f32fa83a8fe510107</div><div id='time'> Time: 2022-03-01</div><div id='author'> Author: yuxuanzh@h1.fl-alg.gaia-pg0.wisc.cloudlab.us</div><div id='file'> File Name: core/examples/fed_hetero/resnet_fedhet.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/examples/fed_hetero/resnet_fedhet.py</div><div id='n_file'> N File Name: core/examples/fed_hetero/resnet_fedhet.py</div><div id='m_start'> M Start Line: 155</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_inp, x_labels = x[:, :-1], x[:, 1:]
+        out = self.net(x_inp, **kwargs)
+
+        <a id="change">return </a><a id="change">F.cross_entropy(
+            </a>out.transpose(1, 2),
+            x_labels<a id="change">,
+            ignore_index = self.ignore_index
+        )</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, **kwargs):
+        x_inp, x_labels = x[:, :-1], x[:, 1:]
+        <a id="change">return </a>self.net(x_inp, labels = x_labels, **kwargs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/triton-transformer/commit/80fcca960e94fbf3c682102518d4cac2a592ac7c#diff-940dcd74be4c6729681c7c0eb465aff0f85934462147a02ef0b988e5f3692440L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12948472</div><div id='project'> Project Name: lucidrains/triton-transformer</div><div id='commit'> Commit Name: 80fcca960e94fbf3c682102518d4cac2a592ac7c</div><div id='time'> Time: 2021-09-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: triton_transformer/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: triton_transformer/autoregressive_wrapper.py</div><div id='n_file'> N File Name: triton_transformer/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 69</div><BR>

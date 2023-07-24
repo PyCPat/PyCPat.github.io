@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute and apply filter
+        notch_kernel = notch_filter(drop_frequency).to(clean_waveform.device)
+        padding = (len(notch_kernel) // 2, <a id="change">len(</a>notch_kernel<a id="change">) // 2</a>)
+        dropped_waveform = convolve1d(dropped_waveform, notch_kernel, padding)
+
+        &#47&#47 Save the state of the RNG for reproducibility</code></pre><h3>After Change</h3><pre><code class='java'>
+        drop_filter[0, 0, pad] = 1
+
+        &#47&#47 Subtract each frequency
+        <a id="change">for frequency</a> in drop_frequency<a id="change">:
+            </a>notch_kernel = notch_filter(
+                frequency, filter_length, self.drop_width,
+            ).to(clean_waveform.device)
+            drop_filter<a id="change"> = </a>convolve1d(drop_filter, notch_kernel, pad)
+
+        &#47&#47 Apply filter
+        dropped_waveform = convolve1d(dropped_waveform, drop_filter, pad)</code></pre>

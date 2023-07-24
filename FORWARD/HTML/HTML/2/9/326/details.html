@@ -1,0 +1,95 @@
+<html><h3>Pattern ID :326
+</h3><img src='1292531.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return self.bottleneck(torch.cat(psp_outs, dim=1))
+
+    def forward(self, inputs: Tuple[Tensor, Tensor, Tensor, Tensor]) -&gt; Tensor:
+        laterals = <a id="change">[lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]</a>
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = len(laterals)
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs<a id="change"> = </a>[self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels-1, 0, -1):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, features: Tuple[Tensor, Tensor, Tensor, Tensor]) -&gt; Tensor:
+        f = self.ppm(features[-1])
+        fpn_features<a id="change"> = </a><a id="change">[</a>f<a id="change"></a>]
+
+        <a id="change">for i</a> in reversed(range(len(features)-1))<a id="change">:
+            </a>feature<a id="change"> = </a>self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            <a id="change">fpn_features.append(</a>self.fpn_out[i](f)<a id="change">)</a>
+
+        fpn_features.reverse()
+        for i in range(1, len(features)):
+            fpn_features[i] = F.interpolate(fpn_features[i], size=fpn_features[0].shape[-2:], mode=&quotbilinear&quot, align_corners=False)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1292531</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 (B, in_dim*K, T_in)
+        &#47&#47 Concat conv1d bank outputs
+        x<a id="change"> = </a>torch.cat(<a id="change">[conv1d(x)[:, :, :T] for conv1d in self.conv1d_banks]</a>, dim=1)
+        assert x.size(1) == self.in_dim * len(self.conv1d_banks)
+        x = self.max_pool1d(x)[:, :, :T]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 (B, in_features*K, T_in)
+        &#47&#47 Concat conv1d bank outputs
+        outs<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for conv1d</a> in self.conv1d_banks<a id="change">:
+            </a>out = conv1d(x)
+            out<a id="change"> = </a>out[:, :, :T]
+            <a id="change">outs.append(</a>out<a id="change">)</a>
+        
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.in_features * len(self.conv1d_banks)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/7d5bcd6ca4486e1f33d6de2533f56861d197a4bd#diff-63415e5bdfe9c172be8a9cadb35d1f47d718fea5f15c6879f5715ebb9e331155L92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1292528</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 7d5bcd6ca4486e1f33d6de2533f56861d197a4bd</div><div id='time'> Time: 2018-02-08</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron.py</div><div id='m_class'> M Class Name: CBHG</div><div id='n_method'> N Class Name: CBHG</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron.py</div><div id='n_file'> N File Name: layers/tacotron.py</div><div id='m_start'> M Start Line: 94</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 140</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input = torch.transpose(input, 1, 2)
+        conv_res = [self.activation(conv(input)) for conv in self.convs] &#47&#47[b, o, lout]
+
+        tmp<a id="change"> = </a><a id="change">[F.max_pool1d(input=x, kernel_size=x.size(2)).squeeze(2) for x in conv_res]</a>
+        return torch.cat(tmp, dim=-1)
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        conv_res = [self.activation(conv(input)) for conv in self.convs] &#47&#47[b, o, lout]
+
+        &#47&#47import pdb;pdb.set_trace()
+        tmp<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for i</a> in range(len(conv_res))<a id="change">:
+            </a>dim = conv_res[i].size(2)
+            if isinstance(dim, torch.Tensor):
+                &#47&#47trace 无法识别tuple的操作，会转成tensor
+                dim = dim.tolist()
+            max_out<a id="change"> = </a>F.max_pool1d(conv_res[i], kernel_size=dim)
+            <a id="change">tmp.append(</a>max_out.squeeze(2)<a id="change">)</a>
+
+        return torch.cat(tmp, dim=-1)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/waterzxj/unf/commit/09694a5d28252c5e2327c1d695b8e7de6a965605#diff-7555e84696efe507d515faae88b0e68bad2396f14a740ed860abe4e088f1a36dL51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1292532</div><div id='project'> Project Name: waterzxj/unf</div><div id='commit'> Commit Name: 09694a5d28252c5e2327c1d695b8e7de6a965605</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 1486459973@qq.com</div><div id='file'> File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_class'> M Class Name: CnnMaxpoolLayer</div><div id='n_method'> N Class Name: CnnMaxpoolLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='n_file'> N File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 73</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.miner:
+            hard_pairs = self.miner(emb, labels)
+            only_negative_labels_indicis<a id="change"> = </a><a id="change">[unique_labels.index(l) for l in self.only_negative_labels]</a>
+            valid_indicies = [int(i) for i in hard_pairs[0] if labels_int[int(i)] not in only_negative_labels_indicis]
+            hard_pairs = (hard_pairs[0][valid_indicies], hard_pairs[1][valid_indicies], hard_pairs[2][valid_indicies])
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.miner:
+            hard_pairs = self.miner(emb, labels)
+            only_negative_labels_indicis<a id="change"> = </a><a id="change">[]</a>
+
+            <a id="change">for l</a> in self.only_negative_labels<a id="change">:
+                </a>try:
+                    uniq_index<a id="change"> = </a>unique_labels.index(l)
+                    <a id="change">only_negative_labels_indicis.append(</a>uniq_index<a id="change">)</a>
+                except ValueError:
+                    pass
+
+            valid_indicies = [int(i) for i in hard_pairs[0] if labels_int[int(i)] not in only_negative_labels_indicis]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mpi-dortmund/tomotwin-cryoet/commit/0c4f29f49e0fcb94651e1e5391baec4e2d2c38b4#diff-a5368024cf213af390ea3d3bb511f789849b1b77cc573d895e5ae3bc21508154L403' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1292524</div><div id='project'> Project Name: mpi-dortmund/tomotwin-cryoet</div><div id='commit'> Commit Name: 0c4f29f49e0fcb94651e1e5391baec4e2d2c38b4</div><div id='time'> Time: 2022-09-16</div><div id='author'> Author: thorsten.wagner@mpi-dortmund.mpg.de</div><div id='file'> File Name: tomotwin/modules/training/LossPyML.py</div><div id='m_class'> M Class Name: LossPyML</div><div id='n_method'> N Class Name: LossPyML</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tomotwin/modules/training/LossPyML.py</div><div id='n_file'> N File Name: tomotwin/modules/training/LossPyML.py</div><div id='m_start'> M Start Line: 426</div><div id='m_end'> M End Line: 426</div><div id='n_start'> N Start Line: 426</div><div id='n_end'> N End Line: 435</div><BR>

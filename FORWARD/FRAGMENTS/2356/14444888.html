@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 reshape back to original sequence
+
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quot(b k) n d -&gt; b (k n) d&quot</a><a id="change">, k = n // chunk_size)</a>
+
+        &#47&#47 pad back to original, with 0s at the beginning (which will be added to the residual and be fine)
+
+        out = F.pad(out, (0, 0, causal_padding, -causal_padding), value = 0.)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, *, context, pos_emb = None, **kwargs):
+        &#47&#47 derive variables
+
+        b, n, num_chunks, num_retrieved, chunk_size = x.shape[0], x.shape[-2], *context.shape[<a id="change">-4:-1</a>]
+        causal_padding = chunk_size - 1
+
+        &#47&#47 causal padding</code></pre>

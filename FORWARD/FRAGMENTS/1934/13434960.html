@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.sample()
+
+    def forward(self, x: torch.FloatTensor) -&gt; torch.FloatTensor:
+        batch_size<a id="change"> = </a>x.shape[0]
+
+        return x * <a id="change">self.mask.repeat(</a>batch_size, <a id="change">1</a><a id="change">)</a>
+
+    def sample(self):
+        self.mask = torch.bernoulli(
+            torch.ones(1, self.input_dim, device=self.device) * 1 - self.dropout</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mask = None
+
+    def forward(self, x: torch.FloatTensor) -&gt; torch.FloatTensor:
+        <a id="change">if </a>self.mask is None<a id="change">:
+            </a>raise ValueError("Dropout mask hasn&quott been sampled yet. Use .sample().")
+
+        return x * self.mask
+</code></pre>

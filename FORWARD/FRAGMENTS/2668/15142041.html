@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            return rearrange(logits, &quotb (s d) n -&gt; b s d n&quot, d = depth)
+
+        logits = <a id="change">logits[..., :-1, :]</a>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb s d -&gt; b (s d)&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        depth_tokens = rearrange(depth_tokens, &quot(b s) d f -&gt; b s d f&quot, b = b)
+
+        logits = self.to_logits(depth_tokens)
+        logits<a id="change"> = </a><a id="change">rearrange(</a>logits, <a id="change">&quotb ... f -&gt; b (...) f&quot</a><a id="change">)</a>
+        logits = logits[:, :(seq_len + 1)]
+
+        if not return_loss:
+            logits = logits[:, 1:]</code></pre>

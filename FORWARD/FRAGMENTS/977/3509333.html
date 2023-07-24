@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
+            if self.with_aux:
+                aux_in = torch.empty(
+                    (<a id="change">global_graph_out.size()</a>[0]<a id="change">, self.polyline_vec_shape</a>),
+                    device=self.device
+                )
+                aux_gt = torch.empty(</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
+
+        if self.training and self.with_aux:
+            mask_polyline_indices = [random.randint(0, time_step_len<a id="change"> - </a>1) + i * time_step_len <a id="change">for</a> i in
+                                     <a id="change">range(</a>x.size()[0]<a id="change">)</a>]
+            x = x.view(-1, self.subgraph_width)
+            aux_gt = x[mask_polyline_indices]
+            x[mask_polyline_indices] = 0.0
+            x<a id="change"> = </a>x.view(-1, time_step_len, self.subgraph_width)
+
+        &#47&#47 TODO: compute the adjacency matrix???
+        &#47&#47 reconstruct the batch global interaction graph data</code></pre>

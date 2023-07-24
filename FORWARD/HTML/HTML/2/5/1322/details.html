@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :1322
+</h3><img src='4631750.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, anchor, positive, dist_keypts):
+        pids = torch.FloatTensor(np.arange(len(anchor))).to(anchor.device)
+        &#47&#47 dists = cdist(anchor, positive, metric=self.metric)
+        dists = torch.matmul(anchor, <a id="change">positive.permute(1</a>,<a id="change">0</a><a id="change">)</a>)
+        &#47&#47 add 10 to false negative
+        &#47&#47 dist_keypts = np.eye(dist_keypts.shape[0]) * 10 + dist_keypts.detach().cpu().numpy()
+        &#47&#47 add_matrix = torch.zeros_like(dists)
+        &#47&#47 add_matrix[np.where(dist_keypts &lt; self.safe_radius)] += 10
+        &#47&#47 dists = dists + add_matrix
+        false_negative = dist_keypts &lt; self.safe_radius
+
+        pos_mask = torch.eq(torch.unsqueeze(pids, dim=1), torch.unsqueeze(pids, dim=0))
+        &#47&#47 pos_mask = pos_mask | false_negative
+        neg_mask = torch.logical_not(pos_mask | false_negative)
+
+        &#47&#47 dists * pos_mask get the distance of each valid anchor-positive pair.
+        furthest_positive, _ = torch.min(dists + 1e5 * (~pos_mask).float(), dim=1)
+        &#47&#47 here we use "dists +  10000*pos_mask" to avoid the anchor-positive pair been selected.
+        closest_negative, _ = torch.max(dists - 1e5 * (~neg_mask).float(), dim=1)
+        &#47&#47 closest_negative_row, _ = torch.min(dists + 1e5 * pos_mask.float(), dim=0)
+        &#47&#47 closest_negative = torch.min(closest_negative_col, closest_negative_row)
+        average_negative = (torch.sum(dists, dim=-1) - furthest_positive) / (dists.shape[0] - 1)
+        accuracy = (furthest_positive &gt; closest_negative).sum() * 100.0 / dists.shape[0]
+
+
+        &#47&#47 pos = dists + 1e5 * (~pos_mask).float()
+        pos = furthest_positive[:, None]
+        pos_weight = (self.pos_optimal - pos).detach()
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+
+        neg = dists - 128 * (~neg_mask).float()
+        neg_weight =  (neg - self.neg_optimal).detach()
+        neg_weight = torch.max(torch.zeros_like(neg_weight), neg_weight)
+        lse_negative_row = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-1)
+        lse_negative_col = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-2)
+
+        loss_row = F.softplus(lse_positive + lse_negative_row) / self.log_scale
+        loss_col = F.softplus(lse_positive + lse_negative_col) / self.log_scale
+        loss<a id="change"> = </a>(loss_row + loss_col) / 2
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        diff = furthest_positive - closest_negative
+        accuracy = (diff &lt; 0).sum() * 100.0 / diff.shape[0]
+
+        pos = dists - 1e5 * <a id="change">neg_mask.float()</a>
+        pos_weight = (pos - self.pos_optimal).detach()
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/f47b90c1a30103d37497f6614f6e7d59f20d7399#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL124' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4631750</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: f47b90c1a30103d37497f6614f6e7d59f20d7399</div><div id='time'> Time: 2020-07-21</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 155</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    &#47&#47with torch.no_grad():
+    batch_features = self.__cnn__(images) &#47&#47 (N, features_dim, block_num, block_num)
+    
+    conv_features = <a id="change">self.__img2embed_conv__(batch_features).permute(</a>0, <a id="change">2</a>, 3, <a id="change">1</a><a id="change">)</a> &#47&#47 (N, block_num, block_num, embed_dim * 0.5)
+    apool<a id="change"> = </a>torch.mean(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+    mpool, _ = torch.max(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+
+    imgs_embed = torch.cat([apool, mpool], dim = 2) &#47&#47 (N, block_num, embed_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+    &#47&#47batch_texts = self.__clip__.encode_text(text_input)
+
+    &#47&#47tags_embed = self.__text2embed__(self.__clip_drop__(batch_texts.float())).unsqueeze(1)
+    imgs_embed = self.__img2embed__(self.__clip_drop__(<a id="change">batch_features.float()</a>)).unsqueeze(1)
+
+    words_embed = self.__content_embed__(input_ids) 
+    indices  = torch.arange(self.seq_len + self.tags_num + self.block_num).expand(batch, -1).to(device)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/siwooyong/codalab-microsoft-coco-image-captioning-challenge/commit/d24b22ec9f0be1acd2f307be20ec85f84f8d8795#diff-7c1ece53a18959b293126dd93f3cf0f768220f50d2c1201e1601681873e6f6e4L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4631748</div><div id='project'> Project Name: siwooyong/codalab-microsoft-coco-image-captioning-challenge</div><div id='commit'> Commit Name: d24b22ec9f0be1acd2f307be20ec85f84f8d8795</div><div id='time'> Time: 2021-07-08</div><div id='author'> Author: 68500343+yongsiwoo@users.noreply.github.com</div><div id='file'> File Name: models/base_model.py</div><div id='m_class'> M Class Name: decoder</div><div id='n_method'> N Class Name: decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base_model.py</div><div id='n_file'> N File Name: models/base_model.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 74</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        N, M, D = self.embedding.size()
+        assert C == N * D
+
+        x<a id="change"> = </a><a id="change">x.view(B, N, D, L).permute(1</a>, 0, 3, <a id="change">2</a><a id="change">)</a>  &#47&#47 N, B, L, D
+        x_flat = x.detach().reshape(N, -1, D)
+
+        distances = torch.cdist(x_flat, self.embedding)</code></pre><h3>After Change</h3><pre><code class='java'>
+                                x_flat, self.embedding.t(),
+                                alpha=-2.0, beta=1.0)
+
+        indices = torch.argmin(<a id="change">distances.float()</a>, dim=-1)
+        encodings = F.one_hot(indices, M).float()
+        quantized = F.embedding(indices, self.embedding)
+        quantized = quantized.view_as(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bshall/vectorquantizedcpc/commit/535c95415d62ececde085e376f451b3b76e1b624#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4631774</div><div id='project'> Project Name: bshall/vectorquantizedcpc</div><div id='commit'> Commit Name: 535c95415d62ececde085e376f451b3b76e1b624</div><div id='time'> Time: 2020-05-01</div><div id='author'> Author: benji.l.shall@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: VQEmbeddingEMA</div><div id='n_method'> N Class Name: VQEmbeddingEMA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 112</div><BR>

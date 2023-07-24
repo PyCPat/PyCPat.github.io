@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.act_fn(self.fc_1(torch.cat([hidden, state], dim=1)))
+        out = self.act_fn(self.fc_2(out))
+        reward = self.fc_3(out).squeeze(dim=1)
+        <a id="change">return </a>reward
+
+class ActionModel(nn.Module):
+    &quot&quot&quot</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.act_fn(self.fc_2(out))
+        mean_reward = self.fc_3(out).squeeze(dim=1)
+        if self.dist == "normal":
+            <a id="change">return </a><a id="change">torch.distributions.Normal(</a>mean_reward,1<a id="change">)</a>
+        &#47&#47reward = d.rsample()
+        &#47&#47return d
+
+</code></pre>

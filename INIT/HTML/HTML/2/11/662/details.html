@@ -1,0 +1,208 @@
+<html><h3>Pattern ID :662
+</h3><img src='2289670.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif self.config[&quotglobal_pool&quot] == &quotsum&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a>&quot{} pooling is not supported&quot<a id="change"> )</a>
+
+    def forward(self, positions):
+        batch_size = positions.size(0)
+        n_vertices = positions.size(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                geometric.DynamicEdgeConv(_MLP(other_layers_mpl), k=self.config[&quotk_neighbors&quot], aggr=self.config[&quotEConv_aggr&quot]))
+
+        &#47&#47 pooling layers
+        if <a id="change">self.config[&quotgraph_pooling&quot]</a>:
+            self.gpool_layers = nn.ModuleList()
+            for _ in range(0, self.config[&quotconv_depth&quot]):
+                self.gpool_layers.append(
+                    DynamicTopKPool(self.config[&quotEConv_feature&quot], k=self.config[&quotk_neighbors&quot], pool_ratio=self.config[&quotpool_ratio&quot]))
+
+        &#47&#47 global pooling layer based on config
+        if self.config[&quotglobal_pool&quot] == &quotmax&quot:
+            self.global_pool = geometric.global_max_pool
+        elif self.config[&quotglobal_pool&quot] == &quotmean&quot:
+            self.global_pool = geometric.global_mean_pool
+        elif self.config[&quotglobal_pool&quot] == &quotadd&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a><a id="change">&quot{} pooling is not supported&quot.format(self.config[&quotglobal_pool&quot]</a><a id="change">))</a>
+            
+        &#47&#47 Output linear layer
+        out_features = self.config[&quotEConv_feature&quot] * self.config[&quotconv_depth&quot] if self.config[&quotskip_connections&quot] else self.config[&quotEConv_feature&quot]
+        self.lin = nn.Linear(out_features, out_size)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/maria-korosteleva/garment-pattern-estimation/commit/58004a47b8e9b3137f4c2616414bb5405d5647ed#diff-89c20b5db964bedc27e4675e157d9980f5ec0b6bc5ce56cbdf2701e60bf7bc8eL95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2289670</div><div id='project'> Project Name: maria-korosteleva/garment-pattern-estimation</div><div id='commit'> Commit Name: 58004a47b8e9b3137f4c2616414bb5405d5647ed</div><div id='time'> Time: 2020-09-24</div><div id='author'> Author: mariako@kaist.ac.kr</div><div id='file'> File Name: nn/net_blocks.py</div><div id='m_class'> M Class Name: EdgeConvFeatures</div><div id='n_method'> N Class Name: EdgeConvFeatures</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nn/net_blocks.py</div><div id='n_file'> N File Name: nn/net_blocks.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
+            self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
+        else:
+            <a id="change">raise ValueError()</a>
+
+        &#47&#47 action branch and value branch
+        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
+        self.value_branch = nn.Linear(self.input_dim, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                         name)
+
+        &#47&#47 judge the model arch
+        <a id="change">self.custom_config</a> = model_config["custom_model_config"]
+        self.full_obs_space = getattr(obs_space, "original_space", obs_space)
+        self.n_agents = self.custom_config["num_agents"]
+
+        if "encode_layer" in self.custom_config["model_arch_args"]:
+            encode_layer = <a id="change">self.custom_config["model_arch_args"]["encode_layer"]</a>
+            encoder_layer_dim = encode_layer.split("-")
+            encoder_layer_dim = [int(i) for i in encoder_layer_dim]
+        else:  &#47&#47 default config
+            encoder_layer_dim = []
+            for i in range(self.custom_config["model_arch_args"]["fc_layer"]):
+                out_dim = self.custom_config["model_arch_args"]["out_dim_fc_{}".format(i)]
+                encoder_layer_dim.append(out_dim)
+
+        self.encoder_layer_dim = encoder_layer_dim
+        self.activation = model_config.get("fcnet_activation")
+
+        &#47&#47 encoder
+        layers = []
+        if "fc_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space[&quotobs&quot].shape[0]
+            input_dim = self.obs_size
+            for out_dim in self.encoder_layer_dim:
+                layers.append(
+                    SlimFC(in_size=input_dim,
+                           out_size=out_dim,
+                           initializer=normc_initializer(1.0),
+                           activation_fn=self.activation))
+                input_dim = out_dim
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
+            self.obs_size = self.full_obs_space[&quotobs&quot].shape
+            input_dim = self.obs_size[2]
+            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
+                conv_f = nn.Conv2d(
+                    in_channels=input_dim,
+                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                )
+                relu_f = nn.ReLU()
+                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
+
+                layers.append(conv_f)
+                layers.append(relu_f)
+                layers.append(pool_f)
+
+                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
+
+        else:
+            raise ValueError()
+
+        self.input_dim = input_dim
+
+        &#47&#47 obs encoder
+        self.encoder = nn.Sequential(
+            *layers
+        )
+        self.vf_encoder = nn.Sequential(
+            *layers
+        )
+
+        &#47&#47 core rnn
+        self.hidden_state_size = self.custom_config["model_arch_args"]["hidden_state_size"]
+
+        if self.custom_config["model_arch_args"]["core_arch"] == "gru":
+            self.rnn = nn.GRU(input_dim, self.hidden_state_size, batch_first=True)
+        elif self.custom_config["model_arch_args"]["core_arch"] == "lstm":
+            self.rnn = nn.LSTM(input_dim, self.hidden_state_size, batch_first=True)
+        else:
+            <a id="change">raise ValueError(
+                </a><a id="change">"should be either gru or lstm, got {}".format(</a><a id="change">self.custom_config["model_arch_args"]["core_arch"]))</a>
+
+        &#47&#47 action branch and value branch
+        self.action_branch = nn.Linear(self.hidden_state_size, num_outputs)
+        self.value_branch = nn.Linear(self.input_dim, 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/229bfd1c9db33d2ff0761dbdbe21e47a47a9b87c#diff-e310323240be446aa2287d549762141aae57452d84612f7b2056cac71cf28a4eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2289671</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: 229bfd1c9db33d2ff0761dbdbe21e47a47a9b87c</div><div id='time'> Time: 2023-02-23</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='m_class'> M Class Name: Base_RNN</div><div id='n_method'> N Class Name: Base_RNN</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: TorchRNN,nn.Module</div><div id='n_parent_class'> N Parent Class: TorchRNN,nn.Module</div><div id='m_file'> M File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='n_file'> N File Name: marllib/marl/models/zoo/rnn/base_rnn.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        elif self.config[&quotglobal_pool&quot] == &quotsum&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a>&quot{} pooling is not supported&quot<a id="change"> )</a>
+
+    def forward(self, positions):
+        batch_size = positions.size(0)
+        n_vertices = positions.size(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, out_size, config={}):
+        super().__init__()
+
+        <a id="change">self.config</a> = {
+            &quotconv_depth&quot: 3, 
+            &quotk_neighbors&quot: 10, 
+            &quotEConv_hidden&quot: 64, 
+            &quotEConv_hidden_depth&quot : 2, 
+            &quotEConv_feature&quot: 64, 
+            &quotEConv_aggr&quot: &quotmax&quot, 
+            &quotglobal_pool&quot: &quotmax&quot, 
+            &quotskip_connections&quot: True, 
+            &quotgraph_pooling&quot: True,
+            &quotpool_ratio&quot: 0.5  &#47&#47 only used when the graph pooling is enabled
+            }  &#47&#47 defaults for this net
+        self.config.update(config)  &#47&#47 from input
+
+        &#47&#47 MLP Schemes
+        first_layer_mpl = [2 * 3] + [self.config[&quotEConv_hidden&quot] for _ in range(self.config[&quotEConv_hidden_depth&quot])] + [self.config[&quotEConv_feature&quot]]
+        other_layers_mpl = ([2 * self.config[&quotEConv_feature&quot]] 
+            + [self.config[&quotEConv_hidden&quot] for _ in range(self.config[&quotEConv_hidden_depth&quot])] + [self.config[&quotEConv_feature&quot]])
+
+        &#47&#47 Contruct the net
+        &#47&#47 Conv layers
+        self.conv_layers = nn.ModuleList()
+        &#47&#47 first is always there
+        self.conv_layers.append(
+            geometric.DynamicEdgeConv(_MLP(first_layer_mpl), k=self.config[&quotk_neighbors&quot], aggr=self.config[&quotEConv_aggr&quot]))
+
+        for _ in range(1, self.config[&quotconv_depth&quot]):
+            self.conv_layers.append(
+                geometric.DynamicEdgeConv(_MLP(other_layers_mpl), k=self.config[&quotk_neighbors&quot], aggr=self.config[&quotEConv_aggr&quot]))
+
+        &#47&#47 pooling layers
+        if self.config[&quotgraph_pooling&quot]:
+            self.gpool_layers = nn.ModuleList()
+            for _ in range(0, self.config[&quotconv_depth&quot]):
+                self.gpool_layers.append(
+                    DynamicTopKPool(<a id="change">self.config[&quotEConv_feature&quot]</a>, k=self.config[&quotk_neighbors&quot], pool_ratio=self.config[&quotpool_ratio&quot]))
+
+        &#47&#47 global pooling layer based on config
+        if self.config[&quotglobal_pool&quot] == &quotmax&quot:
+            self.global_pool = geometric.global_max_pool
+        elif self.config[&quotglobal_pool&quot] == &quotmean&quot:
+            self.global_pool = geometric.global_mean_pool
+        elif self.config[&quotglobal_pool&quot] == &quotadd&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a><a id="change">&quot{} pooling is not supported&quot.format(</a><a id="change">self.config[&quotglobal_pool&quot]))</a>
+            
+        &#47&#47 Output linear layer
+        out_features = self.config[&quotEConv_feature&quot] * self.config[&quotconv_depth&quot] if self.config[&quotskip_connections&quot] else self.config[&quotEConv_feature&quot]
+        self.lin = nn.Linear(out_features, out_size)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maria-korosteleva/garment-pattern-estimation/commit/58004a47b8e9b3137f4c2616414bb5405d5647ed#diff-89c20b5db964bedc27e4675e157d9980f5ec0b6bc5ce56cbdf2701e60bf7bc8eL92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2289668</div><div id='project'> Project Name: maria-korosteleva/garment-pattern-estimation</div><div id='commit'> Commit Name: 58004a47b8e9b3137f4c2616414bb5405d5647ed</div><div id='time'> Time: 2020-09-24</div><div id='author'> Author: mariako@kaist.ac.kr</div><div id='file'> File Name: nn/net_blocks.py</div><div id='m_class'> M Class Name: EdgeConvFeatures</div><div id='n_method'> N Class Name: EdgeConvFeatures</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nn/net_blocks.py</div><div id='n_file'> N File Name: nn/net_blocks.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                     type=&quotCrossEntropyLoss&quot, use_mask=True, loss_weight=1.0)):
+        super(FCNMaskHead, self).__init__()
+        if upsample_method not in [None, &quotdeconv&quot, &quotnearest&quot, &quotbilinear&quot]:
+            <a id="change">raise ValueError(
+                </a>&quotInvalid upsample method {}, accepted methods &quot
+                &quotare "deconv", "nearest", "bilinear"&quot.format(upsample_method)<a id="change">)</a>
+        self.num_convs = num_convs
+        &#47&#47 WARN: roi_feat_size is reserved and not used
+        self.roi_feat_size = _pair(roi_feat_size)
+        self.in_channels = in_channels</code></pre><h3>After Change</h3><pre><code class='java'>
+                 loss_mask=dict(
+                     type=&quotCrossEntropyLoss&quot, use_mask=True, loss_weight=1.0)):
+        super(FCNMaskHead, self).__init__()
+        <a id="change">self.upsample_cfg</a> = upsample_cfg.copy()
+        if <a id="change">self.upsample_cfg[&quottype&quot]</a> not in [
+                None, &quotdeconv&quot, &quotnearest&quot, &quotbilinear&quot, &quotcarafe&quot
+        ]:
+            <a id="change">raise ValueError(
+                </a><a id="change">&quotInvalid upsample method {}, accepted methods &quot
+                &quotare "deconv", "nearest", "bilinear", "carafe"&quot.format(
+                    </a><a id="change">self.upsample_cfg[&quottype&quot]))</a>
+        self.num_convs = num_convs
+        &#47&#47 WARN: roi_feat_size is reserved and not used
+        self.roi_feat_size = _pair(roi_feat_size)
+        self.in_channels = in_channels</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/b5431092505f7dcd7de616c8a79eba4d2532fbc8#diff-82a2ab843e4fc204629926964b43e16f568eee55dbebb2a9832e4f310aad05c6L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2289669</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: b5431092505f7dcd7de616c8a79eba4d2532fbc8</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: 1155098160@link.cuhk.edu.hk</div><div id='file'> File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_class'> M Class Name: FCNMaskHead</div><div id='n_method'> N Class Name: FCNMaskHead</div><div id='m_method'> M Method Name: __init__(12)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='n_file'> N File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 76</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 90</div><BR>

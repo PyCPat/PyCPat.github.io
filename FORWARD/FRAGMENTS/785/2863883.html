@@ -1,0 +1,88 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        alignments = torch.stack(alignments).transpose(0, 1)
+        outputs = torch.stack(outputs).transpose(0, 1).contiguous()
+
+        return outputs<a id="change">, alignments</a>
+
+
+def is_end_of_frames(output, eps=0.2): &#47&#470.2
+    return (output.data &lt;= eps).all()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        outputs = []
+        alignments = []
+        stop_outputs<a id="change"> = </a>[]
+
+        t = 0
+        memory_input = initial_memory
+        while True:
+            if t &gt; 0:
+                if greedy:
+                    memory_input = outputs[-1]
+                else:
+                    &#47&#47 combine prev. model output and prev. real target
+                    &#47&#47 memory_input = torch.div(outputs[-1] + memory[t-1], 2.0)
+                    &#47&#47 add a random noise
+                    &#47&#47 noise = torch.autograd.Variable(
+                        &#47&#47 memory_input.data.new(memory_input.size()).normal_(0.0, 0.5))
+                    &#47&#47 memory_input = memory_input + noise
+                    memory_input = memory[t-1]
+
+            &#47&#47 Prenet
+            processed_memory = self.prenet(memory_input)
+
+            &#47&#47 Attention RNN
+            attention_rnn_hidden, current_context_vec, alignment = self.attention_rnn(
+                processed_memory, current_context_vec, attention_rnn_hidden,
+                inputs)
+
+            &#47&#47 Concat RNN output and attention context vector
+            decoder_input = self.project_to_decoder_in(
+                torch.cat((attention_rnn_hidden, current_context_vec), -1))
+
+            &#47&#47 Pass through the decoder RNNs
+            for idx in range(len(self.decoder_rnns)):
+                decoder_rnn_hiddens[idx] = self.decoder_rnns[idx](
+                    decoder_input, decoder_rnn_hiddens[idx])
+                &#47&#47 Residual connectinon
+                decoder_input = decoder_rnn_hiddens[idx] + decoder_input
+            
+            output = decoder_input
+            stop_token_input = decoder_input
+            
+            &#47&#47 stop token prediction
+            stop_token_input = torch.cat((output, current_context_vec), -1)
+            stop_output = self.stop_token(stop_token_input)
+
+            &#47&#47 predict mel vectors from decoder vectors
+            output = self.proj_to_mel(output)
+
+            outputs += [output]
+            alignments += [alignment]
+            stop_outputs += [stop_output]
+
+            t += 1
+
+            if (not greedy and self.training) or (greedy and memory is not None):
+                if t &gt;= T_decoder:
+                    break
+            else:
+                if t &gt; 1 and is_end_of_frames(output, self.eps):
+                    break
+                elif t &gt; self.max_decoder_steps:
+                    print(" !! Decoder stopped with &quotmax_decoder_steps&quot. \
+                          Something is probably wrong.")
+                    break
+                           
+        assert greedy or len(outputs) == T_decoder
+
+        &#47&#47 Back to batch first
+        alignments = torch.stack(alignments).transpose(0, 1)
+        outputs = torch.stack(outputs).transpose(0, 1).contiguous()
+        stop_outputs<a id="change"> = </a><a id="change">torch.stack(stop_outputs).transpose(0, 1).contiguous()</a>
+
+        return outputs, alignments, stop_outputs
+
+</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q = self.w_q(x).view(batch_size, -1, seg_len, embed_dim)
+        kv = self.w_kv(h).view(2*batch_size, -1, total_len, embed_dim)
+        r_emb = self.w_r(self.R[-total_len:]).view(1, -1, total_len, embed_dim)
+        k<a id="change">, v = </a><a id="change">kv.chunk(2</a><a id="change">, dim=0)</a>
+        
+        &#47&#47 the "XL specific" way of computing the pre-softmax attention score
+        AC = torch.einsum("bhid,bhjd-&gt;bhij", q + self.u1, k)
+        BD = torch.einsum("bhid,bhjd-&gt;bhij", q + self.u2, r_emb)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 compute projections of input and memory embeddings
+        q = self.w_q(x).view(batch_size, -1, seg_len, embed_dim)
+        k = self.w_k(h).view(batch_size, -1, total_len, embed_dim)
+        v<a id="change"> = </a><a id="change">self.w_v(h).view(</a>batch_size, <a id="change">-1</a>, total_len, embed_dim<a id="change">)</a>
+        r_emb = self.w_r(self.R[-total_len:]).view(1, -1, total_len, embed_dim)
+        
+        &#47&#47 the "XL specific" way of computing the pre-softmax attention score
+        ac = torch.einsum("bhid,bhjd-&gt;bhij", q + self.u1, k)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = <a id="change">values[None, :, None, :, :]</a>.expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        value_indices, attn = <a id="change">map(</a>lambda x: x.reshape(-1, self.topk * h), (value_indices<a id="change">, attn</a>)<a id="change">)</a>
+        out = self.values(value_indices, per_sample_weights=attn)
+        return out.reshape(b, t, e)
+
+</code></pre>

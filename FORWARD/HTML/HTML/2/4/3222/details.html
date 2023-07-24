@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :3222
+</h3><img src='17121846.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        text_encodings = None,
+        cond_prob_drop = 0.
+    ):
+        batch_size, device = <a id="change">image_embed.shape[0]</a>, image_embed.device
+        t = self.time_mlp(time) if exists(self.time_mlp) else None
+
+        cond_prob_mask = prob_mask_like(batch_size, cond_prob_drop, device = device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 mask out image embedding depending on condition dropout
+        &#47&#47 for classifier free guidance
+
+        image_embed = <a id="change">torch.where(
+            </a>rearrange(cond_prob_mask, &quotb -&gt; b 1&quot),
+            image_embed,
+            rearrange(self.null_image_embed, &quotd -&gt; 1 d&quot)<a id="change">
+        )</a>
+
+        cond<a id="change"> = </a>torch.cat((t, image_embed), dim = -1)
+
+        hiddens = []
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/25d980ebbf1e22ce8396cdec400e22e83f754176#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL411' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17121846</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 25d980ebbf1e22ce8396cdec400e22e83f754176</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 414</div><div id='n_start'> N Start Line: 412</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans = x.new_ones(x.shape[:-1]+(1,)) / <a id="change">x.shape[1]</a>
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+        L = u.size(-1)
+        if lengths is not None:
+            assert isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask<a id="change"> = </a><a id="change">torch.where(</a>torch.arange(L, device=lengths.device) &lt; lengths[:, None, None], 1., 0.<a id="change">)</a>
+            u = u * mask
+
+        device = u.device
+        batch_size = u.size(0)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17121841</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return x_next
+
+    def forward(self, x: Tensor, num_steps: int = None) -&gt; Tensor:
+        b, device = <a id="change">x.shape[0]</a>, x.device
+        num_steps = default(num_steps, self.num_steps)
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Sample from first sigma distribution
+        x = sigmas[0] * x
+        &#47&#47 Compute gammas
+        gammas<a id="change"> = </a><a id="change">torch.where(
+            </a>(sigmas &gt;= self.s_tmin) & (sigmas &lt;= self.s_tmax),
+            min(self.s_churn / num_steps, sqrt(2) - 1),
+            0.0<a id="change">,
+        )</a>
+        &#47&#47 Denoise x
+        for i in range(num_steps - 1):
+            x = self.step(x, sigma=sigmas[i], sigma_next=sigmas[i + 1], gamma=gammas[i])
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/20b010038ad4770a712c7ce8a76ddb01f332641b#diff-ac9a7192cf236d8e3ab3b7a76336dfcdeb2d26dc13b98a8b8637509c69a4cff7L181' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17121848</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 20b010038ad4770a712c7ce8a76ddb01f332641b</div><div id='time'> Time: 2022-07-14</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='m_class'> M Class Name: DiffusionSampler</div><div id='n_method'> N Class Name: DiffusionSampler</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='m_start'> M Start Line: 182</div><div id='m_end'> M End Line: 182</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 199</div><BR>

@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        return context<a id="change">, alignment</a>
+
+
+class Postnet(nn.Module):
+    def __init__(self, mel_dim, num_convs=5):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.forward_attn:
+            &#47&#47 forward attention
+            prev_alpha = F.pad(self.alpha[:, :-1].clone(), (1, 0, 0, 0)).to(inputs.device)
+            self.alpha = (((1-self.u) * <a id="change">self.alpha.clone()</a>.to(inputs.device) + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm<a id="change"> = </a>self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context
+            context = torch.bmm(alpha_norm.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            return context<a id="change">, alpha_norm, alignment</a>
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            return context<a id="change">, alignment, alignment</a>
+
+
+class Postnet(nn.Module):
+    def __init__(self, mel_dim, num_convs=5):</code></pre>

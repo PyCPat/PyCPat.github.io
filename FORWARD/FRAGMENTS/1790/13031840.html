@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        edge_slices = torch.Tensor(data.__slices__[&quotedge_index&quot]).cpu().long()
+        batch = data.batch
+
+        <a id="change">if </a>self.fake<a id="change">:
+            </a>pers0<a id="change">, pers1 = </a>self.compute_fake_persistence(
+            x, edge_index, vertex_slices, edge_slices, batch
+            )
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            pers1_mask = ~((pers1_reshaped == 0).all(-1))
+            x1 = pers1_reshaped[pers1_mask]
+            for layer in self.set_fn1:
+                <a id="change">if </a>isinstance(layer, DeepSetLayerDim1)<a id="change">:
+                    </a>x1 = layer(x1, edge_slices, mask=pers1_mask)
+                else:
+                    x1<a id="change"> = </a><a id="change">layer(</a>x1<a id="change">)</a>
+        else:
+            x1 = None
+
+        &#47&#47 Collect valid</code></pre>

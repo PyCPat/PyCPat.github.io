@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        for idx in range(self.depth):
+            if stacked is None:
+                stacked<a id="change"> = </a>x
+            else:
+                stacked = torch.cat(<a id="change">[</a>stacked, x<a id="change"></a>], dim=1)
+            x = self.net[idx](stacked)
+        
+        output<a id="change"> = </a>x
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            output (batch_size, out_channels, n_bins, n_frames)
+        
+        x = input
+        stacked = <a id="change">[]</a>
+        output = []
+
+        stacked.append(input)
+
+        for idx in range(self.depth):
+            if idx != 0:
+                x = torch.cat(stacked, dim=1)
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output<a id="change"> = </a><a id="change">torch.cat(</a>stacked[1:]<a id="change">, dim=1)</a>
+
+        return output
+
+class MultiDilatedConvBlock(nn.Module):</code></pre>

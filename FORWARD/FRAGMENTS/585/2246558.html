@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 prepare text key / values for the image tokens to attend to
+
+        k_text, v_text = map(lambda t: repeat(t, &quotb n d -&gt; (b ax) n d&quot, ax = img_size), (k_text, v_text))
+        k_img = <a id="change">torch.cat(</a>(k_text<a id="change">, k_img</a>)<a id="change">, dim = 1)</a>
+        v_img = torch.cat((v_text, v_img), dim = 1)
+
+        &#47&#47 similarity
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 similarity
+
+        dots_image_to_image = einsum(&quotb x i d, b x j d -&gt; b x i j&quot, q_img, k_img)
+        dots_image_to_text = <a id="change">einsum(&quotb x i d, b j d -&gt; b x i j&quot</a>, q_img, k_text<a id="change">)</a>
+
+        dots = torch.cat((dots_image_to_text, dots_image_to_image), dim = -1)
+
+        &#47&#47 mask so image has full attention to text, but causal along axis</code></pre>

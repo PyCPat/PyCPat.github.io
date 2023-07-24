@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(<a id="change">mask[..., None]</a>, 0.)
+
+        gate = F.conv1d(gate, weight, bias)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(mask, 0.)
+
+        gate<a id="change"> = </a><a id="change">einsum(&quotb n d, m n -&gt; b m d&quot</a>, gate, weight<a id="change">)</a>
+        gate<a id="change"> = </a>gate + rearrange(bias, &quotn -&gt; () n ()&quot)
+
+        if exists(gate_res):
+            gate = gate + gate_res</code></pre>

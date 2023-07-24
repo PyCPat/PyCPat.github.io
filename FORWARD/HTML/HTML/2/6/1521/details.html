@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :1521
+</h3><img src='5102828.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        &#47&#47 TODO
+        <a id="change">pass</a>
+
+
+class ColorJitter(nn.Module):
+    def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 This size determines a valid cropping region
+        common_size = self.gcd_size(x)
+        common_crop_size = self.get_common_crop_size(img.size, common_size)
+        <a id="change">if </a>common_crop_size[0] &gt; common_size[0] or <a id="change">common_crop_size[1] &gt; common_size[1]:
+            </a>raise ValueError(f"Crop size {self.size} is too large for {img.size}")
+        w, h = common_size
+        tw, th = common_crop_size
+        i<a id="change"> = </a>torch.randint(0, h - th + 1, size=(1, )).item()
+        j = torch.randint(0, w - tw + 1, size=(1, )).item()
+        common_crop_region = (i, j, th, tw)
+        return apply_all(x, lambda y: self.apply_crop(y, common_size, common_crop_region))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coloquinte/torchsr/commit/f94e6e94ccb31707484bf8e745e5c2e2cb4f2385#diff-f954b426a55453dd736f52f9b5ec6ebeefd8da0ad71cb21eba7d9dbf7354f6a4L43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5102828</div><div id='project'> Project Name: coloquinte/torchsr</div><div id='commit'> Commit Name: f94e6e94ccb31707484bf8e745e5c2e2cb4f2385</div><div id='time'> Time: 2021-03-06</div><div id='author'> Author: gabriel.gouvine_GIT@gmx.com</div><div id='file'> File Name: transforms/transforms.py</div><div id='m_class'> M Class Name: RandomCrop</div><div id='n_method'> N Class Name: RandomCrop</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transforms/transforms.py</div><div id='n_file'> N File Name: transforms/transforms.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 129</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x, padding):
+        <a id="change">pass</a>
+
+
+class QuantizerEncoder(nn.Module):
+    def __init__(self, m: int, k: int, d: int):</code></pre><h3>After Change</h3><pre><code class='java'>
+class PostProcess(nn.Module):
+    def forward(self, x: torch.Tensor, cAndPadding: torch.Tensor) -&gt; torch.Tensor:
+        x = x[:, :, cAndPadding[3]:(-cAndPadding[4]), cAndPadding[1]:(-cAndPadding[2])]
+        <a id="change">if </a><a id="change">cAndPadding[0] == 1:
+            </a>x<a id="change"> = </a>x.mean(1, keepdim=True)
+        return (x + 1) / 2
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/5eab1f3405e52a0cf81c11777abe1eafeb655b59#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5102846</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 5eab1f3405e52a0cf81c11777abe1eafeb655b59</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: PostProcess</div><div id='n_method'> N Class Name: PostProcess</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 46</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Args:
+            x (torch.Tensor):
+        
+        <a id="change">pass</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 check input tensors
+        if x.ndim != 2:
+            raise ValueError(f"Expected a 2D tensor. Got {x.ndim}-D tensor.")
+        <a id="change">if </a><a id="change">x.shape[-1] != self.in_dim:
+            </a>raise ValueError(f"Expected {self.in_dim}-D position vector. Got {x.shape[-1]}.")
+
+        out = self.relu_actvn(self.fc_in(x))
+        out = self.relu_actvn(self.fc_1(out))
+        out = self.relu_actvn(self.fc_2(out))
+        out<a id="change"> = </a>self.fc_out(out)
+
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dvelopery0115/torch-nerf/commit/bb350d76461be52a2ba9703bd1399e837d80e939#diff-ab13585b39a3aafea1f7085b64042f7789807c092dffc969e0a4c917489edf83L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5102824</div><div id='project'> Project Name: dvelopery0115/torch-nerf</div><div id='commit'> Commit Name: bb350d76461be52a2ba9703bd1399e837d80e939</div><div id='time'> Time: 2022-07-09</div><div id='author'> Author: dreamy1534@kaist.ac.kr</div><div id='file'> File Name: torch_nerf/src/network/instant_ngp.py</div><div id='m_class'> M Class Name: InstantNGPMLP</div><div id='n_method'> N Class Name: InstantNGPMLP</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_nerf/src/network/instant_ngp.py</div><div id='n_file'> N File Name: torch_nerf/src/network/instant_ngp.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 108</div><BR>

@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if is_video:
+            x = rearrange(x, &quotb c f h w -&gt; (b f) c h w&quot)
+
+        x<a id="change"> = </a>self.spatial_conv(x)
+
+        if is_video:
+            x = <a id="change">rearrange(</a>x, <a id="change">&quot(b f) c h w -&gt; b c f h w&quot</a><a id="change">, b = b)</a>
+
+        if not convolve_across_time:
+            return x
+
+        x<a id="change"> = </a>rearrange(x, &quotb c f h w -&gt; (b h w) c f&quot)
+
+        x = self.temporal_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+
+        scale_shift = None
+        <a id="change">if </a>exists(self.time_mlp) and <a id="change">exists(</a>time_emb<a id="change">)</a><a id="change">:
+            </a>time_emb = self.time_mlp(time_emb)
+            time_emb = rearrange(time_emb, &quotb c -&gt; b c 1 1&quot)
+            scale_shift<a id="change"> = time_emb.chunk(2</a><a id="change">, dim = 1)</a>
+
+        h = self.block1(x, scale_shift = scale_shift, convolve_across_time = convolve_across_time)
+
+        h = self.block2(h, convolve_across_time = convolve_across_time)</code></pre>

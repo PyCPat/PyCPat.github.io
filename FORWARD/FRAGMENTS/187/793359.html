@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 print("feat_in_repeat size: ", feat_in_repeat.size())
+
+        &#47&#47 compute probability for each candidate
+        tar_candit_prob = <a id="change">F.softmax(self.prob_mlp(feat_in_repeat), dim=1).squeeze(-1</a><a id="change">)</a>  &#47&#47 [batch_size, n_tar, 1]
+        tar_offset_mean = self.mean_mlp(feat_in_repeat)                                &#47&#47 [batch_size, n_tar, 2]
+        &#47&#47 print("tar_candit_pro size: ", tar_candit_prob.size())
+        &#47&#47 print("tar_offset_mean size: ", tar_offset_mean.size())</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print("feat_in_repeat size: ", feat_in_repeat.size())
+
+        &#47&#47 compute probability for each candidate
+        prob_tensor = <a id="change">self.prob_mlp(</a>feat_in_repeat<a id="change">)</a>
+        if not isinstance(candidate_mask, torch.Tensor):
+            tar_candit_prob = <a id="change">F.softmax(prob_tensor, dim=1).squeeze(-1</a><a id="change">)</a>                         &#47&#47 [batch_size, n_tar, 1]
+        else:
+            tar_candit_prob = masked_softmax(prob_tensor, candidate_mask, dim=1).squeeze(-1)    &#47&#47 [batch_size, n_tar, 1]
+        tar_offset_mean = self.mean_mlp(feat_in_repeat)                                         &#47&#47 [batch_size, n_tar, 2]</code></pre>

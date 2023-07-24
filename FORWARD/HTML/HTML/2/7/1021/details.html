@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :1021
+</h3><img src='3678896.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 split heads
+
+        <a id="change">q</a><a id="change">, k, v</a> = <a id="change">map(</a>lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), (<a id="change">q</a><a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 rotary embeddings
+
+        positions = self.rotary_emb(n, device = device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        n, device, h = x.shape[1], x.device, self.heads
+        q, k, v = (<a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(x).chunk(2, dim = -1)</a>)
+
+        &#47&#47 pre layernorm
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/palm-pytorch/commit/100b3ee7d7209056a2e3ee20def4eecbd16dd4b6#diff-a5ba5faa1b15b08f73db45e9342fcadc130f44195e1a0b082fa3d9b3e025885cL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3678896</div><div id='project'> Project Name: lucidrains/palm-pytorch</div><div id='commit'> Commit Name: 100b3ee7d7209056a2e3ee20def4eecbd16dd4b6</div><div id='time'> Time: 2022-04-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: palm_pytorch/palm_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: palm_pytorch/palm_pytorch.py</div><div id='n_file'> N File Name: palm_pytorch/palm_pytorch.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        heads, r = self.heads, self.reduction_ratio
+
+        q, k, v = self.to_qkv(x).chunk(3, dim = 1)
+        k<a id="change">, v</a> = <a id="change">map(</a>lambda t: reduce(t, &quotb c (h r1) (w r2) -&gt; b c h w&quot, &quotmean&quot, r1 = r, r2 = r), (k<a id="change">, v</a>)<a id="change">)</a>
+
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = heads), (q, k, v))
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * self.scale</code></pre><h3>After Change</h3><pre><code class='java'>
+        h, w = x.shape[-2:]
+        heads = self.heads
+
+        q, k, v = (<a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(x).chunk(2, dim = 1)</a>)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = heads), (q, k, v))
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * self.scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/segformer-pytorch/commit/7ab3c29d960d9dea11417a98a7922b2a624961c1#diff-0f38911db3a61122a663429b4c2da58a59fab732a392fa02e0d929736c6ff309L47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3678894</div><div id='project'> Project Name: lucidrains/segformer-pytorch</div><div id='commit'> Commit Name: 7ab3c29d960d9dea11417a98a7922b2a624961c1</div><div id='time'> Time: 2021-06-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: segformer_pytorch/segformer_pytorch.py</div><div id='m_class'> M Class Name: EfficientSelfAttention</div><div id='n_method'> N Class Name: EfficientSelfAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: segformer_pytorch/segformer_pytorch.py</div><div id='n_file'> N File Name: segformer_pytorch/segformer_pytorch.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 split heads
+
+        q<a id="change">, k, v</a> = <a id="change">map(</a>lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 rotary embeddings
+
+        positions = self.rotary_emb(n, device = device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        n, device, h = x.shape[1], x.device, self.heads
+        q, k, v = (<a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(x).chunk(2, dim = -1)</a>)
+
+        &#47&#47 pre layernorm
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/palm-pytorch/commit/100b3ee7d7209056a2e3ee20def4eecbd16dd4b6#diff-a5ba5faa1b15b08f73db45e9342fcadc130f44195e1a0b082fa3d9b3e025885cL97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3678897</div><div id='project'> Project Name: lucidrains/palm-pytorch</div><div id='commit'> Commit Name: 100b3ee7d7209056a2e3ee20def4eecbd16dd4b6</div><div id='time'> Time: 2022-04-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: palm_pytorch/palm_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: palm_pytorch/palm_pytorch.py</div><div id='n_file'> N File Name: palm_pytorch/palm_pytorch.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.norm(x)
+        q, k, v = self.to_qkv(x).chunk(3, dim = -1)
+        q<a id="change">, k, v</a> = <a id="change">map(</a>lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        q = q * self.scale
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        h, device = self.heads, x.device
+
+        x = self.norm(x)
+        q, k, v = (<a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(x).chunk(2, dim = -1)</a>)
+        q = rearrange(q, &quotb n (h d) -&gt; b h n d&quot, h = h)
+
+        q = q * self.scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/56a8e24814d90cebb03454d9feed0bff4bee69ba#diff-6aad5c31d64c6b7a1a8cd103c9aceb7a4b5bb6c1b41d581e98e22e1a4473b554L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3678902</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 56a8e24814d90cebb03454d9feed0bff4bee69ba</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='n_file'> N File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 131</div><BR>

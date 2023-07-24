@@ -1,0 +1,105 @@
+<html><h3>Pattern ID :3637
+</h3><img src='17838480.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            v2 = torch.cat((x_r, x_l), dim=2) &#47&#47 (B, N-k, C*2)
+            &#47&#47 concat
+            v = torch.cat((v1, v2), dim=0) &#47&#47 (B*2, N-k, C*2)
+            v = torch.reshape(v, (B*2*(N-k), C<a id="change">*</a>2)) &#47&#47 (B*2*(N-k), C*2)
+            for fc in self.fc[:-1]:
+                v = F.relu(fc(v))
+                v = self.dropout(v)
+            v = self.fc[-1](v) &#47&#47 (B*2*(N-k), 1)
+            v = <a id="change">torch.reshape(</a>v, (B*2, N-k)<a id="change">)</a> &#47&#47 (B*2, N-k)
+            v1, v2 = torch.chunk(v, 2, dim=0) &#47&#47 (B, N-k) * 2
+            y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+            y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47     y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+        &#47&#47     y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)
+
+        x_l = <a id="change">x.view(B, N, 1, C).expand(</a>B, <a id="change">N</a>, <a id="change">N</a>, <a id="change">C</a><a id="change">)</a>
+        x_r = <a id="change">x.view(B, 1, N, C).expand(</a>B, <a id="change">N</a>, <a id="change">N</a>, <a id="change">C</a><a id="change">)</a>
+        v = torch.cat((x_l, x_r), dim=3) &#47&#47 (B, N, N, C*2)
+        v = v.view(B*N*N, <a id="change">C</a><a id="change">*</a>2)
+        for fc in self.fc[:-1]:
+            v = F.relu(fc(v))
+            v = self.dropout(v)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keio-bioinformatics/mxfold2/commit/0a9ffac3926d53527ad492faf10321f7110d6e5f#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17838480</div><div id='project'> Project Name: keio-bioinformatics/mxfold2</div><div id='commit'> Commit Name: 0a9ffac3926d53527ad492faf10321f7110d6e5f</div><div id='time'> Time: 2019-11-02</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCPairedLayer</div><div id='n_method'> N Class Name: FCPairedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        q = q.reshape(b * h, t, d_h)
+        k = <a id="change">k.reshape(</a>b<a id="change"> * </a>h, t, d_h<a id="change">)</a>
+        v = v.reshape(b * h, t, d_h)
+
+        bucket_fn = partial(bucket, buckets)
+        b_q, b_k, b_v = map(bucket_fn, (q, k, v))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, q, k, v):
+        b, h, t, d_h, d, heads, buckets, device = *q.shape, self.dim, self.heads, self.buckets, q.device
+        bh = b<a id="change"> * </a>h
+
+        <a id="change">bsz</a> = t // buckets
+        hh = h // 2
+
+        hh_slice = (slice(None), slice(hh, None))
+
+        q[hh_slice] = rotate_left(q[hh_slice], bsz-1, dim=2)
+        k[hh_slice] = rotate_left(k[hh_slice], bsz-1, dim=2)
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        merge_batch_head = lambda x: x.reshape(b * h, t, d_h)
+        q, k, v = map(merge_batch_head, (q, k, v))
+
+        &#47&#47 bucket qkv
+
+        bucket_fn = partial(bucket, buckets)
+        b_q, b_k, b_v = map(bucket_fn, (q, k, v))
+
+        &#47&#47 calculate R
+
+        R = self.sort_net(q, k)
+
+        &#47&#47 softmax and mask to prevent future buckets going to past
+
+        mask_value = max_neg_value(q)
+        mask = torch.zeros((b * h, buckets, buckets + 1), device=device).bool()
+        i, j = torch.triu_indices(buckets, buckets)
+        mask[:, i, j + 1] = True
+        R.masked_fill_(mask, mask_value)
+        R = R.softmax(dim=-1)
+        R = R.tril(diagonal=-1) &#47&#47 extra insurance
+        del mask
+
+        R = R.type_as(q).to(q)
+
+        &#47&#47 only allow one bucket to be reordered to, needed for input masking to work
+        R = zero_all_but_top(R, dim=2, k=1)
+
+        &#47&#47 add null key / value buckets at index 0
+        null_key_bucket = <a id="change">self.null_key[None, :, None, :, :].expand(</a>b, -1, 1, bsz, -1<a id="change">)</a>.reshape(bh, 1, bsz, -1)
+        null_value_bucket = <a id="change">self.null_value[None, :, None, :, :].expand(</a>b, -1, 1, bsz, -1<a id="change">)</a>.reshape(bh, 1, bsz, -1)
+
+        b_k_r = torch.cat((null_key_bucket, b_k), dim=1)
+        b_v_r = torch.cat((null_value_bucket, b_v), dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/02446a9900a155b2512af5839f071ea84d292deb#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL286' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17838448</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 02446a9900a155b2512af5839f071ea84d292deb</div><div id='time'> Time: 2020-04-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornCausalAttention</div><div id='n_method'> N Class Name: SinkhornCausalAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 297</div><div id='n_end'> N End Line: 345</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            v2 = torch.cat((x_r, x_l), dim=2) &#47&#47 (B, N-k, C*2)
+            &#47&#47 concat
+            v = torch.cat((v1, v2), dim=0) &#47&#47 (B*2, N-k, C*2)
+            v = torch.reshape(v, (B*2*(N-k), C<a id="change">*</a>2)) &#47&#47 (B*2*(N-k), C*2)
+            for fc in self.fc[:-1]:
+                v = F.relu(fc(v))
+                v = self.dropout(v)
+            v = self.fc[-1](v) &#47&#47 (B*2*(N-k), 1)
+            v = <a id="change">torch.reshape(</a>v, (B*2, N-k)<a id="change">)</a> &#47&#47 (B*2, N-k)
+            v1, v2 = torch.chunk(v, 2, dim=0) &#47&#47 (B, N-k) * 2
+            y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+            y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47     y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+        &#47&#47     y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)
+
+        x_l = <a id="change">x.view(B, N, 1, C).expand(</a>B, N, N, C<a id="change">)</a>
+        x_r = <a id="change">x.view(B, 1, N, C).expand(</a>B, N, N, C<a id="change">)</a>
+        v = torch.cat((x_l, x_r), dim=3) &#47&#47 (B, N, N, C*2)
+        v = v.view(B*N*N, C<a id="change">*</a>2)
+        for fc in self.fc[:-1]:
+            v = F.relu(fc(v))
+            v = self.dropout(v)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keio-bioinformatics/mxfold2/commit/0a9ffac3926d53527ad492faf10321f7110d6e5f#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17838481</div><div id='project'> Project Name: keio-bioinformatics/mxfold2</div><div id='commit'> Commit Name: 0a9ffac3926d53527ad492faf10321f7110d6e5f</div><div id='time'> Time: 2019-11-02</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCPairedLayer</div><div id='n_method'> N Class Name: FCPairedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 71</div><BR>

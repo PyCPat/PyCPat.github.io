@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        :return: The output feature
+        
+        semantic_embeddings = []
+        <a id="change">for </a>i, g in enumerate(gs)<a id="change">:
+            </a>semantic_embeddings.append(self.gat_layers[i](g, h).flatten(1))
+        semantic_embeddings = torch.stack(semantic_embeddings, dim=1)  &#47&#47 (N, M, D * K)
+        return self.semantic_attention(semantic_embeddings)  &#47&#47 (N, D * K)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param h: tensor(N, d_in) 输入顶点特征
+        :return: tensor(N, K*d_out) 输出顶点特征
+        
+        zp = <a id="change">[gat(g, h).flatten(start_dim=1) for gat, g in zip(self.gats, gs)]</a>  &#47&#47 基于元路径的嵌入
+        zp = torch.stack(zp, dim=1)  &#47&#47 (N, M, K*d_out)
+        z<a id="change"> = </a>self.semantic_attention(zp)  &#47&#47 (N, K*d_out)
+        return z
+
+</code></pre>

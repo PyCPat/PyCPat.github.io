@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1199
+</h3><img src='4347072.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.assert_shapes: tg.guard(x, "B, C, W, H")
+        if self.assert_shapes:
+            tg.guard(c, "B, NUMCLASSES")
+            <a id="change">assert </a>c.mean().item() in [1/c.shape[1], 0.0] &#47&#47 i.e. every row has only one el with value 1 or all 0
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        if self.assert_shapes: tg.guard(time_embedding, "B, TE")
+        hs = []</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.FloatTensor, t: torch.Tensor, c: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x_channels = x.shape[1]
+        class_embedding<a id="change"> = </a><a id="change">self.linear_class_embedding(c).reshape(</a>x.shape[0], self.class_embed_size, self.width, self.height<a id="change">)</a>
+        x = torch.cat([x, class_embedding], dim=1)
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        hs = []
+        h = x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/michedev/ddpms-pytorch/commit/51d7ed31108f8d035371afbaa6e36b0fe04016b1#diff-a5d868609fc74698673e4480043bfdb30c0cd88bd12c32a453f25e282ea95cf5L77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4347072</div><div id='project'> Project Name: michedev/ddpms-pytorch</div><div id='commit'> Commit Name: 51d7ed31108f8d035371afbaa6e36b0fe04016b1</div><div id='time'> Time: 2022-09-02</div><div id='author'> Author: mdv1994@gmail.com</div><div id='file'> File Name: ddpm_pytorch/model/unet_class.py</div><div id='m_class'> M Class Name: UNetTimeStepClassConditioned</div><div id='n_method'> N Class Name: UNetTimeStepClassConditioned</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ddpm_pytorch/model/unet_class.py</div><div id='n_file'> N File Name: ddpm_pytorch/model/unet_class.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 78</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, height, width, sums, repetitions = x.size()
+        assert width == 1
+        assert height == 1
+        <a id="change">assert </a>sums == self.config.num_classes
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x<a id="change"> = </a><a id="change">x.reshape(</a>batch_size, 1, channels * repetitions, 1<a id="change">)</a>
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/a4eb63bd492b9a22102ddc82e107efac0bdf04ee#diff-b07179cedca4d239e2586e9cb6fff9e541bc16eec55c28d6d2537cfebff90289L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4347066</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: a4eb63bd492b9a22102ddc82e107efac0bdf04ee</div><div id='time'> Time: 2022-01-07</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: simple_einet/einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_einet/einet.py</div><div id='n_file'> N File Name: simple_einet/einet.py</div><div id='m_start'> M Start Line: 145</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 148</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        <a id="change">assert </a>channels == 1  &#47&#47 number of channels should be 1 at this point
+        x = x.view(batch_size, 1, repetitions, 1)
+
+        &#47&#47 Apply C sum node outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x<a id="change"> = </a><a id="change">x.reshape(</a>batch_size, 1, channels * repetitions, 1<a id="change">)</a>
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/1fb68845af9033ccf3b13e014d9efc0e5a4022a3#diff-35a1a2e89788f4224c6a113abf09018e54e13fa95eaadf95759c229412ed7a0dL158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4347064</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: 1fb68845af9033ccf3b13e014d9efc0e5a4022a3</div><div id='time'> Time: 2021-11-24</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: einet.py</div><div id='n_file'> N File Name: einet.py</div><div id='m_start'> M Start Line: 169</div><div id='m_end'> M End Line: 181</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 144</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        seq_masks = seq_masks.unsqueeze(-1)                         &#47&#47 [t, N * K] =&gt; [t, N * K, 1]
+
+        mols_per_minibatch = encodings.shape[1] / batch_size
+        <a id="change">assert </a>mols_per_minibatch == self.args.minibatch_size, \
+            f"calculated minibatch size: {mols_per_minibatch}, given in args: {self.args.minibatch_size}"
+
+        encodings = encodings * seq_masks                           &#47&#47 mask out padding</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    [-1, &#47&#47batch_size,
+                                    self.args.minibatch_size, 1])
+        else:
+            encodings<a id="change"> = </a><a id="change">torch.reshape(</a>encodings,                        &#47&#47 [t, N * K, h] =&gt; [t, N, K, h]
+                                    [self.args.max_seq_len,
+                                    -1, &#47&#47 batch_size
+                                    self.args.minibatch_eval,
+                                    self.hidden_size]<a id="change">)</a>
+            batch_lens = torch.reshape(batch_lens,                      &#47&#47 [N * K] =&gt; [N, K, 1]
+                                    [-1, &#47&#47batch_size,
+                                    self.args.minibatch_eval, 1])
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coleygroup/rxn-ebm/commit/c2b91fe228925af0252974264a7832d6ac318aaf#diff-85248f5df1685e9735ae0d0d64fb195b40b63275ea8900d6b168c190fa18a372L62' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4347065</div><div id='project'> Project Name: coleygroup/rxn-ebm</div><div id='commit'> Commit Name: c2b91fe228925af0252974264a7832d6ac318aaf</div><div id='time'> Time: 2021-01-02</div><div id='author'> Author: linmin001@e.ntu.edu.sg</div><div id='file'> File Name: rxnebm/model/S2E.py</div><div id='m_class'> M Class Name: S2E</div><div id='n_method'> N Class Name: S2E</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rxnebm/model/S2E.py</div><div id='n_file'> N File Name: rxnebm/model/S2E.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 123</div><BR>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k = self.to_k(z).view(b, self.heads, m, c)
+        v = self.to_v(z).view(b, self.heads, m, c)
+        &#47&#47 b h l m
+        dots = <a id="change">einsum(&quotb h l c, b h m c -&gt; b h l m&quot</a>, q, k<a id="change">)</a> * self.scale
+        &#47&#47 b h l m
+        attn = self.attend(dots)
+        out<a id="change"> = </a>einsum(&quotb h l m, b h m c -&gt; b h l c&quot, attn, v)
+        out = rearrange(out, &quotb h l c -&gt; b l (h c)&quot)
+        out = self.to_out(out)
+        out = out.view(b, c, h, w)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = x.contiguous().view(b, h * w, c).unsqueeze(1)
+        k = self.to_k(z).view(b, self.heads, m, c)
+        v = self.to_v(z).view(b, self.heads, m, c)
+        dots = q @ <a id="change">k.transpose(2</a>, <a id="change">3</a><a id="change">)</a> * self.scale
+        attn = self.attend(dots)
+        out<a id="change"> = </a>attn @ v
+        out = rearrange(out, &quotb h l c -&gt; b l (h c)&quot)
+        out = self.to_out(out)
+        out = out.view(b, c, h, w)</code></pre>

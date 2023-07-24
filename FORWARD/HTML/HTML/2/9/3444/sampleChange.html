@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        text_mask = None,
+        return_loss = False
+    ):
+        seq_len, device = <a id="change">text.shape[1]</a>, text.device
+        assert seq_len &lt;= self.text_max_seq_len, &quotyour input text has a greater length than what was designated on initialization&quot
+
+        tokens = self.text_embedding(text)</code></pre><h3>After Change</h3><pre><code class='java'>
+        text_embeds = self.text_transformer(tokens, mask = text_mask)
+
+        frame_indices = self.vae.get_video_indices(video)
+        frame_indices = <a id="change">rearrange(</a>frame_indices, <a id="change">&quotb ... -&gt; b (...)&quot</a><a id="change">)</a>
+        frame_indices_input = frame_indices[:, :-1] if return_loss else frame_indices
+
+        frame_embeddings = self.image_embedding(frame_indices_input)
+        frame_embeddings<a id="change"> = </a>self.video_pos_emb(frame_embeddings) + frame_embeddings
+
+        bos = repeat(self.video_bos, &quotd -&gt; b 1 d&quot, b = batch)
+        frame_embeddings = torch.cat((bos, frame_embeddings), dim = 1)
+        frame_embeddings<a id="change"> = </a>self.video_transformer(frame_embeddings)
+
+        logits<a id="change"> = </a>self.to_logits(frame_embeddings)
+
+        if not return_loss:
+            return logits
+
+        loss<a id="change"> = </a>F.cross_entropy(<a id="change">rearrange(</a>logits, <a id="change">&quotb n c -&gt; b c n&quot</a><a id="change">)</a>, frame_indices)
+        return loss
+</code></pre>

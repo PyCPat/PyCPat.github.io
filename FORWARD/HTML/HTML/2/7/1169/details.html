@@ -1,0 +1,114 @@
+<html><h3>Pattern ID :1169
+</h3><img src='4124094.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        scores, indices = dots.topk(k=self.topk, dim=-1)
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        shape = (b<a id="change">, h, t, self.topk ** 2</a>)
+
+        all_scores = (
+            scores[0][..., :, None] +
+            scores[1][..., None, :]
+        ).reshape(*shape)
+
+        all_indices = (
+            indices[0][..., :, None] * self.num_keys +
+            indices[1][..., None, :]
+        ).reshape(*shape)
+
+        final_topk, final_indices = all_scores.topk(self.topk, dim=-1)
+        value_indices = all_indices.gather(-1, final_indices)
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = values[None, :, None, :, :].expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+
+        out = (attn.unsqueeze(-1) * selected_values).sum(dim=-2)
+        out<a id="change"> = </a><a id="change">out.transpose(1, 2).reshape(</a>b, <a id="change">t</a>, <a id="change">-1</a><a id="change">)</a>
+        return self.to_out(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        queries = queries.chunk(2, dim=-1)
+        queries = torch.stack(queries).reshape(2, b, t, h, -1)
+
+        dots = <a id="change">torch.einsum(&quotpbthd,hnpd-&gt;bthpn&quot</a>, queries, self.keys<a id="change">)</a>
+        scores, indices = dots.topk(k=self.topk, dim=-1)
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        all_topk = self.topk ** 2</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/product-key-memory/commit/915dd922ef8e168f7970d5336d0ba79b4f57fe47#diff-53ae44ef28554a4a669d1c87edbe44e54bf426a6c124261ea02da7a46a53f1d9L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4124094</div><div id='project'> Project Name: lucidrains/product-key-memory</div><div id='commit'> Commit Name: 915dd922ef8e168f7970d5336d0ba79b4f57fe47</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: product_key_memory/product_key_memory.py</div><div id='m_class'> M Class Name: PKM</div><div id='n_method'> N Class Name: PKM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: product_key_memory/product_key_memory.py</div><div id='n_file'> N File Name: product_key_memory/product_key_memory.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 71</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            init.zeros_(self.bias)
+
+    def forward(self, x):
+        batch_size<a id="change">, c_in, T, n_vertex</a> = x.shape
+
+        x_first_mul = torch.mm(<a id="change">x.reshape(-1</a>, c_in<a id="change">)</a>, self.weight).view(n_vertex, -1)
+        x_second_mul<a id="change"> = </a>torch.mm(self.gcnconv_matrix, x_first_mul).view(-1, self.c_out)
+
+        if self.bias is not None:
+            x_gcnconv = x_second_mul + self.bias</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47bs, c_in, ts, n_vertex = x.shape
+        x = torch.permute(x, (0, 2, 3, 1))
+
+        first_mul = <a id="change">torch.einsum(&quothi,btij-&gt;bthj&quot</a>, self.gso, x<a id="change">)</a>
+        second_mul = torch.einsum(&quotbthi,ij-&gt;bthj&quot, first_mul, self.weight)
+
+        if self.bias is not None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hazdzz/stgcn/commit/de050cc05a36453eafe1bf7bac60401c6561e947#diff-db69bbef9e404fa5af08d5bc209ae131c092e0ce285d496efe5f46170b20add9L231' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4124095</div><div id='project'> Project Name: hazdzz/stgcn</div><div id='commit'> Commit Name: de050cc05a36453eafe1bf7bac60401c6561e947</div><div id='time'> Time: 2022-02-07</div><div id='author'> Author: raphaelpeo@gmail.com</div><div id='file'> File Name: model/layers.py</div><div id='m_class'> M Class Name: GCNConv</div><div id='n_method'> N Class Name: GraphConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/layers.py</div><div id='n_file'> N File Name: model/layers.py</div><div id='m_start'> M Start Line: 232</div><div id='m_end'> M End Line: 238</div><div id='n_start'> N Start Line: 204</div><div id='n_end'> N End Line: 210</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        scores, indices = dots.topk(k=self.topk, dim=-1)
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        shape = (b<a id="change">, h, t, self.topk ** 2</a>)
+
+        all_scores = (
+            scores[0][..., :, None] +
+            scores[1][..., None, :]
+        ).reshape(*shape)
+
+        all_indices = (
+            indices[0][..., :, None] * self.num_keys +
+            indices[1][..., None, :]
+        ).reshape(*shape)
+
+        final_topk, final_indices = all_scores.topk(self.topk, dim=-1)
+        value_indices = all_indices.gather(-1, final_indices)
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = values[None, :, None, :, :].expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+
+        out = (attn.unsqueeze(-1) * selected_values).sum(dim=-2)
+        out<a id="change"> = </a><a id="change">out.transpose(1, 2).reshape(</a>b, t, <a id="change">-1</a><a id="change">)</a>
+        return self.to_out(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        queries = queries.chunk(2, dim=-1)
+        queries = torch.stack(queries).reshape(2, b, t, h, -1)
+
+        dots = <a id="change">torch.einsum(&quotpbthd,hnpd-&gt;bthpn&quot</a>, queries, self.keys<a id="change">)</a>
+        scores, indices = dots.topk(k=self.topk, dim=-1)
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        all_topk = self.topk ** 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/product-key-memory/commit/915dd922ef8e168f7970d5336d0ba79b4f57fe47#diff-53ae44ef28554a4a669d1c87edbe44e54bf426a6c124261ea02da7a46a53f1d9L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4124093</div><div id='project'> Project Name: lucidrains/product-key-memory</div><div id='commit'> Commit Name: 915dd922ef8e168f7970d5336d0ba79b4f57fe47</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: product_key_memory/product_key_memory.py</div><div id='m_class'> M Class Name: PKM</div><div id='n_method'> N Class Name: PKM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: product_key_memory/product_key_memory.py</div><div id='n_file'> N File Name: product_key_memory/product_key_memory.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 71</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            init.zeros_(self.bias)
+
+    def forward(self, x):
+        batch_size<a id="change">, c_in, T, n_vertex</a> = x.shape
+
+        &#47&#47 Using recurrence relation to reduce time complexity from O(n^2) to O(K|E|),
+        &#47&#47 where K = Ks - 1
+        x = <a id="change">x.reshape(</a>n_vertex, <a id="change">-1</a><a id="change">)</a>
+        x_0 = x
+        x_1<a id="change"> = </a>torch.mm(self.chebconv_matrix, x)
+        if self.Ks - 1 &lt; 0:
+            raise ValueError(f&quotERROR: the graph convolution kernel size Ks has to be a positive integer, but received {self.Ks}.&quot)  
+        elif self.Ks - 1 == 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_list = [x_0]
+        elif self.Ks - 1 == 1:
+            x_0 = x
+            x_1 = <a id="change">torch.einsum(&quothi,btij-&gt;bthj&quot</a>, self.gso, x<a id="change">)</a>
+            x_list = [x_0, x_1]
+        elif self.Ks - 1 &gt;= 2:
+            x_0 = x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hazdzz/stgcn/commit/de050cc05a36453eafe1bf7bac60401c6561e947#diff-db69bbef9e404fa5af08d5bc209ae131c092e0ce285d496efe5f46170b20add9L182' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4124098</div><div id='project'> Project Name: hazdzz/stgcn</div><div id='commit'> Commit Name: de050cc05a36453eafe1bf7bac60401c6561e947</div><div id='time'> Time: 2022-02-07</div><div id='author'> Author: raphaelpeo@gmail.com</div><div id='file'> File Name: model/layers.py</div><div id='m_class'> M Class Name: ChebConv</div><div id='n_method'> N Class Name: ChebGraphConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/layers.py</div><div id='n_file'> N File Name: model/layers.py</div><div id='m_start'> M Start Line: 183</div><div id='m_end'> M End Line: 209</div><div id='n_start'> N Start Line: 153</div><div id='n_end'> N End Line: 180</div><BR>

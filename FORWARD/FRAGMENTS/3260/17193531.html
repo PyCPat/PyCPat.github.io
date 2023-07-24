@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        next_cmem = []
+        aux_loss = torch.zeros(1, requires_grad = True, **to(x))
+
+        for attn, ff, m, c in <a id="change">zip(</a>self.attn_layers, self.ff_layers, mem, cmem<a id="change">)</a>:
+            x, (mem_out, cmem_out), layer_aux_loss = attn(x, memories = (m, c), input_mask = mask, pos_emb = pos_emb)
+            x, = ff(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        next_cmem = []
+        aux_loss = torch.zeros(1, requires_grad = True, **to(x))
+
+        for ind, (attn, ff, m, c) in <a id="change">enumerate(</a><a id="change">zip(</a>self.attn_layers, self.ff_layers, mem, cmem<a id="change">))</a>:
+            layer_num = ind + 1
+            use_memory<a id="change"> = layer_num in self.use_memory_layers</a>
+
+            x, (mem_out, cmem_out), layer_aux_loss = attn(x, memories = (m, c), input_mask = mask, pos_emb = pos_emb)
+            x, = ff(x)
+</code></pre>

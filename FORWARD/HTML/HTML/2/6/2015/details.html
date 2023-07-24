@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :2015
+</h3><img src='13740753.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        laterals = [lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = <a id="change">len(</a>laterals<a id="change">)</a>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels<a id="change">-1</a>, 0, -1):
+            fpn_outs[i] = F.interpolate(fpn_outs[i], size=fpn_outs[0].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+ 
+        output = self.fpn_bottleneck(torch.cat(fpn_outs, dim=1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        <a id="change">for i</a> in reversed(range(len(features)-1))<a id="change">:
+            </a>feature = self.fpn_in[i](features[i])
+            f<a id="change"> = </a>feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))
+
+        fpn_features.reverse()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13740753</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            if i &lt; <a id="change">len(</a>self.output_convs<a id="change">) - 1</a>:
+                out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out = self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for i</a> in range(self.num_levels - 2, -1 , -1)<a id="change">:
+            </a>tds[i]<a id="change"> = </a>self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13740755</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute and apply filter
+        notch_kernel = notch_filter(drop_frequency).to(clean_waveform.device)
+        padding = (len(notch_kernel) // 2, <a id="change">len(</a>notch_kernel<a id="change">) // 2</a>)
+        dropped_waveform = convolve1d(dropped_waveform, notch_kernel, padding)
+
+        &#47&#47 Save the state of the RNG for reproducibility</code></pre><h3>After Change</h3><pre><code class='java'>
+        drop_filter[0, 0, pad] = 1
+
+        &#47&#47 Subtract each frequency
+        <a id="change">for frequency</a> in drop_frequency<a id="change">:
+            </a>notch_kernel = notch_filter(
+                frequency, filter_length, self.drop_width,
+            ).to(clean_waveform.device)
+            drop_filter<a id="change"> = </a>convolve1d(drop_filter, notch_kernel, pad)
+
+        &#47&#47 Apply filter
+        dropped_waveform = convolve1d(dropped_waveform, drop_filter, pad)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/a478adfd391cc6d4fe1d41abd3613d20b7fc349d#diff-8f41b7c6f8310ccf5ec23acf0ede4f3b90c12388db593458278544ffb09ae3d5L1919' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13740757</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: a478adfd391cc6d4fe1d41abd3613d20b7fc349d</div><div id='time'> Time: 2020-03-02</div><div id='author'> Author: plantinga.peter@protonmail.com</div><div id='file'> File Name: data_augmentation.py</div><div id='m_class'> M Class Name: drop_freq</div><div id='n_method'> N Class Name: drop_freq</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: data_augmentation.py</div><div id='n_file'> N File Name: data_augmentation.py</div><div id='m_start'> M Start Line: 1926</div><div id='m_end'> M End Line: 1944</div><div id='n_start'> N Start Line: 2021</div><div id='n_end'> N End Line: 2059</div><BR>

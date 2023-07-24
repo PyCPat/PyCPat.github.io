@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2156
+</h3><img src='14014677.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        contextLoss = F.cross_entropy(predict, c1)
+        &#47&#47 [n, m, h, w, k] -&gt; [n, k, m, h, w]
+        l1, l2 = <a id="change">l1.permute(</a>0, <a id="change">4</a>, <a id="change">1</a>, 2, <a id="change">3</a><a id="change">)</a>, l2.permute(0, 4, 1, 2, 3)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        &#47&#47 sum(-logP) / ()
+        bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        prior1 = torch.distributions.Categorical(logits=torch.zeros_like(l1))
+        prior2 = torch.distributions.Categorical(logits=torch.zeros_like(l2))
+
+        reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior1, prior1).mean()</a> + torch.distributions.kl_divergence(posterior2, prior2).mean()
+
+        return ssimLoss, contextLoss, reg
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14014677</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef</div><div id='time'> Time: 2021-09-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 144</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, latents, codebooks, logits, codes):
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = <a id="change">z.detach().permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, 1<a id="change">)</a>
+            k = l.shape[-1]
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, latents, zqs, softs):
+        loss = 0.0
+        for z, zq, soft in zip(latents, zqs, softs):
+            qe = <a id="change">F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))</a>
+            commit = F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = F.mse_loss(z, soft.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss<a id="change"> += </a>qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14015188</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, device, info=None):
+        extra info is not used here
+        x = <a id="change">x.permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>  &#47&#47 Permute to channel first
+        o = self.network(x)
+        o = o.permute(0, 2, 1)  &#47&#47 Permute to channel last
+        return o</code></pre><h3>After Change</h3><pre><code class='java'>
+            cur_x = cur_x.permute(0, 2, 1)  &#47&#47 Permute to channel first
+            o = self.network(cur_x)
+            o = o.permute(0, 2, 1)  &#47&#47 Permute to channel last
+            out[:, cur_time, :]<a id="change"> = </a><a id="change">torch.mean(</a>o<a id="change">, dim=1)</a>
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/0aa43aa6600f3932ca2ffb844677f3d9544a3e9e#diff-d660456577fe7eaafa8eb66e3d6e62675eb18a2d1ed83e8a9ad037cc2baff956L145' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14014612</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: 0aa43aa6600f3932ca2ffb844677f3d9544a3e9e</div><div id='time'> Time: 2022-07-28</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/tcn.py</div><div id='m_class'> M Class Name: TemporalConvNet</div><div id='n_method'> N Class Name: TemporalConvNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/tcn.py</div><div id='n_file'> N File Name: app/models/backbones/tcn.py</div><div id='m_start'> M Start Line: 147</div><div id='m_end'> M End Line: 150</div><div id='n_start'> N Start Line: 149</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        :param input: An float tensor with shape of [batch_size, seq_len, embed_size]
+        :return: An float tensor with shape of [batch_size, latent_variable_size]
+        
+        input = <a id="change">input.permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>
+        result = self.cnn(input)
+        return result.squeeze(2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        input = input.transpose(1, 2).contiguous()
+        output = self.cnn(input)
+        output<a id="change"> = </a><a id="change">torch.mean(</a>output<a id="change">, dim=-1)</a>
+        return output
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rucaibox/textbox/commit/967fc58bc72f549bde3d8cba8dcd88b0bd40e138#diff-56011e36222cd7dc77146903db7e4845e7c358287f8b47e1844615ade0f1982bL40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14014673</div><div id='project'> Project Name: rucaibox/textbox</div><div id='commit'> Commit Name: 967fc58bc72f549bde3d8cba8dcd88b0bd40e138</div><div id='time'> Time: 2020-12-06</div><div id='author'> Author: lijunyi@ruc.edu.cn</div><div id='file'> File Name: textbox/module/Encoder/cnn_encoder.py</div><div id='m_class'> M Class Name: HybridEncoder</div><div id='n_method'> N Class Name: BasicCNNEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: textbox/module/Encoder/cnn_encoder.py</div><div id='n_file'> N File Name: textbox/module/Encoder/cnn_encoder.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 48</div><BR>

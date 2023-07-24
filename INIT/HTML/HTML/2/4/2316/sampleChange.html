@@ -2,19 +2,19 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        super().__init__()
-        &#47&#47 self._squeeze = nn.ModuleList([Transit(numCodewords, cin) for numCodewords in k])
-        &#47&#47 self._prob = nn.ModuleList([Transit(cin, numCodewords) for numCodewords in k])
-        self._squeeze<a id="change"> = </a><a id="change">nn.ModuleList(</a>[Transit(numCodewords, cin, order="last") for numCodewords in k]<a id="change">)</a>
-        self._prob = nn.ModuleList([Transit(cin, numCodewords, order="first") for numCodewords in k])
-        &#47&#47 self._encoder = nn.Transformer(cin, )
-        self._encoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(cin, 8, cin, rate, "gelu"), 12, None)
-        self._decoder = nn.TransformerDecoder(nn.TransformerDecoderLayer(cin, 8, cin, rate, "gelu"), 12, None)</code></pre><h3>After Change</h3><pre><code class='java'>
-        self._codebookAsValue = nn.ModuleList([nn.Linear(cin, cin) for numCodewords in k])
-        self._xAsQuery = nn.ModuleList([nn.Linear(cin, cin) for numCodewords in k])
-        self._k = k
-        self._scaling = <a id="change">[sqrt(kk) for kk in k]</a>
-        self._d = float(cin) ** 0.5
-        self._c = cin
-        self._position = PositionalEncoding2D(cin, 120, 120)
-        self._dePosition = DePositionalEncoding2D(cin, 120, 120)</code></pre>
+
+
+        &#47&#47 One Propagation layer for each meta path
+        self.propagation_layers<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        for i in range(len(meta_paths)):
+            self.propagation_layers.append(APPNPConv(k_layer, alpha, edge_drop))
+        self.semantic_fusion = SemanticFusion()
+        self.meta_paths = list(tuple(meta_path) for meta_path in meta_paths)</code></pre><h3>After Change</h3><pre><code class='java'>
+        semantic_attention = SemanticAttention(in_size=in_size)
+        self.model = MetapathConv(
+            meta_paths,
+            <a id="change">[APPNPConv(k_layer, alpha, edge_drop)
+             for _ in meta_paths]</a>,
+            semantic_attention
+        )
+        self._cached_graph = None</code></pre>

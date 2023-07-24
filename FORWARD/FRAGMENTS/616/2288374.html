@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if i.shape[0] &gt; max_det:  &#47&#47 limit detections
+                i = i[:max_det]
+            if self.merge and (1 &lt; n &lt; 3E3):  &#47&#47 Merge NMS (boxes merged using weighted mean)
+                <a id="change">try:  &#47&#47 update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
+                    </a>iou = self.box_iou(boxes[i], boxes) &gt; self.iou_thres  &#47&#47 iou matrix
+                    weights = iou * scores[None]  &#47&#47 box weights
+                    x[i, :4] = torch.mm(weights, x[:, :4]).float() / weights.sum(1, keepdim=True)  &#47&#47 merged boxes
+                    if redundant:
+                        i = i[iou.sum(1) &gt; 1]  &#47&#47 require redundancy
+                <a id="change">except </a>RuntimeError:  &#47&#47 possible CUDA error https://github.com/ultralytics/yolov3/issues/1139
+                    print(x, i, x.shape, i.shape)
+                    pass
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            if multi_label:
+                inds = torch.nonzero(x[:, 5:] &gt; self.conf_thres)
+                i = inds[:, 0]
+                j<a id="change"> = </a><a id="change">inds[:, 1]</a>
+                x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+            else:  &#47&#47 best class only
+                conf, j = x[:, 5:].max(1, keepdim=True)
+                x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) &gt; self.conf_thres]</code></pre>

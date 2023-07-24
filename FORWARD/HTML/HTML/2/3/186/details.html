@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :186
+</h3><img src='793261.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        scale_shift = None
+        if exists(self.to_time_embedding) and exists(time_context):
+            time_embedding = self.to_time_embedding(time_context)
+            time_embedding = <a id="change">rearrange(</a>time_embedding, <a id="change">"b c -&gt; b c 1"</a><a id="change">)</a>
+            scale_shift = time_embedding.chunk(2, dim=1)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        skips = []
+        for block in self.blocks:
+            x = block(x, t)
+            skips += <a id="change">[</a>x<a id="change"></a>]
+
+        if self.use_attention:
+            x = self.transformer(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 793261</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: DownsampleBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 458</div><div id='n_end'> N End Line: 473</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [conv(x) for conv, x in zip(self.conv_list, v_img_list)]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = <a id="change">rearrange(</a>conv_v_img, <a id="change">&quotB (h Ch) H W -&gt; B h (H W) Ch&quot</a><a id="change">, h=h)</a>          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+
+        EV_hat_img = q_img * conv_v_img
+        zero = torch.zeros((B, h, 1, Ch), dtype=q.dtype, layout=q.layout, device=q.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        v_img = v_img.transpose(-1, -2).reshape(B, h * Ch, H, W)
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = <a id="change">[]</a>
+        for i, conv in enumerate(self.conv_list):
+            conv_v_img_list.append(conv(v_img_list[i]))
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 793263</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        t = torch.arange(n, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((sinusoid_inp.sin(), sinusoid_inp.cos()), dim=-1)
+        return <a id="change">rearrange(</a>emb, <a id="change">&quoti j -&gt; () i j&quot</a><a id="change">)</a>
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):
+        super().__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq = torch.arange(n, device = device).type_as(self.inv_freq)
+        freqs = einsum(&quoti , j -&gt; i j&quot, seq, self.inv_freq)
+        freqs = repeat(freqs, &quoti j -&gt; () i (j r)&quot, r = 2)
+        return <a id="change">[</a>freqs.sin(), freqs.cos()<a id="change"></a>]
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/9be6fd958ff5432932845aa3f1f9a23f4b203199#diff-46753fec5461ebc4d150c2c0a150758924540bc61b06a15759dbf2721ce48677L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 793264</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 9be6fd958ff5432932845aa3f1f9a23f4b203199</div><div id='time'> Time: 2021-04-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/rotary.py</div><div id='m_class'> M Class Name: FixedPositionalEmbedding</div><div id='n_method'> N Class Name: FixedPositionalEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/rotary.py</div><div id='n_file'> N File Name: alphafold2_pytorch/rotary.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 45</div><BR>

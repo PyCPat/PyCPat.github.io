@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, target):
+        eps = np.finfo(float).eps
+        p_t = torch.where(target == 1, x, 1-x)
+        fl = -<a id="change"> 1 * (1 - p_t) ** self.gamma * </a>torch.log(p_t + eps)
+        fl = <a id="change">torch.where(</a>target == 1, fl * self.alpha, fl * (1 - self.alpha)<a id="change">)</a>
+        return self._reduce(fl)
+
+    def _reduce(self, x):
+        if self.reduction == &quotmean&quot:</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: Tensor, target: Tensor) -&gt; Tensor:
+        mask = target == self.ignore_index
+        x = self._process_preds(x)
+        num_classes = <a id="change">x.shape[-1]</a>
+        target = self._process_target(target, num_classes)
+        pt = self._calc_pt(target, x, mask)
+        focal = 1 - pt
+        nll = -torch.log(self.eps + pt)</code></pre>

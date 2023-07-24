@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :2349
+</h3><img src='14437983.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Self-attention
+        causality_mask = np.tril(np.ones((1, 1, seq_len, seq_len), dtype=np.int))
+        attn_mask<a id="change"> = </a><a id="change">torch.from_numpy(causality_mask).to(</a>self.device<a id="change">)</a>
+        &#47&#47 attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        for block in self.transformer_block:
+            seq = block(seq, attn_mask)
+        seq = seq * valid_mask[:, :, None].float()</code></pre><h3>After Change</h3><pre><code class='java'>
+        ])
+
+    def forward(self, seq, lengths):
+        batch_size, seq_len = <a id="change">seq.size(0</a><a id="change">)</a>, seq.size(1)
+        len_range = torch.from_numpy(np.arange(seq_len)).to(self.device)
+        valid_mask = len_range[None, :] &lt; lengths[:, None]
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuwangcy/rechorus/commit/03e00482d35ef5c38ecdfba21aa5cd1802873944#diff-d2a4c783861f109528c488d25afaac8423879e158b7cf5227259c3f8f528f1f8L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14437983</div><div id='project'> Project Name: thuwangcy/rechorus</div><div id='commit'> Commit Name: 03e00482d35ef5c38ecdfba21aa5cd1802873944</div><div id='time'> Time: 2020-12-12</div><div id='author'> Author: THUwangcy@gmail.com</div><div id='file'> File Name: src/models/sequential/ContrastRec.py</div><div id='m_class'> M Class Name: SASRecEncoder</div><div id='n_method'> N Class Name: BERT4RecEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequential/ContrastRec.py</div><div id='n_file'> N File Name: src/models/sequential/ContrastRec.py</div><div id='m_start'> M Start Line: 267</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 270</div><div id='n_end'> N End Line: 285</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+	def forward(self, row_index, ind, x, y = None):
+		x = x.float()
+		hs = [<a id="change">torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(</a>self.device<a id="change">)</a> for _ in range(self.args[&quotnum_units&quot])]
+		cs = None
+		if self.args[&quotrnn_cell&quot] == &quotLSTM&quot:
+			cs = [torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(self.device) for _ in range(self.args[&quotnum_units&quot])]
+		xs = torch.split(x, 1, 1)
+		&#47&#47print(xs[0].size())
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		h<a id="change"> = </a>torch.cat(hs, dim = 1)
+		preds = self.Linear(h)
+		if y is not None:
+			y = y.long()</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		preds = self.Linear(hs.contiguous().view(<a id="change">x.size(0</a><a id="change">)</a>, -1))
+		if y is not None:
+			y = y.long()
+			probs = nn.Softmax(dim = -1)(preds)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L149' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14437988</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: MnistModel</div><div id='n_method'> N Class Name: MnistModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 198</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input0 = features[2]
+        h0 = torch.zeros(self.num_layers, input0.size(0),
+                         self.hidden_size).to(device)
+        c0<a id="change"> = </a><a id="change">torch.zeros(self.num_layers, input0.size(0),
+                         self.hidden_size).to(</a>device<a id="change">)</a>
+        out, _ = self.lstm(input0, (h0, c0))
+        out = self.attention_net(out)
+        out = self.fc(out[:, -1, :])
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, features, device):
+        inp = features[0]
+        self.sequence_length = <a id="change">inp.size(1</a><a id="change">)</a>
+        out, _ = self.lstm(inp)
+        out = self.attention_net(out, device)
+        out = self.fc1(out)
+        out = self.fc2(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/logintelligence/logadempirical/commit/a67d9fc74c175ac3aa700fe533e22a6fe62290ab#diff-806bb9e744e96a11cbd4585413a0bb83f6d2cfa6977027c8a5e60b1ed0d1bb81L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14437990</div><div id='project'> Project Name: logintelligence/logadempirical</div><div id='commit'> Commit Name: a67d9fc74c175ac3aa700fe533e22a6fe62290ab</div><div id='time'> Time: 2021-06-23</div><div id='author'> Author: c3363046@uon.edu.au</div><div id='file'> File Name: logbert/logdeep/models/lstm.py</div><div id='m_class'> M Class Name: robustlog</div><div id='n_method'> N Class Name: robustlog</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: logbert/logdeep/models/lstm.py</div><div id='n_file'> N File Name: logbert/logdeep/models/lstm.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Self-attention
+        causality_mask = np.tril(np.ones((1, 1, seq_len, seq_len), dtype=np.int))
+        attn_mask = <a id="change">torch.from_numpy(causality_mask).to(</a>self.device<a id="change">)</a>
+        &#47&#47 attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        for block in self.transformer_block:
+            seq = block(seq, attn_mask)
+        seq = seq * valid_mask[:, :, None].float()
+
+        his_vector<a id="change"> = </a>(seq * (position == 1).float()[:, :, None]).sum(1)
+        return his_vector
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        ])
+
+    def forward(self, seq, lengths):
+        batch_size, seq_len = <a id="change">seq.size(0</a><a id="change">)</a>, seq.size(1)
+        len_range = torch.from_numpy(np.arange(seq_len)).to(self.device)
+        valid_mask = len_range[None, :] &lt; lengths[:, None]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuwangcy/rechorus/commit/7b8b88b828f814cb8da18e1305837d1bce99306c#diff-241681d83ed41535f24036f276cdf5077ac2951f43b27830606e4083f188b23dL279' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14437986</div><div id='project'> Project Name: thuwangcy/rechorus</div><div id='commit'> Commit Name: 7b8b88b828f814cb8da18e1305837d1bce99306c</div><div id='time'> Time: 2021-04-14</div><div id='author'> Author: THUwangcy@gmail.com</div><div id='file'> File Name: src/models/developing/ContraRecBeta.py</div><div id='m_class'> M Class Name: SASRecEncoder</div><div id='n_method'> N Class Name: BERT4RecEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/developing/ContraRecBeta.py</div><div id='n_file'> N File Name: src/models/developing/ContraRecBeta.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 297</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 150</div><BR>

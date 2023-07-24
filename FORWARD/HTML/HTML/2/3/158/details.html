@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :158
+</h3><img src='713390.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        key_padding_mask=None,
+        **kwargs,
+    ):
+        <a id="change">if </a>key is None<a id="change">:
+            </a>key = query
+        if value is None:
+            value = key
+        if identity is None:</code></pre><h3>After Change</h3><pre><code class='java'>
+                pos=pos,
+                query_pos=query_pos,
+            )
+            <a id="change">if </a>self.return_intermediate<a id="change">:
+                </a>intermediate.append(<a id="change">self.norm(</a>output<a id="change">)</a>)
+
+        if self.norm is not None:
+            output = self.norm(output)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/idea-research/detrex/commit/b8b4cd0723f75ae9d120d40381355c5dfa9915f1#diff-255531dfd26cdeaf5d286d8b8b6c9a29e4dea4c4cf8a9dad083d748fd7e212e4L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 713390</div><div id='project'> Project Name: idea-research/detrex</div><div id='commit'> Commit Name: b8b4cd0723f75ae9d120d40381355c5dfa9915f1</div><div id='time'> Time: 2022-08-08</div><div id='author'> Author: rentianhe@dgx061.scc.idea</div><div id='file'> File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ideadet/layers/transformer_rebuild.py</div><div id='n_file'> N File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output1 = self.forward_once(input1)
+        output2 = self.forward_once(input2)
+
+        <a id="change">if </a>input3 is not None<a id="change">:
+            </a>output3 = self.forward_once(input3)
+            return output1, output2, output3
+
+        return output1, output2, output3</code></pre><h3>After Change</h3><pre><code class='java'>
+        feat = self.net(x)
+        size = [int(s) for s in feat.size()[2:]]
+        output = F.avg_pool2d(feat, size)
+        <a id="change">if </a>self.reid<a id="change">:
+            </a>output.squeeze_(2).squeeze_(2)
+            output.div_(<a id="change">output.norm(p=2, dim=1, keepdim=True)</a>)
+        return output
+
+    def forward_twice(self, input1, input2, input3=None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cv-zmh/human-action-recognition/commit/2d158bf09726acf3a77fd18d7689bb0f79a24bff#diff-3a074a860809954cf3cfff5506ff8d39586548391390adf2ee28dec79d37815aL43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 713394</div><div id='project'> Project Name: cv-zmh/human-action-recognition</div><div id='commit'> Commit Name: 2d158bf09726acf3a77fd18d7689bb0f79a24bff</div><div id='time'> Time: 2021-07-08</div><div id='author'> Author: zinmoehtoo2015@gmail.com</div><div id='file'> File Name: src/lib/tracker/deepsort/models/siamese_net.py</div><div id='m_class'> M Class Name: SiameseNet</div><div id='n_method'> N Class Name: SiameseNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/lib/tracker/deepsort/models/siamese_net.py</div><div id='n_file'> N File Name: src/lib/tracker/deepsort/models/siamese_net.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 46</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+
+        <a id="change">if </a>exists(self.rel_pos_length)<a id="change">:
+            </a>row_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_rows)
+            column_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_columns)
+
+        return content_out</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        content_out = einsum(&quotnde,ndxy-&gt;nexy&quot, context, content_q)
+
+        <a id="change">if </a>exists(self.rel_pos_length)<a id="change">:
+            </a>Ix = calc_reindexing_tensor(x, L, device)
+            Px = einsum(&quotxir,rd-&gt;xid&quot, Ix, self.rel_rows)
+            Sx = einsum(&quotndxy,xid-&gt;nixy&quot, q, Px)
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+
+            Yh = <a id="change">self.norm(</a>Yh<a id="change">)</a>
+
+            Iy = calc_reindexing_tensor(y, L, device)
+            Py = einsum(&quotxir,rd-&gt;xid&quot, Iy, self.rel_columns)
+            Sy = einsum(&quotndxy,xid-&gt;nixy&quot, q, Py)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/global-self-attention-network/commit/6e87bd0b96350f46edc8d4b4ccd582ecc868e22f#diff-af8f87d68d6adf627dabaab6519f02d4b454d6ba08e146c8f5dc18f07e073e31L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 713393</div><div id='project'> Project Name: lucidrains/global-self-attention-network</div><div id='commit'> Commit Name: 6e87bd0b96350f46edc8d4b4ccd582ecc868e22f</div><div id='time'> Time: 2020-10-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_class'> M Class Name: GSA</div><div id='n_method'> N Class Name: GSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gsa_pytorch/gsa_pytorch.py</div><div id='n_file'> N File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 74</div><BR>

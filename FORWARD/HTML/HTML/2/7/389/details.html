@@ -1,0 +1,80 @@
+<html><h3>Pattern ID :389
+</h3><img src='1503541.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        avg_target = target.mean(dim=3)
+
+        bin_size<a id="change"> = </a>self.max_pixel_val<a id="change"> / </a>self.output_channel_bits
+        channel_bins = torch.arange(bin_size, self.max_pixel_val, bin_size).to(avg_target.device)
+        discretized_target = torch.bucketize(avg_target, channel_bins)
+        discretized_target<a id="change"> = </a>F.one_hot(discretized_target,
+                                       self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits
+        discretized_target = <a id="change">rearrange(</a>discretized_target,
+                                       <a id="change">"b n c bi -&gt; b n (c bi)"</a><a id="change">,
+                                       c=c,
+                                       bi=bi)</a>
+
+        bin_mask = 2**torch.arange(c * bi - 1, -1,
+                                   -1).to(discretized_target.device,
+                                          discretized_target.dtype)
+        target_label = torch.sum(bin_mask * discretized_target, -1)
+        predicted_patches = predicted_patches[mask]
+        target_label = target_label[mask]
+        loss<a id="change"> = </a>F.cross_entropy(predicted_patches, target_label)
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.std = torch.tensor(std).view(-1, 1, 1) if std else None
+
+    def forward(self, predicted_patches, target, mask):
+        p<a id="change">, c, mpv, bits, device</a> = self.patch_size, self.channels, self.max_pixel_val, self.output_channel_bits, target.device
+        bin_size = mpv / (2 ** bits)
+
+        &#47&#47 un-normalize input</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/64a2ef6462bde61db4dd8f0887ee71192b273692#diff-6b502c3fca9000d4ac485e72a6b6cb51b335fed8a8e158013b955ffed39c59abL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1503541</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 64a2ef6462bde61db4dd8f0887ee71192b273692</div><div id='time'> Time: 2021-06-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp.py</div><div id='n_file'> N File Name: vit_pytorch/mpp.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)
+
+        q<a id="change"> = </a>q<a id="change"> * </a>self.scale
+
+        if exists(mask):
+            v.masked_fill_(~mask, 0.)
+
+        context = einsum(&quotb h n d, b h n e -&gt; b h d e&quot, k, v)
+        out<a id="change"> = </a>einsum(&quotb h d e, b h n d -&gt; b h n e&quot, context, q)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out), 0
+
+class EquivariantAttention(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, queries, mask = None):
+        induced = self.attn1(queries, x, mask = mask)
+        out     = self.attn2(x, induced)
+        return out<a id="change">, 0</a>
+
+class EquivariantAttention(nn.Module):
+    def __init__(
+        self,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/6bd1817d780502d24a2515e850c9cd1600f24642#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L131' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1503573</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 6bd1817d780502d24a2515e850c9cd1600f24642</div><div id='time'> Time: 2021-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: GlobalLinearAttention</div><div id='n_method'> N Class Name: GlobalLinearAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q = torch.nn.functional.normalize(q, dim=-1)
+        k = torch.nn.functional.normalize(k, dim=-1)
+
+        attn = (q<a id="change"> @ </a>k.transpose(-2, -1)) * self.temperature
+        attn<a id="change"> = </a>attn.softmax(dim=-1)
+
+        out<a id="change"> = </a>(attn @ v)
+
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb head c (h w) -&gt; b (head c) h w&quot</a><a id="change">, head=self.num_heads, h=h, w=w)</a>
+
+        out = self.project_out(out)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = q.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        k = k.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        v = v.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1)<a id="change">, F.normalize(k, dim=-1)</a>
+
+        attn = torch.softmax(torch.matmul(q, k.transpose(-2, -1)) * self.temperature, dim=-1)
+        out = self.project_out(torch.matmul(attn, v).view(b, -1, h * w).view(b, -1, h, w))
+        return out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/leftthomas/restormer/commit/b68437812320f378e8cfaa3c4fc1f59342dda9b0#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1503546</div><div id='project'> Project Name: leftthomas/restormer</div><div id='commit'> Commit Name: b68437812320f378e8cfaa3c4fc1f59342dda9b0</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: leftthomas@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: MDTA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 122</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 26</div><BR>

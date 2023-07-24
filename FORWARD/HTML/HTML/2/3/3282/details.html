@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :3282
+</h3><img src='17209413.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            graph.srcdata[&quoth&quot] = feat_src
+            graph.apply_edges(lambda edges: {&quoth&quot: edges.data[&quot_edge_weight&quot] * 2})
+            graph.update_all(aggregate_fn, fn.sum(msg=&quotm&quot, out=&quoth&quot))
+            rst<a id="change"> = </a>graph.dstdata[&quoth&quot]
+            rst = th.matmul(feat_src, self.weight1) + th.matmul(rst, self.weight2)
+
+
+            if self.activation is not None:
+                rst = self.activation(rst)
+
+            <a id="change">return </a>rst
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                stype, etype, dtype = e
+                sub_graph = hg[stype, etype, dtype]
+                sub_graph.update_all(aggregate_fn, fn.sum(msg=&quotm&quot, out=&quotout&quot))
+                temp = <a id="change">hg.ndata[&quotout&quot].pop(</a>dtype<a id="change">)</a>
+                if isinstance(temp, dict):
+                    temp = temp[dtype]
+                if outputs.get(dtype) is None:
+                    outputs[dtype] = temp</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/8673a0f313e6be0f6f7ccaf65aaf993769e4adf9#diff-429162e7bcdfbbc409aabd0e6317a9f8bd71ecc0fdb9f27c08cab2cd0cda454cL155' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17209413</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 8673a0f313e6be0f6f7ccaf65aaf993769e4adf9</div><div id='time'> Time: 2021-05-23</div><div id='author'> Author: theheavenszhao@outlook.com</div><div id='file'> File Name: openhgnn/models/RSHN.py</div><div id='m_class'> M Class Name: GraphConv</div><div id='n_method'> N Class Name: GraphConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/RSHN.py</div><div id='n_file'> N File Name: openhgnn/models/RSHN.py</div><div id='m_start'> M Start Line: 170</div><div id='m_end'> M End Line: 179</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 186</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if value is None:
+            value = key
+        if identity is None:
+            identity<a id="change"> = </a>query
+        if key_pos is None:
+            if query_pos is not None:
+                &#47&#47 use query_pos if key_pos is not available
+                if query_pos.shape == key.shape:
+                    key_pos = query_pos
+                else:
+                    warnings.warn(
+                        f"position encoding of key is" f"missing in {self.__class__.__name__}."
+                    )
+        if query_pos is not None:
+            query = query + query_pos
+        if key_pos is not None:
+            key = key + key_pos
+
+        out = self.attn(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+            key_padding_mask=key_padding_mask,
+        )[0]
+
+        <a id="change">return </a>identity + self.proj_drop(out)
+
+
+class FFN(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.norm is not None:
+            output = self.norm(output)
+            if self.return_intermediate:
+                <a id="change">intermediate.pop()</a>
+                intermediate.append(output)
+
+        if self.return_intermediate:
+            return torch.stack(intermediate)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/idea-research/detrex/commit/b8b4cd0723f75ae9d120d40381355c5dfa9915f1#diff-255531dfd26cdeaf5d286d8b8b6c9a29e4dea4c4cf8a9dad083d748fd7e212e4L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17209418</div><div id='project'> Project Name: idea-research/detrex</div><div id='commit'> Commit Name: b8b4cd0723f75ae9d120d40381355c5dfa9915f1</div><div id='time'> Time: 2022-08-08</div><div id='author'> Author: rentianhe@dgx061.scc.idea</div><div id='file'> File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ideadet/layers/transformer_rebuild.py</div><div id='n_file'> N File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, a, b):
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        outputs<a id="change"> = </a>[]
+        for i in range(len(output_a)):
+            outputs.append(output_a[i] + output_b[i])
+
+        <a id="change">return </a>outputs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, a, b):
+        labels = a[&quotlabels&quot]
+        <a id="change">a.pop(</a>&quotlabels&quot<a id="change">)</a>
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output = torch.cat([output_a, output_b, output_a-output_b], dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/prajjwal1/fluence/commit/384e5722f994d3a39d54cf057a0a48a996206bbf#diff-9b5227bea9875a2faa1f5803fb8bdaa8a1891793820bda7ba792e31c87a9e25fL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17209416</div><div id='project'> Project Name: prajjwal1/fluence</div><div id='commit'> Commit Name: 384e5722f994d3a39d54cf057a0a48a996206bbf</div><div id='time'> Time: 2020-08-03</div><div id='author'> Author: prajjwalin@protonmail.com</div><div id='file'> File Name: fluence/models/siamese_model.py</div><div id='m_class'> M Class Name: SiameseTransformer</div><div id='n_method'> N Class Name: SiameseTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fluence/models/siamese_model.py</div><div id='n_file'> N File Name: fluence/models/siamese_model.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 32</div><BR>

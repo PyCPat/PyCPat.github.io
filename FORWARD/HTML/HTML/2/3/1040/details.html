@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :1040
+</h3><img src='3783019.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.args.semiF_path:
+            mol_graph, semiF_features = mol_graph
+            if self.args.semiF_only:
+                semiF_features = np.stack(<a id="change">[features.todense() for features in semiF_features]</a>)
+                semiF_features = torch.from_numpy(semiF_features).float().cuda()
+                return semiF_features
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mol_graph, features_batch = mol_graph
+
+            if self.args.features_only:
+                features_batch = torch.from_numpy(<a id="change">np.stack(</a>features_batch<a id="change">)</a>).float()
+
+                if self.args.cuda:  &#47&#47 can&quott use next(self.parameters()).is_cuda b/c no parameters
+                    features_batch = features_batch.cuda()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/b458b250cc81267ae851a68cc6917be18204ee9d#diff-91b4e1ef89fbd915183928818e07287d60ba2d013478779025955bb686f6410dL122' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3783019</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: b458b250cc81267ae851a68cc6917be18204ee9d</div><div id='time'> Time: 2018-10-28</div><div id='author'> Author: swansonk.14@gmail.com</div><div id='file'> File Name: mpn.py</div><div id='m_class'> M Class Name: MPNEncoder</div><div id='n_method'> N Class Name: MPNEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpn.py</div><div id='n_file'> N File Name: mpn.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 315</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 324</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        multi_crops = []
+        &#47&#47 multi-crop all images in the batch
+        for i in range(len(self.transforms)):
+            crops = <a id="change">[self.transforms[i](image).unsqueeze_(0) for image, _, _ in batch]</a>
+            multi_crops.append(torch.cat(crops, 0))
+
+        &#47&#47 list of labels
+        labels = torch.LongTensor([item[1] for item in batch])</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        views = []
+        for transform in self.transforms:
+            view = <a id="change">torch.stack(</a>[transform(img) for img, _, _ in batch]<a id="change">)</a>
+            views.append(view)
+        &#47&#47 list of labels
+        labels = torch.LongTensor([label for _, label, _ in batch])
+        &#47&#47 list of filenames</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lightly-ai/lightly/commit/416ed3fdb3387a49f3407f58c16ef3c7cba3d66b#diff-bacf9bc1dab9e318873d7e84b2dff4fa5d1a46fa0479aabca52ef7c343872a5eL380' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3783022</div><div id='project'> Project Name: lightly-ai/lightly</div><div id='commit'> Commit Name: 416ed3fdb3387a49f3407f58c16ef3c7cba3d66b</div><div id='time'> Time: 2022-02-01</div><div id='author'> Author: 43336610+guarin@users.noreply.github.com</div><div id='file'> File Name: lightly/data/collate.py</div><div id='m_class'> M Class Name: MultiCropCollateFunction</div><div id='n_method'> N Class Name: MultiViewCollateFunction</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lightly/data/collate.py</div><div id='n_file'> N File Name: lightly/data/collate.py</div><div id='m_start'> M Start Line: 386</div><div id='m_end'> M End Line: 393</div><div id='n_start'> N Start Line: 208</div><div id='n_end'> N End Line: 214</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = <a id="change">[block for block, drop in zip(self.blocks, to_drop) if not drop]</a>
+            blocks = self.blocks[:1] if len(blocks) == 0 else blocks
+
+        block_args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, block_args))
+        return _ReversibleFunction.apply(x, blocks, block_args)</code></pre><h3>After Change</h3><pre><code class='java'>
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out =  _ReversibleFunction.apply(x, blocks, args)
+        return <a id="change">torch.stack(</a>out.chunk(2, dim=-1)<a id="change">)</a>.sum(dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/d5b9c649e59290b15c15f85d0bb182cb20b699fb#diff-27d52caf7b4f725ff9fe7d9e57172c62a7c8744ebafb23663512e7990a5ed131L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3783025</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: d5b9c649e59290b15c15f85d0bb182cb20b699fb</div><div id='time'> Time: 2020-04-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/reversible.py</div><div id='n_file'> N File Name: sinkhorn_transformer/reversible.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>

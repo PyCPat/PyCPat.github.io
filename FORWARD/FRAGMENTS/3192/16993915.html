@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        
+        neg = dists + 1e5 * pos_mask.float()
+        neg_weight<a id="change"> =  </a><a id="change">(self.neg_margin - neg).detach()</a>
+        neg_weight = torch.max(torch.zeros_like(neg_weight), neg_weight)
+        lse_negative = torch.logsumexp(self.log_scale * (self.neg_margin - neg) * neg_weight, dim=-1)
+
+        loss = F.softplus(lse_positive + lse_negative) / self.log_scale</code></pre><h3>After Change</h3><pre><code class='java'>
+
+
+        &#47&#47 pos = dists + 1e5 * (~pos_mask).float()
+        pos = <a id="change">furthest_positive[:, None]</a>
+        pos_weight = (self.pos_optimal - pos).detach()
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+</code></pre>

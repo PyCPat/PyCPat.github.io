@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :1731
+</h3><img src='12911301.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            h, e = conv(g, h, e)
+        g.ndata[&quoth&quot] = h
+
+        <a id="change">if self.readout == "sum"</a><a id="change">:
+            </a>hg = dgl.sum_nodes(g, &quoth&quot)
+        elif self.readout == "max":
+            hg<a id="change"> = </a>dgl.max_nodes(g, &quoth&quot)
+        elif <a id="change">self.readout == "mean"</a><a id="change">:
+            </a>hg = dgl.mean_nodes(g, &quoth&quot)
+        else:
+            hg<a id="change"> = </a>dgl.mean_nodes(g, &quoth&quot)  &#47&#47 default readout is mean nodes
+
+        sig = nn.Sigmoid()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g):
+        self.gnn(g)
+
+        readouts_to_cat = <a id="change">[dgl.readout_nodes(g, &quotf&quot, op=aggr) for aggr in self.readout_aggregators]</a>
+        readout = torch.cat(readouts_to_cat, dim=-1)
+        return self.output(readout)
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/934d8fb3ef28cbe5340fd6a305e55c7130a16966#diff-751ff93b94afd83b75b234394c48d17d323bb03dc5de0cbc0b77ec28ec92d46eL270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12911301</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: 934d8fb3ef28cbe5340fd6a305e55c7130a16966</div><div id='time'> Time: 2021-06-12</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/san.py</div><div id='m_class'> M Class Name: SAN</div><div id='n_method'> N Class Name: SAN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/san.py</div><div id='n_file'> N File Name: models/san.py</div><div id='m_start'> M Start Line: 297</div><div id='m_end'> M End Line: 320</div><div id='n_start'> N Start Line: 270</div><div id='n_end'> N End Line: 274</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.readout == "sum":
+            hg = dgl.sum_nodes(g, &quoth&quot)
+        elif <a id="change">self.readout == "max"</a><a id="change">:
+            </a>hg<a id="change"> = </a>dgl.max_nodes(g, &quoth&quot)
+        elif <a id="change">self.readout == "mean"</a><a id="change">:
+            </a>hg = dgl.mean_nodes(g, &quoth&quot)
+        else:
+            hg<a id="change"> = </a>dgl.mean_nodes(g, &quoth&quot)  &#47&#47 default readout is mean nodes
+
+        sig = nn.Sigmoid()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            h, e = conv(g, h, e)
+        g.ndata[&quoth&quot] = h
+
+        readouts_to_cat = <a id="change">[dgl.readout_nodes(g, &quotf&quot, op=aggr) for aggr in self.readout_aggregators]</a>
+        readout = torch.cat(readouts_to_cat, dim=-1)
+        return self.output(readout)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/1d85f551afa4c84c3832ac28e92b838537f54542#diff-751ff93b94afd83b75b234394c48d17d323bb03dc5de0cbc0b77ec28ec92d46eL369' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12911365</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: 1d85f551afa4c84c3832ac28e92b838537f54542</div><div id='time'> Time: 2021-06-11</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/san.py</div><div id='m_class'> M Class Name: SAN_NodeLPE</div><div id='n_method'> N Class Name: SAN_NodeLPE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/san.py</div><div id='n_file'> N File Name: models/san.py</div><div id='m_start'> M Start Line: 369</div><div id='m_end'> M End Line: 412</div><div id='n_start'> N Start Line: 369</div><div id='n_end'> N End Line: 403</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    &#47&#47 X: a list of features from different modalities
+    def forward(self, X):
+        <a id="change">if self.split_block == 1</a><a id="change">:
+            </a>ret<a id="change"> = </a>self.blocks[0](X)
+            return ret
+
+        &#47&#47 split into multiple time segments, assumes in 2nd dim
+        segmented_x = [list(torch.split(x, x.shape[2] // self.split_block, dim=2)) for x in X]
+        for x in segmented_x:
+            <a id="change">if len(x) &gt; self.split_block</a><a id="change">:
+                </a>x[-2]<a id="change"> = </a>torch.cat(x[-2:], dim=2)
+
+        ret_segments = []
+        for i in range(self.split_block):</code></pre><h3>After Change</h3><pre><code class='java'>
+        segment_shapes = [[x.shape[2] // self.split_block] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            seg_shape[-1] += x.shape[2] % self.split_block
+        segmented_x = <a id="change">[torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]</a>
+
+        &#47&#47 apply MSAF
+        ret_segments = [self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12911366</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>

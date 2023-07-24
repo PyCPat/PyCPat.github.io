@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        mem, x = x[:, :num_mem], x[:, num_mem:]
+
+        <a id="change">if </a>return_embeddings<a id="change">:
+            </a>return x
+
+        return self.to_logits(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if return_mems:
+            new_mems = list(map(lambda pair: torch.cat(pair, dim = -2), zip(mems, hiddens))) if exists(mems) else hiddens
+            new_mems<a id="change"> = </a><a id="change">list(map(</a>lambda t: t[..., -self.max_mem_len:, :].detach(), new_mems<a id="change">)</a><a id="change">)</a>
+            return out, new_mems
+
+        return out
+</code></pre>

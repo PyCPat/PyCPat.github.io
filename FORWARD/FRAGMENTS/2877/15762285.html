@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                <a id="change">g.srcdata.update(</a>{&quotemb&quot: emb[i]}<a id="change">)</a>
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                             Fn.sum(&quotm&quot, &quotemb&quot))
+                h_prime.append(g.ndata[&quotemb&quot])
+            h_output = torch.cat(h_prime, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()
+            g.edata[&quotalpha&quot] = edge_attention
+            <a id="change">g.srcdata[&quotemb&quot]</a> = emb
+            g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                         Fn.sum(&quotm&quot, &quotemb&quot))
+            &#47&#47 g.apply_edges(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot))</code></pre>

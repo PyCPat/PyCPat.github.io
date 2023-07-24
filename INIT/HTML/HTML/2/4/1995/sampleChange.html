@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class LUConv3d(nn.Module):
+    def __init__(self, nchan, elu):
+        super(LUConv3d, self).__init__()
+        self.relu1 = <a id="change">ELUCons(</a>elu, nchan<a id="change">)</a>
+        self.conv1 = nn.Conv3d(nchan, nchan, kernel_size=3, padding=1)
+        self.bn1 = ContBatchNorm3d(nchan)
+        self.bn1 = nn.BatchNorm3d(nchan)</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(LUConv3d, self).__init__()
+        self.conv1 = nn.Conv3d(nchan, nchan, kernel_size=3, padding=1)
+        self.bn1 = nn.GroupNorm(8, nchan)
+        self.relu1 = <a id="change">nn.ReLU(inplace=True)</a>
+        self.drop = <a id="change">nn.Dropout3d(p=prob, inplace=True)</a>
+
+    def forward(self, x):
+        out = self.relu1(self.drop(self.bn1(self.conv1(x))))</code></pre>

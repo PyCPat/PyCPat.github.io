@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        codes = self.encode(x)
+        quantized = self.decode(codes)
+
+        diff<a id="change"> = </a>(x<a id="change"> - </a>quantized).pow(2).mean()
+        quantized = quantized<a id="change"> + </a>x - <a id="change">x.detach()</a>
+
+        if self.training:
+            self.replace_dead_codes(x)
+
+            onehot = F.one_hot(codes, self.size).float()
+            usage = onehot.sum(0)
+            targets = (x.T @ onehot / usage).T
+
+            targets = torch.where(torch.isnan(targets), self.embedding,
+                                  targets)
+
+            ema_inplace(self.embedding, targets, self.ema)
+            ema_inplace(self.usage, usage, self.ema)
+
+        quantized<a id="change"> = </a>quantized.reshape(
+            batch_size,
+            -1,
+            quantized.shape[-1],
+        ).permute(0, 2, 1)
+        codes<a id="change"> = </a>codes.reshape(batch_size, -1)
+        <a id="change">return </a>quantized, diff.mean(), codes[:, None]
+
+
+class ResidualVQ(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            self.embed.data.copy_(embed_normalized)
+
+        <a id="change">return </a>quantize, embed_ind
+
+
+class VectorQuantization(nn.Module):</code></pre>

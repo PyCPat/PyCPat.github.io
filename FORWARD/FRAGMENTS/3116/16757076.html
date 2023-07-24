@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        lsnr, h_snr = self.gru_snr(x_rnn.transpose(1, 2).flatten(2, 3), h_snr)
+        lsnr = self.fc_snr(lsnr) * self.lsnr_scale + self.lsnr_offset
+        m = self.conv_out(x1)
+        <a id="change">return </a>m<a id="change">, lsnr, h, h_snr</a>
+
+
+class SpectralRefinement(nn.Module):
+    def __init__(self, kernel_size_t: int = 1, dilation: int = 1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 input shape: [B, 1, T, F]
+        x0 = self.conv_in(input)  &#47&#47 [B, C, T, F]
+        x1 = self.down_block(x0)  &#47&#47 [B, C, T, F/2]
+        <a id="change">if h_prev is not None</a><a id="change">:
+            </a>assert self.conv_hprev_down is not None
+            h_prev<a id="change"> = </a>self.conv_hprev_down(h_prev)
+            x1 = x1 + h_prev
+        x_rnn, h = self.gru(x1, h)
+        x_rnn = x_rnn<a id="change"> + </a>x1
+        x1 = self.up_block(x_rnn)
+        x1<a id="change"> = </a>x1<a id="change"> + </a>x0
+        m = self.conv_out(x1)
+        <a id="change">return </a>m<a id="change">, x_rnn, h</a>
+
+
+def _init_weights(module, name=None, head_init_scale=1.0):
+    if isinstance(module, nn.Conv2d):</code></pre>

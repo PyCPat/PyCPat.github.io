@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            with torch.no_grad():
+                if isinstance(x, Tensor):
+                    x<a id="change"> = </a><a id="change">x.detach().to(</a>self.device<a id="change">)</a>.requires_grad_()
+                    self.cache_input[micro_batch_idx] = x
+                    x = self.layers(x)
+                else:</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.input_buffer[micro_batch_idx] = x
+                    x = self.layers(x)
+                else:
+                    <a id="change">for </a>tensor in x<a id="change">:
+                        </a>tensor.detach_().requires_grad_()
+                    self.input_buffer[micro_batch_idx] = x
+                    x = self.layers(*x)
+            return x</code></pre>

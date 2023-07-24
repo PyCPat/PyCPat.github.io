@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1409
+</h3><img src='4833865.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if is_video:
+            x = rearrange(x, &quot(b f) c h w -&gt; b c f h w&quot, b = b)
+
+        <a id="change">if </a>not convolve_across_time<a id="change">:
+            </a>return x
+
+        x = <a id="change">rearrange(</a>x, <a id="change">&quotb c f h w -&gt; (b h w) c f&quot</a><a id="change">)</a>
+
+        x = self.temporal_conv(x)
+
+        x<a id="change"> = </a>rearrange(x, &quot(b h w) c f -&gt; b c f h w&quot, h = h, w = w)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+
+        scale_shift = None
+        <a id="change">if </a>exists(self.time_mlp) and <a id="change">exists(</a>time_emb<a id="change">):
+            </a>time_emb = self.time_mlp(time_emb)
+            time_emb = <a id="change">rearrange(</a>time_emb, &quotb c -&gt; b c 1 1&quot<a id="change">)</a>
+            scale_shift<a id="change"> = </a>time_emb.chunk(2, dim = 1)
+
+        h = self.block1(x, scale_shift = scale_shift, convolve_across_time = convolve_across_time)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/0af63d7db1964f26183becb09f25cd09c40ffbf5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4833865</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: 0af63d7db1964f26183becb09f25cd09c40ffbf5</div><div id='time'> Time: 2022-12-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: Pseudo3DConv</div><div id='n_method'> N Class Name: ResnetBlock</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 239</div><div id='n_end'> N End Line: 253</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = 0
+
+        <a id="change">if </a>self.col_attn<a id="change">:
+            </a>w_x = <a id="change">rearrange(</a>x, <a id="change">&quotb h w d -&gt; (b w) h d&quot</a><a id="change">)</a>
+            if exists(attn_bias):
+                attn_bias = repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = w)
+
+            tie_dim = w if self.global_query_attn else None
+            w_out = self.attn(w_x, mask = w_mask, attn_bias = attn_bias, tie_dim = tie_dim)
+            w_out = rearrange(w_out, &quot(b w) h d -&gt; b h w d&quot, h = h, w = w)
+
+            out<a id="change"> += </a>w_out
+
+        if self.row_attn:
+            h_x = rearrange(x, &quotb h w d -&gt; (b h) w d&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = rearrange(x, input_fold_eq)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = rearrange(</a>mask, mask_fold_axial_eq<a id="change">)</a>
+
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):
+            attn_bias = self.edges_to_attn_bias(edges)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4833857</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k)
+
+        <a id="change">if </a>self.causal<a id="change">:
+            </a>sim<a id="change"> = </a>sim / <a id="change">rearrange(</a>torch.arange(seq_len, device = device) + 1, &quot... -&gt; ... 1&quot<a id="change">)</a>
+        else:
+            sim = sim / seq_len
+
+        if exists(rel_pos_bias):</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = F.relu(sim) ** 2
+        attn = self.dropout(attn)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask = <a id="change">rearrange(</a>mask, <a id="change">&quotb j -&gt; b 1 j&quot</a><a id="change">)</a>
+            attn<a id="change"> = </a>attn.masked_fill(~mask, 0.)
+
+        if self.causal:
+            causal_mask = torch.ones((seq_len, seq_len), dtype = torch.bool, device = device).triu(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/flash-pytorch/commit/6b0cc2e2316bf9c93b8b48916a11f774209d7bf1#diff-6408ce30d3c8730249ca81344fdd04a1dd01ed7b072e84e9d752276e93661682L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4833843</div><div id='project'> Project Name: lucidrains/flash-pytorch</div><div id='commit'> Commit Name: 6b0cc2e2316bf9c93b8b48916a11f774209d7bf1</div><div id='time'> Time: 2022-03-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: flash_pytorch/flash_pytorch.py</div><div id='m_class'> M Class Name: GAU</div><div id='n_method'> N Class Name: GAU</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: flash_pytorch/flash_pytorch.py</div><div id='n_file'> N File Name: flash_pytorch/flash_pytorch.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 178</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 184</div><BR>

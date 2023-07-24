@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss = self.diffusion_prior(*args, **kwargs)
+            scaled_loss = self.scaler.scale(loss / divisor)
+            scaled_loss.backward()
+        return <a id="change">loss.item()</a>
+
+&#47&#47 decoder trainer
+
+class DecoderTrainer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            with autocast(enabled = self.amp):
+                loss = self.diffusion_prior(*chunked_args, **chunked_kwargs)
+
+                total_loss += <a id="change">loss.item() * </a>chunk_size
+                total_samples += chunk_size
+
+                self.scaler.scale(loss * (chunk_size / batch_size)).backward()</code></pre>

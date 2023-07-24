@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :1513
+</h3><img src='5085389.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        return self._quantizer(self._encoder(x)), <a id="change">torch.tensor(</a>[h, w]<a id="change">, dtype=torch.int)</a>
+
+
+class RefDecoder(nn.Module):
+    def __init__(self, m, k, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(self._levels):
+            head = self._heads[i]
+            z = head(latent)
+            <a id="change">if i &lt; self._levels - 1</a><a id="change">:
+                </a>mapper<a id="change"> = </a>self._mappers[i]
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent<a id="change"> = </a>latent - hard
+            else:
+                code = self._quantizers[i](z)
+            codes.append(code)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5085389</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+&#47&#47     loss_semantic += self.semantic_loss(grad_reverse(negative_output, self.grl_lambda), embedding)
+&#47&#47     loss_semantic = loss_semantic.mean()
+
+    loss_semantic = <a id="change">torch.tensor(</a>0.0<a id="change">)</a>.to(self.device)
+
+    loss_triplet = self.triplet_loss(anchor_output, positive_output, negative_output)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    targets_sketch = torch.zeros(batch_size).to(self.device)
+    targets_photos = torch.ones(batch_size).to(self.device)
+
+    <a id="change">if epoch &lt; 5</a><a id="change">:
+      </a>lmbda<a id="change"> = </a>0
+    elif epoch &lt; 25:
+      lmbda<a id="change"> = </a>(epoch-5)/20.0
+    else:
+      lmbda = 1.0
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ashok-arjun/zero-shot-sketch-based-image-retrieval/commit/085a42cbf259a0114fd96e1b8acfa2c75bb79c31#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5085388</div><div id='project'> Project Name: ashok-arjun/zero-shot-sketch-based-image-retrieval</div><div id='commit'> Commit Name: 085a42cbf259a0114fd96e1b8acfa2c75bb79c31</div><div id='time'> Time: 2020-08-16</div><div id='author'> Author: arjun2000ashok@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: DetangledJointDomainLoss</div><div id='n_method'> N Class Name: DetangledJointDomainLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 112</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pearson = [neg_Pearson_Loss(prediction,targets) for prediction in predictions ]
+        &#47&#47 snr_loss = [si_snr(prediction,targets) for prediction in predictions ]
+
+        return torch.mean(<a id="change">torch.tensor(</a>pearson<a id="change">)</a>)&#47&#47torch.sum(torch.Tensor(pearson)) &#47&#47+ torch.sum(torch.Tensor(snr_loss))&#47&#47torch.mean(torch.tensor(pearson))
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 p_loss = mutual_information_loss(predictions[i], targets)
+
+        <a id="change">if epoch &gt;= 400</a><a id="change">:
+            </a>loss<a id="change"> += </a>phase_correlation_loss(predictions[i],targets)
+            loss<a id="change"> += </a>power_spectrum_loss(predictions[i], targets)
+        shrink_factor = 4
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tvs-ai/pytorch_rppgs/commit/6e1f4d2b69e34974564cdb09205c0c29ae43db07#diff-5417214fd82eddc828782e56401ffa056e917ad8ae14669fb0b704cd9dcad2bfL287' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5085401</div><div id='project'> Project Name: tvs-ai/pytorch_rppgs</div><div id='commit'> Commit Name: 6e1f4d2b69e34974564cdb09205c0c29ae43db07</div><div id='time'> Time: 2023-02-23</div><div id='author'> Author: spicyyeol@gmail.com</div><div id='file'> File Name: loss.py</div><div id='m_class'> M Class Name: BVPVelocityLoss</div><div id='n_method'> N Class Name: BVPVelocityLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss.py</div><div id='n_file'> N File Name: loss.py</div><div id='m_start'> M Start Line: 288</div><div id='m_end'> M End Line: 291</div><div id='n_start'> N Start Line: 387</div><div id='n_end'> N End Line: 423</div><BR>

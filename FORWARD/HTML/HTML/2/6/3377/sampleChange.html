@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self):
+        super().__init__()
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Discriminator(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = rearrange(x, &quotb c -&gt; b c () ()&quot)
+        x = self.initial_conv(x)
+
+        residuals<a id="change"> = </a><a id="change">dict()</a>
+
+        for (res, (up, sle)) in zip(self.res_layers, self.layers):
+            x<a id="change"> = </a>up(x)
+            if exists(sle):
+                out_res = self.sle_map[res]
+                residual = sle(x)
+                residuals[out_res]<a id="change"> = </a>residual
+
+            if res in residuals:
+                x = x + residuals[res]
+
+        x = self.out_conv(x)
+        <a id="change">return </a>x.tanh()
+
+class Discriminator(nn.Module):
+    def __init__(self):</code></pre>

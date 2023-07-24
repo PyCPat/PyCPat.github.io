@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            notes: LongTensor[batch, time]
+        
+        x = self.emb(notes) &#47&#47 batch, time, emb_size
+        h, _ = self.rnn(x, <a id="change">self.h0[None].expand(1</a>, x.shape[0], <a id="change">-1</a><a id="change">)</a>) &#47&#47batch, time, hidden_size
+        logits = self.proj(h[:,:-1]) &#47&#47 batch, time-1, 128
+        logits = F.log_softmax(logits, -1) &#47&#47 logits = logits - logits.logsumexp(-1, keepdim=True)
+        targets = notes[:,1:,None] &#47&#47batch, time-1, 1</code></pre><h3>After Change</h3><pre><code class='java'>
+            notes: LongTensor[batch, time]
+        
+        x = self.emb(notes) &#47&#47 batch, time, emb_size
+        h0 = <a id="change">self.h0[None].expand(1</a>, x.shape[0], <a id="change">-1</a><a id="change">)</a>.contiguous() &#47&#47 1 x batch x hidden_size
+        h, _ = self.rnn(x, h0) &#47&#47batch, time, hidden_size
+        logits = self.proj(h[:,:-1]) &#47&#47 batch, time-1, 128
+        logits = F.log_softmax(logits, -1) &#47&#47 logits = logits - logits.logsumexp(-1, keepdim=True)</code></pre>

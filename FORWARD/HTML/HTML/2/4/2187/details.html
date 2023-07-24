@@ -1,0 +1,104 @@
+<html><h3>Pattern ID :2187
+</h3><img src='14133303.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.resample&gt;1:
+            x = audio.pt_resample_audio(audio=x, sr=self.sampling_rate,
+                        target_sr=int(self.sampling_rate * self.resample))
+        <a id="change">print(</a>"resampled-&gt;",x.shape<a id="change">)</a>
+        encoder_outputs = []
+        for encoder in self.encoder:
+            x = encoder(x)
+            print(x.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self,mixed_signal):
+
+        <a id="change">if mixed_signal.dim() == 2</a><a id="change">:
+            </a>mixed_signal<a id="change"> = </a>mixed_signal.unsqueeze(1)
+
+        length = mixed_signal.shape[-1]
+        x = F.pad(mixed_signal, (0,self.get_padding_length(length) - length)) </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/shahules786/mayavoz/commit/4edc90deb0f36a17404b2e78ed4faf210ed7c9d0#diff-ae222fe663e9b184f8fdc35f842fee011444775d4757dbff087f2e43e1eedf0fL89' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133303</div><div id='project'> Project Name: shahules786/mayavoz</div><div id='commit'> Commit Name: 4edc90deb0f36a17404b2e78ed4faf210ed7c9d0</div><div id='time'> Time: 2022-09-06</div><div id='author'> Author: shahules786@gmail.com</div><div id='file'> File Name: enhancer/models/demucs.py</div><div id='m_class'> M Class Name: Demucs</div><div id='n_method'> N Class Name: Demucs</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enhancer/models/demucs.py</div><div id='n_file'> N File Name: enhancer/models/demucs.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 104</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x):
+        <a id="change">print(</a>&quot\n input of first convolution:{}&quot.format(x.size())<a id="change">)</a>
+        out = F.relu(self.bn1(self.conv1(x)))
+        print(&quot\n output of first convolution:{}&quot.format(out.size()))
+
+        out = self.bn2(self.conv2(out))</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = </a>self.downsample(x)
+
+        out += identity
+        out = self.relu(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mdiephuis/simclr/commit/cded7358aca8d4b0d4043c06952a30a0882c05f1#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133302</div><div id='project'> Project Name: mdiephuis/simclr</div><div id='commit'> Commit Name: cded7358aca8d4b0d4043c06952a30a0882c05f1</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: shideh.rezaeifar@unige.ch</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: BasicBlock</div><div id='n_method'> N Class Name: BasicBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 radial part
+        &#47&#47 -&gt; (Nbatch,Nelec,Nrbf)
+        X = R**self.bas_n * torch.exp(-self.bas_exp*R)
+        <a id="change">print(</a>X.shape<a id="change">)</a>
+
+        &#47&#47 compute by the spherical harmonics
+        &#47&#47 -&gt; (Nbatch,Nelec,Nrbf)
+        Y = SphericalHarmonics(xyz,self.bas_l,self.bas_m)</code></pre><h3>After Change</h3><pre><code class='java'>
+        XY = X * Y
+
+        &#47&#47 add the components if DZ basis set
+        <a id="change">if self.basis == &quotdz&quot</a><a id="change">:
+            </a>nrbf = XY.shape[-1]
+            norb<a id="change"> = </a>int(nrbf/2)
+            XY = XY.view(-1,self.nelec,2,norb).sum(2)
+
+        return XY</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/ce1377a8a2603d0b0eb0889b5a292d77d0ea8bdc#diff-c4b696bab0338843e20e1b077a934f2c51ac9f11e89bdcc8c82af04b072cd569L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133301</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: ce1377a8a2603d0b0eb0889b5a292d77d0ea8bdc</div><div id='time'> Time: 2019-07-11</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_class'> M Class Name: STO_SZ</div><div id='n_method'> N Class Name: STO</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='n_file'> N File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 93</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+        print(sequence_length)
+        print(torch_mask_time_indices.shape)
+        <a id="change">print(</a>negative_sample_indices.shape<a id="change">)</a>
+
+        return (
+            self.model(
+                wav,</code></pre><h3>After Change</h3><pre><code class='java'>
+        max_number_negative = (
+            torch_mask_time_indices.sum(dim=-1).min() // self.negative_threshold
+        )
+        <a id="change">if self.config.num_negatives &gt; max_number_negative</a><a id="change">:
+            </a>dynamic_num_negatives<a id="change"> = </a>max_number_negative
+        else:
+            dynamic_num_negatives = self.config.num_negatives
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/fc71dfc14d8e7b570ed4bf77c9b6ca3d2684d706#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133311</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: fc71dfc14d8e7b570ed4bf77c9b6ca3d2684d706</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 352</div><div id='m_end'> M End Line: 393</div><div id='n_start'> N Start Line: 362</div><div id='n_end'> N End Line: 382</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return total_loss
+
+    def forward(self):
+        <a id="change">print(</a>f&quotImagining "{self.text}" from the depths of my weights...&quot<a id="change">)</a>
+
+        self.model(self.encoded_text) &#47&#47 one warmup step due to issue with CLIP and CUDA
+
+        if self.open_folder:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self):
+        penalizing = ""
+        <a id="change">if len(self.text_min) &gt; 0</a><a id="change">:
+            </a>penalizing<a id="change"> = </a>f&quotpenalizing "{self.text_min}"&quot
+        print(f&quotImagining "{self.text}" {penalizing}...&quot)
+        self.model(self.encoded_texts["max"][0]) &#47&#47 one warmup step due to issue with CLIP and CUDA
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/big-sleep/commit/4e40452960be080128e5cf7fc323d48635dc69b0#diff-a32d425a1d65b549cda9588699a004a9d283f46d0623256309606cc74f8d3dd8L351' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133307</div><div id='project'> Project Name: lucidrains/big-sleep</div><div id='commit'> Commit Name: 4e40452960be080128e5cf7fc323d48635dc69b0</div><div id='time'> Time: 2021-02-28</div><div id='author'> Author: samsepi0l@fastmail.com</div><div id='file'> File Name: big_sleep/big_sleep.py</div><div id='m_class'> M Class Name: Imagine</div><div id='n_method'> N Class Name: Imagine</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: big_sleep/big_sleep.py</div><div id='n_file'> N File Name: big_sleep/big_sleep.py</div><div id='m_start'> M Start Line: 352</div><div id='m_end'> M End Line: 354</div><div id='n_start'> N Start Line: 386</div><div id='n_end'> N End Line: 390</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, pool_indices):
+
+        x_current = x
+        <a id="change">print (</a>pool_indices.keys()<a id="change">)</a>
+        for k_layer in range(self.n_layers):
+            key = &quotlayer_{}&quot.format(k_layer)
+            key_inverse = &quotlayer_{}&quot.format(self.n_layers - k_layer - 1)
+            pool_index = pool_indices[key_inverse]</code></pre><h3>After Change</h3><pre><code class='java'>
+            key = &quotlayer_{}&quot.format(k_layer)
+            key_inverse = &quotlayer_{}&quot.format(self.n_layers - k_layer - 1)
+            pool_index = pool_indices[key_inverse]
+            <a id="change">if key in self.norms</a><a id="change">:
+                </a>x_current = self.norms[key](self.convolutions[key](self.pools[key](x_current, pool_index)))
+            else:
+                x_current<a id="change"> = </a>self.convolutions[key](self.pools[key](x_current, pool_index))
+
+        return x_current
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anderzzz/monkey_caput/commit/3a0b2918b02b326ddad2b5711558462d976051b2#diff-1620bcb4e00b771ef2a1627cff2489ecd8ae6cff18fc61bc146b0469472db071L140' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14133305</div><div id='project'> Project Name: anderzzz/monkey_caput</div><div id='commit'> Commit Name: 3a0b2918b02b326ddad2b5711558462d976051b2</div><div id='time'> Time: 2020-10-08</div><div id='author'> Author: ohrn.anders@gmail.com</div><div id='file'> File Name: ae_cluster.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ae_cluster.py</div><div id='n_file'> N File Name: ae_cluster.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 148</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 152</div><BR>

@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1930
+</h3><img src='13415065.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hx=None):
+        output_size = (
+            <a id="change">int(</a>(input.size(-1) - self.kernel_size + 2 * self.padding_ih) / self.stride<a id="change">)</a> + 1
+        )
+        &#47&#47 Handle the case of no hidden state provided
+        if hx is None:
+            hx<a id="change"> = </a>torch.zeros(input.size(0), self.h_channels, output_size, device=input.device)
+        &#47&#47 Run the optimized convgru-cell
+        return _opt_convgrucell_1d(
+            input,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input, h_prev=None):
+        &#47&#47 init hidden on forward
+        <a id="change">if </a>h_prev is None<a id="change">:
+            </a>h_prev<a id="change"> = </a>self.init_hidden(input)
+        print(f"input: {input.shape} prev: {h_prev.shape}")
+        combined = torch.cat((input, h_prev), dim=1)  &#47&#47 concatenate along channel axis
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13415065</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU1DCell</div><div id='n_method'> N Class Name: ConvGRUCell</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 82</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        cutn = 64
+        pieces = []
+        for ch in range(cutn):
+            size = torch.randint(<a id="change">int(</a>.5 * width<a id="change">)</a>, int(.98 * width), ())
+            offsetx<a id="change"> = </a>torch.randint(0, width - size, ())
+            offsety = torch.randint(0, width - size, ())
+            apper = out[:, :, offsetx:offsetx + size, offsety:offsety + size]
+            apper = torch.nn.functional.interpolate(apper, (224, 224), mode = &quotbilinear&quot, align_corners = False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for (num_images, (lo, hi), downsize) in cutout_specs:
+            for _ in range(num_images):
+                cutout = rand_cutout(out, ratio = (lo, hi))
+                <a id="change">if </a>exists(downsize)<a id="change">:
+                    </a>cutout<a id="change"> = </a>interpolate(cutout, downsize)
+                resized_cutout = interpolate(cutout, 224)
+                pieces.append(normalize_image(resized_cutout))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/deep-daze/commit/31c2b6b8607914862120163bc48908ad3e6b5c12#diff-616c9e43a41350a422ceed25123abc6af77b07529631176f76732b6cfab3b710L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13415066</div><div id='project'> Project Name: lucidrains/deep-daze</div><div id='commit'> Commit Name: 31c2b6b8607914862120163bc48908ad3e6b5c12</div><div id='time'> Time: 2021-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: deep_daze/deep_daze.py</div><div id='m_class'> M Class Name: DeepDaze</div><div id='n_method'> N Class Name: DeepDaze</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deep_daze/deep_daze.py</div><div id='n_file'> N File Name: deep_daze/deep_daze.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            image_tokens += [image_token]
+        
+            if self.is_verbose:
+                token<a id="change"> = </a><a id="change">int(</a>image_token.detach().numpy()<a id="change">)</a>
+                print("image token {} is {}".format(i, token))
+            
+        return torch.cat(image_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+    ) -&gt; LongTensor:
+        image_tokens: List[LongTensor] = []
+        keys_values_state = torch.zeros(self.keys_values_state_shape)
+        <a id="change">if </a>torch.cuda.is_available()<a id="change">: 
+            </a>keys_values_state<a id="change"> = </a>keys_values_state.cuda()
+        image_token = self.start_token
+
+        for i in range(self.sample_token_count):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/17c96fe110fad3d48ea591dcd46475f521499770#diff-a32b6e5a8d67db649bbd4d0118fdcd645421a8fcca842a8ccaa2bf61e702f403L197' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13415060</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: 17c96fe110fad3d48ea591dcd46475f521499770</div><div id='time'> Time: 2022-06-28</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_class'> M Class Name: DalleBartDecoderTorch</div><div id='n_method'> N Class Name: DalleBartDecoderTorch</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_start'> M Start Line: 205</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 206</div><div id='n_end'> N End Line: 212</div><BR>

@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        output = self.fc(output.flatten())
+        &#47&#47 print(output)
+        &#47&#47 return torch.mean(output, dim=0)
+        <a id="change">return </a>output
+
+    def name(self):
+        return "RhythmNet"</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(100, 1)
+
+    def forward(self, st_maps, target):
+        <a id="change">output_per_clip</a><a id="change"> = </a><a id="change">[]</a>
+        &#47&#47 so as to reflect a batch_size = 1
+        st_maps = st_maps.unsqueeze(0)
+        <a id="change">for t</a> in range(st_maps.size(1))<a id="change">:
+            </a>with torch.no_grad():
+                x = self.resnet18(st_maps[:, t, :, :, :])
+                &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+                x = x.view(x.size(0), -1)
+            &#47&#47 output dim: BSx1
+            x = self.fc_resnet(x)
+            &#47&#47 For now since we&quotre working with BS = 1, lets collapse that dimension
+            <a id="change">output_per_clip.append(</a>x.squeeze(0)<a id="change">)</a>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>output_per_clip<a id="change">, dim=0)</a>.transpose_(0, 1)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        <a id="change">return </a>output_seq<a id="change">, gru_output.squeeze(0)</a>
+
+    def name(self):
+        return "RhythmNet"
+</code></pre>

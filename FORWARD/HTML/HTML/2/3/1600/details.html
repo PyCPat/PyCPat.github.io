@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :1600
+</h3><img src='5449536.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+             *************** TODO: NEED DETACH? ******************* 
+            encoderIn = <a id="change">xRaw.detach()</a>.permute(2, 3, 0, 1)
+            &#47&#47 encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            if False:
+                encoderIn = self._position(encoderIn).reshape(-1, n, c)
+                &#47&#47 encoderIn = encoderIn.reshape(-1, n, c)
+                &#47&#47 [h*w, n, c]
+                x = self._encoder(encoderIn)
+            else:
+                x<a id="change"> = </a>encoderIn.reshape(-1, n ,c)
+            &#47&#47 similar to scaled dot-product attention
+            &#47&#47 [h*w, N, Cin],    M * [h*w, n, k]
+            quantized, samples, logits = self._attention(x, temp, True)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            <a id="change">logits.append(</a>logit.permute(1, 0, 2).reshape(n, h, w, k)<a id="change">)</a>
+        return quantizeds, codes, logits
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/a4a40624c11a9779699f4a37cccb5b5ed8bc5048#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L271' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5449536</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: a4a40624c11a9779699f4a37cccb5b5ed8bc5048</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 298</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 534</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 calculate new memory only if sequence length buffer is full
+        if self.seq_len == t:
+            hidden_states = torch.stack(hidden_states)
+            new_mem<a id="change"> = </a><a id="change">torch.cat((mem, hidden_states), dim=2)[:, :, -self.mem_len:, :].detach()</a>
+        else:
+            new_mem = mem
+
+        return out, new_mem</code></pre><h3>After Change</h3><pre><code class='java'>
+        for attn, ff, m in zip(self.attn_layers, self.ff_layers, mem):
+            x, mem_out = attn(x, mem = m)
+            x, = ff(x)
+            <a id="change">next_mem.append(</a>mem_out<a id="change">)</a>
+
+        out = self.to_logits(x)
+        next_mem = torch.stack(next_mem)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/b5257bf3b0c5f8aed8ccce17883bfe9409c33909#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL124' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5449543</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: b5257bf3b0c5f8aed8ccce17883bfe9409c33909</div><div id='time'> Time: 2020-07-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 145</div><div id='n_end'> N End Line: 159</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            logit = logit - logit.mean(1, keepdim=True)
+            logit = logit / logit.std(1, keepdim=True)
+
+            meanLogit<a id="change"> = </a><a id="change">logit.detach()</a>.mean(1)
+
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)</code></pre><h3>After Change</h3><pre><code class='java'>
+            codebookQ = self._codebookQuery(codebook)
+            &#47&#47 [n, h*w, c]
+            x = self._encoder(encoderIn, codebookQ)
+            <a id="change">xs.append(</a>x<a id="change">)</a>
+            &#47&#47 [n, h*w, k]
+            logit = self._select(x)
+
+            &#47&#47 [k]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/ff056abb47b531e42496967adda543c562e1cefd#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L504' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5449532</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: ff056abb47b531e42496967adda543c562e1cefd</div><div id='time'> Time: 2021-05-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 505</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 508</div><div id='n_end'> N End Line: 554</div><BR>

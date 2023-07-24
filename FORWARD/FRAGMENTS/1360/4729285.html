@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.stage_type == &quotskipsum&quot:
+            h = h + h_0
+        elif self.stage_type == &quotskipconcat&quot:
+            h = <a id="change">torch.cat(</a>(h_0, h), <a id="change">1</a><a id="change">)</a>
+        else:
+            raise ValueError(&quotstage_type must in [skipsum, skipconcat]&quot)
+        h = self.act(h)
+        return h</code></pre><h3>After Change</h3><pre><code class='java'>
+        for layer in self.f:
+            h = layer(g, h)
+        out_h = {}
+        <a id="change">for </a>key, <a id="change">value</a> in h_0.items()<a id="change">:
+
+            </a>if self.stage_type == &quotskipsum&quot:
+                out_h[key]<a id="change"> = </a>self.act(h[key]<a id="change"> + </a>h_0[key])
+            elif self.stage_type == &quotskipconcat&quot:
+                out_h[key] = self.act(torch.cat((h[key]<a id="change">, h_0[key]</a>), 1))
+            else:
+                raise ValueError(&quotstage_type must in [skipsum, skipconcat]&quot)
+</code></pre>

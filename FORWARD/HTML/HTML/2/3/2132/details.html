@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :2132
+</h3><img src='13980951.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        v_img = rearrange(v_img, &quotB h (H W) Ch -&gt; B (h Ch) H W&quot, H=H, W=W)               &#47&#47 Shape: [B, h, H*W, Ch] -&gt; [B, h*Ch, H, W].
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [conv(x) for conv, x in <a id="change">zip(</a>self.conv_list, v_img_list<a id="change">)</a>]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v_img = v_img.transpose(-1, -2).reshape(B, h * Ch, H, W)
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = []
+        <a id="change">for </a>i, conv in <a id="change">enumerate(</a>self.conv_list<a id="change">):
+            </a>conv_v_img_list.append(conv(v_img_list[i]))
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13980951</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.revert_projs.append(nn.Sequential(*tmp))
+
+    def forward(self, x):
+        outs_b = [block(x_) for x_, block in <a id="change">zip(</a>x, self.blocks<a id="change">)</a>]
+        &#47&#47 only take the cls token out
+        proj_cls_token = [proj(x[:, 0:1]) for x, proj in zip(outs_b, self.projs)]
+        &#47&#47 cross attention</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+
+        outs_b = []
+        <a id="change">for </a>i, block in <a id="change">enumerate(</a>self.blocks<a id="change">):
+            </a>outs_b.append(block(x[i]))
+
+        &#47&#47 only take the cls token out
+        proj_cls_token = torch.jit.annotate(List[torch.Tensor], [])</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bb50b69a57229a3ee30bbd460539c9a45e508532#diff-dfa58a86c2e5f14a2a2f186a74a7cbe9fd5379f38b9baadfecf799fc5e96bf55L213' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13980950</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bb50b69a57229a3ee30bbd460539c9a45e508532</div><div id='time'> Time: 2021-09-08</div><div id='author'> Author: chenrich@us.ibm.com</div><div id='file'> File Name: timm/models/crossvit.py</div><div id='m_class'> M Class Name: MultiScaleBlock</div><div id='n_method'> N Class Name: MultiScaleBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/crossvit.py</div><div id='n_file'> N File Name: timm/models/crossvit.py</div><div id='m_start'> M Start Line: 213</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 220</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        head, kl = self.variational_block(features[-1])
+
+        kl_losses = [kl]
+        for feature, relative_variational_block in <a id="change">zip(
+            </a>reversed(features[:-1]), self.relative_variational_blocks<a id="change">
+        )</a>:
+            head, relative_kl = relative_variational_block(head, feature)
+            kl_losses.append(relative_kl)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        head, kl = self.variational_block(features[-1])
+
+        kl_losses = [kl]
+        <a id="change">for </a>index, feature in <a id="change">enumerate(</a>reversed(features[:-1])<a id="change">):
+            </a>for inner_index in range(2):
+                relative_variational_block = (
+                    self.relative_variational_blocks[index * 2 + inner_index]
+                )</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aiwizo/template-nvae/commit/d879fa62732d3632db1b7925828f5f3bf211979b#diff-54f3c5cab6954d7cc7b38d1ccfb412a79f073e69490d12192ff9295ba9ac725bL154' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13980952</div><div id='project'> Project Name: aiwizo/template-nvae</div><div id='commit'> Commit Name: d879fa62732d3632db1b7925828f5f3bf211979b</div><div id='time'> Time: 2020-08-15</div><div id='author'> Author: samedii@gmail.com</div><div id='file'> File Name: mnist_nvae/architecture/decoder.py</div><div id='m_class'> M Class Name: DecoderNVAE</div><div id='n_method'> N Class Name: DecoderNVAE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mnist_nvae/architecture/decoder.py</div><div id='n_file'> N File Name: mnist_nvae/architecture/decoder.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 164</div><div id='n_start'> N Start Line: 165</div><div id='n_end'> N End Line: 173</div><BR>

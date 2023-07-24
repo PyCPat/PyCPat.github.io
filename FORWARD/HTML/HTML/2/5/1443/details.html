@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :1443
+</h3><img src='4943355.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 For undirected graphs, in_degree is the same as
+        &#47&#47 out_degree.
+        h = g.in_degrees().view(-1, 1).float()
+        <a id="change">for conv</a> in self.layers<a id="change">:
+            </a>h = <a id="change">conv(</a>g, h<a id="change">)</a>
+        g.ndata[&quoth&quot] = h
+        hg = dgl.mean_nodes(g, &quoth&quot)
+        return self.classify(hg)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            if name is &quotGraphConv&quot:
+                w, b = vars[idx], vars[idx + 1]
+                conv = self.graph_conv[idx_gcn]
+                h<a id="change"> = </a><a id="change">conv(</a>g, h, w, b<a id="change">)</a>
+                g.ndata[&quoth&quot] = h
+
+                idx += 2 
+                idx_gcn += 1</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/g-meta/commit/aed3468b5f71c857f788169b34b97a411628930b#diff-bfc53d3f42fcfc13f05953bcea57cd8efdca40eea6586556bb44b5bda0745717L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4943355</div><div id='project'> Project Name: mims-harvard/g-meta</div><div id='commit'> Commit Name: aed3468b5f71c857f788169b34b97a411628930b</div><div id='time'> Time: 2020-03-02</div><div id='author'> Author: cosamhkx@gmail.com</div><div id='file'> File Name: src/learner.py</div><div id='m_class'> M Class Name: Classifier</div><div id='n_method'> N Class Name: Classifier</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/learner.py</div><div id='n_file'> N File Name: src/learner.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.FloatTensor) -&gt; torch.FloatTensor:
+        for conv in self._convs:
+            x<a id="change"> = </a><a id="change">conv(</a>x<a id="change">)</a>
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Return types:
+            * **X** (PyTorch Float Tensor) - Output tensor, with shape (batch_size, num_his, num_nodes, units[-1]).
+        
+        <a id="change">for conv</a> in self._conv2ds<a id="change">:
+            </a>X = <a id="change">conv(</a>X<a id="change">)</a>
+        return X
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/7fd78cd2d93919f7328eaffeb5f1a1bb0b25cc53#diff-23bf81031fa8655150b4674c51c7d6eefc8f0ab5b206b922158a4414e899aa8cL55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4943343</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 7fd78cd2d93919f7328eaffeb5f1a1bb0b25cc53</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: He_YX@outlook.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_class'> M Class Name: FC</div><div id='n_method'> N Class Name: FullyConnected</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        v_img = rearrange(v_img, &quotB h (H W) Ch -&gt; B (h Ch) H W&quot, H=H, W=W)               &#47&#47 Shape: [B, h, H*W, Ch] -&gt; [B, h*Ch, H, W].
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [<a id="change">conv(</a>x<a id="change">)</a> for conv, x in zip(self.conv_list, v_img_list)]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img<a id="change"> = </a>rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+
+        EV_hat_img = q_img * conv_v_img
+        zero = torch.zeros((B, h, 1, Ch), dtype=q.dtype, layout=q.layout, device=q.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        v_img = v_img.transpose(-1, -2).reshape(B, h * Ch, H, W)
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = []
+        <a id="change">for </a>i, <a id="change">conv</a> in enumerate(self.conv_list)<a id="change">:
+            </a>conv_v_img_list.append(<a id="change">conv(</a>v_img_list[i]<a id="change">)</a>)
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4943342</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>

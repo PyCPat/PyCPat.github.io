@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = self.transformer(x)
+            skips += [x]
+
+        <a id="change">if not self.use_pre_downsample</a><a id="change">:
+            </a>x = self.downsample(x)
+
+        return x, skips
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Compute scale and shift from time_context
+        scale_shift = None
+        if exists(self.to_time_embedding) and exists(time_context):
+            time_embedding<a id="change"> = </a>self.to_time_embedding(time_context)
+            time_embedding<a id="change"> = </a>rearrange(time_embedding, "b c -&gt; b c 1")
+            scale_shift = <a id="change">time_embedding.chunk(2</a><a id="change">, dim=1)</a>
+
+        h = self.block2(h, scale_shift=scale_shift)
+
+        return h + self.to_out(x)</code></pre>

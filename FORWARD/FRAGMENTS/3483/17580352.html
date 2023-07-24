@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        encoded: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The encoded embedding for each series and time step.
+        
+        <a id="change">pass</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Treat the various time steps as a batch dimension
+            mod_series = self.layer_series[i]
+            data = <a id="change">data.transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+            &#47&#47 [series, batch, time steps, embedding]
+            data = data.flatten(start_dim=1, end_dim=2)
+            &#47&#47 [series, batch * time steps, embedding] Correct order for PyTorch module
+            data = mod_series(data)
+            data<a id="change"> = </a>data.unflatten(dim=1, sizes=(num_batches, num_timesteps))
+            &#47&#47 [series, batch, time steps, embedding]
+            data<a id="change"> = </a>data.transpose(0, 1)
+            &#47&#47 [batch, series, time steps, embedding]
+
+        &#47&#47 The resulting tensor may not be contiguous, which can cause problems further down the line.
+        output<a id="change"> = </a>data.contiguous()
+
+        <a id="change">return </a>output
+</code></pre>

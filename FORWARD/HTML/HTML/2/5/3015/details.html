@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :3015
+</h3><img src='16367929.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        s = student.unsqueeze(0) - student.unsqueeze(1)
+        if normalize:
+            s = F.normalize(s, p=2, dim=2)
+        s = <a id="change">torch.bmm(</a>s, <a id="change">s.transpose(1</a>, <a id="change">2</a><a id="change">)</a><a id="change">)</a>.view(-1)
+        return F.smooth_l1_loss(s, t, reduction="mean")
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            t = t / (t_mean + 1e-7)
+
+        s = pairwaise_distance(student)
+        s_mean = <a id="change">s[s &gt; 0]</a>.mean()
+        s = s / (s_mean + 1e-7)
+        return F.smooth_l1_loss(s, t)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/28d2e68c71f5d14e9784f85a4f5c6241b858089b#diff-b961522aed8d6a6f3005bd0b5346b3a3a715bb27e672091336acb5e4fd84f798L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16367929</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: 28d2e68c71f5d14e9784f85a4f5c6241b858089b</div><div id='time'> Time: 2020-08-28</div><div id='author'> Author: khizirsiddiqui@gmail.com</div><div id='file'> File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='m_class'> M Class Name: RKDDistanceLoss</div><div id='n_method'> N Class Name: RKDDistanceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='n_file'> N File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        src_mask = src_mask.float().unsqueeze(-1) &#47&#47 [batch, seq_len, 1]
+        mel_mask = mel_mask.float().unsqueeze(-1) &#47&#47 [batch, mel_len, 1]
+        attn_mask = <a id="change">torch.bmm(</a>src_mask, <a id="change">mel_mask.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a><a id="change">)</a>.bool() &#47&#47 [batch, seq_len, mel_len]
+
+        output, attn = self.attention(q, k, v, mask=attn_mask)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        k = self.w_ks(mel_encoding)
+        v = self.w_vs(mel_encoding)
+
+        src_len, mel_len = src_mask.shape[1], <a id="change">mel_mask.shape[1]</a>
+        src_mask_ = src_mask.unsqueeze(-1).expand(-1, -1, mel_len) &#47&#47 [batch, seq_len, mel_len]
+        mel_mask_ = mel_mask.unsqueeze(1).expand(-1, src_len, -1) &#47&#47 [batch, seq_len, mel_len]
+
+        output, attn = self.attention(q, k, v, src_mask=src_mask_, mel_mask=mel_mask_)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/parallel-tacotron2/commit/1f98efe5d09778b2b77e291aff63ef6e497c6bb9#diff-eed8dda7a8e19d25dc983adc6194cdb57bfef7afee02def70160e6694ca3984aL265' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16367930</div><div id='project'> Project Name: keonlee9420/parallel-tacotron2</div><div id='commit'> Commit Name: 1f98efe5d09778b2b77e291aff63ef6e497c6bb9</div><div id='time'> Time: 2021-07-26</div><div id='author'> Author: 1531820402@qq.com</div><div id='file'> File Name: model/blocks.py</div><div id='m_class'> M Class Name: VariableLengthAttention</div><div id='n_method'> N Class Name: VariableLengthAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/blocks.py</div><div id='n_file'> N File Name: model/blocks.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 273</div><div id='n_start'> N Start Line: 271</div><div id='n_end'> N End Line: 273</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 h = torch.stack([h1, h2, h3, h4], dim=1)
+            h = torch.stack([h1, h4], dim=1)
+            attn_weights = F.softmax(self.gnn_attns[l](h), dim=1)
+            attn_weights = <a id="change">attn_weights.transpose(-1</a>, <a id="change">-2</a><a id="change">)</a>
+            print(&quotattn_weights.shape:&quot, attn_weights.shape)
+            print(&quoth: &quot,h.shape)
+            h = <a id="change">torch.bmm(</a>attn_weights, h<a id="change">)</a>[:, 0]
+            
+            h = self.norm_layers[5 * l + 4](h)
+            h = self.dropout(h)</code></pre><h3>After Change</h3><pre><code class='java'>
+            h1 = self.norm_layers[5 * l](h1)
+            h1 = F.elu(h1)
+            
+            h2 = self.graphsage[l](<a id="change">blocks[l]</a>, h)
+            h2 = self.norm_layers[5 * l + 1](h2)
+            h2 = F.elu(h2)
+            </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/langgege-cqu/maxp_dgl/commit/4c0c32b85678b9d29f17c435092a48969ab58f7f#diff-73cabe7235c39153dd75ce7fc05e001a37863f579ceb86eaf0b9dbf1ed058f4fL171' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16367924</div><div id='project'> Project Name: langgege-cqu/maxp_dgl</div><div id='commit'> Commit Name: 4c0c32b85678b9d29f17c435092a48969ab58f7f</div><div id='time'> Time: 2021-11-10</div><div id='author'> Author: 814112480@qq.com</div><div id='file'> File Name: maxp_model/unimp.py</div><div id='m_class'> M Class Name: GNNModel</div><div id='n_method'> N Class Name: GNNModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: maxp_model/unimp.py</div><div id='n_file'> N File Name: maxp_model/unimp.py</div><div id='m_start'> M Start Line: 185</div><div id='m_end'> M End Line: 205</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 209</div><BR>

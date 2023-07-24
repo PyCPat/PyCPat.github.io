@@ -1,0 +1,142 @@
+<html><h3>Pattern ID :2170
+</h3><img src='14082102.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        &#47&#47 TODO: loop if window_size is greater than 2 (for cycle loss)
+        bsz, encoder_dim, n_points = keypoint_desc.size()
+        batch_size<a id="change"> = </a>int(bsz / self.window_size)
+        _, _, height, width = desc_dense.size()
+
+        src_desc = keypoint_desc[::self.window_size]  &#47&#47 B x C x N
+        src_desc = F.normalize(src_desc, dim=1)
+
+        tgt_desc_dense = <a id="change">desc_dense[1::self.window_size]</a>  &#47&#47 B x C x H x W
+        tgt_desc_unrolled = F.normalize(tgt_desc_dense.view(batch_size, encoder_dim, -1), dim=1)  &#47&#47 B x C x HW
+
+        match_vals = torch.matmul(src_desc.transpose(2, 1), tgt_desc_unrolled)  &#47&#47 B x N x HW
+        soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 B x N x HW
+
+        v_coord, u_coord = torch.meshgrid([torch.arange(0, height), torch.arange(0, width)])
+        v_coord = v_coord.reshape(height * width).float()  &#47&#47 HW
+        u_coord = u_coord.reshape(height * width).float()
+        coords = torch.stack((u_coord, v_coord), dim=1)  &#47&#47 HW x 2
+        tgt_coords_dense = coords.unsqueeze(0).expand(batch_size, height * width, 2).to(self.gpuid)  &#47&#47 B x HW x 2
+
+        pseudo_coords = torch.matmul(tgt_coords_dense.transpose(2, 1),
+                                     soft_match_vals.transpose(2, 1)).transpose(2, 1)  &#47&#47 BxNx2
+
+        &#47&#47 GET SCORES for pseudo point locations
+        pseudo_norm = normalize_coords(pseudo_coords, height, width).unsqueeze(1)          &#47&#47 B x 1 x N x 2
+        tgt_scores_dense = scores_dense[1::self.window_size]
+        pseudo_scores = F.grid_sample(tgt_scores_dense, pseudo_norm, mode=&quotbilinear&quot)           &#47&#47 B x 1 x 1 x N
+        pseudo_scores = pseudo_scores.reshape(batch_size, 1, n_points)                          &#47&#47 B x 1 x N
+        &#47&#47 GET DESCRIPTORS for pseudo point locations
+        pseudo_desc = F.grid_sample(tgt_desc_dense, pseudo_norm, mode=&quotbilinear&quot)               &#47&#47 B x C x 1 x N
+        pseudo_desc = pseudo_desc.reshape(batch_size, encoder_dim, n_points)                    &#47&#47 B x C x N
+
+        desc_match_score = torch.sum(src_desc * pseudo_desc, dim=1, keepdim=True) / float(encoder_dim)  &#47&#47 Bx1xN
+        src_scores = keypoint_scores[::self.window_size]
+        if self.score_comp:
+            match_weights = 0.5 * (desc_match_score + 1) * src_scores * pseudo_scores
+        else:
+            match_weights = pseudo_scores
+
+        <a id="change">return </a>pseudo_coords, match_weights
+
+def normalize_coords(coords_2D, width, height):
+    Normalizes coords_2D (B x N x 2) to be within [-1, 1] </code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            match_weights = pseudo_scores
+
+        <a id="change">return </a>pseudo_coords<a id="change">, match_weights, kp_inds</a>
+
+def normalize_coords(coords_2D, width, height):
+    Normalizes coords_2D (B x N x 2) to be within [-1, 1] 
+    batch_size = coords_2D.size(0)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/utiasasrl/hero_radar_odometry/commit/3393ae645f3b4eea057784a2cd3746aefb0c81b1#diff-23e0da2f9fd5de38a06280e99a19331414bae7133b397e03cf546a99b3ddce20L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14082102</div><div id='project'> Project Name: utiasasrl/hero_radar_odometry</div><div id='commit'> Commit Name: 3393ae645f3b4eea057784a2cd3746aefb0c81b1</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: keenburn2004@gmail.com</div><div id='file'> File Name: networks/softmax_matcher.py</div><div id='m_class'> M Class Name: SoftmaxMatcher</div><div id='n_method'> N Class Name: SoftmaxMatcher</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks/softmax_matcher.py</div><div id='n_file'> N File Name: networks/softmax_matcher.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        queries: FloatTensor,
+        attention_mask: BoolTensor
+    ) -&gt; FloatTensor:
+        batch_count<a id="change"> = </a>keys.shape[0]
+
+        &#47&#47 b(hc)1q -&gt; bqhc
+        &#47&#47 print(keys.shape, "keys", values.shape, "values", queries.shape, "queries")
+        keys = keys.transpose(1, 3)
+        keys = keys.reshape(<a id="change">keys.shape[:2]</a> + (self.head_count, -1))
+
+        &#47&#47 b(hc)1q -&gt; bchq
+        shape = (batch_count, self.head_count, self.head_dim, -1)
+        values = values.reshape(shape)
+        values = values.transpose(1, 2)
+        queries = queries.reshape(shape)
+        queries = queries.transpose(1, 2)
+
+        &#47&#47 print(keys.shape, "keys", values.shape, "values", queries.shape, "queries")
+
+        attention_bias = torch.where(
+            attention_mask,
+            torch.zeros([1, 1]),
+            torch.ones([1, 1]) * (-torch.inf),
+        )
+        attention_weights: FloatTensor = torch.einsum(
+            &quotbchq,bkhc-&gt;bkhq&quot,
+            queries / self.head_dim ** 0.5, 
+            keys
+        )
+        attention_weights += attention_bias[:, :, None, None]
+        attention_weights = torch.softmax(attention_weights, 1)
+        &#47&#47 print(attention_weights.shape, "attention_weights")
+        hidden_state: FloatTensor = torch.einsum(
+            "bkhq,bchk-&gt;bchq",
+            attention_weights, 
+            values
+        )
+        &#47&#47 bchq -&gt; b(hc)1q
+        &#47&#47 print(hidden_state.shape, "hidden_state")
+        hidden_state = hidden_state.transpose(1, 2)
+        hidden_state = hidden_state.reshape(batch_count, self.embed_count, 1, -1)
+        hidden_state = self.out_proj.forward(hidden_state)
+        &#47&#47 print(hidden_state.shape, "hidden_state")
+        <a id="change">return </a>hidden_state
+
+
+class EncoderSelfAttentionTorch(AttentionTorch):</code></pre><h3>After Change</h3><pre><code class='java'>
+            attention_weights, 
+            values
+        )
+        shape = attention_output.shape[:2] + (self.embed_count<a id="change"></a>,)
+        attention_output = attention_output.reshape(shape)
+        attention_output = self.out_proj.forward(attention_output)
+        <a id="change">return </a>attention_output
+
+
+class EncoderSelfAttentionTorch(AttentionTorch):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/c936d261021f0f38d064e146a2167cf3daeeb0db#diff-722632c2506383b8dc00c81914b9d7066a94dfb2b6295335e1218166a6c05cfcL36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14082103</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: c936d261021f0f38d064e146a2167cf3daeeb0db</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_class'> M Class Name: AttentionTorch</div><div id='n_method'> N Class Name: AttentionTorch</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+        
+    def forward(self, f1, f2, f3):
+        f1<a id="change"> = </a>self.upsample(f1, f3.shape[-2:])
+        f2 = self.upsample(f2, <a id="change">f3.shape[-2:]</a>)
+        f3 = torch.cat([f1, f2, f3], dim=1)
+        f3 = self.conv1(f3)
+
+        Hf3 = self.Hattn(f3)
+        Wf3 = self.Wattn(f3)
+
+        f3 = self.conv2(Hf3 + Wf3)
+        f3 = self.conv3(f3)
+        f3 = self.conv4(f3)
+        out = self.conv5(f3)
+
+        <a id="change">return </a>f3, out
+
+class PAA_d2(nn.Module):
+    def __init__(self, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.conv4(x)
+        out = self.conv5(x)
+
+        <a id="change">return </a>x<a id="change">, out</a>
+
+class PAA_d2(nn.Module):
+    def __init__(self, channel):
+        super(PAA_d2, self).__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/722874b88a2465f214eac13d8cda7a9f446e9040#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14082097</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 722874b88a2465f214eac13d8cda7a9f446e9040</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d</div><div id='n_method'> N Class Name: PAA_d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 101</div><BR>

@@ -1,0 +1,100 @@
+<html><h3>Pattern ID :3107
+</h3><img src='16692478.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 masked by the missing entries
+        &#47&#47 note, different batch may contain different number of real entities
+        tensor_list = []
+        <a id="change">for </a>i, batch in enumerate(out)<a id="change">:
+            </a>mean_entity<a id="change"> = </a>0.
+            real_number = real_number_tensor[i]
+            real_number = real_number if real_number != 0 else 1
+            for j, entity in enumerate(batch):</code></pre><h3>After Change</h3><pre><code class='java'>
+        print(&quotentity_num:&quot, entity_num) if debug else None
+
+        &#47&#47 generate the mask for transformer
+        mask<a id="change"> = </a>torch.arange(0, self.max_entities).float()
+        mask<a id="change"> = </a><a id="change">mask.repeat(</a>batch_size, 1<a id="change">)</a>
+        mask<a id="change"> = </a>mask &lt; entity_num.unsqueeze(dim=1)
+
+        print(&quotmask:&quot, mask) if debug else None
+        print(&quotmask.shape:&quot, mask.shape) if debug else None
+
+        &#47&#47 mask: [batch_size, max_entities]
+        device = next(self.parameters()).device
+        mask = mask.to(device)
+
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        &#47&#47 x is batch_entities_tensor (dim = 3). Shape: batch_seq_size x entities_size x embeding_size
+        x = self.embedd(x)
+        print(&quotx.shape:&quot, x.shape) if debug else None
+
+        &#47&#47 mask for transformer need a special format
+        mask_seq_len = mask.shape[-1]
+        tran_mask<a id="change"> = </a>mask.unsqueeze(1)
+
+        &#47&#47 tran_mask: [batch_seq_size x max_entities x max_entities]
+        tran_mask = tran_mask.repeat(1, mask_seq_len, 1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L716' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16692478</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			content_code = content_code + noise
+
+		x = content_code
+		<a id="change">for </a>block in self.decoder<a id="change">:
+			</a>x<a id="change"> = </a>block(x, style_code)
+
+		return self.to_rgb(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		nn.init.uniform_(self.class_embedding.weight, a=-0.05, b=0.05)
+
+	def forward(self, content_code, class_id):
+		batch_size<a id="change"> = </a>content_code.shape[0]
+
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			content_code = content_code + noise
+
+		class_code = self.class_embedding(class_id)
+		class_code_repeated<a id="change"> = </a><a id="change">class_code.view((batch_size, -1, 1, 1)).repeat(</a>(1, 1, 16, 16)<a id="change">)</a>
+		x<a id="change"> = </a>torch.cat((content_code, class_code_repeated), dim=1)
+
+		for block in self.adains:
+			x<a id="change"> = </a>block(x, class_code)
+
+		return self.convs(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16691452</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: 3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0</div><div id='time'> Time: 2020-07-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 63</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		else:
+			out = content_code
+
+		<a id="change">for </a>layer in self.layers<a id="change">:
+			</a>out<a id="change"> = </a>layer(out, class_code, None)
+
+		out = self.to_rgb(out)
+		return out</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.n_latent = self.log_size * 2 - 2
+
+	def forward(self, content_codes, class_codes):
+		styles<a id="change"> = </a>torch.cat((content_codes, class_codes), dim=1)
+		latent = <a id="change">styles.unsqueeze(dim=1).repeat(</a>1, self.n_latent, 1<a id="change">)</a>
+		&#47&#47 latent = styles.view((-1, self.n_latent, 512))
+
+		out = self.input(latent)
+		out = self.conv1(out, latent[:, 0])
+
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], self.convs[1::2], self.to_rgbs):
+			out<a id="change"> = </a>conv1(out, latent[:, i])
+			out<a id="change"> = </a>conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)
+
+			i += 2
+
+		image<a id="change"> = </a>skip
+		return image
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16691346</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>

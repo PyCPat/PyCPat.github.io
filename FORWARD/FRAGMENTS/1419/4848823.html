@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                or (batch_size, depth * growth_rate, n_bins, n_frames) if type(growth_rate) is int
+        
+        x = input
+        <a id="change">stacked</a> = []
+        output = []
+
+        <a id="change">stacked.append(</a>input<a id="change">)</a>
+
+        for idx in range(self.depth):
+            if idx != 0:
+                x = <a id="change">torch.cat(</a>stacked<a id="change">, dim=1)</a>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(stacked[1:], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections = [in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre>

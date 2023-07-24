@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :404
+</h3><img src='1537460.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        eps = 1e-5 if x.dtype == torch.float32 else 1e-3
+        var = <a id="change">torch.var(x</a><a id="change">, dim = 1, unbiased = False, keepdim = True)</a>
+        mean = <a id="change">torch.mean(x</a><a id="change">, dim = 1, keepdim = True)</a>
+        return (x - mean) * var.clamp(min = eps).rsqrt() * self.g
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer("beta", torch.zeros(dim))
+
+    def forward(self, x):
+        <a id="change">return </a>F.layer_norm(x, x.shape[-1:], self.gamma, self.beta)
+
+&#47&#47 positional embeds
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/627fa4e8c36a59b89f571cdfdb478a7b72cbf855#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1537460</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 627fa4e8c36a59b89f571cdfdb478a7b72cbf855</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: LayerNorm</div><div id='n_method'> N Class Name: LayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 77</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.g = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x):
+        var = <a id="change">torch.var(</a>x<a id="change">, dim = -1, unbiased = False, keepdim = True)</a>
+        mean = <a id="change">torch.mean(</a>x<a id="change">, dim = -1, keepdim = True)</a>
+        return (x - mean) / (var + self.eps).sqrt() * self.g
+
+&#47&#47 parallel with residual
+&#47&#47 discovered by Wang et al + EleutherAI from GPT-J fame</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer(&quotbeta&quot, torch.zeros(dim))
+
+    def forward(self, x):
+        <a id="change">return </a>F.layer_norm(x, x.shape[-1:], self.gamma, self.beta)
+
+&#47&#47 parallel with residual
+&#47&#47 discovered by Wang et al + EleutherAI from GPT-J fame</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/palm-pytorch/commit/0832087f78006c10d52c0600c7377c5929568e0b#diff-a5ba5faa1b15b08f73db45e9342fcadc130f44195e1a0b082fa3d9b3e025885cL17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1537459</div><div id='project'> Project Name: lucidrains/palm-pytorch</div><div id='commit'> Commit Name: 0832087f78006c10d52c0600c7377c5929568e0b</div><div id='time'> Time: 2022-04-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: palm_pytorch/palm_pytorch.py</div><div id='m_class'> M Class Name: LayerNorm</div><div id='n_method'> N Class Name: LayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: palm_pytorch/palm_pytorch.py</div><div id='n_file'> N File Name: palm_pytorch/palm_pytorch.py</div><div id='m_start'> M Start Line: 18</div><div id='m_end'> M End Line: 20</div><div id='n_start'> N Start Line: 19</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        :type inverse: bool, optional
+        
+        if train:
+            self._parallel_variance(<a id="change">torch.mean(</a>x<a id="change">, dim=0)</a>, <a id="change">torch.var(</a>x<a id="change">, dim=0)</a>, x.shape[0])
+
+        &#47&#47 scale back the data to the original representation
+        if inverse:</code></pre><h3>After Change</h3><pre><code class='java'>
+            with torch.no_grad():
+                return self._compute(x, train, inverse)
+        else:
+            <a id="change">return </a>self._compute(x, train, inverse)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/toni-sm/skrl/commit/3ff78a027e492182b7e8d539ce2233a89cdf9bc0#diff-bc43aa4c67bd0eb748dda11701cf63e0d3118648dbc475df748b6b7702960e9eL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1537458</div><div id='project'> Project Name: toni-sm/skrl</div><div id='commit'> Commit Name: 3ff78a027e492182b7e8d539ce2233a89cdf9bc0</div><div id='time'> Time: 2022-07-08</div><div id='author'> Author: toni.semu@gmail.com</div><div id='file'> File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_class'> M Class Name: RunningStandardScaler</div><div id='n_method'> N Class Name: RunningStandardScaler</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='n_file'> N File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 150</div><BR>

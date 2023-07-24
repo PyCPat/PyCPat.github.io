@@ -2,19 +2,19 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-            norm_layer: Optional[Callable[..., nn.Module]] = None
-    ) -&gt; None:
-        super(Bottleneck, self).__init__()
-        <a id="change">if norm_layer is None</a><a id="change">:
-            </a>norm_layer = nn.BatchNorm2d
-        width = int(planes * (base_width / 64.)) * groups
-        &#47&#47 Both self.conv2 and self.downsample layers downsample the input when stride != 1
-        self.conv1 = conv1x1(inplanes, width)</code></pre><h3>After Change</h3><pre><code class='java'>
-            base_width: base number of channels in each group.
-            widen_factor: factor to reduce the input dimensionality before convolution.
-        
-        <a id="change">super().__init__()</a>
-        width_ratio = out_channels / (widen_factor * 64.)
-        D = cardinality * int(base_width * width_ratio)
-        self.conv_reduce = nn.Conv2d(
-            in_channels, D, kernel_size=1, stride=1, padding=0, bias=False)</code></pre>
+        self.bn_expand = nn.BatchNorm2d(out_channels)
+
+        self.shortcut = nn.Sequential()
+        <a id="change">if in_channels != out_channels</a><a id="change">:
+            </a>self.shortcut.add_module(&quotshortcut_conv&quot, nn.Conv2d(
+                in_channels, out_channels, kernel_size=1, stride=stride, padding=0, bias=False))
+            self.shortcut.add_module(
+                &quotshortcut_bn&quot, nn.BatchNorm2d(out_channels))</code></pre><h3>After Change</h3><pre><code class='java'>
+    expansion = 2
+
+    def __init__(self, in_planes, cardinality=32, bottleneck_width=4, stride=1):
+        <a id="change">super(Block, self).__init__()</a>
+        group_width = cardinality * bottleneck_width
+        self.conv1 = nn.Conv2d(in_planes, group_width, kernel_size=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(group_width)
+        self.conv2 = nn.Conv2d(group_width, group_width, kernel_size=3, stride=stride, padding=1, groups=cardinality, bias=False)</code></pre>

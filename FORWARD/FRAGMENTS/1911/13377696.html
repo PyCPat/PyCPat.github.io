@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            row_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_rows)
+            column_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_columns)
+
+        <a id="change">return </a>content_out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        content_out = einsum(&quotnde,ndxy-&gt;nexy&quot, context, content_q)
+
+        <a id="change">if </a>exists(self.rel_pos_length)<a id="change">:
+            </a>Ix = calc_reindexing_tensor(x, L, device)
+            Px = einsum(&quotxir,rd-&gt;xid&quot, Ix, self.rel_rows)
+            Sx = einsum(&quotndxy,xid-&gt;nixy&quot, q, Px)
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+
+            Yh = self.norm(Yh)
+
+            Iy = calc_reindexing_tensor(y, L, device)
+            Py = einsum(&quotxir,rd-&gt;xid&quot, Iy, self.rel_columns)
+            Sy<a id="change"> = </a>einsum(&quotndxy,xid-&gt;nixy&quot, q, Py)
+            rel_pos_out = einsum(&quotnixy,neiy-&gt;nexy&quot, Sy, Yh)
+            <a id="change">del Iy</a>
+
+            content_out = content_out + rel_pos_out
+
+        content_out = rearrange(content_out, &quot(b h) c x y -&gt; b (h c) x y&quot, b = b, h = h)</code></pre>

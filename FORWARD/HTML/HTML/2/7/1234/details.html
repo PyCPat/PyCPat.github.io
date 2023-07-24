@@ -1,0 +1,95 @@
+<html><h3>Pattern ID :1234
+</h3><img src='4390214.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        old_mem, new_mem = split_at_index(1, -self.mem_len, torch.cat((mem, x), dim=1))
+
+        <a id="change">if </a>old_mem.shape[1] != 0 and <a id="change">self.lmem_len &gt; 0</a><a id="change">:
+            </a>pass
+
+        return logits, Memory(new_mem, new_lmem)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem, lmem = memories
+
+        init_mem = lambda: torch.empty(b, 0, e, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, <a id="change">init_mem</a><a id="change">)</a>
+        lmem<a id="change"> = </a><a id="change">default(</a>lmem, <a id="change">init_mem</a><a id="change">)</a>
+
+        mem_len = mem.shape[1]
+        lmem_len = lmem.shape[1]
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4390214</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 217</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert t &lt;= self.seq_len, f&quotinput contains a sequence length {t} that is greater than the designated maximum sequence length {self.seq_len}&quot
+
+        mem = cmem = None
+        <a id="change">if memories is not None</a><a id="change">:
+            </a>mem, cmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        mem = default(mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem, cmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        <a id="change">init_empty_mem</a> = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_empty_mem<a id="change">)</a>
+        cmem<a id="change"> = </a><a id="change">default(</a>cmem, init_empty_mem<a id="change">)</a>
+
+        total_len = mem.shape[2] + cmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/a6c5be1e66824f8c0135d7fdac6f91090ce95ffe#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL305' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4390215</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: a6c5be1e66824f8c0135d7fdac6f91090ce95ffe</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 312</div><div id='m_end'> M End Line: 328</div><div id='n_start'> N Start Line: 319</div><div id='n_end'> N End Line: 334</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, t, e, h, dim_h = *x.shape, self.heads, self.dim_head
+
+        mem = lmem = None
+        <a id="change">if memories is not None</a><a id="change">:
+            </a>mem, lmem = memories
+
+        mem = default(mem, lambda: torch.empty(b, 0, e, **to(x)))
+        lmem = default(lmem, lambda: torch.empty(b, 0, e, **to(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        memories = default(memories, (None, None))
+        mem, lmem = memories
+
+        <a id="change">init_mem</a> = lambda: torch.empty(b, 0, e, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_mem<a id="change">)</a>
+        lmem<a id="change"> = </a><a id="change">default(</a>lmem, init_mem<a id="change">)</a>
+
+        mem_len = mem.shape[1]
+        lmem_len = lmem.shape[1]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L154' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4390216</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 217</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, t, e, h, dim_h = *x.shape, self.heads, self.dim_head
+
+        mem = cmem = None
+        <a id="change">if memories is not None</a><a id="change">:
+            </a>mem, cmem = memories
+
+        mem = default(mem, lambda: torch.empty(b, 0, e, **to(x)))
+        cmem = default(cmem, lambda: torch.empty(b, 0, e, **to(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        memories = default(memories, (None, None))
+        mem, cmem = memories
+
+        <a id="change">init_empty_mem</a> = lambda: torch.empty(b, 0, e, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_empty_mem<a id="change">)</a>
+        cmem<a id="change"> = </a><a id="change">default(</a>cmem, init_empty_mem<a id="change">)</a>
+
+        mem_len = mem.shape[1]
+        cmem_len = cmem.shape[1]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/a6c5be1e66824f8c0135d7fdac6f91090ce95ffe#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL178' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4390222</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: a6c5be1e66824f8c0135d7fdac6f91090ce95ffe</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 181</div><div id='m_end'> M End Line: 186</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 193</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert t &lt;= self.seq_len, f&quotinput contains a sequence length {t} that is greater than the designated maximum sequence length {self.seq_len}&quot
+
+        mem = lmem = None
+        <a id="change">if memories is not None</a><a id="change">:
+            </a>mem, lmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        mem = default(mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem, lmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        <a id="change">init_mem</a> = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_mem<a id="change">)</a>
+        lmem<a id="change"> = </a><a id="change">default(</a>lmem, init_mem<a id="change">)</a>
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4390220</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ml = self.ml(input=mask, clean=clean, noisy=noisy, max_bin=max_bin)
+        if self.sl_f != 0 and self.sl is not None:
+            sl = torch.zeros((), device=clean.device)
+            <a id="change">for mss</a> in multi_stage_specs<a id="change">:
+                </a>mss<a id="change"> = </a>as_complex(mss.squeeze(1)).unsqueeze(1)
+                sl += self.sl(input=mss, target=clean[..., : mss.shape[-1]])
+            else:
+                sl = self.sl(input=enhanced, target=clean)</code></pre><h3>After Change</h3><pre><code class='java'>
+        multi_stage_td = None
+        if multi_stage_specs:
+            &#47&#47 Stack spectrograms in a channel dimension
+            multi_stage = as_complex(<a id="change">torch.stack(</a>multi_stage_specs<a id="change">, dim=1)</a>)
+        lsnr_gt = self.lsnr(clean, noise=noisy - clean)
+        if self.istft is not None:
+            if self.store_losses or self.mrsl is not None:</code></pre>

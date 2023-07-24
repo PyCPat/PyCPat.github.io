@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+        &#47&#47 top-down
+        tds = <a id="change">[</a>None<a id="change"></a>] * self.num_levels
+        tds[-1]<a id="change"> = </a>x[-1]
+        for i in range(self.num_levels - 2, -1, -1):
+            tds[i] = self.td_fuses[i](
+                [x[i], self.upsample(tds[i + 1])]
+            )  &#47&#47 P6td = conv(P6in + resize(P7td))
+
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0]<a id="change"> = </a>tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i + 1] = self.out_fuses[i](
+                [x[i + 1], tds[i + 1], self.downsample(tds[i])]</code></pre><h3>After Change</h3><pre><code class='java'>
+            tds[-2 - i] = td_fuse([x[-2 - i], self.upsample(tds[-1 - i])])
+
+        &#47&#47 bottom-up, P4in + P4td + resize(P3td)
+        outs<a id="change"> = </a><a id="change">list(</a>tds<a id="change">)</a>
+        for i, out_fuse in enumerate(self.out_fuses):
+            outs[i + 1] = out_fuse([x[i + 1], tds[i + 1], self.downsample(tds[i])])
+
+        &#47&#47 &#47&#47 P7in + resize(P6td)</code></pre>

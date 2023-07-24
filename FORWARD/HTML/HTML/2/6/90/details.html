@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :90
+</h3><img src='333625.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+
+        with g.local_scope():
+            h_prime = <a id="change">[]</a>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                             Fn.sum(&quotm&quot, &quotemb&quot))
+                h_prime.append(g.ndata[&quotemb&quot])
+            h_output<a id="change"> = torch.cat(</a>h_prime<a id="change">, dim=1)</a>
+
+        g.edata[&quotalpha&quot] = edge_attention
+        if self.residual:
+            res = self.residual(h)</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_attention = edge_attention * \
+                             (1 - self.beta) + res_attn * self.beta
+        if self.num_heads == 1:
+            edge_attention = <a id="change">edge_attention[:, 0]</a>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 333625</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = x
+        out2 = fac1 * torch.exp(-1.0 * alpha)
+        for i, layer in enumerate(self.fc_layers):
+            out<a id="change"> = </a>layer(<a id="change">torch.cat(</a><a id="change">[</a>out, out2<a id="change"></a>]<a id="change">, dim=1)</a>)
+        return self.fc_out(torch.cat([out, out2], dim=1))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, alpha, fac1):
+        out = x
+        out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]</a>
+        out2 = out2 * fac1 + (1 - fac1)
+        return self.fc_out(out * out2)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/d406d3694ab25140dafeb3f2af61335a50011a32#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 333627</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: d406d3694ab25140dafeb3f2af61335a50011a32</div><div id='time'> Time: 2020-09-25</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 35</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out1 = x
+        &#47&#47 out2 = torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]
+        out2 = torch.exp(-alpha) * fac1
+        out<a id="change"> = torch.cat(</a><a id="change">[</a>out1, out2<a id="change"></a>]<a id="change">, dim=1)</a>
+        return self.fc_out(out)
+
+
+class GbsConvNet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, alpha, fac1):
+        out1 = x
+        if self.in_feat != self.n_a:
+            out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]</a> * fac1
+        else:
+            out2 = torch.exp(-alpha) * fac1
+        return self.fc_out(out1 * out2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/e398255427327fff201f2d2e562bf00bec52783f#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 333626</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: e398255427327fff201f2d2e562bf00bec52783f</div><div id='time'> Time: 2020-09-28</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 38</div><BR>

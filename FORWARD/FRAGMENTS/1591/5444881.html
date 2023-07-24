@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        inters = [x[-1]]                                                        &#47&#47 P7in
+        for i, conv in enumerate(self.inter_convs):
+            out = <a id="change">F.interpolate(</a>inters[-1]<a id="change">, scale_factor=2., mode="nearest")</a>    &#47&#47 resize(P7td)
+            out = self.fuse([x[-2-i], out])                                     &#47&#47 P6in + resize(P7td)
+            inters.append(conv(out))                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            </code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for i</a> in range(self.num_levels - 2, -1 , -1)<a id="change">:
+            </a>tds[i]<a id="change"> = </a>self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels</code></pre>

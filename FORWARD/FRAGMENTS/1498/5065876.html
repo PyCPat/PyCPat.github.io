@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [h*w, N, Cin],    M * [h*w, n, k]
+            quantized, samples, logits = self._attention(x, temp, True)
+            &#47&#47 quantized = x
+            <a id="change">if False</a><a id="change">:
+                &#47&#47 [h*w, n, c]
+                </a>posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+                deTransformed = self._decoder(posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed<a id="change"> = </a>quantized.reshape(h, w, n, c).permute(2, 3, 0, 1)
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self._encoder(codebook, encoderIn)
+            &#47&#47 [h*w, n, k]
+            logit = self._select(x)
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temp, True<a id="change">)</a>
+            &#47&#47 [k, 1, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [h*w, n, c]
+            quantized = sample @ codewords[:, 0, ...]</code></pre>

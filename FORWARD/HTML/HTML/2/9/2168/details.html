@@ -1,0 +1,145 @@
+<html><h3>Pattern ID :2168
+</h3><img src='14077142.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = up_conv(x, before_pool, se=self.wm_atts[i])
+        x_wm = x
+
+        <a id="change">return </a>x_im<a id="change">,x_mask,x_wm</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input):
+        &#47&#47 Encoder convs
+        im_encoder_outs<a id="change"> = </a><a id="change">[]</a>
+        mask_encoder_outs<a id="change"> = </a>[]
+        x = input
+        for i, d_conv in enumerate(self.down_convs):
+            &#47&#47 d_conv, attn = nets
+            x, before_pool = d_conv(x)
+            <a id="change">im_encoder_outs.append(</a>before_pool<a id="change">)</a>
+            mask_encoder_outs.append(before_pool)
+        x_im = x
+        x_mask = x
+
+        &#47&#47 Decoder convs
+        x = x_im
+        for i, nets in enumerate(zip(self.up_convs, self.up_im_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if im_encoder_outs is not None:
+                before_pool = im_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=attn)
+        x_im = x
+
+        x = x_mask       
+        for i, nets in enumerate(zip(self.up_convs, self.up_mask_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if mask_encoder_outs is not None:
+                before_pool = mask_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = attn)
+        x_mask<a id="change"> = </a>x
+
+        <a id="change">return </a>x_im<a id="change">, x_mask</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-1599e3fabe6f8d9fdcda23a2f19a46bdeb3b09c3c28b82c490897e88308729a6L84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14077142</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/resunet.py</div><div id='m_class'> M Class Name: SharedDecoder</div><div id='n_method'> N Class Name: SharedBottleNeck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/resunet.py</div><div id='n_file'> N File Name: src/networks/resunet.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+        self.batch_size, _, _, _ = inputs.shape
+        device<a id="change"> = </a>inputs.device
+        [C3, C4, C5] = self.backbone(inputs)
+
+        del inputs
+
+        features = self.fpn([C3, C4, C5])
+
+        del C3, C4, C5
+
+        self.fpn_feature_sizes<a id="change"> = </a><a id="change">[]</a>
+        cls_heads, reg_heads, center_heads = [], [], []
+        for feature, scale in zip(features, self.scales):
+            <a id="change">self.fpn_feature_sizes.append(</a>[feature.shape[3], feature.shape[2]]<a id="change">)</a>
+            cls_outs = self.cls_head(feature)
+            &#47&#47 [N,num_classes,H,W] -&gt; [N,H,W,num_classes]
+            cls_outs = cls_outs.permute(0, 2, 3, 1).contiguous()
+            cls_heads.append(cls_outs)
+
+            reg_outs, center_outs = self.regcenter_head(feature)
+            &#47&#47 [N,4,H,W] -&gt; [N,H,W,4]
+            reg_outs = reg_outs.permute(0, 2, 3, 1).contiguous()
+            reg_outs = reg_outs * scale
+            reg_heads.append(reg_outs)
+            &#47&#47 [N,1,H,W] -&gt; [N,H,W,1]
+            center_outs = center_outs.permute(0, 2, 3, 1).contiguous()
+            center_heads.append(center_outs)
+
+        del features
+
+        self.fpn_feature_sizes<a id="change"> = </a>torch.tensor(
+            self.fpn_feature_sizes).to(device)
+
+        batch_positions = self.positions(self.batch_size,
+                                         self.fpn_feature_sizes)
+
+        &#47&#47 if input size:[B,3,640,640]
+        &#47&#47 features shape:[[B, 256, 80, 80],[B, 256, 40, 40],[B, 256, 20, 20],[B, 256, 10, 10],[B, 256, 5, 5]]
+        &#47&#47 cls_heads shape:[[B, 80, 80, 80],[B, 40, 40, 80],[B, 20, 20, 80],[B, 10, 10, 80],[B, 5, 5, 80]]
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+        &#47&#47 batch_positions shape:[[B, 80, 80, 2],[B, 40, 40, 2],[B, 20, 20, 2],[B, 10, 10, 2],[B, 5, 5, 2]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads, batch_positions</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zgcr/pytorch-imagenet-cifar-coco-voc-training/commit/d271077f312fa0d2bf7456c3b5edc63e49aa3a39#diff-6b560ed73e116d61747b3731c97901ea8e7ab1c3ed66961b7b39383395fa0851L76' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14077140</div><div id='project'> Project Name: zgcr/pytorch-imagenet-cifar-coco-voc-training</div><div id='commit'> Commit Name: d271077f312fa0d2bf7456c3b5edc63e49aa3a39</div><div id='time'> Time: 2020-07-19</div><div id='author'> Author: zgcr@mail.ustc.edu.cn</div><div id='file'> File Name: public/detection/models/fcos.py</div><div id='m_class'> M Class Name: FCOS</div><div id='n_method'> N Class Name: FCOS</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: public/detection/models/fcos.py</div><div id='n_file'> N File Name: public/detection/models/fcos.py</div><div id='m_start'> M Start Line: 109</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        next_mem, next_lmem = map(torch.stack, (next_mem, next_lmem))
+        next_mem, next_lmem = map(torch.detach, (next_mem, next_lmem))
+
+        <a id="change">return </a>out<a id="change">, Memory(short = next_mem, long = next_lmem)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_memory_layers = len(self.memory_layers)
+        init_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem<a id="change"> = </a>default(mem, init_mem)
+        lmem = default(lmem, init_mem)
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        hiddens<a id="change"> = </a><a id="change">[]</a>
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter, lmem_iter)) if use_memory else None
+
+            if use_memory:
+                <a id="change">hiddens.append(</a>x<a id="change">)</a>
+
+            x = attn(x, memories = memories, calc_memory = use_memory, input_mask = mask, pos_emb = pos_emb)
+            x = ff(x)
+
+        hiddens = torch.stack(hiddens)
+        out = self.to_logits(x)
+
+        &#47&#47 calculate next memory state
+
+        next_memory<a id="change"> = </a>self.memory_network(lmem, mem, hiddens)
+        <a id="change">return </a>out<a id="change">, next_memory</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14077136</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>

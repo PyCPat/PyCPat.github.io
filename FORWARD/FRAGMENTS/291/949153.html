@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Note: this is a bit of a hack but we avoid any resampling issues here if we just try 24kHz throughout
+        &#47&#47 which makes convert_audio a no-op
+        wav = convert_audio(x, x_sampling_rate, self.model.sample_rate, self.model.channels)
+        wav = <a id="change">wav.unsqueeze(0</a><a id="change">)</a>
+        &#47&#47 Extract discrete codes from EnCodec
+        with torch.no_grad():
+            encoded_frames = self.model.encode(wav)
+        codes = torch.cat([encoded[0] for encoded in encoded_frames], dim=-1)  &#47&#47 [batch, num_quantizers, timesteps]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 convert_audio and unsqueeze. The convert_audio function also doesn&quott play nicely with batches.
+
+        &#47&#47 b = batch, t = timesteps, 1 channel for the 24kHz model, 2 channels for the 48kHz model
+        wav = <a id="change">rearrange(</a>x, <a id="change">f&quotb t -&gt; b {self.model.channels} t&quot</a><a id="change">)</a>
+
+        &#47&#47 Extract discrete codes from EnCodec
+        with torch.no_grad():
+            encoded_frames = self.model.encode(wav)</code></pre>

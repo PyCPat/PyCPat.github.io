@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hx=None):
+        output_size = (
+            <a id="change">int(</a>(input<a id="change">.size(-1) - self.kernel_size + </a>2 * self.padding_ih) / self.stride<a id="change">)</a> + 1
+        )
+        &#47&#47 Handle the case of no hidden state provided
+        if hx is None:
+            hx<a id="change"> = </a>torch.zeros(input.size(0), self.h_channels, output_size, device=input.device)
+        &#47&#47 Run the optimized convgru-cell
+        return _opt_convgrucell_1d(
+            input,</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 init hidden on forward
+        if h_prev is None:
+            h_prev = self.init_hidden(input)
+        <a id="change">print(</a>f"input: {input.shape} prev: {h_prev.shape}"<a id="change">)</a>
+        combined = torch.cat((input, h_prev), dim=1)  &#47&#47 concatenate along channel axis
+
+        combined_conv = F.sigmoid(self.conv_zr(combined))
+</code></pre>

@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        grad_accumulate_every = math.ceil(x.shape[0] / max_batch_size)
+        mems = [None] * grad_accumulate_every
+
+        for xi_seg, xo_seg, mask_seg in <a id="change">zip(</a>xi, xo, mask<a id="change">)</a>:
+            xi_seg, xo_seg = map(split_batch_fn, (xi_seg, xo_seg))
+            mask_seg = split_batch_fn(mask_seg) if mask_seg is not None else ((None,) * grad_accumulate_every)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        grad_accumulate_every = math.ceil(x.shape[0] / max_batch_size)
+        mems = [None] * grad_accumulate_every
+
+        for ind, (xi_seg, xo_seg, mask_seg) in <a id="change">enumerate(</a><a id="change">zip(</a>xi, xo, mask<a id="change">))</a>:
+            xi_seg, xo_seg = map(split_batch_fn, (xi_seg, xo_seg))
+            mask_seg = split_batch_fn(mask_seg) if mask_seg is not None else ((None,) * grad_accumulate_every)
+            truncate<a id="change"> = </a>truncate_every is not None and <a id="change">((ind + 1) % truncate_every) == 0</a>
+
+            new_mems = []
+            for ind, (xi_seg_b, xo_seg_b, mask_seg_b, mem) in enumerate(zip(xi_seg, xo_seg, mask_seg, mems)):
+                is_last = ind == (grad_accumulate_every - 1)</code></pre>

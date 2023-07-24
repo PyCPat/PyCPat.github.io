@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            <a id="change">if </a>i &lt; len(self.output_convs) - 1<a id="change">:
+                </a>out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out<a id="change"> = </a>self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)
+            outputs.append(conv(out))                                           &#47&#47 P4out = conv(P4in + P4td + resize(P3td))
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1]<a id="change"> = </a>self.out_fuses[-1]([x[-1], <a id="change">self.downsample(</a>tds[-2]<a id="change">)</a>])                &#47&#47 P7in + resize(P6td)
+
+        return outs
+</code></pre>

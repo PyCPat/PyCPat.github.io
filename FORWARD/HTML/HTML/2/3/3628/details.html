@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :3628
+</h3><img src='17808262.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = 1 - mask
+        mask = mask.expand_as(x)
+        if self.offset:
+            offset = <a id="change">torch.from_numpy(2 * (np.random.rand(h, w) - 0.5)).to(
+                x.dtype).cuda()</a>
+            x = x * mask + offset * (1 - mask)
+        else:
+            x = x * mask
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask[:, s:t] *= 0
+
+        r = np.random.randint(self.rotate)
+        mask = <a id="change">rotate(mask.unsqueeze(0), r)[0]</a>
+        mask = mask[(hh - h) // 2:(hh - h) // 2 + h,
+                    (ww - w) // 2:(ww - w) // 2 + w]
+        mask = mask.to(x.dtype)
+        if self.mode == 1:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/f8c9a9a1c958b17554827f0bac33cab069b72735#diff-190c314dcad98a2f8efc2d44ad73f6dff215d25d2822159150774909133d59b6L116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17808262</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: f8c9a9a1c958b17554827f0bac33cab069b72735</div><div id='time'> Time: 2022-11-23</div><div id='author'> Author: 30484308+Cathy0908@users.noreply.github.com</div><div id='file'> File Name: easycv/models/detection3d/utils/grid_mask.py</div><div id='m_class'> M Class Name: GridMask</div><div id='n_method'> N Class Name: GridMask</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/detection3d/utils/grid_mask.py</div><div id='n_file'> N File Name: easycv/models/detection3d/utils/grid_mask.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 117</div><div id='n_end'> N End Line: 141</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 下面是使用CFR
+        crf_model = CRF(self.num_token_type, batch_first=True)
+        if USE_CUDA:
+            crf_model = <a id="change">crf_model.cuda()</a>
+        if not is_test:
+            log_likelihood = crf_model(ner_score, data_item[&quottoken_type_list&quot].to(torch.int64),
+                                       mask=data_item[&quotmask_tokens&quot])
+            loss_ner = -log_likelihood</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 这样计算交叉熵有问题吗
+            &#47&#47 交叉熵计算不适用 rel_score_prob， 应该是rel_score_matrix
+            loss_rel = F.cross_entropy(rel_score_prob.permute(0, 3, 1, 2), data_item[&quotpred_rel_matrix&quot], self.weights_rel)  &#47&#47 要把分类放在第二维度
+            loss_rel *= <a id="change">rel_score_prob.shape[1]</a>
+        rel_score_prob = rel_score_prob - (self.config.threshold_rel - 0.5)  &#47&#47 超过了一定阈值之后才能判断关系
+        pred_rel = torch.round(rel_score_prob).to(torch.int64)
+        &#47&#47 print("hello2")
+        if is_test:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mangonihao/multiheadjointentityrelationextraction_simple/commit/3a8d46652627013ee302506e87489ee75fea8ae9#diff-11eebc726596bfe963ef6f272a32530164721eb5c2c8e1df5102b38a690f4f92L104' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17808261</div><div id='project'> Project Name: mangonihao/multiheadjointentityrelationextraction_simple</div><div id='commit'> Commit Name: 3a8d46652627013ee302506e87489ee75fea8ae9</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: 2075419247@qq.com</div><div id='file'> File Name: modules/joint_model.py</div><div id='m_class'> M Class Name: JointModel</div><div id='n_method'> N Class Name: JointModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: modules/joint_model.py</div><div id='n_file'> N File Name: modules/joint_model.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 165</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        ce_loss_t = -torch.sum(one_hot_labels * log_softmax_t, 1, keepdim=True)
+
+        focal_weight = ce_loss_s / (ce_loss_t + 1e-7)
+        ratio_lower = <a id="change">torch.zeros(1).cuda()</a>
+        focal_weight = torch.max(focal_weight, ratio_lower)
+        focal_weight = 1 - torch.exp(-focal_weight)
+        ce_loss = focal_weight * ce_loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, student, teacher, data_samples):
+
+        &#47&#47 Unpack data samples and pack targets
+        if &quotscore&quot in <a id="change">data_samples[0]</a>.gt_label:
+            &#47&#47 Batch augmentation may convert labels to one-hot format scores.
+            gt_labels = torch.stack([i.gt_label.score for i in data_samples])
+            one_hot_labels = gt_labels.float()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmrazor/commit/cb238e36e3d68bc64cfa0da7d5c12d749b7043a2#diff-b093b3baf2579ca86dfd55ea88fd75ade78fbf583fb196e6376f9caeaf928c31L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17808260</div><div id='project'> Project Name: open-mmlab/mmrazor</div><div id='commit'> Commit Name: cb238e36e3d68bc64cfa0da7d5c12d749b7043a2</div><div id='time'> Time: 2022-07-15</div><div id='author'> Author: 67539920+pppppM@users.noreply.github.com</div><div id='file'> File Name: mmrazor/models/losses/weighted_soft_label_distillation.py</div><div id='m_class'> M Class Name: WSLD</div><div id='n_method'> N Class Name: WSLD</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmrazor/models/losses/weighted_soft_label_distillation.py</div><div id='n_file'> N File Name: mmrazor/models/losses/weighted_soft_label_distillation.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 60</div><BR>

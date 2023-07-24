@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            attn = attn * mapping_mask
+        output = torch.bmm(attn, v)
+
+        <a id="change">return </a>output<a id="change">, attn</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if key_mask is not None:
+            attn = attn.masked_fill(key_mask == 0., -np.inf)
+        if attn_prior is not None:
+            attn = self.log_softmax(attn)<a id="change"> + </a><a id="change">torch.log(</a>attn_prior.transpose(1, 2) + 1e-8<a id="change">)</a>
+        attn_logprob<a id="change"> = </a>attn.unsqueeze(1).clone()
+
+        attn = self.softmax(attn)
+</code></pre>

@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :1700
+</h3><img src='5801043.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        log_prob = F.log_softmax(input_tensor, dim=-1)
+        prob = torch.exp(log_prob) 
+        target = target_tensor.long()
+        <a id="change">return </a>{&quotT&quot:F.nll_loss(
+            ((1 - prob) ** self.gamma) * log_prob, 
+            target_tensor.long(), 
+            weight=self.weight,</code></pre><h3>After Change</h3><pre><code class='java'>
+        log_prob = F.log_softmax(input_tensor, dim=-1)
+        prob = torch.exp(log_prob) 
+        target = target_tensor.long()
+        <a id="change">loss</a><a id="change"> = </a>F.nll_loss(
+            ((1 - prob) ** self.gamma) * log_prob, 
+            target_tensor.long(), 
+            weight=self.weight,
+            reduction = self.reduction
+        ).mean()
+        <a id="change">return loss</a><a id="change">, {&quotT&quot: loss.item()}</a>
+
+
+
+if __name__ == &quot__main__&quot:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/6e5cfd1947913bd3a5a6ef96df26223fde80e3e5#diff-8b1e6b32fd47a5b8d241adce516c72939c4d0ae2c5bbc764b5338bd8f19e8016L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5801043</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: 6e5cfd1947913bd3a5a6ef96df26223fde80e3e5</div><div id='time'> Time: 2020-11-23</div><div id='author'> Author: official_kaylode@users.noreply.github.com</div><div id='file'> File Name: losses/focalloss.py</div><div id='m_class'> M Class Name: FocalLoss</div><div id='n_method'> N Class Name: FocalLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: losses/focalloss.py</div><div id='n_file'> N File Name: losses/focalloss.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 39</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size = predict.shape[0]
+        for prb, lbl in zip(probas, targets):
+            total_loss += lovasz_softmax_flat(prb, lbl, self.ignore_index, self.only_present)
+        <a id="change">return </a>total_loss / batch_size</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch_size = predict.shape[0]
+        for prb, lbl in zip(probas, targets):
+            total_loss += lovasz_softmax_flat(prb, lbl, self.ignore_index, self.only_present)
+        <a id="change">loss</a><a id="change"> = </a>total_loss / batch_size
+
+        loss_dict = <a id="change">{</a>"LOVASZ": <a id="change">loss.item()}</a>
+        <a id="change">return </a>loss<a id="change">, loss_dict</a></code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/36281ee247b9224402b9d21ffcf8ab682068bc5d#diff-240ffa90d392e331ff467d967786511d9d00a0fffd2ae260f612a814dd106808L72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5801044</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: 36281ee247b9224402b9d21ffcf8ab682068bc5d</div><div id='time'> Time: 2022-02-19</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/segmentation/losses/lovasz_loss.py</div><div id='m_class'> M Class Name: LovaszSoftmax</div><div id='n_method'> N Class Name: LovaszSoftmax</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/segmentation/losses/lovasz_loss.py</div><div id='n_file'> N File Name: theseus/segmentation/losses/lovasz_loss.py</div><div id='m_start'> M Start Line: 77</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if loss_hard.numel() &lt; n_min:
+            loss_hard, _ = loss.topk(n_min)
+
+        <a id="change">return </a>torch.mean(loss_hard)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if loss_hard.numel() &lt; n_min:
+            loss_hard, _ = loss.topk(n_min)
+        
+        <a id="change">loss</a><a id="change"> = </a>loss_hard.mean()
+        
+        loss_dict = <a id="change">{</a>"OhemCE": <a id="change">loss.item()}</a>
+        <a id="change">return </a>loss<a id="change">, loss_dict</a></code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/d05f950218292f78c5aef6b85b473d941ef64dfd#diff-a8d40a9ffebea97211716dd51c53c70a073661fe0ad0d1054fbb400259683888L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5801045</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: d05f950218292f78c5aef6b85b473d941ef64dfd</div><div id='time'> Time: 2022-02-19</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/segmentation/losses/ce_loss.py</div><div id='m_class'> M Class Name: OhemCrossEntropy</div><div id='n_method'> N Class Name: OhemCrossEntropy</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/segmentation/losses/ce_loss.py</div><div id='n_file'> N File Name: theseus/segmentation/losses/ce_loss.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 73</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 85</div><BR>

@@ -1,0 +1,96 @@
+<html><h3>Pattern ID :2883
+</h3><img src='15890418.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.weight:
+            w = torch.sigmoid(self.w) * (2 / self.n)  &#47&#47 sigmoid weights (0-1)
+            if self.n == 2:
+                return x * w[0] + outputs[self.layers[0]] * <a id="change">w[1]</a>
+            elif self.n == 3:
+                return x * w[0] + outputs[self.layers[0]] * <a id="change">w[1]</a> + outputs[self.layers[1]] * <a id="change">w[2]</a>
+        else:
+            if self.n == 2:
+                return x + outputs[self.layers[0]]
+            elif self.n == 3:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Fusion
+        nc = x.shape[1]  &#47&#47 number of channels
+        <a id="change">for </a>i in range(self.n - 1)<a id="change">:
+            </a>a = outputs[self.layers[i]]  &#47&#47 feature to add
+            dc = nc - a.shape[1]  &#47&#47 delta channels
+
+            &#47&#47 Adjust channels
+            <a id="change">if </a><a id="change">dc &gt; 0:  &#47&#47 pad
+                </a>pad = nn.ZeroPad2d((0<a id="change">, 0, 0, 0, 0, dc</a>))
+                a<a id="change"> = </a>pad(a)
+            elif <a id="change">dc &lt; 0</a><a id="change">:  &#47&#47 slice
+                </a>a = a[:, :nc]
+
+            &#47&#47 Sum
+            x = x + a * w[i + 1]<a id="change"> if </a>self.weight<a id="change"> else </a>x + a
+        return x
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 11</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nightsnack/yolobile/commit/f92ad043bd0bd2e06265bc6099d4300fcc4780db#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL131' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15890418</div><div id='project'> Project Name: nightsnack/yolobile</div><div id='commit'> Commit Name: f92ad043bd0bd2e06265bc6099d4300fcc4780db</div><div id='time'> Time: 2020-02-19</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: weightedFeatureFusion</div><div id='n_method'> N Class Name: weightedFeatureFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 132</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, outputs):
+        if self.weight:
+            <a id="change">w</a> = torch.sigmoid(self.w) * (2 / self.n)  &#47&#47 sigmoid weights (0-1)
+            if self.n == 2:
+                return x * <a id="change">w[0]</a> + outputs[self.layers[0]] * <a id="change">w[1]</a>
+            elif self.n == 3:
+                return x * w[0] + outputs[self.layers[0]] * w[1] + outputs[self.layers[1]] * <a id="change">w[2]</a>
+        else:
+            if self.n == 2:
+                return x + outputs[self.layers[0]]
+            elif self.n == 3:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Fusion
+        nc = x.shape[1]  &#47&#47 number of channels
+        <a id="change">for </a>i in range(self.n - 1)<a id="change">:
+            </a>a = outputs[self.layers[i]]  &#47&#47 feature to add
+            dc = nc - a.shape[1]  &#47&#47 delta channels
+
+            &#47&#47 Adjust channels
+            <a id="change">if </a><a id="change">dc &gt; 0:  &#47&#47 pad
+                </a>pad = nn.ZeroPad2d((0<a id="change">, 0, 0, 0, 0, dc</a>))
+                a<a id="change"> = </a>pad(a)
+            elif <a id="change">dc &lt; 0</a><a id="change">:  &#47&#47 slice
+                </a>a = a[:, :nc]
+
+            &#47&#47 Sum
+            x = x + a * w[i + 1]<a id="change"> if </a>self.weight<a id="change"> else </a>x + a
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nightsnack/yolobile/commit/f92ad043bd0bd2e06265bc6099d4300fcc4780db#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15890423</div><div id='project'> Project Name: nightsnack/yolobile</div><div id='commit'> Commit Name: f92ad043bd0bd2e06265bc6099d4300fcc4780db</div><div id='time'> Time: 2020-02-19</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: weightedFeatureFusion</div><div id='n_method'> N Class Name: weightedFeatureFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 132</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if augment:
+            img_size = x.shape[-2:]  &#47&#47 height, width
+            s = [0.83, 0.67]  &#47&#47 scales
+            <a id="change">y</a> = []
+            for i, xi in enumerate((x,
+                                    torch_utils.scale_img(x.flip(3), s[0]),  &#47&#47 flip-lr and scale
+                                    torch_utils.scale_img(x, s[1]),  &#47&#47 scale
+                                    )):
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % i, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])
+                y.append(self.forward_once(xi)[0])
+
+            <a id="change">y[1]</a>[..., :4] /= s[0]  &#47&#47 scale
+            <a id="change">y[1]</a>[..., 0] = img_size[1] - <a id="change">y[1]</a>[..., 0]  &#47&#47 flip lr
+            y[2][..., :4] /= s[1]  &#47&#47 scale
+            return torch.cat(y, 1), None  &#47&#47 augmented inference, train
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            s = [1, 0.83, 0.67]  &#47&#47 scales
+            f = [None, 3, None]  &#47&#47 flips (2-ud, 3-lr)
+            y = []  &#47&#47 outputs
+            <a id="change">for </a>si, fi in zip(s, f)<a id="change">:
+                </a>xi = torch_utils.scale_img(x.flip(fi)<a id="change"> if </a>fi<a id="change"> else </a>x, si)
+                yi = self.forward_once(xi)[0]  &#47&#47 forward
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % s, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])  &#47&#47 save
+                yi[..., :4] /= si  &#47&#47 de-scale
+                <a id="change">if </a><a id="change">fi is 2:
+                    </a>yi[..., 1]<a id="change"> = </a>img_size[0] - yi[...<a id="change">, 1</a>]  &#47&#47 de-flip ud
+                elif <a id="change">fi is 3</a><a id="change">:
+                    </a>yi[..., 0] = img_size[1] - yi[..., 0]  &#47&#47 de-flip lr
+                y.append(yi)
+            return torch.cat(y, 1), None  &#47&#47 augmented inference, train
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wmcnally/kapao/commit/1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15890942</div><div id='project'> Project Name: wmcnally/kapao</div><div id='commit'> Commit Name: 1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 98</div><BR>

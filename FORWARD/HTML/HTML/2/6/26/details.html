@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :26
+</h3><img src='38297.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                "If use_lma is specified, q_chunk_size and kv_chunk_size must "
+                "be provided"
+            )
+        <a id="change">if</a><a id="change">(use_memory_efficient_kernel and use_lma):
+            </a>raise ValueError(
+                "Choose one of use_memory_efficient_kernel and use_lma"
+            )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                "be provided"
+            )
+
+        <a id="change">if</a>(use_flash and <a id="change">biases is not None</a>)<a id="change">:
+            </a>raise ValueError(
+                "use_flash is incompatible with the bias option. For masking, "
+                "use flash_mask instead"
+            )
+
+        attn_options<a id="change"> = </a><a id="change">[</a>use_memory_efficient_kernel, use_lma, use_flash<a id="change"></a>]
+        if(sum(attn_options) &gt; 1):
+            raise ValueError(
+                "Choose at most one alternative attention algorithm"</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/4f53624d92b28c56c5479c20f262f63b4eaeec68#diff-82626769d3840a38323ce57203d6c0ef948f806b1e92681e55ea2e4b15ed1078L415' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38297</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: 4f53624d92b28c56c5479c20f262f63b4eaeec68</div><div id='time'> Time: 2022-07-08</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/primitives.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(10)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/primitives.py</div><div id='n_file'> N File Name: openfold/model/primitives.py</div><div id='m_start'> M Start Line: 439</div><div id='m_end'> M End Line: 469</div><div id='n_start'> N Start Line: 415</div><div id='n_end'> N End Line: 486</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        biases = [bias]
+
+        <a id="change">if </a><a id="change">(self.pair_bias and 
+            z is not None and                       &#47&#47 For the 
+            self.layer_norm_z is not None and       &#47&#47 benefit of
+            self.linear_z is not None               &#47&#47 TorchScript
+        ):
+            &#47&#47 [*, N_res, N_res, C_z]
+            </a>z = self.layer_norm_z(z)
+
+            &#47&#47 [*, N_res, N_res, no_heads]
+            z = self.linear_z(z)</code></pre><h3>After Change</h3><pre><code class='java'>
+                cost of slower execution. Chunking is not performed by default.
+                
+        
+        <a id="change">if(_chunk_logits is not None)</a><a id="change">:
+            </a>return self._chunked_msa_attn(
+                m=m, z=z, mask=mask, 
+                chunk_logits=_chunk_logits, checkpoint=_checkpoint_chunks
+            )           
+
+        m, mask_bias, z = self._prep_inputs(m, z, mask)
+
+        biases<a id="change"> = </a><a id="change">[</a>mask_bias<a id="change"></a>]
+        if(z is not None):
+            biases.append(z)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/a8601529127ff19fc50fee55e8ac810ebe712c82#diff-25f9fda6a67f97ad7a24a51705552578aa3804c6733c4f8bdc2d44e78c008ab8L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38300</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: a8601529127ff19fc50fee55e8ac810ebe712c82</div><div id='time'> Time: 2022-02-03</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/msa.py</div><div id='m_class'> M Class Name: MSAAttention</div><div id='n_method'> N Class Name: MSAAttention</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/msa.py</div><div id='n_file'> N File Name: openfold/model/msa.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 185</div><div id='n_end'> N End Line: 214</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            k2 = self.relative_positions_encoding(k2, model_kwargs[&quotposition_ids&quot][:, 1, :])
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))
+            key_layer = torch.concat([k1, k2], dim=(k1.ndim - 1))
+        elif <a id="change">self.p_bias == &quotrotary&quot and not self.position_encoding_2d:  &#47&#47 原rotary逻辑
+            </a>query_layer = self.relative_positions_encoding(query_layer, model_kwargs[&quotposition_ids&quot])
+            key_layer = self.relative_positions_encoding(key_layer, model_kwargs[&quotposition_ids&quot])
+
+        if self.is_decoder:</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:  &#47&#47 原rotary逻辑
+                query_layer = self.relative_positions_encoding(query_layer, model_kwargs[&quotposition_ids&quot])
+                key_layer = self.relative_positions_encoding(key_layer, model_kwargs[&quotposition_ids&quot])
+            <a id="change">if past_key_value is not None</a><a id="change">:  &#47&#47 过了rope再concat
+                </a>key_layer<a id="change"> = </a>torch.cat(<a id="change">[</a>past_key_value[0], key_layer<a id="change"></a>], dim=2)
+                value_layer = torch.cat([past_key_value[1], value_layer], dim=2)
+
+        if self.is_decoder:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tongjilibo/bert4torch/commit/090c634fbb8811f4efd757a1f34268eabbfad570#diff-423158f6414177c50deaf8ff8d75202474ddccb543fca22c762f1c3c0e973f8eL141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38301</div><div id='project'> Project Name: tongjilibo/bert4torch</div><div id='commit'> Commit Name: 090c634fbb8811f4efd757a1f34268eabbfad570</div><div id='time'> Time: 2023-04-07</div><div id='author'> Author: tongjilibo@163.com</div><div id='file'> File Name: bert4torch/layers.py</div><div id='m_class'> M Class Name: MultiHeadAttentionLayer</div><div id='n_method'> N Class Name: MultiHeadAttentionLayer</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert4torch/layers.py</div><div id='n_file'> N File Name: bert4torch/layers.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 151</div><div id='n_end'> N End Line: 192</div><BR>

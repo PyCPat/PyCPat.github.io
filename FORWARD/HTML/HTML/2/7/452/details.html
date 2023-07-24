@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :452
+</h3><img src='1677251.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not isinstance(feat, tuple):
+            feat = (feat, )
+        if len(feat) &gt;= 2:
+            <a id="change">assert </a>self.with_temporal_pool
+        if self.with_temporal_pool:
+            feat = [torch.mean(x, 2, keepdim=True) for x in feat]
+        feat = torch.cat(feat, axis=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            feat = [F.interpolate(x, max_shape).contiguous() for x in feat]
+
+        if self.with_temporal_pool:
+            <a id="change">if self.temporal_pool_mode == &quotavg&quot</a><a id="change">:
+                </a>feat = [torch.mean(x, 2, keepdim=True) for x in feat]
+            elif <a id="change">self.temporal_pool_mode == &quotmax&quot</a><a id="change">:
+                </a>feat<a id="change"> = </a>[torch.max(x, 2, keepdim=True)[0] for x in feat]
+            else:
+                raise NotImplementedError
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/7ea0e01d94fc6b3665c3df4386af570047d98396#diff-96d95e27d9c9619405cf21c5fdc4b23664f806d3c1f87596b4cccc0822769c16L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677251</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: 7ea0e01d94fc6b3665c3df4386af570047d98396</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: 34324155+kennymckormick@users.noreply.github.com</div><div id='file'> File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='m_class'> M Class Name: SingleRoIExtractor3D</div><div id='n_method'> N Class Name: SingleRoIExtractor3D</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='n_file'> N File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.n_lags &gt;= 1:
+            out += self.auto_regression(lags=lags)
+        if seasonalities is None:
+            <a id="change">assert</a>(self.season_dims is None)
+        else:
+            out = self.all_seasonalities(out, seasonalities)
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+            out += self.auto_regression(lags=lags)
+        if seasonalities is not None:
+            s = self.seasonalities(periods=seasonalities)
+            <a id="change">if self.season_mode == &quotadditive&quot</a><a id="change">: </a>out = out + s
+            elif <a id="change">self.season_mode == &quotmultiplicative&quot</a><a id="change">: </a>out<a id="change"> = </a>out * s
+            else: raise NotImplementedError("Seasonality Mode {} not implemented".format(mode))
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ourownstory/neural_prophet/commit/6c2ec029f5701959a2786d0e77ddee5318e6fcfc#diff-3c68424fa3c3e2e27a6aed55b945978a3d2c11b63a551ebfa3e0426522ac0254L186' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677250</div><div id='project'> Project Name: ourownstory/neural_prophet</div><div id='commit'> Commit Name: 6c2ec029f5701959a2786d0e77ddee5318e6fcfc</div><div id='time'> Time: 2020-06-02</div><div id='author'> Author: oskar.triebe@merantix.com</div><div id='file'> File Name: code/model.py</div><div id='m_class'> M Class Name: TimeNet</div><div id='n_method'> N Class Name: TimeNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/model.py</div><div id='n_file'> N File Name: code/model.py</div><div id='m_start'> M Start Line: 187</div><div id='m_end'> M End Line: 193</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 169</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        enc_output: batch_size, max_length, dec_embed_dim
+        hidden: n_layer, batch_size, hidden_size
+        &quot&quot&quot
+        <a id="change">assert </a>(hidden is not None) or self.use_attention, "No use of a decoder with No attention and No Hidden"
+
+        batch_sz = x.shape[0]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        enc_output: batch_size, max_length, dec_embed_dim
+        hidden: n_layer, batch_size, hidden_size | lstm: (h_n, c_n)
+        &quot&quot&quot
+        <a id="change">if </a>(hidden is None) and <a id="change">(self.use_attention is False)</a><a id="change">:
+            </a>raise Exception( "No use of a decoder with No attention and No Hidden")
+
+        batch_sz = x.shape[0]
+
+        if hidden is None:
+            &#47&#47 hidden: n_layers, batch_size, hidden_dim
+            hid_for_att = torch.zeros((self.dec_layers, batch_sz,
+                                    self.dec_hidden_dim )).to(self.device)
+        elif <a id="change">self.dec_rnn_type == &quotlstm&quot</a><a id="change">:
+            </a>hid_for_att<a id="change"> = </a>hidden[1] &#47&#47 c_n
+
+        &#47&#47 x (batch_size, 1, dec_embed_dim) -&gt; after embedding
+        x = self.embedding(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ai4bharat/indiannlp-transliteration/commit/6c10e8866b04a68a182182d1f291591320471d50#diff-2e968f438383750c4a8bcd4c9c6be4f873196e13588f94531d9140122aa144e4L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677252</div><div id='project'> Project Name: ai4bharat/indiannlp-transliteration</div><div id='commit'> Commit Name: 6c10e8866b04a68a182182d1f291591320471d50</div><div id='time'> Time: 2020-05-30</div><div id='author'> Author: josephgeobenjamin@gmail.com</div><div id='file'> File Name: algorithms/recurrent_nets.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/recurrent_nets.py</div><div id='n_file'> N File Name: algorithms/recurrent_nets.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 150</div><div id='n_end'> N End Line: 175</div><BR>

@@ -1,0 +1,181 @@
+<html><h3>Pattern ID :3133
+</h3><img src='16783616.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, keys = None):
+        device = x.device
+        b<a id="change">, t, e, m</a> = *x.shape, self.num_mem_kv
+
+        mem = self.mem_kv.expand(m, b, e)
+        keys = default(keys, torch.empty(b, 0, e, device=device))
+
+        x, keys = x.transpose(0, 1), keys.transpose(0, 1)
+
+        kv = torch.cat((x, mem, keys))
+
+        attn_shape = (<a id="change">t</a><a id="change">, kv.shape[0]</a>)
+        attn_mask = torch.zeros(*attn_shape, device=x.device)
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.causal = causal
+
+    def forward(self, qk, v, query_len = None):
+        query_len = <a id="change">default(</a>query_len, qk.shape[1]<a id="change">)</a>
+        t = query_len
+
+        q = qk[:, 0:query_len]
+        qk = F.normalize(qk, 2, dim=-1)
+
+        dot = torch.einsum(&quotbie,bje-&gt;bij&quot, q, qk)
+
+        &#47&#47 qk attention requires tokens not attend to self
+        i = torch.arange(t)
+        dot[:, i, i] = -1e-5 
+
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)
+            dot[:, i, j] = float(&quot-inf&quot)
+
+        dot<a id="change"> = </a>dot.softmax(dim=-1)
+        out = torch.einsum(&quotbij,bje-&gt;bie&quot, dot, v)
+        return out<a id="change">, dot</a>
+
+&#47&#47 Shared qk attention, using either full or LSH attention
+
+class LSHSelfAttention(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/d2462f9b33944e20f5fbeaf19efaa9591378ba65#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16783616</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: d2462f9b33944e20f5fbeaf19efaa9591378ba65</div><div id='time'> Time: 2020-01-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 386</div><div id='m_end'> M End Line: 403</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 349</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        total_len = mem.shape[2] + lmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+
+        <a id="change">next_mem</a> = []
+        next_lmem = []
+
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+
+            memories = None
+            if use_memory:
+                memories = (next(mem_iter), next(lmem_iter))
+
+            x, (mem_out, lmem_out) = attn(x, memories = memories, calc_memory = use_memory, input_mask = mask, pos_emb = pos_emb)
+            x, = ff(x)
+
+            if use_memory:
+                next_mem.append(mem_out)
+                next_lmem.append(lmem_out)
+
+        out = self.to_logits(x)
+
+        next_mem<a id="change">, next_lmem</a> = map(torch.stack, (next_mem<a id="change">, next_lmem</a>))
+        next_mem, next_lmem = map(torch.detach, (next_mem, next_lmem))
+
+        return out, Memory(short = next_mem, long = next_lmem)</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_memory_layers = len(self.memory_layers)
+        init_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_mem<a id="change">)</a>
+        lmem = default(lmem, init_mem)
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        hiddens = []
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter, lmem_iter)) if use_memory else None
+
+            if use_memory:
+                hiddens.append(x)
+
+            x = attn(x, memories = memories, calc_memory = use_memory, input_mask = mask, pos_emb = pos_emb)
+            x = ff(x)
+
+        hiddens = torch.stack(hiddens)
+        out = self.to_logits(x)
+
+        &#47&#47 calculate next memory state
+
+        next_memory = self.memory_network(lmem, mem, hiddens)
+        return out<a id="change">, next_memory</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16783459</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter<a id="change">, lmem_iter</a> = map(iterate_tensor, (mem, lmem))
+
+        hiddens = []
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter<a id="change">, lmem_iter</a>)) if use_memory else None
+
+            if use_memory:
+                hiddens.append(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        num_memory_layers = len(self.memory_layers)
+
+        mem = <a id="change">default(</a>mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))<a id="change">)</a>
+        lmem = default(lmem, lambda: torch.empty(b, 0, d, **to(x)))
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+
+        mem_iter<a id="change"> = </a>iterate_tensor(mem)
+
+        hiddens = []
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = next(mem_iter)<a id="change">, lmem if use_memory else None</a>
+
+            if use_memory:
+                hiddens.append(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/288be75552a43b02c0c272ce7da8157e73c78d2d#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L368' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16783579</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: 288be75552a43b02c0c272ce7da8157e73c78d2d</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 379</div><div id='m_end'> M End Line: 395</div><div id='n_start'> N Start Line: 385</div><div id='n_end'> N End Line: 400</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mem = self.mem_kv.expand(m, b, e)
+        keys = default(keys, torch.empty(b, 0, e, device=device))
+
+        x<a id="change">, keys</a> = x.transpose(0, 1), keys.transpose(0, 1)
+
+        kv = torch.cat((x<a id="change">, mem, keys</a>))
+
+        attn_shape = (t, kv.shape[0])
+        attn_mask = torch.zeros(*attn_shape, device=x.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.causal = causal
+
+    def forward(self, qk, v, query_len = None):
+        query_len = <a id="change">default(</a>query_len, qk.shape[1]<a id="change">)</a>
+        t = query_len
+
+        q = qk[:, 0:query_len]
+        qk = F.normalize(qk, 2, dim=-1)
+
+        dot = torch.einsum(&quotbie,bje-&gt;bij&quot, q, qk)
+
+        &#47&#47 qk attention requires tokens not attend to self
+        i = torch.arange(t)
+        dot[:, i, i] = -1e-5 
+
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)
+            dot[:, i, j] = float(&quot-inf&quot)
+
+        dot<a id="change"> = </a>dot.softmax(dim=-1)
+        out = torch.einsum(&quotbij,bje-&gt;bie&quot, dot, v)
+        return out<a id="change">, dot</a>
+
+&#47&#47 Shared qk attention, using either full or LSH attention
+
+class LSHSelfAttention(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/d2462f9b33944e20f5fbeaf19efaa9591378ba65#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL385' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16783471</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: d2462f9b33944e20f5fbeaf19efaa9591378ba65</div><div id='time'> Time: 2020-01-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 386</div><div id='m_end'> M End Line: 403</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 349</div><BR>

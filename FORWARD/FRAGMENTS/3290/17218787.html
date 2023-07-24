@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                            
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(<a id="change">self.conv2(</a>x<a id="change">)</a>))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x<a id="change"> = </a>F.log_softmax(x, dim=1)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.dropout(out)
+
+        &#47&#47 The last hidden state is taken
+        out = torch.relu_(self.fc1(<a id="change">out[:,-1,:]</a>))
+        out = self.dropout(out)
+        out = torch.sigmoid(self.fc2(out))
+            </code></pre>

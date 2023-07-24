@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+	def forward(self, content_code, class_code):
+		batch_size = content_code.shape[0]
+
+		content_code = <a id="change">content_code.view(</a>(batch_size, -1, 4, 4)<a id="change">)</a>
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			out<a id="change"> = </a>content_code + noise
+		else:
+			out = content_code
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in <a id="change">zip(</a>self.convs[::2], self.convs[1::2], self.to_rgbs<a id="change">)</a>:
+			out = conv1(out, latent[:, i])
+			out = conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)</code></pre>

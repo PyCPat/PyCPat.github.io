@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y = x[i].clone()
+                <a id="change">y[..., :5 + self.nc]</a>.sigmoid_()
+                if self.inplace:
+                    y[..., 0:2] = (y[..., 0:2] * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh</code></pre><h3>After Change</h3><pre><code class='java'>
+                    xy, wh, conf, mask = x[i].split((2, 2, self.nc + 1, self.no - self.nc - 5), 4)
+                    xy = (xy.sigmoid() * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (wh.sigmoid() * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, <a id="change">conf.sigmoid()</a>, mask), 4)
+                else:  &#47&#47 Detect (boxes only)
+                    xy, wh, conf = x[i].sigmoid().split((2, 2, self.nc + 1), 4)
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre>

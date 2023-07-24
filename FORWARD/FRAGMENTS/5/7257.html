@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        key_layer = key_layer.transpose(1, 0).reshape(output_size[3], output_size[0] * output_size[1], -1)
+
+        &#47&#47 slice alibi tensor until the query length
+        sliced_alibi = <a id="change">alibi[: output_size[0] * output_size[1], :, : output_size[3]]</a>
+
+        &#47&#47 Raw attention scores. [batch_size * num_heads, q_length, k_length]
+        beta = 1.0 / self.layer_number
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_attentions=False,
+    ):
+        if alibi is None:
+            current_sequence_length = hidden_states.shape[1] + (0<a id="change"> if </a>layer_past is None<a id="change"> else </a>layer_past[0].shape[1])
+            alibi = build_alibi_tensor(
+                current_sequence_length, n_head=self.num_heads, dtype=hidden_states.dtype, device=hidden_states.device
+            )</code></pre>

@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input, encoder_outs=None):
+        &#47&#47 im branch
+        x = input
+        <a id="change">for </a>i, <a id="change">up_conv</a> in <a id="change">enumerate(</a>self.up_convs<a id="change">):
+            </a>before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x<a id="change"> = </a>up_conv(x, before_pool,se=self.im_atts[i])
+        x_im = x
+
+        x = input        
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = self.mask_atts[i])
+        x_mask = x
+
+        x = input
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se=self.wm_atts[i])
+        x_wm = x
+
+        <a id="change">return </a>x_im,x_mask,x_wm
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = up_conv(x, before_pool, se = attn)
+        x_mask = x
+
+        <a id="change">return </a>x_im<a id="change">, x_mask</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre>

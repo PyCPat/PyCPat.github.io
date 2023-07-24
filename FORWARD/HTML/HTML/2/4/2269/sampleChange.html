@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = <a id="change">self.blocks[:1]</a> if len(blocks) == 0 else blocks
+
+        block_args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, block_args))
+        return _ReversibleFunction.apply(x, blocks, block_args)</code></pre><h3>After Change</h3><pre><code class='java'>
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out =  _ReversibleFunction.apply(x, blocks, args)
+        return <a id="change">torch.stack(out.chunk(2, dim=-1)).sum(dim=0)</a>
+</code></pre>

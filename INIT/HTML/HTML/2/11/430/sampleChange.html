@@ -2,27 +2,35 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-            nn.ReLU()
-        ])
-
-        <a id="change">for l</a> in <a id="change">range(</a>num_layers_linear_hidden - 1<a id="change">):
-            self.operators.append(</a>nn.Linear(hidden_dim, hidden_dim)<a id="change">)</a>
-            <a id="change">self.operators.append(</a>nn.ReLU()<a id="change">)</a>
-            &#47&#47 self.operators.append(nn.Dropout(0.2))
-
-        self.operators.append(nn.Linear(hidden_dim, 2 * action_dim))
-</code></pre><h3>After Change</h3><pre><code class='java'>
-            nn.Linear(in_dim, prev_object[1]),
-        ])
-
-        <a id="change">for </a>layer, argument in policy_structure[:-1]<a id="change">:
-            </a>if layer == &quotlinear&quot:
-                <a id="change">self.operators.append(</a>nn.Linear(prev_object[1], argument)<a id="change">)</a>
-                prev_object = (layer, argument)
-            elif <a id="change">layer == &quotrelu&quot</a><a id="change">:
-                </a>assert argument is None, &quotNo argument for ReLU please&quot
-                <a id="change">self.operators.append(</a>nn.ReLU()<a id="change">)</a>
-            elif layer == &quotdropout&quot:
-                self.operators.append(nn.Dropout(argument))
+        nhiddens += 1
+        self.nhiddens = nhiddens
+        MLP = []
+        <a id="change">for ihiddens</a> in <a id="change">range(</a>self.nhiddens<a id="change">):
+            </a>if ihiddens==0:
+                fin = 1
             else:
-                raise NotImplementedError(f&quot{layer} not known&quot)</code></pre>
+                fin = ndim
+            if ihiddens&lt;nhiddens-1:
+                MLP.append(nn.Linear(fin,ndim))
+                <a id="change">MLP.append(</a>nn.BatchNorm1d(ndim)<a id="change">)</a>
+                <a id="change">MLP.append(</a>nn.LeakyReLU()<a id="change">)</a>
+                if dp!=0:
+                    MLP.append(nn.Dropout(p=dp))
+            else:
+                &#47&#47 last linear maps to binary class probabilities ; loss includes LogSoftmax</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(classifnet, self).__init__()
+        n_layers = 2
+        MLP = []
+        <a id="change">for </a>ilayer in range(n_layers)<a id="change">:
+            </a>if ilayer==0:
+                fin = 1
+            else:
+                fin = ndim[ilayer-1]
+            MLP.append(nn.Linear(fin,ndim[ilayer]))
+            <a id="change">if BN==1</a><a id="change">:
+                MLP.append(</a>nn.BatchNorm1d(ndim[ilayer])<a id="change">)</a>
+            <a id="change">MLP.append(</a>nn.LeakyReLU()<a id="change">)</a>
+            if dp!=0:
+                MLP.append(nn.Dropout(p=dp))
+        &#47&#47 last linear maps to binary class probabilities ; loss includes LogSoftmax
+        MLP.append(nn.Linear(ndim[ilayer],2))</code></pre>

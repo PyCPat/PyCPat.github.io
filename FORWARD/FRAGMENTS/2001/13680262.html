@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                diversity = batchWiseLogit.var(1).sum(-1).sigmoid()
+
+                summedProb = batchWiseLogit.sum(1)
+                posterior = <a id="change">OneHotCategorical(logits=summedProb)</a>
+                prior<a id="change"> = </a><a id="change">OneHotCategorical(probs=torch.ones_like(summedProb) / summedProb.shape[-1])</a>
+                reg = torch.distributions.kl_divergence(posterior, prior)<a id="change"> / </a>diversity
+                &#47&#47 reg += compute_penalties(unNormlogit, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)
+                regs.append(reg)
+            regs = sum(regs)</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 posterior = OneHotCategorical(logits=summedProb)
+                &#47&#47 prior = OneHotCategorical(probs=torch.ones_like(summedProb) / summedProb.shape[-1])
+                &#47&#47 reg = torch.distributions.kl_divergence(posterior, prior) / diversity
+                reg = <a id="change">compute_penalties(</a>batchWiseLogit<a id="change">, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)</a>
+                reg = reg<a id="change"> / </a>diversity
+            regs = sum(regs)
+        return ssimLoss, l1Loss + l2Loss, l1QLoss + l2QLoss, regs &#47&#47 + 10 * stdReg
+</code></pre>

@@ -1,0 +1,63 @@
+<html><h3>Pattern ID :1790
+</h3><img src='13031844.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                x = layer(x)
+
+        for layer in self.ups:
+            <a id="change">if </a>isinstance(layer, ResnetBlocWithAttn)<a id="change">:
+                </a>x = layer(torch.cat((x<a id="change">, feats.pop()</a>), dim=1), t)
+            else:
+                x<a id="change"> = </a>layer(x)
+
+        return self.final_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        idx = 0
+        for layer in self.ups:
+            info = feats.pop()
+            <a id="change">if </a>idx &gt;= self.skip_start<a id="change">:
+                </a>x<a id="change"> = </a><a id="change">layer(</a>x+info, noise_embed<a id="change">)</a>
+            else:
+                x = layer(x, noise_embed)
+            idx += 1
+        return self.final_conv(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/e4bf6add27ee36067514a0b3debcd3bf98dbaa17#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L241' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13031844</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: e4bf6add27ee36067514a0b3debcd3bf98dbaa17</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: UNet</div><div id='n_method'> N Class Name: UNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 303</div><div id='m_end'> M End Line: 325</div><div id='n_start'> N Start Line: 241</div><div id='n_end'> N End Line: 255</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        edge_slices = torch.Tensor(data.__slices__[&quotedge_index&quot]).cpu().long()
+        batch = data.batch
+
+        <a id="change">if </a>self.fake<a id="change">:
+            </a>pers0<a id="change">, pers1 = </a>self.compute_fake_persistence(
+            x, edge_index, vertex_slices, edge_slices, batch
+            )
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            pers1_mask = ~((pers1_reshaped == 0).all(-1))
+            x1 = pers1_reshaped[pers1_mask]
+            for layer in self.set_fn1:
+                <a id="change">if </a>isinstance(layer, DeepSetLayerDim1)<a id="change">:
+                    </a>x1 = layer(x1, edge_slices, mask=pers1_mask)
+                else:
+                    x1<a id="change"> = </a><a id="change">layer(</a>x1<a id="change">)</a>
+        else:
+            x1 = None
+
+        &#47&#47 Collect valid</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/borgwardtlab/togl/commit/f6de25e187c5a78974edd07cec7fc20c675bbbc6#diff-1bcc83bc8c3847d0b5b3dec6be3a4c891b6976da3e071a7a73d3c3bf28d0141cL220' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13031840</div><div id='project'> Project Name: borgwardtlab/togl</div><div id='commit'> Commit Name: f6de25e187c5a78974edd07cec7fc20c675bbbc6</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: max.horn@bsse.ethz.ch</div><div id='file'> File Name: topognn/layers.py</div><div id='m_class'> M Class Name: SimpleSetTopoLayer</div><div id='n_method'> N Class Name: SimpleSetTopoLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: topognn/layers.py</div><div id='n_file'> N File Name: topognn/layers.py</div><div id='m_start'> M Start Line: 222</div><div id='m_end'> M End Line: 261</div><div id='n_start'> N Start Line: 238</div><div id='n_end'> N End Line: 270</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                x = layer(x)
+
+        for layer in self.ups:
+            <a id="change">if </a>isinstance(layer, ResnetBlocWithAttn)<a id="change">:
+                </a>x = layer(torch.cat((x<a id="change">, feats.pop()</a>), dim=1), t)
+            else:
+                x<a id="change"> = </a>layer(x)
+
+        return self.final_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        idx = 0
+        for layer in self.ups:
+            info = feats.pop()
+            <a id="change">if </a>idx &gt;= self.skip_start<a id="change">:
+                </a>x = layer(x+info, noise_embed)
+            else:
+                x<a id="change"> = </a><a id="change">layer(</a>x, noise_embed<a id="change">)</a>
+            idx += 1
+        return self.final_conv(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/12c2447fe9d989a51a1674b23fbb225c783186e5#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L302' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13031841</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 12c2447fe9d989a51a1674b23fbb225c783186e5</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: UNet</div><div id='n_method'> N Class Name: UNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 303</div><div id='m_end'> M End Line: 325</div><div id='n_start'> N Start Line: 241</div><div id='n_end'> N End Line: 255</div><BR>

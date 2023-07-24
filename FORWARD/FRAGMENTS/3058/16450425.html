@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            usage = onehot.sum(0)
+            targets = (x.T @ onehot / usage).T
+
+            targets = torch.where(<a id="change">torch.isnan(</a>targets<a id="change">)</a>, self.embedding,
+                                  targets)
+
+            ema_inplace(self.embedding, targets, self.ema)</code></pre><h3>After Change</h3><pre><code class='java'>
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = (laplace_smoothing(
+                self.cluster_size, self.codebook_size, self.epsilon) *
+                            <a id="change">self.cluster_size.sum()</a>)
+            embed_normalized = self.embed_avg<a id="change"> / </a>cluster_size.unsqueeze(1)
+            self.embed.data.copy_(embed_normalized)
+
+        return quantize, embed_ind</code></pre>

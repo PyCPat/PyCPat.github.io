@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        t = torch.arange(n, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((sinusoid_inp.sin(), sinusoid_inp.cos()), dim=-1)
+        return <a id="change">rearrange(</a>emb, <a id="change">&quoti j -&gt; () i j&quot</a><a id="change">)</a>
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):
+        super().__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq = torch.arange(n, device = device).type_as(self.inv_freq)
+        freqs = einsum(&quoti , j -&gt; i j&quot, seq, self.inv_freq)
+        freqs = repeat(freqs, &quoti j -&gt; () i (j r)&quot, r = 2)
+        return <a id="change">[</a>freqs.sin(), freqs.cos()<a id="change"></a>]
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):</code></pre>

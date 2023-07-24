@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 electron pairs down,down
+        factors_downdown = factors_[:,nup:,nup:]
+        factors_downdown = factors_downdown[:,<a id="change">torch.tril(torch.ones(</a>ndown,ndown<a id="change">)</a><a id="change">)</a>==0]
+
+        return factors_upup.prod(1) * factors_downdown.prod(1) * factors_updown.prod(2).prod(1)
+class JastrowFunction(torch.autograd.Function):</code></pre><h3>After Change</h3><pre><code class='java'>
+        factors = torch.exp(self.static_weight * input / (1.0 + self.weight * input))
+        &#47&#47factors = factors[:,torch.tril(torch.ones(self.nelec,self.nelec))==0].prod(1)
+        factors = factors.sum(2).sum(1)
+        return <a id="change">factors.view(-1</a>,<a id="change">1</a><a id="change">)</a>
+        &#47&#47return JastrowFunction.apply(input,self.weight,self.static_weight)
+
+        
+class JastrowFunction(torch.autograd.Function):</code></pre>

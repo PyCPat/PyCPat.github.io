@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :3208
+</h3><img src='16998586.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = <a id="change">sig_t.unsqueeze(2).expand_as(</a>g_t<a id="change">)</a>
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights</code></pre><h3>After Change</h3><pre><code class='java'>
+        j = self.J[:inputs.size(1)]
+
+        &#47&#47 attention weights
+        phi_t = g_t.unsqueeze(-1) * torch.exp(-0.5 * (mu_t.unsqueeze(-1) - j)**2 / (<a id="change">sig_t.unsqueeze(-1</a><a id="change">)</a>**2))
+        alpha_t = self.COEF * torch.sum(phi_t, 1)
+
+        &#47&#47 apply masking</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/0e8881114b7cd223a41a452ea7cf570b56c109a7#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L162' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16998586</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 0e8881114b7cd223a41a452ea7cf570b56c109a7</div><div id='time'> Time: 2020-01-10</div><div id='author'> Author: root@sp-mlc3-5423-0.mlc</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 346</div><div id='n_end'> N End Line: 355</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = <a id="change">sig_t.unsqueeze(2).expand_as(</a>g_t<a id="change">)</a>
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights</code></pre><h3>After Change</h3><pre><code class='java'>
+        j = self.J[:inputs.size(1)+1]
+
+        &#47&#47 attention weights
+        phi_t = g_t.unsqueeze(-1) * torch.exp(-0.5 * (mu_t.unsqueeze(-1) - j)**2 / (<a id="change">sig_t.unsqueeze(-1</a><a id="change">)</a>**2))
+
+        &#47&#47 discritize attention weights
+        alpha_t = self.COEF * torch.sum(phi_t, 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/5e148038be5971f2c7c811d46a1d7b28c759ecda#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16998585</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 5e148038be5971f2c7c811d46a1d7b28c759ecda</div><div id='time'> Time: 2020-01-09</div><div id='author'> Author: root@sp-mlc3-5423-0.mlc</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 We use the same vector as both a query and a key.
+        assert int(buckets.shape[1]) == self.n_hashes * seqlen
+
+        ticker = <a id="change">torch.arange(self.n_hashes * seqlen, device=device).unsqueeze(0).expand_as(</a>buckets<a id="change">)</a>
+        buckets_and_t = seqlen * buckets + (ticker % seqlen)
+        buckets_and_t = buckets_and_t.detach()
+
+        &#47&#47 Hash-based sort ("s" at the start of variable names means "sorted")</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        total_hashes = self.n_hashes + self.n_local_attn_hashes
+
+        ticker = <a id="change">torch.arange(total_hashes * seqlen, device=device).unsqueeze(0</a><a id="change">)</a>.expand_as(buckets)
+        buckets_and_t = seqlen * buckets + (ticker % seqlen)
+        buckets_and_t = buckets_and_t.detach()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/4017831b71f1807ce6e82b28d63eae6bce6dcf7b#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL178' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16998584</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 4017831b71f1807ce6e82b28d63eae6bce6dcf7b</div><div id='time'> Time: 2020-03-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: LSHAttention</div><div id='n_method'> N Class Name: LSHAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 186</div><div id='m_end'> M End Line: 352</div><div id='n_start'> N Start Line: 189</div><div id='n_end'> N End Line: 361</div><BR>

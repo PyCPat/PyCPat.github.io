@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.global_skip:
+            x = self.global_skip_conv(x)
+        x0 = self.conv_in(x)
+        x1<a id="change"> = </a>self.down_block(x0)
+        if h_prev is not None:
+            assert self.conv_hprev_down is not None
+            h_prev<a id="change"> = </a>self.conv_hprev_down(h_prev)
+            x1 = x1 + h_prev
+        x_rnn, h = self.gru(x1, h)
+        x_rnn = x_rnn + x1
+        x1 = self.up_block(x_rnn)
+        x1 = x1 + x0
+        m = self.conv_out(x1, skip=x if self.global_skip else None)
+        <a id="change">return </a>m<a id="change">, x_rnn, h</a>
+
+
+def _init_weights(module, name=None, out_init_scale=1.0):
+    if isinstance(module, (nn.Conv2d, nn.ConvTranspose2d, nn.LayerNorm)):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: Tensor, h: Optional[Tensor] = None) -&gt; Tuple[Tensor, Tensor, Tensor]:
+        &#47&#47 input shape: [B, C, T, F]
+        intermediate<a id="change"> = []</a>
+        for enc_layer in self.enc:
+            x = enc_layer(x)
+            <a id="change">intermediate.append(</a>x<a id="change">)</a>
+        x_rnn, h = self.rnn(x, h)
+        for dec_layer, x_enc in zip(self.dec, reversed(intermediate)):
+            x = dec_layer(x + x_enc)
+        <a id="change">return </a>x<a id="change">, x_rnn, h</a>
+
+
+class ComplexCompression(nn.Module):
+    def __init__(self, n_freqs: int, init_value: float = 0.5):</code></pre>

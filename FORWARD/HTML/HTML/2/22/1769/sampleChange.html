@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        encoder_outputs, hidden = self.encoder(x_enc)
+        
+        &#47&#47first input to the decoder is the &lt;sos&gt; tokens
+        <a id="change">if </a><a id="change">isinstance(x_dec</a>, <a id="change">list</a><a id="change">):
+            </a>input = <a id="change">[i[:, 0, :].unsqueeze(dim=1) for i in x_dec]</a>
+        else:
+            input = x_dec[:, 0, :].unsqueeze(dim=1)
+        for t in range(1, x_dec_len):
+            
+            &#47&#47insert input token embedding, previous hidden state and the context state
+            &#47&#47receive output tensor (predictions) and new hidden state
+            output, hidden = self.decoder(input, hidden, encoder_outputs)
+            
+            &#47&#47place predictions in a tensor holding predictions for each token
+            outputs[:, t-1, :] = output.squeeze(dim=1)
+            
+            &#47&#47decide if we are going to use teacher forcing or not
+            teacher_force = random.random() &lt; teacher_forcing_ratio
+            
+            &#47&#47if teacher forcing, use actual next token as next input
+            &#47&#47if not, use predicted token
+            <a id="change">if isinstance(x_dec</a>, <a id="change">list</a><a id="change">)</a><a id="change">:
+                </a>input0 = <a id="change">x_dec[0][:, t, :].unsqueeze(dim=1) if teacher_force</a><a id="change"> else </a>output
+                input = <a id="change">[</a>input0, <a id="change">x_dec[1]</a>[:, t, :].unsqueeze(dim=1)<a id="change"></a>]
+            else:
+                input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+        return outputs[:, :, -self.out_size:]</code></pre><h3>After Change</h3><pre><code class='java'>
+            input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+            input_mark = x_dec_mark[:, t, :].unsqueeze(dim=1)
+
+        return outputs[:, <a id="change">-self.pred_len</a>:, -self.out_size:]
+       
+if __name__ == &quot__main__&quot:
+    enc_in, dec_in, emb_dim, enc_hid_dim, dec_hid_dim = 45, 45, 512, 512, 512</code></pre>

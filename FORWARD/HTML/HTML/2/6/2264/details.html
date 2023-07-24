@@ -1,0 +1,105 @@
+<html><h3>Pattern ID :2264
+</h3><img src='14285699.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, arg_route = (True, True), **kwargs):
+        f_args, g_args = map(lambda route: kwargs if route else {}, arg_route)
+        block_kwargs = <a id="change">{</a>&quotf_args&quot: f_args, &quotg_args&quot: g_args<a id="change">}</a>
+        <a id="change">return </a>_ReversibleFunction.apply(x, self.blocks, block_kwargs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x, **kwargs):
+        x = torch.cat(<a id="change">[</a>x, x<a id="change"></a>], dim=-1)
+
+        blocks = self.blocks
+        args = route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out<a id="change"> =  </a>_ReversibleFunction.apply(x, blocks, args)
+        <a id="change">return </a><a id="change">torch.stack(</a>out.chunk(2, dim=-1)<a id="change">)</a>.sum(dim=0)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/linear-attention-transformer/commit/fa23ce09a98a63d26116e3935ad5902cf705255d#diff-29d3c048298bdaa9a9670921a4026430e5b09b55bc1da20d65da18bd5c85f575L118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14285699</div><div id='project'> Project Name: lucidrains/linear-attention-transformer</div><div id='commit'> Commit Name: fa23ce09a98a63d26116e3935ad5902cf705255d</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linear_attention_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linear_attention_transformer/reversible.py</div><div id='n_file'> N File Name: linear_attention_transformer/reversible.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 121</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text_tokens: LongTensor,
+        encoder_state: FloatTensor
+    ) -&gt; LongTensor:
+        image_tokens: List[LongTensor] = <a id="change">[]</a>
+        attention_state = torch.zeros(self.attention_state_shape)
+        if torch.cuda.is_available(): 
+            attention_state = attention_state.cuda()
+        image_token = self.start_token
+
+        for i in range(self.sample_token_count):
+            probs, attention_state = self.decode_step(
+                text_tokens = text_tokens,
+                encoder_state = encoder_state,
+                attention_state = attention_state,
+                prev_token = image_token,
+                token_index = self.token_indices[[i]]
+            )
+
+            image_token = torch.multinomial(probs, 1)
+            image_tokens += [image_token]
+            
+        <a id="change">return </a>torch.cat(image_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if torch.cuda.is_available(): attention_state = attention_state.cuda()
+        
+        image_tokens = self.start_token[[0] * image_count]
+        image_tokens_sequence<a id="change">: list[LongTensor] = </a><a id="change">[]</a>
+        for i in range(self.sample_token_count):
+            probs, attention_state = self.decode_step(
+                attention_mask = attention_mask,
+                encoder_state = encoder_state,
+                attention_state = attention_state,
+                prev_tokens = image_tokens,
+                token_index = self.token_indices[[i]]
+            )
+
+            image_tokens = torch.multinomial(probs, 1)[:, 0]
+            image_tokens_sequence += [image_tokens]
+        
+        <a id="change">return </a><a id="change">torch.stack(</a>image_tokens_sequence<a id="change">)</a>.T</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/1eb56737d8173379a240faab78ffc4605e7b1582#diff-cdf6c765ac154a08d38442c8f2599da87fe2c451ad8d485b2a3c6fde4f659a81L196' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14285698</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: 1eb56737d8173379a240faab78ffc4605e7b1582</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='m_class'> M Class Name: DalleBartDecoder</div><div id='n_method'> N Class Name: DalleBartDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='m_start'> M Start Line: 201</div><div id='m_end'> M End Line: 220</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 226</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, input, hidden_state=None):
+        output = <a id="change">[]</a>
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(input[:, step, :, :, :], hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)
+        <a id="change">return </a>output
+
+
+&#47&#47 --------------------------------------------------------------------------</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_len = len(cur_layer_input)
+
+        layer_output_list = []
+        last_state_list<a id="change"> = </a><a id="change">[]</a>
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)
+            last_state_list.append(h)
+
+        layer_output = torch.stack(output_inner, dim=int(self.batch_first))
+        last_state_list = <a id="change">torch.stack(</a>last_state_list<a id="change">, dim=0)</a>
+        <a id="change">return </a>layer_output, last_state_list
+
+    def reset_parameters(self):
+        for c in self.cell_list:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14285700</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>

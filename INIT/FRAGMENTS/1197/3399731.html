@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+        &#47&#47 parameters of the network
+        base_channels = <a id="change">int(</a>wid_mul<a id="change"> * 64</a><a id="change">)</a>  &#47&#47 64
+        base_depth = max(round(dep_mul * 3), 1)  &#47&#47 3
+        assert out_features, "please provide output features of Darknet!"
+        self.out_features = out_features</code></pre><h3>After Change</h3><pre><code class='java'>
+            BaseConv(channels[1], channels[2], 3, 2, norm=norm, act=act),
+            CSPLayer(
+                channels[2],
+                <a id="change">channels[2]</a>,
+                num_bottle=base_depth * 3,
+                norm=norm,
+                act=act,
+            ),
+        )
+
+        &#47&#47 dark4
+        self.dark4 = nn.Sequential(
+            BaseConv(channels[2], channels[3], 3, 2, norm=norm, act=act),
+            CSPLayer(
+                channels[3],
+                channels[3],
+                num_bottle=base_depth * 3,
+                norm=norm,
+                act=act,
+            ),
+        )
+
+        &#47&#47 dark5
+        self.dark5 = nn.Sequential(
+            BaseConv(<a id="change">channels[3]</a>, channels[4], 3, 2, norm=norm, act=act),
+            SPPBottleneck(channels[4], channels[4], norm=norm, act=act),
+            CSPLayer(
+                channels[4],</code></pre>

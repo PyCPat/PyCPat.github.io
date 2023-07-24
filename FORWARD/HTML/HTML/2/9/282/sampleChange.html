@@ -1,0 +1,70 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input, encoder_outs=None):
+        &#47&#47 im branch
+        x = input
+        <a id="change">for </a>i, <a id="change">up_conv</a> in <a id="change">enumerate(</a>self.up_convs<a id="change">)</a><a id="change">:
+            </a>before_pool = None
+            if encoder_outs is not None:
+                before_pool<a id="change"> = </a>encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=self.im_atts[i])
+        x_im = x
+
+        x = input        
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = self.mask_atts[i])
+        x_mask = x
+
+        x = input
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se=self.wm_atts[i])
+        x_wm = x
+
+        <a id="change">return </a>x_im,x_mask,x_wm
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        &#47&#47 Encoder convs
+        im_encoder_outs = []
+        mask_encoder_outs<a id="change"> = </a>[]
+        x = input
+        for i, d_conv in enumerate(self.down_convs):
+            &#47&#47 d_conv, attn = nets
+            x, before_pool = d_conv(x)
+            im_encoder_outs.append(before_pool)
+            mask_encoder_outs.append(before_pool)
+        x_im = x
+        x_mask = x
+
+        &#47&#47 Decoder convs
+        x = x_im
+        for i, nets in enumerate(zip(self.up_convs, self.up_im_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if im_encoder_outs is not None:
+                before_pool = im_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=attn)
+        x_im = x
+
+        x = x_mask       
+        for i, nets in enumerate(zip(self.up_convs, self.up_mask_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if mask_encoder_outs is not None:
+                before_pool = mask_encoder_outs[-(i+2)]
+            x<a id="change"> = </a>up_conv(x, before_pool, se = attn)
+        x_mask<a id="change"> = </a>x
+
+        <a id="change">return </a>x_im, x_mask
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre>

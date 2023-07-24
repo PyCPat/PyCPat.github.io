@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :3326
+</h3><img src='17240215.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.average:
+            distance = distance.mean(0)
+        else:
+            distance = <a id="change">distance.sum(0</a><a id="change">)</a>
+
+        <a id="change">return </a>distance</code></pre><h3>After Change</h3><pre><code class='java'>
+        stfts_y = self.multiscale_stft(y)
+        distance = 0.
+
+        <a id="change">for </a>x, y in zip(stfts_x, stfts_y)<a id="change">:
+            </a>distance<a id="change"> = </a>distance<a id="change"> + lin_distance(x, y) + </a>log_distance(x, y)
+
+
+@gin.register</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/c57a98c5145db1f44c6e5c540989494f696502ca#diff-aca7ec2a2422bb0681d3fcd464ed2c9c1a77d411f39d853fc5fb0b166f9108b1L276' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17240215</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: c57a98c5145db1f44c6e5c540989494f696502ca</div><div id='time'> Time: 2022-11-05</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/core.py</div><div id='m_class'> M Class Name: AudioDistance</div><div id='n_method'> N Class Name: AudioDistanceV1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/core.py</div><div id='n_file'> N File Name: rave/core.py</div><div id='m_start'> M Start Line: 284</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 276</div><div id='n_end'> N End Line: 284</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.average:
+            distance = distance.mean(0)
+        else:
+            distance = <a id="change">distance.sum(0</a><a id="change">)</a>
+
+        <a id="change">return </a>distance</code></pre><h3>After Change</h3><pre><code class='java'>
+        stfts_y = self.multiscale_stft(y)
+        distance = 0.
+
+        <a id="change">for </a>x, <a id="change">y</a> in zip(stfts_x, stfts_y)<a id="change">:
+            </a>distance<a id="change"> = </a>distance<a id="change"> + </a>lin_distance(x, y) + log_distance(x, y)
+
+
+@gin.register</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/c57a98c5145db1f44c6e5c540989494f696502ca#diff-aca7ec2a2422bb0681d3fcd464ed2c9c1a77d411f39d853fc5fb0b166f9108b1L283' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17240214</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: c57a98c5145db1f44c6e5c540989494f696502ca</div><div id='time'> Time: 2022-11-05</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/core.py</div><div id='m_class'> M Class Name: AudioDistance</div><div id='n_method'> N Class Name: AudioDistanceV1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/core.py</div><div id='n_file'> N File Name: rave/core.py</div><div id='m_start'> M Start Line: 284</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 276</div><div id='n_end'> N End Line: 284</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        print(sample[..., None].shape)
+        print(self._codebook[:, None, None, ...].shape)
+        exit()
+        <a id="change">return </a><a id="change">(sample[..., None] * self._codebook[:, None, None, ...]).sum(-2</a><a id="change">)</a>
+
+
+class _quantizerEncoder(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        return torch.einsum("nmhwk,mkd-&gt;nmhwd", sample, self._codebook).permute(0, 1, 4, 2, 3).reshape(n, -1, h, w)
+
+        quantizeds = list()
+        <a id="change">for i</a> in range(len(self._codebook))<a id="change">:
+            &#47&#47 [n, h, w, k]
+            </a>oneHot = sample[:, i]
+            &#47&#47 [n, h, w, k] @ [k, d] -&gt; [n, h, w, d]
+            quantized<a id="change"> = </a>oneHot<a id="change"> @ </a>self._codebook[i]
+            quantizeds.append(quantized)
+        &#47&#47 m * [n, h, w, d] -&gt; [n, h, w, c] -&gt; [n, c, h, w]
+        return torch.cat(quantizeds, -1).permute(0, 3, 1, 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/e36abadfbaa15ca5f2208734c7a8c25586153013#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17240216</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: e36abadfbaa15ca5f2208734c7a8c25586153013</div><div id='time'> Time: 2022-01-07</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: _multiCodebookDeQuantization</div><div id='n_method'> N Class Name: _multiCodebookDeQuantization</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 156</div><div id='n_end'> N End Line: 164</div><BR>

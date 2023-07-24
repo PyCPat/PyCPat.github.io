@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = rearrange(gate, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        gate = einsum(&quotb h n d, h n m -&gt; b h m d&quot, gate, weight)
+        gate = gate + rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate<a id="change"> = </a><a id="change">rearrange(</a>gate, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+
+        return gate * res
+
+def gMLPBlock(</code></pre><h3>After Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        gate = F.pad(gate, (0, 0, 0, 0, 1, 0), value = 0.)
+        gate = torch.cat((gate[:, <a id="change">:-1</a>], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre>

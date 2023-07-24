@@ -1,0 +1,46 @@
+<html><h3>Pattern ID :2762
+</h3><img src='15463339.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise ValueError(f"PatchEmbed module. Input image width ({W}) doesn&quott match model ({self.img_size[1]}).")
+        x = self.proj(x)
+        if self.flatten:
+            x<a id="change"> = </a><a id="change">x.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>  &#47&#47 BCHW -&gt; BNC
+        x = self.norm(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, C, H, W = x.shape
+        &#47&#47 FIXME look at relaxing size constraints
+        <a id="change">assert </a>H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = self.proj(x).flatten(2).transpose(1, 2)  &#47&#47 B Ph*Pw C
+        if self.norm is not None:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/ab2534f05b48a529d03f8c28af2579245772f4e0#diff-8ea48274a2159a0abc4b0425f2fb246399f29a78d6a46d98cdbda118b48a4195L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15463339</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: ab2534f05b48a529d03f8c28af2579245772f4e0</div><div id='time'> Time: 2022-07-11</div><div id='author'> Author: rashit.bayazitov.1995@gmail.com</div><div id='file'> File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/modules/blocks/patch_embedding.py</div><div id='n_file'> N File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs<a id="change"> = </a><a id="change">torch.stack(mel_outputs).transpose(0</a>, <a id="change">1</a><a id="change">)</a>.contiguous()
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check
+        <a id="change">assert </a>greedy or mel_outputs.size(1) == T_decoder
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15463338</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = torch.stack(mel_outputs).transpose(0, 1).contiguous()
+        stop_tokens<a id="change"> = </a><a id="change">torch.stack(stop_tokens).transpose(0</a>, <a id="change">1</a><a id="change">)</a>.squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs = mel_outputs.reshape(B, -1, self.mel_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check
+        <a id="change">assert </a>greedy or mel_outputs.size(1) == T_decoder
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15463347</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

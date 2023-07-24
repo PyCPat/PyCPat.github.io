@@ -1,0 +1,129 @@
+<html><h3>Pattern ID :2850
+</h3><img src='15660362.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask = <a id="change">F.pad(</a>x, (0, padding)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+
+        q *= self.scale
+
+        img_seq_len = img_size ** 2
+        text_len = seq_len - img_seq_len
+        ((q_text, q_img), (k_text, k_img), (v_text, v_img)) = map(lambda t: (t[:, img_seq_len:], t[:, -img_seq_len:]), (q, k, v))
+
+        &#47&#47 text attention
+
+        dots_text = einsum(&quotb i d, b j d -&gt; b i j&quot, q_text, k_text)
+        mask_value = max_neg_value(dots_text)
+
+        i, j = dots_text.shape[-2:]
+        mask = torch.ones(i, j, device = device).triu_(j - i + 1).bool()
+        dots_text.masked_fill(mask, mask_value)
+
+        attn_text = dots_text.softmax(dim = -1)
+        out_text = einsum(&quotb i j, b j d -&gt; b i d&quot, attn_text, v_text)
+
+        &#47&#47 image attention
+
+        effective_kernel_size = (kernel_size - 1) * dilation + 1
+        padding = effective_kernel_size // 2
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.unfold(t, kernel_size, padding = padding, dilation = dilation), (k_img, v_img))
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (j d) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        k_text, v_text = map(lambda t: repeat(t, &quotb j d -&gt; b i j d&quot, i = img_seq_len), (k_text, v_text))
+
+        &#47&#47 let image attend to all of text
+
+        k_img = torch.cat((k_text, k_img), dim = 2)
+        v_img = torch.cat((v_text, v_img), dim = 2)
+
+        dots_image = einsum(&quotb i d, b i j d -&gt; b i j&quot, q_img, k_img)
+
+        &#47&#47 calculate causal attention for local convolution
+
+        i, j = dots_image.shape[-2:]
+        img_seq = torch.arange(img_seq_len, device = device)
+        k_img_indices = rearrange(img_seq.float(), &quot(h w) -&gt; () () h w&quot, h = img_size)
+        k_img_indices = F.pad(k_img_indices, (padding,) * 4, value = img_seq_len) &#47&#47 padding set to be max, so it is never attended to
+        k_img_indices = F.unfold(k_img_indices, kernel_size, dilation = dilation)
+        k_img_indices = rearrange(k_img_indices, &quotb j i -&gt; b i j&quot)
+
+        &#47&#47 mask image attention
+
+        q_img_indices = rearrange(img_seq, &quoti -&gt; () i ()&quot)
+        mask =  q_img_indices &gt;= k_img_indices
+
+        &#47&#47 image can attend to all of text
+
+        mask<a id="change"> = </a>F.pad(mask, (text_len, 0), value = True)
+        dots_image.masked_fill_(~mask, mask_value)
+
+        attn_image = dots_image.softmax(dim = -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = default(mask, lambda: torch.ones(b, text_len, device = device).bool())
+
+        x = F.pad(x, (0, 0, 0, padding), value = 0)
+        mask = <a id="change">mask[:, :text_len]</a>
+
+        &#47&#47 derive query / keys / values
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15660362</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>x, (0, padding)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = default(mask, lambda: torch.ones(b, text_len, device = device).bool())
+
+        x = F.pad(x, (0, 0, 0, padding), value = 0)
+        mask = <a id="change">mask[:, :text_len]</a>
+
+        &#47&#47 derive queries / keys / values
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15660360</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 191</div><div id='m_end'> M End Line: 241</div><div id='n_start'> N Start Line: 201</div><div id='n_end'> N End Line: 259</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    ) -&gt; Tuple[Tensor, Tensor, Tensor, Tensor]:
+        feat_spec = feat_spec.squeeze(1).permute(0, 3, 1, 2)
+
+        feat_erb<a id="change"> = </a><a id="change">self.pad(</a>feat_erb<a id="change">)</a>
+        feat_spec = self.pad(feat_spec)
+        e0, e1, e2, e3, emb, c0, lsnr = self.enc(feat_erb, feat_spec)
+        m = self.erb_dec(emb, e3, e2, e1, e0)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 Legacy mode only pads the lower part of the spectrum.
+                spec_f = self.pad_spec(spec)
+                spec_f = self.df_op(spec_f, df_coefs)
+                spec[..., : self.nb_df, :] = <a id="change">spec_f[..., : self.nb_df, :]</a>
+            else:
+                spec = self.pad_spec(spec)
+                spec = self.df_op(spec, df_coefs)
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/a02877c94eb3c65d15ea256da7fb5a5193f6596a#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL482' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15660373</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: a02877c94eb3c65d15ea256da7fb5a5193f6596a</div><div id='time'> Time: 2022-05-11</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 488</div><div id='m_end'> M End Line: 504</div><div id='n_start'> N Start Line: 431</div><div id='n_end'> N End Line: 456</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = x.unsqueeze(0)
+
+        x = torch.sign(x)
+        x = <a id="change">self.pad(</a>x<a id="change">)</a>
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)
+        z = 0.5 * torch.abs(x[..., 1:] - x[..., :-1]).sum(-1)
+
+        if self.norm:
+            z = z / self.frame_length
+        for _ in range(3 - d):
+            z<a id="change"> = </a>z.squeeze(0)
+        return z
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        
+        x = torch.sign(x)
+        x = torch.cat((<a id="change">x[..., :1]</a>, x), dim=-1)
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)
+        z = 0.5 * torch.abs(x[..., 1:] - x[..., :-1]).sum(-1)
+        if self.norm:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/c71e34ed516f1d63687f4f2135d421d08cedfd44#diff-3d2136b6eab363c825aa063298d2778a1ef04444522749238d8d95629ba95f7aL45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15660370</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: c71e34ed516f1d63687f4f2135d421d08cedfd44</div><div id='time'> Time: 2022-04-15</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/core/zcross.py</div><div id='m_class'> M Class Name: ZeroCrossingAnalysis</div><div id='n_method'> N Class Name: ZeroCrossingAnalysis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/zcross.py</div><div id='n_file'> N File Name: diffsptk/core/zcross.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 68</div><BR>

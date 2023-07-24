@@ -1,0 +1,82 @@
+<html><h3>Pattern ID :576
+</h3><img src='2233762.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        v = v if torch.is_tensor(v) else k if torch.is_tensor(k) else q
+        k = k if torch.is_tensor(k) else q
+
+        q<a id="change"> = </a><a id="change">q.transpose(0, 1).contiguous()</a>
+        k = k.transpose(0, 1).contiguous()
+        v = v.transpose(0, 1).contiguous()
+
+        b = q.size(1) * self._heads</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q.view(-1, b, self._head_dims).transpose(0, 1)
+        k = k.view(-1, b, self._head_dims).transpose(0, 1)
+        v<a id="change"> = </a><a id="change">v.view(-1, b, self._head_dims).transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        att = torch.bmm(q, k.transpose(1, 2)) / self._h_dims**0.5
+
+        if mask is not None:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yeliudev/nncore/commit/591ba982d2f81385c91f619f48fc1fa6068f0d9a#diff-b66764790ba7b310b71bcb990fc01ea802675de40cfbd1e8da361bbc4827b8c3L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2233762</div><div id='project'> Project Name: yeliudev/nncore</div><div id='commit'> Commit Name: 591ba982d2f81385c91f619f48fc1fa6068f0d9a</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: yeliudev@outlook.com</div><div id='file'> File Name: nncore/nn/blocks/transformer.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nncore/nn/blocks/transformer.py</div><div id='n_file'> N File Name: nncore/nn/blocks/transformer.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, c, h, w = x.shape
+        &#47&#47 b l c -&gt; b l h*c -&gt; b h l c
+        x = x.contiguous().view(b, h * w, c).repeat(1, 1, self.heads)
+        x<a id="change"> = </a><a id="change">x.contiguous()</a>.view(b, self.heads, h * w, c)
+        k, v = x, x
+        &#47&#47 b m d -&gt; b m h*c -&gt; b h m c
+        q = self.to_q(z).view(b, self.heads, m, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, c, h, w = x.shape
+        x = x.contiguous().view(b, h * w, c).unsqueeze(1)
+        q = self.to_q(z).view(b, self.heads, m, c)
+        dots = q @ <a id="change">x.transpose(2</a>, <a id="change">3</a><a id="change">)</a> * self.scale
+        attn = self.attend(dots)
+        out<a id="change"> = </a>attn @ x
+        out = rearrange(out, &quotb h m c -&gt; b m (h c)&quot)
+        return z + self.to_out(out)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/acheun9/pytorch-implementation-of-mobile-former/commit/a7707a31a6e64a5bf04964631a03da650b9b0fee#diff-23c7e28d14d23a06b7adfd7497ec890f8df07225e5bd7ca3288fbf5d8d29ea1fL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2233795</div><div id='project'> Project Name: acheun9/pytorch-implementation-of-mobile-former</div><div id='commit'> Commit Name: a7707a31a6e64a5bf04964631a03da650b9b0fee</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: 50159673+ACheun9@users.noreply.github.com</div><div id='file'> File Name: bridge.py</div><div id='m_class'> M Class Name: Mobile2Former</div><div id='n_method'> N Class Name: Mobile2Former</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bridge.py</div><div id='n_file'> N File Name: bridge.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 33</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 44</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, m, d = z.shape
+        b, c, h, w = x.shape
+        x_ = x.contiguous().view(b, h * w, c).repeat(1, 1, self.heads)
+        x_<a id="change"> = </a><a id="change">x_.contiguous()</a>.view(b, self.heads, h * w, c)
+        q = x_
+        &#47&#47 b h m c
+        k = self.to_k(z).view(b, self.heads, m, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = x.contiguous().view(b, h * w, c).unsqueeze(1)
+        k = self.to_k(z).view(b, self.heads, m, c)
+        v = self.to_v(z).view(b, self.heads, m, c)
+        dots = q @ <a id="change">k.transpose(2</a>, <a id="change">3</a><a id="change">)</a> * self.scale
+        attn = self.attend(dots)
+        out<a id="change"> = </a>attn @ v
+        out = rearrange(out, &quotb h l c -&gt; b l (h c)&quot)
+        out = self.to_out(out)
+        out = out.view(b, c, h, w)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/acheun9/pytorch-implementation-of-mobile-former/commit/a7707a31a6e64a5bf04964631a03da650b9b0fee#diff-23c7e28d14d23a06b7adfd7497ec890f8df07225e5bd7ca3288fbf5d8d29ea1fL55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2233734</div><div id='project'> Project Name: acheun9/pytorch-implementation-of-mobile-former</div><div id='commit'> Commit Name: a7707a31a6e64a5bf04964631a03da650b9b0fee</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: 50159673+ACheun9@users.noreply.github.com</div><div id='file'> File Name: bridge.py</div><div id='m_class'> M Class Name: Former2Mobile</div><div id='n_method'> N Class Name: Former2Mobile</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bridge.py</div><div id='n_file'> N File Name: bridge.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores<a id="change"> = </a>torch.matmul(<a id="change">src_embedding.transpose(2, 1).contiguous()</a>, tgt_embedding) / math.sqrt(self.emb_dims)
+		scores = torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())</code></pre><h3>After Change</h3><pre><code class='java'>
+            rotation_ba, translation_ba = self.head(tgt_embedding, src_embedding, tgt, src)
+
+        else:
+            rotation_ba<a id="change"> = </a><a id="change">rotation_ab.transpose(2</a>, <a id="change">1</a><a id="change">)</a>.contiguous()
+            translation_ba = -torch.matmul(rotation_ba, translation_ab.unsqueeze(2)).squeeze(2)
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L269' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2233863</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                    -1)  &#47&#47 shape=(batch_size, seq_len, hidden_size*interest_num)
+
+        item_eb_hat = item_eb_hat.view(-1, self.seq_len, self.interest_num, self.hidden_size)
+        item_eb_hat<a id="change"> = </a><a id="change">item_eb_hat.permute(0, 2, 1, 3).contiguous()</a>
+        item_eb_hat = item_eb_hat.view(-1, self.interest_num, self.seq_len,
+                                       self.hidden_size)  &#47&#47 [batch_size, num_interest, seq_len, hidden_size]
+
+        &#47&#47 [batch_size, num_interest, seq_len, hidden_size]</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    dim=3)  &#47&#47 shape=(batch_size, maxlen, hidden_size*interest_num)
+
+        item_eb_hat = torch.reshape(item_eb_hat, (-1, self.seq_len, self.interest_num, self.hidden_size))
+        item_eb_hat<a id="change"> = </a><a id="change">torch.transpose(</a>item_eb_hat, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>.contiguous()
+        item_eb_hat = torch.reshape(item_eb_hat, (-1, self.interest_num, self.seq_len, self.hidden_size))
+
+        &#47&#47 [b, in, s, h]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/edb52c9a2e35045250d5fda164df336768f37599#diff-16584232aba0343bfbe840c65428273f6373d78df60d98d31ac5c2a5f4a698dcL102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2233836</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: edb52c9a2e35045250d5fda164df336768f37599</div><div id='time'> Time: 2023-03-24</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_class'> M Class Name: CapsuleNetwork</div><div id='n_method'> N Class Name: CapsuleNetwork</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/layers/multi_interest.py</div><div id='n_file'> N File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 154</div><BR>

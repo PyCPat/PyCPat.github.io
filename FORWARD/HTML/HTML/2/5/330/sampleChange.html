@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.g = nn.Parameter(torch.ones(1))
+
+    def forward(self, x):
+        n = <a id="change">torch.norm(x, dim = -1, keepdim = True).clamp(min = self.eps)</a>
+        return x / n * self.g
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.g = nn.Parameter(torch.ones(dim))
+
+    def forward(self, x):
+        norm = <a id="change">torch.norm(</a>x<a id="change">, dim = -1, keepdim = True) * </a>self.scale
+        return x / <a id="change">norm.clamp(min = self.eps)</a> * self.g
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre>

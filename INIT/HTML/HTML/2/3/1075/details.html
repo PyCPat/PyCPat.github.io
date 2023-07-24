@@ -1,8 +1,23 @@
 <html><h3>Pattern ID :1075
-</h3><img src='3313319.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='3239057.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        sparse_layer = cast_tuple(sparse_attn, depth)
+
+        for _, sparse_attn in zip(range(depth), sparse_layer):
+            attn_class = Attention<a id="change"> if </a>not sparse_attn<a id="change"> else </a>partial(SparseAttention, sparse_attn_global_indices = sparse_attn_global_indices)
+
+            layers.append(nn.ModuleList([
+                PreNorm(dim, attn_class(dim, causal = causal, seq_len = seq_len, heads = heads, dim_head = dim_head, dropout = attn_dropout, noncausal_attn_len = noncausal_attn_len)),</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        layers = nn.ModuleList([])
+        sparse_layer = cast_tuple(sparse_attn, depth)
+        attn_types<a id="change"> = </a><a id="change">default(</a>attn_types, (&quotfull&quot,)<a id="change">)</a>
+        attn_type_layer = islice(cycle(attn_types), depth)
+
+        for _, sparse_attn, attn_type in zip(range(depth), sparse_layer, attn_type_layer):
+            if attn_type == &quotfull&quot:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-ee397916e2ccc5603bb55b6ea44f20d581aae722f1e26d17108234ff0411b1beL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3239057</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/transformer.py</div><div id='n_file'> N File Name: dalle_pytorch/transformer.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
 
         self.to_q = nn.Linear(dim, dim, bias = False)
 
@@ -31,22 +46,7 @@
         self.to_out<a id="change"> = </a>nn.Linear(dim_head * heads, dim)
 
     def forward(self, x, context = None, **kwargs):
-        b, n, d, d_h, h, k = *x.shape, self.dim_head, self.heads, self.k</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/linformer/commit/6449082dbf683beae01505350def842814c3a965#diff-74f1a83ad894dfa28f06db1b179206aa2b59978e08070320a2b2dc4bf01778a1L47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3313319</div><div id='project'> Project Name: lucidrains/linformer</div><div id='commit'> Commit Name: 6449082dbf683beae01505350def842814c3a965</div><div id='time'> Time: 2020-07-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linformer/linformer.py</div><div id='m_class'> M Class Name: LinformerSelfAttention</div><div id='n_method'> N Class Name: LinformerSelfAttention</div><div id='m_method'> M Method Name: __init__(9)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linformer/linformer.py</div><div id='n_file'> N File Name: linformer/linformer.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        sparse_layer = cast_tuple(sparse_attn, depth)
-
-        for _, sparse_attn in zip(range(depth), sparse_layer):
-            attn_class = Attention<a id="change"> if </a>not sparse_attn<a id="change"> else </a>partial(SparseAttention, sparse_attn_global_indices = sparse_attn_global_indices)
-
-            layers.append(nn.ModuleList([
-                PreNorm(dim, attn_class(dim, causal = causal, seq_len = seq_len, heads = heads, dim_head = dim_head, dropout = attn_dropout, noncausal_attn_len = noncausal_attn_len)),</code></pre><h3>After Change</h3><pre><code class='java'>
-        super().__init__()
-        layers = nn.ModuleList([])
-        sparse_layer = cast_tuple(sparse_attn, depth)
-        attn_types<a id="change"> = </a><a id="change">default(</a>attn_types, (&quotfull&quot,)<a id="change">)</a>
-        attn_type_layer = islice(cycle(attn_types), depth)
-
-        for _, sparse_attn, attn_type in zip(range(depth), sparse_layer, attn_type_layer):
-            if attn_type == &quotfull&quot:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-ee397916e2ccc5603bb55b6ea44f20d581aae722f1e26d17108234ff0411b1beL46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3313316</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/transformer.py</div><div id='n_file'> N File Name: dalle_pytorch/transformer.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, n, d, d_h, h, k = *x.shape, self.dim_head, self.heads, self.k</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/linformer/commit/6449082dbf683beae01505350def842814c3a965#diff-74f1a83ad894dfa28f06db1b179206aa2b59978e08070320a2b2dc4bf01778a1L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3239061</div><div id='project'> Project Name: lucidrains/linformer</div><div id='commit'> Commit Name: 6449082dbf683beae01505350def842814c3a965</div><div id='time'> Time: 2020-07-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linformer/linformer.py</div><div id='m_class'> M Class Name: LinformerSelfAttention</div><div id='n_method'> N Class Name: LinformerSelfAttention</div><div id='m_method'> M Method Name: __init__(9)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linformer/linformer.py</div><div id='n_file'> N File Name: linformer/linformer.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
             *[block(dim, fill[i]) for i in range(depth)],
             Pass(nn.LayerNorm(dim)),
             Pass(nn.Linear(dim, dim_out)),
@@ -61,4 +61,4 @@
 
         if isinstance(fill,(float,int)):
             fill = [fill] * depth
-</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/lie-transformer-pytorch/commit/a049c07481f39e254f161dbb403570c545d602f9#diff-78e7fa359a5bc9dbf54973fbbe180c506bc637c8d340a936811d56c7558ca659L309' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3313321</div><div id='project'> Project Name: lucidrains/lie-transformer-pytorch</div><div id='commit'> Commit Name: a049c07481f39e254f161dbb403570c545d602f9</div><div id='time'> Time: 2021-01-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='m_class'> M Class Name: LieTransformer</div><div id='n_method'> N Class Name: LieTransformer</div><div id='m_method'> M Method Name: __init__(16)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='n_file'> N File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='m_start'> M Start Line: 322</div><div id='m_end'> M End Line: 347</div><div id='n_start'> N Start Line: 337</div><div id='n_end'> N End Line: 358</div><BR>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/lie-transformer-pytorch/commit/a049c07481f39e254f161dbb403570c545d602f9#diff-78e7fa359a5bc9dbf54973fbbe180c506bc637c8d340a936811d56c7558ca659L309' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3239060</div><div id='project'> Project Name: lucidrains/lie-transformer-pytorch</div><div id='commit'> Commit Name: a049c07481f39e254f161dbb403570c545d602f9</div><div id='time'> Time: 2021-01-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='m_class'> M Class Name: LieTransformer</div><div id='n_method'> N Class Name: LieTransformer</div><div id='m_method'> M Method Name: __init__(16)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='n_file'> N File Name: lie_transformer_pytorch/lie_transformer_pytorch.py</div><div id='m_start'> M Start Line: 322</div><div id='m_end'> M End Line: 347</div><div id='n_start'> N Start Line: 337</div><div id='n_end'> N End Line: 358</div><BR>

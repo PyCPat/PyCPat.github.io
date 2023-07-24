@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :447
+</h3><img src='1672089.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, E: Tensor, J: Tensor):
+        x = E.square().sum(-1, keepdim=True)
+        G = jacobian(self.func, x)
+        <a id="change">return </a>G<a id="change"> * </a>E, J
+
+
+class FastTriggs(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &quot&quot&quot
+        x = E.square().sum(-1, keepdim=True)
+        g = jacobian(self.func, x)
+        s<a id="change"> = </a><a id="change">s.expand_as(E).reshape(-1</a>, <a id="change">1</a><a id="change">)</a>
+        <a id="change">return </a>g<a id="change"> * </a>E, s<a id="change"> * </a>J
+
+
+class FastTriggs(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pypose/pypose/commit/0a01e666b48aa48903cdadab810bb3de0e4252c1#diff-a38a43132725706da060a24a329719784a08162a7b1a12955e9682197306b47dL17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1672089</div><div id='project'> Project Name: pypose/pypose</div><div id='commit'> Commit Name: 0a01e666b48aa48903cdadab810bb3de0e4252c1</div><div id='time'> Time: 2022-07-12</div><div id='author'> Author: jeffsan@gmx.com</div><div id='file'> File Name: pypose/optim/corrector.py</div><div id='m_class'> M Class Name: TrivialScale</div><div id='n_method'> N Class Name: GradScale</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pypose/optim/corrector.py</div><div id='n_file'> N File Name: pypose/optim/corrector.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 18</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 46</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        oC, iC, kH, kW = self.weight.size()
+
+        affined_style = self.style_fc(style)
+        weight = self<a id="change">.elr_scale * self.weight.view(1, oC, iC, kH, kW) * </a>affined_style.view(B, 1, iC, 1, 1)
+    
+        if self.demod:
+            norm = 1 / ((weight**2).sum([2, 3, 4]) + 1.e-8)**0.5
+            weight = weight * norm.view(B, oC, 1, 1, 1)
+
+        out = F.conv2d(
+            x.contiguous().view(1, B*iC, H, W), weight.view(B<a id="change">*</a>oC, iC, kH, kW),
+            stride=self.stride, padding=self.padding, groups=B
+        )
+
+        _, _, H, W = out.size()
+        out = out.view(B, -1, H, W)
+        <a id="change">return </a>out
+
+class Bias(nn.Module):
+    def __init__(self, out_channels, bias_init=0, lr=1.):</code></pre><h3>After Change</h3><pre><code class='java'>
+            weight = weight * d
+
+        &#47&#47 reshaping for conv input
+        x<a id="change"> = </a><a id="change">x.reshape(1</a>, <a id="change">-1</a>, H, W<a id="change">)</a>
+        _, _, *ws = weight.size()
+        weight = weight.reshape(B*self.out_channels, *ws)
+        pad = self._get_same_padding(H)
+
+        &#47&#47 conv
+        x = F.conv2d(x, weight, padding=pad, groups=B)
+
+        &#47&#47 return with bias
+        <a id="change">return </a>x.reshape(B, self.out_channels, H, W)<a id="change"> + </a>self.bias
+    
+    def _get_same_padding(self, size):
+        return ((size - 1) * (self.stride - 1) + (self.kernel_size - 1)) // 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1672088</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='m_class'> M Class Name: EqualizedModulatedConv2d</div><div id='n_method'> N Class Name: ModulatedConv2d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: implementations/StyleGAN2/model.py</div><div id='n_file'> N File Name: implementations/StyleGAN2/model.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 87</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 131</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, E: Tensor, J: Tensor):
+        x = E.square().sum(-1, keepdim=True)
+        G = jacobian(self.func, x)
+        <a id="change">return </a>G<a id="change"> * </a>E, J
+
+
+class FastTriggs(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &quot&quot&quot
+        x = E.square().sum(-1, keepdim=True)
+        g = jacobian(self.func, x)
+        s<a id="change"> = </a><a id="change">s.expand_as(E).reshape(-1</a>, <a id="change">1</a><a id="change">)</a>
+        <a id="change">return </a>g<a id="change"> * </a>E, s<a id="change"> * </a>J
+
+
+class FastTriggs(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pypose/pypose/commit/e3cfe6c2a3cad823d35c9a48d6b711b7248e19b7#diff-a38a43132725706da060a24a329719784a08162a7b1a12955e9682197306b47dL15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1672079</div><div id='project'> Project Name: pypose/pypose</div><div id='commit'> Commit Name: e3cfe6c2a3cad823d35c9a48d6b711b7248e19b7</div><div id='time'> Time: 2022-07-10</div><div id='author'> Author: jeffsan@gmx.com</div><div id='file'> File Name: pypose/optim/corrector.py</div><div id='m_class'> M Class Name: TrivialScale</div><div id='n_method'> N Class Name: GradScale</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pypose/optim/corrector.py</div><div id='n_file'> N File Name: pypose/optim/corrector.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 18</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 46</div><BR>

@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :1989
+</h3><img src='13677137.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores = torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding)<a id="change"> / </a><a id="change">math.sqrt(</a>self.emb_dims<a id="change">)</a>
+		scores = torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)</code></pre><h3>After Change</h3><pre><code class='java'>
+        tgt_embedding = tgt_embedding + tgt_embedding_p
+
+        rotation_ab, translation_ab = self.head(src_embedding, tgt_embedding, src, tgt)
+        <a id="change">if </a>self.cycle<a id="change">:
+            </a>rotation_ba, translation_ba = self.head(tgt_embedding, src_embedding, tgt, src)
+
+        else:
+            rotation_ba<a id="change"> = </a>rotation_ab.transpose(2, 1).contiguous()
+            translation_ba = -torch.matmul(rotation_ba, translation_ab.unsqueeze(2)).squeeze(2)
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677137</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: Tensor) -&gt; Tensor:
+        var = torch.var(x, dim=1, unbiased=False, keepdim=True)
+        mean = torch.mean(x, dim=1, keepdim=True)
+        norm = (<a id="change">x - mean) / (var + self.eps).sqrt() * </a>self.g
+        return norm + self.b if self.bias else norm
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self, x: Tensor, scale_shift: Optional[Tuple[Tensor, Tensor]] = None
+    ) -&gt; Tensor:
+        x = self.groupnorm(x)
+        <a id="change">if </a>exists(scale_shift)<a id="change">:
+            </a>x<a id="change"> = </a>scale_and_shift(x, scale=scale_shift[0], shift=scale_shift[1])
+        x = self.activation(x)
+        return self.project(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L307' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677153</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ConvLayerNorm</div><div id='n_method'> N Class Name: ConvBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 307</div><div id='m_end'> M End Line: 311</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        n_units = self.n_units
+        
+        real, imag = torch.split(input, [n_units // 2, n_units // 2], dim=1)
+        magnitude = <a id="change">torch.sqrt(</a>real**2 + imag**2<a id="change">)</a>
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude<a id="change"> + </a>self.eps)
+        ratio = torch.where(output_magnitude &gt;= 0, ratio, torch.zeros_like(magnitude))
+        real, imag = ratio * real, ratio * imag
+        output = torch.cat([real, imag], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        is_complex = torch.is_complex(input)
+
+        <a id="change">if </a>not is_complex<a id="change">:
+            </a>input<a id="change"> = </a>torch.view_as_complex(input)
+        
+        magnitude = torch.abs(input)
+        angle = torch.angle(input)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/4663266b4fc0a2328bdc62039fb64bdb0beedbf3#diff-d2a1aeb484b86497f04c4e8890fa4fda7abd429d423b8c7384bf31d50f69c476L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677155</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 4663266b4fc0a2328bdc62039fb64bdb0beedbf3</div><div id='time'> Time: 2021-11-17</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/activation.py</div><div id='m_class'> M Class Name: ModReLU1d</div><div id='n_method'> N Class Name: ModReLU1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/activation.py</div><div id='n_file'> N File Name: src/activation.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            Normalized audio tensor with same shape as input
+        
+        mean = audio.mean(1, keepdim=True).detach()
+        std = <a id="change">(audio.var(1, keepdim=True).detach() + self.div_guard).sqrt()</a>
+        return (audio - mean)<a id="change"> / </a>std
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Normalized audio tensor with same shape as input
+        
+        attention_mask: Optional[torch.Tensor] = None
+        <a id="change">if </a>self.mask_input<a id="change">:
+            </a>attention_mask<a id="change"> = </a>lengths_to_mask(
+                audio_lengths, max_len=audio.size(-1)
+            ).int()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/05cbe02b3779b4bafc6dbd1914e490e47893b6da#diff-6f21f8fa5be3ce7b1ffede013b84d050bde988efbbe1747432115d11fc285da4L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677148</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 05cbe02b3779b4bafc6dbd1914e490e47893b6da</div><div id='time'> Time: 2021-11-30</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/wav2vec/transform.py</div><div id='m_class'> M Class Name: Wav2Vec2Preprocess</div><div id='n_method'> N Class Name: Wav2Vec2Preprocess</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/wav2vec/transform.py</div><div id='n_file'> N File Name: src/thunder/wav2vec/transform.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 49</div><BR>

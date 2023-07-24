@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        <a id="change">q</a><a id="change">, k = </a><a id="change">map(</a>l2norm, (<a id="change">q</a><a id="change">, k</a>)<a id="change">)</a>
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, <a id="change">q</a>, <a id="change">k</a><a id="change">)</a> * self.scale
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a><a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre>

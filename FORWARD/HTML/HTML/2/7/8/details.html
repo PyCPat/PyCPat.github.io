@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :8
+</h3><img src='8896.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not return_loss:
+            logits = logits[..., 1:, :]
+
+            <a id="change">if </a>flattened_dim<a id="change">:
+                </a>logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits<a id="change"> = </a>logits[:, :seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 bump space by one to account for a boundary case
+
+        ids<a id="change"> = </a><a id="change">F.pad(</a>ids, (0<a id="change">, 0, 0, 1</a>)<a id="change">)</a>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= (self.max_spatial_seq_len + 1), &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        assert depth == self.depth_seq_len, &quotdepth dimension must be equal to depth_seq_len&quot</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/2a7448ae1a81a9da7b26d5e7e637098d2b829492#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L198' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8896</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 2a7448ae1a81a9da7b26d5e7e637098d2b829492</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 198</div><div id='m_end'> M End Line: 257</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 269</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                "Padding must be &quotsame&quot or &quotvalid&quot. Got " + self.padding
+            )
+
+        <a id="change">if </a>self.padding == "causal"<a id="change">:
+            </a>self.conv.weight.data<a id="change"> = </a>self.conv.weight.data * self.k_mask
+        wx = self.conv(x)
+
+        if self.unsqueeze:</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        elif self.padding == "causal":
+            num_pad = (self.kernel_size[1] - 1) * self.dilation[1]
+            x<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, 0, num_pad, 0</a>)<a id="change">)</a>
+
+            print("padded tensor is ", x)
+
+        elif self.padding == "valid":</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/411b2389e00962ccd9c5cf96b51e9e0581753810#diff-1b45bc4ca480a5eecab4db3acbd98f2b27b6ce46f9c41160c5efb8932d4af2fdL631' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8833</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 411b2389e00962ccd9c5cf96b51e9e0581753810</div><div id='time'> Time: 2022-11-09</div><div id='author'> Author: francescopaissan@Paissans-MacBook-Air.local</div><div id='file'> File Name: speechbrain/nnet/CNN.py</div><div id='m_class'> M Class Name: Conv2d</div><div id='n_method'> N Class Name: Conv2d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/nnet/CNN.py</div><div id='n_file'> N File Name: speechbrain/nnet/CNN.py</div><div id='m_start'> M Start Line: 646</div><div id='m_end'> M End Line: 661</div><div id='n_start'> N Start Line: 641</div><div id='n_end'> N End Line: 657</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, *dimensions):
+        device = self.device
+
+        <a id="change">if </a>not exists(self.rel_pos) or not self.cache_rel_pos<a id="change">:
+            </a>positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid<a id="change"> = </a>rearrange(grid, &quotc ... -&gt; (...) c&quot)
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 calculate strides
+
+        strides = torch.flip(rel_pos_shape, (0,)).cumprod(dim = -1)
+        strides<a id="change"> = </a>torch.flip(<a id="change">F.pad(</a>strides, (<a id="change">1</a><a id="change">, -1</a>)<a id="change">, value = 1)</a>, (0,))
+
+        &#47&#47 get all positions and calculate all the relative distances
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8842</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>

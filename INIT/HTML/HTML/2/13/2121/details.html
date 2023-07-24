@@ -1,5 +1,5 @@
 <html><h3>Pattern ID :2121
-</h3><img src='4989100.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='5166254.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
@@ -22,7 +22,78 @@
             self.activate<a id="change"> = </a>build_activation_layer(act_cfg_)
 
         &#47&#47 Use msra init by default
-        self.init_weights()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/saic-vul/iterdet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4989100</div><div id='project'> Project Name: saic-vul/iterdet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.init_weights()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5166254</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        <a id="change">self.activation</a> = activation
+        self.inplace = inplace
+        self.order = order
+        assert isinstance(self.order, tuple) and len(self.order) == 3
+        assert set(order) == set([&quotconv&quot, &quotnorm&quot, &quotact&quot])
+
+        self.with_norm = norm_cfg is not None
+        self.with_activation = activation is not None
+        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
+        if bias == &quotauto&quot:
+            bias = False if self.with_norm else True
+        self.with_bias = bias
+
+        if self.with_norm and self.with_bias:
+            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
+
+        &#47&#47 build convolution layer
+        self.conv = build_conv_layer(
+            conv_cfg,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        &#47&#47 export the attributes of self.conv to a higher level for convenience
+        self.in_channels = self.conv.in_channels
+        self.out_channels = self.conv.out_channels
+        self.kernel_size = self.conv.kernel_size
+        self.stride = self.conv.stride
+        self.padding = self.conv.padding
+        self.dilation = self.conv.dilation
+        self.transposed = self.conv.transposed
+        self.output_padding = self.conv.output_padding
+        self.groups = self.conv.groups
+
+        &#47&#47 build normalization layers
+        if self.with_norm:
+            &#47&#47 norm layer is after conv layer
+            if order.index(&quotnorm&quot) &gt; order.index(&quotconv&quot):
+                norm_channels = out_channels
+            else:
+                norm_channels = in_channels
+            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
+            self.add_module(self.norm_name, norm)
+
+        &#47&#47 build activation layer
+        if self.with_activation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if </a><a id="change">self.activation not in [&quotrelu&quot]:
+                </a><a id="change">raise ValueError(&quot{} is currently not supported.&quot.format(
+                    </a>self.activation<a id="change">)</a><a id="change">)</a>
+            if self.activation == &quotrelu&quot:
+                self.activate<a id="change"> = </a>nn.ReLU(inplace=inplace)
+
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 build activation layer
+        if self.with_activation:
+            act_cfg_<a id="change"> = </a><a id="change">act_cfg.copy()</a>
+            act_cfg_.setdefault(&quotinplace&quot, inplace)
+            self.activate<a id="change"> = </a>build_activation_layer(act_cfg_)
+
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saic-vul/iterdet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5166253</div><div id='project'> Project Name: saic-vul/iterdet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
                  loss_mask=dict(
                      type=&quotCrossEntropyLoss&quot, use_mask=True, loss_weight=1.0)):
         super(FCNMaskHead, self).__init__()
@@ -99,75 +170,4 @@
         self.upsample<a id="change"> = </a>build_upsample_layer(upsample_cfg_)
 
         out_channels = 1 if self.class_agnostic else self.num_classes
-        logits_in_channel = (</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saic-vul/iterdet/commit/b5431092505f7dcd7de616c8a79eba4d2532fbc8#diff-82a2ab843e4fc204629926964b43e16f568eee55dbebb2a9832e4f310aad05c6L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4989085</div><div id='project'> Project Name: saic-vul/iterdet</div><div id='commit'> Commit Name: b5431092505f7dcd7de616c8a79eba4d2532fbc8</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: 1155098160@link.cuhk.edu.hk</div><div id='file'> File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_class'> M Class Name: FCNMaskHead</div><div id='n_method'> N Class Name: FCNMaskHead</div><div id='m_method'> M Method Name: __init__(12)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='n_file'> N File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 76</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 90</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        assert norm_cfg is None or isinstance(norm_cfg, dict)
-        self.conv_cfg = conv_cfg
-        self.norm_cfg = norm_cfg
-        <a id="change">self.activation</a> = activation
-        self.inplace = inplace
-        self.order = order
-        assert isinstance(self.order, tuple) and len(self.order) == 3
-        assert set(order) == set([&quotconv&quot, &quotnorm&quot, &quotact&quot])
-
-        self.with_norm = norm_cfg is not None
-        self.with_activation = activation is not None
-        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
-        if bias == &quotauto&quot:
-            bias = False if self.with_norm else True
-        self.with_bias = bias
-
-        if self.with_norm and self.with_bias:
-            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
-
-        &#47&#47 build convolution layer
-        self.conv = build_conv_layer(
-            conv_cfg,
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        &#47&#47 export the attributes of self.conv to a higher level for convenience
-        self.in_channels = self.conv.in_channels
-        self.out_channels = self.conv.out_channels
-        self.kernel_size = self.conv.kernel_size
-        self.stride = self.conv.stride
-        self.padding = self.conv.padding
-        self.dilation = self.conv.dilation
-        self.transposed = self.conv.transposed
-        self.output_padding = self.conv.output_padding
-        self.groups = self.conv.groups
-
-        &#47&#47 build normalization layers
-        if self.with_norm:
-            &#47&#47 norm layer is after conv layer
-            if order.index(&quotnorm&quot) &gt; order.index(&quotconv&quot):
-                norm_channels = out_channels
-            else:
-                norm_channels = in_channels
-            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
-            self.add_module(self.norm_name, norm)
-
-        &#47&#47 build activation layer
-        if self.with_activation:
-            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
-            <a id="change">if </a><a id="change">self.activation not in [&quotrelu&quot]:
-                </a><a id="change">raise ValueError(&quot{} is currently not supported.&quot.format(
-                    </a>self.activation<a id="change">)</a><a id="change">)</a>
-            if self.activation == &quotrelu&quot:
-                self.activate<a id="change"> = </a>nn.ReLU(inplace=inplace)
-
-        &#47&#47 Use msra init by default
-        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        &#47&#47 build activation layer
-        if self.with_activation:
-            act_cfg_<a id="change"> = </a><a id="change">act_cfg.copy()</a>
-            act_cfg_.setdefault(&quotinplace&quot, inplace)
-            self.activate<a id="change"> = </a>build_activation_layer(act_cfg_)
-
-        &#47&#47 Use msra init by default
-        self.init_weights()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4989096</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>
+        logits_in_channel = (</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/b5431092505f7dcd7de616c8a79eba4d2532fbc8#diff-82a2ab843e4fc204629926964b43e16f568eee55dbebb2a9832e4f310aad05c6L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5166251</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: b5431092505f7dcd7de616c8a79eba4d2532fbc8</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: 1155098160@link.cuhk.edu.hk</div><div id='file'> File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_class'> M Class Name: FCNMaskHead</div><div id='n_method'> N Class Name: FCNMaskHead</div><div id='m_method'> M Method Name: __init__(12)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='n_file'> N File Name: mmdet/models/mask_heads/fcn_mask_head.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 76</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 90</div><BR>

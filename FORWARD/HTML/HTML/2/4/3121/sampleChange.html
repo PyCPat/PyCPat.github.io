@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            final_chunk_state_list.append(final_state)
+
+        if self.use_gru:
+            <a id="change">return </a>x<a id="change">, final_chunk_state_list, init_state_c_box</a>
+        else:
+            final_chunk_state_h_list = [final_chunk_state_list[i][0] for i in range(self.num_rnn_layers)]
+            final_chunk_state_c_list = [final_chunk_state_list[i][1] for i in range(self.num_rnn_layers)]
+            final_chunk_state_h_box = torch.concat(final_chunk_state_h_list, dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+                init_state_list = init_state_h_list
+            else:
+                init_state_h_list = torch.split(init_state_h_box, 1, dim=0)
+                init_state_c_list<a id="change"> = </a><a id="change">torch.split(</a>init_state_c_box, 1<a id="change">, dim=0)</a>
+                init_state_list = [(init_state_h_list[i], init_state_c_list[i]) for i in range(self.num_rnn_layers)]
+        else:
+            init_state_list = [None] * self.num_rnn_layers
+        final_chunk_state_list = []</code></pre>

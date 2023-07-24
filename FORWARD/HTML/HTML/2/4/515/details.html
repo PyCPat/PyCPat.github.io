@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :515
+</h3><img src='1841796.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		preds = []
+		for k in xs:
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			h = <a id="change">torch.cat(</a>hs<a id="change">, dim = 1)</a>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_ = torch.transpose(preds, 1, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+		for i,k in enumerate(xs):
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			
+			preds = self.Linear(<a id="change">hs.contiguous().view(</a>x.size(0), <a id="change">-1</a><a id="change">)</a>)
+			preds_.append(preds)
+			if y is not None:
+				loss+=self.Loss(preds, y[:,i].squeeze().long())</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L255' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1841796</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		h = <a id="change">torch.cat(</a>hs<a id="change">, dim = 1)</a>
+		preds = self.Linear(h)
+		if y is not None:
+			y = y.long()
+			probs = nn.Softmax(dim = -1)(preds)</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		preds = self.Linear(<a id="change">hs.contiguous().view(</a>x.size(0), <a id="change">-1</a><a id="change">)</a>)
+		if y is not None:
+			y = y.long()
+			probs = nn.Softmax(dim = -1)(preds)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L149' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1841794</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: MnistModel</div><div id='n_method'> N Class Name: MnistModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 198</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        cb = repeat(cb)
+        cr = repeat(cr)
+        return <a id="change">torch.cat(</a>[y.unsqueeze(3), cb.unsqueeze(3), cr.unsqueeze(3)]<a id="change">, dim=3)</a>
+
+
+class YCbCr2RGBJpeg(nn.Module):
+    Converts YCbCr image to RGB JPEG</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch_size = x.shape[0]
+        x_reshaped = x.view(batch_size, height // self.k, self.k, -1, self.k)
+        x_transposed = x_reshaped.permute(0, 1, 3, 2, 4)
+        out = <a id="change">x_transposed.contiguous().view(</a>batch_size, <a id="change">-1</a>, self.k, self.k<a id="change">)</a>
+
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/real_esrgan-pytorch/commit/edfbb6820fc2084c2ffe132e9b64a348a323d1e7#diff-91082468503b154b2d3c94cbaadeb7add2ea070f5f30593233516dd4b7e2ac5bL1770' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1841795</div><div id='project'> Project Name: lornatang/real_esrgan-pytorch</div><div id='commit'> Commit Name: edfbb6820fc2084c2ffe132e9b64a348a323d1e7</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: imgproc.py</div><div id='m_class'> M Class Name: ChromaUpsampling</div><div id='n_method'> N Class Name: _BlockSplitting</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imgproc.py</div><div id='n_file'> N File Name: imgproc.py</div><div id='m_start'> M Start Line: 1770</div><div id='m_end'> M End Line: 1789</div><div id='n_start'> N Start Line: 1230</div><div id='n_end'> N End Line: 1237</div><BR>

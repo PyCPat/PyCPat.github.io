@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h = self.heads
+        q, k, v = (self.to_q(x), *self.to_kv(x).chunk(2, dim = -1))
+
+        q<a id="change">, k, v</a> = <a id="change">map(</a>lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 calculate local attention
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * self.scale</code></pre><h3>After Change</h3><pre><code class='java'>
+        h = self.heads
+        q, k, v = (self.to_q(x), *self.to_kv(x).chunk(2, dim = -1))
+
+        q = <a id="change">rearrange(</a>q, <a id="change">&quotb n (h d) -&gt; b h n d&quot</a><a id="change">, h = h)</a>
+
+        &#47&#47 calculate local attention
+
+        sim = einsum(&quotb h i d, b j d -&gt; b h i j&quot, q, k) * self.scale
+
+        sim = self.rel_pos_bias(sim) + sim
+
+        i, j = sim.shape[-2:]
+        mask_value = -torch.finfo(sim.dtype).max
+
+        causal_mask = torch.ones((i, j), dtype = torch.bool).triu(j - i + 1)
+        sim = sim.masked_fill(causal_mask, mask_value)
+
+        attn = stable_softmax(sim)
+        attn = self.dropout(attn)
+
+        local_values<a id="change"> = </a>einsum(&quotb h i j, b j d -&gt; b h i d&quot, attn, v)
+
+        &#47&#47 calculate knn attention over memory, if index is passed in
+</code></pre>

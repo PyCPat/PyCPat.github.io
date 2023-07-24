@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, data):
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        lr_logit = self.lr_layer(data)
+        cin_logit = self.cin(feature_emb)
+        if self.dnn is not None:
+            dnn_logit = self.dnn(<a id="change">feature_emb.flatten(start_dim=1)</a>)
+            y_pred = lr_logit + cin_logit + dnn_logit
+        else:
+            y_pred = lr_logit + cin_logit</code></pre><h3>After Change</h3><pre><code class='java'>
+        lr_logit = self.lr_layer(data)
+        cin_logit = self.cin(feature_emb)
+        if self.dnn is not None:
+            dense_input = <a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+            emb_flatten = <a id="change">feature_emb.flatten(start_dim=1)</a>
+            dnn_logit = self.dnn(<a id="change">torch.cat(</a><a id="change">[</a>emb_flatten, dense_input<a id="change"></a>]<a id="change">, dim=1)</a>)
+            y_pred = lr_logit + cin_logit + dnn_logit
+        else:
+            y_pred = lr_logit + cin_logit</code></pre>

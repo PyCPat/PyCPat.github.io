@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :546
+</h3><img src='1900076.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        src_desc = keypoint_desc[::self.window_size]  &#47&#47 B x C x N
+        src_desc = F.normalize(src_desc, dim=1)
+
+        tgt_desc_dense = <a id="change">desc_dense[1::self.window_size]</a>  &#47&#47 B x C x H x W
+        tgt_desc_unrolled = F.normalize(tgt_desc_dense.view(batch_size, encoder_dim, -1), dim=1)  &#47&#47 B x C x HW
+
+        match_vals = torch.matmul(src_desc.transpose(2, 1), tgt_desc_unrolled)  &#47&#47 B x N x HW</code></pre><h3>After Change</h3><pre><code class='java'>
+        _, _, height, width = desc_dense.size()
+        kp_inds, dense_inds = get_indices(batch_size, self.window_size)
+
+        src_desc<a id="change"> = </a>keypoint_desc[kp_inds]  &#47&#47 B x C x N
+        src_desc = F.normalize(src_desc, dim=1)
+        B = src_desc.size(0)
+
+        tgt_desc_dense = desc_dense[dense_inds]  &#47&#47 B x C x H x W
+        tgt_desc_unrolled = F.normalize(tgt_desc_dense.view(B, encoder_dim, -1), dim=1)  &#47&#47 B x C x HW
+
+        match_vals = torch.matmul(src_desc.transpose(2, 1), tgt_desc_unrolled)  &#47&#47 B x N x HW
+        soft_match_vals = F.softmax(match_vals / self.softmax_temp, dim=2)  &#47&#47 B x N x HW
+
+        v_coord, u_coord = torch.meshgrid([torch.arange(0, height), torch.arange(0, width)])
+        v_coord = v_coord.reshape(height * width).float()  &#47&#47 HW
+        u_coord = u_coord.reshape(height * width).float()
+        coords = torch.stack((u_coord, v_coord), dim=1)  &#47&#47 HW x 2
+        tgt_coords_dense = coords.unsqueeze(0).expand(B, height * width, 2).to(self.gpuid)  &#47&#47 B x HW x 2
+
+        pseudo_coords = torch.matmul(tgt_coords_dense.transpose(2, 1),
+                                     soft_match_vals.transpose(2, 1)).transpose(2, 1)  &#47&#47 BxNx2
+
+        &#47&#47 GET SCORES for pseudo point locations
+        pseudo_norm = normalize_coords(pseudo_coords, height, width).unsqueeze(1)          &#47&#47 B x 1 x N x 2
+        tgt_scores_dense = scores_dense[dense_inds]
+        pseudo_scores = F.grid_sample(tgt_scores_dense, pseudo_norm, mode=&quotbilinear&quot)           &#47&#47 B x 1 x 1 x N
+        pseudo_scores = pseudo_scores.reshape(B, 1, n_points)                          &#47&#47 B x 1 x N
+        &#47&#47 GET DESCRIPTORS for pseudo point locations
+        pseudo_desc = F.grid_sample(tgt_desc_dense, pseudo_norm, mode=&quotbilinear&quot)               &#47&#47 B x C x 1 x N
+        pseudo_desc = pseudo_desc.reshape(B, encoder_dim, n_points)                    &#47&#47 B x C x N
+
+        desc_match_score = torch.sum(src_desc * pseudo_desc, dim=1, keepdim=True) / float(encoder_dim)  &#47&#47 Bx1xN
+        src_scores = keypoint_scores[kp_inds]
+        if self.score_comp:
+            match_weights = 0.5 * (desc_match_score + 1) * src_scores * pseudo_scores
+        else:
+            match_weights = pseudo_scores
+
+        <a id="change">return </a>pseudo_coords<a id="change">, match_weights, kp_inds</a>
+
+def normalize_coords(coords_2D, width, height):
+    Normalizes coords_2D (B x N x 2) to be within [-1, 1] 
+    batch_size = coords_2D.size(0)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/utiasasrl/hero_radar_odometry/commit/3393ae645f3b4eea057784a2cd3746aefb0c81b1#diff-23e0da2f9fd5de38a06280e99a19331414bae7133b397e03cf546a99b3ddce20L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900076</div><div id='project'> Project Name: utiasasrl/hero_radar_odometry</div><div id='commit'> Commit Name: 3393ae645f3b4eea057784a2cd3746aefb0c81b1</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: keenburn2004@gmail.com</div><div id='file'> File Name: networks/softmax_matcher.py</div><div id='m_class'> M Class Name: SoftmaxMatcher</div><div id='n_method'> N Class Name: SoftmaxMatcher</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks/softmax_matcher.py</div><div id='n_file'> N File Name: networks/softmax_matcher.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, feat_maps, smap, lmap=None, shape=None):
+        assert not xor(self.lmap_in is True, lmap is not None)
+        for i, f in enumerate(feat_maps):
+            if <a id="change">f.shape[-2:]</a> != shape:
+                feat_maps[i] = self.upsample(f, shape)
+        x = torch.cat(feat_maps, dim=1)
+        b, c, h, w = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 compute refined feature
+        context = torch.bmm(sim, value).permute(0, 2, 1).contiguous().view(b, -1, h, w)
+        context<a id="change"> = </a>self.conv_out1(context)
+        
+        x = torch.cat([x, context], dim=1)
+        x = self.conv_out2(x)
+        x = self.conv_out3(x)
+        out = self.conv_out4(x)
+
+        <a id="change">return </a>x<a id="change">, out</a></code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/c355ab0cc90c9a3d27726822c1223d2f98cd0f0c#diff-28958d122b29eab3fc1387f31469a5b4e62962cb186585d136905133ef0975afL81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900078</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: c355ab0cc90c9a3d27726822c1223d2f98cd0f0c</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/attention_module.py</div><div id='m_class'> M Class Name: ASCA</div><div id='n_method'> N Class Name: ASCA</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/attention_module.py</div><div id='n_file'> N File Name: lib/modules/attention_module.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 136</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        with torch.no_grad():
+            means, buckets, dists = kmeans(x, means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+            indices = indices.contiguous().view(*<a id="change">indices.size()[:2]</a>, -1)
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if update_means:
+            with torch.no_grad():
+                means<a id="change"> = </a>kmeans_iter(x, means, buckets)
+            self.new_means = means
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment
+
+        <a id="change">return </a>dists<a id="change">, loss</a>
+
+&#47&#47 kmeans attention class
+
+class KmeansAttention(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL394' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1900083</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: Kmeans</div><div id='n_method'> N Class Name: Kmeans</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 396</div><div id='m_end'> M End Line: 410</div><div id='n_start'> N Start Line: 367</div><div id='n_end'> N End Line: 384</div><BR>

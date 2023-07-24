@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :3103
+</h3><img src='16680156.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections<a id="change"> = </a>[in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if idx == 0:
+                x = input
+            else:
+                _in_channels<a id="change"> = growth_rate</a><a id="change">[idx - 1]</a>
+                sections<a id="change"> = </a>[_in_channels, sum(<a id="change">growth_rate[idx:]</a>)]
+                x, x_residual = torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/3bac874df403a2b5648fd98049865790c104ed55#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16680156</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 3bac874df403a2b5648fd98049865790c104ed55</div><div id='time'> Time: 2021-10-16</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2BlockFixedDilation</div><div id='n_method'> N Class Name: D2BlockFixedDilation</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 89</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels<a id="change"> = </a><a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections = [in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if idx == 0:
+                x = input
+            else:
+                _in_channels<a id="change"> = </a><a id="change">growth_rate[idx - 1]</a>
+                sections<a id="change"> = </a>[_in_channels, sum(<a id="change">growth_rate[idx:]</a>)]
+                x, x_residual = torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/3bac874df403a2b5648fd98049865790c104ed55#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L165' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16680155</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 3bac874df403a2b5648fd98049865790c104ed55</div><div id='time'> Time: 2021-10-16</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 174</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 187</div><div id='n_end'> N End Line: 195</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            loss_n = torch.sum(torch.exp(self.scale * alpha_n * (neg_pair_ - margin_n)))
+            loss.append(torch.log(1 + loss_p * loss_n))
+
+        loss<a id="change"> = </a><a id="change">sum(</a>loss<a id="change">)</a> / batch_size
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        m = labels.size(0)
+        mask = labels.expand(m, m).t().eq(labels.expand(m, m)).float()
+        pos_mask = mask.triu(diagonal=1)
+        neg_mask = (mask<a id="change"> - 1</a>).abs_().triu(diagonal=1)
+        if self.similarity == &quotdot&quot:
+            sim_mat = torch.matmul(feats, torch.t(feats))
+        elif self.similarity == &quotcos&quot:
+            feats = F.normalize(feats)
+            sim_mat = feats.mm(feats.t())
+        else:
+            raise ValueError(&quotThis similarity is not implemented.&quot)
+
+        pos_pair_ = <a id="change">sim_mat[pos_mask == 1]</a>
+        neg_pair_<a id="change"> = </a><a id="change">sim_mat[neg_mask == 1]</a>
+
+        alpha_p = torch.relu(-pos_pair_ + 1 + self.margin)
+        alpha_n = torch.relu(neg_pair_ + self.margin)
+        margin_p = 1 - self.margin
+        margin_n = self.margin
+        loss_p = torch.sum(torch.exp(-self.scale * alpha_p * (pos_pair_ - margin_p)))
+        loss_n = torch.sum(torch.exp(self.scale * alpha_n * (neg_pair_ - margin_n)))
+        loss<a id="change"> = </a>torch.log(1 + loss_p * loss_n)
+        return loss
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qianjinhao/circle-loss/commit/55a6035c552f781d6c761475f88b33b8f684fbe7#diff-ee4498af95089c1dacb3bbdedbf8cffa6eecc60617a8a1d405b07f6f81510abbL13' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16680165</div><div id='project'> Project Name: qianjinhao/circle-loss</div><div id='commit'> Commit Name: 55a6035c552f781d6c761475f88b33b8f684fbe7</div><div id='time'> Time: 2020-04-02</div><div id='author'> Author: qianjinhao@126.com</div><div id='file'> File Name: circle_loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: circle_loss.py</div><div id='n_file'> N File Name: circle_loss.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 38</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels<a id="change"> = </a><a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections = [in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if idx == 0:
+                x = input
+            else:
+                _in_channels<a id="change"> = </a><a id="change">growth_rate[idx - 1]</a>
+                sections<a id="change"> = </a>[_in_channels, sum(<a id="change">growth_rate[idx:]</a>)]
+                x, x_residual = torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/3bac874df403a2b5648fd98049865790c104ed55#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16680162</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 3bac874df403a2b5648fd98049865790c104ed55</div><div id='time'> Time: 2021-10-16</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2BlockFixedDilation</div><div id='n_method'> N Class Name: D2BlockFixedDilation</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 89</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 92</div><BR>

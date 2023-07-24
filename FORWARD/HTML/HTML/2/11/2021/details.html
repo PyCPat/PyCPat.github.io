@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :2021
+</h3><img src='13748633.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                qkv_bias = torch.cat((self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias))
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv[0]</a><a id="change">, qkv[1], qkv[2]</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><h3>After Change</h3><pre><code class='java'>
+                qkv_bias = torch.cat((self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias))
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv.unbind(0</a><a id="change">)</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/f805ba86d9ee589c42da47c5efe744bb57db7508#diff-23223719d678dae199e59ce099f5c28b814f8e6994288cffd291929cd9eb4c03L138' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13748633</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: f805ba86d9ee589c42da47c5efe744bb57db7508</div><div id='time'> Time: 2021-10-24</div><div id='author'> Author: tv.code@beamnet.de</div><div id='file'> File Name: timm/models/beit.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/beit.py</div><div id='n_file'> N File Name: timm/models/beit.py</div><div id='m_start'> M Start Line: 138</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 138</div><div id='n_end'> N End Line: 139</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+         
+        B, T, N, C = x.shape
+        &#47&#47 result of next line is (qkv, B, num (H)eads, T, N, (C&quot)hannels per head)
+        <a id="change">qkv</a> = self.qkv(x).reshape(B, T, N, 3, self.num_heads, C // self.num_heads).permute(3, 0, 4, 1, 2, 5)
+        q, k, v = <a id="change">qkv[0]</a><a id="change">, qkv[1], qkv[2]</a>   &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale &#47&#47 (B, H, T, N, N)
+        attn = attn.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+         
+        B, T, N, C = x.shape
+        &#47&#47 result of next line is (qkv, B, num (H)eads, T, N, (C&quot)hannels per head)
+        <a id="change">qkv</a> = self.qkv(x).reshape(B, T, N, 3, self.num_heads, C // self.num_heads).permute(3, 0, 4, 1, 2, 5)
+        q, k, v = <a id="change">qkv.unbind(0</a><a id="change">)</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale &#47&#47 (B, H, T, N, N)
+        attn = attn.softmax(dim=-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/f805ba86d9ee589c42da47c5efe744bb57db7508#diff-e211399888fa3b741d9160f3d951ddc724fe39ee05d9e83b46718906f0098cbcL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13748643</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: f805ba86d9ee589c42da47c5efe744bb57db7508</div><div id='time'> Time: 2021-10-24</div><div id='author'> Author: tv.code@beamnet.de</div><div id='file'> File Name: timm/models/nest.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/nest.py</div><div id='n_file'> N File Name: timm/models/nest.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 84</div><div id='n_start'> N Start Line: 83</div><div id='n_end'> N End Line: 84</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            else:
+                qkv_bias = torch.cat((self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias))
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        <a id="change">qkv</a> = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv[0]</a><a id="change">, qkv[1], qkv[2]</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                qkv_bias = torch.cat((self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias))
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        <a id="change">qkv</a> = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv.unbind(0</a><a id="change">)</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/f805ba86d9ee589c42da47c5efe744bb57db7508#diff-23223719d678dae199e59ce099f5c28b814f8e6994288cffd291929cd9eb4c03L128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13748632</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: f805ba86d9ee589c42da47c5efe744bb57db7508</div><div id='time'> Time: 2021-10-24</div><div id='author'> Author: tv.code@beamnet.de</div><div id='file'> File Name: timm/models/beit.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/beit.py</div><div id='n_file'> N File Name: timm/models/beit.py</div><div id='m_start'> M Start Line: 138</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 138</div><div id='n_end'> N End Line: 139</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mask: (0/-inf) mask with shape of (num_windows, Wh*Ww, Wh*Ww) or None
+        
+        B_, N, C = x.shape
+        <a id="change">qkv</a> = self.qkv(x).reshape(B_, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv[0]</a><a id="change">, qkv[1], qkv[2]</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask: (0/-inf) mask with shape of (num_windows, Wh*Ww, Wh*Ww) or None
+        
+        B_, N, C = x.shape
+        <a id="change">qkv</a> = self.qkv(x).reshape(B_, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = <a id="change">qkv.unbind(0</a><a id="change">)</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/f805ba86d9ee589c42da47c5efe744bb57db7508#diff-c3f6257d253f745d7a4173fba458244ef3c26a267ff9b1a366ee0514d812be2cL167' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13748637</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: f805ba86d9ee589c42da47c5efe744bb57db7508</div><div id='time'> Time: 2021-10-24</div><div id='author'> Author: tv.code@beamnet.de</div><div id='file'> File Name: timm/models/swin_transformer.py</div><div id='m_class'> M Class Name: WindowAttention</div><div id='n_method'> N Class Name: WindowAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer.py</div><div id='n_file'> N File Name: timm/models/swin_transformer.py</div><div id='m_start'> M Start Line: 174</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 174</div><div id='n_end'> N End Line: 175</div><BR>

@@ -3,20 +3,16 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        skip_dims = []
+        self.latents_attend_to_patches = Attention(dim, norm = True, norm_context = True, **attn_kwargs)
 
-        down_stage_parameters<a id="change"> = </a><a id="change">[
-            </a>in_out,
-            nested_unet_depths,
-            num_blocks_per_stage<a id="change"></a>
-        ]
+        self.latent_self_attns<a id="change"> = </a>nn.ModuleList(<a id="change">[]</a>)
+        for _ in range(latent_self_attn_depth):
+            self.latent_self_attns.append(nn.ModuleList([
+                Attention(dim, norm = True, **attn_kwargs),</code></pre><h3>After Change</h3><pre><code class='java'>
 
-        up_stage_parameters = [reversed(params[:-1]) for params in down_stage_parameters]
-</code></pre><h3>After Change</h3><pre><code class='java'>
-            self.downs.append(nn.ModuleList([
-                blocks(dim_in, dim_in, nested_unet_depth = nested_unet_depth, nested_unet_dim = nested_unet_dim),
-                nn.ModuleList([blocks(dim_in, dim_in, nested_unet_depth = nested_unet_depth, nested_unet_dim = nested_unet_dim) for _ in range(num_blocks - 1)]),
-                nn.ModuleList(<a id="change">[TransformerBlock(dim_in, depth = self_attn_blocks, **attn_kwargs) for _ in range(self_attn_blocks)]</a>),
-                Downsample(dim_in, dim_out)
-            ]))
-</code></pre>
+        attn_kwargs = {**attn_kwargs, &quottime_cond_dim&quot: time_dim}
+
+        self.blocks = nn.ModuleList(<a id="change">[RINBlock(dim, latent_self_attn_depth = latent_self_attn_depth, **attn_kwargs) for _ in range(depth)]</a>)
+
+    def forward(
+        self,</code></pre>

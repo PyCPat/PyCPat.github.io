@@ -1,0 +1,188 @@
+<html><h3>Pattern ID :350
+</h3><img src='1372036.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                edge_weight: OptTensor = None) -&gt; Tensor:
+        
+
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(edge_index</a><a id="change">)</a>
+
+        if <a id="change">self.normalize</a>:
+            <a id="change">if is_edge_like</a><a id="change">:
+                edge_index</a><a id="change">, edge_weight = </a><a id="change">gcn_norm(edge_index</a>, <a id="change">edge_weight</a>,
+                                                   <a id="change">x.size(0</a><a id="change">)</a>, False,
+                                                   <a id="change">self.add_self_loops</a><a id="change">,
+                                                   dtype=x.dtype)</a>
+            elif <a id="change">isinstance(edge_index</a>, SparseTensor<a id="change">)</a><a id="change">:
+                </a>edge_index<a id="change"> = </a>gcn_norm(edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>,
+                                      False, self.add_self_loops,
+                                      dtype=x.dtype)
+            else:
+                &#47&#47 N by N dense adjacency matrix
+                edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(edge_index</a><a id="change">,
+                                            add_self_loops=self.add_self_loops)</a>
+
+        xs = [x]
+        for k in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+                edge_weight: OptTensor = None) -&gt; Tensor:
+        
+
+        if <a id="change">self.add_self_loops</a>:
+            <a id="change">edge_index</a><a id="change">, edge_weight = </a>make_self_loops(edge_index, edge_weight,
+                                                      num_nodes=x.size(0))
+
+        <a id="change">if self.normalize</a><a id="change">:
+            edge_index</a><a id="change">, edge_weight = </a><a id="change">make_gcn_norm(edge_index</a>, <a id="change">edge_weight</a><a id="change">)</a>
+
+        xs = [x]
+        for k in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 19</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/1819ebeba22b4c7ed49da15853223d63191096cf#diff-8732ac2dabfa06f3d0c51bd6d0bc047301d592c2a58003bc788bee9e29194626L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1372036</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 1819ebeba22b4c7ed49da15853223d63191096cf</div><div id='time'> Time: 2022-11-16</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: greatx/nn/layers/tag_conv.py</div><div id='m_class'> M Class Name: TAGConv</div><div id='n_method'> N Class Name: TAGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: greatx/nn/layers/tag_conv.py</div><div id='n_file'> N File Name: greatx/nn/layers/tag_conv.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 73</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+
+        cache = self._cached_x
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if cache is None:
+            if <a id="change">self.normalize</a>:
+                <a id="change">if </a><a id="change">is_edge_like:
+                    </a>edge_index<a id="change">, edge_weight = </a><a id="change">gcn_norm(  &#47&#47 yapf: disable
+                        </a>edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        <a id="change">self.add_self_loops</a><a id="change">, dtype=x.dtype)</a>
+                elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+                    </a>edge_index<a id="change"> = </a>gcn_norm(  &#47&#47 yapf: disable
+                        edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        self.add_self_loops, dtype=x.dtype)
+                else:
+                    &#47&#47 N by N dense adjacency matrix
+                    edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(
+                        </a>edge_index<a id="change">, add_self_loops=self.add_self_loops)</a>
+
+            for k in range(self.K):
+                x = spmm(x, edge_index, edge_weight)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        cache = self._cached_x
+
+        if cache is None:
+            if <a id="change">self.add_self_loops</a>:
+                edge_index<a id="change">, edge_weight = </a>make_self_loops(
+                    edge_index, edge_weight, num_nodes=x.size(0))
+
+            <a id="change">if self.normalize</a><a id="change">:
+                </a>edge_index<a id="change">, edge_weight = </a><a id="change">make_gcn_norm(
+                    </a>edge_index, edge_weight<a id="change">)</a>
+
+            for k in range(self.K):
+                x = spmm(x, edge_index, edge_weight)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/1819ebeba22b4c7ed49da15853223d63191096cf#diff-47fca7417b5de091753e8148920cb95df4f43088cd50d36c06760d555a226c66L82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1372037</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 1819ebeba22b4c7ed49da15853223d63191096cf</div><div id='time'> Time: 2022-11-16</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: greatx/nn/layers/sg_conv.py</div><div id='m_class'> M Class Name: SGConv</div><div id='n_method'> N Class Name: SGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: greatx/nn/layers/sg_conv.py</div><div id='n_file'> N File Name: greatx/nn/layers/sg_conv.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 104</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 94</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                edge_weight: OptTensor = None) -&gt; Tensor:
+        
+
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if <a id="change">self.normalize</a>:
+            <a id="change">if </a><a id="change">is_edge_like:
+                </a>edge_index<a id="change">, edge_weight = </a><a id="change">gcn_norm(</a>edge_index, edge_weight,
+                                                   <a id="change">x.size(0</a><a id="change">)</a>, False,
+                                                   <a id="change">self.add_self_loops</a><a id="change">,
+                                                   dtype=x.dtype)</a>
+            elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+                </a>edge_index<a id="change"> = </a>gcn_norm(edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>,
+                                      False, self.add_self_loops,
+                                      dtype=x.dtype)
+            else:
+                &#47&#47 N by N dense adjacency matrix
+                edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(</a>edge_index<a id="change">,
+                                            add_self_loops=self.add_self_loops)</a>
+
+        xs = [x]
+        for k in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+                edge_weight: OptTensor = None) -&gt; Tensor:
+        
+
+        if <a id="change">self.add_self_loops</a>:
+            edge_index<a id="change">, edge_weight = </a>make_self_loops(edge_index, edge_weight,
+                                                      num_nodes=x.size(0))
+
+        <a id="change">if self.normalize</a><a id="change">:
+            </a>edge_index<a id="change">, edge_weight = </a><a id="change">make_gcn_norm(</a>edge_index, edge_weight<a id="change">)</a>
+
+        xs = [x]
+        for k in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/1819ebeba22b4c7ed49da15853223d63191096cf#diff-8732ac2dabfa06f3d0c51bd6d0bc047301d592c2a58003bc788bee9e29194626L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1372038</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 1819ebeba22b4c7ed49da15853223d63191096cf</div><div id='time'> Time: 2022-11-16</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: greatx/nn/layers/tag_conv.py</div><div id='m_class'> M Class Name: TAGConv</div><div id='n_method'> N Class Name: TAGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: greatx/nn/layers/tag_conv.py</div><div id='n_file'> N File Name: greatx/nn/layers/tag_conv.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 73</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+
+        cache = self._cached_x
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if cache is None:
+            if <a id="change">self.normalize</a>:
+                <a id="change">if </a><a id="change">is_edge_like:
+                    </a>edge_index<a id="change">, edge_weight = </a><a id="change">gcn_norm(  &#47&#47 yapf: disable
+                        </a>edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        <a id="change">self.add_self_loops</a><a id="change">, dtype=x.dtype)</a>
+                elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+                    </a>edge_index<a id="change"> = </a>gcn_norm(  &#47&#47 yapf: disable
+                        edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        self.add_self_loops, dtype=x.dtype)
+                else:
+                    &#47&#47 N by N dense adjacency matrix
+                    edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(
+                        </a>edge_index<a id="change">, add_self_loops=self.add_self_loops)</a>
+
+            x_out = x * self.alpha
+            for k in range(self.K):
+                x = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+        cache = self._cached_x
+
+        if cache is None:
+            if <a id="change">self.add_self_loops</a>:
+                edge_index<a id="change">, edge_weight = </a>make_self_loops(
+                    edge_index, edge_weight, num_nodes=x.size(0))
+
+            <a id="change">if self.normalize</a><a id="change">:
+                </a>edge_index<a id="change">, edge_weight = </a><a id="change">make_gcn_norm(
+                    </a>edge_index, edge_weight<a id="change">)</a>
+
+            x_out = x * self.alpha
+            for k in range(self.K):
+                x = spmm(x, edge_index, edge_weight)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/1819ebeba22b4c7ed49da15853223d63191096cf#diff-90a830faa9c78010c047f4c7013567db84fdd628431fb413cbf384a7a7d16d86L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1372039</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 1819ebeba22b4c7ed49da15853223d63191096cf</div><div id='time'> Time: 2022-11-16</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: greatx/nn/layers/ssg_conv.py</div><div id='m_class'> M Class Name: SSGConv</div><div id='n_method'> N Class Name: SSGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: greatx/nn/layers/ssg_conv.py</div><div id='n_file'> N File Name: greatx/nn/layers/ssg_conv.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 107</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+
+        cache = self._cached_x
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if cache is None:
+            if <a id="change">self.normalize</a>:
+                <a id="change">if </a><a id="change">is_edge_like:
+                    </a>edge_index<a id="change">, edge_weight = </a><a id="change">gcn_norm(  &#47&#47 yapf: disable
+                        </a>edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        <a id="change">self.add_self_loops</a><a id="change">, dtype=x.dtype)</a>
+                elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+                    </a>edge_index<a id="change"> = </a>gcn_norm(  &#47&#47 yapf: disable
+                        edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        self.add_self_loops, dtype=x.dtype)
+                else:
+                    &#47&#47 N by N dense adjacency matrix
+                    edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(
+                        </a>edge_index<a id="change">, add_self_loops=self.add_self_loops)</a>
+
+            delta = self.t / self.K
+            for k in range(self.K):
+                out = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+        cache = self._cached_x
+
+        if cache is None:
+            if <a id="change">self.add_self_loops</a>:
+                edge_index<a id="change">, edge_weight = </a>make_self_loops(
+                    edge_index, edge_weight, num_nodes=x.size(0))
+
+            <a id="change">if self.normalize</a><a id="change">:
+                </a>edge_index<a id="change">, edge_weight = </a><a id="change">make_gcn_norm(
+                    </a>edge_index, edge_weight<a id="change">)</a>
+
+            delta = self.t / self.K
+            for k in range(self.K):
+                out = spmm(x, edge_index, edge_weight)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/1819ebeba22b4c7ed49da15853223d63191096cf#diff-fa180c0591224d22af2ddb573e25b7569fb46a3930f168e955c32cd44dba9bc6L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1372041</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 1819ebeba22b4c7ed49da15853223d63191096cf</div><div id='time'> Time: 2022-11-16</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: greatx/nn/layers/dg_conv.py</div><div id='m_class'> M Class Name: DGConv</div><div id='n_method'> N Class Name: DGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: greatx/nn/layers/dg_conv.py</div><div id='n_file'> N File Name: greatx/nn/layers/dg_conv.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 107</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 97</div><BR>

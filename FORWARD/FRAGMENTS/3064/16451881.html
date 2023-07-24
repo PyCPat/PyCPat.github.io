@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = self.n_units
+        
+        real, imag = input[:,:n_units//2], <a id="change">input</a>[:,<a id="change">n_units//2</a>:]
+        magnitude = torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = self.n_units
+        
+        real, imag = <a id="change">torch.split(</a>input, [n_units // 2, n_units // 2]<a id="change">, dim=1)</a>
+        magnitude = torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)
+        ratio = torch.where(output_magnitude &gt;= 0, ratio, torch.zeros_like(magnitude))</code></pre>

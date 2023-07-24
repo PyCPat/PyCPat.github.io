@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :1152
+</h3><img src='4105070.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        g_t = torch.softmax(g_t, dim=-1) / sig_t + self.eps
+
+        &#47&#47 each B x K x T_in
+        g_t = g_t.unsqueeze(2).expand(<a id="change">g_t.size(0</a><a id="change">)</a>,
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 discritize attention weights
+        alpha_t = self.COEF * torch.sum(phi_t, 1)
+        alpha_t = alpha_t[:, <a id="change">1</a>:] - alpha_t[:, :-1]
+
+        &#47&#47 apply masking
+        if mask is not None:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/5e148038be5971f2c7c811d46a1d7b28c759ecda#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L162' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4105070</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 5e148038be5971f2c7c811d46a1d7b28c759ecda</div><div id='time'> Time: 2020-01-09</div><div id='author'> Author: root@sp-mlc3-5423-0.mlc</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        out = self.backbone(x)
+        if <a id="change">out.size(-1</a><a id="change">)</a> != 1:
+            out = F.relu(out, inplace=True).mean([2, 3])
+        else:
+            out = out.squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, *x):
+        x = list(x)
+        input_shape = x[0].shape[<a id="change">-2:</a>]
+        out = self.bacbone(x[0])
+        x[0] = out
+        out = self.classifer(*x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/ded678ac1ebc9480abda4b2edf1614501d3242db#diff-97bc3b1cc271fb8b5a084eb7cb7ac1bd24a50dfd46dd7e740c75c4a5feca4527L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4105071</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: ded678ac1ebc9480abda4b2edf1614501d3242db</div><div id='time'> Time: 2021-02-08</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/nbsnet.py</div><div id='m_class'> M Class Name: GeneralConvNet</div><div id='n_method'> N Class Name: SegNet</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/nbsnet.py</div><div id='n_file'> N File Name: models/nbsnet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        
+        &#47&#47 Return copy if upsampling factor is one.
+        if <a id="change">self.upsampling_filter.size(0</a><a id="change">)</a> == 1:
+            return x
+
+        d = x.dim()</code></pre><h3>After Change</h3><pre><code class='java'>
+            (x.size(-1) - 1) * self.scale_factor + 1,
+            mode="linear",
+            align_corners=True,
+        )[..., <a id="change">:-1</a>]
+        y = x.transpose(1, 2).reshape(B, -1, D)
+
+        if d == 1:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/e6c55923477c74a650f2ccefe1a7287628539779#diff-6ab70ee3fa1e884da79c9f0d2f1742874e47b9e79e722287b9491248fa3c2bddL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4105078</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: e6c55923477c74a650f2ccefe1a7287628539779</div><div id='time'> Time: 2023-05-23</div><div id='author'> Author: chin-yun.yu@qmul.ac.uk</div><div id='file'> File Name: diffsptk/core/linear_intpl.py</div><div id='m_class'> M Class Name: LinearInterpolation</div><div id='n_method'> N Class Name: LinearInterpolation</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/linear_intpl.py</div><div id='n_file'> N File Name: diffsptk/core/linear_intpl.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 89</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.assert_shapes: tg.guard(x, "B, C, W, H")
+        if self.assert_shapes:
+            tg.guard(c, "B, NUMCLASSES")
+            <a id="change">assert </a>c.mean().item() in [1/c.shape[1], 0.0] &#47&#47 i.e. every row has only one el with value 1 or all 0
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        if self.assert_shapes: tg.guard(time_embedding, "B, TE")
+        hs = []</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.FloatTensor, t: torch.Tensor, c: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x_channels = x.shape[1]
+        class_embedding = self.linear_class_embedding(c).reshape(<a id="change">x.shape[0]</a>, self.class_embed_size, self.width, self.height)
+        x = torch.cat([x, class_embedding], dim=1)
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        hs = []</code></pre>

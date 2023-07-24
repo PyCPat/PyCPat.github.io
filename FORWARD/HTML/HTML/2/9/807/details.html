@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :807
+</h3><img src='2915661.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = mask.contiguous().view(mask.size()[0], -1)
+            pred = pred * mask
+            target = target<a id="change"> * </a>mask
+
+        a<a id="change"> = </a>torch.sum(pred<a id="change"> * </a>target)
+        b<a id="change"> = </a><a id="change">torch.sum(</a>pred<a id="change">)</a>
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)
+
+        <a id="change">return </a>1<a id="change"> - </a>d
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        mask = mask.contiguous().view(mask.size(0), -1)
+        pred = pred * mask
+        gt<a id="change"> = </a>gt * mask
+
+        dice_coeff = (2 * (pred * gt).sum()) / (
+            pred.sum() + gt.sum() + self.eps)
+
+        <a id="change">return </a>1 - dice_coeff
+
+
+@MODELS.register_module()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmocr/commit/1cbc42eceb40334c56474b979b1ac5be0065280a#diff-3e14d2946351cc46726adfb31ba17279be5fb04d0e8431385396357532b4cf87L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2915661</div><div id='project'> Project Name: open-mmlab/mmocr</div><div id='commit'> Commit Name: 1cbc42eceb40334c56474b979b1ac5be0065280a</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: gaotongxiao@gmail.com</div><div id='file'> File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: MaskedDiceLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmocr/models/common/losses/dice_loss.py</div><div id='n_file'> N File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        elif derivative == 2:
+
+            invr3<a id="change"> = </a>(1.<a id="change"> / </a>(dist<a id="change">**</a>3)).unsqueeze(1)
+            diff_axis = input_.transpose(1, 2).unsqueeze(3)
+            diff_axis = (diff_axis - self.atoms.T.unsqueeze(1))**2
+
+            diff_axis<a id="change"> = </a><a id="change">diff_axis[:, [
+                [1, 2], [2, 0], [0, 1]], ...].sum(</a>2<a id="change">)</a>
+
+            <a id="change">return </a>(diff_axis<a id="change"> * </a>invr3)
+
+    @staticmethod
+    def _get_distance_quadratic(elec_pos, atom_pos):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        elif derivative == 2:
+
+            d2_dist<a id="change"> = </a>self.get_second_der_distance(input_, dist)
+
+            if self.scale:
+                der_dist = self.get_der_distance(input_, dist)
+                <a id="change">return </a>get_second_der_scaled_distance(self.kappa,
+                                                      dist,
+                                                      der_dist,
+                                                      d2_dist)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/952cc59bced026b13272ad2193da84fa2b03665b#diff-6d847461c7dda34adf998dd4f306382da5ab904949c13e6c6ebadb13ab5e88e0L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2915614</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: 952cc59bced026b13272ad2193da84fa2b03665b</div><div id='time'> Time: 2021-04-02</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: qmctorch/wavefunction/jastrows/distance/electron_nuclei_distance.py</div><div id='m_class'> M Class Name: ElectronNucleiDistance</div><div id='n_method'> N Class Name: ElectronNucleiDistance</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: qmctorch/wavefunction/jastrows/distance/electron_nuclei_distance.py</div><div id='n_file'> N File Name: qmctorch/wavefunction/jastrows/distance/electron_nuclei_distance.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 80</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 95</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if preds.shape[2:] != targets.shape[2:]:
+            preds = F.interpolate(preds, size=targets.shape[2:], mode=&quotbilinear&quot, align_corners=False)
+
+        tp<a id="change"> = </a><a id="change">torch.sum(</a>targets*preds<a id="change">, dim=(2, 3))</a>
+        fn<a id="change"> = </a>torch.sum(targets<a id="change">*</a>(1<a id="change">-</a>preds), dim=(2, 3))
+        fp<a id="change"> = </a>torch.sum((1-targets)*preds, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp<a id="change"> + </a>self.delta * fn + (1 - self.delta) * fp + 1e-6)
+        dice_score = torch.sum(1-dice_score, dim=-1)
+
+        &#47&#47 adjust loss to account for number of classes
+        dice_score = dice_score / targets.shape[1]
+        <a id="change">return </a>dice_score.mean()
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, targets: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a>sum([w * self._forward(pred, targets) for (pred, w) in zip(preds, self.aux_weights)])
+        return self._forward(preds, targets)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2915784</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: Dice</div><div id='n_method'> N Class Name: Dice</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 80</div><BR>

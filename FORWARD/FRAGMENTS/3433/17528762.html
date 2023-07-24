@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.dense3 = torch.nn.Linear(30, latent_size)
+
+    def forward(self, x):  &#47&#47 16,1,200,200
+        out = <a id="change">F.leaky_relu(</a>self.e2econv1(x)<a id="change">, negative_slope=0.33)</a>  &#47&#47 16,32,200,200
+        out = F.leaky_relu(self.e2econv2(out), negative_slope=0.33)  &#47&#47 16,64,200,200
+        out = F.leaky_relu(self.E2N(out), negative_slope=0.33)  &#47&#47 16,1,200,1
+        out = F.dropout(F.leaky_relu(self.N2G(out), negative_slope=0.33), p=0.5)  &#47&#47 16,256,1,1
+        out = out.view(out.size(0), -1)  &#47&#47 16,256
+        out = F.dropout(<a id="change">F.leaky_relu(</a>self.dense1(out)<a id="change">, negative_slope=0.33)</a>, p=0.5)
+        out = F.dropout(F.leaky_relu(self.dense2(out), negative_slope=0.33), p=0.5)
+        out = F.leaky_relu(self.dense3(out), negative_slope=0.33)
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.dense3 = torch.nn.Linear(latent_size, 30)
+
+    def forward(self, x):
+        out = F.dropout(<a id="change">F.leaky_relu(</a>self.dense3(x)<a id="change">, negative_slope=0.33)</a>, p=0.5)
+        out = F.dropout(F.leaky_relu(self.dense2(out), negative_slope=0.33), p=0.5)
+        out = F.leaky_relu(self.dense1(out), negative_slope=0.33)
+        out = out.view(out.size(0), out.size(1), 1, 1)
+        out = F.dropout(F.leaky_relu(self.N2G(out), negative_slope=0.33), p=0.5)
+        out = F.leaky_relu(self.E2N(out), negative_slope=0.33)
+        out<a id="change"> = F.leaky_relu(</a>self.e2econv2(out)<a id="change">, negative_slope=0.33)</a>
+        out = F.leaky_relu(self.e2econv1(out), negative_slope=0.33)
+        return out
+
+</code></pre>

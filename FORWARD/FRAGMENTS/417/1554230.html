@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        pred = outputs["outputs"]
+        target = move_to(batch["targets"], device)
+
+        <a id="change">if self.weight is not None</a><a id="change">:
+            </a>self.weight = move_to(self.weight, device)
+
+        if self.ignore_index is not None:
+            target = torch.argmax(target, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        targets = move_to(batch["targets"], device)
+        
+        batch_size, num_classes = pred.shape[:2]
+        y_hot = <a id="change">move_to(torch.zeros(pred.shape), device).scatter_(1</a>, targets.unsqueeze(1) , 1.0<a id="change">)</a>
+        y_smooth = (1 - self.alpha) * y_hot + self.alpha / num_classes
+        loss = torch.sum(- y_smooth * torch.nn.functional.log_softmax(pred, -1), -1).sum()
+
+        if self.reduction == "mean":</code></pre>

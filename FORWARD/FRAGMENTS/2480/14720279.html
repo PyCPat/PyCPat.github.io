@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, style):
+        B, C, H, W = x.size()
+        oC, iC, kH, kW = <a id="change">self.weight.size()</a>
+
+        affined_style = self.style_fc(style)
+        weight = self.elr_scale * self.weight.view(1, oC, iC, kH, kW) * affined_style.view(B, 1, iC, 1, 1)
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 reshaping for conv input
+        x = x.reshape(1, -1, H, W)
+        _, _, *ws = weight.size()
+        weight = <a id="change">weight.reshape(</a>B<a id="change">*</a>self.out_channels, *<a id="change">ws)</a>
+        pad = self._get_same_padding(H)
+
+        &#47&#47 conv
+        x = F.conv2d(x, weight, padding=pad, groups=B)</code></pre>

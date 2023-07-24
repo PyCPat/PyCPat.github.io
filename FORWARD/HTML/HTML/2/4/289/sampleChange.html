@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        alpha_n = self.relu(sn - self.O_n)
+
+        r_sp_m = alpha_p * (sp - self.Delta_p)
+        r_sn_m = alpha_n * (sn<a id="change"> - </a>self.Delta_n)
+
+        _Z = torch.cat((r_sn_m, r_sp_m), 1)
+        _Z = _Z * self.gamma
+
+        logZ = torch.logsumexp(_Z, dim=1, keepdims=True)
+
+        loss =  -r_sp_m * self.gamma + logZ
+
+        <a id="change">return </a>loss.mean()
+        
+        
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        logit_p = - ap * (sp - delta_p) * self.gamma
+        logit_n = an * (sn - delta_n) * self.gamma
+
+        loss = self.soft_plus(<a id="change">torch.logsumexp(</a>logit_n<a id="change">, dim=0) + </a>torch.logsumexp(logit_p, dim=0))
+
+        return loss
+        </code></pre>

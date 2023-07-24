@@ -1,0 +1,163 @@
+<html><h3>Pattern ID :2871
+</h3><img src='15758848.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        outputs = []
+        alignments = []
+        stop_outputs = <a id="change">[]</a>
+
+        t = 0
+        memory_input = initial_memory
+        while True:
+            if t &gt; 0:
+                if greedy:
+                    memory_input = outputs[-1]
+                else:
+                    &#47&#47 combine prev. model output and prev. real target
+                    &#47&#47 memory_input = torch.div(outputs[-1] + memory[t-1], 2.0)
+                    &#47&#47 add a random noise
+                    &#47&#47 noise = torch.autograd.Variable(
+                        &#47&#47 memory_input.data.new(memory_input.size()).normal_(0.0, 0.5))
+                    &#47&#47 memory_input = memory_input + noise
+                    memory_input = memory[t-1]
+
+            &#47&#47 Prenet
+            processed_memory = self.prenet(memory_input)
+
+            &#47&#47 Attention RNN
+            attention_rnn_hidden, current_context_vec, alignment = self.attention_rnn(
+                processed_memory, current_context_vec, attention_rnn_hidden,
+                inputs)
+
+            &#47&#47 Concat RNN output and attention context vector
+            decoder_input = self.project_to_decoder_in(
+                torch.cat((attention_rnn_hidden, current_context_vec), -1))
+
+            &#47&#47 Pass through the decoder RNNs
+            for idx in range(len(self.decoder_rnns)):
+                decoder_rnn_hiddens[idx] = self.decoder_rnns[idx](
+                    decoder_input, decoder_rnn_hiddens[idx])
+                &#47&#47 Residual connectinon
+                decoder_input = decoder_rnn_hiddens[idx] + decoder_input
+            
+            output = decoder_input
+            stop_token_input = decoder_input
+            
+            &#47&#47 stop token prediction
+            stop_token_input = torch.cat((output, current_context_vec), -1)
+            stop_output = self.stop_token(stop_token_input)
+
+            &#47&#47 predict mel vectors from decoder vectors
+            output = self.proj_to_mel(output)
+
+            outputs += [output]
+            alignments += [alignment]
+            stop_outputs += [stop_output]
+
+            t += 1
+
+            if (not greedy and self.training) or (greedy and memory is not None):
+                if t &gt;= T_decoder:
+                    break
+            else:
+                if t &gt; 1 and is_end_of_frames(output, self.eps):
+                    break
+                elif t &gt; self.max_decoder_steps:
+                    print(" !! Decoder stopped with &quotmax_decoder_steps&quot. \
+                          Something is probably wrong.")
+                    break
+                           
+        assert greedy or len(outputs) == T_decoder
+
+        &#47&#47 Back to batch first
+        alignments = torch.stack(alignments).transpose(0, 1)
+        outputs = torch.stack(outputs).transpose(0, 1).contiguous()
+        stop_outputs<a id="change"> = </a><a id="change">torch.stack(</a>stop_outputs<a id="change">)</a>.transpose(0, 1).contiguous()
+
+        return outputs, alignments, stop_outputs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        alignments = torch.stack(alignments).transpose(0, 1)
+        outputs = torch.stack(outputs).transpose(0, 1).contiguous()
+
+        return outputs<a id="change">, alignments</a>
+
+
+def is_end_of_frames(output, eps=0.2): &#47&#470.2
+    return (output.data &lt;= eps).all()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/a925c9c75cdc699336b1c1b012db9b2e08bc23da#diff-63415e5bdfe9c172be8a9cadb35d1f47d718fea5f15c6879f5715ebb9e331155L280' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15758848</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: a925c9c75cdc699336b1c1b012db9b2e08bc23da</div><div id='time'> Time: 2018-03-22</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron.py</div><div id='n_file'> N File Name: layers/tacotron.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 346</div><div id='n_end'> N End Line: 349</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 ========= weighted dimension-wise Median aggregation ===
+        N, D = feat.size()
+        row, col, e_id = graph.edges(order=&quotsrcdst&quot, form=&quotall&quot)
+        edge_index = <a id="change">torch.stack([</a>row, col<a id="change"></a>]<a id="change">, dim=0)</a>
+
+        if self._norm != &quotnone&quot:
+            &#47&#47 if edge_weight is all 1 and it is not necessary
+            &#47&#47 to sort again
+            edge_weight = edge_weight[e_id]
+
+        median_idx<a id="change"> = </a>dimmedian_idx(feat, edge_index, edge_weight, N)
+        col_idx = torch.arange(D, device=graph.device).view(1, -1).expand(N, D)
+        feat = feat[median_idx, col_idx]
+        &#47&#47 Normalization and calculation of new embeddings</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 cache edges
+            if self._cached:
+                self._cached_edges = row<a id="change">, col, edge_weight</a>
+
+        if self.weight is not None:
+            feat = feat @ self.weight
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/2a8eb98eb7ce6b2b2f129bf19675705f95a675e3#diff-59f54b224c5b357d5e3ddd750c33456b459e3d3244d7c25e6976d616357e06e7L81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15758849</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: 2a8eb98eb7ce6b2b2f129bf19675705f95a675e3</div><div id='time'> Time: 2022-03-05</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: graphwar/nn/reliable_conv.py</div><div id='m_class'> M Class Name: DimwiseMedianConv</div><div id='n_method'> N Class Name: DimwiseMedianConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: graphwar/nn/reliable_conv.py</div><div id='n_file'> N File Name: graphwar/nn/reliable_conv.py</div><div id='m_start'> M Start Line: 109</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 107</div><div id='n_end'> N End Line: 133</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding = <a id="change">[]</a>
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                combined_embedding.append(
+                    self.combining_function(trial_embeddings, dim=0)
+                )
+
+            combined_embedding<a id="change"> = </a><a id="change">torch.stack(</a>combined_embedding<a id="change">, dim=0)</a>
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."
+
+        &#47&#47 add number of trials as additional input</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0]<a id="change">, x.shape[self.aggregation_dim]</a>
+        nan_counts = (
+            torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]  &#47&#47 counts are the same across data dims</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15758850</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        c1 = c[:, 1:] * self.arange
+        c1 = torch.flip(c1, [1])
+
+        h = <a id="change">[]</a>
+        h.append(torch.exp(c0))
+        for n in range(1, self.impulse_response_length):
+            idx = -min(n, self.cep_order)
+            h.append(
+                torch.einsum(
+                    "bd,bd-&gt;b",
+                    torch.stack(h[idx:], 1),
+                    c1[:, idx:],
+                )
+                / n
+            )
+        h<a id="change"> = </a><a id="change">torch.stack(</a>h, 1<a id="change">)</a>
+        return h
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        c1 = c[:, 1:] * self.arange
+        c1 = torch.flip(c1, [1])
+
+        h = torch.empty((c.shape[0]<a id="change">, self.impulse_response_length</a>), device=c.device)
+        h[:, 0] = torch.exp(c0)
+        for n in range(1, self.impulse_response_length):
+            s = n - self.cep_order</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/95d7da9e29f52cdd75988edd56bb731ee3ec8548#diff-2d67f85d56a34c0e8c8ceb842ef0057f3ab57000c7035eb3d4337f7cd6cefb95L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15758842</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: 95d7da9e29f52cdd75988edd56bb731ee3ec8548</div><div id='time'> Time: 2022-03-11</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/c2mpir.py</div><div id='m_class'> M Class Name: CepstrumToImpulseResponse</div><div id='n_method'> N Class Name: CepstrumToImpulseResponse</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/c2mpir.py</div><div id='n_file'> N File Name: diffsptk/c2mpir.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 74</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 73</div><BR>

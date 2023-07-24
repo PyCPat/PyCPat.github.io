@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x + self.em_embedding(exact_match_pos) &#47&#47 (8, 384(문장길이), 768(임베딩)) =&gt; x[2] + em_embedding[2] / x[8] + em_embedding[8]
+
+        x = x.transpose(1, 2).contiguous()
+        conv1_out = <a id="change">self.conv_1(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">)</a>
+        conv3_out = <a id="change">self.conv_3(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">)</a>
+        conv5_out = <a id="change">self.conv_5(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">)</a>
+        output = <a id="change">self.fc(torch.cat(</a>(conv1_out, conv3_out, conv5_out), -1<a id="change">)</a><a id="change">)</a>
+
+        return output
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x + self.em_embedding(exact_match_pos) &#47&#47 (8, 384(문장길이), 768(임베딩)) =&gt; x[2] + em_embedding[2] / x[8] + em_embedding[8]
+
+        x = x.transpose(1, 2).contiguous()
+        conv1_out = <a id="change">self.relu(self.conv_1(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">)</a><a id="change">)</a>
+        conv3_out = <a id="change">self.relu(</a><a id="change">self.conv_3(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">))</a>
+        conv5_out = <a id="change">self.relu(</a><a id="change">self.conv_5(x).transpose(1, 2).contiguous().squeeze(-1</a><a id="change">))</a>
+        output = <a id="change">self.fc(</a><a id="change">self.dropout(torch.cat(</a>(conv1_out, conv3_out, conv5_out), -1<a id="change">)</a><a id="change">))</a>
+
+        return output
+
+</code></pre>

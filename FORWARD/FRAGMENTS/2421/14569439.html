@@ -1,0 +1,50 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor):
+        &#47&#47 NOTE: targets is a 2D Gaussian
+        pos_mask = targets.eq(1).float()
+        neg_mask = <a id="change">targets.lt(1).float()</a>
+
+        probs = torch.sigmoid(inputs)   &#47&#47 convert logits to probabilities
+
+        &#47&#47 use logsigmoid for numerical stability
+        pos_loss = -F.logsigmoid(inputs) * (1-probs)**self.alpha * pos_mask                         &#47&#47 loss at Gaussian peak
+        neg_loss = -F.logsigmoid(-inputs) * probs**self.alpha * (1<a id="change">-</a>targets)**self.beta * neg_mask   &#47&#47 loss at everywhere else
+
+        pos_loss = <a id="change">pos_loss.sum()</a>
+        neg_loss = neg_loss.sum()
+
+        N = pos_mask.sum()  &#47&#47 number of peaks = number of ground-truth detections
+        &#47&#47 use N + eps instead of 2 cases?
+        if N == 0:
+            loss = neg_loss
+        else:
+            loss = (pos_loss + neg_loss)<a id="change"> / </a>N
+
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor):
+        &#47&#47 NOTE: targets is a 2D Gaussian
+        pos_weight = targets.eq(1).float()              &#47&#47 gaussian peaks are positive samples
+        neg_weight = torch.pow(1<a id="change">-</a>targets, self.beta)    &#47&#47 when target = 1, this will become 0
+
+        probs = torch.sigmoid(inputs)   &#47&#47 convert logits to probabilities
+
+        &#47&#47 use logsigmoid for numerical stability
+        &#47&#47 NOTE: log(1 - sigmoid(x)) = log(sigmoid(-x))
+        pos_loss = -(1-probs)**self.alpha * F.logsigmoid(inputs) * pos_weight
+        neg_loss = -probs**self.alpha * F.logsigmoid(-inputs) * neg_weight
+
+        loss = pos_loss + neg_loss
+
+        if self.reduction == "sum":
+            return torch.sum(loss)
+        
+        if self.reduction == "mean":
+            return torch.sum(loss)<a id="change"> / </a><a id="change">torch.sum(</a>pos_weight<a id="change">)</a>
+
+        return loss
+
+class QualityFocalLossWithLogits(nn.Module):</code></pre>

@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :1341
+</h3><img src='4650502.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, features, num_voxels, coors=None):
+        points_mean = features[:, :, : self.C_in].sum(
+            dim=1, keepdim=False
+        ) / <a id="change">num_voxels.type_as(</a>features<a id="change">)</a>.view(-1, 1)
+        return points_mean.contiguous()
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :feature FloatTensor of shape (N, K, C)
+        :return FloatTensor of shape (N, C)
+        
+        denominator<a id="change"> = </a>occupancy.type_as(feature).view(-1, 1)
+        feature<a id="change"> = </a>(feature.sum(1)<a id="change"> / </a>denominator).contiguous()
+        <a id="change">return </a>feature
+
+
+class SparseCNN(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/1736771fde51c478418ee6b5bb8b783fb604b064#diff-678424cc8e3d16b428f9821c522ec01e04fcdd2acd6612c40ca447dc4bb31a56L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4650502</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 1736771fde51c478418ee6b5bb8b783fb604b064</div><div id='time'> Time: 2020-02-09</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/backbone.py</div><div id='m_class'> M Class Name: VoxelFeatureExtractor</div><div id='n_method'> N Class Name: VoxelFeatureExtractor</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/backbone.py</div><div id='n_file'> N File Name: pvrcnn/backbone.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        indexing = &quotij&quot))
+
+        grid.requires_grad = False
+        grid = <a id="change">grid.type_as(</a>x<a id="change">)</a>
+
+        vgrid = grid + offsets
+
+        vgrid_h, vgrid_w = vgrid.unbind(dim = 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 relative positional bias
+
+        grid<a id="change"> = </a>create_grid_like(x)
+        rel_pos_bias = self.rel_pos_bias(grid, vgrid)
+        sim<a id="change"> = </a>sim<a id="change"> + </a>rel_pos_bias
+
+        &#47&#47 numerical stability
+
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+
+        &#47&#47 attention
+
+        attn = sim.softmax(dim = -1)
+        attn = self.dropout(attn)
+
+        &#47&#47 aggregate and combine heads
+
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)
+        out = self.to_out(out)
+
+        if return_vgrid:
+            return out, vgrid
+
+        <a id="change">return </a>out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/deformable-attention/commit/8db7edc4c647e25b0eab43ca2bbab9ccf83fde31#diff-fbd4003973672d8116fb4745aaa135c45af22c3db84b3be83f84c424fa08f619L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4650487</div><div id='project'> Project Name: lucidrains/deformable-attention</div><div id='commit'> Commit Name: 8db7edc4c647e25b0eab43ca2bbab9ccf83fde31</div><div id='time'> Time: 2022-03-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: deformable_attention/deformable_attention.py</div><div id='m_class'> M Class Name: DeformableAttention</div><div id='n_method'> N Class Name: DeformableAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deformable_attention/deformable_attention.py</div><div id='n_file'> N File Name: deformable_attention/deformable_attention.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 204</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, context_len = 0):
+        n, device = x.shape[1], x.device
+        l = n + context_len
+        t = <a id="change">torch.arange(l - 1, -1, -1, device = device).type_as(</a>self.inv_freq<a id="change">)</a>
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((sinusoid_inp.sin(), sinusoid_inp.cos()), dim = -1)
+        return emb
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, qlen, klen):
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos<a id="change"> = </a>torch.arange(klen, dtype = torch.long, device = device)
+        rel_pos = k_pos[None, :]<a id="change"> - </a>q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values<a id="change"> = </a>self.relative_attention_bias(rp_bucket)
+        <a id="change">return </a>rearrange(values, &quoti j h -&gt; () h i j&quot)
+
+&#47&#47 main classes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4650480</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: SinusoidalEmbedding</div><div id='n_method'> N Class Name: RelativePositionBias</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 77</div><BR>

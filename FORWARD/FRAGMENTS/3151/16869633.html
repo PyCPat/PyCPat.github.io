@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 query / key similarities
+
+        dots = <a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q, k<a id="change">)</a> * self.scale
+
+        &#47&#47 add attention bias, if supplied (for pairwise to msa attention communication)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 query / key similarities
+
+        <a id="change">if exists(</a>tie_dim<a id="change">)</a><a id="change">:
+            &#47&#47 as in the paper, for the extra MSAs
+            &#47&#47 they average the queries along the rows of the MSAs
+            &#47&#47 they named this particular module MSAColumnGlobalAttention
+
+            </a>q<a id="change">, k = </a>map(lambda t: rearrange(t, &quot(b r) ... -&gt; b r ...&quot, r = tie_dim), (q, k))
+            q = q.mean(dim = 1)
+
+            dots = einsum(&quotb h i d, b r h j d -&gt; b r h i j&quot, q, k)
+            dots<a id="change"> = </a>rearrange(dots, &quotb r ... -&gt; (b r) ...&quot)
+        else:
+            dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+</code></pre>

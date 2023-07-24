@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        cutn = 64
+        pieces = []
+        for ch in range(cutn):
+            size = torch.randint(<a id="change">int(</a>.5 * width<a id="change">)</a>, int(.98 * width), ())
+            offsetx<a id="change"> = </a>torch.randint(0, width - size, ())
+            offsety = torch.randint(0, width - size, ())
+            apper = out[:, :, offsetx:offsetx + size, offsety:offsety + size]
+            apper = torch.nn.functional.interpolate(apper, (224, 224), mode = &quotbilinear&quot, align_corners = False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for (num_images, (lo, hi), downsize) in cutout_specs:
+            for _ in range(num_images):
+                cutout = rand_cutout(out, ratio = (lo, hi))
+                <a id="change">if </a>exists(downsize)<a id="change">:
+                    </a>cutout<a id="change"> = </a>interpolate(cutout, downsize)
+                resized_cutout = interpolate(cutout, 224)
+                pieces.append(normalize_image(resized_cutout))
+</code></pre>

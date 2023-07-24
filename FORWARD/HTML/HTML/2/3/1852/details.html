@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :1852
+</h3><img src='13134712.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = torch.einsum(&quotbhij,bhjd-&gt;bhid&quot, attn, v)
+        out = out.transpose(1, 2).reshape(b, t, -1)
+        return <a id="change">self.to_out(</a>out<a id="change">)</a>
+
+&#47&#47 transformer
+
+class CompressiveTransformer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 calculate next memory - compressed memory calculations will be put here
+        mem_next = mem
+        <a id="change">if </a>self.seq_len == t<a id="change">:
+            </a>mem_next<a id="change"> = </a>torch.cat((mem, x), dim=1)[:, -self.mem_len:, :].detach()
+
+        return SelfAttentionOutput(out = self.to_out(out), mem = mem_next)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/b5257bf3b0c5f8aed8ccce17883bfe9409c33909#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13134712</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: b5257bf3b0c5f8aed8ccce17883bfe9409c33909</div><div id='time'> Time: 2020-07-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 107</div><div id='n_start'> N Start Line: 97</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 print(attn.shape)
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        return <a id="change">self.to_out(</a>out<a id="change">)</a>, attn
+
+
+class CrossAttention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            print(&quotadd pos_embeddings to q and k&quot)
+            q = q + pos_embeddings
+            k = k + pos_embeddings
+            <a id="change">if </a>self.AddPosEmb2Value<a id="change">:
+                </a>print(&quotadd pos_embeddings to v&quot)
+                v<a id="change"> = </a>v + pos_embeddings
+
+        &#47&#47 self attention
+        attn_q, attn_map = self.Attention(q, k, v)  &#47&#47 attn_q has same shape with q</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/f6865257f4bea4ed62e0170644d99dcdb1d20c94#diff-f5d4e504fb1ef29f758d7f77376318f372efbfb4498293f8d8797c46106d1d7aL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13134713</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: f6865257f4bea4ed62e0170644d99dcdb1d20c94</div><div id='time'> Time: 2022-10-28</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/Transformer.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: TransformerEncoderLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/Transformer.py</div><div id='n_file'> N File Name: wama_modules/Transformer.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 199</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        h = self.block2(h, scale_shift=scale_shift)
+
+        return h + <a id="change">self.to_out(</a>x<a id="change">)</a>
+
+
+class InsertNullTokens(nn.Module):
+    def __init__(self, head_features: int, num_heads: int):</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = block(x, t)
+            skips += [x]
+
+        <a id="change">if </a>self.use_attention<a id="change">:
+            </a>x = self.transformer(x)
+            skips<a id="change"> += </a>[x]
+
+        if not self.use_pre_downsample:
+            x = self.downsample(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13134717</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: DownsampleBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 458</div><div id='n_end'> N End Line: 473</div><BR>

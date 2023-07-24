@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        labels = torch.cat((torch.zeros(batch, device = device), torch.ones(batch, device = device)), dim = 0)
+        real_or_fake = self.disc(torch.cat((fmap, img), dim = 0))
+        gen_loss = F.binary_cross_entropy(<a id="change">real_or_fake.sigmoid()</a>, labels)
+
+        &#47&#47 lpips
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        labels = torch.cat((torch.zeros(batch, device = device), torch.ones(batch, device = device)), dim = 0)
+
+        <a id="change">if </a>return_discr_loss<a id="change">:
+            </a>labels<a id="change"> = </a>torch.flip(labels, (0,))
+
+        real_or_fake = self.disc(torch.cat((fmap, img), dim = 0))
+        gan_loss = F.binary_cross_entropy(real_or_fake, labels)</code></pre>

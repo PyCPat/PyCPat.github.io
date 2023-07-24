@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :2872
+</h3><img src='15759572.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        b, n, _, h, img_size, kernel_size, dilation, seq_len, device = *x.shape, self.heads, self.image_size, self.kernel_size, self.dilation, self.seq_len, x.device
+
+        <a id="change">if n &lt; seq_len</a><a id="change">:
+            </a>padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, padding</a>)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        causal_mask = repeat(causal_mask, &quot() i j -&gt; b i j&quot, b = b * h)
+        mask = repeat(mask, &quotb j -&gt; (b h) i j&quot, i = i, h = h)
+        mask = torch.cat((~mask<a id="change">, causal_mask</a>), dim = -1)
+
+        &#47&#47 image can attend to all of text
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15759572</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        b, n, _, h, img_size, axis, seq_len, device = *x.shape, self.heads, self.image_size, self.axis, self.seq_len, x.device
+
+        <a id="change">if n &lt; seq_len</a><a id="change">:
+            </a>padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, padding</a>)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+
+        mask = repeat(mask, &quotb j -&gt; (b r) i j&quot, r = (bh // b), i = i)
+        mask = torch.cat((~mask<a id="change">, causal_mask</a>), dim = -1)
+
+        dots_image.masked_fill_(mask, mask_value)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15759573</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 191</div><div id='m_end'> M End Line: 241</div><div id='n_start'> N Start Line: 201</div><div id='n_end'> N End Line: 259</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        B, D, H, W, C = x.shape
+
+        &#47&#47 padding
+        pad_input = (H % 2 == 1) or <a id="change">(W % 2 == 1)</a>
+        <a id="change">if </a>pad_input<a id="change">:
+            </a>x<a id="change"> = </a><a id="change">F.pad(</a>x, (0<a id="change">, 0, 0, W % 2, 0, H % 2</a>)<a id="change">)</a>
+
+        x0 = x[:, :, 0::2, 0::2, :]  &#47&#47 B D H/2 W/2 C
+        x1 = x[:, :, 1::2, 0::2, :]  &#47&#47 B D H/2 W/2 C
+        x2 = x[:, :, 0::2, 1::2, :]  &#47&#47 B D H/2 W/2 C</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x: B, H*W, C
+        
+        H<a id="change">, W</a> = self.input_resolution
+        B, L, C = x.shape
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/829a2ecf6cd071bfc222fe830ebca1ed7a9cd8c4#diff-e237dac88e7ea9172f4d3310b0f37332bce40b9f8893b1e30b30feaddce55e94L287' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15759574</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: 829a2ecf6cd071bfc222fe830ebca1ed7a9cd8c4</div><div id='time'> Time: 2021-11-08</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/backbones/swin_transformer.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/backbones/swin_transformer.py</div><div id='n_file'> N File Name: transoar/models/backbones/swin_transformer.py</div><div id='m_start'> M Start Line: 292</div><div id='m_end'> M End Line: 299</div><div id='n_start'> N Start Line: 307</div><div id='n_end'> N End Line: 319</div><BR>

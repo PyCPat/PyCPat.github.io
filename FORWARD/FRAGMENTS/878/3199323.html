@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            Confidence of sequence(s) beeing in one of the n_classes.
+        
+        x = self.encoding(x).permute(0, 2, 1).contiguous()
+        x = <a id="change">self.conv1(</a>x<a id="change">)</a>
+        x = self.activation1(x)
+        x<a id="change"> = </a>self.pool1(x)
+        x<a id="change"> = </a>self.dropout1(x)
+        x = x.view(-1, self.conv1.out_channels)
+        x = self.classification1(x)
+        out = self.softmax(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            Confidence of sequence(s) beeing in one of the n_classes.
+        
+        x = self.encoding(x).permute(0, 2, 1).contiguous()
+        max_pool_layer = <a id="change">[]</a>
+        <a id="change">for i</a> in range(self.n_conv_layers)<a id="change">:
+            </a>x_conv = getattr(self, f&quotconv{i+1}&quot)(x)
+            x_conv = self.activation1(x_conv)
+            x_conv<a id="change"> = </a>self.pool1(x_conv)
+            <a id="change">max_pool_layer.append(</a>x_conv<a id="change">)</a>
+        &#47&#47 Concatenate max_pooling output of different convolutions
+        x = torch.cat(max_pool_layer, dim=1)
+        x = x.view(-1, <a id="change">x.shape[1]</a>)
+        x = self.classification1(x)
+        out = self.softmax(x)
+        return out</code></pre>

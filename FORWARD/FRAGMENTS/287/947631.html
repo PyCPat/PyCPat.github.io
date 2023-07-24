@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        i, j = dots_image.shape[-2:]
+        img_seq = torch.arange(img_seq_len, device = device)
+        k_img_indices = rearrange(img_seq.float(), &quot(h w) -&gt; () () h w&quot, h = img_size)
+        k_img_indices = F.pad(k_img_indices, (padding<a id="change"></a>,) * 4, value = img_seq_len) &#47&#47 padding set to be max, so it is never attended to
+        k_img_indices = F.unfold(k_img_indices, kernel_size, dilation = dilation)
+        k_img_indices = rearrange(k_img_indices, &quotb j i -&gt; b i j&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.pad(t, causal_padding), (k_img, v_img))
+        <a id="change">k_img</a><a id="change">, v_img = </a><a id="change">map(</a>lambda t: F.unfold(t, kernel_size, dilation = dilation), (<a id="change">k_img</a><a id="change">, v_img</a>)<a id="change">)</a>
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        &#47&#47 let image attend to all of text
+</code></pre>

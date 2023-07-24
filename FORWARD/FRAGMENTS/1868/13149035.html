@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if input_mask is not None:
+            mask = input_mask[:, None, :, None] * input_mask[:, None, None, :]
+            mask = F.pad(mask, (mem_len + cmem_len, 0), value = False)
+            dots.masked_fill_(~mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+
+        mask = torch.ones(t, kv_len, **to(x)).triu_(diagonal = 1 + kv_len).bool()
+        dots.masked_fill_(mask[None, None, ...], float(&quot-inf&quot))</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(merge_heads, (q, k, v))
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+        mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if pos_emb is not None:
+            pos_dots = torch.einsum(&quotbhid,hjd-&gt;bhij&quot, q, pos_emb) * self.scale
+            pos_dots = shift(pos_dots)</code></pre>

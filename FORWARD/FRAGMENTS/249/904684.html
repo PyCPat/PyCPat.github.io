@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+
+
+        concat_aligned_img_feature = <a id="change">img_feaure[:, None, :].repeat(1</a>, T_1, <a id="change">1</a><a id="change">)</a>
+        concatenated_features = torch.cat((trajectories_past, concat_aligned_img_feature), dim=2) &#47&#47 (N, T_1, 3 + 16)
+        output = self.transformer(src=concatenated_features, tgt=trajectories_future, tgt_mask=tgt_mask) &#47&#47 (N, T_2, 3)
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 img (N, T_1, 3, 100, 100) -&gt; CNN -&gt; (N, T_1, 16)
+        for t in range(T_1):
+            <a id="change">concat_aligned_img_feature[:, t, :]</a> = self.cnn(images_past[:, t, :, :, :])
+
+
+        &#47&#47 trajectory_history: (N, 10, 3)</code></pre>

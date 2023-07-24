@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            output &lt;torch.Tensor&gt;: (batch_size,) or ()
+        
+        batch_size<a id="change">, num_classes</a> = input.size()
+        scale, margin = self.scale, self.margin
+        eps = self.eps
+
+        input = torch.clamp(input, -1+eps, 1-eps)
+        theta = torch.arccos(input) &#47&#47 (batch_size, num_classes)
+        theta_modified = theta + margin &#47&#47 (batch_size, num_classes)
+        mesh = torch.arange(0, num_classes).unsqueeze(dim=0) &#47&#47 (1, num_classes) 
+        mesh_target = target.unsqueeze(dim=1) &#47&#47 (batch_size, 1)
+        condition = mesh==mesh_target &#47&#47 (batch_size, num_classes)
+        theta_modified = torch.where(condition, theta_modified, theta)
+        cos = scale * torch.cos(theta_modified) &#47&#47 (batch_size, num_classes)
+
+        indices = <a id="change">num_classes</a><a id="change"> * </a>torch.arange(batch_size) + target &#47&#47 (batch_size,)
+        cos_target<a id="change"> = </a>torch.take(cos, indices) &#47&#47 (batch_size,)
+
+        loss = - cos_target + torch.logsumexp(cos, dim=1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        eps = self.eps
+
+        cos_th = input
+        sin_th = <a id="change">torch.sqrt(</a>1 - cos_th**2 + eps<a id="change">)</a>
+        cos_phi = cos_th * cos_m - sin_th * sin_m &#47&#47 (batch_size, num_classes)
+
+        &#47&#47 For target class
+        if self.easy_margin:
+            cos_phi = torch.where(cos_th &lt; 0, cos_th, cos_phi) &#47&#47 (batch_size, num_classes)
+        else:
+            cos_phi = torch.where(cos_th &gt; self.cos_pi_m, cos_th - margin, cos_phi) &#47&#47 (batch_size, num_classes)
+        
+        &#47&#47 For non-target class
+        mask = F.one_hot(target, num_classes=num_classes) &#47&#47 (batch_size, num_classes)
+        input = scale * (mask<a id="change"> * </a>cos_phi + (1.0 - mask) * cos_th)
+        loss = F.cross_entropy(input, target, reduction="none")
+
+        if batch_mean:</code></pre>

@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :1730
+</h3><img src='12896324.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = (x - 0.5) / 0.5
+        shape = x.shape
+        n, c, h, w = shape
+        <a id="change">if c == 1</a><a id="change">:
+            </a>x<a id="change"> = </a>x.expand(1, 3, 1, 1)
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for </a>i in range(self._levels)<a id="change">:
+            </a>head = self._heads[i]
+            z<a id="change"> = </a>head(latent)
+            if i &lt; self._levels - 1:
+                mapper = self._mappers[i]
+                latent<a id="change"> = </a>mapper(latent)
+                code<a id="change"> = </a>self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard
+            else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12896324</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = (x - 0.5) / 0.5
+        shape = x.shape
+        n, c, h, w = shape
+        <a id="change">if c == 1</a><a id="change">:
+            </a>x<a id="change"> = </a>x.expand(1, 3, 1, 1)
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for i</a> in range(self._levels)<a id="change">:
+            </a>head<a id="change"> = </a>self._heads[i]
+            z<a id="change"> = </a>head(latent)
+            if i &lt; self._levels - 1:
+                mapper = self._mappers[i]
+                latent = mapper(latent)
+                code<a id="change"> = </a>self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard
+            else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12896325</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, image, video):
+        &#47&#47 image, video: 1 x 3 x 128 x 128, 1 x 100 x 3 x 128 x 128
+        image = self.image_patch_emb(image)  &#47&#47 1 x 64 x 16 x 16
+        <a id="change">if video is not None</a><a id="change">:
+            </a>video = video.permute(0, 2, 1, 3, 4)  &#47&#47 B x T x C x H x W -&gt; B x C x T x H x W
+            video = self.video_patch_emb(video)  &#47&#47 1 x 64 x 20 x 16 x 16
+            video<a id="change"> = </a>torch.cat([image.unsqueeze(2), video], dim=2)  &#47&#47 1 x 64 x 21 x 16 x 16
+        else:
+            video = image.unsqueeze(2)
+        video = video.view(*video.shape[:3], -1).permute(0, 2, 3, 1)  &#47&#47 B x T x (H x W) x C -&gt; 1 x 21 x (16*16) x 64</code></pre><h3>After Change</h3><pre><code class='java'>
+        video = self.stem(video)
+        s = None
+        if len(self.encoder) &gt; 0:
+            <a id="change">for </a>block, <a id="change">remapper</a> in zip(self.encoder, self.remapper)<a id="change">:
+                </a>if block.scaler is not None:
+                    prev_s<a id="change"> = </a>nn.functional.interpolate(video, scale_factor=(1, 0.5, 0.5), recompute_scale_factor=False)
+                else:
+                    prev_s = video
+                video<a id="change"> = </a>block(video, s)
+                if block.scaler is not None:
+                    video<a id="change"> = </a>remapper(video)
+                s = prev_s
+        video = self.bottleneck(video)
+        return video</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12896349</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 104</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		batch_size = content_code.shape[0]
+
+		content_code = content_code.view((batch_size, -1, 4, 4))
+		<a id="change">if </a>self.training and <a id="change">self.config[&quotcontent_std&quot] != 0</a><a id="change">:
+			</a>noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			out<a id="change"> = </a>content_code + noise
+		else:
+			out = content_code
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		<a id="change">for </a>conv1, conv2, <a id="change">to_rgb</a> in zip(self.convs[::2], self.convs[1::2], self.to_rgbs)<a id="change">:
+			</a>out<a id="change"> = </a>conv1(out, latent[:, i])
+			out = conv2(out, latent[:, i + 1])
+			skip<a id="change"> = </a>to_rgb(out, latent[:, i + 2], skip)
+
+			i<a id="change"> += </a>2
+
+		image = skip
+		return image</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12896334</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>

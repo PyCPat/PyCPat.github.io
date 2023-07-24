@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        <a id="change">assert </a>channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x = x.reshape(batch_size, 1, channels * repetitions, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = x.unsqueeze(-1)
+
+        if x.dim() == 4:  &#47&#47 [N, C, H, W]
+            x = x.view(<a id="change">x.shape[0]</a>, self.config.num_channels, -1)
+
+        assert x.dim() == 3
+        assert x.shape[1] == self.config.num_channels</code></pre>

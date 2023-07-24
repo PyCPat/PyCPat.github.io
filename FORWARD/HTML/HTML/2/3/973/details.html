@@ -1,0 +1,68 @@
+<html><h3>Pattern ID :973
+</h3><img src='3490807.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            size = torch.randint(int(.5 * width), int(.98 * width), ())
+            offsetx = torch.randint(0, width - size, ())
+            offsety = torch.randint(0, width - size, ())
+            apper = <a id="change">out[:, :, offsetx:offsetx + size, offsety:offsety + size]</a>
+            apper = torch.nn.functional.interpolate(apper, (224, 224), mode = &quotbilinear&quot, align_corners = False)
+            pieces.append(normalize_image(apper))
+
+        image = torch.cat(pieces)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for (num_images, (lo, hi), downsize) in cutout_specs:
+            for _ in range(num_images):
+                cutout = rand_cutout(out, ratio = (lo, hi))
+                <a id="change">if </a><a id="change">exists(</a>downsize<a id="change">):
+                    </a>cutout = interpolate(cutout, downsize)
+                resized_cutout = interpolate(cutout, 224)
+                pieces.append(normalize_image(resized_cutout))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/deep-daze/commit/31c2b6b8607914862120163bc48908ad3e6b5c12#diff-616c9e43a41350a422ceed25123abc6af77b07529631176f76732b6cfab3b710L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3490807</div><div id='project'> Project Name: lucidrains/deep-daze</div><div id='commit'> Commit Name: 31c2b6b8607914862120163bc48908ad3e6b5c12</div><div id='time'> Time: 2021-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: deep_daze/deep_daze.py</div><div id='m_class'> M Class Name: DeepDaze</div><div id='n_method'> N Class Name: DeepDaze</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deep_daze/deep_daze.py</div><div id='n_file'> N File Name: deep_daze/deep_daze.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        spatial_cls_tokens = repeat(self.spatial_cls_token, &quot1 1 d -&gt; b f 1 d&quot, b = b, f = f)
+        x = torch.cat((spatial_cls_tokens, x), dim = 2)
+        x += <a id="change">self.pos_embedding[:, :(n + 1)]</a>
+        x = self.dropout(x)
+
+        x = rearrange(x, &quotb f n d -&gt; (b f) n d&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 append temporal CLS tokens
+
+        <a id="change">if </a><a id="change">exists(</a>self.temporal_cls_token<a id="change">):
+            </a>temporal_cls_tokens = repeat(self.temporal_cls_token, &quot1 1 d-&gt; b 1 d&quot, b = b)
+
+            x = torch.cat((temporal_cls_tokens, x), dim = 1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/6ec8fdaa6dc114b3789b80635a64b126756c02c8#diff-5a6a5461c9325f66f90d85a868b229d6aa9c98ac38f278a4b3ae4f117e238ef8L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3490812</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 6ec8fdaa6dc114b3789b80635a64b126756c02c8</div><div id='time'> Time: 2022-10-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/vivit.py</div><div id='m_class'> M Class Name: ViT</div><div id='n_method'> N Class Name: ViT</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/vivit.py</div><div id='n_file'> N File Name: vit_pytorch/vivit.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            coors_out = coors
+
+        if exists(self.node_mlp):
+            m_ij = m_ij.masked_fill(~<a id="change">mask[..., None]</a>, 0.)
+
+            if self.m_pool_method == &quotmean&quot:
+                if exists(mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, feats, coors, edges = None, mask = None, adj_mat = None):
+        b, n, d, device, fourier_features, num_nearest, valid_radius, only_sparse_neighbors = *feats.shape, feats.device, self.fourier_features, self.num_nearest_neighbors, self.valid_radius, self.only_sparse_neighbors
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>num_nodes = mask.sum(dim = -1)
+
+        use_nearest = num_nearest &gt; 0
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/egnn-pytorch/commit/915d4b6d33459acbfc65a3b8a474bef843c61067#diff-bc5f0b587e39386590599ccefaeb0776a2edb29856099faa2ece667dd370ec4cL141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3490809</div><div id='project'> Project Name: lucidrains/egnn-pytorch</div><div id='commit'> Commit Name: 915d4b6d33459acbfc65a3b8a474bef843c61067</div><div id='time'> Time: 2021-03-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_class'> M Class Name: EGNN</div><div id='n_method'> N Class Name: EGNN</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: egnn_pytorch/egnn_pytorch.py</div><div id='n_file'> N File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_start'> M Start Line: 207</div><div id='m_end'> M End Line: 237</div><div id='n_start'> N Start Line: 146</div><div id='n_end'> N End Line: 242</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+        for q_chunk, k_chunk, v_chunk in zip(q.split(max_heads, dim = 1), k.split(max_heads, dim = 1), v.split(max_heads, dim = 1)):
+            sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q_chunk, k_chunk)
+
+            <a id="change">if </a><a id="change">exists(</a>context_mask<a id="change">):
+                </a>sim = sim.masked_fill(~context_mask, mask_value)
+
+            sim = sim.masked_fill(causal_mask, mask_value)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-ar-pytorch/commit/be3765300f5aae03b779edf0e256b7a74bda5fc8#diff-5ab51011b3cb840590737cf5342761683a8f59ac8817bfe6b989cf9e213218e4L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3490811</div><div id='project'> Project Name: lucidrains/perceiver-ar-pytorch</div><div id='commit'> Commit Name: be3765300f5aae03b779edf0e256b7a74bda5fc8</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_class'> M Class Name: CausalPrefixAttention</div><div id='n_method'> N Class Name: CausalPrefixAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='n_file'> N File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 178</div><BR>

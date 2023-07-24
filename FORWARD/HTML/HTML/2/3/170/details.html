@@ -1,0 +1,82 @@
+<html><h3>Pattern ID :170
+</h3><img src='720730.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs<a id="change"> = </a><a id="change">torch.stack(mel_outputs).transpose(0, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs = mel_outputs.reshape(B, -1, self.mel_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+                    break
+
+        &#47&#47 To tensor
+        mel_outputs = <a id="change">torch.cat(</a>mel_outputs<a id="change">, dim=1)</a> &#47&#47 (B, T_decoder, mel_dim)
+        attn_scores = torch.cat(attn_scores, dim=1) &#47&#47 (B, T_decoder/r, T_encoder)
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720730</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 out = self.conv2(out, batch)
+        &#47&#47 out = self.conv3(out, batch)  &#47&#47 n_points x length_features
+        &#47&#47 reshape back into batch 
+        out<a id="change"> = </a><a id="change">out.contiguous()</a>.view(batch_size, n_vertices, -1)
+
+        &#47&#47 aggregate features from vertices
+        out = out.max(dim=-2, keepdim=False)[0]</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.config[&quotskip_connections&quot]:
+                aggr_features.append(self.global_pool(out, batch, batch_size))
+        
+        feature = <a id="change">torch.cat(</a>aggr_features, -1<a id="change">)</a> if self.config[&quotskip_connections&quot] else self.global_pool(out, batch, batch_size)
+
+        &#47&#47 post-processing
+        out = self.lin(feature)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maria-korosteleva/garment-pattern-estimation/commit/fd8ff19db9d988e5ac9788f8b67560dab3cc7c33#diff-89c20b5db964bedc27e4675e157d9980f5ec0b6bc5ce56cbdf2701e60bf7bc8eL105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720745</div><div id='project'> Project Name: maria-korosteleva/garment-pattern-estimation</div><div id='commit'> Commit Name: fd8ff19db9d988e5ac9788f8b67560dab3cc7c33</div><div id='time'> Time: 2020-09-23</div><div id='author'> Author: mariako@kaist.ac.kr</div><div id='file'> File Name: nn/net_blocks.py</div><div id='m_class'> M Class Name: EdgeConvFeatures</div><div id='n_method'> N Class Name: EdgeConvFeatures</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nn/net_blocks.py</div><div id='n_file'> N File Name: nn/net_blocks.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 137</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        embed_out = self.embedding(x)
+        lstm_out, self.hidden = self.lstm(embed_out, self.hidden)
+        lstm_out = self.dropout(lstm_out)
+        lstm_out<a id="change"> = </a><a id="change">lstm_out.contiguous()</a>.view(-1, self.hidden_dim)
+        fc_out = self.fc(lstm_out)
+
+        return fc_out</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        _, (hidden, cell) = self.lstm(packed_embed_out)
+
+        hidden = self.dropout(<a id="change">torch.cat(</a>(hidden[-2, :, :], hidden[-1, :, :])<a id="change">, dim=1)</a>)
+        fc_out = self.fc(hidden)
+
+        return fc_out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8#diff-7dbb295508efd990fc66851d3b00d01a8e3b3d09d0e339f9e740d64e599e9c7dL57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720734</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 31511755+avishreekh@users.noreply.github.com</div><div id='file'> File Name: KD_Lib/models/lstm.py</div><div id='m_class'> M Class Name: LSTMNet</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/models/lstm.py</div><div id='n_file'> N File Name: KD_Lib/models/lstm.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = <a id="change">torch.stack(mel_outputs).transpose(0, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 To tensor
+        mel_outputs = torch.cat(mel_outputs, dim=1) &#47&#47 (B, T_decoder, mel_dim)
+        attn_scores = <a id="change">torch.cat(</a>attn_scores<a id="change">, dim=1)</a> &#47&#47 (B, T_decoder/r, T_encoder)
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720735</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.dense_block(input)
+        x = self.bottleneck_conv2d(x)
+        x = x.squeeze(dim=1)
+        x<a id="change"> = </a><a id="change">x.permute(0, 2, 1).contiguous()</a>
+        x, _ = self.rnn(x)
+        x = self.linear(x)
+        x = x.view(batch_size, W, out_channels, H)
+        output = x.permute(0, 2, 3, 1).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_rnn = x_rnn.view(batch_size, W, 1, H)
+        x_rnn = x_rnn.permute(0, 2, 3, 1).contiguous()
+
+        output = <a id="change">torch.cat(</a>[x, x_rnn]<a id="change">, dim=1)</a>
+
+        return output
+
+class RNNBeforeDenseBlock(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/a03228ac5d881722942f5d3b8f51c12b05045f49#diff-c4583de27288d3ca1427dcdebe94ac7c663a338bc0a093c70b5ec1d51e3e2363L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720742</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: a03228ac5d881722942f5d3b8f51c12b05045f49</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/models/dense_rnn.py</div><div id='m_class'> M Class Name: RNNAfterDenseBlock</div><div id='n_method'> N Class Name: RNNAfterDenseBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/dense_rnn.py</div><div id='n_file'> N File Name: src/models/dense_rnn.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 57</div><div id='n_end'> N End Line: 66</div><BR>

@@ -1,0 +1,44 @@
+<html><h3>Pattern ID :2241
+</h3><img src='14277177.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        dice0 = 2 * (pred[:,0] * target[:,0]).sum(dim=1).sum(dim=1).sum(dim=1) / (pred[:,0].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
+                                            target[:,0].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        dice1 = 2 * (pred[:,1] * target[:,1]).sum(dim=1).sum(dim=1).sum(dim=1) / (pred[:,1].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
+                                            <a id="change">target[:,1]</a>.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        dice = (dice1+dice0) / 2.0
+        &#47&#47 返回的是dice距离
+        return torch.clamp((1 - dice).mean(), 0, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        smooth = 1
+
+        &#47&#47 dice系数的定义
+        dice = 2 * (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / (<a id="change">pred.pow(2</a><a id="change">)</a>.sum(dim=1).sum(dim=1).sum(dim=1) +
+                                            target.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+
+        &#47&#47 返回的是dice距离</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lee-zq/3dunet-pytorch/commit/5503c174b8875343fe4812ebb0dcbe77346a348a#diff-8a45704eb3dc7993aeb0011c99dee572f7edce10f06785250639c8a95dcc3ee5L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14277177</div><div id='project'> Project Name: lee-zq/3dunet-pytorch</div><div id='commit'> Commit Name: 5503c174b8875343fe4812ebb0dcbe77346a348a</div><div id='time'> Time: 2021-05-21</div><div id='author'> Author: zq_lee@163.com</div><div id='file'> File Name: loss/Dice.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/Dice.py</div><div id='n_file'> N File Name: loss/Dice.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 26</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 23</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    minibatch standard deviation
+    &quot&quot&quot
+    def forward(self, x):
+        std = torch.std(x).expand(x.shape[0], 1, *<a id="change">x.shape[2:]</a>)
+        return torch.cat([x, std], dim=1)
+
+class Blur2d(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+&quot&quot&quotPixel Normalization&quot&quot&quot
+class PixelNorm(nn.Module):
+    def forward(self, x):
+        x = x / <a id="change">x.pow(2</a><a id="change">)</a>.mean(dim=1, keepdim=True).sqrt().add_(1e-4)
+        return x
+
+&quot&quot&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L123' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14277178</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='m_class'> M Class Name: MiniBatchStd</div><div id='n_method'> N Class Name: PixelNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: implementations/StyleGAN2/model.py</div><div id='n_file'> N File Name: implementations/StyleGAN2/model.py</div><div id='m_start'> M Start Line: 124</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 254</div><div id='n_end'> N End Line: 255</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    dice_loss *= self.weight[i]
+                total_loss += dice_loss
+
+        return total_loss/<a id="change">target.shape[1]</a></code></pre><h3>After Change</h3><pre><code class='java'>
+        dice = 0.
+        &#47&#47 dice系数的定义
+        for i in range(pred.size(1)):
+            dice += 2 * (pred[:,i] * target[:,i]).sum(dim=1).sum(dim=1).sum(dim=1) / (<a id="change">pred[:,i].pow(2</a><a id="change">)</a>.sum(dim=1).sum(dim=1).sum(dim=1) +
+                                                target[:,i].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        &#47&#47 返回的是dice距离
+        dice = dice / pred.size(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lee-zq/3dunet-pytorch/commit/070a8816879b33e97a9541e35cc5b2bfaf1bcd76#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14277169</div><div id='project'> Project Name: lee-zq/3dunet-pytorch</div><div id='commit'> Commit Name: 070a8816879b33e97a9541e35cc5b2bfaf1bcd76</div><div id='time'> Time: 2021-05-22</div><div id='author'> Author: zq_lee@163.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 27</div><BR>

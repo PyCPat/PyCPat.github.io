@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :3147
+</h3><img src='16868561.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		for block in self.decoder:
+			x = block(x, class_with_style_code)
+
+		<a id="change">return </a><a id="change">{
+			</a>&quotimg&quot: self.to_rgb(x),
+			&quotcontent_code&quot: content_code,
+			&quotstyle_code&quot: style_code<a id="change">
+		}</a>
+
+
+class Discriminator(nn.Module):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		class_with_style_code = self.class_style_modulation(class_with_style_code)
+
+		adain_params = self.modulation(class_with_style_code)
+		generated_img = <a id="change">self.decoder(</a>regularized_content_code, adain_params<a id="change">)</a>
+
+		return {
+			&quotimg&quot: generated_img,
+			&quotcontent_code&quot: content_code,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/5fdf4019e9ff74b0574e25f5c6e8dc6a5e588cbe#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16868561</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: 5fdf4019e9ff74b0574e25f5c6e8dc6a5e588cbe</div><div id='time'> Time: 2020-05-23</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		for block in self.adains:
+			x = block(x, class_code.view((batch_size, -1)))
+
+		<a id="change">return </a><a id="change">{
+			</a>&quotimg&quot: self.convs(x),
+			&quotcontent_code&quot: content_code<a id="change">
+		}</a>
+
+
+class Discriminator(nn.Module):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = torch.cat((content_code_regularized, class_code), dim=1)
+
+		return {
+			&quotimg&quot: <a id="change">self.decoder(</a>x<a id="change">)</a>,
+			&quotcontent_code&quot: content_code
+		}
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/2e57d3e1542653b97b1c30947259f93314cdf3e4#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16868560</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: 2e57d3e1542653b97b1c30947259f93314cdf3e4</div><div id='time'> Time: 2020-07-23</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.args = args
+
+    def forward(self, x: torch.Tensor):
+        <a id="change">return </a>self.decoder.generate(torch.LongTensor(<a id="change">[</a>self.args.bos_token<a id="change"></a>]*len(x)).to(x.device),
+                                     self.args.max_seq_len, eos_token=self.args.eos_token, context=self.encoder(x))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor, tgt_seq: torch.Tensor, **kwargs):
+        encoded = self.encoder(x)
+        out = <a id="change">self.decoder(</a>tgt_seq<a id="change">, context=encoded, **kwargs)</a>
+        return out
+
+    @torch.no_grad()
+    def generate(self, x: torch.Tensor):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lukas-blecher/latex-ocr/commit/e2b55fb4715f3ab5792f7a1accd07b737c744f96#diff-12f7a2fee1f027defb166ee393c7f1d95d92f6413ae2538b7560b04682dfa7fdL16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16868563</div><div id='project'> Project Name: lukas-blecher/latex-ocr</div><div id='commit'> Commit Name: e2b55fb4715f3ab5792f7a1accd07b737c744f96</div><div id='time'> Time: 2022-05-19</div><div id='author'> Author: yuhang.tao.email@gmail.com</div><div id='file'> File Name: pix2tex/models/utils.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pix2tex/models/utils.py</div><div id='n_file'> N File Name: pix2tex/models/utils.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 18</div><div id='n_start'> N Start Line: 16</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                return output
+            else:
+                outputs = []
+                noutputs = <a id="change">[]</a>
+                for wc in self.wblocks:
+                    outputs.append(wc(output))
+                outputs=torch.stack(outputs).unsqueeze(0)
+                for nc in self.nblocks:
+                    noutputs.append(nc(output))
+                <a id="change">return </a>outputs, noutputs
+
+class WBlock(nn.Module):
+    Define a linear block for W</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        Standard forward
+        output = self.encoder(input)
+        output = <a id="change">self.decoder(</a>output<a id="change">)</a>
+        return output
+    
+class MobileResnetEncoderSty2(nn.Module):
+    def __init__(self, input_nc, output_nc, ngf, norm_layer=nn.InstanceNorm2d,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jolibrain/joligan/commit/9a512b0d50106ae0f1c8a9c6f4f933c2c9ee1326#diff-010a861ce1ffa95811ffe534b05467dd6c9d327db6535e2a0117e696d34f1d90L140' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16868562</div><div id='project'> Project Name: jolibrain/joligan</div><div id='commit'> Commit Name: 9a512b0d50106ae0f1c8a9c6f4f933c2c9ee1326</div><div id='time'> Time: 2021-02-05</div><div id='author'> Author: pnsuau@wanadoo.fr</div><div id='file'> File Name: models/modules/resnet_architecture/mobile_resnet_generator.py</div><div id='m_class'> M Class Name: MobileResnetGenerator</div><div id='n_method'> N Class Name: MobileResnetGenerator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/modules/resnet_architecture/mobile_resnet_generator.py</div><div id='n_file'> N File Name: models/modules/resnet_architecture/mobile_resnet_generator.py</div><div id='m_start'> M Start Line: 150</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 87</div><BR>

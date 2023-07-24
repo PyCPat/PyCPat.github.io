@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        out = self.bn1(x)
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>self.conv1(out)
+        out = self.bn2(out)
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+        out = self.conv2(out)
+        if self.dropRate &gt; 0:
+            out<a id="change"> = </a><a id="change">F.dropout(</a>out<a id="change">, p=self.dropRate, training=self.training)</a>
+
+        out = torch.cat((x, out), 1)
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        out = self.conv1(F.relu(self.bn1(x)))
+        out = self.conv2(F.relu(self.bn2(out)))
+        out = torch.cat(<a id="change">[</a>out,x<a id="change"></a>], 1)
+        return out
+
+</code></pre>

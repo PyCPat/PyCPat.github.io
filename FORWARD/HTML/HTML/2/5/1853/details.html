@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1853
+</h3><img src='13135352.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.mvit[2](x)
+        x = self.conv2(x)
+
+        x = <a id="change">self.pool(x).view(-1</a>, x.shape[1]<a id="change">)</a>
+        x = self.fc(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for conv in self.stem:
+            x = conv(x)
+
+        <a id="change">for </a>conv, <a id="change">attn</a> in self.trunk<a id="change">:
+            </a>x<a id="change"> = </a>conv(x)
+            x = attn(x)
+
+        return self.to_logits(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/b983bbee390bf2a9b677de5ba1e91b3327f8cfc8#diff-180c1535c305da16bf6b05e1db96f9ac1e4ee6fb798bd3da9f10e336cf10ddbaL209' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13135352</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: b983bbee390bf2a9b677de5ba1e91b3327f8cfc8</div><div id='time'> Time: 2021-12-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/mobile_vit.py</div><div id='m_class'> M Class Name: MobileViT</div><div id='n_method'> N Class Name: MobileViT</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mobile_vit.py</div><div id='n_file'> N File Name: vit_pytorch/mobile_vit.py</div><div id='m_start'> M Start Line: 209</div><div id='m_end'> M End Line: 228</div><div id='n_start'> N Start Line: 230</div><div id='n_end'> N End Line: 239</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            video = torch.cat([image.unsqueeze(2), video], dim=2)  &#47&#47 1 x 64 x 21 x 16 x 16
+        else:
+            video = image.unsqueeze(2)
+        video = <a id="change">video.view(</a>*video.shape[:3], <a id="change">-1</a><a id="change">)</a>.permute(0, 2, 3, 1)  &#47&#47 B x T x (H x W) x C -&gt; 1 x 21 x (16*16) x 64
+        video = self.attention(video)  &#47&#47 1 x 21 x 256 x 64
+        return video
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        video = self.stem(video)
+        s = None
+        if len(self.encoder) &gt; 0:
+            <a id="change">for </a>block, <a id="change">remapper</a> in zip(self.encoder, self.remapper)<a id="change">:
+                </a>if block.scaler is not None:
+                    prev_s = nn.functional.interpolate(video, scale_factor=(1, 0.5, 0.5), recompute_scale_factor=False)
+                else:
+                    prev_s = video
+                video<a id="change"> = </a>block(video, s)
+                if block.scaler is not None:
+                    video = remapper(video)
+                s = prev_s</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13135346</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 104</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 out = self.conv2(out, batch)
+        &#47&#47 out = self.conv3(out, batch)  &#47&#47 n_points x length_features
+        &#47&#47 reshape back into batch 
+        out = <a id="change">out.contiguous().view(</a>batch_size, n_vertices, <a id="change">-1</a><a id="change">)</a>
+
+        &#47&#47 aggregate features from vertices
+        out = out.max(dim=-2, keepdim=False)[0]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.config[&quotskip_connections&quot]:
+            aggr_features.append(self.global_pool(out, batch, batch_size))
+        
+        <a id="change">for conv_id</a> in range(1, self.config[&quotconv_depth&quot])<a id="change">:
+            </a>out<a id="change"> = </a>self.conv_layers[conv_id](out, batch)
+            if self.config[&quotskip_connections&quot]:
+                aggr_features.append(self.global_pool(out, batch, batch_size))
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maria-korosteleva/garment-pattern-estimation/commit/fd8ff19db9d988e5ac9788f8b67560dab3cc7c33#diff-89c20b5db964bedc27e4675e157d9980f5ec0b6bc5ce56cbdf2701e60bf7bc8eL105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13135347</div><div id='project'> Project Name: maria-korosteleva/garment-pattern-estimation</div><div id='commit'> Commit Name: fd8ff19db9d988e5ac9788f8b67560dab3cc7c33</div><div id='time'> Time: 2020-09-23</div><div id='author'> Author: mariako@kaist.ac.kr</div><div id='file'> File Name: nn/net_blocks.py</div><div id='m_class'> M Class Name: EdgeConvFeatures</div><div id='n_method'> N Class Name: EdgeConvFeatures</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nn/net_blocks.py</div><div id='n_file'> N File Name: nn/net_blocks.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 137</div><div id='n_end'> N End Line: 161</div><BR>

@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 Update parts U
+            encodings_u = self.u_update(torch.cat([
+                encodings_u,
+                <a id="change">torch.mm(adjacency_matrix</a>, <a id="change">self.v_to_u(</a>encodings_v<a id="change">)</a><a id="change">)</a>
+            ], 1))
+
+            &#47&#47 Updaet parts V
+            encodings_v = self.v_update(torch.cat([
+                encodings_v,
+                <a id="change">torch.mm(</a><a id="change">adjacency_matrix.t()</a>, <a id="change">self.u_to_v(</a>encodings_u<a id="change">)</a><a id="change">)</a>
+            ], 1))
+
+        return encodings_u, encodings_v, adjacency_matrix
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            weights = self.adjacency(torch.cat([
+                encodings_u[u], encodings_v[v]
+            ], 1))
+            <a id="change">adjacency_matrix</a> = weights.reshape(n_u, n_v)
+
+            &#47&#47 Update parts U
+            encodings_u = self.u_update(torch.cat([
+                encodings_u, <a id="change">self.v_to_u_norm(
+                    torch.mm(adjacency_matrix</a>, <a id="change">self.v_to_u(</a>encodings_v<a id="change">)</a><a id="change">)</a><a id="change">
+                )</a>
+            ], 1))
+
+            &#47&#47 Updaet parts V
+            encodings_v = self.v_update(torch.cat([
+                encodings_v, <a id="change">self.u_to_v_norm(</a><a id="change">torch.mm(
+                    </a><a id="change">adjacency_matrix.t()</a>, <a id="change">self.u_to_v(</a>encodings_u<a id="change">)</a><a id="change">)
+                )</a>
+            ], 1))
+
+        return encodings_u, encodings_v, adjacency_matrix
+</code></pre>

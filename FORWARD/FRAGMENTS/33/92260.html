@@ -1,0 +1,72 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 reshape z -&gt; (batch, height, width, channel) and flatten
+        &#47&#47z, &quotb c h w -&gt; b h w c&quot
+        z = z.permute(0, 2, 3, 1).contiguous()
+        <a id="change">z_flattened</a> = z.view(-1, self.codebook_dim)
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+
+        d = torch.sum(z_flattened.pow(2), dim=1, keepdim=True) + \
+            torch.sum(self.embed.pow(2), dim=1) - 2<a id="change"> * \
+            torch.einsum(&quotbd,dn-&gt;bn&quot</a>, z_flattened, <a id="change">self.embed.permute(1</a>,<a id="change">0</a><a id="change">))</a> &#47&#47 &quotn d -&gt; d n&quot
+
+        encoding_indices = <a id="change">torch.argmin(</a>d<a id="change">, dim=1)</a>
+        z_q = self.embedding(encoding_indices).view(z.shape)
+        encodings<a id="change"> = </a>F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+        
+
+        &#47&#47 Use EMA to update the embedding vectors
+        if self.training:
+            &#47&#47EMA cluster size
+            new_cluster_size = torch.sum(encodings, 0)
+            self.cluster_size.data.mul_(self.decay).add_(new_cluster_size, alpha=1 - self.decay)
+            
+            &#47&#47 Laplace smoothing of the cluster size
+            cluster_size_sum = torch.sum(self.cluster_size.data)
+            self.cluster_size.data.add_(self.eps).div_(cluster_size_sum + self.num_tokens * self.eps)
+
+            &#47&#47EMA embedding weight
+            new_ema_w = <a id="change">torch.matmul(encodings.t()</a>, z_flattened<a id="change">)</a>
+            <a id="change">self.embed_avg.data.mul_(self.decay).add_(</a>new_ema_w<a id="change">, alpha=1 - self.decay)</a>   
+
+            &#47&#47normalize embedding weight EMA and update current embedding weight
+            self.embed.data.copy_(self.embed_avg / self.cluster_size.unsqueeze(1))
+        
+        &#47&#47 compute loss for embedding
+        loss = self.beta * <a id="change">F.mse_loss(</a>z_q.detach(), z<a id="change">)</a>
+        &#47&#47 preserve gradients
+        z_q = z + (z_q - z).detach()
+
+        &#47&#47 reshape back to match original input shape</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, z):
+        z = z.permute(0, 2, 3, 1).contiguous()
+        <a id="change">z_flattened</a> = z.reshape(-1, self.codebook_dim)
+        d = (
+            z_flattened.pow(2).sum(1, keepdim=True)
+            - <a id="change">2</a><a id="change"> * z_flattened @ </a>self.embedding.weight
+            + self.embedding.weight.pow(2).sum(0, keepdim=True)
+        )
+        _, encoding_indices = <a id="change">(-d).max(1</a><a id="change">)</a>
+        encodings<a id="change"> = </a>F.one_hot(encoding_indices, self.num_tokens).type(z_flattened.dtype)
+        encoding_indices = encoding_indices.view(*z.shape[:-1])
+        z_q = self.embedding(encoding_indices)
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum<a id="change"> = </a><a id="change">z_flattened.transpose(0</a>, <a id="change">1</a><a id="change">)</a><a id="change"> @ </a>encodings
+
+            self.embedding.cluster_size.data.mul_(self.decay).add_(
+                encodings_sum, alpha=1 - self.decay
+            )
+            <a id="change">self.embedding.embed_avg.data.mul_(self.decay).add_(</a>embed_sum<a id="change">, alpha=1 - self.decay)</a>
+            n = self.embedding.cluster_size.sum()
+            cluster_size = (
+                (self.embedding.cluster_size + self.eps) / (n + self.num_tokens * self.eps) * n
+            )</code></pre>

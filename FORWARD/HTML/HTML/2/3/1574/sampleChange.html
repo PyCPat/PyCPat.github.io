@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        p = p[torch.arange(p.shape[0]), target]
+
+        &#47&#47 Adapt formula as p is in log-scale
+        loss = <a id="change">torch.where(
+            </a>p &lt;= math.log(1 / self.tau),
+            -self.tau * torch.exp(p) + math.log(self.tau) + 1,
+            <a id="change">-p</a><a id="change">,
+        )</a>
+
+        return torch.mean(loss)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        loss = torch.empty_like(p)
+        clip = (p &lt;= 1 / self.tau)
+        loss[clip] = -self.tau * <a id="change">p[clip]</a> + math.log(self.tau) + 1
+        loss[~clip] = -torch.log(p[~clip])
+
+        return torch.mean(loss)</code></pre>

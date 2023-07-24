@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.domain_discriminator_accuracy = None
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s<a id="change">, domain_acc_s</a> = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = F.softmax(g,dim=1).detach()
+        h<a id="change"> = </a>self.grl(self.map(f, g))
+        d<a id="change"> = </a>self.domain_discriminator(h)
+        d_label<a id="change"> = </a>torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight = 1.0 + torch.exp(-entropy(g))
+        batch_size = f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, <a id="change">weight.view_as(</a>d<a id="change">)</a>)
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre>

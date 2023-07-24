@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input):
+        &#47&#47 conv features
+        conv = self.cnn(input)
+        b<a id="change">, c, h, w = </a><a id="change">conv.size()</a>
+        assert h == 1, "the height of conv must be 1"
+        conv = conv.squeeze(2)
+        conv = conv.permute(2, 0, 1)  &#47&#47 [w, b, c]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 add log_softmax to converge output
+        output = F.log_softmax(cls, dim=2)
+        if self.return_cls:
+            return output, <a id="change">F.softmax(</a>cls, 2<a id="change">)</a>
+
+        return output
+
+</code></pre>

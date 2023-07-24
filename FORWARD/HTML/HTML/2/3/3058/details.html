@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :3058
+</h3><img src='16450425.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            usage = onehot.sum(0)
+            targets = (x.T @ onehot / usage).T
+
+            targets = torch.where(<a id="change">torch.isnan(</a>targets<a id="change">)</a>, self.embedding,
+                                  targets)
+
+            ema_inplace(self.embedding, targets, self.ema)</code></pre><h3>After Change</h3><pre><code class='java'>
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = (laplace_smoothing(
+                self.cluster_size, self.codebook_size, self.epsilon) *
+                            <a id="change">self.cluster_size.sum()</a>)
+            embed_normalized = self.embed_avg<a id="change"> / </a>cluster_size.unsqueeze(1)
+            self.embed.data.copy_(embed_normalized)
+
+        return quantize, embed_ind</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450425</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: VQ</div><div id='n_method'> N Class Name: EuclideanCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 97</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 187</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        print(&quotentity_input is nan:&quot, <a id="change">torch.isnan(</a>x<a id="change">)</a>.any()) if debug else None
+
+        &#47&#47 calculate there are how many real entities in each batch
+        tmp_x = torch.mean(x, dim=2, keepdim=False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z = <a id="change">masked_out.sum(dim=1, keepdim=False)</a>
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z = z<a id="change"> / </a>entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L717' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450423</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~<a id="change">torch.isnan(</a>x[i, :, 0]<a id="change">)</a>, :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding = (
+                <a id="change">trial_embeddings.sum(dim=self.aggregation_dim) / </a>trial_counts
+            )
+        else:
+            combined_embedding = trial_embeddings.sum(dim=self.aggregation_dim)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450422</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>

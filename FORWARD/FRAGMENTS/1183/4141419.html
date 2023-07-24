@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, pred: torch.Tensor, batch: Dict[str, Any], device: torch.device):
+        targets = batch[&quottargets&quot].to(device)
+        dice_loss<a id="change">, _</a> = self.dice(pred, batch, device)
+        ce_loss, _ = self.ce(pred, batch, device)
+        total_loss = dice_loss + ce_loss
+        loss_dict = {</code></pre><h3>After Change</h3><pre><code class='java'>
+        total_loss = 0
+        total_loss_dict = {}
+
+        <a id="change">for </a>weight, <a id="change">loss_fn</a> in <a id="change">zip(</a>self.weights, self.losses<a id="change">):
+          </a>loss<a id="change">, loss_dict</a> = loss_fn(pred, batch, device)
+          total_loss<a id="change"> += </a>(weight<a id="change">*</a>loss)
+          total_loss_dict.update(loss_dict)
+
+        total_loss_dict.update({&quotTotal&quot: total_loss.item()})</code></pre>

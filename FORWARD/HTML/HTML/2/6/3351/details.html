@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :3351
+</h3><img src='17354120.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		else:
+			out = content_code
+
+		<a id="change">for layer</a> in self.layers<a id="change">:
+			</a>out<a id="change"> = </a>layer(out, class_code, None)
+
+		out = self.to_rgb(out)
+		return out</code></pre><h3>After Change</h3><pre><code class='java'>
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], <a id="change">self.convs[1::2]</a>, self.to_rgbs):
+			out = conv1(out, latent[:, i])
+			out = conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17354120</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_id = 0
+            <a id="change">for mod</a> in x<a id="change">:
+                </a>for x_mod in mod:
+                    x_mod *= mask[mask_id]
+                    mask_id<a id="change"> += </a>1
+            return x, mask
+        return x, None
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask_size = torch.Size([X[0].shape[0], sum(blocks_per_mod)])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_shapes = [list(<a id="change">x.shape[:2]</a>) + [1] * (x.dim() - 2) for x in X]
+            grouped_masks = torch.split(mask, blocks_per_mod, dim=1)
+            grouped_masks = [m.reshape(s) for m, s in zip(grouped_masks, mask_shapes)]
+            X = [x * m for x, m in zip(X, grouped_masks)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/a2c91bd6e186680ca2c41bbf22c9b57aff4654d2#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17354122</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: a2c91bd6e186680ca2c41bbf22c9b57aff4654d2</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: BlockDropout</div><div id='n_method'> N Class Name: BlockDropout</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.encoder[idx](x)
+            skips.append(x)
+
+        <a id="change">for idx</a> in range(self.num_stacks - 1)<a id="change">:
+            </a>skip_idx = self.num_stacks - idx - 1
+            skip<a id="change"> = </a>skips[skip_idx]
+            x = self.decoder[idx](x, skip=skip)
+
+        output = self.bottleneck_conv2d(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.conv2d(input)
+        x, skip = self.encoder(x)
+        x = self.bottleneck_conv2d(x)
+        x = self.decoder(x, <a id="change">skip[::-1]</a>)
+
+        if self.pointwise_conv2d:
+            output = self.pointwise_conv2d(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L201' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17354119</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3NetBackbone</div><div id='n_method'> N Class Name: D3NetBackbone</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 206</div><div id='m_end'> M End Line: 220</div><div id='n_start'> N Start Line: 207</div><div id='n_end'> N End Line: 226</div><BR>

@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :2972
+</h3><img src='16236739.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self,x):
+        Xout = self.FC(x).view(-1, self.nchannels, self.height_target, self.width_target)
+        return Xout[:,0,:,:]<a id="change"> if </a>self.None_nchannels<a id="change"> else </a>Xout
+
+if __name__ == &quot__main__&quot:
+    ny = (20,20)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+    def forward(self, Y):
+        if self.None_nchannels:
+            Y = <a id="change">Y[:,None,:,:]</a>
+        return self.downblocks(Y).view(Y.shape[0],-1)
+
+class CNN_encoder(nn.Module):
+    def __init__(self, nb, nu, na, ny, nx, n_nodes_per_layer=64, n_hidden_layers=2, activation=nn.Tanh, features_ups_factor=1.33):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/gerbenbeintema/deepsi/commit/46e16f590ba593426b3efdebec4fc6580387c65b#diff-c47ac71b5c790a760834d10dffdddbbe3e1104b431ea47d77b49064848c805afL193' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236739</div><div id='project'> Project Name: gerbenbeintema/deepsi</div><div id='commit'> Commit Name: 46e16f590ba593426b3efdebec4fc6580387c65b</div><div id='time'> Time: 2021-09-13</div><div id='author'> Author: g.i.beintema@tue.nl</div><div id='file'> File Name: deepSI/utils/torch_nets.py</div><div id='m_class'> M Class Name: FC_video</div><div id='n_method'> N Class Name: CNN_chained_downscales</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepSI/utils/torch_nets.py</div><div id='n_file'> N File Name: deepSI/utils/torch_nets.py</div><div id='m_start'> M Start Line: 193</div><div id='m_end'> M End Line: 194</div><div id='n_start'> N Start Line: 242</div><div id='n_end'> N End Line: 244</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, start: Tensor, keep_start: bool = False) -&gt; Tensor:
+        half_length = start.shape[2] // 2
+
+        spans = [start[:, :, :half_length]]<a id="change"> if </a>keep_start<a id="change"> else </a>[]
+        inpaint = start
+        inpaint_mask = sequential_mask(like=start, start=half_length)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        spans = list(start.chunk(chunks=2, dim=-1)) if keep_start else []
+        &#47&#47 Inpaint second half from first half
+        inpaint = torch.zeros_like(start)
+        inpaint[:, :, :half_length] = <a id="change">start[:, :, half_length:]</a>
+        inpaint_mask = sequential_mask(like=start, start=half_length)
+
+        for i in range(self.num_spans):
+            &#47&#47 Inpaint second half</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/b85b8257596629919b372418b2d3d690e30b7572#diff-ac9a7192cf236d8e3ab3b7a76336dfcdeb2d26dc13b98a8b8637509c69a4cff7L321' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236738</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: b85b8257596629919b372418b2d3d690e30b7572</div><div id='time'> Time: 2022-07-27</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='m_class'> M Class Name: SpanBySpanComposer</div><div id='n_method'> N Class Name: SpanBySpanComposer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion/elucidated.py</div><div id='m_start'> M Start Line: 324</div><div id='m_end'> M End Line: 325</div><div id='n_start'> N Start Line: 322</div><div id='n_end'> N End Line: 327</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 some of the encoder model doesnt output the pooler output. It has to be made from hidden state
+        &#47&#47ouputs in those cases
+        sequenceOutput = outputs[0]
+        pooledOutput = outputs[1]<a id="change"> if </a>len(outputs) &gt;1<a id="change"> else </a>self.make_pooler_output(sequenceOutput)
+
+        taskType = self.taskParams.taskTypeMap[self.taskParams.taskIdNameMap[taskId]]
+        if taskType == TaskType.Span:</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(outputs) &gt; 1:
+            pooledOutput = outputs[1]
+        else:
+            pooledOutput = nn.ReLU()(self.poolerLayer(<a id="change">sequenceOutput[:, 0]</a>))
+
+        &#47&#47pooledOutput = outputs[1] if len(outputs) &gt;1 else self.make_pooler_output(sequenceOutput)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hellohaptik/multi-task-nlp/commit/434af597e1f2dd437d60e963d98b9db78222fcdf#diff-806f82422552da4fd8e7f277c42d565823581d20382c946937ce3f69879bca96L89' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236737</div><div id='project'> Project Name: hellohaptik/multi-task-nlp</div><div id='commit'> Commit Name: 434af597e1f2dd437d60e963d98b9db78222fcdf</div><div id='time'> Time: 2020-04-20</div><div id='author'> Author: mehtasaransh614@gmail.com</div><div id='file'> File Name: models/model.py</div><div id='m_class'> M Class Name: multiTaskNetwork</div><div id='n_method'> N Class Name: multiTaskNetwork</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model.py</div><div id='n_file'> N File Name: models/model.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 108</div><BR>

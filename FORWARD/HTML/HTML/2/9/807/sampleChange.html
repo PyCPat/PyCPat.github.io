@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = mask.contiguous().view(mask.size()[0], -1)
+            pred = pred * mask
+            target = target<a id="change"> * </a>mask
+
+        a<a id="change"> = </a>torch.sum(pred<a id="change"> * </a>target)
+        b<a id="change"> = </a><a id="change">torch.sum(</a>pred<a id="change">)</a>
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)
+
+        <a id="change">return </a>1<a id="change"> - </a>d
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        mask = mask.contiguous().view(mask.size(0), -1)
+        pred = pred * mask
+        gt<a id="change"> = </a>gt * mask
+
+        dice_coeff = (2 * (pred * gt).sum()) / (
+            pred.sum() + gt.sum() + self.eps)
+
+        <a id="change">return </a>1 - dice_coeff
+
+
+@MODELS.register_module()</code></pre>

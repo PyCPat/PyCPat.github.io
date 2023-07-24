@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1494
+</h3><img src='5064432.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = rearrange(x, &quotn -&gt; () n&quot)
+
+        if x.dtype == torch.long:
+            x = <a id="change">F.one_hot(</a>x<a id="change">, num_classes = self.num_alphabet)</a>
+
+        x = self._trunk(<a id="change">x.float()</a>)
+        out = map_values(lambda fn: fn(x), self._heads)
+
+        if no_batch:</code></pre><h3>After Change</h3><pre><code class='java'>
+        dtype = x.dtype
+
+        if x.dtype == torch.long:
+            x = <a id="change">F.one_hot(</a>x<a id="change">, num_classes = self.num_alphabet)</a>.float()
+
+        no_batch = x.ndim == 2
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/enformer-pytorch/commit/cf8d4440cc67d8b83d4e70906be27f54087158ec#diff-d41824114176cf139e53af298fee855401c92b5fbb8c782f4eb1dd3fbf56fe10L348' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5064432</div><div id='project'> Project Name: lucidrains/enformer-pytorch</div><div id='commit'> Commit Name: cf8d4440cc67d8b83d4e70906be27f54087158ec</div><div id='time'> Time: 2021-12-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_class'> M Class Name: Enformer</div><div id='n_method'> N Class Name: Enformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enformer_pytorch/enformer_pytorch.py</div><div id='n_file'> N File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_start'> M Start Line: 348</div><div id='m_end'> M End Line: 355</div><div id='n_start'> N Start Line: 350</div><div id='n_end'> N End Line: 372</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Gather the vectors at the specific positions over a batch.
+        
+        num_classes = int(sequence.shape[1])
+        one_hot_positions = <a id="change">F.one_hot(</a>positions, num_classes<a id="change">)</a>
+        if self._is_half:
+            one_hot_positions = one_hot_positions.half()
+        else:
+            one_hot_positions = <a id="change">one_hot_positions.float()</a>
+        return torch.matmul(one_hot_positions.detach(), sequence)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Gather the vectors at the specific positions over a batch.
+        
+        num_classes = int(sequence.shape[1])
+        one_hot_positions = <a id="change">F.one_hot(</a>positions, num_classes<a id="change">)</a>.to(dtype=sequence.dtype)
+        return torch.matmul(one_hot_positions.detach(), sequence)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/huggingface/optimum-graphcore/commit/14c3842bd5a259b70093f647a77e7e765687a6c0#diff-a0003aad39f81b5fca3daef203e850d0ede6fb80bd54f3ca662e4ba96101a78dL410' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5064435</div><div id='project'> Project Name: huggingface/optimum-graphcore</div><div id='commit'> Commit Name: 14c3842bd5a259b70093f647a77e7e765687a6c0</div><div id='time'> Time: 2022-10-06</div><div id='author'> Author: jamesbr@graphcore.ai</div><div id='file'> File Name: optimum/graphcore/modeling_utils.py</div><div id='m_class'> M Class Name: OnehotGather</div><div id='n_method'> N Class Name: OnehotGather</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: optimum/graphcore/modeling_utils.py</div><div id='n_file'> N File Name: optimum/graphcore/modeling_utils.py</div><div id='m_start'> M Start Line: 414</div><div id='m_end'> M End Line: 420</div><div id='n_start'> N Start Line: 401</div><div id='n_end'> N End Line: 402</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            c = (q @ k.transpose(-2, -1)) * (1.0 / RWKV_HEAD_QK_DIM)
+            c = c.masked_fill(self.copy_mask[:T, :T] == 0, 0)
+
+            c = c @ <a id="change">F.one_hot(idx, num_classes=RWKV_CFG.vocab_size).float()</a>
+            x = self.head(x) + c
+        else:
+            x = self.head(x)        
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            c = c.masked_fill(self.copy_mask[:T, :T] == 0, 0)
+
+            if &quot32&quot in os.environ[&quotRWKV_FLOAT_MODE&quot]:
+                c = c @ <a id="change">F.one_hot(</a>idx<a id="change">, num_classes=RWKV_CFG.vocab_size)</a>
+            elif os.environ[&quotRWKV_FLOAT_MODE&quot] == &quotfp16&quot:
+                c = c @ F.one_hot(idx, num_classes=RWKV_CFG.vocab_size).half()
+            elif os.environ[&quotRWKV_FLOAT_MODE&quot] == &quotbf16&quot:
+                c = c @ F.one_hot(idx, num_classes=RWKV_CFG.vocab_size).bfloat16()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/blinkdl/rwkv-lm/commit/73b96705d7ac7824c7b443c2220aa3beeafde8f5#diff-d9c8edca16c15f91815ac4ac63c7a88ab77dfc14c60db34c5e8823e644f18bd5L211' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5064434</div><div id='project'> Project Name: blinkdl/rwkv-lm</div><div id='commit'> Commit Name: 73b96705d7ac7824c7b443c2220aa3beeafde8f5</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: a@a.com</div><div id='file'> File Name: RWKV-v4/src/model_run.py</div><div id='m_class'> M Class Name: RWKV_GPT</div><div id='n_method'> N Class Name: RWKV_GPT</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: RWKV-v4/src/model_run.py</div><div id='n_file'> N File Name: RWKV-v4/src/model_run.py</div><div id='m_start'> M Start Line: 225</div><div id='m_end'> M End Line: 225</div><div id='n_start'> N Start Line: 223</div><div id='n_end'> N End Line: 232</div><BR>

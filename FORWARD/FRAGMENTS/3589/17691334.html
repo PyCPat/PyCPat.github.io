@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47print(input.size(), self.weight.size())
+        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        angles = torch.acos(torch.clamp(cosine, -1, 1))
+        phi = <a id="change">torch.cos(</a>angles + self.m<a id="change">)</a>
+        one_hot = torch.zeros(cosine.size(), device=&quotcuda&quot)
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        &#47&#47 -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
+        &#47&#47 you can use torch.where if your torch.__version__ is 0.4</code></pre><h3>After Change</h3><pre><code class='java'>
+        cosine = F.linear(F.normalize(input), F.normalize(self.weight))
+        &#47&#47 angles = torch.acos(torch.clamp(cosine, -1, 1))
+        &#47&#47 phi = torch.cos(angles + self.m)
+        sine = torch.sqrt((<a id="change">1.0</a><a id="change"> - </a>torch.pow(cosine, 2)).clamp(0, 1))
+        phi = cosine<a id="change"> * self.cos_m - </a>sine<a id="change"> * </a>self.sin_m
+        <a id="change">if </a><a id="change">self.easy_margin:
+            </a>phi = torch.where(<a id="change">cosine &gt; 0</a>, phi, cosine)
+        else:
+            phi<a id="change"> = </a><a id="change">torch.where(cosine &gt; self.th</a>, phi, cosine<a id="change"> - </a>self.mm<a id="change">)</a>
+
+        one_hot = torch.zeros(cosine.size(), device=&quotcuda&quot)
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        &#47&#47 -------------torch.where(out_i = {x_i if condition_i else y_i) -------------</code></pre>

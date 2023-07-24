@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :3426
+</h3><img src='17522766.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = self.to_qkv(feats).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = </a><a id="change">rearrange(</a>mask, <a id="change">&quotb n -&gt; b () n ()&quot</a><a id="change">)</a>
+            k.masked_fill_(~mask, -torch.finfo(k.dtype).max)
+
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, queries, mask = None):
+        induced = self.attn1(queries, x, mask = mask)
+        out     = self.attn2(x, induced)
+        <a id="change">return </a>out, 0
+
+class EquivariantAttention(nn.Module):
+    def __init__(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/6bd1817d780502d24a2515e850c9cd1600f24642#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17522766</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 6bd1817d780502d24a2515e850c9cd1600f24642</div><div id='time'> Time: 2021-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: GlobalLinearAttention</div><div id='n_method'> N Class Name: GlobalLinearAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute scale and shift from time_context
+        scale_shift = None
+        <a id="change">if </a>exists(self.to_time_embedding) and <a id="change">exists(</a>time_context<a id="change">):
+            </a>time_embedding = self.to_time_embedding(time_context)
+            time_embedding<a id="change"> = </a><a id="change">rearrange(</a>time_embedding, <a id="change">"b c -&gt; b c 1"</a><a id="change">)</a>
+            scale_shift = time_embedding.chunk(2, dim=1)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if not self.use_pre_downsample:
+            x = self.downsample(x)
+
+        <a id="change">return </a>x, skips
+
+
+class UpsampleBlock1d(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17522781</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: DownsampleBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 458</div><div id='n_end'> N End Line: 473</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, *dimensions):
+        device = self.device
+
+        <a id="change">if </a>not <a id="change">exists(</a>self.rel_pos<a id="change">)</a> or not self.cache_rel_pos<a id="change">:
+            </a>positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid = <a id="change">rearrange(</a>grid, <a id="change">&quotc ... -&gt; (...) c&quot</a><a id="change">)</a>
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos<a id="change"> = </a>torch.sign(rel_pos) * torch.log(rel_pos.abs() + 1)
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias = bias[rel_dist_indices]
+        <a id="change">return </a>rearrange(bias, &quoti j h -&gt; h i j&quot)
+
+&#47&#47 helper classes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17522774</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>

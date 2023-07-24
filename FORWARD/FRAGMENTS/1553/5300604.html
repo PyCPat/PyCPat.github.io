@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        y = x.mean(dim=2, keepdims=True).mean(dim=3, keepdims=True)
+        beta = <a id="change">torch.sigmoid(</a><a id="change">self.bn2(</a><a id="change">self.fc2(</a><a id="change">self.bn1(</a>self.fc1(y)<a id="change">))))</a>
+        dpx = (self.p1 - self.p2) * x
+        return dpx * torch.sigmoid(beta * dpx) + self.p2 * x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = x.mean(dim=2, keepdims=True).mean(dim=3, keepdims=True)
+        &#47&#47 batch-size 1 bug/instabilities https://github.com/ultralytics/yolov5/issues/2891
+        &#47&#47 beta = torch.sigmoid(self.bn2(self.fc2(self.bn1(self.fc1(y)))))  &#47&#47 bug/unstable
+        beta = <a id="change">torch.sigmoid(</a><a id="change">self.fc2(</a>self.fc1(y)<a id="change">))</a>  &#47&#47 bug patch BN layers removed
+        dpx = (self.p1 - self.p2) * x
+        return dpx * torch.sigmoid(beta * dpx) + self.p2 * x
+</code></pre>

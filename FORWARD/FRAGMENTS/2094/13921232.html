@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Reshape value mapping
+        value_mapping = value_mapping.view(batch_size, -1, height * width)
+        &#47&#47 Attention features
+        attention_features = <a id="change">torch.bmm(</a>value_mapping, attention<a id="change">)</a>
+        &#47&#47 Reshape to original shape
+        attention_features = attention_features.view(batch_size, channels, height, width)
+        &#47&#47 Residual mapping and gamma multiplication
+        output = self.gamma * attention_features + input</code></pre><h3>After Change</h3><pre><code class='java'>
+        key = key.view(-1, channels // 8, height * width // 4)
+        value = value.view(-1, channels // 2, height * width // 4)
+        &#47&#47 Calc attention map
+        attention_map = <a id="change">torch.bmm(</a>query, key<a id="change">)</a>.softmax(dim=-1).permute(0, 2, 1)
+        &#47&#47 Apply attention map to value to obtain the attention output features
+        attention_features<a id="change"> = </a>torch.bmm(value, attention_map)
+        &#47&#47 Reshape attention features
+        attention_features = attention_features.view(-1, channels // 2, height, width)
+        &#47&#47 Get output features</code></pre>

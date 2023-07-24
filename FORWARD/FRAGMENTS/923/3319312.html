@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize<a id="change"> = </a><a id="change">rearrange(</a>quantize, <a id="change">&quotb d n -&gt; b n d&quot</a><a id="change">)</a>
+
+        return quantize, embed_ind, loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        shape, device, codebook_size = x.shape, x.device, self.codebook_size
+
+        need_transpose = <a id="change">not self.channel_last and not self.accept_image_fmap</a>
+
+        if self.accept_image_fmap:
+            height, width = x.shape[-2:]
+            x = rearrange(x, &quotb c h w -&gt; b (h w) c&quot)
+
+        if need_transpose:
+            x = rearrange(x, &quotb d n -&gt; b n d&quot)
+
+        x = self.project_in(x)
+
+        quantize, embed_ind = self._codebook(x)
+
+        if self.training:
+            quantize = x + (quantize - x).detach()
+
+        loss = torch.tensor([0.], device = device, requires_grad = self.training)
+
+        if self.training:
+            if self.commitment_weight &gt; 0:
+                commit_loss = F.mse_loss(quantize.detach(), x)
+                loss = loss + commit_loss * self.commitment_weight
+
+            if self.orthogonal_reg_weight &gt; 0:
+                orthogonal_reg_loss = orthgonal_loss_fn(self.codebook)
+                loss = loss + orthogonal_reg_loss * self.orthogonal_reg_weight
+
+        quantize = self.project_out(quantize)
+
+        <a id="change">if </a>need_transpose<a id="change">:
+            </a>quantize<a id="change"> = </a>rearrange(quantize, &quotb n d -&gt; b d n&quot)
+
+        if self.accept_image_fmap:
+            quantize = rearrange(quantize, &quotb (h w) c -&gt; b c h w&quot, h = height, w = width)</code></pre>

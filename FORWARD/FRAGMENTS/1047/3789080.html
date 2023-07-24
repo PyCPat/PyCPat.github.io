@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                aux_in = torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(self.device)
+                aux_gt<a id="change"> = </a><a id="change">torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(</a>self.device<a id="change">)</a>
+                for i, idx in enumerate(mask_polyline_indices):
+                    aux_in[i] = global_graph_out[i, idx].squeeze(0)
+                    aux_gt[i] = x[i, idx].squeeze(0)
+                aux_out = self.aux_mlp(aux_in)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.training:
+            &#47&#47 mask out the features for a random subset of polyline nodes
+            &#47&#47 for one batch, we mask the same polyline features
+            <a id="change">if </a>self.with_aux<a id="change">:
+                </a>mask_polyline_indices = [random.randint(0, time_step_len-1) + i * time_step_len for i in range(x.size()[0])]
+                x = x.view(-1, self.subgraph_width)
+                aux_gt = x[mask_polyline_indices]
+                x[mask_polyline_indices] = 0.0
+
+                x = x.view(-1, time_step_len, self.subgraph_width)
+                global_graph_out = self.global_graph(x, valid_lens)
+                pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
+
+                aux_in = global_graph_out.view(-1, self.global_graph_width)[mask_polyline_indices]
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt
+            else:
+                global_graph_out<a id="change"> = </a>self.global_graph(x, valid_lens)
+                pred = self.traj_pred_mlp(global_graph_out[:, <a id="change">[</a>0<a id="change"></a>]].squeeze(1))
+
+                return pred, None, None
+</code></pre>

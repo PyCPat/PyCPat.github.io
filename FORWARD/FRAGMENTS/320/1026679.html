@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                self.embedding_dim,
+                self.padding_idx,
+            )
+        <a id="change">self.weights</a> = self.weights.to(self._float_tensor)
+
+        if incremental_state is not None:
+            &#47&#47 positions is the same for every token when decoding a single step
+            pos = (timestep.int() + 1).long() if timestep is not None else seq_len
+            if self.onnx_trace:
+                return <a id="change">self.weights[self.padding_idx + pos, :].unsqueeze(1</a><a id="change">)</a>.repeat(bsz, 1, 1)
+            return self.weights[self.padding_idx + pos, :].expand(bsz, 1, -1)
+
+        positions = utils.make_positions(input, self.padding_idx, onnx_trace=self.onnx_trace)</code></pre><h3>After Change</h3><pre><code class='java'>
+                self.embedding_dim,
+                self.padding_idx,
+            )
+        <a id="change">self.weights</a> = self.weights.to(self._float_tensor)
+
+        if incremental_state is not None:
+            &#47&#47 positions is the same for every token when decoding a single step
+            pos = timestep.view(-1)[0] + 1 if timestep is not None else seq_len
+            if self.onnx_trace:
+                return <a id="change">self.weights.index_select(index=self.padding_idx + pos, dim=0).unsqueeze(1</a><a id="change">)</a>.repeat(bsz, 1, 1)
+            return self.weights[self.padding_idx + pos, :].expand(bsz, 1, -1)
+
+        positions = utils.make_positions(input, self.padding_idx, onnx_trace=self.onnx_trace)</code></pre>

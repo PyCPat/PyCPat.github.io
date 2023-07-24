@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        log_prob = self.logsoftmax(inputs)
+        targets = torch.zeros_like(log_prob).scatter_(1, targets.unsqueeze(1), 1)
+        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+        loss<a id="change"> = </a><a id="change">(- targets * log_prob).mean(</a>0<a id="change">)</a>.sum()
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.log_softmax = nn.LogSoftmax(dim=1).cuda()
+
+    def forward(self, y, labels):
+        log_prob<a id="change"> = </a>self.log_softmax(y)
+        labels = torch.zeros_like(log_prob).scatter_(1, labels.unsqueeze(1), 1)
+        labels = (1 - self.epsilon) * labels + self.epsilon / self.num_classes
+        loss<a id="change"> = </a><a id="change">(- labels * log_prob).mean(0).sum()</a>
+        return loss
+
+
+class TripletLoss(nn.Module):</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, item):
+        G_cls, G_reg = map(item.get, [&quotproposal_targets_cls&quot, &quotproposal_targets_reg&quot])
+        P_cls, P_reg = map(item.get, [&quotproposal_scores&quot, &quotproposal_boxes&quot])
+        G_cls<a id="change">, mask_cls = </a><a id="change">G_cls.split(</a>[self.cfg.NUM_CLASSES, 1]<a id="change">, dim=1)</a>
+        mask_reg = G_cls[:, :-1, ..., None].sum(1, keepdim=True)
+        cls_loss = self.cls_loss(P_cls, G_cls, mask_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, mask_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, item):
+        TODO: Decide on cleaner input representation.
+        keys = [&quotG_cls&quot, &quotM_cls&quot, &quotP_cls&quot, &quotG_reg&quot, &quotM_reg&quot, &quotP_reg&quot]
+        G_cls<a id="change">, M_cls, P_cls, G_reg, M_reg, P_reg</a> = map(item.get, keys)
+        cls_loss = self.cls_loss(P_cls, G_cls, M_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, M_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss</code></pre>

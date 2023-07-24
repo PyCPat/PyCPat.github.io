@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :236
+</h3><img src='859333.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        weight, bias = self.weight, self.bias
+        weight, bias = <a id="change">weight</a>[:, :n, <a id="change">:</a>n], bias[:, :n]
+
+        mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+        weight = weight.masked_fill(mask[..., None], 0.)</code></pre><h3>After Change</h3><pre><code class='java'>
+        res, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+
+        gate<a id="change"> = </a><a id="change">F.pad(</a>gate, (0, 0, 0, 0, 1, 0)<a id="change">, value = 0.)</a>
+        gate = torch.cat((gate[:, :-1], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859333</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            if flattened_dim:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = <a id="change">logits</a>[:, <a id="change">:</a>seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 bump space by one to account for a boundary case
+
+        ids<a id="change"> = </a><a id="change">F.pad(</a>ids, (0, 0, 0, 1)<a id="change">)</a>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= (self.max_spatial_seq_len + 1), &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        assert depth == self.depth_seq_len, &quotdepth dimension must be equal to depth_seq_len&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/2a7448ae1a81a9da7b26d5e7e637098d2b829492#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L196' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859311</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 2a7448ae1a81a9da7b26d5e7e637098d2b829492</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 198</div><div id='m_end'> M End Line: 257</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 269</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            outs.append(out)
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.conv_bank_features * len(self.conv1d_banks)
+        x = <a id="change">self</a>.max_pool1d(x)[:, :, <a id="change">:</a>T]
+        for conv1d in self.conv1d_projections:
+            x = conv1d(x)
+        &#47&#47 (B, T_in, hid_feature)</code></pre><h3>After Change</h3><pre><code class='java'>
+            outs.append(out)
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.conv_bank_features * len(self.conv1d_banks)
+        x<a id="change"> = </a><a id="change">nn.functional.pad(</a>x, [0, 1]<a id="change">)</a>
+        x = self.max_pool1d(x)
+        for conv1d in self.conv1d_projections:
+            x = conv1d(x)
+        &#47&#47 (B, T_in, hid_feature)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/00c0c9cde637a6cd7e3938a77ff833db1440ebca#diff-63415e5bdfe9c172be8a9cadb35d1f47d718fea5f15c6879f5715ebb9e331155L171' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859327</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 00c0c9cde637a6cd7e3938a77ff833db1440ebca</div><div id='time'> Time: 2018-09-17</div><div id='author'> Author: erengolge@gmail.com</div><div id='file'> File Name: layers/tacotron.py</div><div id='m_class'> M Class Name: CBHG</div><div id='n_method'> N Class Name: CBHG</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron.py</div><div id='n_file'> N File Name: layers/tacotron.py</div><div id='m_start'> M Start Line: 178</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 187</div><div id='n_end'> N End Line: 190</div><BR>

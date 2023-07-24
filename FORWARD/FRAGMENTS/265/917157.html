@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                )
+                for i, idx in enumerate(mask_polyline_indices):
+                    aux_in[i] = global_graph_out[i, idx].squeeze(0)
+                    aux_gt[i] = x[i<a id="change">, idx</a>].squeeze(0)
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
+
+        if self.training and self.with_aux:
+            mask_polyline_indices = [<a id="change">random.randint(</a>0, time_step_len - 1<a id="change">)</a> + i<a id="change"> * </a>time_step_len for i in
+                                     range(x.size()[0])]
+            x<a id="change"> = </a>x.view(-1, self.subgraph_width)
+            aux_gt = x[mask_polyline_indices]
+            x[mask_polyline_indices]<a id="change"> = 0.0</a>
+            x<a id="change"> = </a>x.view(-1, time_step_len, self.subgraph_width)
+
+        &#47&#47 TODO: compute the adjacency matrix???
+        &#47&#47 reconstruct the batch global interaction graph data</code></pre>

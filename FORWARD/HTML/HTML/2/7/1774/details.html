@@ -1,0 +1,82 @@
+<html><h3>Pattern ID :1774
+</h3><img src='12989958.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            align = F.softmax(attn_score, dim=-1)
+
+        context = torch.bmm(align.unsqueeze(dim=1), value).squeeze(dim=1)
+        <a id="change">return </a>context<a id="change">, align</a>
+
+
+class ScaledDotProductAttention(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Get output
+        combined = torch.cat([context, residual], dim=2)
+        output<a id="change"> = </a>self.out_projection(<a id="change">combined.view(-1</a>, self.hidden_dim &lt;&lt; 1<a id="change">)</a>).view(batch_size, -1, self.hidden_dim)
+        <a id="change">return </a>output<a id="change">, attn</a>
+
+
+class ScaledDotProductAttention(nn.Module):
+    </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sooftware/attentions/commit/49890ecd635842fd2e24da374f6de271471ac65c#diff-eb7ae2070281ad9c6011e2b97c48b86fea6c48408aa6b0e9d20c8c520d3c7cf2L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12989958</div><div id='project'> Project Name: sooftware/attentions</div><div id='commit'> Commit Name: 49890ecd635842fd2e24da374f6de271471ac65c</div><div id='time'> Time: 2020-05-26</div><div id='author'> Author: sh951011@gmail.com</div><div id='file'> File Name: attention.py</div><div id='m_class'> M Class Name: LocationAwareAttention</div><div id='n_method'> N Class Name: LocationAwareAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: attention.py</div><div id='n_file'> N File Name: attention.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 110</div><div id='n_end'> N End Line: 136</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        zD = self.decode(z_)
+        out = torch.sigmoid(zD)
+
+        <a id="change">return </a>out<a id="change">, kld</a>
+
+
+def bound(rce, x, kld, beta):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 KLD including logdet term
+        p_z_ = torch.sum(p.log_prob(z_), -1)
+        q0_z_0 = torch.sum(q0.log_prob(z_0), -1)
+        log_det<a id="change"> = </a><a id="change">log_det.view(-1</a><a id="change">)</a>
+        kld = - torch.sum(p.log_prob(z_), -1) + torch.sum(q0.log_prob(z_0), -1) - log_det.view(-1)
+        self.test_params = [torch.mean(- torch.sum(p.log_prob(z_), -1)), torch.mean(torch.sum(q0.log_prob(z_0), -1)), torch.mean(- log_det.view(-1)), torch.mean(kld)]
+
+        &#47&#47 Decode
+        z_ = z_.view(z_.size(0), args.latent_size)
+        zD = self.decode(z_)
+        out = torch.sigmoid(zD)
+
+        <a id="change">return </a>out<a id="change">, p_z_, q0_z_0, log_det</a>
+
+
+def bound(rce, x, p_z_, q0_z_0, log_det, beta):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vincentstimper/normalizing-flows/commit/bd001374eacad94bdea4150d2bfd1876d35d7523#diff-0091436da545a2bba7ec14a6fc56f43dbb125df1bbcf44db867ea5e94359eb15L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12989959</div><div id='project'> Project Name: vincentstimper/normalizing-flows</div><div id='commit'> Commit Name: bd001374eacad94bdea4150d2bfd1876d35d7523</div><div id='time'> Time: 2020-03-08</div><div id='author'> Author: 43236963+lukasryll@users.noreply.github.com</div><div id='file'> File Name: normflow/inf_network.py</div><div id='m_class'> M Class Name: FlowVAE</div><div id='n_method'> N Class Name: FlowVAE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: normflow/inf_network.py</div><div id='n_file'> N File Name: normflow/inf_network.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 92</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 95</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        probs = torch.exp(logits - torch.logsumexp(logits, dim=1, keepdim=True))
+        out = torch.sum(o * probs, dim=1)
+        <a id="change">return </a>out<a id="change">, buckets</a>
+
+&#47&#47 simple full attention
+
+class FullQKAttention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self._return_attn:
+            attn_unsort = ((bq_t * seqlen)[:, :, :, None] + bkv_t[:, :, None, :])
+            attn_unsort = <a id="change">attn_unsort.view(-1</a>, 2 * self.bucket_size * self.bucket_size<a id="change">)</a>
+            unsorted_dots<a id="change"> = </a>scatter_sum(dots.view_as(attn_unsort), attn_unsort)
+            unsorted_dots = unsorted_dots.reshape(batch_size, self.n_hashes, n_buckets, seqlen, seqlen).sum(dim=2)
+            attn = torch.sum(unsorted_dots[:, :, 0:query_len, :] * probs, dim=1)
+
+        &#47&#47 return output, attention matrix, and bucket distribution
+        <a id="change">return </a>out<a id="change">, attn, buckets</a>
+
+&#47&#47 simple full attention
+
+class FullQKAttention(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/873a26a64b4dfac3677aa32083ed3979475d2d02#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL194' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12989952</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 873a26a64b4dfac3677aa32083ed3979475d2d02</div><div id='time'> Time: 2020-02-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: LSHAttention</div><div id='n_method'> N Class Name: LSHAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 201</div><div id='m_end'> M End Line: 345</div><div id='n_start'> N Start Line: 204</div><div id='n_end'> N End Line: 365</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        linear_outputs = self.postnet(mel_outputs)
+        linear_outputs = self.last_linear(linear_outputs)
+
+        <a id="change">return </a>mel_outputs<a id="change">, linear_outputs, alignments</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Reshape
+        &#47&#47 (B, T, mel_dim)
+        mel_outputs = mel_outputs.view(B, -1, self.mel_dim)
+        stop_outputs<a id="change"> = </a><a id="change">stop_outputs.view(</a>B, <a id="change">-1</a><a id="change">)</a>
+
+        linear_outputs = self.postnet(mel_outputs)
+        linear_outputs = self.last_linear(linear_outputs)
+
+        <a id="change">return </a>mel_outputs<a id="change">, linear_outputs, alignments, stop_outputs</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/5750090fcd4a6718608c7357e3890f5b2a545ae0#diff-852be801ffb42483a749d2f0dadc027d0a30839010bd0eb9c3d14866e8eec8ffL28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12989950</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 5750090fcd4a6718608c7357e3890f5b2a545ae0</div><div id='time'> Time: 2018-03-22</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: models/tacotron.py</div><div id='m_class'> M Class Name: Tacotron</div><div id='n_method'> N Class Name: Tacotron</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/tacotron.py</div><div id='n_file'> N File Name: models/tacotron.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 48</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 51</div><BR>

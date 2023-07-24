@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                x = layer(x)
+            feats.append(x)
+
+        for <a id="change">layer</a> in self.mid:
+            if isinstance(layer, ResnetBlocWithAttn):
+                x = layer(x, t)
+            else:
+                x<a id="change"> = </a><a id="change">layer(</a>x<a id="change">)</a>
+
+        for layer in self.ups:
+            if isinstance(layer, ResnetBlocWithAttn):
+                x = layer(torch.cat((x, feats.pop()), dim=1), t)</code></pre><h3>After Change</h3><pre><code class='java'>
+        idx = 0
+        for layer in self.ups:
+            info = feats.pop()
+            <a id="change">if idx &gt;= self.skip_start</a><a id="change">:
+                </a>x<a id="change"> = </a><a id="change">layer(</a>x+info, noise_embed<a id="change">)</a>
+            else:
+                x<a id="change"> = </a><a id="change">layer(</a>x, noise_embed<a id="change">)</a>
+            idx += 1
+        return self.final_conv(x)
+</code></pre>

@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1581
+</h3><img src='5426130.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = gate + rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate = rearrange(gate, &quotb h n d -&gt; b n (h d)&quot)
+
+        <a id="change">return </a>gate * res
+
+def gMLPBlock(
+    *,</code></pre><h3>After Change</h3><pre><code class='java'>
+        res, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+
+        gate<a id="change"> = </a><a id="change">F.pad(</a>gate, (<a id="change">0</a><a id="change">, 0, 0, 0, 1, 0</a>)<a id="change">, value = 0.)</a>
+        gate<a id="change"> = </a>torch.cat((gate[:, :-1], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+
+        mask = torch.ones(weight.shape[-2:], device = device).triu_(1 + w).bool()
+        weight = weight.masked_fill(mask[None, ...], 0.)
+
+        gate = rearrange(gate, &quotb w n (h d) -&gt; b w h n d&quot, h = h)
+        gate = einsum(&quotb w h n d, h m n -&gt; b w h m d&quot, gate, weight)
+        gate = gate + rearrange(bias, &quoth n -&gt; () () h n ()&quot)
+
+        gate = rearrange(gate, &quotb w h n d -&gt; b w n (h d)&quot)
+
+        out = gate * res
+        out<a id="change"> = </a>rearrange(out, &quotb w n d -&gt; b (w n) d&quot)
+        <a id="change">return </a>out[:, :n]
+
+def gMLPBlock(
+    *,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5426130</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        <a id="change">return </a>context, alignment
+
+
+class Postnet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        if self.forward_attn:
+            &#47&#47 forward attention
+            prev_alpha = <a id="change">F.pad(</a>self.alpha[:, :-1].clone(), (<a id="change">1</a><a id="change">, 0, 0, 0</a>)<a id="change">)</a>.to(inputs.device)
+            self.alpha<a id="change"> = </a>(((1-self.u) * self.alpha.clone().to(inputs.device) + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm<a id="change"> = </a>self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context
+            context<a id="change"> = </a>torch.bmm(alpha_norm.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            <a id="change">return </a>context, alpha_norm, alignment
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)
+            context = context.squeeze(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/961af0f5cdefbb5f267671f6847cf05659962d6c#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL145' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5426174</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 961af0f5cdefbb5f267671f6847cf05659962d6c</div><div id='time'> Time: 2019-04-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 208</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">return </a>tokens
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            top_down_out = self.top_down(levels[..., 1:, :])
+
+            bottom_up_out = torch.cat((bottom_level, bottom_up_out), dim = -2)
+            top_down_out<a id="change"> = </a><a id="change">F.pad(</a>top_down_out, (<a id="change">0</a><a id="change">, 0, 0, 1</a>)<a id="change">, value = 0.)</a>
+
+            consensus = self.attention(levels)
+
+            levels<a id="change"> = </a>torch.stack((levels, bottom_up_out, top_down_out, consensus)).mean(dim = 0) &#47&#47 hinton said to use the weighted mean of (1) bottom up (2) top down (3) previous level value {t - 1} (4) consensus value
+            levels<a id="change"> = </a>levels[..., 1:, :]  &#47&#47 excise out the bottom level
+
+        <a id="change">return </a>levels
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/glom-pytorch/commit/869b711d49f23be53cc295d583c5ef37f95c96a5#diff-2bce7536af7c0a2fe47054a9c6dd00320e623412cf5c9d7e24a0b0b8c950a574L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5426124</div><div id='project'> Project Name: lucidrains/glom-pytorch</div><div id='commit'> Commit Name: 869b711d49f23be53cc295d583c5ef37f95c96a5</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: glom_pytorch/glom_pytorch.py</div><div id='m_class'> M Class Name: Glom</div><div id='n_method'> N Class Name: Glom</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: glom_pytorch/glom_pytorch.py</div><div id='n_file'> N File Name: glom_pytorch/glom_pytorch.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 114</div><BR>

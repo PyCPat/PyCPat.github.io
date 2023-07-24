@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :3036
+</h3><img src='16437586.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = x + self.drop_path(self.mlp(self.norm2(x)))
+        else:
+            x = x + self.drop_path(
+                self.gamma_1 * <a id="change">self.attn(</a>self.norm1(x), H, W<a id="change">)</a>)
+            x = x + self.drop_path(self.gamma_2 * self.mlp(self.norm2(x)))
+        if not self.window and self.aggregation != &quotattn&quot:
+            x<a id="change"> = </a>self.conv_aggregation(x, H, W)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = self.attn(x)
+        &#47&#47 Reverse window partition
+        <a id="change">if </a>self.window_size &gt; 0<a id="change">:
+            </a>x = window_unpartition(x, self.window_size, pad_hw, (H, W))
+
+        x = shortcut + self.drop_path(x)
+        x = x + self.drop_path(self.mlp(self.norm2(x)))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/9f01a37ad4df57b30430c41df08459025174e8fd#diff-78f05b57f42dcd5f7f060081ceac6dd4b971872c6edf8842805ae881484d5589L318' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16437586</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: 9f01a37ad4df57b30430c41df08459025174e8fd</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: 38110862+tuofeilunhifi@users.noreply.github.com</div><div id='file'> File Name: easycv/models/backbones/vitdet.py</div><div id='m_class'> M Class Name: Block</div><div id='n_method'> N Class Name: Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/backbones/vitdet.py</div><div id='n_file'> N File Name: easycv/models/backbones/vitdet.py</div><div id='m_start'> M Start Line: 497</div><div id='m_end'> M End Line: 507</div><div id='n_start'> N Start Line: 318</div><div id='n_end'> N End Line: 336</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if key_pos is not None:
+            key = key + key_pos
+
+        out<a id="change"> = </a><a id="change">self.attn(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+            key_padding_mask=key_padding_mask,
+        )</a>[0]
+
+        return identity + self.proj_drop(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                pos=pos,
+                query_pos=query_pos,
+            )
+            <a id="change">if </a>self.return_intermediate<a id="change">:
+                </a>intermediate.append(self.norm(output))
+
+        if self.norm is not None:
+            output = self.norm(output)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/idea-research/detrex/commit/b8b4cd0723f75ae9d120d40381355c5dfa9915f1#diff-255531dfd26cdeaf5d286d8b8b6c9a29e4dea4c4cf8a9dad083d748fd7e212e4L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16437548</div><div id='project'> Project Name: idea-research/detrex</div><div id='commit'> Commit Name: b8b4cd0723f75ae9d120d40381355c5dfa9915f1</div><div id='time'> Time: 2022-08-08</div><div id='author'> Author: rentianhe@dgx061.scc.idea</div><div id='file'> File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ideadet/layers/transformer_rebuild.py</div><div id='n_file'> N File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                attn_bias = repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = w)
+
+            tie_dim = w if self.global_query_attn else None
+            w_out = <a id="change">self.attn(</a>w_x<a id="change">, mask = w_mask, attn_bias = attn_bias, tie_dim = tie_dim)</a>
+            w_out<a id="change"> = </a>rearrange(w_out, &quot(b w) h d -&gt; b h w d&quot, h = h, w = w)
+
+            out += w_out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            input_fold_eq = &quotb h w d -&gt; (b w) h d&quot
+            output_fold_eq = &quot(b w) h d -&gt; b h w d&quot
+
+        elif <a id="change"></a>self.row_attn<a id="change">:
+            </a>axial_dim = h
+            mask_fold_axial_eq = &quotb h w -&gt; (b h) w&quot
+            input_fold_eq = &quotb h w d -&gt; (b h) w d&quot
+            output_fold_eq = &quot(b h) w d -&gt; b h w d&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16437585</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>

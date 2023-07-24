@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1866
+</h3><img src='13146831.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(</a>device<a id="change">)</a>
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h
+			for i in range(self.n_glimpse):</code></pre><h3>After Change</h3><pre><code class='java'>
+			query = query.squeeze(1)
+			for i in range(self.n_glimpse):
+				query = self.glimpse(query, ref)
+				query = <a id="change">query.unsqueeze(1</a><a id="change">)</a>
+		&quot&quot&quot	
+		- page 5/15 in paper
+		critic model architecture detail is out there, "Critic’s architecture for TSP"
+		- page 14/15 in paper</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/ab78416ee96de7b4b780b38a77f4956518afa19c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13146831</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: ab78416ee96de7b4b780b38a77f4956518afa19c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (dec_h0, dec_c0) = self.Encoder(embed_enc_inputs, None)
+		hidden = enc_h.size(2)
+		dec_state = (dec_h0, dec_c0)
+		dec_i1 = <a id="change">torch.rand(batch, 1, hidden).to(</a>device<a id="change">)</a>&#47&#47hidden not embed
+		for i in range(city_t):
+			dec_h, dec_state = self.LSTMprocess_block(dec_i1, dec_state)
+			dec_i1 = self.attending_mechanism(enc_h, dec_h)</code></pre><h3>After Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1</a><a id="change">)</a>.to(device)
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/baba7bab0eb239771948cc519681967a5498129b#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13146832</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: baba7bab0eb239771948cc519681967a5498129b</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 50</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if len(noise_level.shape) &gt; 1:
+            noise_level = noise_level.squeeze(-1)
+        half_dim = self.n_channels // 2
+        exponents = <a id="change">torch.arange(half_dim, dtype=torch.float32).to(
+            </a>noise_level<a id="change">)</a> / float(half_dim)
+        exponents = 1e-4 ** exponents
+        exponents = LINEAR_SCALE * \
+            noise_level.unsqueeze(1) * exponents.unsqueeze(0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        step = torch.arange(count, dtype=noise_level.dtype,
+                            device=noise_level.device) / count
+        encoding = noise_level.unsqueeze(
+            1) * torch.exp(-math.log(1e4) * <a id="change">step.unsqueeze(0</a><a id="change">)</a>)
+        encoding = torch.cat(
+            [torch.sin(encoding), torch.cos(encoding)], dim=-1)
+        return encoding</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/b67b0027e58f09f86887422de2e539fdc67b972f#diff-b593ba3a4aa85330f1259b20cb82fcf87f8c4f32853ace60580e05618b8ee030L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13146833</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: b67b0027e58f09f86887422de2e539fdc67b972f</div><div id='time'> Time: 2021-08-06</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/sr3_modules/unet.py</div><div id='m_class'> M Class Name: PositionalEncoding</div><div id='n_method'> N Class Name: PositionalEncoding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/sr3_modules/unet.py</div><div id='n_file'> N File Name: model/sr3_modules/unet.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 52</div><BR>

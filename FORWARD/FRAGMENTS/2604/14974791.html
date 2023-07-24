@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  &#47&#47 uint8 to fp16/32
+
+        &#47&#47 Inference
+        x<a id="change"> = </a><a id="change">self.model(</a>x, augment, profile<a id="change">)</a>  &#47&#47 forward
+        x = non_max_suppression(<a id="change">x[0]</a>, conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)  &#47&#47 NMS
+
+        &#47&#47 Post-process
+        for i in batch:</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  &#47&#47 uint8 to fp16/32
+
+        &#47&#47 Inference
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>y<a id="change"> = </a><a id="change">self.model(x, augment, profile)[0]</a>  &#47&#47 forward
+        y = non_max_suppression(y, conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)  &#47&#47 NMS
+
+        &#47&#47 Post-process</code></pre>

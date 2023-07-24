@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 print("tar_offset_mean size: ", tar_offset_mean.size())
+
+        &#47&#47 compute the prob. of normal distribution
+        d_x_dist = Normal(tar_offset_mean[:, :, 0], <a id="change">torch.tensor(</a>[1.0]<a id="change">, device=self.device)</a>)    &#47&#47 [batch_size, self.N_tar]
+        d_y_dist = Normal(tar_offset_mean[:, :, 1], torch.tensor([1.0], device=self.device))    &#47&#47 [batch_size, self.N_tar]
+
+        d_x<a id="change"> = </a>d_x_dist.sample()
+        d_y<a id="change"> = </a>d_y_dist.sample()
+
+        &#47&#47 p = tar_candit_pro * d_x_dist.log_prob(d_x) * d_y_dist.log_prob(d_y)
+        _, indices = tar_candit_prob.topk(self.M, dim=1)
+
+        <a id="change">return </a>tar_candit_prob<a id="change">, d_x, d_y, indices</a>
+
+    def loss(self,
+             feat_in: torch.Tensor,
+             tar_candidate: torch.Tensor,</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 p = tar_candit_pro * d_x_dist.log_prob(d_x) * d_y_dist.log_prob(d_y)
+        _, indices = tar_candit_prob.topk(self.M, dim=1)
+        batch_idx = torch.vstack([torch.arange(0, batch_size, device=self.device) for _ in range(self.M)]).T
+        <a id="change">return </a>tar_candidate[batch_idx, indices]<a id="change">, offset[batch_idx, indices]</a>
+
+    def loss(self,
+             feat_in: torch.Tensor,
+             tar_candidate: torch.Tensor,</code></pre>

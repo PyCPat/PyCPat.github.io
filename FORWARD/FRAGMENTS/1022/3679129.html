@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, label):
+        &#47&#47 --------------------------- cos(theta) & phi(theta) ---------------------------
+        cosine = F.linear(<a id="change">F.normalize(</a>input<a id="change">)</a>, F.normalize(self.weight))
+        sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
+        phi = cosine * self.cos_m - sine * self.sin_m
+        if self.easy_margin:</code></pre><h3>After Change</h3><pre><code class='java'>
+        kernel_norm = l2_norm(self.kernel, axis = 0)
+        cos_theta = torch.mm(embbedings, kernel_norm)
+        cos_theta = cos_theta.clamp(-1, 1)  &#47&#47 for numerical stability
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>origin_cos<a id="change"> = </a>cos_theta.clone()
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))</code></pre>

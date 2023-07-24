@@ -1,0 +1,104 @@
+<html><h3>Pattern ID :4
+</h3><img src='7200.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        cut_point = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+&#47&#47 %% ../../nbs/models.nbeats.ipynb 8</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">harmonic_size</a> = self.forecast_basis.shape[0] &#47&#47 [harmonic_size, L+H]
+        backcast_theta<a id="change"> = theta</a><a id="change">[:, :harmonic_size]</a>
+        <a id="change">forecast_theta = theta</a><a id="change">[:, harmonic_size:]</a>
+        forecast_theta<a id="change"> = forecast_theta</a><a id="change">.reshape(len(forecast_theta</a><a id="change">)</a>,<a id="change">harmonic_size</a>,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 17</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nixtla/neuralforecast/commit/8f1eaf62feaeed6ca505e87a6193fe740b276c62#diff-a7dc432cc8778a314f7fe3103948e43dc174dfe957795927551fa29aedebbba9L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7200</div><div id='project'> Project Name: nixtla/neuralforecast</div><div id='commit'> Commit Name: 8f1eaf62feaeed6ca505e87a6193fe740b276c62</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: kin.gtz.olivares@gmail.com</div><div id='file'> File Name: neuralforecast/models/nbeats.py</div><div id='m_class'> M Class Name: SeasonalityBasis</div><div id='n_method'> N Class Name: SeasonalityBasis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralforecast/models/nbeats.py</div><div id='n_file'> N File Name: neuralforecast/models/nbeats.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">cut_point</a> = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+&#47&#47 %% ../../nbs/models.nbeatsx.ipynb 9</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">harmonic_size</a> = self.forecast_basis.shape[0] &#47&#47 [harmonic_size, L+H]
+        backcast_theta<a id="change"> = </a><a id="change">theta[:, :harmonic_size]</a>
+        <a id="change">forecast_theta = </a><a id="change">theta[:, harmonic_size:]</a>
+        forecast_theta<a id="change"> = </a><a id="change">forecast_theta.reshape(len(</a>forecast_theta<a id="change">)</a>,harmonic_size,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nixtla/neuralforecast/commit/3c58547660b8cf230a1fc3915292ec6543d6797f#diff-55a0984e5013c74f55c88f211f27f4a802c613921db7e9460e8802002728963cL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7201</div><div id='project'> Project Name: nixtla/neuralforecast</div><div id='commit'> Commit Name: 3c58547660b8cf230a1fc3915292ec6543d6797f</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: kin.gtz.olivares@gmail.com</div><div id='file'> File Name: neuralforecast/models/nbeatsx.py</div><div id='m_class'> M Class Name: SeasonalityBasis</div><div id='n_method'> N Class Name: SeasonalityBasis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralforecast/models/nbeatsx.py</div><div id='n_file'> N File Name: neuralforecast/models/nbeatsx.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                    for i in range(polynomial_size)]), dtype=torch.float32), requires_grad=False)
+    
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">cut_point</a> = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+class SeasonalityBasis(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    for i in range(polynomial_size)]), dtype=torch.float32), requires_grad=False)
+    
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">polynomial_size</a> = self.forecast_basis.shape[0] &#47&#47 [polynomial_size, L+H]
+        backcast_theta<a id="change"> = </a><a id="change">theta[:, :polynomial_size]</a>
+        <a id="change">forecast_theta = </a><a id="change">theta[:, polynomial_size:]</a>
+        forecast_theta<a id="change"> = </a><a id="change">forecast_theta.reshape(len(</a>forecast_theta<a id="change">)</a>,polynomial_size,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nixtla/neuralforecast/commit/3c58547660b8cf230a1fc3915292ec6543d6797f#diff-55a0984e5013c74f55c88f211f27f4a802c613921db7e9460e8802002728963cL39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7204</div><div id='project'> Project Name: nixtla/neuralforecast</div><div id='commit'> Commit Name: 3c58547660b8cf230a1fc3915292ec6543d6797f</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: kin.gtz.olivares@gmail.com</div><div id='file'> File Name: neuralforecast/models/nbeatsx.py</div><div id='m_class'> M Class Name: TrendBasis</div><div id='n_method'> N Class Name: TrendBasis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralforecast/models/nbeatsx.py</div><div id='n_file'> N File Name: neuralforecast/models/nbeatsx.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                    for i in range(polynomial_size)]), dtype=torch.float32), requires_grad=False)
+    
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">cut_point</a> = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+class SeasonalityBasis(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    for i in range(polynomial_size)]), dtype=torch.float32), requires_grad=False)
+    
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">polynomial_size</a> = self.forecast_basis.shape[0] &#47&#47 [polynomial_size, L+H]
+        backcast_theta<a id="change"> = </a><a id="change">theta[:, :polynomial_size]</a>
+        <a id="change">forecast_theta = </a><a id="change">theta[:, polynomial_size:]</a>
+        forecast_theta<a id="change"> = </a><a id="change">forecast_theta.reshape(len(</a>forecast_theta<a id="change">)</a>,polynomial_size,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nixtla/neuralforecast/commit/8f1eaf62feaeed6ca505e87a6193fe740b276c62#diff-a7dc432cc8778a314f7fe3103948e43dc174dfe957795927551fa29aedebbba9L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7206</div><div id='project'> Project Name: nixtla/neuralforecast</div><div id='commit'> Commit Name: 8f1eaf62feaeed6ca505e87a6193fe740b276c62</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: kin.gtz.olivares@gmail.com</div><div id='file'> File Name: neuralforecast/models/nbeats.py</div><div id='m_class'> M Class Name: TrendBasis</div><div id='n_method'> N Class Name: TrendBasis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralforecast/models/nbeats.py</div><div id='n_file'> N File Name: neuralforecast/models/nbeats.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">cut_point</a> = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+&#47&#47 %% ../../nbs/models.nbeats.ipynb 8</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">harmonic_size</a> = self.forecast_basis.shape[0] &#47&#47 [harmonic_size, L+H]
+        backcast_theta<a id="change"> = </a><a id="change">theta[:, :harmonic_size]</a>
+        <a id="change">forecast_theta = </a><a id="change">theta[:, harmonic_size:]</a>
+        forecast_theta<a id="change"> = </a><a id="change">forecast_theta.reshape(len(</a>forecast_theta<a id="change">)</a>,harmonic_size,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nixtla/neuralforecast/commit/8f1eaf62feaeed6ca505e87a6193fe740b276c62#diff-a7dc432cc8778a314f7fe3103948e43dc174dfe957795927551fa29aedebbba9L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7209</div><div id='project'> Project Name: nixtla/neuralforecast</div><div id='commit'> Commit Name: 8f1eaf62feaeed6ca505e87a6193fe740b276c62</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: kin.gtz.olivares@gmail.com</div><div id='file'> File Name: neuralforecast/models/nbeats.py</div><div id='m_class'> M Class Name: SeasonalityBasis</div><div id='n_method'> N Class Name: SeasonalityBasis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: neuralforecast/models/nbeats.py</div><div id='n_file'> N File Name: neuralforecast/models/nbeats.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 85</div><BR>

@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                the first half. For the images, the two halves represent 
+                different transforms of the original images.
+        
+        batch_a = <a id="change">torch.cat(
+            </a>[self.transform(item[0]).unsqueeze_(0) for item in batch], <a id="change">0</a><a id="change">
+        )</a>
+        batch_b = torch.cat(
+            [self.transform(item[0]).unsqueeze_(0) for item in batch], 0
+        )
+        labels = torch.tensor([item[1] for item in batch]).long()
+        fnames = [item[2] for item in batch]
+        <a id="change">return </a>(torch.cat((batch_a<a id="change">, batch_b</a>), 0),
+                torch.cat((labels, labels), 0),
+                fnames)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                the first half. For the images, the two halves represent 
+                different transforms of the original images.
+        
+        batch_size = <a id="change">len(</a>batch<a id="change">)</a>
+
+        &#47&#47 list of transformed images
+        transforms = [self.transform(<a id="change">batch[i % batch_size]</a>[0]).unsqueeze_(0)
+                      for i in range(2 * batch_size)]
+        &#47&#47 list of labels
+        labels = [batch[i % batch_size][1] for i in range(2 * batch_size)]</code></pre>

@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :1419
+</h3><img src='4848825.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            _xq, _diff, _codes = vq(x - xq)
+            diff = diff + _diff
+            xq = xq + _xq
+            <a id="change">codes.append(</a>_codes<a id="change">)</a>
+        codes = <a id="change">torch.cat(codes</a>, 1<a id="change">)</a>
+        return xq, (x - xq).pow(2).mean(), codes
+
+    def encode(self, x):
+        return self.forward(x)[-1]</code></pre><h3>After Change</h3><pre><code class='java'>
+            all_losses.append(loss)
+
+        out_losses, out_indices = map(torch.stack, (all_losses, all_indices))
+        return quantized_out, <a id="change">sum(</a>out_losses<a id="change">)</a>, out_indices.permute(1, 0, 2)
+
+    def encode(self,
+               x: torch.Tensor,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4848825</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: ResidualVQ</div><div id='n_method'> N Class Name: ResidualVectorQuantization</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 289</div><div id='n_end'> N End Line: 307</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                or (batch_size, num_blocks*growth_rate, n_bins, n_frames)
+        
+        x = input
+        <a id="change">stacked</a> = []
+
+        <a id="change">stacked.append(</a>input<a id="change">)</a>
+
+        for idx in range(self.num_blocks):
+            if idx != 0:
+                x = <a id="change">torch.cat(</a>stacked<a id="change">, dim=1)</a>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(stacked[1:], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections = [in_channels, stacked_channels]
+
+            if idx != num_blocks - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L348' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4848827</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Block</div><div id='n_method'> N Class Name: D3Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 357</div><div id='m_end'> M End Line: 367</div><div id='n_start'> N Start Line: 414</div><div id='n_end'> N End Line: 430</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                or (batch_size, depth * growth_rate, n_bins, n_frames) if type(growth_rate) is int
+        
+        x = input
+        <a id="change">stacked</a> = []
+        output = []
+
+        <a id="change">stacked.append(</a>input<a id="change">)</a>
+
+        for idx in range(self.depth):
+            if idx != 0:
+                x = <a id="change">torch.cat(</a>stacked<a id="change">, dim=1)</a>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(stacked[1:], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections = [in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4848823</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 67</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        xq = 0
+        diff = 0
+        <a id="change">codes</a> = []
+        for vq in self.vqs:
+            _xq, _diff, _codes = vq(x - xq)
+            diff = diff + _diff
+            xq = xq + _xq
+            <a id="change">codes.append(</a>_codes<a id="change">)</a>
+        codes = <a id="change">torch.cat(</a>codes, 1<a id="change">)</a>
+        return xq, (x - xq).pow(2).mean(), codes
+
+    def encode(self, x):
+        return self.forward(x)[-1]</code></pre><h3>After Change</h3><pre><code class='java'>
+            all_losses.append(loss)
+
+        out_losses, out_indices = map(torch.stack, (all_losses, all_indices))
+        return quantized_out, <a id="change">sum(</a>out_losses<a id="change">)</a>, out_indices.permute(1, 0, 2)
+
+    def encode(self,
+               x: torch.Tensor,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/acids-ircam/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4848822</div><div id='project'> Project Name: acids-ircam/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: ResidualVQ</div><div id='n_method'> N Class Name: ResidualVectorQuantization</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 289</div><div id='n_end'> N End Line: 307</div><BR>

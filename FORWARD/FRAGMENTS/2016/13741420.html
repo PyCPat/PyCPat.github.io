@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            pred = self.var_predict_multi * self.var_predict_module(input)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if <a id="change">len(pred.shape) == 1</a>:
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pred = None
+        if self.var_predict_module is not None and not _ignore_input:
+            pred = self.var_predict_module(*<a id="change">[inputs[x] for x in self.expected_kwargs]</a>)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if (pred &lt; 0).any():</code></pre>

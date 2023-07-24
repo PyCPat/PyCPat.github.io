@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            audio_emo_vecs = self.affineAudio(text_emo_vecs_origin)
+            audio_emo_vecs = audio_emo_vecs.unsqueeze(0).repeat(batch_size, 1, 1)
+            audio_attn_weights = self.attention(output_audio, audio_emo_vecs)
+            logits = audio_attn_weights<a id="change"> if </a>logits is None<a id="change"> else </a>logits + audio_attn_weights
+
+        if &quotv&quot in self.modalities:
+            output_visual, _ = self.RNNs[2](X_visual)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logits = visual_attn_weights if logits is None else logits + visual_attn_weights
+            scores.append(visual_attn_weights.unsqueeze(0))
+
+        scores = <a id="change">torch.cat(</a>tuple(scores)<a id="change">, dim=0)</a>.transpose(0, 2)
+        logits<a id="change"> = </a>self.modality_weights(scores)
+        logits = logits.squeeze().t()
+        &#47&#47 for i in range(len(self.modalities)):
+        &#47&#47     if i == 0:</code></pre>

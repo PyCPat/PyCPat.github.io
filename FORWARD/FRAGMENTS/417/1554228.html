@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        final_target_logit = torch.where(
+            target_logit &gt; self.th, cos_theta_m, target_logit - self.mm
+        )
+        <a id="change">if </a>cfg["USE_AMP"] == True and <a id="change">cfg["OPT_LEVEL"] == "O1"</a><a id="change">:
+            </a>final_target_logit = final_target_logit.half()
+        cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
+        output = cos_theta * self.s
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+        if is_half:
+            cos_theta_m = cos_theta_m.half()
+        index = torch.zeros_like(cos_theta)
+        <a id="change">index.scatter_(</a>1, label.data.view(-1, 1), <a id="change">1</a><a id="change">)</a>
+        index = index.byte().bool()
+        output = cos_theta * 1.0
+        output[index] = cos_theta_m[index]
+        output *= self.s</code></pre>

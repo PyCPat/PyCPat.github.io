@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        device = feats.device
+        V = self.v(feats) &#47&#47 N x V, unsorted
+        Q = self.q(feats).view(feats.shape[0], -1)
+        <a id="change">for i</a> in range(c.shape[1])<a id="change">:
+            </a>_, indices = torch.sort(c[:, i], 0, True)         
+            feats = torch.index_select(feats, 0, indices) &#47&#47 N x K, sorted
+            q_max = self.q(feats[0].view(1, -1)) &#47&#47 1 x 1 x Q
+            temp = torch.mm(Q, q_max.view(-1, 1)) / torch.sqrt(torch.tensor(Q.shape[1], dtype=torch.float32, device=device))
+            if i == 0:
+                A<a id="change"> = </a>F.softmax(temp, 0) &#47&#47 N x 1
+                B = torch.sum(torch.mul(A, V), 0).view(1, -1) &#47&#47 1 x V
+            else:
+                temp = F.softmax(temp, 0) &#47&#47 N x 1</code></pre><h3>After Change</h3><pre><code class='java'>
+        q_max = self.q(m_feats) &#47&#47 compute queries of critical instances, q_max in shape C x Q
+        A = torch.mm(Q, q_max.transpose(0, 1)) &#47&#47 compute inner product of Q to each entry of q_max, A in shape N x C, each column contains unnormalized attention scores
+        A = F.softmax( A / torch.sqrt(torch.tensor(Q.shape[1], dtype=torch.float32, device=device)), 0) &#47&#47 normalize attention scores, A in shape N x C, 
+        B<a id="change"> = </a>torch.mm(<a id="change">A.transpose(0</a>, <a id="change">1</a><a id="change">)</a>, V) &#47&#47 compute bag representation, B in shape C x V
+        
+        
+&#47&#47         for i in range(c.shape[1]):</code></pre>

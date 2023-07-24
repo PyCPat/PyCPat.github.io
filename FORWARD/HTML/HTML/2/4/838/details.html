@@ -1,0 +1,62 @@
+<html><h3>Pattern ID :838
+</h3><img src='3107823.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        rx = (x * idx_theta2.cos()[:, None, None, :]) + (neg_half_x * <a id="change">idx_theta2.sin()</a>[:, None, None, :])
+
+        &#47&#47
+        <a id="change">return </a>rx
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        x_rope = (x_rope * self.cos_cached[:x.shape[0]])<a id="change"> + </a>(neg_half_x * self.sin_cached[:x.shape[0]])
+
+        &#47&#47
+        <a id="change">return </a>torch.cat((x_rope, x_pass), dim=-1)
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lab-ml/nn/commit/0ce65adf9e602321109528b05cf99fccb16cd2de#diff-637497eb531dcbf4c4fff534c48c9dc4ec23ef7b14699edc95d8b280b04de206L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3107823</div><div id='project'> Project Name: lab-ml/nn</div><div id='commit'> Commit Name: 0ce65adf9e602321109528b05cf99fccb16cd2de</div><div id='time'> Time: 2022-06-03</div><div id='author'> Author: vpjayasiri@gmail.com</div><div id='file'> File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_class'> M Class Name: RotaryPositionalEmbeddings</div><div id='n_method'> N Class Name: RotaryPositionalEmbeddings</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: labml_nn/transformers/rope/__init__.py</div><div id='n_file'> N File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 193</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        positions = rearrange(positions, &quotb t -&gt; b t 1&quot)
+        product = positions * self.freq.to(x)
+
+        pos_emb = <a id="change">torch.sin(</a>product + self.cos_shifts.to(x)<a id="change">)</a>
+
+        if not self.batch_first:
+            pos_emb = rearrange(pos_emb, &quotb t c -&gt; t b c&quot)
+
+        <a id="change">return </a>pos_emb
+
+    def augment_positions(self, positions: Tensor):
+        assert self.max_global_scaling &gt;= 1</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer(&quotcos_shifts&quot, cos_shifts)
+
+    def forward(self, x: Tensor) -&gt; Tensor:
+        <a id="change">return </a>x<a id="change"> + </a>self.compute_pos_emb(x)
+
+    def compute_pos_emb(self, x: Tensor) -&gt; Tensor:
+        if self.batch_first:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gcambara/cape/commit/f442553b2eb7d5f143abf7de2da8e550fb058ed5#diff-7fa374f1a5ecd784a38f81aa2a23c26df78689c32aa63e9cc88df831e1d6c877L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3107816</div><div id='project'> Project Name: gcambara/cape</div><div id='commit'> Commit Name: f442553b2eb7d5f143abf7de2da8e550fb058ed5</div><div id='time'> Time: 2021-12-05</div><div id='author'> Author: guillermocambara@gmail.com</div><div id='file'> File Name: cape/cape.py</div><div id='m_class'> M Class Name: CAPE1d</div><div id='n_method'> N Class Name: CAPE1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cape/cape.py</div><div id='n_file'> N File Name: cape/cape.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 32</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        l = n + context_len
+        t = torch.arange(l - 1, -1, -1, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((<a id="change">sinusoid_inp.sin()</a>, sinusoid_inp.cos()), dim = -1)
+        <a id="change">return </a>emb
+
+&#47&#47 main classes
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos = torch.arange(klen, dtype = torch.long, device = device)
+        rel_pos = k_pos[None, :]<a id="change"> - </a>q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values = self.relative_attention_bias(rp_bucket)
+        <a id="change">return </a>rearrange(values, &quoti j h -&gt; () h i j&quot)
+
+&#47&#47 main classes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3107813</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: SinusoidalEmbedding</div><div id='n_method'> N Class Name: RelativePositionBias</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 77</div><BR>

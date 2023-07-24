@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        <a id="change">print(</a>&quotentity_input is nan:&quot, torch.isnan(x).any()<a id="change">)</a> if debug else None
+
+        &#47&#47 calculate there are how many real entities in each batch
+        tmp_x = torch.mean(x, dim=2, keepdim=False)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out * <a id="change">mask.unsqueeze(2</a><a id="change">)</a>
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>masked_out.sum(dim=1, keepdim=False)
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]</code></pre>

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = sum(growth_rate[idx+1:])
+            sections<a id="change"> = </a><a id="change">[</a>in_channels, stacked_channels<a id="change"></a>]
+
+            if idx != depth - 1:
+                x<a id="change">, x_residual = </a>torch.split(x_residual, sections, dim=1)
+        
+        output = x_residual
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_residual = 0
+
+        for idx in range(depth):
+            <a id="change">if idx == 0</a><a id="change">:
+                </a>x = input
+            else:
+                _in_channels = growth_rate[idx - 1]
+                sections<a id="change"> = </a>[_in_channels, sum(growth_rate[idx:])]
+                x<a id="change">, x_residual = </a>torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)
+            x_residual = x_residual + x</code></pre>

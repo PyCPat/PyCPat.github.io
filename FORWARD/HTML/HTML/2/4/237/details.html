@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :237
+</h3><img src='859853.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 add the components if DZ basis set
+        if self.basis == &quotdz&quot:
+            nrbf = XY.shape[-1]
+            norb<a id="change"> = </a><a id="change">int(</a>nrbf<a id="change">/</a>2<a id="change">)</a>
+            XY = 0.5*XY.view(-1,self.nelec,2,norb).sum(2)
+
+        return XY
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                nbatch = XY.shape[0]
+                XYtmp = torch.zeros(nbatch,self.nelec,self.norb)
+                print(XYtmp.shape)
+                <a id="change">print(</a>XY.shape<a id="change">)</a>
+                print(self.index_ctr)
+                XYtmp.index_add_(2,self.index_ctr,XY)
+
+        return XY</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/74731adef629b6f7c9b971bc1c1e46c207d99cc9#diff-c4b696bab0338843e20e1b077a934f2c51ac9f11e89bdcc8c82af04b072cd569L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859853</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: 74731adef629b6f7c9b971bc1c1e46c207d99cc9</div><div id='time'> Time: 2019-08-13</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_class'> M Class Name: STO</div><div id='n_method'> N Class Name: STO</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='n_file'> N File Name: pyCHAMP/wavefunction/slater_orbitals.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hx=None):
+        output_size = (
+            <a id="change">int(</a>(input<a id="change">.size(-1) - self.kernel_size + </a>2 * self.padding_ih) / self.stride<a id="change">)</a> + 1
+        )
+        &#47&#47 Handle the case of no hidden state provided
+        if hx is None:
+            hx<a id="change"> = </a>torch.zeros(input.size(0), self.h_channels, output_size, device=input.device)
+        &#47&#47 Run the optimized convgru-cell
+        return _opt_convgrucell_1d(
+            input,</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 init hidden on forward
+        if h_prev is None:
+            h_prev = self.init_hidden(input)
+        <a id="change">print(</a>f"input: {input.shape} prev: {h_prev.shape}"<a id="change">)</a>
+        combined = torch.cat((input, h_prev), dim=1)  &#47&#47 concatenate along channel axis
+
+        combined_conv = F.sigmoid(self.conv_zr(combined))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859852</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU1DCell</div><div id='n_method'> N Class Name: ConvGRUCell</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 82</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            device=wav.device,
+            dtype=torch.long,
+        )
+        factor<a id="change"> = </a><a id="change">int(</a>self.config.num_negatives<a id="change"> % </a>dynamic_num_negatives.item()<a id="change">)</a>
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices] * 2, dim=-1
+        )
+        print(negative_sample_indices.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            [negative_sample_indices] * 2, dim=-1
+        )
+        print(negative_sample_indices.shape)
+        <a id="change">print(</a>dynamic_num_negatives<a id="change">)</a>
+
+        return (
+            self.model(
+                wav,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/8a2c07820baa979804b6575b242e6f9160222763#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859855</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 8a2c07820baa979804b6575b242e6f9160222763</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 391</div><div id='m_end'> M End Line: 396</div><div id='n_start'> N Start Line: 396</div><div id='n_end'> N End Line: 396</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            device=wav.device,
+            dtype=torch.long,
+        )
+        factor<a id="change"> = </a><a id="change">int(</a>self.config.num_negatives<a id="change"> % </a>dynamic_num_negatives[0]<a id="change">)</a>
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices] * factor, dim=-1
+        )
+        print(negative_sample_indices.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            [negative_sample_indices] * 2, dim=-1
+        )
+        print(negative_sample_indices.shape)
+        <a id="change">print(</a>dynamic_num_negatives<a id="change">)</a>
+        print(dynamic_num_negatives.items())
+
+        return (
+            self.model(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/39b9dd07cd0d0c9aad94d3b2f623441809c052e6#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 859854</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 39b9dd07cd0d0c9aad94d3b2f623441809c052e6</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 391</div><div id='m_end'> M End Line: 396</div><div id='n_start'> N Start Line: 393</div><div id='n_end'> N End Line: 397</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~<a id="change">torch.isnan(</a>x[i, :, 0]<a id="change">)</a>, :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding = (
+                <a id="change">trial_embeddings.sum(dim=self.aggregation_dim) / </a>trial_counts
+            )
+        else:
+            combined_embedding = trial_embeddings.sum(dim=self.aggregation_dim)</code></pre>

@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :2847
+</h3><img src='15659930.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for logit, code in zip(logits, codes.permute(1, 0, 2, 3)):
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior<a id="change"> = </a>Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            &#47&#47 [n, h, w, k]
+            &#47&#47 weight = (-logit).detach().softmax(-1)
+            &#47&#47 oneHot = F.one_hot(code, num_classes=logit.shape[-1]).float()
+            &#47&#47 [n, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+
+        regs = list()
+        n<a id="change">, h, w, k</a> = logits[0].shape
+        
+        &#47&#47 ths = torch.tensor(float(h * w) / k, device=device).clamp(1.0, h * w)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/889502a9674fd8fd3545cccd565e3adaf3aacc5c#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15659930</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 889502a9674fd8fd3545cccd565e3adaf3aacc5c</div><div id='time'> Time: 2021-08-30</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 124</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+        regs = list()
+
+        for <a id="change">logit</a> in logits:
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior<a id="change"> = </a>Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            regs.append(reg)
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+        regs = list()
+
+        n<a id="change">, h, w, k</a> = logits[0].shape
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w])
+        for code, logit, freqMap in zip(codes.permute(1, 0, 2, 3), logits, codeFreqMap):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3b419aa2f7b4286b6ae991022fe7469650db4bbd#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15659931</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3b419aa2f7b4286b6ae991022fe7469650db4bbd</div><div id='time'> Time: 2021-08-01</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        regs = sum(regs) / len(regs)
+        
+
+        for logit, <a id="change">code</a> in zip(logits, codes.permute(1, 0, 2, 3)):
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            prior<a id="change"> = </a>Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            &#47&#47 [n, h, w, k]
+            &#47&#47 weight = (-logit).detach().softmax(-1)
+            &#47&#47 oneHot = F.one_hot(code, num_classes=logit.shape[-1]).float()
+            &#47&#47 [n, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+
+        regs = list()
+        n<a id="change">, h, w, k</a> = logits[0].shape
+        
+        &#47&#47 ths = torch.tensor(float(h * w) / k, device=device).clamp(1.0, h * w)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/889502a9674fd8fd3545cccd565e3adaf3aacc5c#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15659928</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 889502a9674fd8fd3545cccd565e3adaf3aacc5c</div><div id='time'> Time: 2021-08-30</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 124</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 l1 = l1.mean((2,3))
+        &#47&#47 l2 = l2.mean((2,3))
+        regs = list()
+        for <a id="change">l</a> in allLogits:
+            posterior<a id="change"> = </a>torch.distributions.Categorical(logits=l)
+            prior = torch.distributions.Categorical(logits=torch.zeros_like(l))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            regs.append(reg)
+
+        return ssimLoss, contextLoss, sum(regs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47     reg = torch.distributions.kl_divergence(posterior, prior).mean()
+        &#47&#47     regs.append(reg)
+
+        return ssimLoss<a id="change">, contextLoss, 0.0</a>
+
+
+class CompressionLossQ(nn.Module):
+    def __init__(self):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3fcc323b5ed6d13cedbbf8ae61c4749b1880c20c#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15659925</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3fcc323b5ed6d13cedbbf8ae61c4749b1880c20c</div><div id='time'> Time: 2021-09-27</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 140</div><div id='m_end'> M End Line: 158</div><div id='n_start'> N Start Line: 140</div><div id='n_end'> N End Line: 158</div><BR>

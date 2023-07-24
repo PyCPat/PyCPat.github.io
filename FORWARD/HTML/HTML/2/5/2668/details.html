@@ -1,0 +1,88 @@
+<html><h3>Pattern ID :2668
+</h3><img src='15142055.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        weight, bias = self.weight, self.bias
+        weight, bias = weight[:, :n, :n], <a id="change">bias[:, :n]</a>
+
+        mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+        weight = weight.masked_fill(mask[..., None], 0.)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        gate = rearrange(gate, &quotb w n (h d) -&gt; b w h n d&quot, h = h)
+        gate = einsum(&quotb w h n d, h m n -&gt; b w h m d&quot, gate, weight)
+        gate = gate + <a id="change">rearrange(</a>bias, <a id="change">&quoth n -&gt; () () h n ()&quot</a><a id="change">)</a>
+
+        gate = rearrange(gate, &quotb w h n d -&gt; b w n (h d)&quot)
+
+        out<a id="change"> = </a>gate * res
+        out = rearrange(out, &quotb w n d -&gt; b (w n) d&quot)
+        return out[:, :n]
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15142055</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        j_pos = torch.arange(wsz, device = device)
+        grid = torch.stack(torch.meshgrid(i_pos, j_pos))
+        grid = rearrange(grid, &quotc i j -&gt; (i j) c&quot)
+        rel_ij = grid[:, None] - <a id="change">grid[None, :]</a>
+        rel_pos_bias = self.dpb(rel_ij.float())
+
+        sim = sim + rel_pos_bias
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pos = torch.arange(-wsz, wsz + 1, device = device)
+        rel_pos = torch.stack(torch.meshgrid(pos, pos))
+        rel_pos<a id="change"> = </a><a id="change">rearrange(</a>rel_pos, <a id="change">&quotc i j -&gt; (i j) c&quot</a><a id="change">)</a>
+        biases = self.dpb(rel_pos.float())
+        rel_pos_bias = biases[self.rel_pos_indices]
+
+        sim = sim + rel_pos_bias</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/b69b5af34f7759948425113f6dc3b30dfb91d4d1#diff-65c2de0175e6c0cd43148fc01483ce4dcd04a52ba15130b05fdc9f6521caf494L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15142054</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: b69b5af34f7759948425113f6dc3b30dfb91d4d1</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/crossformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/crossformer.py</div><div id='n_file'> N File Name: vit_pytorch/crossformer.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 152</div><div id='n_end'> N End Line: 156</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        h = self.block1(x)
+
+        if exists(self.mlp):
+            h += <a id="change">self.mlp(time_emb)[:, :, None, None]</a>
+
+        h = self.block2(h)
+        return h + self.res_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if exists(self.mlp):
+            assert exists(time_emb), &quottime emb must be passed in&quot
+            condition = self.mlp(time_emb)
+            h<a id="change"> = </a>h + <a id="change">rearrange(</a>condition, <a id="change">&quotb c -&gt; b c 1 1&quot</a><a id="change">)</a>
+
+        h = self.net(h)
+        return h + self.res_conv(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/91cff459394b784f870f3998023439796c95b7ca#diff-1ef0846017d5c27bd277b66e5afcab8798667afd39675e6f9382fc7e87a1fe28L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15142035</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 91cff459394b784f870f3998023439796c95b7ca</div><div id='time'> Time: 2022-01-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: ConvNextBlock</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 165</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 152</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            return rearrange(logits, &quotb (s d) n -&gt; b s d n&quot, d = depth)
+
+        logits = <a id="change">logits[..., :-1, :]</a>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb s d -&gt; b (s d)&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        depth_tokens = rearrange(depth_tokens, &quot(b s) d f -&gt; b s d f&quot, b = b)
+
+        logits = self.to_logits(depth_tokens)
+        logits<a id="change"> = </a><a id="change">rearrange(</a>logits, <a id="change">&quotb ... f -&gt; b (...) f&quot</a><a id="change">)</a>
+        logits = logits[:, :(seq_len + 1)]
+
+        if not return_loss:
+            logits = logits[:, 1:]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/74477d913a78ceaaa628a9fff470218443c78114#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L197' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15142041</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 74477d913a78ceaaa628a9fff470218443c78114</div><div id='time'> Time: 2022-04-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 211</div><div id='m_end'> M End Line: 271</div><div id='n_start'> N Start Line: 227</div><div id='n_end'> N End Line: 266</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(u_f * K_f, &quot... h d -&gt; ... (h d)&quot)
+
+        out = <a id="change">irfft(out, seq_len * 2, dim = -2)[..., :seq_len, :]</a>
+
+        return out + residual
+
+class GatedDsConv(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        out = conv1d_fft(u, K, dim = -3, weight_dim = -2)
+
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quot... h d -&gt; ... (h d)&quot</a><a id="change">)</a>
+
+        return out + residual
+
+class GatedDsConv(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/gated-state-spaces-pytorch/commit/b0c0e2150b8a4be3a2ddf560e3eba823addb2188#diff-c008c658d78f9c1e86d588f49c9f385cf6b4696ea583837f5d0868952b302241L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15142040</div><div id='project'> Project Name: lucidrains/gated-state-spaces-pytorch</div><div id='commit'> Commit Name: b0c0e2150b8a4be3a2ddf560e3eba823addb2188</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_class'> M Class Name: EfficientDsConv</div><div id='n_method'> N Class Name: EfficientDsConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='n_file'> N File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 64</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 80</div><BR>

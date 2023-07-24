@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                authen_output = torch.squeeze(self.linear1(h))
+                return authen_output
+
+            elif self.conditional_strategy in <a id="change">[</a>&quotContraGAN&quot, <a id="change">&quotProxy_NCA_GAN&quot</a>, <a id="change">&quotNT_Xent_GAN&quot</a>]:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                cls_proxy = self.embedding(label)
+                cls_embed = self.linear2(h)
+                <a id="change">if self.nonlinear_embed</a><a id="change">:
+                    </a>cls_embed<a id="change"> = self</a><a id="change">.linear3(self.activation(cls_embed</a><a id="change">)</a><a id="change">)</a>
+                if self.normalize_embed:
+                    cls_proxy = F.normalize(cls_proxy, dim=1)
+                    cls_embed = F.normalize(cls_embed, dim=1)
+                <a id="change">return </a>cls_proxy<a id="change">, cls_embed, authen_output</a>
+
+            elif self.conditional_strategy == &quotProjGAN&quot:
+                authen_output<a id="change"> = </a><a id="change">torch.squeeze(self</a><a id="change">.linear1(</a>h<a id="change">))</a>
+                proj = torch.sum(torch.mul(self.embedding(label), h), 1)
+                <a id="change">return </a>authen_output<a id="change"> + </a>proj
+
+            elif <a id="change">self.conditional_strategy == &quotACGAN&quot</a><a id="change">:
+                </a>authen_output = torch.squeeze(self.linear1(h))
+                cls_output<a id="change"> = self</a><a id="change">.linear4(</a>h<a id="change">)</a>
+                <a id="change">return </a>cls_output<a id="change">, authen_output</a>
+
+            else:
+                raise NotImplementedError
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            adv_output = torch.squeeze(self.linear1(h))
+            if self.d_cond_mtd == "AC":
+                <a id="change">if self.normalize_d_embed</a><a id="change">:
+                    for W</a> in <a id="change">self.linear2.parameters():
+                        </a>W<a id="change"> = F.normalize(W</a><a id="change">, dim=1)</a>
+                    h = F.normalize(h, dim=1)
+                cls_output = self.linear2(h)
+            elif self.d_cond_mtd == "PD":
+                adv_output = adv_output + torch.sum(torch.mul(self.embedding(label), h), 1)</code></pre>

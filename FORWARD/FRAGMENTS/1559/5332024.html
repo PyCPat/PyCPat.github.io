@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        a.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        sigma = torch.ones_like(inp, device=inp.device, dtype=inp.dtype) * self.m
+        src = torch.ones_like(<a id="change">label.unsqueeze(1</a><a id="change">)</a>, dtype=inp.dtype, device=inp.device) - self.m
+        sigma.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        return self.loss(a * (inp - sigma) * self.gamma, label)</code></pre><h3>After Change</h3><pre><code class='java'>
+        ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
+        an = torch.clamp_min(sn.detach() + self.m, min=0.)
+
+        sigma_p = <a id="change">1</a><a id="change"> - </a>self.m
+        sigma_n = self.m
+
+        logit_p<a id="change"> = </a>ap * (sp - sigma_p) * self.gamma
+        logit_n = an * (sn - sigma_n) * self.gamma
+
+        loss = torch.log(1 + torch.clamp_max(torch.exp(logit_n).sum() * <a id="change">torch.exp(- logit_p).sum()</a>, max=1e38))
+        z<a id="change"> = </a>- torch.exp(- loss) + 1
+
+        sp.backward(gradient=z * ap * torch.softmax(logit_p, dim=0))
+        sn.backward(gradient=z * an * torch.softmax(logit_n, dim=0))</code></pre>

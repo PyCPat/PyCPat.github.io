@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :3478
+</h3><img src='17563055.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 KL Divergence Loss
+        beta = torch.tensor(self.kl_anneal(step))
+        log_vars, mus = log_vars.masked_select(src_masks.unsqueeze(-1)), mus.masked_select(<a id="change">src_masks.unsqueeze(-1</a><a id="change">)</a>)
+        kl_loss = -0.5 * torch.sum(1 + log_vars - mus.pow(2) - log_vars.exp())
+
+        &#47&#47 Residual Attention Loss</code></pre><h3>After Change</h3><pre><code class='java'>
+            mel_iter_comp = torch.sigmoid(mel_iter)
+            mel_iter_loss += self.sdtw_loss(mel_iter_comp, mel_targets_comp).mean()
+            &#47&#47 mel_iter_loss += self.sdtw_loss(mel_iter, mel_targets).mean()
+        mel_loss = (mel_iter_loss / (<a id="change">len(</a>mel_iters<a id="change">)</a> * mel_lens_targets)).mean()
+
+        &#47&#47 Duration Loss
+        duration_loss = self.lambda_ * (self.mae_loss(durations.sum(-1), mel_lens_targets) / src_lens_targets).mean()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keonlee9420/parallel-tacotron2/commit/2c2f8c0876192de39c8e6d3c4f579dc68a50a678#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17563055</div><div id='project'> Project Name: keonlee9420/parallel-tacotron2</div><div id='commit'> Commit Name: 2c2f8c0876192de39c8e6d3c4f579dc68a50a678</div><div id='time'> Time: 2021-05-25</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: ParallelTacotron2Loss</div><div id='n_method'> N Class Name: ParallelTacotron2Loss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x = x.mean(-2) / <a id="change">x_len.float().unsqueeze(-1</a><a id="change">)</a>
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.pre_proj(x)
+
+        if x_len is not None:
+            x = [x[b, : x_len[b]].mean(0) for b in range(<a id="change">len(</a>x<a id="change">)</a>)]
+            x = torch.stack(x, dim=0)
+        else:
+            x = x.mean(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/atosystem/speechclip/commit/b2d7d1450922b5f68626bcc7751faf4feca14ed5#diff-36cf0d2ba2e002faba923e96cac943aa23122917b021c2258ac13f6f611ab652L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17563054</div><div id='project'> Project Name: atosystem/speechclip</div><div id='commit'> Commit Name: b2d7d1450922b5f68626bcc7751faf4feca14ed5</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: b06901020@ntu.edu.tw</div><div id='file'> File Name: avssl/module/pooling.py</div><div id='m_class'> M Class Name: MeanPoolingLayer</div><div id='n_method'> N Class Name: MeanPoolingLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: avssl/module/pooling.py</div><div id='n_file'> N File Name: avssl/module/pooling.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        out = [(point_features, xyz)] + out
+
+        xyz = <a id="change">xyz.unsqueeze(0</a><a id="change">)</a>.contiguous()
+        indices = furthest_point_sample(xyz, cfg.n_keypoints).squeeze(0).long()
+        keypoints = points[indices]
+        keypoints_xyz, keypoints_features = torch.split(keypoints, [3, 1], dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        keypoints_xyz, keypoints_features = self.sample_keypoints(xyz, point_features)
+        out = [(point_features, xyz)] + out
+        for i in range(<a id="change">len(</a>self.cfg.strides<a id="change">)</a>):
+            voxel_features_i, voxel_coords_i = out[i]
+            voxel_coords_i = voxel_coords_i.unsqueeze(0).contiguous()
+            voxel_features_i = voxel_features_i.unsqueeze(0).permute(0, 2, 1).contiguous()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/b58d5a394a6cc04a99daeaa04b0ef90f050f8582#diff-acdbb7a8541d282e4e6bd0147d753b4b222401d39382c8be5223bd3ab78db7fcL109' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17563053</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: b58d5a394a6cc04a99daeaa04b0ef90f050f8582</div><div id='time'> Time: 2020-01-17</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/main.py</div><div id='m_class'> M Class Name: PV_RCNN</div><div id='n_method'> N Class Name: PV_RCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/main.py</div><div id='n_file'> N File Name: pvrcnn/main.py</div><div id='m_start'> M Start Line: 120</div><div id='m_end'> M End Line: 130</div><div id='n_start'> N Start Line: 143</div><div id='n_end'> N End Line: 151</div><BR>

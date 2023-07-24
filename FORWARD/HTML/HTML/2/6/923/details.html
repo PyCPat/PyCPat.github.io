@@ -1,0 +1,86 @@
+<html><h3>Pattern ID :923
+</h3><img src='3319218.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not convolve_across_time:
+            return x
+
+        x = <a id="change">rearrange(</a>x, <a id="change">&quotb c f h w -&gt; (b h w) c f&quot</a><a id="change">)</a>
+
+        x = self.temporal_conv(x)
+
+        x<a id="change"> = </a>rearrange(x, &quot(b h w) c f -&gt; b c f h w&quot, h = h, w = w)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+
+        scale_shift = None
+        <a id="change">if </a><a id="change">exists(self.time_mlp) and exists(time_emb):
+            </a>time_emb = self.time_mlp(time_emb)
+            time_emb = rearrange(time_emb, &quotb c -&gt; b c 1 1&quot)
+            scale_shift<a id="change"> = </a>time_emb.chunk(2, dim = 1)
+
+        h = self.block1(x, scale_shift = scale_shift, convolve_across_time = convolve_across_time)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/0af63d7db1964f26183becb09f25cd09c40ffbf5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3319218</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: 0af63d7db1964f26183becb09f25cd09c40ffbf5</div><div id='time'> Time: 2022-12-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: Pseudo3DConv</div><div id='n_method'> N Class Name: ResnetBlock</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 239</div><div id='n_end'> N End Line: 253</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize<a id="change"> = </a><a id="change">rearrange(</a>quantize, <a id="change">&quotb d n -&gt; b n d&quot</a><a id="change">)</a>
+
+        return quantize, embed_ind, loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        shape, device, codebook_size = x.shape, x.device, self.codebook_size
+
+        need_transpose = <a id="change">not self.channel_last and not self.accept_image_fmap</a>
+
+        if self.accept_image_fmap:
+            height, width = x.shape[-2:]
+            x = rearrange(x, &quotb c h w -&gt; b (h w) c&quot)
+
+        if need_transpose:
+            x = rearrange(x, &quotb d n -&gt; b n d&quot)
+
+        x = self.project_in(x)
+
+        quantize, embed_ind = self._codebook(x)
+
+        if self.training:
+            quantize = x + (quantize - x).detach()
+
+        loss = torch.tensor([0.], device = device, requires_grad = self.training)
+
+        if self.training:
+            if self.commitment_weight &gt; 0:
+                commit_loss = F.mse_loss(quantize.detach(), x)
+                loss = loss + commit_loss * self.commitment_weight
+
+            if self.orthogonal_reg_weight &gt; 0:
+                orthogonal_reg_loss = orthgonal_loss_fn(self.codebook)
+                loss = loss + orthogonal_reg_loss * self.orthogonal_reg_weight
+
+        quantize = self.project_out(quantize)
+
+        <a id="change">if </a>need_transpose<a id="change">:
+            </a>quantize<a id="change"> = </a>rearrange(quantize, &quotb n d -&gt; b d n&quot)
+
+        if self.accept_image_fmap:
+            quantize = rearrange(quantize, &quotb (h w) c -&gt; b c h w&quot, h = height, w = width)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/c9725a6e2556251a8b8a5d73795dabdc59c7c0f4#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL300' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3319312</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: c9725a6e2556251a8b8a5d73795dabdc59c7c0f4</div><div id='time'> Time: 2021-12-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: VectorQuantize</div><div id='n_method'> N Class Name: VectorQuantize</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 303</div><div id='m_end'> M End Line: 331</div><div id='n_start'> N Start Line: 304</div><div id='n_end'> N End Line: 342</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        ]
+        q = rearrange(q, &quotb n (h d) -&gt; b h n d&quot, h=h_q)
+        k = rearrange(k, &quotb n (h d) -&gt; b h n d&quot, h=h_kv)
+        v<a id="change"> = </a><a id="change">rearrange(</a>v, <a id="change">&quotb n (h d) -&gt; b h n d&quot</a><a id="change">, h=h_kv)</a>
+
+        &#47&#47 _ = [print(i.shape) for i in [q,k,v]]
+
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * self.scale</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        
+
+        <a id="change">if </a><a id="change">k_tokens is None and v_tokens is None:
+            </a>v_tokens = k_tokens<a id="change"> = </a>q_tokens
+        elif k_tokens is not None and v_tokens is not None:
+            pass
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/f6865257f4bea4ed62e0170644d99dcdb1d20c94#diff-f5d4e504fb1ef29f758d7f77376318f372efbfb4498293f8d8797c46106d1d7aL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3319300</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: f6865257f4bea4ed62e0170644d99dcdb1d20c94</div><div id='time'> Time: 2022-10-28</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/Transformer.py</div><div id='m_class'> M Class Name: CrossAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/Transformer.py</div><div id='n_file'> N File Name: wama_modules/Transformer.py</div><div id='m_start'> M Start Line: 129</div><div id='m_end'> M End Line: 138</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 103</div><BR>

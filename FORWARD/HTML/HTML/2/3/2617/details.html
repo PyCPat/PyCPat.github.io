@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2617
+</h3><img src='14985925.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask<a id="change"> = </a>mask[:, :-1]
+            <a id="change">kwargs[&quotmask&quot]</a> = mask
+
+        out = self.net(xi, **kwargs)
+        loss = F.cross_entropy(out.transpose(1, 2), xo, ignore_index = self.ignore_index)</code></pre><h3>After Change</h3><pre><code class='java'>
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask = ~<a id="change">torch.zeros_like(</a>inp<a id="change">)</a>.scatter(1, indices, 1.).bool()
+            kwargs.update(context_mask = mask)
+
+        out = self.net(inp, **kwargs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14985925</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for idx in range(batch_size):
+            target_ball_global[idx] = create_target_ball(global_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            target_ball_local[idx] = create_target_ball(local_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            <a id="change">target_events[idx] = </a>create_target_events(event_class[idx], device=self.device)
+
+        global_ball_loss = self.ball_loss_criterion(pred_ball_global, target_ball_global)
+        local_ball_loss = self.ball_loss_criterion(pred_ball_local, target_ball_local)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if pred_ball_local is not None:
+            log_vars_idx += 1
+            target_ball_local = <a id="change">torch.zeros_like(</a>pred_ball_local<a id="change">)</a>
+            for sample_idx in range(batch_size):
+                target_ball_local[sample_idx] = create_target_ball(local_ball_pos_xy[sample_idx], sigma=1., w=self.w,
+                                                                   h=self.h, thresh_mask=0.01, device=self.device)
+            local_ball_loss = self.ball_loss_criterion(pred_ball_local, target_ball_local)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch/commit/4e2a9eb758dbd4cdd39420a237e25ba581182193#diff-1894af787af773f0900f2d4288fad393d1be5feb407cc292b0bfc65198036c33L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14985943</div><div id='project'> Project Name: maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch</div><div id='commit'> Commit Name: 4e2a9eb758dbd4cdd39420a237e25ba581182193</div><div id='time'> Time: 2020-06-01</div><div id='author'> Author: nguyenmaudung93.kstn@gmail.com</div><div id='file'> File Name: src/models/multi_task_learning_model.py</div><div id='m_class'> M Class Name: Multi_Task_Learning_Model</div><div id='n_method'> N Class Name: Multi_Task_Learning_Model</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/multi_task_learning_model.py</div><div id='n_file'> N File Name: src/models/multi_task_learning_model.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        mask = torch.ne(base_mask, 0).unsqueeze(-1)
+        size = [-1] * mask.dim()
+        <a id="change">size[-1] = </a>self.frame_period
+        mask = mask.expand(size)
+        mask = mask.reshape(signal_shape)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            r = torch.ceil(phase)
+            r = torch.cat((r[..., :1] * 0, r), dim=-1)
+            pulse_pos = torch.ge(r[..., 1:] - r[..., :-1], 1)
+            e = <a id="change">torch.zeros_like(</a>p<a id="change">)</a>
+            e[pulse_pos] = torch.sqrt(p[pulse_pos])
+        elif self.voiced_region == "sinusoidal":
+            e = torch.sin((2 * torch.pi) * phase)
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/72fcde4bb44021e8c00f3b017785d97afc934e29#diff-67f9ab0b92a7f985bcadf886c56879784cffad18aeaf33c4d1709e836ff2807fL54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14985923</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: 72fcde4bb44021e8c00f3b017785d97afc934e29</div><div id='time'> Time: 2023-01-11</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/core/excite.py</div><div id='m_class'> M Class Name: ExcitationGeneration</div><div id='n_method'> N Class Name: ExcitationGeneration</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/excite.py</div><div id='n_file'> N File Name: diffsptk/core/excite.py</div><div id='m_start'> M Start Line: 77</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 105</div><BR>

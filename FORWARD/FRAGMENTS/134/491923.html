@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                processed_inputs=None, mask=None, inputs_lengths=None):
+
+        if processed_inputs is None:
+            processed_inputs<a id="change"> = </a>inputs
+
+        if inputs_lengths is not None and mask is None:
+            mask = get_mask_from_lengths(inputs, inputs_lengths)
+
+        &#47&#47 Alignment
+        &#47&#47 (batch, max_time)
+        &#47&#47 e_{ij} = a(s_{i-1}, h_j)
+        &#47&#47 import ipdb
+        &#47&#47 ipdb.set_trace()
+        alignment = self.alignment_model(cell_state, processed_inputs)
+
+        if mask is not None:
+            mask = mask.view(query.size(0), -1)
+            alignment.data.masked_fill_(mask, self.score_mask_value)
+
+        &#47&#47 Normalize context_vec weight
+        alignment = F.softmax(alignment, dim=-1)
+
+        &#47&#47 Attention context vector
+        &#47&#47 (batch, 1, dim)
+        &#47&#47 c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+        context_vec = torch.bmm(alignment.unsqueeze(1), inputs)
+        context_vec = context_vec.squeeze(1)
+
+        &#47&#47 Concat input query and previous context_vec context
+        cell_input = torch.cat((query, context_vec), -1)
+        &#47&#47cell_input = cell_input.unsqueeze(1)
+
+        &#47&#47 Feed it to RNN
+        &#47&#47 s_i = f(y_{i-1}, c_{i}, s_{i-1})
+        cell_output = self.rnn_cell(cell_input, cell_state)
+
+        context_vec = context_vec.squeeze(1)
+        <a id="change">return </a>cell_output<a id="change">, context_vec, alignment</a>
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 s_i = f(y_{i-1}, c_{i}, s_{i-1})
+        rnn_output = self.rnn_cell(rnn_input, rnn_state)
+
+        context<a id="change"> = </a><a id="change">context.squeeze(1</a><a id="change">)</a>
+        <a id="change">return </a>rnn_output<a id="change">, context, alignment</a>
+
+
+</code></pre>

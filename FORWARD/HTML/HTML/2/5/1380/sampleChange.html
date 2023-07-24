@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, preds: Tensor, targets: Tensor) -&gt; Tensor:
+        &#47&#47 preds in shape [B, C, H, W] and targets in shape [B, C, H, W]
+        if preds.shape[2:] != targets.shape[2:]:
+            preds = <a id="change">F.interpolate(</a>preds<a id="change">, size=targets.shape[2:], mode=&quotbilinear&quot, align_corners=False)</a>
+
+        tp = torch.sum(targets*preds, dim=(2, 3))
+        fn<a id="change"> = </a>torch.sum(targets*(1-preds), dim=(2, 3))
+        fp = torch.sum((1-targets)*preds, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp + self.delta * fn + (1 - self.delta) * fp + 1e-6)
+        dice_score<a id="change"> = </a>torch.sum(1-dice_score, dim=-1)
+
+        &#47&#47 adjust loss to account for number of classes
+        dice_score = dice_score / targets.shape[1]
+        <a id="change">return </a>dice_score.mean()
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, targets: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a>sum([w * self._forward(pred, targets) for (pred, w) in zip(preds, self.aux_weights)])
+        return self._forward(preds, targets)
+
+</code></pre>

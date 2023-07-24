@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert not torch.isnan(x).any()
+        x = self.bn(x)
+        x_a = self.first_step(x)[:, self.n_d :]
+        sparse_loss = <a id="change">torch.zeros(</a>1<a id="change">)</a>.to(x.device)
+        out = torch.zeros(x.size(0), self.n_d).to(x.device)
+        for step in self.steps:
+            x_te, l = step(x, x_a, priors)
+            out += F.relu(x_te[:, : self.n_d])  &#47&#47 split the feautre from feat_transformer
+            x_a = x_te[:, self.n_d :]
+            sparse_loss<a id="change"> += </a>l
+        return self.fc(out), sparse_loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert not torch.isnan(x).any()
+        x = self.bn(x)
+        x_a = self.first_step(x)[:, self.n_d :]
+        sparse_loss = <a id="change">[]</a>
+        out = torch.zeros(x.size(0), self.n_d).to(x.device)
+        for step in self.steps:
+            x_te, l = step(x, x_a, priors)
+            out += F.relu(x_te[:, : self.n_d])  &#47&#47 split the feautre from feat_transformer</code></pre>

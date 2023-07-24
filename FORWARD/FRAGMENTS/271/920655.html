@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 sample random times
+
+        times<a id="change"> = </a><a id="change">torch.zeros((batch,), device = device).float().uniform_(0</a>, <a id="change">1.</a><a id="change">)</a>
+
+        &#47&#47 noise sample
+
+        noise = torch.randn_like(img)
+
+        noise_level = self.log_snr(times)
+        padded_noise_level = right_pad_dims_to(img, noise_level)
+        alpha, sigma =  log_snr_to_alpha_sigma(padded_noise_level)
+
+        noised_img = alpha * img + sigma * noise
+
+        &#47&#47 if doing self-conditioning, 50% of the time, predict x_start from current set of times
+        &#47&#47 and condition with unet with that
+        &#47&#47 this technique will slow down training by 25%, but seems to lower FID significantly
+
+        self_cond = None
+        if random() &lt; 0.5:
+            with torch.no_grad():
+                self_cond = self.model(noised_img, noise_level).detach_()
+
+        &#47&#47 predict and take gradient step
+
+        pred<a id="change"> = </a>self.model(noised_img, noise_level, self_cond)
+
+        <a id="change">return </a>F.mse_loss(pred, img)
+
+&#47&#47 trainer class
+</code></pre>

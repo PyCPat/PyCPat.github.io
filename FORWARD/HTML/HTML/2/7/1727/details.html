@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :1727
+</h3><img src='5817181.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        outputs = []
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        <a id="change">if timespans is None</a><a id="change">:
+            </a>timespans<a id="change"> = </a>x.new_ones(x.shape[:-1]+(1,))<a id="change"> / </a>x.shape[1]
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()
+            hidden_state = self.rnn_cell.forward(inputs, hidden_state, ts)
+            current_output = self.fc(hidden_state[0])
+            outputs.append(current_output)
+            last_output = current_output
+        if self.return_sequences:
+            outputs = torch.stack(outputs, dim=1)  &#47&#47 return entire sequence
+        else:
+            outputs<a id="change"> = </a>last_output  &#47&#47 only last item
+        return outputs, hidden_state</code></pre><h3>After Change</h3><pre><code class='java'>
+        L = u.size(-1)
+        if lengths is not None:
+            assert isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = torch.where(torch.arange(L, device=lengths.device) &lt; <a id="change">lengths[:, None, None]</a>, 1., 0.)
+            u = u * mask
+
+        device = u.device</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5817181</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 (B, T, mel_dim) -&gt; (B, T&quot, mel_dim*r)
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            <a id="change">if inputs.size(-1) == self.mel_dim</a><a id="change">:
+                </a>inputs<a id="change"> = </a>inputs.reshape(B, inputs.size(1)<a id="change"> // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5817170</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 (B, T, mel_dim) -&gt; (B, T&quot, mel_dim*r)
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            <a id="change">if inputs.size(-1) == self.mel_dim</a><a id="change">:
+                </a>inputs<a id="change"> = </a>inputs.reshape(B, inputs.size(1)<a id="change"> // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5817172</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

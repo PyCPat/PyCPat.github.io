@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            if t == 0:
+                gru_output, h_n = self.rnn(<a id="change">x.unsqueeze(1</a><a id="change">)</a>)
+            else:
+                gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        &#47&#47 gru_output = gru_output.squeeze(1)
+        for i in range(<a id="change">gru_output.size(0</a><a id="change">)</a>):
+            hr = self.gru_fc_out(gru_output[i, :, :])
+        &#47&#47     &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr.flatten())</code></pre>

@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :194
+</h3><img src='817165.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        c_t = torch.bmm(alpha_t.unsqueeze(1), inputs).squeeze(1)
+        self.mu_tm1 = mu_t
+        return c_t<a id="change">, mu_t, alpha_t</a>
+
+
+class Attention(nn.Module):
+    &#47&#47 Pylint gets confused by PyTorch conventions here</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 g_t = torch.softmax(g_t, dim=-1) + self.epsilon  &#47&#47 distribution weight
+        &#47&#47 sig_t = torch.exp(b_t) + self.epsilon  &#47&#47 variance
+        &#47&#47 mu_t = self.mu_prev + self.attention_alignment * torch.exp(k_t)  &#47&#47 mean
+        sig_t = <a id="change">torch.pow(</a>torch.nn.functional.softplus(b_t), <a id="change">2</a><a id="change">)</a>
+        mu_t = self.mu_prev + torch.nn.functional.softplus(k_t)
+        g_t = (torch.softmax(g_t, dim=-1)<a id="change"> / </a>sig_t) * self.COEF
+
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/adf9ebd629abc21e0969db2a1c29f389b5301c9d#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 817165</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: adf9ebd629abc21e0969db2a1c29f389b5301c9d</div><div id='time'> Time: 2019-11-12</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 149</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        action = action.tanh()
+
+        return action<a id="change">, std</a>
+
+
+if __name__ == &quot__main__&quot:
+    use_cuda = torch.cuda.is_available()</code></pre><h3>After Change</h3><pre><code class='java'>
+            action = action_base.tanh()
+
+            &#47&#47 According to "Soft Actor-Critic" (Haarnoja et. al) Appendix C
+            action_bound_compensation = torch.log(1.<a id="change"> - action.tanh().pow(2) + </a>1e-6)
+            action_bound_compensation = action_bound_compensation.sum(dim=-1, keepdim=True)
+            log_prob.sub_(action_bound_compensation)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tmdt-buw/karolos/commit/e8ce439013ace3e3e9647de55ed22ddf38f35396#diff-29037086e0dfbb6a2262a556dce65661316ec86ddf4f52bf9de230586208ab9dL95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 817176</div><div id='project'> Project Name: tmdt-buw/karolos</div><div id='commit'> Commit Name: e8ce439013ace3e3e9647de55ed22ddf38f35396</div><div id='time'> Time: 2020-04-23</div><div id='author'> Author: scheiderer@uni-wuppertal.de</div><div id='file'> File Name: agents/nnfactory/sac.py</div><div id='m_class'> M Class Name: Policy</div><div id='n_method'> N Class Name: Policy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: agents/nnfactory/sac.py</div><div id='n_file'> N File Name: agents/nnfactory/sac.py</div><div id='m_start'> M Start Line: 103</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            stride=self.stride, padding=self.padding, groups=B
+        )
+
+        _<a id="change">, _, H, W</a> = out.size()
+        out = out.view(B, -1, H, W)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 demodulate
+        if self.demod:
+            d = torch.rsqrt(<a id="change">weight.pow(2</a><a id="change">)</a>.sum([2, 3, 4], keepdim=True) + 1e-4)
+            weight = weight * d
+
+        &#47&#47 reshaping for conv input
+        x = x.reshape(1, -1, H, W)
+        _, _, *ws = weight.size()
+        weight = weight.reshape(B*self.out_channels, *ws)
+        pad = self._get_same_padding(H)
+
+        &#47&#47 conv
+        x = F.conv2d(x, weight, padding=pad, groups=B)
+
+        &#47&#47 return with bias
+        return x.reshape(B, self.out_channels, H, W)<a id="change"> + </a>self.bias
+    
+    def _get_same_padding(self, size):
+        return ((size - 1) * (self.stride - 1) + (self.kernel_size - 1)) // 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stomoya/animeface/commit/b3652bae109c713da926d5532eb014b02135da52#diff-0383c3e0d2575e5076916c51cfa38d4b02353d9aef3e245e35d328bb2169f279L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 817174</div><div id='project'> Project Name: stomoya/animeface</div><div id='commit'> Commit Name: b3652bae109c713da926d5532eb014b02135da52</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: blackie0110@gmail.com</div><div id='file'> File Name: implementations/StyleGAN2/model.py</div><div id='m_class'> M Class Name: EqualizedModulatedConv2d</div><div id='n_method'> N Class Name: ModulatedConv2d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: implementations/StyleGAN2/model.py</div><div id='n_file'> N File Name: implementations/StyleGAN2/model.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 87</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 131</div><BR>

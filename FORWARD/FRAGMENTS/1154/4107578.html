@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self,input):
+
+        out = torch.zeros(input.shape[0],self.nconfs)
+        <a id="change">for </a>isample in <a id="change">range(</a>input.shape[0]<a id="change">):
+
+            </a>for ic,(cup,cdown) in enumerate(zip(self.configs[0],self.configs[1])):
+
+                mo_up = input[isample].index_select(0,self.index_up).index_select(1,cup)
+                mo_down = <a id="change">input[isample]</a>.index_select(0,self.index_down).index_select(1,cdown)
+                out[isample,ic] = torch.det(mo_up) * torch.det(mo_down)
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returnn:
+            determiant (Nbatch, Ndet)
+        &quot&quot&quot
+        nbatch<a id="change"> = </a>input.shape[0]
+        out = torch.zeros(nbatch,self.nconfs)
+        
+        for ic,(cup,cdown) in enumerate(zip(self.configs[0],self.configs[1])):
+
+            mo_up = input.index_select(1,self.index_up).index_select(2,cup)
+            mo_down = input.index_select(1,self.index_down).index_select(2,cdown)
+
+            &#47&#47 a batch version of det is on its way (end July 2019)
+            &#47&#47 https://github.com/pytorch/pytorch/issues/7500
+            &#47&#47 we&quotll move to that asap but in the mean time we loop
+            <a id="change">for </a>isample in <a id="change">range(</a>nbatch<a id="change">):
+                </a>out[isample,ic] = torch.det(mo_up[isample]) * torch.det(mo_down[isample])
+
+        return out
+</code></pre>

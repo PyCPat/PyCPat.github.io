@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :96
+</h3><img src='380021.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                         dimension corresponds to the number of negative samples (N_B  or N_B + N_A)
+        
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = -(<a id="change">logit.diag().view(</a>-1, <a id="change">1</a><a id="change">)</a>.expand_as(logit) - logit)
+        loss = torch.mean(logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2)))
+        <a id="change">return </a>loss
+
+
+class TOP1_max_reg(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        positives = logits_scores.diag().view(-1, 1).expand_as(logits_scores)
+        diff = positives - logits_scores
+        penalization = torch.sigmoid(logits_scores ** 2)
+        loss = <a id="change">torch.sigmoid(</a>-diff<a id="change">)</a> + penalization
+        logit_softmax = F.softmax(logits_scores, dim = 1)
+        loss = logit_softmax * loss
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = loss.sum(1) / negative_mask.sum(1)
+        <a id="change">return </a>torch.mean(loss)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/da9442ba125855b2a0630c905ad4da0def19be70#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 380021</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: da9442ba125855b2a0630c905ad4da0def19be70</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: TOP1_max</div><div id='n_method'> N Class Name: TOP1_max</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 116</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                         dimension corresponds to the number of negative samples (N_B  or N_B + N_A)
+        
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = -(<a id="change">logit.diag().view(-1</a>, 1<a id="change">)</a>.expand_as(logit) - logit)
+        loss = torch.mean(logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2)))
+        <a id="change">return </a>loss
+
+
+class TOP1_max_reg(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        positive_mask = ~negative_mask
+        positives = logits_scores.diag().view(-1, 1).expand_as(logits_scores)
+        diff = positives - logits_scores
+        penalization = <a id="change">torch.sigmoid(</a>logits_scores ** 2<a id="change">)</a>
+        loss = torch.sigmoid(-diff) + penalization
+        logit_softmax = F.softmax(logits_scores, dim = 1)
+        loss = logit_softmax * loss
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = loss.sum(1) / negative_mask.sum(1)
+        <a id="change">return </a>torch.mean(loss)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/58b4bf9dfdc2fe5ce6c90ac57f4db71224268942#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L89' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 380023</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: 58b4bf9dfdc2fe5ce6c90ac57f4db71224268942</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: TOP1_max</div><div id='n_method'> N Class Name: TOP1_max</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 116</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, channels, width, height = x.size()
+
+        &#47&#47 (b, 1, 28, 28) -&gt; (b, 1*28*28)
+        x = <a id="change">x.view(</a>batch_size, <a id="change">-1</a><a id="change">)</a>
+        x = self.layer_1(x)
+        x = F.relu(x)
+        x = self.layer_2(x)
+        x = F.relu(x)
+        x = self.layer_3(x)
+        x = F.relu(x)
+        x = self.layer_4(x)
+
+        <a id="change">return </a>F.log_softmax(x, dim=1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = F.relu(x)
+        x = self.drop2(x)
+        x = self.lin_2(x)
+        <a id="change">return </a><a id="change">torch.sigmoid(</a>x<a id="change">)</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ashleve/lightning-hydra-template/commit/e694cd0164e92dee9a451b8df20260fdf9bec4e2#diff-3a0ebb1b65c298f993c1c380f3f8fb3af71d7351417b77de111ae136deaddb31L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 380017</div><div id='project'> Project Name: ashleve/lightning-hydra-template</div><div id='commit'> Commit Name: e694cd0164e92dee9a451b8df20260fdf9bec4e2</div><div id='time'> Time: 2020-11-15</div><div id='author'> Author: zalewski.ukas@gmail.com</div><div id='file'> File Name: project/pipeline_modules/models.py</div><div id='m_class'> M Class Name: ModelMNISTv2</div><div id='n_method'> N Class Name: EfficientNetPretrained</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: project/pipeline_modules/models.py</div><div id='n_file'> N File Name: project/pipeline_modules/models.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 61</div><BR>

@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1917
+</h3><img src='13379393.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        print(x.shape, x_.shape)
+        
+        b, n, _, h = *x.shape, self.heads
+        qkv<a id="change"> = </a><a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim=-1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h=h), qkv)
+
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            print(&quotadd pos_embeddings to q and k&quot)
+            q = q + pos_embeddings
+            k = k + pos_embeddings
+            <a id="change">if self.AddPosEmb2Value</a><a id="change">:
+                </a>print(&quotadd pos_embeddings to v&quot)
+                v<a id="change"> = </a>v + pos_embeddings
+
+        &#47&#47 self attention
+        attn_q, attn_map = self.Attention(q, k, v)  &#47&#47 attn_q has same shape with q</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/f6865257f4bea4ed62e0170644d99dcdb1d20c94#diff-f5d4e504fb1ef29f758d7f77376318f372efbfb4498293f8d8797c46106d1d7aL78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13379393</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: f6865257f4bea4ed62e0170644d99dcdb1d20c94</div><div id='time'> Time: 2022-10-28</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/Transformer.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: TransformerEncoderLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/Transformer.py</div><div id='n_file'> N File Name: wama_modules/Transformer.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 199</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if exists(self.to_time_embedding) and exists(time_context):
+            time_embedding = self.to_time_embedding(time_context)
+            time_embedding = rearrange(time_embedding, "b c -&gt; b c 1")
+            scale_shift<a id="change"> = </a><a id="change">time_embedding.chunk(2</a><a id="change">, dim=1)</a>
+
+        h = self.block2(h, scale_shift=scale_shift)
+
+        return h + self.to_out(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = block(x, t)
+            skips += [x]
+
+        <a id="change">if self.use_attention</a><a id="change">:
+            </a>x = self.transformer(x)
+            skips<a id="change"> += </a>[x]
+
+        if not self.use_pre_downsample:
+            x = self.downsample(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13379394</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: DownsampleBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 458</div><div id='n_end'> N End Line: 473</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if exists(self.to_time_embedding) and exists(t):
+            time_embedding = self.to_time_embedding(t)
+            time_embedding = rearrange(time_embedding, "b c -&gt; b c 1")
+            scale_shift<a id="change"> = </a><a id="change">time_embedding.chunk(2</a><a id="change">, dim=1)</a>
+
+        h = self.block2(h, scale_shift=scale_shift)
+
+        return h + self.to_out(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            h = self.cross_attend(h, context=embedding) + h
+
+        scale_shift = None
+        <a id="change">if self.use_mapping</a><a id="change">:
+            </a>scale_shift<a id="change"> = </a>self.to_scale_shift(mapping)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/3c710edf168da06dcc89c23ef12023d0f8b63043#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L208' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13379395</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 3c710edf168da06dcc89c23ef12023d0f8b63043</div><div id='time'> Time: 2022-09-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: ResnetBlock1d</div><div id='n_method'> N Class Name: ResnetBlock1d</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 229</div><div id='n_start'> N Start Line: 194</div><div id='n_end'> N End Line: 206</div><BR>

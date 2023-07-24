@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mel_outputs, alignments, stop_tokens = self.decoder(
+            encoder_outputs, mel_specs, mask,
+            self.speaker_embeddings_projected)
+        mel_outputs<a id="change"> = </a><a id="change">mel_outputs.view(</a>B, <a id="change">-1</a>, self.mel_dim<a id="change">)</a>
+        linear_outputs = self.postnet(mel_outputs)
+        linear_outputs = self.last_linear(linear_outputs)
+        <a id="change">return </a>mel_outputs<a id="change">, linear_outputs, alignments, stop_tokens</a>
+
+    def inference(self, characters, speaker_ids=None, style_mel=None):
+        B = characters.size(0)
+        inputs = self.embedding(characters)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 B x T_out x posnet_dim
+        postnet_outputs = self.last_linear(postnet_outputs)
+        &#47&#47 B x T_out x decoder_dim
+        decoder_outputs<a id="change"> = </a>decoder_outputs.transpose(1, 2)
+        if self.bidirectional_decoder:
+            decoder_outputs_backward, alignments_backward = self._backward_inference(mel_specs, encoder_outputs, mask)
+            return decoder_outputs, postnet_outputs, alignments, stop_tokens, decoder_outputs_backward, alignments_backward
+        <a id="change">return </a>decoder_outputs<a id="change">, postnet_outputs, alignments, stop_tokens</a>
+
+    def inference(self, characters, speaker_ids=None, style_mel=None):
+        B = characters.size(0)
+        inputs = self.embedding(characters)</code></pre>

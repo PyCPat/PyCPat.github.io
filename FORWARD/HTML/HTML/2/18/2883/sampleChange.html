@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.weight:
+            w = torch.sigmoid(self.w) * (2 / self.n)  &#47&#47 sigmoid weights (0-1)
+            if self.n == 2:
+                return x * w[0] + outputs[self.layers[0]] * <a id="change">w[1]</a>
+            elif self.n == 3:
+                return x * w[0] + outputs[self.layers[0]] * <a id="change">w[1]</a> + outputs[self.layers[1]] * <a id="change">w[2]</a>
+        else:
+            if self.n == 2:
+                return x + outputs[self.layers[0]]
+            elif self.n == 3:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Fusion
+        nc = x.shape[1]  &#47&#47 number of channels
+        <a id="change">for </a>i in range(self.n - 1)<a id="change">:
+            </a>a = outputs[self.layers[i]]  &#47&#47 feature to add
+            dc = nc - a.shape[1]  &#47&#47 delta channels
+
+            &#47&#47 Adjust channels
+            <a id="change">if </a><a id="change">dc &gt; 0:  &#47&#47 pad
+                </a>pad = nn.ZeroPad2d((0<a id="change">, 0, 0, 0, 0, dc</a>))
+                a<a id="change"> = </a>pad(a)
+            elif <a id="change">dc &lt; 0</a><a id="change">:  &#47&#47 slice
+                </a>a = a[:, :nc]
+
+            &#47&#47 Sum
+            x = x + a * w[i + 1]<a id="change"> if </a>self.weight<a id="change"> else </a>x + a
+        return x
+
+</code></pre>

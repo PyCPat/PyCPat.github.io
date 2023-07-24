@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList()
+        for i in range(n_layers):
+            if layer_norm:
+                <a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i])<a id="change">)</a>
+            self.layers.append(GATConv(in_feats=n_features[i] * n_heads if i != 0 else n_features[i],
+                                       out_feats=n_features[i + 1],
+                                       num_heads=n_heads if i != n_layers - 1 else 1,
+                                       feat_drop=feat_dropout if i != n_layers - 1 else 0.0,</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList()
+        for i in range(n_layers):
+            if layer_norm:
+                <a id="change">if i == 0</a><a id="change">:
+                    </a><a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i])<a id="change">)</a>
+                else:
+                    <a id="change">self.layers.append(</a>nn.LayerNorm(n_features[i]<a id="change"> * </a>n_heads)<a id="change">)</a>
+            self.layers.append(GATConv(in_feats=n_features[i] * n_heads if i != 0 else n_features[i],
+                                       out_feats=n_features[i + 1],
+                                       num_heads=n_heads if i != n_layers - 1 else 1,
+                                       feat_drop=feat_dropout if i != n_layers - 1 else 0.0,</code></pre>

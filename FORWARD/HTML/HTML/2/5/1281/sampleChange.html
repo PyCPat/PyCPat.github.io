@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                norm_w=None,
+                norm_b=None,
+                alibi=None):
+        output = <a id="change">DeepSpeedSelfAttentionFunction.apply(
+            </a>input,
+            input_mask,
+            head_mask,
+            layer_past,
+            get_present,
+            encoder_hidden_states,
+            encoder_attention_mask,
+            output_attentions,
+            norm_w,
+            norm_b,
+            self.config,
+            self.attn_qkvw,
+            self.attn_qkvb,
+            self.num_attention_heads_per_partition,
+            self.norm_factor,
+            self.hidden_size_per_partition,
+            self.attn_ow,
+            self.attn_ob,
+            self.mp_group,
+            self.q_scales,
+            self.q_groups,
+            self.merge_count,
+            self.qkv_merging,
+            self.score_context_func,
+            alibi<a id="change">)</a>
+
+        <a id="change">return </a>output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            layer_past=layer_past,
+            alibi=alibi)
+
+        output<a id="change"> = </a>self.vector_matmul_func(input=context_layer, weight=self.attn_ow)
+
+        inp_norm<a id="change"> = </a>qkv_out[-1]
+
+        if self.config.mlp_after_attn and self.mp_group is not None and dist.get_world_size(
+                group=self.mp_group) &gt; 1:
+            dist.all_reduce(output, group=self.mp_group)
+
+        <a id="change">return </a>(output, key_layer, value_layer, context_layer, inp_norm)
+
+
+class BloomSelfAttention(DeepSpeedSelfAttention):</code></pre>

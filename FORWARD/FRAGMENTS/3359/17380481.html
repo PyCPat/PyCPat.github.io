@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.multiPoolPrepare(x)
+
+        x = self.l_relu(<a id="change">self.conv1(</a>x<a id="change">)</a>)
+        x = self.multiMaxPooling1(x)
+
+        x = self.l_relu(<a id="change">self.conv2(</a>x<a id="change">)</a>)
+        x = self.multiMaxPooling2(x)
+
+        x = self.l_relu(self.conv3(x))
+        x = self.multiMaxPooling3(x)
+
+        x = self.l_relu(self.conv4(x))
+        x = self.l_relu(self.conv5(x))
+
+        x = self.unwrapPrepare(x)
+        x = self.unwrapPool3(x)
+        x = self.unwrapPool2(x)
+        x<a id="change"> = </a>self.unwrapPool1(x)
+
+        y = x.view(self.outChans, self.imH, self.imW, -1)
+        y = y.permute(3, 1, 2, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    def forward(self, x):
+        x = self.multiPoolPrepare(x)
+        b<a id="change">, _, _, _</a> = x.size()
+        y = torch.zeros(b, self.outChans, self.imH, self.imW)
+        for i in range(self.imH):
+            for j in range(self.imW):</code></pre>

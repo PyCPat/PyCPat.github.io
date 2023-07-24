@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 number of classes
+        c = output.size()[-1]
+        log_preds = F.log_softmax(output, dim=-1)
+        loss<a id="change"> = </a><a id="change">reduce_loss(-log_preds.sum(dim=-1)</a>, self.reduction<a id="change">)</a>
+        nll<a id="change"> = </a><a id="change">F.nll_loss(log_preds</a>, target<a id="change">, reduction=self.reduction)</a>
+        &#47&#47 (1-ε)* H(q,p) + ε*H(u,p)
+        return (1-self.eps)*nll + self.eps*(loss<a id="change">/</a>c) 
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, output, target):
+        c = output.size()[-1]
+        log_preds = F.log_softmax(output, dim=-1)
+        <a id="change">if self.reduction==&quotsum&quot</a><a id="change">:
+            </a>loss<a id="change"> = </a><a id="change">-log_preds.sum()</a>
+        else:
+            loss<a id="change"> = </a><a id="change">-log_preds.sum(dim=-1)</a>
+            <a id="change">if self.reduction==&quotmean&quot</a><a id="change">:
+                </a>loss<a id="change"> = </a><a id="change">loss.mean()</a>
+        return loss*self.eps/c + (1-self.eps) * <a id="change">F.nll_loss(log_preds</a>, target<a id="change">, reduction=self.reduction)</a>
+
+&#47&#47 class topk_BCEWithLogits(nn.Module):
+&#47&#47     def __init__(self, top_k=0.75):
+&#47&#47         super(topk_BCEWithLogits, self).__init__()</code></pre>

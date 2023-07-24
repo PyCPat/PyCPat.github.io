@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h, x, y = self.heads, *fmap.shape[-2:]
+
+        fmap = self.norm(fmap)
+        q, k, v = <a id="change">self.to_qkv(fmap).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = rearrange_many((q, k, v), &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = h)
+
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        h, x, y = self.heads, *fmap.shape[-2:]
+
+        fmap = self.norm(fmap)
+        q, k, v = map(lambda fn: fn(fmap), (self.to_q<a id="change">, self.to_k, self.to_v</a>))
+        q, k, v = rearrange_many((q, k, v), &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = h)
+
+        q = q.softmax(dim = -1)</code></pre>

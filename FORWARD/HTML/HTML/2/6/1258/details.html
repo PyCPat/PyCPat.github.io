@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :1258
+</h3><img src='4463172.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        i = (h - th) // 2
+        j = (w - tw) // 2
+        common_crop_region = (i, j, th, tw)
+        <a id="change">return </a>apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
+
+
+class ColorJitter(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        tw, th = common_crop_size
+        i = (h - th) // 2
+        j = (w - tw) // 2
+        <a id="change">if </a>not <a id="change">isinstance(</a>x, (list<a id="change">, tuple</a>)<a id="change">):
+            </a>return crop(x, h, w, th, tw)
+        ret<a id="change"> = </a>[]
+        for img, (rw, rh) in zip(x, size_ratios):
+            ret.append(crop(img, i * rh, j * rw, th<a id="change"> * </a>rh, tw * rw))
+        return ret
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coloquinte/torchsr/commit/5c2c956fd875020d071302db9a93f34552a83bb3#diff-f954b426a55453dd736f52f9b5ec6ebeefd8da0ad71cb21eba7d9dbf7354f6a4L198' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4463172</div><div id='project'> Project Name: coloquinte/torchsr</div><div id='commit'> Commit Name: 5c2c956fd875020d071302db9a93f34552a83bb3</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: gabriel.gouvine_GIT@gmx.com</div><div id='file'> File Name: transforms/transforms.py</div><div id='m_class'> M Class Name: CenterCrop</div><div id='n_method'> N Class Name: CenterCrop</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transforms/transforms.py</div><div id='n_file'> N File Name: transforms/transforms.py</div><div id='m_start'> M Start Line: 198</div><div id='m_end'> M End Line: 208</div><div id='n_start'> N Start Line: 209</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        i = torch.randint(0, h - th + 1, size=(1, )).item()
+        j = torch.randint(0, w - tw + 1, size=(1, )).item()
+        common_crop_region = (i, j, th, tw)
+        <a id="change">return </a>apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
+
+
+class CenterCrop(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        tw, th = common_crop_size
+        i = torch.randint(0, h - th + 1, size=(1, )).item()
+        j = torch.randint(0, w - tw + 1, size=(1, )).item()
+        <a id="change">if </a>not <a id="change">isinstance(</a>x, (list<a id="change">, tuple</a>)<a id="change">):
+            </a>return crop(x, h, w, th, tw)
+        ret<a id="change"> = </a>[]
+        for img, (rw, rh) in zip(x, size_ratios):
+            ret.append(crop(img, i * rh, j * rw, th<a id="change"> * </a>rh, tw * rw))
+        return ret
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coloquinte/torchsr/commit/5c2c956fd875020d071302db9a93f34552a83bb3#diff-f954b426a55453dd736f52f9b5ec6ebeefd8da0ad71cb21eba7d9dbf7354f6a4L172' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4463168</div><div id='project'> Project Name: coloquinte/torchsr</div><div id='commit'> Commit Name: 5c2c956fd875020d071302db9a93f34552a83bb3</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: gabriel.gouvine_GIT@gmx.com</div><div id='file'> File Name: transforms/transforms.py</div><div id='m_class'> M Class Name: RandomCrop</div><div id='n_method'> N Class Name: RandomCrop</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transforms/transforms.py</div><div id='n_file'> N File Name: transforms/transforms.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 182</div><div id='n_start'> N Start Line: 174</div><div id='n_end'> N End Line: 188</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size = patches.shape[0]
+        image_reshaped = patches.view(batch_size, height // k, width // k, k, k)
+        image_transposed = image_reshaped.permute(0, 1, 3, 2, 4)
+        <a id="change">return </a>image_transposed.contiguous().view(batch_size, height, width)
+
+
+class ChromaUpsampling(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.y_table = y_table
+
+    def forward(self, x: torch.Tensor, factor: torch.Tensor) -&gt; torch.Tensor:
+        <a id="change">if </a><a id="change">isinstance(</a>factor, (int<a id="change">, float</a>)<a id="change">):
+            </a>out = x<a id="change"> * </a>(self.y_table * factor)
+        else:
+            b = factor.size(0)
+            table = self.y_table.expand(b, 1, 8, 8) * factor.view(b, 1, 1, 1)
+            out<a id="change"> = </a>x * table
+
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/real_esrgan-pytorch/commit/edfbb6820fc2084c2ffe132e9b64a348a323d1e7#diff-91082468503b154b2d3c94cbaadeb7add2ea070f5f30593233516dd4b7e2ac5bL1747' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4463137</div><div id='project'> Project Name: lornatang/real_esrgan-pytorch</div><div id='commit'> Commit Name: edfbb6820fc2084c2ffe132e9b64a348a323d1e7</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: imgproc.py</div><div id='m_class'> M Class Name: BlockMerging</div><div id='n_method'> N Class Name: _YDeQuantize</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imgproc.py</div><div id='n_file'> N File Name: imgproc.py</div><div id='m_start'> M Start Line: 1747</div><div id='m_end'> M End Line: 1760</div><div id='n_start'> N Start Line: 1325</div><div id='n_end'> N End Line: 1333</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size = image.shape[0]
+        image_reshaped = image.view(batch_size, height // self.k, self.k, -1, self.k)
+        image_transposed = image_reshaped.permute(0, 1, 3, 2, 4)
+        <a id="change">return </a>image_transposed.contiguous().view(batch_size, -1, self.k, self.k)
+
+
+class DCT8x8(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.c_table = c_table
+
+    def forward(self, x: torch.Tensor, factor: torch.Tensor) -&gt; torch.Tensor:
+        <a id="change">if </a><a id="change">isinstance(</a>factor, (int<a id="change">, float</a>)<a id="change">):
+            </a>out = x<a id="change"> * </a>(self.c_table * factor)
+        else:
+            b<a id="change"> = </a>factor.size(0)
+            table = self.c_table.expand(b, 1, 8, 8) * factor.view(b, 1, 1, 1)
+            out = x * table
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/real_esrgan-pytorch/commit/edfbb6820fc2084c2ffe132e9b64a348a323d1e7#diff-91082468503b154b2d3c94cbaadeb7add2ea070f5f30593233516dd4b7e2ac5bL1533' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4463149</div><div id='project'> Project Name: lornatang/real_esrgan-pytorch</div><div id='commit'> Commit Name: edfbb6820fc2084c2ffe132e9b64a348a323d1e7</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: imgproc.py</div><div id='m_class'> M Class Name: BlockSplitting</div><div id='n_method'> N Class Name: _CDeQuantize</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imgproc.py</div><div id='n_file'> N File Name: imgproc.py</div><div id='m_start'> M Start Line: 1533</div><div id='m_end'> M End Line: 1544</div><div id='n_start'> N Start Line: 1341</div><div id='n_end'> N End Line: 1349</div><BR>

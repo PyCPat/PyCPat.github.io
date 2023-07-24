@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )
+            elif <a id="change">pred.shape[-1] not in (1, self.param_rank)</a><a id="change">:
+                </a><a id="change">raise </a><a id="change">ValueError(
+                    f"{self.id} `predict_variance` module output should have `shape[-1]` of "
+                    f"{self.param_rank}, got {pred.shape[-1]}"</a><a id="change">
+                )</a>
+        if pred is not None:
+            diag_multi = torch.diag_embed(torch.exp(pred))
+            mini_cov = diag_multi @ mini_cov @ diag_multi
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        mask = self.mask.unsqueeze(0).unsqueeze(0)
+
+        <a id="change">return </a>mask @ mini_cov @ mask.tranpose(-1, -2)
+</code></pre>

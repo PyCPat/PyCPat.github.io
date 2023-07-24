@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            gt_roi_label        = torch.Tensor(gt_roi_label).long()
+            sample_roi_index    = torch.zeros(len(sample_roi))
+            
+            <a id="change">if feature.is_cuda</a><a id="change">:
+                </a>sample_roi          = sample_roi.cuda()
+                sample_roi_index    = sample_roi_index.cuda()
+                gt_roi_loc          = gt_roi_loc.cuda()
+                gt_roi_label<a id="change">        = gt_roi_label.cuda()</a>
+
+            roi_cls_loc, roi_score = self.faster_rcnn([torch.unsqueeze(feature, 0), sample_roi, sample_roi_index, img_size], mode = &quothead&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            sample_roi          = torch.Tensor(sample_roi).type_as(rpn_locs)
+            gt_roi_loc          = torch.Tensor(gt_roi_loc).type_as(rpn_locs)
+            gt_roi_label        = torch.Tensor(gt_roi_label).type_as(rpn_locs).long()
+            sample_roi_index    = <a id="change">torch.zeros(len(sample_roi)).type_as(</a>rpn_locs<a id="change">)</a>.long()
+            
+            roi_cls_loc, roi_score = self.faster_rcnn([torch.unsqueeze(feature, 0), sample_roi, sample_roi_index, img_size], mode = &quothead&quot)
+</code></pre>

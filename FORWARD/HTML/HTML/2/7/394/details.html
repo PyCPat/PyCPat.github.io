@@ -1,0 +1,92 @@
+<html><h3>Pattern ID :394
+</h3><img src='1510423.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        results_pairwise = rearrange(results_pairwise, &quotb h n d -&gt; b n (h d)&quot, h = h)
+
+        results = torch.cat((results_scalar, results_pairwise), dim = -1)
+        <a id="change">return </a>single_repr
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        point_qk_diff = rearrange(q_point, &quotb i d c -&gt; b i () d c&quot) - rearrange(k_point, &quotb j d c -&gt; b () j d c&quot)
+        point_dist = (point_qk_diff ** 2).sum(dim = -2)
+
+        point_weights<a id="change"> = </a>F.softplus(self.point_weights)
+        point_weights = repeat(point_weights, &quoth -&gt; (b h) () () ()&quot, b = b)
+
+        attn_logits_points<a id="change"> = </a>-0.5 * (point_dist * point_weights).sum(dim = -1)
+
+        &#47&#47 combine attn logits
+
+        attn_logits = attn_logits_scalar + attn_logits_pairwise + attn_logits_points
+
+        &#47&#47 mask
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb i -&gt; b i ()&quot) * rearrange(mask, &quotb j -&gt; b () j&quot)
+            mask_value = max_neg_value(attn_logits)
+            attn_logits = attn_logits.masked_fill(~mask, mask_value)
+
+        &#47&#47 attention
+
+        attn = attn_logits.softmax(dim = - 1)
+
+        &#47&#47 aggregate values
+
+        results_scalar = einsum(&quotb i j, b j d -&gt; b i d&quot, attn, v_scalar)
+
+        attn_with_heads = rearrange(attn, &quot(b h) i j -&gt; b h i j&quot, h = h)
+        results_pairwise = einsum(&quotb h i j, b i j d -&gt; b h i d&quot, attn_with_heads, pairwise_repr)
+
+        &#47&#47 aggregate point values
+
+        results_points<a id="change"> = </a>einsum(&quotb i j, b j d c -&gt; b i d c&quot, attn, v_point)
+
+        &#47&#47 merge back heads
+
+        results_scalar = rearrange(results_scalar, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        results_pairwise = rearrange(results_pairwise, &quotb h n d -&gt; b n (h d)&quot, h = h)
+        results_points<a id="change"> = </a>rearrange(results_points, &quot(b h) n d c -&gt; b n (h d c)&quot, h = h)
+
+        results = torch.cat((results_scalar, results_pairwise, results_points), dim = -1)
+        <a id="change">return </a><a id="change">self.to_out(</a>results<a id="change">)</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/invariant-point-attention/commit/50b83b2cd424d6d78992e69936604801c9ad9f39#diff-0da2273b318a8de68ee540d826cb25884d25cde25c8c908cdf65788b98c2aac3L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1510423</div><div id='project'> Project Name: lucidrains/invariant-point-attention</div><div id='commit'> Commit Name: 50b83b2cd424d6d78992e69936604801c9ad9f39</div><div id='time'> Time: 2021-07-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: invariant_point_attention/invariant_point_attention.py</div><div id='m_class'> M Class Name: InvariantPointAttention</div><div id='n_method'> N Class Name: InvariantPointAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: invariant_point_attention/invariant_point_attention.py</div><div id='n_file'> N File Name: invariant_point_attention/invariant_point_attention.py</div><div id='m_start'> M Start Line: 99</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 148</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(img).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = h), qkv)
+
+        k<a id="change"> = </a>k.softmax(dim = -1)
+        context<a id="change"> = </a>einsum(&quotbhdn,bhen-&gt;bhde&quot, k, v)
+
+        content_out<a id="change"> = </a>einsum(&quotbhde,bhdn-&gt;bhen&quot, context, q)
+        content_out<a id="change"> = </a>content_out.reshape(b, -1, x, y)
+        content_out = <a id="change">self.to_out(</a>content_out<a id="change">)</a>
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+
+        <a id="change">return </a>content_out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/global-self-attention-network/commit/d77a85968865b0add52563e51f842283e90b1061#diff-af8f87d68d6adf627dabaab6519f02d4b454d6ba08e146c8f5dc18f07e073e31L9' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1510919</div><div id='project'> Project Name: lucidrains/global-self-attention-network</div><div id='commit'> Commit Name: d77a85968865b0add52563e51f842283e90b1061</div><div id='time'> Time: 2020-10-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_class'> M Class Name: GSA</div><div id='n_method'> N Class Name: GSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gsa_pytorch/gsa_pytorch.py</div><div id='n_file'> N File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 10</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        h = self.heads
+        context = default(context, x)
+
+        q<a id="change"> = </a>self.to_q(x)
+        k, v = self.to_kv(context).chunk(2, dim = -1)
+
+        q<a id="change"> = </a>q * self.scale
+
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        out<a id="change"> = </a>attention(q, k, v, mask = mask, causal = self.causal)
+
+        out<a id="change"> = </a>rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        <a id="change">return </a><a id="change">self.to_out(</a>out<a id="change">)</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-efficient-attention-pytorch/commit/b5a38e377b7dc5bab5407cce852eddc69f45de82#diff-7de1bf8844a9aafc0b616bb3f7f2bc3701cbdab6390a8d8096e5dfea36da1708L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1510937</div><div id='project'> Project Name: lucidrains/memory-efficient-attention-pytorch</div><div id='commit'> Commit Name: b5a38e377b7dc5bab5407cce852eddc69f45de82</div><div id='time'> Time: 2022-03-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_efficient_attention_pytorch/memory_efficient_attention.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_efficient_attention_pytorch/memory_efficient_attention.py</div><div id='n_file'> N File Name: memory_efficient_attention_pytorch/memory_efficient_attention.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 17</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 78</div><BR>

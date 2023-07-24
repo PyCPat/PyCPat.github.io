@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.base(x)
+        x = F.avg_pool2d(x, <a id="change">x.size()[2:]</a>)
+        f = x.view(x.size(0), -1)
+        if not self.training:
+            return f</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.features(x)
+        f = F.relu(f, inplace=True)
+        v = self.global_avgpool(f)
+        v<a id="change"> = </a>v.view(<a id="change">v.size(0</a><a id="change">)</a>, -1)
+        
+        if self.fc is not None:
+            v = self.fc(v)</code></pre>

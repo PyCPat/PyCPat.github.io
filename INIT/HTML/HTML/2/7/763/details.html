@@ -1,75 +1,74 @@
 <html><h3>Pattern ID :763
-</h3><img src='2543718.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='2483564.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-                          nn.ReLU(),
-                          &#47&#47nn.Linear(400, 200),
-                          &#47&#47nn.ReLU(),
-                          <a id="change">nn.Linear(</a>200, 200<a id="change">)</a>,
-                          &#47&#47nn.Dropout(p=0.5),
-                          &#47&#47nn.Linear(200, 100),
-                          nn.ReLU(),</code></pre><h3>After Change</h3><pre><code class='java'>
-    def __init__(self, number_of_labels, model_choice, embedding_size, dropout_layer, frozen):
-          super(CustomBERTModel, self).__init__()
+        super(QNetwork, self).__init__()
 
-          <a id="change">if model_choice == "t5-3b"</a><a id="change">:
+        hl: int = 256
+        self.fc1 = <a id="change">nn.Linear(</a>state_size, hl<a id="change">)</a>
+        self.fc2 = <a id="change">nn.Linear(</a>hl, action_size<a id="change">)</a>
 
-            </a>tokenizer = T5Tokenizer.from_pretrained(model_choice, model_max_length=512)
-            model_encoding = T5EncoderModel.from_pretrained(model_choice)
-            embedding_size<a id="change"> = </a>1024
-            self.encoderModel = model_encoding
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(QNetwork, self).__init__()
 
-          else:
+        layers_conn = [state_size] + list(hidden_layer) + [action_size]
+        layers = <a id="change">[nn.Linear(layers_conn[idx], layers_conn[idx+1]) for idx in range(len(layers_conn)-1)]</a>
+        self.layers = nn.ModuleList(layers) 
 
-            tokenizer<a id="change"> = </a>AutoTokenizer.from_pretrained(model_choice, model_max_length=512)
-                                                      &#47&#47attention_probs_dropout_prob=0.5)
-                                                      &#47&#47hidden_dropout_prob=0.5)
-            model_encoding = AutoModel.from_pretrained(model_choice)
-            embedding_size = 768
-            self.encoderModel<a id="change"> = </a>model_encoding
-
-
-</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/allenai/embeddingrecycling/commit/e8f2ce21388322a4ea20ce43cd214ed12c49e8fd#diff-12e41abdf60fc3caafa5a98d28e44da28cba19f698fed890c00ceecc14b813a8L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2543718</div><div id='project'> Project Name: allenai/embeddingrecycling</div><div id='commit'> Commit Name: e8f2ce21388322a4ea20ce43cd214ed12c49e8fd</div><div id='time'> Time: 2022-03-15</div><div id='author'> Author: jonsaadfalcon@gmail.com</div><div id='file'> File Name: General_BiLSTM+LinearClassifer.py</div><div id='m_class'> M Class Name: CustomBERTModel</div><div id='n_method'> N Class Name: CustomBERTModel</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: General_BiLSTM+LinearClassifer.py</div><div id='n_file'> N File Name: General_BiLSTM+LinearClassifer.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        io_size = ch * freqs
-        self.gru = nn.GRU(io_size, hidden_size, *args, **kwargs)
-        self.norm = nn.LayerNorm(hidden_size)
-        self.fc = <a id="change">nn.Linear(</a>hidden_size, io_size<a id="change">)</a>
-
-    def forward(self, x: Tensor, h: Optional[Tensor] = None) -&gt; Tuple[Tensor, Tensor]:
-        GRU transposing [B, C, T, F] input shape to [B, T, C*F].
-        _, _, _, f = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gate = F.relu
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/laszukdawid/ai-traineree/commit/77be0bb6fb859ff9a82ccb5ba4740e8e6898df77#diff-09b2920a188404192d8e9d5726d2a00970f575e4ccbf3da7cf904f36f9137b4cL6' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2483564</div><div id='project'> Project Name: laszukdawid/ai-traineree</div><div id='commit'> Commit Name: 77be0bb6fb859ff9a82ccb5ba4740e8e6898df77</div><div id='time'> Time: 2020-07-12</div><div id='author'> Author: laszukdawid@gmail.com</div><div id='file'> File Name: ai_traineree/networks.py</div><div id='m_class'> M Class Name: QNetwork</div><div id='n_method'> N Class Name: QNetwork</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ai_traineree/networks.py</div><div id='n_file'> N File Name: ai_traineree/networks.py</div><div id='m_start'> M Start Line: 6</div><div id='m_end'> M End Line: 11</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
         super().__init__()
-        self.conv = Conv2dNormAct(in_ch, out_ch, kernel_size=kernel, fstride=fstride)
-        assert gru_mode in ("skip", "scale")
-        <a id="change">if gru_mode == "skip"</a><a id="change">:
-            </a>skip = nn.Identity
-            scale<a id="change"> = </a>None
-        else:
-            skip<a id="change"> = </a>None
-            scale<a id="change"> = </a>nn.Sigmoid
-        self.gru = GruSE(out_ch, gru_dim, groups=gru_groups, skip=skip, scale_activation=scale)
+        self.fc1 = nn.Linear(4, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.act1 = <a id="change">nn.Linear(</a>256, num_sprt<a id="change">)</a>
+        self.act2 = <a id="change">nn.Linear(</a>256, num_sprt<a id="change">)</a>
+    
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.fc1 = nn.Linear(4, 256)
+        self.fc2 = nn.Linear(256, 256)
+        self.acts = <a id="change">[nn.Linear(256, num_sprt) for _ in range(num_act)]</a>
+    
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rl-max/deep-reinforcement-learning-pytorch/commit/8d887659e1f8e488123279511313b2690ded38a6#diff-fe15883d6810d35395ad4a7612b9ad47eac3d12c25bad024697a2156fa15fdeeL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2483561</div><div id='project'> Project Name: rl-max/deep-reinforcement-learning-pytorch</div><div id='commit'> Commit Name: 8d887659e1f8e488123279511313b2690ded38a6</div><div id='time'> Time: 2021-04-07</div><div id='author'> Author: poiroth946@gmail.com</div><div id='file'> File Name: c51.py</div><div id='m_class'> M Class Name: QNet</div><div id='n_method'> N Class Name: QNet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: c51.py</div><div id='n_file'> N File Name: c51.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 27</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.input_feat_len = input_feat_len
 
-    def forward(self, input: Tensor, h=None) -&gt; Tuple[Tensor, Tensor]:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/29ca309dcc54dd9da42b84a8c2a658b009f143a1#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L248' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2543702</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 29ca309dcc54dd9da42b84a8c2a658b009f143a1</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: GruMlp</div><div id='n_method'> N Class Name: EncLayer</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 250</div><div id='m_end'> M End Line: 256</div><div id='n_start'> N Start Line: 211</div><div id='n_end'> N End Line: 228</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        patch_dim = channels * patch_size * patch_size
-        self.to_patch_embedding = nn.Sequential(
-            Rearrange(&quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1=patch_size, p2=patch_size),
-            <a id="change">nn.Linear(</a>patch_dim, emb_dim<a id="change">)</a>,
+        self.net = nn.Sequential(
+            <a id="change">nn.Linear(</a>self.input_feat_len, self.input_feat_len*3<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Linear(self.input_feat_len*3, self.input_feat_len*3),
+            nn.ReLU(),
+            <a id="change">nn.Linear(</a>self.input_feat_len*3, self.input_feat_len<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Linear(self.input_feat_len, 1)
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.width = width
+
+        self.linears = nn.ModuleList([nn.Linear(self.input_feat_len, width)])
+        self.linears.extend(<a id="change">[nn.Linear(width, width) for i in range(1, self.num_layers-1)]</a>)
+        self.output = nn.Linear(width, 1)
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/microsoft/archai/commit/de9f58e7d18749d3dc65f6edada0285fb264dd04#diff-39212ff150e119ccf87d2787c8f8aa3b139d000abcf63c649107ea2400203168L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2483563</div><div id='project'> Project Name: microsoft/archai</div><div id='commit'> Commit Name: de9f58e7d18749d3dc65f6edada0285fb264dd04</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: dedey@microsoft.com</div><div id='file'> File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_class'> M Class Name: FFEnsembleMember</div><div id='n_method'> N Class Name: FFEnsembleMember</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='n_file'> N File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 97</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 fully-connected layers
+        self.fc_in = nn.Linear(self._in_dim, self._feat_dim)
+        self.fc_1 = <a id="change">nn.Linear(</a>self._feat_dim, self._feat_dim<a id="change">)</a>
+        self.fc_2 = <a id="change">nn.Linear(</a>self._feat_dim, self._feat_dim<a id="change">)</a>
+        self.fc_out = nn.Linear(self._feat_dim, self._out_dim)
+
+        &#47&#47 activation layer
+        self.relu_actvn = nn.ReLU()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 fully-connected layers
+        self.fc_in = nn.Linear(self._in_dim, self._feat_dim)
+        self.fc_hidden = nn.ModuleList(
+            <a id="change">[nn.Linear(self._feat_dim, self._feat_dim) for _ in range(self._num_hidden_layer)]</a>
         )
-        &#47&#47Embedding
-        self.cls_token = nn.Parameter(torch.randn(1, 1, emb_dim))</code></pre><h3>After Change</h3><pre><code class='java'>
-        self.fusions = nn.ModuleList(self.fusions)
+        self.fc_out = nn.Linear(self._feat_dim, self._out_dim)
 
-        &#47&#47Head
-        <a id="change">if type == "full"</a><a id="change">:
-            </a>self.head_depth = HeadDepth(resample_dim)
-            self.head_segmentation = HeadSeg(resample_dim, nclasses=nclasses)
-        elif type == "depth":
-            self.head_depth<a id="change"> = </a>HeadDepth(resample_dim)
-            self.head_segmentation = None
-        else:
-            self.head_depth<a id="change"> = </a>None
-            self.head_segmentation<a id="change"> = </a>HeadSeg(resample_dim, nclasses=nclasses)
-
-    def forward(self, img):
-        &#47&#47 x = self.to_patch_embedding(img)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/antocad/focusondepth/commit/705d8789c4e66dbdbfdd3aeb7f20666f019481dd#diff-941ba600a0201cf159de01531ff7e943fc0434587165f1ce11d65e14346b32b6L13' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2543927</div><div id='project'> Project Name: antocad/focusondepth</div><div id='commit'> Commit Name: 705d8789c4e66dbdbfdd3aeb7f20666f019481dd</div><div id='time'> Time: 2022-01-03</div><div id='author'> Author: antoine.cadiou@icloud.com</div><div id='file'> File Name: FOD/FocusOnDepth.py</div><div id='m_class'> M Class Name: FocusOnDepth</div><div id='n_method'> N Class Name: FocusOnDepth</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: FOD/FocusOnDepth.py</div><div id='n_file'> N File Name: FOD/FocusOnDepth.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 69</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 81</div><BR>
+        &#47&#47 activation layer</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dvelopery0115/torch-nerf/commit/32f020ac75e07c6e37c75e2b5d01f82b1fe88d68#diff-ab13585b39a3aafea1f7085b64042f7789807c092dffc969e0a4c917489edf83L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2483562</div><div id='project'> Project Name: dvelopery0115/torch-nerf</div><div id='commit'> Commit Name: 32f020ac75e07c6e37c75e2b5d01f82b1fe88d68</div><div id='time'> Time: 2022-07-09</div><div id='author'> Author: dreamy1534@kaist.ac.kr</div><div id='file'> File Name: torch_nerf/src/network/instant_ngp.py</div><div id='m_class'> M Class Name: InstantNGPMLP</div><div id='n_method'> N Class Name: InstantNGPMLP</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_nerf/src/network/instant_ngp.py</div><div id='n_file'> N File Name: torch_nerf/src/network/instant_ngp.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 72</div><div id='n_end'> N End Line: 95</div><BR>

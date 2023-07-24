@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mol_graph, semiF_features = mol_graph
+            if self.args.semiF_only:
+                semiF_features = np.stack([features.todense() for features in semiF_features])
+                semiF_features = <a id="change">torch.from_numpy(semiF_features).float().cuda()</a>
+                return semiF_features
+
+        f_atoms, f_bonds, a2b, b2a, b2revb, a_scope, b_scope = mol_graph.get_components()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.args.features_only:
+                features_batch = torch.from_numpy(np.stack(features_batch)).float()
+
+                <a id="change">if self.args.cuda</a><a id="change">:  &#47&#47 can&quott use next(self.parameters()).is_cuda b/c no parameters
+                    </a>features_batch<a id="change"> = </a><a id="change">features_batch.cuda()</a>
+
+                return features_batch
+
+        f_atoms, f_bonds, a2b, b2a, b2revb, a_scope, b_scope = mol_graph.get_components()</code></pre>

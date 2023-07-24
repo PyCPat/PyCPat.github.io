@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :288
+</h3><img src='947950.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        
+        d = x.dim()
+        <a id="change">for _</a> in <a id="change">range(</a>3 - d<a id="change">):
+            </a>x<a id="change"> = </a>x.unsqueeze(0)
+
+        x = torch.sign(x)
+        x = self.pad(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        
+        x = torch.sign(x)
+        x = torch.cat((<a id="change">x[..., :1]</a>, x), dim=-1)
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)
+        z = 0.5 * torch.abs(x[..., 1:] - x[..., :-1]).sum(-1)
+        if self.norm:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/c71e34ed516f1d63687f4f2135d421d08cedfd44#diff-3d2136b6eab363c825aa063298d2778a1ef04444522749238d8d95629ba95f7aL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947950</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: c71e34ed516f1d63687f4f2135d421d08cedfd44</div><div id='time'> Time: 2022-04-15</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/core/zcross.py</div><div id='m_class'> M Class Name: ZeroCrossingAnalysis</div><div id='n_method'> N Class Name: ZeroCrossingAnalysis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/zcross.py</div><div id='n_file'> N File Name: diffsptk/core/zcross.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 a batch version of det is on its way (end July 2019)
+            &#47&#47 https://github.com/pytorch/pytorch/issues/7500
+            &#47&#47 we&quotll move to that asap but in the mean time we loop
+            <a id="change">for isample</a> in <a id="change">range(</a>nbatch<a id="change">):
+                </a>out[isample,ic]<a id="change"> = </a>(torch.det(mo_up[isample]) * torch.det(mo_down[isample]))
+
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47    out[isample,ic] = (torch.det(mo_up[isample]) * torch.det(mo_down[isample]))
+
+            &#47&#47 using my own BatchDeterminant
+            <a id="change">out[:,ic]</a> = BatchDeterminant.apply(mo_up) * BatchDeterminant.apply(mo_down)
+
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/e0016a16872ca54aa40b0c2f9c67ae326faf03f3#diff-0daf4a9de2606308323da4dce765f4ac36d2892c25e6116bf91d95094b8f1fa2L59' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947954</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: e0016a16872ca54aa40b0c2f9c67ae326faf03f3</div><div id='time'> Time: 2019-07-12</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: pyCHAMP/wavefunction/wave_modules.py</div><div id='m_class'> M Class Name: SlaterPooling</div><div id='n_method'> N Class Name: SlaterPooling</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyCHAMP/wavefunction/wave_modules.py</div><div id='n_file'> N File Name: pyCHAMP/wavefunction/wave_modules.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 81</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 80</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = torch.sort(self.weight_read, descending=True)[1].cpu()
+
+        <a id="change">for i_track</a> in <a id="change">range(</a>self.num_prediction<a id="change">):
+            </a>present<a id="change"> = </a>present_temp
+            prediction_single = torch.Tensor().cuda()
+            ind = self.index_max [:, i_track]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        past_normalized = F.normalize(self.memory_past, p=2, dim=1)
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = <a id="change">torch.sort(self.weight_read, descending=True)[1].cpu()[:,:self.num_prediction]</a>
+        present = present_temp.repeat_interleave(self.num_prediction, dim=0)
+        state_past = state_past.repeat_interleave(self.num_prediction, dim=1)
+        ind = self.index_max.flatten()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/04d7a063354c991d5aaa36f28a63df2ebbee9f78#diff-6ffca9b13cf6255ad4de971b4259c7aec5c8be0e8498858880e49c2bec255ddfL120' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 947952</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 04d7a063354c991d5aaa36f28a63df2ebbee9f78</div><div id='time'> Time: 2020-01-18</div><div id='author'> Author: francescom394@gmail.com</div><div id='file'> File Name: models/model_decoder.py</div><div id='m_class'> M Class Name: model_decoder</div><div id='n_method'> N Class Name: model_decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_decoder.py</div><div id='n_file'> N File Name: models/model_decoder.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 162</div><BR>

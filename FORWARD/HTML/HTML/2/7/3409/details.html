@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :3409
+</h3><img src='17494155.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        a.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        sigma = torch.ones_like(inp, device=inp.device, dtype=inp.dtype) * self.m
+        src = torch.ones_like(<a id="change">label.unsqueeze(1</a><a id="change">)</a>, dtype=inp.dtype, device=inp.device) - self.m
+        sigma.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        return self.loss(a * (inp - sigma) * self.gamma, label)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gamma = gamma
+
+    def forward(self, sp: Tensor, sn: Tensor) -&gt; Tensor:
+        ap = torch.clamp_min(- <a id="change">sp.detach()</a> + 1 + self.m, min=0.)
+        an = torch.clamp_min(<a id="change">sn.detach()</a> + self.m, min=0.)
+
+        sigma_p = 1 - self.m
+        sigma_n = self.m
+
+        logit_p = ap * (sp - sigma_p) * self.gamma
+        logit_n = an<a id="change"> * (sn - sigma_n) * </a>self.gamma
+
+        loss = torch.log(1<a id="change"> + </a>torch.clamp_max(torch.exp(logit_n).sum() * torch.exp(- logit_p).sum(), max=1e38))
+        z = - torch.exp(- loss) + 1
+
+        sp.backward(gradient=z * ap * torch.softmax(logit_p, dim=0))
+        sn.backward(gradient=z * an * torch.softmax(logit_n, dim=0))
+
+        <a id="change">return </a>loss.detach()
+
+
+if __name__ == "__main__":</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tinyzeamays/circleloss/commit/9c909ec6274b1c9c139a62f9f84ecf91c5edee35#diff-ee4498af95089c1dacb3bbdedbf8cffa6eecc60617a8a1d405b07f6f81510abbL23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17494155</div><div id='project'> Project Name: tinyzeamays/circleloss</div><div id='commit'> Commit Name: 9c909ec6274b1c9c139a62f9f84ecf91c5edee35</div><div id='time'> Time: 2020-04-03</div><div id='author'> Author: 1049793129@qq.com</div><div id='file'> File Name: circle_loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLossBackward</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: circle_loss.py</div><div id='n_file'> N File Name: circle_loss.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_std[i, :] = x[i, :, :].std(dim=1)
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x - x_mean.unsqueeze(2)) / <a id="change">x_std.unsqueeze(2</a><a id="change">)</a>
+
+
+class DitherAudio(nn.Module):
+    def __init__(self, dither=1e-5):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True).detach()</a>
+        x_std = <a id="change">x.std(dim=2, keepdim=True).detach()</a>
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        <a id="change">return </a>(x<a id="change"> - </a>x_mean)<a id="change"> / </a>x_std
+
+
+class DitherAudio(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17494147</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        a.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        sigma = torch.ones_like(inp, device=inp.device, dtype=inp.dtype) * self.m
+        src = torch.ones_like(<a id="change">label.unsqueeze(1</a><a id="change">)</a>, dtype=inp.dtype, device=inp.device) - self.m
+        sigma.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        return self.loss(a * (inp - sigma) * self.gamma, label)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.soft_plus = nn.Softplus()
+
+    def forward(self, sp: Tensor, sn: Tensor) -&gt; Tensor:
+        ap = torch.clamp_min(- <a id="change">sp.detach()</a> + 1 + self.m, min=0.)
+        an = torch.clamp_min(<a id="change">sn.detach()</a> + self.m, min=0.)
+
+        delta_p = 1 - self.m
+        delta_n = self.m
+
+        logit_p = - ap * (sp - delta_p) * self.gamma
+        logit_n = an<a id="change"> * </a>(sn - delta_n) * self.gamma
+
+        loss = self.soft_plus(torch.logsumexp(logit_n, dim=0)<a id="change"> + </a>torch.logsumexp(logit_p, dim=0))
+
+        <a id="change">return </a>loss
+
+
+if __name__ == "__main__":</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tinyzeamays/circleloss/commit/61758eefe091cf44f4de87aadd84fcb2bc377f94#diff-ee4498af95089c1dacb3bbdedbf8cffa6eecc60617a8a1d405b07f6f81510abbL23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17494150</div><div id='project'> Project Name: tinyzeamays/circleloss</div><div id='commit'> Commit Name: 61758eefe091cf44f4de87aadd84fcb2bc377f94</div><div id='time'> Time: 2020-04-04</div><div id='author'> Author: 1049793129@qq.com</div><div id='file'> File Name: circle_loss.py</div><div id='m_class'> M Class Name: CircleLossLikeCE</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: circle_loss.py</div><div id='n_file'> N File Name: circle_loss.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 35</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 39</div><BR>

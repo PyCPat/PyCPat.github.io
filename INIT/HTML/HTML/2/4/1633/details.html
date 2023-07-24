@@ -1,8 +1,39 @@
 <html><h3>Pattern ID :1633
-</h3><img src='4257344.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='4247874.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w d -&gt; b d w h&quot),
+            <a id="change">nn.Conv2d(</a>dim, hidden_dim, <a id="change">1</a><a id="change">)</a>,
+            Rearrange(&quotb d w h -&gt; b (d w) h&quot),
+            nn.Conv1d(hidden_dim * w, w * w, 1, groups=segment),
+            Rearrange(&quotb (w1 w2) h -&gt; b h w1 w2&quot, w1 = w),</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Softmax(dim = -1),
+        )
+        self.recover = Rearrange(&quotb h s w d -&gt; b h w (s d)&quot, s = segment)
+        self.proc<a id="change"> = </a><a id="change">nn.Linear(</a>dim, dim<a id="change">)</a>
+
+    def forward(self, x):
+        &#47&#47 b h w d = X.shape
+        input = x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4247874</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_w</div><div id='n_method'> N Class Name: DynaMixerOp_w</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Initial convolution block
+        down_layers = [nn.ReflectionPad2d(3),
+                       <a id="change">nn.Conv2d(</a>in_channels, <a id="change">64</a><a id="change">, kernel_size=7, stride=1, padding=0, bias=False)</a>,
+                       nn.InstanceNorm2d(64),
+                       nn.ReLU(inplace=True)]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Gamma, Beta block
+        if self.light:
+            fc<a id="change"> = </a>[nn.Linear(256, 256, bias=False),
+                  nn.ReLU(inplace=True),
+                  <a id="change">nn.Linear(</a>256, 256<a id="change">, bias=False)</a>,
+                  nn.ReLU(inplace=True)]
+        else:
+            fc = [nn.Linear(image_size * image_size * 16, 256, bias=False),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/ugatit-pytorch/commit/29402d1cfc1f9bbb66eed660fd84b48adcbdc188#diff-e8118e86fc113b641b3608172d63f952472dd6ce3d4d09b1f2bdb52b837dc3b2L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4247892</div><div id='project'> Project Name: lornatang/ugatit-pytorch</div><div id='commit'> Commit Name: 29402d1cfc1f9bbb66eed660fd84b48adcbdc188</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: ugatit_pytorch/model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ugatit_pytorch/model.py</div><div id='n_file'> N File Name: ugatit_pytorch/model.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(512, 1024, kernel_size=1),
             nn.LeakyReLU(0.2),
@@ -18,7 +49,7 @@
             <a id="change">nn.Linear(</a>512 * 14 * 14, 1024<a id="change">)</a>,
             nn.LeakyReLU(0.2),
             nn.Linear(1024, 1)
-        )</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lornatang/srgan-pytorch/commit/9e0f283960ecefe65d9f18e11108f7e5b780f6da#diff-a953b33cee07c104980e771037f7c50ac9861f73e6e07e04b2990ed8b8585403L62' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4257344</div><div id='project'> Project Name: lornatang/srgan-pytorch</div><div id='commit'> Commit Name: 9e0f283960ecefe65d9f18e11108f7e5b780f6da</div><div id='time'> Time: 2020-10-20</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: srgan_pytorch/model.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: srgan_pytorch/model.py</div><div id='n_file'> N File Name: srgan_pytorch/model.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/srgan-pytorch/commit/9e0f283960ecefe65d9f18e11108f7e5b780f6da#diff-a953b33cee07c104980e771037f7c50ac9861f73e6e07e04b2990ed8b8585403L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4247877</div><div id='project'> Project Name: lornatang/srgan-pytorch</div><div id='commit'> Commit Name: 9e0f283960ecefe65d9f18e11108f7e5b780f6da</div><div id='time'> Time: 2020-10-20</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: srgan_pytorch/model.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: srgan_pytorch/model.py</div><div id='n_file'> N File Name: srgan_pytorch/model.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
                 Fire(512, 64, 256, 256),
             )
         &#47&#47 Final convolution is initialized differently form the rest
@@ -34,21 +65,7 @@
 
         self._init_params()
 
-    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vlsomers/bpbreid/commit/3ddf9ce6998e6a5d2052aba4286b8b899e03149e#diff-83c753925e8ca4134d272ad898aceb5423eb0f5ee01ec40bf0eddb1b72473213L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4257313</div><div id='project'> Project Name: vlsomers/bpbreid</div><div id='commit'> Commit Name: 3ddf9ce6998e6a5d2052aba4286b8b899e03149e</div><div id='time'> Time: 2018-10-27</div><div id='author'> Author: k.zhou@qmul.ac.uk</div><div id='file'> File Name: torchreid/models/squeezenet.py</div><div id='m_class'> M Class Name: SqueezeNet</div><div id='n_method'> N Class Name: SqueezeNet</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchreid/models/squeezenet.py</div><div id='n_file'> N File Name: torchreid/models/squeezenet.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 102</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        super().__init__()
-        self.attend = nn.Sequential(
-            Rearrange(&quotb h w d -&gt; b d w h&quot),
-            <a id="change">nn.Conv2d(</a>dim, hidden_dim, <a id="change">1</a><a id="change">)</a>,
-            Rearrange(&quotb d w h -&gt; b (d w) h&quot),
-            nn.Conv1d(hidden_dim * w, w * w, 1, groups=segment),
-            Rearrange(&quotb (w1 w2) h -&gt; b h w1 w2&quot, w1 = w),</code></pre><h3>After Change</h3><pre><code class='java'>
-        self.segment = segment
-        self.reshape = Rearrange(&quotb h w (s d) -&gt; b h s w d&quot, s = segment)
-
-        self.Wd<a id="change"> = </a>nn.ModuleList([<a id="change">nn.Linear(</a>dim, hidden_dim<a id="change">)</a> for i in range(segment)])
-        self.attend = nn.Sequential(
-            Rearrange(&quotb h w (s d) -&gt; b h s (w d)&quot, s = segment),
-            nn.Linear(int(hidden_dim * w), w * w),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4257347</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_w</div><div id='n_method'> N Class Name: DynaMixerOp_w</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vlsomers/bpbreid/commit/3ddf9ce6998e6a5d2052aba4286b8b899e03149e#diff-83c753925e8ca4134d272ad898aceb5423eb0f5ee01ec40bf0eddb1b72473213L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4247883</div><div id='project'> Project Name: vlsomers/bpbreid</div><div id='commit'> Commit Name: 3ddf9ce6998e6a5d2052aba4286b8b899e03149e</div><div id='time'> Time: 2018-10-27</div><div id='author'> Author: k.zhou@qmul.ac.uk</div><div id='file'> File Name: torchreid/models/squeezenet.py</div><div id='m_class'> M Class Name: SqueezeNet</div><div id='n_method'> N Class Name: SqueezeNet</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchreid/models/squeezenet.py</div><div id='n_file'> N File Name: torchreid/models/squeezenet.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 102</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
         self.reshape = Rearrange(&quotb h w d -&gt; b w h d&quot)
         self.attend = nn.Sequential(
             Rearrange(&quotb h w d -&gt; b d h w&quot),
@@ -62,18 +79,4 @@
         self.Wd<a id="change"> = </a>nn.ModuleList([<a id="change">nn.Linear(</a>dim, hidden_dim<a id="change">)</a> for i in range(segment)])
         self.attend = nn.Sequential(
             Rearrange(&quotb h w (s d) -&gt; b w s (h d)&quot, s = segment),
-            nn.Linear(int(hidden_dim * h), h * h),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4257331</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_h</div><div id='n_method'> N Class Name: DynaMixerOp_h</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-
-        &#47&#47 Initial convolution block
-        down_layers = [nn.ReflectionPad2d(3),
-                       <a id="change">nn.Conv2d(</a>in_channels, <a id="change">64</a><a id="change">, kernel_size=7, stride=1, padding=0, bias=False)</a>,
-                       nn.InstanceNorm2d(64),
-                       nn.ReLU(inplace=True)]
-</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        &#47&#47 Gamma, Beta block
-        if self.light:
-            fc<a id="change"> = </a>[<a id="change">nn.Linear(</a>256, 256<a id="change">, bias=False)</a>,
-                  nn.ReLU(inplace=True),
-                  nn.Linear(256, 256, bias=False),
-                  nn.ReLU(inplace=True)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/ugatit-pytorch/commit/29402d1cfc1f9bbb66eed660fd84b48adcbdc188#diff-e8118e86fc113b641b3608172d63f952472dd6ce3d4d09b1f2bdb52b837dc3b2L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4257333</div><div id='project'> Project Name: lornatang/ugatit-pytorch</div><div id='commit'> Commit Name: 29402d1cfc1f9bbb66eed660fd84b48adcbdc188</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: ugatit_pytorch/model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ugatit_pytorch/model.py</div><div id='n_file'> N File Name: ugatit_pytorch/model.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 142</div><BR>
+            nn.Linear(int(hidden_dim * h), h * h),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4247867</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_h</div><div id='n_method'> N Class Name: DynaMixerOp_h</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 79</div><BR>

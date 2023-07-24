@@ -1,0 +1,80 @@
+<html><h3>Pattern ID :1899
+</h3><img src='13334274.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, _ = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs<a id="change"> = </a>[<a id="change">spec.squeeze(1).clone()</a> for _ in range(len(self.refinement_stages) + 1)]
+        &#47&#47 re/im into channel axis
+        spec_f = (
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()
+        )  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None
+        for i, (stage, _) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(self.cplx_comp(spec_f), h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :] = spec_f.permute(0, 2, 3, 1)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec, m, lsnr, out_specs
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec<a id="change">, m, lsnr, None</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/946b362aa406f8a1808a252393351d0e7523130a#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L504' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13334274</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 946b362aa406f8a1808a252393351d0e7523130a</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 534</div><div id='m_end'> M End Line: 547</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 510</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 B = B.reshape(N, 1, ord_num * H * W)
+        A = A.unsqueeze(dim=1)
+        B = B.unsqueeze(dim=1)
+        concat_feats = torch.cat((A<a id="change">, B</a>), dim=1)
+
+        if self.training:
+            prob = F.log_softmax(concat_feats, dim=1)
+            ord_prob<a id="change"> = </a><a id="change">x.clone()</a>
+            ord_prob[:, 0::2, :, :] = prob[:, 0, :, :, :]
+            ord_prob[:, 1::2, :, :] = prob[:, 1, :, :, :]
+            <a id="change">return </a>ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1).reshape((N, 1, H, W))</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.view(-1, 2, ord_num, H, W)
+        if self.training:
+            prob = F.log_softmax(x, dim=1).view(N, C, H, W)
+            <a id="change">return </a>prob
+
+        ord_prob = F.softmax(x, dim=1)[:, 0, :, :, :]
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/a29756ee2e089a313d149f6fa3ea441d955e42a0#diff-4113dbf82d3c85db8d660e5485c3df3048dd9c7cefb1a9060e9e80ba9a7c2cc5L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13334272</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: a29756ee2e089a313d149f6fa3ea441d955e42a0</div><div id='time'> Time: 2020-05-04</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_class'> M Class Name: OrdinalRegressionLayer</div><div id='n_method'> N Class Name: OrdinalRegressionLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='n_file'> N File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_start'> M Start Line: 28</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 57</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    for encoder in self.encoders:
+      x = encoder(x, input_mask)
+
+    encoder_logit<a id="change"> = </a><a id="change">x.clone()</a>
+
+    for decoder in self.decoders:
+      &#47&#47 target, encoder_output, encoder_mask)
+      target = decoder(target, x, input_mask)
+
+    lm_logits = self.lm_head(x)
+
+    loss = None
+    if labels is not None:
+      &#47&#47 Shift so that tokens &lt; n predict n
+      shift_logits = lm_logits[..., :-1, :].contiguous()
+      shift_labels = labels[..., 1:].contiguous()
+
+      &#47&#47 Flatten the tokens
+      loss_fct = CrossEntropyLoss()
+      loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+    <a id="change">return </a>lm_logits, loss, encoder_logit, x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+      loss_fct = CrossEntropyLoss()
+      loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+    <a id="change">return </a>lm_logits<a id="change">, loss</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nawnoes/pytorch-meena/commit/d475c52c2ba0c43b75056e0f552fa7ce953b2fdd#diff-b5c330a9134d9d483dace86181c61dc3172de74c8f234cfb8465c733ddddcc00L48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13334276</div><div id='project'> Project Name: nawnoes/pytorch-meena</div><div id='commit'> Commit Name: d475c52c2ba0c43b75056e0f552fa7ce953b2fdd</div><div id='time'> Time: 2021-05-04</div><div id='author'> Author: nawnoes@gmail.com</div><div id='file'> File Name: model/meena.py</div><div id='m_class'> M Class Name: Meena</div><div id='n_method'> N Class Name: Meena</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/meena.py</div><div id='n_file'> N File Name: model/meena.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 60</div><div id='n_end'> N End Line: 74</div><BR>

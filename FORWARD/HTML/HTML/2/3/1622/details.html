@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :1622
+</h3><img src='5548277.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((<a id="change">logit.shape[1]</a>, )).permute(1, 0, 2)
+            randomFalseMask *= -1e9
+            bernoulli = Bernoulli(logits=-meanLogit - 3.0)
+            randomTrueMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n, h*w, )).bool()
+
+            maskedLogit = <a id="change">logit.masked_fill(</a>randomFalseMask, <a id="change">-1e9</a><a id="change">)</a>
+
+            &#47&#47 randomFalseMask *= -1e9
+            &#47&#47 maskedLogit = logit + randomFalseMask &#47&#47 + randomTrueMask
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/ff056abb47b531e42496967adda543c562e1cefd#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L505' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5548277</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: ff056abb47b531e42496967adda543c562e1cefd</div><div id='time'> Time: 2021-05-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 505</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 508</div><div id='n_end'> N End Line: 554</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            to_zeros_mask = ones_mask & (w_abs &lt;= 0.9 * (mu - self.beta * std))
+            to_ones_mask = zeros_mask & (w_abs &gt;= 1.1 * (mu + self.beta * std))
+            self.mask[to_zeros_mask] = 0.0  &#47&#47 type: ignore
+            <a id="change">self.mask[to_ones_mask]</a> = 1.0  &#47&#47 type: ignore
+            mask = self.mask
+            del mu, std, ones_mask, zeros_mask, to_zeros_mask, to_ones_mask
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            ones_mask = self.mask == 1.0
+            to_zeros_mask = ones_mask & (w_abs &lt;= 0.9 * (mu - self.beta * std))
+            to_ones_mask = zeros_mask & (w_abs &gt;= 1.1 * (mu + self.beta * std))
+            <a id="change">self.mask.masked_fill(</a>to_zeros_mask, <a id="change">0.0</a><a id="change">)</a>  &#47&#47 type: ignore
+            self.mask.masked_fill(to_ones_mask, 1.0)  &#47&#47 type: ignore
+            mask = self.mask
+            del mu, std, ones_mask, zeros_mask, to_zeros_mask, to_ones_mask</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/carefree0910/carefree-learn/commit/074764f7c4fae38d6f3585df36bdb5d5794b8921#diff-83a31c46d55c1a35b1c7d1869740814893bfacd582fe2dbf71b3d7f796935b0bL221' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5548272</div><div id='project'> Project Name: carefree0910/carefree-learn</div><div id='commit'> Commit Name: 074764f7c4fae38d6f3585df36bdb5d5794b8921</div><div id='time'> Time: 2020-10-17</div><div id='author'> Author: syameimaru_kurumi@pku.edu.cn</div><div id='file'> File Name: cflearn/modules/auxiliary.py</div><div id='m_class'> M Class Name: Pruner</div><div id='n_method'> N Class Name: Pruner</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cflearn/modules/auxiliary.py</div><div id='n_file'> N File Name: cflearn/modules/auxiliary.py</div><div id='m_start'> M Start Line: 229</div><div id='m_end'> M End Line: 232</div><div id='n_start'> N Start Line: 228</div><div id='n_end'> N End Line: 231</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 w_2 = torch.sum(torch.exp(-0.1*(range_param.unsqueeze(-1) ** -2) * (t - c) ** 2), dim=1, keepdim=True)  &#47&#47 [B, 1, T]
+        w_1 = torch.exp(-0.1 * (t - c) ** 2)  &#47&#47 [B, L, T]
+        w_2 = torch.sum(torch.exp(-0.1 * (t - c) ** 2), dim=1, keepdim=True)  &#47&#47 [B, 1, T]
+        <a id="change">w_2[w_2==0.]</a> = 1.
+
+        &#47&#47 w_1 = self.normpdf(t, c, range_param.unsqueeze(-1))  &#47&#47 [B, L, T]
+        &#47&#47 w_1 = torch.distributions.normal.Normal(c, 0.1).log_prob(t)  &#47&#47 [B, L, T]</code></pre><h3>After Change</h3><pre><code class='java'>
+        w = self.get_alignment_energies(g, t)  &#47&#47 [B, L, T]
+
+        if mask is not None:
+            w = <a id="change">w.masked_fill(</a>mask.unsqueeze(-1), <a id="change">0.0</a><a id="change">)</a>
+
+        attn = w / (torch.sum(w, dim=1).unsqueeze(1) + 1e-8)  &#47&#47 [B, L, T]
+        out = torch.bmm(attn.transpose(1, 2), encoder_outputs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/wavegrad2/commit/523ec241c64ab635218f32d071fd85fbc469e178#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5548269</div><div id='project'> Project Name: keonlee9420/wavegrad2</div><div id='commit'> Commit Name: 523ec241c64ab635218f32d071fd85fbc469e178</div><div id='time'> Time: 2021-07-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: GaussianUpsampling</div><div id='n_method'> N Class Name: GaussianUpsampling</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 134</div><BR>

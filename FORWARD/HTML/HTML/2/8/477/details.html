@@ -1,0 +1,89 @@
+<html><h3>Pattern ID :477
+</h3><img src='1708824.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        convolve_across_time &= is_video
+
+        if is_video:
+            x<a id="change"> = </a>rearrange(x, &quotb c f h w -&gt; (b f) c h w&quot)
+
+        x = self.spatial_conv(x)
+
+        if is_video:
+            x = <a id="change">rearrange(</a>x, <a id="change">&quot(b f) c h w -&gt; b c f h w&quot</a><a id="change">, b = b)</a>
+
+        if not convolve_across_time:
+            return x
+
+        x<a id="change"> = </a>rearrange(x, &quotb c f h w -&gt; (b h w) c f&quot)
+
+        x = self.temporal_conv(x)
+
+        x<a id="change"> = </a>rearrange(x, &quot(b h w) c f -&gt; b c f h w&quot, h = h, w = w)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            time_emb = rearrange(time_emb, &quotb c -&gt; b c 1 1&quot)
+            scale_shift = time_emb.chunk(2, dim = 1)
+
+        h<a id="change"> = </a>self.block1(x, scale_shift = scale_shift, convolve_across_time = convolve_across_time)
+
+        h<a id="change"> = </a>self.block2(h, convolve_across_time = convolve_across_time)
+
+        <a id="change">return </a>h + self.res_conv(x)
+
+&#47&#47 pixelshuffle upsamples and downsamples
+&#47&#47 where time dimension can be configured</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/0af63d7db1964f26183becb09f25cd09c40ffbf5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1708824</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: 0af63d7db1964f26183becb09f25cd09c40ffbf5</div><div id='time'> Time: 2022-12-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: Pseudo3DConv</div><div id='n_method'> N Class Name: ResnetBlock</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 239</div><div id='n_end'> N End Line: 253</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads)
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quotb h d i, b h d j -&gt; b h i j&quot, q, k)
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h (x y) d -&gt; b (h d) x y&quot</a><a id="change">, x = h, y = w)</a>
+        out<a id="change"> = </a>self.to_out(out)
+        return rearrange(out, &quot(b f) c h w -&gt; b c f h w&quot, b = b)
+
+&#47&#47 model</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quot... n (h d) -&gt; ... h n d&quot, h = self.heads)
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quot... h i d, ... h j d -&gt; ... h i j&quot, q, k)
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quot... h i j, ... h j d -&gt; ... h i d&quot, attn, v)
+        out = rearrange(out, &quot... h n d -&gt; ... n (h d)&quot)
+        <a id="change">return </a>self.to_out(out)
+
+&#47&#47 model
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/video-diffusion-pytorch/commit/12fac4c86d51e844ecae1514568355d7be6b4833#diff-4ff1a95f5e6b9add82d0e523fd2d858ca38e67b393ea87c2ae88a8b14a0fbb1cL189' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1708858</div><div id='project'> Project Name: lucidrains/video-diffusion-pytorch</div><div id='commit'> Commit Name: 12fac4c86d51e844ecae1514568355d7be6b4833</div><div id='time'> Time: 2022-04-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='n_file'> N File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 204</div><div id='n_start'> N Start Line: 215</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute scale and shift from time_context
+        scale_shift = None
+        if exists(self.to_time_embedding) and exists(time_context):
+            time_embedding<a id="change"> = </a>self.to_time_embedding(time_context)
+            time_embedding<a id="change"> = </a><a id="change">rearrange(</a>time_embedding, <a id="change">"b c -&gt; b c 1"</a><a id="change">)</a>
+            scale_shift<a id="change"> = </a>time_embedding.chunk(2, dim=1)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        skips = []
+        for block in self.blocks:
+            x<a id="change"> = </a>block(x, t)
+            skips += [x]
+
+        if self.use_attention:
+            x = self.transformer(x)
+            skips += [x]
+
+        if not self.use_pre_downsample:
+            x<a id="change"> = </a>self.downsample(x)
+
+        <a id="change">return </a>x, skips
+
+
+class UpsampleBlock1d(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/c6edef1c655542c2bf6a2200ecdf3b4128c01e61#diff-530104878836342680b1130e3708d6e0bc0c8dee12b7c9c8db251798b7be1378L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1708888</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: c6edef1c655542c2bf6a2200ecdf3b4128c01e61</div><div id='time'> Time: 2022-07-13</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/unet.py</div><div id='m_class'> M Class Name: ResnetBlock</div><div id='n_method'> N Class Name: DownsampleBlock1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/unet.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/unet.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 458</div><div id='n_end'> N End Line: 473</div><BR>

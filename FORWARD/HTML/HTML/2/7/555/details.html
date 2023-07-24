@@ -1,0 +1,204 @@
+<html><h3>Pattern ID :555
+</h3><img src='2030285.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x<a id="change"> = </a>self.dropout(x)
+        x = <a id="change">x.unsqueeze(0</a><a id="change">)</a>.expand(targets.size(0), -1, -1, -1, -1)
+
+        copies, bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x<a id="change"> = </a>self.dropout(x)
+
+        negatives = self.sample_negatives(y)
+        y = y.unsqueeze(0)
+        targets = torch.cat([y, negatives], dim=0)  &#47&#47 Copies x B x C x T
+
+        copies = targets.size(0)
+        bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)
+
+        predictions = x.new(
+            bsz * copies * (tsz - self.offset + 1) * steps
+            - ((steps + 1) * steps // 2) * copies * bsz
+        )
+        if self.infonce:
+            labels = predictions.new_full(
+                (predictions.shape[0] // copies,), 0, dtype=torch.long
+            )
+        else:
+            labels = torch.zeros_like(predictions)
+        weights = (
+            torch.full_like(labels, 1 / self.n_negatives)
+            if self.balanced_classes and not self.infonce
+            else None
+        )
+
+        start = end = 0
+        for i in range(steps):
+            offset = i + self.offset
+            end = start + (tsz - offset) * bsz * copies
+            if self.infonce:
+                predictions[start:end] = torch.einsum(
+                    "bct,nbct-&gt;tbn", x[..., :-offset, i], targets[..., offset:]
+                ).flatten()
+            else:
+                pos_num = (end - start) // copies
+                predictions[start:end] = torch.einsum(
+                    "bct,nbct-&gt;nbt", x[..., :-offset, i], targets[..., offset:]
+                ).flatten()
+                labels[start : start + pos_num] = 1.0
+                if weights is not None:
+                    weights[start : start + pos_num] = 1.0
+            start = end
+        assert end == predictions.numel(), "{} != {}".format(end, predictions.numel())
+
+        if self.infonce:
+            predictions<a id="change"> = </a><a id="change">predictions.view(-1</a>, copies<a id="change">)</a>
+        else:
+            if weights is not None:
+                labels = (labels, weights)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mohammadkhalifa/fairseq-tagging/commit/3335de5f441ee1b3824e16dcd98db620e40beaba#diff-9b4dd2bdb515c86c631253c805af3041e9bbf4ce7f68af6a1900ef5b4ffa5c5aL411' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2030285</div><div id='project'> Project Name: mohammadkhalifa/fairseq-tagging</div><div id='commit'> Commit Name: 3335de5f441ee1b3824e16dcd98db620e40beaba</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: alexei.b@gmail.com</div><div id='file'> File Name: fairseq/models/wav2vec.py</div><div id='m_class'> M Class Name: Wav2VecPredictionsModel</div><div id='n_method'> N Class Name: Wav2VecPredictionsModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fairseq/models/wav2vec.py</div><div id='n_file'> N File Name: fairseq/models/wav2vec.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 439</div><div id='n_start'> N Start Line: 638</div><div id='n_end'> N End Line: 691</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        for i_track in range(self.num_prediction):
+            present = present_temp
+            prediction_single<a id="change"> = </a>torch.Tensor().cuda()
+            ind = self.index_max[:, i_track]
+            info_future = self.memory_fut[ind]
+            info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+            input_dec = info_total
+            state_dec = zero_padding
+            for i in range(self.future_len):
+                output_decoder, state_dec = self.decoder(input_dec, state_dec)
+                displacement_next = self.FC_output(output_decoder)
+                coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+                prediction_single = torch.cat((prediction_single, coords_next), 1)
+                present = coords_next
+                input_dec = zero_padding
+
+            &#47&#47 Iteratively refine predictions using context
+            for i_refine in range(1):
+                pred_map = prediction_single + 90
+                pred_map = pred_map.unsqueeze(2)
+                indices = pred_map.permute(0, 2, 1, 3)
+
+                &#47&#47 rescale between -1 and 1
+                indices = 2 * (indices / 180) - 1
+                output = F.grid_sample(scene_2, indices, mode=&quotnearest&quot)
+                output = output.squeeze(2).permute(0, 2, 1)
+
+                state_rnn = state_past
+                output_rnn, state_rnn = self.RNN_scene(output, state_rnn)
+                prediction_refine = self.fc_refine(state_rnn).view(dim_batch, 40, 2)
+                prediction_single = prediction_single + prediction_refine
+
+            prediction = torch.cat((prediction, <a id="change">prediction_single.unsqueeze(1</a><a id="change">)</a>), 1)
+
+        return prediction
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0,1)).transpose(0,1)
+        self.index_max = torch.sort(self.weight_read, descending=True)[1].cpu()[:, :self.num_prediction]
+
+        present<a id="change"> = </a>present_temp.repeat_interleave(self.num_prediction, dim=0)
+        state_past = state_past.repeat_interleave(self.num_prediction, dim=1)
+        scene_2 = scene_2.repeat_interleave(self.num_prediction, dim=0)
+        ind = self.index_max.flatten()
+
+        &#47&#47ablation study
+        &#47&#47 &#47&#47pdb.set_trace()
+        &#47&#47 prediction = self.memory_count[ind]
+        &#47&#47 &#47&#47prediction = temp.view(dim_batch, self.num_prediction, self.future_len, 2)
+
+        info_future = self.memory_fut[ind]
+        info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+        input_dec = info_total
+        state_dec = zero_padding
+        for i in range(self.future_len):
+            output_decoder, state_dec = self.decoder(input_dec, state_dec)
+            displacement_next = self.FC_output(output_decoder)
+            coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+            prediction = torch.cat((prediction, coords_next), 1)
+            present = coords_next
+            input_dec = zero_padding
+
+        &#47&#47pdb.set_trace()
+        &#47&#47 Iteratively refine predictions using context
+        for i_refine in range(4):
+            pred_map = prediction + 90
+            pred_map = pred_map.unsqueeze(2)
+            indices = pred_map.permute(0, 2, 1, 3)
+            &#47&#47 rescale between -1 and 1
+            indices = 2 * (indices / 180) - 1
+            output = F.grid_sample(scene_2, indices, mode=&quotnearest&quot)
+            output = output.squeeze(2).permute(0, 2, 1)
+
+            state_rnn = state_past
+            output_rnn, state_rnn = self.RNN_scene(output, state_rnn)
+            prediction_refine = self.fc_refine(state_rnn).view(-1, 40, 2)
+            prediction = prediction + prediction_refine
+        &#47&#47pdb.set_trace()
+        prediction<a id="change"> = </a><a id="change">prediction.view(</a>dim_batch, self.num_prediction, <a id="change">40</a>, 2<a id="change">)</a>
+
+        return prediction
+
+    def write_in_memory(self, past, future):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/04d7a063354c991d5aaa36f28a63df2ebbee9f78#diff-a0e6c75d4dc7945a3f8930d0c81236b81a0c8affd90ac0db921386274cf16e5cL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2030281</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 04d7a063354c991d5aaa36f28a63df2ebbee9f78</div><div id='time'> Time: 2020-01-18</div><div id='author'> Author: francescom394@gmail.com</div><div id='file'> File Name: models/model_memory_IRM.py</div><div id='m_class'> M Class Name: model_memory_IRM</div><div id='n_method'> N Class Name: model_memory_IRM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_memory_IRM.py</div><div id='n_file'> N File Name: models/model_memory_IRM.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 179</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 190</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        for i_track in range(self.num_prediction):
+            present = present_temp
+            prediction_single<a id="change"> = </a>torch.Tensor().cuda()
+            ind = self.index_max [:, i_track]
+
+            &#47&#47ablation study
+            &#47&#47 prediction_single = self.memory_count[ind]
+            &#47&#47 prediction = torch.cat((prediction, prediction_single.unsqueeze(1)), 1)
+
+            info_future = self.memory_fut[ind]
+            info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+            input_dec = info_total
+            state_dec = zero_padding
+            for i in range(self.future_len):
+                output_decoder, state_dec = self.decoder(input_dec, state_dec)
+                displacement_next = self.FC_output(output_decoder)
+                coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+                prediction_single = torch.cat((prediction_single, coords_next), 1)
+                present = coords_next
+                input_dec = zero_padding
+            prediction = torch.cat((prediction, <a id="change">prediction_single.unsqueeze(1</a><a id="change">)</a>), 1)
+        return prediction
+
+    def write_in_memory(self, past, future):</code></pre><h3>After Change</h3><pre><code class='java'>
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = torch.sort(self.weight_read, descending=True)[1].cpu()[:,:self.num_prediction]
+        present<a id="change"> = </a>present_temp.repeat_interleave(self.num_prediction, dim=0)
+        state_past = state_past.repeat_interleave(self.num_prediction, dim=1)
+        ind = self.index_max.flatten()
+
+        &#47&#47ablation study
+        &#47&#47pdb.set_trace()
+        &#47&#47 temp = self.memory_count[ind]
+        &#47&#47 prediction = temp.view(dim_batch, self.num_prediction, self.future_len, 2)
+
+
+        info_future = self.memory_fut[ind]
+        info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+        input_dec = info_total
+        state_dec = zero_padding
+        for i in range(self.future_len):
+            output_decoder, state_dec = self.decoder(input_dec, state_dec)
+            displacement_next = self.FC_output(output_decoder)
+            coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+            prediction = torch.cat((prediction, coords_next), 1)
+            present = coords_next
+            input_dec = zero_padding
+        prediction<a id="change"> = </a><a id="change">prediction.view(</a>dim_batch, self.num_prediction, self.future_len, <a id="change">2</a><a id="change">)</a>
+        return prediction
+
+    def write_in_memory(self, past, future):
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/04d7a063354c991d5aaa36f28a63df2ebbee9f78#diff-6ffca9b13cf6255ad4de971b4259c7aec5c8be0e8498858880e49c2bec255ddfL120' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2030292</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 04d7a063354c991d5aaa36f28a63df2ebbee9f78</div><div id='time'> Time: 2020-01-18</div><div id='author'> Author: francescom394@gmail.com</div><div id='file'> File Name: models/model_decoder.py</div><div id='m_class'> M Class Name: model_decoder</div><div id='n_method'> N Class Name: model_decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_decoder.py</div><div id='n_file'> N File Name: models/model_decoder.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 162</div><BR>

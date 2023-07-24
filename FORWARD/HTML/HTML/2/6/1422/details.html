@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :1422
+</h3><img src='4851326.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+                &#47&#47 return early results
+                if uncertain &lt; inference_speed:
+                    <a id="change">return </a>prob<a id="change">, i, uncertain_infos</a>
+            return prob, i, uncertain_infos
+
+        &#47&#47 Training phase: the first phase corresponds to the backbone training
+        &#47&#47 the second phase to the branches training (actual distillation)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 positions will keep track of the original position of each element in the
+            &#47&#47 batch when elements will be removed
+            final_probs = torch.zeros((hidden_states[0].shape[0], 2), device=device)
+            positions<a id="change"> = </a><a id="change">torch.arange(start=0, end=hidden_states[0].shape[0], device=device)</a>.long()
+
+            for i, (layer_module, (k, layer_classifier_module)) in enumerate(
+                    zip(self.layer, self.layer_classifiers.items())):
+
+                hidden_states = layer_module(hidden_states[0], attention_mask)
+                logits = layer_classifier_module(hidden_states[0])
+                prob = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+                uncertain = torch.sum(prob * log_prob, 1) / (-torch.log(self.num_class))
+
+                &#47&#47 checking if there&quots enough information
+                enough_info = uncertain &lt; inference_speed
+
+                right_pos<a id="change"> = </a>positions[enough_info]
+                final_probs[right_pos] = prob[enough_info]
+
+                hidden_states = (hidden_states[0][~enough_info],)
+                attention_mask = attention_mask[~enough_info]
+
+                &#47&#47 if we have processed all the samples
+                if hidden_states[0].shape[0] == 0:
+                    <a id="change">return </a>final_probs, i
+
+                positions = positions[~enough_info]  &#47&#47 updating the positions to fit the new batch
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/julesbelveze/bert-squeeze/commit/3cb14b8f1e742b86fe609843f2779e3bb36de4aa#diff-aac748de92a29499c39463320f41c1eaeb283dae0ed8ead9584db8318265a4acL49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851326</div><div id='project'> Project Name: julesbelveze/bert-squeeze</div><div id='commit'> Commit Name: 3cb14b8f1e742b86fe609843f2779e3bb36de4aa</div><div id='time'> Time: 2021-12-11</div><div id='author'> Author: 32683010+JulesBelveze@users.noreply.github.com</div><div id='file'> File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='m_class'> M Class Name: FastBertGraph</div><div id='n_method'> N Class Name: FastBertGraph</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='n_file'> N File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 87</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        stats = self.proj(x) * x_mask
+
+        m, logs = torch.split(stats, self.out_channels, dim=1)
+        <a id="change">return </a>x<a id="change">, m, logs, x_mask</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47text_padded_embedded.size() : torch.Size([batch_size, self.hidden_channels, text_length])
+        &#47&#47マスクの作成
+        max_text_length = text_padded_embedded.size(2)
+        progression<a id="change"> = </a><a id="change">torch.arange(</a>max_text_length<a id="change">, dtype=text_lengths.dtype, device=text_lengths.device)</a>
+        text_mask<a id="change"> = </a>(progression.unsqueeze(0) &lt; text_lengths.unsqueeze(1))
+        text_mask = torch.unsqueeze(text_mask, 1).to(text_padded_embedded.dtype)
+        &#47&#47text_mask.size() : torch.Size([batch_size, 1, text_length])
+
+        text_encoded = self.encoder(text_padded_embedded * text_mask, text_mask)
+        &#47&#47text_encoded.size() : torch.Size([batch_size, self.hidden_channels, text_length])
+        stats = self.proj(text_encoded) * text_mask
+
+        m, logs = torch.split(stats, self.out_channels, dim=1)
+        <a id="change">return </a>text_encoded, m, logs, text_mask
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zassou65535/vits/commit/00ade3b39bd67dc21d25b09c5b535374f2c8bd1d#diff-16d3f9fbcca22429a76565eb201733ad0eb6eba76cf3d99a5c8b02ee599dc37bL290' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851325</div><div id='project'> Project Name: zassou65535/vits</div><div id='commit'> Commit Name: 00ade3b39bd67dc21d25b09c5b535374f2c8bd1d</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: gravity@kuf.biglobe.ne.jp</div><div id='file'> File Name: module/model_component/text_encoder.py</div><div id='m_class'> M Class Name: TextEncoder</div><div id='n_method'> N Class Name: TextEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: module/model_component/text_encoder.py</div><div id='n_file'> N File Name: module/model_component/text_encoder.py</div><div id='m_start'> M Start Line: 292</div><div id='m_end'> M End Line: 304</div><div id='n_start'> N Start Line: 287</div><div id='n_end'> N End Line: 303</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        l = n + context_len
+        t = torch.arange(l - 1, -1, -1, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((sinusoid_inp.sin()<a id="change">, sinusoid_inp.cos()</a>), dim = -1)
+        <a id="change">return </a>emb
+
+&#47&#47 main classes
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, qlen, klen):
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos<a id="change"> = </a><a id="change">torch.arange(</a>klen<a id="change">, dtype = torch.long, device = device)</a>
+        rel_pos = k_pos[None, :] - q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values<a id="change"> = </a>self.relative_attention_bias(rp_bucket)
+        <a id="change">return </a>rearrange(values, &quoti j h -&gt; () h i j&quot)
+
+&#47&#47 main classes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4851330</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: SinusoidalEmbedding</div><div id='n_method'> N Class Name: RelativePositionBias</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 77</div><BR>

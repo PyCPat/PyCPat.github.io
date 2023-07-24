@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        probs = torch.exp(logits - torch.logsumexp(logits, dim=1, keepdim=True))
+        out = torch.sum(o * probs, dim=1)
+        return out<a id="change">, buckets</a>
+
+&#47&#47 simple full attention
+
+class FullQKAttention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = torch.sum(o * probs, dim=1)
+
+        &#47&#47 compute unsorted matrix
+        attn<a id="change"> = </a>torch.empty(0, device=device)
+
+        if self._return_attn:
+            attn_unsort<a id="change"> = </a>((bq_t * seqlen)[:, :, :, None] + bkv_t[:, :, None, :])
+            attn_unsort<a id="change"> = </a>attn_unsort.view(-1, 2 * self.bucket_size * self.bucket_size)
+            unsorted_dots = scatter_sum(<a id="change">dots.view_as(</a>attn_unsort<a id="change">)</a>, attn_unsort)
+            unsorted_dots = unsorted_dots.reshape(batch_size, self.n_hashes, n_buckets, seqlen, seqlen).sum(dim=2)
+            attn = torch.sum(unsorted_dots[:, :, 0:query_len, :] * probs, dim=1)
+
+        &#47&#47 return output, attention matrix, and bucket distribution
+        <a id="change">return </a>out, attn, buckets
+
+&#47&#47 simple full attention
+</code></pre>

@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 KLD including logdet term
+        p_z_ = torch.sum(p.log_prob(z_), -1)
+        q0_z_0<a id="change"> = </a>torch.sum(q0.log_prob(z_0), -1)
+        log_det<a id="change"> = </a><a id="change">log_det.view(-1</a><a id="change">)</a>
+        kld = - torch.sum(p.log_prob(z_), -1) + torch.sum(q0.log_prob(z_0), -1) - log_det.view(-1)
+        self.test_params = [torch.mean(- torch.sum(p.log_prob(z_), -1)), torch.mean(torch.sum(q0.log_prob(z_0), -1)), torch.mean(- log_det.view(-1)), torch.mean(kld)]
+
+        &#47&#47 Decode
+        z_ = z_.view(z_.size(0), args.latent_size)
+        zD = self.decode(z_)
+        out = torch.sigmoid(zD)
+
+        <a id="change">return </a>out<a id="change">, p_z_, q0_z_0, log_det</a>
+
+
+def bound(rce, x, p_z_, q0_z_0, log_det, beta):</code></pre><h3>After Change</h3><pre><code class='java'>
+        zD = self.decode(z_)
+        out = torch.sigmoid(zD)
+
+        <a id="change">return </a>out<a id="change">, kld</a>
+
+
+def bound(rce, x, kld, beta):</code></pre>

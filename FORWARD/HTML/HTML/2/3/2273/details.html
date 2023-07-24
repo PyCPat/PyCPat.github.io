@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2273
+</h3><img src='14288538.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        down2, indices_2, unpool_shape2 = self.down2(down1)
+        down3, indices_3, unpool_shape3 = self.down3(down2)
+        down4, indices_4, unpool_shape4 = self.down4(down3)
+        down5<a id="change">, indices_5, unpool_shape5</a> = self.down5(down4)
+
+        up5 = self.up5(down5, indices_5, unpool_shape5)
+        up4 = self.up4(up5, indices_4, unpool_shape4)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47&#47&#47 encode &#47&#47&#47&#47
+        x = F.relu(self.conv1(x))
+        x = self.pool(x)
+        x = F.relu(<a id="change">self.conv2(</a>x<a id="change">)</a>)
+        x = self.pool(x)
+
+        x = F.relu(self.conv3(x))
+        x = self.pool(x)
+
+        x = F.relu(self.conv4(x))
+        x = self.pool(x)
+        
+        &#47&#47&#47&#47 decode &#47&#47&#47&#47
+        x = F.relu(self.t_conv1(x))
+        x = F.relu(self.t_conv2(x))
+        x = F.relu(self.t_conv3(x))
+        x<a id="change"> = </a>F.relu(self.t_conv4(x))
+
+                
+        return x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rehg-lab/clrec/commit/8636c7d42680451487a44ff9387c0b2dcf45b535#diff-efa95ad6c5128375a07a5bd7510a9ada32b7bb8ea5ec5bb154961bcc29831ea7L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14288538</div><div id='project'> Project Name: rehg-lab/clrec</div><div id='commit'> Commit Name: 8636c7d42680451487a44ff9387c0b2dcf45b535</div><div id='time'> Time: 2022-01-01</div><div id='author'> Author: athai6@gatech.edu</div><div id='file'> File Name: auto_enc/autoencoder.py</div><div id='m_class'> M Class Name: SegNet</div><div id='n_method'> N Class Name: ConvAutoencoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: auto_enc/autoencoder.py</div><div id='n_file'> N File Name: auto_enc/autoencoder.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 46</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 y = convert_labels(y, self.b_int_digits, self.b_dec_digits)
+
+
+        z = torch.cat((z<a id="change">, y</a>), dim=1)
+        if z.is_cuda and self.ngpu &gt; 1:
+            output = nn.parallel.data_parallel(self.linear, z, range(self.ngpu))
+            output_img = output.view(-1, 8*self.ngf, 4, 4)</code></pre><h3>After Change</h3><pre><code class='java'>
+            output_img = output.view(-1, 8*self.ngf, 4, 4)
+            output_img = self.conv1(output_img)
+            output_img = output_img + y
+            output_img<a id="change"> = </a><a id="change">self.conv2(</a>output_img<a id="change">)</a>
+
+
+
+        return output_img</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ubcdingxin/improved_ccgan/commit/ce56ae651818a19364032ed868adaa4ef3ca4754#diff-6358c1fec81edff605eef0381b1e48fa6ef0f6d923b6c1d37d1bc0a47979d68bL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14288539</div><div id='project'> Project Name: ubcdingxin/improved_ccgan</div><div id='commit'> Commit Name: ce56ae651818a19364032ed868adaa4ef3ca4754</div><div id='time'> Time: 2020-03-04</div><div id='author'> Author: dingx92@gmail.com</div><div id='file'> File Name: CellCounting/models/cond_cnn_generator_discriminator.py</div><div id='m_class'> M Class Name: cond_cnn_generator</div><div id='n_method'> N Class Name: cond_cnn_generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: CellCounting/models/cond_cnn_generator_discriminator.py</div><div id='n_file'> N File Name: CellCounting/models/cond_cnn_generator_discriminator.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.fc2(x))
+        output = self.fc3(x)
+        if last:
+          return output<a id="change">, x</a>
+        else:
+          return output
+    def get_embedding_dim(self):
+        return 256</code></pre><h3>After Change</h3><pre><code class='java'>
+                e = F.relu(self.fc2(out))
+        else:
+            out = self.pool(F.relu(self.conv1(x)))
+            out = self.pool(F.relu(<a id="change">self.conv2(</a>out<a id="change">)</a>))
+            out = self.pool(F.relu(self.conv3(out)))
+            out = out.view(-1, 64 * 4 * 4)
+            out<a id="change"> = </a>F.relu(self.fc1(out))
+            e = F.relu(self.fc2(out))
+        out = self.fc3(e)
+        if last:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/decile-team/distil/commit/4108c7fe8b81f9f198410bb6b2598f6833329a5e#diff-7b330b9ddfa3f7f69b09d1020e1f5880bc0e5266cd5006e041a5fc32abf415dcL16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14288530</div><div id='project'> Project Name: decile-team/distil</div><div id='commit'> Commit Name: 4108c7fe8b81f9f198410bb6b2598f6833329a5e</div><div id='time'> Time: 2021-04-29</div><div id='author'> Author: you@example.com</div><div id='file'> File Name: distil/utils/models/cifar10net.py</div><div id='m_class'> M Class Name: CifarNet</div><div id='n_method'> N Class Name: CifarNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: distil/utils/models/cifar10net.py</div><div id='n_file'> N File Name: distil/utils/models/cifar10net.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 19</div><div id='n_end'> N End Line: 42</div><BR>

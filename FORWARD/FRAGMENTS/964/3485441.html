@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            encoder_outputs: encoder outputs
+        
+        feat_outputs = list()
+        stop_outputs<a id="change"> = </a><a id="change">list()</a>
+        alignment_energies = list()
+
+        inputs, max_length, train = self.validate_args(inputs, encoder_outputs)
+        self._init_decoder_states(encoder_outputs)
+
+        if train:
+            inputs = self.prenet(inputs)  &#47&#47 B x T x 256
+
+            for di in range(max_length):
+                feat_output, stop_output, alignment_energy = self.forward_step(inputs[:, di, :].unsqueeze(1), encoder_outputs)
+                feat_outputs.append(feat_output)
+                stop_outputs.append(stop_output)
+                alignment_energies.append(alignment_energy)
+
+        else:
+            input_var = inputs
+
+            for di in range(max_length):
+                input_var = self.prenet(input_var)
+                feat_output, stop_output, alignment_energy = self.forward_step(input_var, encoder_outputs)
+                feat_outputs.append(feat_output)
+                stop_outputs.append(stop_output)
+                alignment_energies.append(alignment_energy)
+
+                if torch.sigmoid(stop_output.item()) &gt; self.stop_threshold:
+                    break
+
+                input_var = feat_output
+
+        output<a id="change"> = </a>self.parse_decoder_outputs(feat_outputs, stop_outputs, alignment_energies)
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            inputs: Optional[Tensor] = None,
+            teacher_forcing_ratio: float = 1.0
+    ) -&gt; Dict[str, Tensor]:
+        feat_outputs, stop_outputs, alignments = list()<a id="change">, list(), list()</a>
+        use_teacher_forcing = True if random.random() &lt; teacher_forcing_ratio else False
+
+        inputs, max_decoding_step = self.validate_args(encoder_outputs, inputs, teacher_forcing_ratio)
+        decoder_states = self._init_decoder_states(encoder_outputs)</code></pre>

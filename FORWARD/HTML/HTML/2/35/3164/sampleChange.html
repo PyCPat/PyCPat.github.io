@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.init.xavier_uniform(self.bypass_conv.weight.data, 1.4142)
+
+    def forward(self, x_in, noise_embed):
+        <a id="change">batch = x_in.shape[0]</a>
+        x = self.model_base1(x_in)
+        <a id="change">if self.use_affine_level</a><a id="change">:
+            gamma</a><a id="change">, beta = </a><a id="change">self.noise_func(noise_embed).view(
+                batch, -1, 1, 1).chunk(2</a><a id="change">, dim=1)</a>
+            x<a id="change"> = </a>(<a id="change">1 + gamma) * x + beta</a>
+        else:
+            x<a id="change"> = x</a><a id="change"> + self.noise_func(noise_embed).view(batch</a>, <a id="change">-1</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        return self.model_base2(x) + self.bypass(x_in)
+
+
+class Swish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, x_in, noise_embed):
+        <a id="change">x</a> = self.model_base1(x_in)
+        x<a id="change"> = </a><a id="change">self.noise_func(x</a>, noise_embed<a id="change">)</a>
+        return self.model_base2(x) + self.bypass(x_in)
+
+
+class UNet(nn.Module):</code></pre>

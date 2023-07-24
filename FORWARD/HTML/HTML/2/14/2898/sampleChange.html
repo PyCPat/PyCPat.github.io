@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Self-attention
+        &#47&#47 TODO: 其他模型结构
+        <a id="change">len_range = </a>torch.from_numpy(<a id="change">np.arange(</a>self.max_his<a id="change">)</a>).to(history.device)
+        position = (<a id="change">lengths[:, None] - len_range[None, :seq_len]</a>) * valid_his
+        pos_vectors = self.p_embeddings(position)
+        his_vectors = his_vectors + pos_vectors
+        attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        his_vectors = self.transformer(his_vectors, attn_mask)
+        his_vectors<a id="change"> = </a>his_vectors * <a id="change">valid_his[:, :, None].float()</a>
+        his_vector = his_vectors.sum(1) / lengths[:, None].float()
+        &#47&#47 his_vector = his_vectors[torch.arange(batch_size), lengths - 1, :]
+
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>intent_pred
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, history, lengths, t_history, user_min_t):
+        valid_his = (history &gt; 0).long()
+        his_vectors = self.i_embeddings(history)
+        his_vector<a id="change"> = </a>self.encoder(his_vectors, lengths, valid_his, t_history, user_min_t)
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>his_vector, intent_pred
+
+
+class GRUEncoder(nn.Module):</code></pre>

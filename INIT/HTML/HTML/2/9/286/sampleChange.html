@@ -2,25 +2,23 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        assert 0 &lt;= f_min and f_min &lt; f_max
-        assert f_max &lt;= sample_rate / 2
-        assert 0 &lt; self.floor
-        <a id="change">assert </a>is_in(self.out_format, ["y", "E", "yE", "y,E"])
+        for _ in range(n_basic_block):
+            basic_block_layer += [ResidualInResidualDenseBlock(num_init_features, growth_rate)]
 
-        lower_bin_index = max(1, int(f_min / sample_rate * fft_length + 1.5))
-        upper_bin_index = min(</code></pre><h3>After Change</h3><pre><code class='java'>
-        assert f_max &lt;= sample_rate / 2
-        assert 0 &lt; self.floor
+        self.basic_block<a id="change"> = nn</a><a id="change">.Sequential(</a>*<a id="change">basic_block_layer)</a>
 
-        <a id="change">if out_format == 0</a> or out_format == "y"<a id="change">:
-            </a>self.format_func<a id="change"> = </a>lambda y, E: y
-        elif out_format == 1 or out_format == "yE":
-            self.format_func<a id="change"> = </a>lambda y, E: torch.cat((y, E), dim=-1)
-        elif out_format == 2 or out_format == "y,E":
-            self.format_func<a id="change"> = </a>lambda y, E: (y, E)
-        else:
-            <a id="change">raise ValueError(f"out_format {out_format} is not supported"</a><a id="change">)</a>
+        self.conv2 = nn.Sequential(nn.ReflectionPad2d(1), nn.Conv2d(num_init_features, num_init_features, 3), nn.ReLU())
+        self.upsample = upsample_block(in_channels=num_init_features, scale_factor=scale_factor)
+        self.conv3 = <a id="change">nn.Sequential(</a>nn.ReflectionPad2d(1), nn.Conv2d(num_init_features, num_init_features, 3), nn.ReLU()<a id="change">)</a>
+        self.conv4 = nn.Sequential(nn.ReflectionPad2d(1), nn.Conv2d(num_init_features, out_channels, 3), nn.ReLU())
 
-        lower_bin_index = max(1, int(f_min / sample_rate * fft_length + 1.5))
-        upper_bin_index = min(
-            fft_length // 2, int(f_max / sample_rate * fft_length + 0.5)</code></pre>
+    def forward(self, inputs):
+        conv1 = self.conv1(inputs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 23 ResidualInResidualDenseBlock layer
+        rrdb_layers = []
+        <a id="change">for _</a> in <a id="change">range(</a>23<a id="change">):
+            </a>rrdb_layers<a id="change"> += </a><a id="change">[</a>ResidualInResidualDenseBlock(64, 32)<a id="change"></a>]
+        self.residual_residual_dense_blocks = nn.Sequential(*rrdb_layers)
+
+        &#47&#47 Second conv layer post residual blocks</code></pre>

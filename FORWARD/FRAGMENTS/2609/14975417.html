@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        e_output = self.encoder(src_emb, e_mask)  &#47&#47 (B, L, d_model)
+        
+        &#47&#47 Encoded input & context combination
+        e_output = <a id="change">torch.cat(</a>(e_output, context.unsqueeze(1).repeat(1,self.config[&quotmax_len&quot],1))<a id="change">, dim=-1)</a>  &#47&#47 (B, L, d_model+d_h)
+        e_output = self.linear1(e_output)  &#47&#47 (B, L, d_mid)
+        e_output<a id="change"> = </a>self.linear2(e_output)  &#47&#47 (B, L, d_model)
+        
+        &#47&#47 Decoding phase
+        d_output = self.decoder(trg_emb, e_output, e_mask, d_mask)  &#47&#47 (B, L, d_model)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        output = self.softmax(self.output_linear(d_output))  &#47&#47 (B, L, vocab_size)
+        
+        <a id="change">del e_mask, d_mask</a>
+        
+        return output, next_context  &#47&#47 (B, L, vocab_size), (B, d_model)
+        
+    def make_encoder_mask(self, src_input):</code></pre>

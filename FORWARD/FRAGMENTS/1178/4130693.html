@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 project in and split heads
+
+        x = self.to_inner(x)
+        x<a id="change"> = </a>rearrange(x, &quot... (h d) -&gt; ... h d&quot, h = self.heads)
+
+        &#47&#47 weights derived from alphas (learned exponential smoothing decay rate)
+
+        alphas = self.alphas.sigmoid()
+        dampen_factors = self.dampen_factors.sigmoid()
+
+        reversed_powers = torch.arange(seq_len - 1, -1, -1, device = device)
+        K = alphas * (((1 - alphas) * dampen_factors) ** rearrange(reversed_powers, &quot... l -&gt; ... l 1&quot))
+
+        &#47&#47 conv1d fft O(nlog(n))
+
+        out = conv1d_fft(x, K, dim = -3, weight_dim = -2)
+
+        &#47&#47 combine heads and out
+
+        out<a id="change"> = </a>rearrange(out, &quot... h d -&gt; ... (h d)&quot)
+        <a id="change">return </a><a id="change">self.to_out(</a>out<a id="change">)</a>
+
+&#47&#47 Mega Layer
+&#47&#47 Single headed Attention + Multi-headed EMA, then GRU-esque gating
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 combine heads and out
+
+        <a id="change">return </a>einsum(&quot... h d, h d -&gt; ... d&quot, out, self.reduction)
+
+&#47&#47 Mega Layer
+&#47&#47 Single headed Attention + Multi-headed EMA, then GRU-esque gating</code></pre>

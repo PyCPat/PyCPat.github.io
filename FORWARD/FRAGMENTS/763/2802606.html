@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, input, hidden_state=None):
+        output<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for step</a> in range(input.size(1))<a id="change">:
+            &#47&#47 Compute current time-step
+            </a>hidden_state<a id="change"> = </a>self.rnn_cell(input[:, step, :, :, :], hidden_state)
+            <a id="change">output.append(</a>hidden_state<a id="change">)</a>
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_len = len(cur_layer_input)
+
+        layer_output_list = []
+        last_state_list<a id="change"> = </a>[]
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)
+            last_state_list.append(h)
+
+        layer_output<a id="change"> = </a>torch.stack(output_inner, dim=int(self.batch_first))
+        last_state_list = torch.stack(last_state_list, dim=0)
+        return layer_output<a id="change">, last_state_list</a>
+
+    def reset_parameters(self):
+        for c in self.cell_list:
+            c.reset_parameters()</code></pre>

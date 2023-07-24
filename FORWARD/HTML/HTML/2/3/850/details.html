@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :850
+</h3><img src='3119613.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        weight, bias = self.weight, self.bias
+        weight, bias = weight[:, <a id="change">:</a>n, :n], bias[:, :n]
+
+        mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+        weight = weight.masked_fill(mask[..., None], 0.)</code></pre><h3>After Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        gate = F.pad(gate, (0, 0, 0, 0, 1, 0), value = 0.)
+        gate = torch.cat((gate[:, <a id="change">:-1</a>], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119613</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            if flattened_dim:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = logits[:, <a id="change">:</a>seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+
+            logits = logits[:, <a id="change">1</a>:(seq_len + 1)] &#47&#47 exclude first start token
+
+            if flattened_dim:
+                return logits</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/2a7448ae1a81a9da7b26d5e7e637098d2b829492#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L196' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119612</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 2a7448ae1a81a9da7b26d5e7e637098d2b829492</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 198</div><div id='m_end'> M End Line: 257</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 269</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        seq_length = seg.size(1)
+        device = seg.device
+        emb = self.pe[<a id="change">: seq_length</a>].transpose(0, 1)
+
+        return emb.to(device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        emb =  torch.zeros(batch_size, seq_length, self.emb_size)
+        for i in range(batch_size):
+            emb[i, :no_pad_num[i], :] = self.emb[<a id="change">2: no_pad_num[i]+2</a>]
+
+        return emb.to(device)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tencent/tencentpretrain/commit/2bc6d47065d7a5e6907d449cf5114248000274fe#diff-41324f66c261d89709c738adf53f3dddb45e587991d1f8c895e23d2dedb742dbL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3119606</div><div id='project'> Project Name: tencent/tencentpretrain</div><div id='commit'> Commit Name: 2bc6d47065d7a5e6907d449cf5114248000274fe</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: 40569026+JINGZIjingzi@users.noreply.github.com</div><div id='file'> File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_class'> M Class Name: SinusoidalposEmbedding</div><div id='n_method'> N Class Name: SinusoidalposEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='n_file'> N File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 68</div><BR>

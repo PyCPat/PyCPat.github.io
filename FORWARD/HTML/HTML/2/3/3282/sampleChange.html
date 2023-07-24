@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            graph.srcdata[&quoth&quot] = feat_src
+            graph.apply_edges(lambda edges: {&quoth&quot: edges.data[&quot_edge_weight&quot] * 2})
+            graph.update_all(aggregate_fn, fn.sum(msg=&quotm&quot, out=&quoth&quot))
+            rst<a id="change"> = </a>graph.dstdata[&quoth&quot]
+            rst = th.matmul(feat_src, self.weight1) + th.matmul(rst, self.weight2)
+
+
+            if self.activation is not None:
+                rst = self.activation(rst)
+
+            <a id="change">return </a>rst
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                stype, etype, dtype = e
+                sub_graph = hg[stype, etype, dtype]
+                sub_graph.update_all(aggregate_fn, fn.sum(msg=&quotm&quot, out=&quotout&quot))
+                temp = <a id="change">hg.ndata[&quotout&quot].pop(</a>dtype<a id="change">)</a>
+                if isinstance(temp, dict):
+                    temp = temp[dtype]
+                if outputs.get(dtype) is None:
+                    outputs[dtype] = temp</code></pre>

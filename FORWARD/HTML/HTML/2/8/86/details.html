@@ -1,0 +1,74 @@
+<html><h3>Pattern ID :86
+</h3><img src='325380.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.weight is not None:
+            self.weight = move_to(self.weight, device)
+
+        <a id="change">if self.ignore_index is not None</a><a id="change">:
+            </a>target = torch.argmax(target, dim=1)
+            loss = nn.functional.cross_entropy(pred, target, weight=self.weight, ignore_index=self.ignore_index)
+        else:
+            loss<a id="change"> = </a>nn.functional.cross_entropy(pred, target, weight=self.weight)
+            
+        loss_dict = {"CE": loss.item()}
+        return loss, loss_dict</code></pre><h3>After Change</h3><pre><code class='java'>
+        targets = move_to(batch["targets"], device)
+        
+        batch_size, num_classes = pred.shape[:2]
+        y_hot<a id="change"> = </a>move_to(torch.zeros(pred.shape), device).scatter_(1, <a id="change">targets.unsqueeze(1</a><a id="change">)</a> , 1.0)
+        y_smooth = (1 - self.alpha) * y_hot + self.alpha / num_classes
+        loss = torch.sum(-<a id="change"> y_smooth * </a>torch.nn.functional.log_softmax(pred, -1), -1).sum()
+
+        if self.reduction == "mean":
+            loss<a id="change"> /= </a>batch_size
+
+        loss_dict = {"CE": loss.item()}
+        return loss, loss_dict</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/b842d768df45af67b9f7ac5349f0a65cf607ddad#diff-af231fce9ae3b854bb3393150bb3c381f7d5ec232316c924d70c1ed2270d9cd8L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 325380</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: b842d768df45af67b9f7ac5349f0a65cf607ddad</div><div id='time'> Time: 2022-09-27</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/semantic/losses/ce_loss.py</div><div id='m_class'> M Class Name: CELoss</div><div id='n_method'> N Class Name: SemanticSmoothCELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/semantic/losses/ce_loss.py</div><div id='n_file'> N File Name: theseus/semantic/losses/ce_loss.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.spk_embed_integration_type = hp.spk_embed_integration_type
+    
+    def forward(self, x, spembs):
+        <a id="change">if self.spk_embed_integration_type == "add"</a><a id="change">:
+            </a>pass
+        elif self.spk_embed_integration_type == "concat":
+            spembs = torch.unsqueeze(spembs, 1)
+            spembs = spembs.repeat(1, x.shape[1], 1)
+            x<a id="change"> = </a>torch.cat((x, spembs), 2)
+        else:
+            raise NotImplementedError("support only add or concat.")
+            </code></pre><h3>After Change</h3><pre><code class='java'>
+        x shape : (batch, 39, 256)
+        spembs shape : (batch, 256)
+        &quot&quot&quot
+        spembs<a id="change"> = </a><a id="change">spembs.unsqueeze(1</a><a id="change">)</a>
+        spembs = spembs.repeat(1,x.shape[1] ,1)
+        x<a id="change"> = </a>x<a id="change"> + </a>spembs
+            
+        return x
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ga642381/fastspeech2/commit/11454a9ef35dab7c01d1d70dde213ce1c60294e0#diff-ae5323d7b76e8ae717b053d5c11b6e16ad4c1cfb3e978c0403a6c6b795078b87L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 325518</div><div id='project'> Project Name: ga642381/fastspeech2</div><div id='commit'> Commit Name: 11454a9ef35dab7c01d1d70dde213ce1c60294e0</div><div id='time'> Time: 2020-11-01</div><div id='author'> Author: ga642381@gmail.com</div><div id='file'> File Name: modules.py</div><div id='m_class'> M Class Name: SpeakerIntegrator</div><div id='n_method'> N Class Name: SpeakerIntegrator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: modules.py</div><div id='n_file'> N File Name: modules.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            real_number = real_number_tensor[i]
+            real_number = real_number if real_number != 0 else 1
+            for j, entity in enumerate(batch):
+                <a id="change">if j &gt;= real_number_tensor[i]</a><a id="change">:
+                    </a>break        
+                mean_entity<a id="change"> = </a>mean_entity + entity
+            mean_entity = mean_entity / (real_number)
+            tensor_list.append(mean_entity.reshape(1, -1))
+        tensor_mean = torch.cat(tensor_list, dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out * <a id="change">mask.unsqueeze(2</a><a id="change">)</a>
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>masked_out.sum(dim=1, keepdim=False)
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>z<a id="change"> / </a>entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L717' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 325486</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>

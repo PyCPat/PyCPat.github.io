@@ -1,0 +1,62 @@
+<html><h3>Pattern ID :1990
+</h3><img src='13677376.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 diversity = torch.minimum(var, torch.ones_like(var))
+                &#47&#47 reg -= diversity
+
+                diversity = <a id="change">batchWiseLogit.std(</a>1<a id="change">)</a>.mean(-1).sigmoid()
+
+                &#47&#47 summedProb = batchWiseLogit.sum(1)
+                &#47&#47 posterior = OneHotCategorical(logits=summedProb)
+                &#47&#47 prior = OneHotCategorical(probs=torch.ones_like(summedProb) / summedProb.shape[-1])
+                &#47&#47 reg = torch.distributions.kl_divergence(posterior, prior) / diversity
+                reg = compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)
+                reg = reg<a id="change"> / </a>diversity
+                regs.append(reg)
+            regs = sum(regs)
+        return ssimLoss, l1Loss + l2Loss, l1QLoss + l2QLoss, regs &#47&#47 + 10 * stdReg</code></pre><h3>After Change</h3><pre><code class='java'>
+            for latent, q in zip(latents, quantizeds):
+                l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l2QLoss.append(0.00001<a id="change"> * </a><a id="change">F.mse_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3))</a>)
+                l1QLoss.append(0.00001 * F.l1_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+
+        l1QLoss = sum(l1QLoss)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/fea4d517415acb825c6282b84ea39c0989abf5fc#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677376</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: fea4d517415acb825c6282b84ea39c0989abf5fc</div><div id='time'> Time: 2021-03-23</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: CompressionLossTwoStage</div><div id='n_method'> N Class Name: CompressionLossTwoStage</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    "in torch.std() returning nan"
+                )
+            x_mean[i, :] = x[i, :, :].mean(dim=1)
+            x_std[i, :] = <a id="change">x[i, :, :].std(dim=1)</a>
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x - x_mean.unsqueeze(2))<a id="change"> / </a>x_std.unsqueeze(2)
+
+
+class DitherAudio(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True)</a>.detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x - x_mean)<a id="change"> / </a>x_std
+
+
+class DitherAudio(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677377</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                feature_fake = self.max_pooling_1d(feature_fake.unsqueeze(dim=1))
+                mask = self.max_pooling_1d(mask.unsqueeze(dim=1))
+            &#47&#47 Normalize features
+            feature_real = (feature_real - feature_real.mean())<a id="change"> / </a><a id="change">feature_real.std()</a>
+            feature_fake = (feature_fake - feature_fake.mean()) / feature_fake.std()
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))
+        &#47&#47 Average loss with number of features</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Normalize features
+            union = torch.cat((feature_real, feature_fake), dim=0)
+            feature_real = (feature_real - union.mean()) / union.std()
+            feature_fake = (feature_fake<a id="change"> - </a><a id="change">union.mean()</a>) / union.std()
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))
+        &#47&#47 Average loss with number of features</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/christophreich1996/semantic_pyramid_for_image_generation/commit/9fabb52baeb908f73e6fb4ac0bbeaa5965bdfb42#diff-522b878e6c6320760247a3dfcdd4cc8c07e403a856a57a7f3c5b0309c21a295cL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13677382</div><div id='project'> Project Name: christophreich1996/semantic_pyramid_for_image_generation</div><div id='commit'> Commit Name: 9fabb52baeb908f73e6fb4ac0bbeaa5965bdfb42</div><div id='time'> Time: 2020-04-29</div><div id='author'> Author: 34400551+ChristophReich1996@users.noreply.github.com</div><div id='file'> File Name: lossfunction.py</div><div id='m_class'> M Class Name: SemanticReconstructionLoss</div><div id='n_method'> N Class Name: SemanticReconstructionLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lossfunction.py</div><div id='n_file'> N File Name: lossfunction.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 58</div><BR>

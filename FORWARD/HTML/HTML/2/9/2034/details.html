@@ -1,0 +1,139 @@
+<html><h3>Pattern ID :2034
+</h3><img src='13842003.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.global_skip:
+            x = self.global_skip_conv(x)
+        x0 = self.conv_in(x)
+        x1<a id="change"> = </a>self.down_block(x0)
+        if h_prev is not None:
+            assert self.conv_hprev_down is not None
+            h_prev<a id="change"> = </a>self.conv_hprev_down(h_prev)
+            x1 = x1 + h_prev
+        x_rnn, h = self.gru(x1, h)
+        x_rnn = x_rnn + x1
+        x1 = self.up_block(x_rnn)
+        x1 = x1 + x0
+        m = self.conv_out(x1, skip=x if self.global_skip else None)
+        <a id="change">return </a>m<a id="change">, x_rnn, h</a>
+
+
+def _init_weights(module, name=None, out_init_scale=1.0):
+    if isinstance(module, (nn.Conv2d, nn.ConvTranspose2d, nn.LayerNorm)):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: Tensor, h: Optional[Tensor] = None) -&gt; Tuple[Tensor, Tensor, Tensor]:
+        &#47&#47 input shape: [B, C, T, F]
+        intermediate<a id="change"> = []</a>
+        for enc_layer in self.enc:
+            x = enc_layer(x)
+            <a id="change">intermediate.append(</a>x<a id="change">)</a>
+        x_rnn, h = self.rnn(x, h)
+        for dec_layer, x_enc in zip(self.dec, reversed(intermediate)):
+            x = dec_layer(x + x_enc)
+        <a id="change">return </a>x<a id="change">, x_rnn, h</a>
+
+
+class ComplexCompression(nn.Module):
+    def __init__(self, n_freqs: int, init_value: float = 0.5):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/946b362aa406f8a1808a252393351d0e7523130a#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L396' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13842003</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 946b362aa406f8a1808a252393351d0e7523130a</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: FreqStage</div><div id='n_method'> N Class Name: FreqStage</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 427</div><div id='n_start'> N Start Line: 396</div><div id='n_end'> N End Line: 403</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x<a id="change"> = </a>up_conv(x, before_pool,se=self.im_atts[i])
+        x_im = x
+
+        x = input        
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = self.mask_atts[i])
+        x_mask = x
+
+        x = input
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se=self.wm_atts[i])
+        x_wm = x
+
+        <a id="change">return </a>x_im<a id="change">,x_mask,x_wm</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input):
+        &#47&#47 Encoder convs
+        im_encoder_outs<a id="change"> = []</a>
+        mask_encoder_outs = []
+        x = input
+        for i, d_conv in enumerate(self.down_convs):
+            &#47&#47 d_conv, attn = nets
+            x, before_pool = d_conv(x)
+            <a id="change">im_encoder_outs.append(</a>before_pool<a id="change">)</a>
+            mask_encoder_outs.append(before_pool)
+        x_im = x
+        x_mask = x
+
+        &#47&#47 Decoder convs
+        x = x_im
+        for i, nets in enumerate(zip(self.up_convs, self.up_im_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if im_encoder_outs is not None:
+                before_pool = im_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=attn)
+        x_im = x
+
+        x<a id="change"> = </a>x_mask       
+        for i, nets in enumerate(zip(self.up_convs, self.up_mask_atts)):
+            up_conv, attn = nets
+            before_pool = None
+            if mask_encoder_outs is not None:
+                before_pool = mask_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = attn)
+        x_mask = x
+
+        <a id="change">return </a>x_im<a id="change">, x_mask</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-1599e3fabe6f8d9fdcda23a2f19a46bdeb3b09c3c28b82c490897e88308729a6L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13842009</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/resunet.py</div><div id='m_class'> M Class Name: SharedDecoder</div><div id='n_method'> N Class Name: SharedBottleNeck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/resunet.py</div><div id='n_file'> N File Name: src/networks/resunet.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        next_mem, next_lmem = map(torch.stack, (next_mem, next_lmem))
+        next_mem, next_lmem = map(torch.detach, (next_mem, next_lmem))
+
+        <a id="change">return </a>out<a id="change">, Memory(short = next_mem, long = next_lmem)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_memory_layers = len(self.memory_layers)
+        init_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem<a id="change"> = </a>default(mem, init_mem)
+        lmem<a id="change"> = </a>default(lmem, init_mem)
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        hiddens<a id="change"> = []</a>
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter, lmem_iter)) if use_memory else None
+
+            if use_memory:
+                <a id="change">hiddens.append(</a>x<a id="change">)</a>
+
+            x = attn(x, memories = memories, calc_memory = use_memory, input_mask = mask, pos_emb = pos_emb)
+            x = ff(x)
+
+        hiddens = torch.stack(hiddens)
+        out = self.to_logits(x)
+
+        &#47&#47 calculate next memory state
+
+        next_memory = self.memory_network(lmem, mem, hiddens)
+        <a id="change">return </a>out<a id="change">, next_memory</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13842088</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>

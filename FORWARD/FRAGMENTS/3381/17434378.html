@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, transformer=None):
+        if transformer is not None and not transformer.is_identity:
+            mus = [m.unsqueeze(0).expand(x.size(0), -1, -1, -1) for m in self.mus]
+            sigmas = [<a id="change">s.unsqueeze(0).expand(</a>x.size(0), <a id="change">-1</a>, -1, <a id="change">-1</a><a id="change">)</a> for s in self.sigmas]
+            beta = transformer.predict_parameters(x)
+            sigmas = transformer.apply_parameters(x, sigmas, beta, is_var=True)[1]
+            x, mus = transformer.apply_parameters(x, mus, beta)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, transformer=None):
+        if transformer is not None and not transformer.is_identity:
+            mus = self.mus.unsqueeze(1).expand(-1, x.size(0), -1, -1, -1)
+            sigmas = <a id="change">self.sigmas.unsqueeze(1).expand(-1</a>, x.size(0), -1, <a id="change">-1</a>, -1<a id="change">)</a>
+            beta = transformer.predict_parameters(x)
+            sigmas = transformer.apply_parameters(x, sigmas, beta, is_var=True)[1]
+            x, mus = transformer.apply_parameters(x, mus, beta)
+            sigmas = sigmas.permute(1, 0, 2, 3, 4)</code></pre>

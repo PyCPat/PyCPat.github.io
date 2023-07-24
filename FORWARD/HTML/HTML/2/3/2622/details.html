@@ -1,0 +1,44 @@
+<html><h3>Pattern ID :2622
+</h3><img src='14987174.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.fc3 = nn.Linear(84, 10)
+
+    def forward(self, x):
+        <a id="change">print(</a>"x:"<a id="change">)</a>
+        print(x)
+        print(len(x))
+        x = F.relu(self.pool(self.conv1(x)))
+        x = F.relu(self.pool(self.conv2(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print(x.shape)
+        x = x.view(-1, 20 * 30 * 30)
+        x = F.relu(self.fc1(x))
+        x<a id="change"> = </a><a id="change">F.dropout(</a>x<a id="change">, training=self.training)</a>
+        x = self.fc2(x)
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/abdullahselek/plant-disease-classification-pytorch/commit/d9334944630cdb79c98f1ab59b926555a52d2dd9#diff-c1e5242e16ae001f039af5b950e1cbfa9e2cc0140d1be1563fbf5f157e6dc1cfL20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14987174</div><div id='project'> Project Name: abdullahselek/plant-disease-classification-pytorch</div><div id='commit'> Commit Name: d9334944630cdb79c98f1ab59b926555a52d2dd9</div><div id='time'> Time: 2020-11-08</div><div id='author'> Author: abdullahselek@gmail.com</div><div id='file'> File Name: plant_disease_classification_pytorch/network.py</div><div id='m_class'> M Class Name: CNN</div><div id='n_method'> N Class Name: CNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: plant_disease_classification_pytorch/network.py</div><div id='n_file'> N File Name: plant_disease_classification_pytorch/network.py</div><div id='m_start'> M Start Line: 28</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 20</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, seq):
+        &#47&#47 seq - [batch_size, seq_len]
+        <a id="change">print(</a>self.transformer(seq, seq).shape<a id="change">)</a></code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, seq):
+        &#47&#47 seq - [batch_size, seq_len]
+        pos = torch.arange(0, seq[1]).unsqueeze(0).repeat(seq[0], 1)
+        seq<a id="change"> = </a><a id="change">self.dropout(</a>(self.tok_embed(seq) * self.scale) + self.pos_encoding(pos)<a id="change">)</a>
+        return self.transformer(seq, seq)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ammesatyajit/videobert/commit/8327374fe54e685ccb4dee5be64421b56903873d#diff-bfbdfcab00b44379d0d84330903c598d633961fc4e68d6adc21c8b9cea49fc5aL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14987182</div><div id='project'> Project Name: ammesatyajit/videobert</div><div id='commit'> Commit Name: 8327374fe54e685ccb4dee5be64421b56903873d</div><div id='time'> Time: 2020-09-19</div><div id='author'> Author: ammesatyajit@gmail.com</div><div id='file'> File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='m_class'> M Class Name: VideoTransformer</div><div id='n_method'> N Class Name: VideoTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='n_file'> N File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='m_start'> M Start Line: 146</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        print(x.shape)
+        <a id="change">print(</a>x.dtype<a id="change">)</a>
+        embed = self.embedding(x)  &#47&#47 [batch_size, seq_len, embeding]=[64, 32, 64]
+        out, _ = self.lstm(embed)
+        out = torch.cat((embed, out), 2)
+        out = F.relu(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+        maxpool_input = fc_output.permute(0, 2, 1)  &#47&#47 [batch_size, hidden_size*2, max_seq_len]
+        maxpool_output = self.maxpool(maxpool_input).squeeze()   &#47&#47 [batch_size, hidden_size*2]
+
+        cls_input = <a id="change">self.dropout(</a>maxpool_output<a id="change">)</a>
+        out<a id="change"> = </a>self.classfier(cls_input)
+
+        return out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ygzwqzd/lamda-ssl/commit/2bff86050026e23fa26339d45b62e1077805a3d6#diff-de03df31d28d6abdaa082f260491d6ad2bcdc691bec9d0d3bb28769b6780da1bL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14987176</div><div id='project'> Project Name: ygzwqzd/lamda-ssl</div><div id='commit'> Commit Name: 2bff86050026e23fa26339d45b62e1077805a3d6</div><div id='time'> Time: 2022-02-19</div><div id='author'> Author: 1129198222@qq.com</div><div id='file'> File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='m_class'> M Class Name: TextRCNN</div><div id='n_method'> N Class Name: TextRCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='n_file'> N File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 39</div><BR>

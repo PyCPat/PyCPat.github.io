@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, time_emb):
+        h = self.block1(x)
+        h += <a id="change">self.mlp(</a>time_emb<a id="change">)</a>[:, :, None, None]
+        h = self.block2(h)
+        return h + self.res_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, time_emb):
+        hiddens = [fn(x) for fn in self.blocks_in]
+
+        time_emb<a id="change"> = </a><a id="change">self.mlp(</a>time_emb<a id="change">)</a>
+        time_emb = rearrange(time_emb, &quotb c -&gt; b c () ()&quot)
+
+        hiddens = [h<a id="change"> + </a>time_emb for h in hiddens]
+        hiddens = [fn(h) for fn, h in zip(self.blocks_out, hiddens)]
+        return sum(hiddens) + self.res_conv(x)
+</code></pre>

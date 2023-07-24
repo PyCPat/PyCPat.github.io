@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :238
+</h3><img src='860429.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out)
+
+def FeedForward(dim, mult = 4):
+    return nn.Sequential(</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.rel_pos_bias = RelPosBias2d(fmap_size, heads)
+
+    def forward(self, x):
+        fmap_size<a id="change"> = </a><a id="change">x.shape[-1]</a>
+        h = self.heads
+
+        x = self.norm(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/parti-pytorch/commit/2b18d49c36b33008c089f578c7fc4b00e36127bd#diff-a02d1835fd6c425c7a4307e1166db05d45762a0ee5cc31b1ecd3b30a4e054fcfL253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 860429</div><div id='project'> Project Name: lucidrains/parti-pytorch</div><div id='commit'> Commit Name: 2b18d49c36b33008c089f578c7fc4b00e36127bd</div><div id='time'> Time: 2022-06-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: parti_pytorch/vit_vqgan.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: parti_pytorch/vit_vqgan.py</div><div id='n_file'> N File Name: parti_pytorch/vit_vqgan.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 255</div><div id='n_start'> N Start Line: 256</div><div id='n_end'> N End Line: 274</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            attended = transformer(stage_tokens[:, :-1])
+            attended = rearrange_with_anon_dims(attended, &quot(...b) n d -&gt; ...b n d&quot, b = prec_dims)
+
+            start_tokens<a id="change"> = </a><a id="change">rearrange(</a>attended, <a id="change">&quot... n d -&gt; ... n 1 d&quot</a><a id="change">)</a>
+
+        logits = self.to_logits(attended)
+
+        if flattened_dims:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            return logits
+
+        logits<a id="change"> = </a><a id="change">logits[..., :-1, :]</a>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+        labels = rearrange(ids, &quotb ... -&gt; b (...)&quot)
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/56a8e24814d90cebb03454d9feed0bff4bee69ba#diff-6aad5c31d64c6b7a1a8cd103c9aceb7a4b5bb6c1b41d581e98e22e1a4473b554L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 860428</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 56a8e24814d90cebb03454d9feed0bff4bee69ba</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_class'> M Class Name: HierarchicalCausalTransformer</div><div id='n_method'> N Class Name: HierarchicalCausalTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='n_file'> N File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_start'> M Start Line: 279</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 293</div><div id='n_end'> N End Line: 344</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if not exists(self.rel_pos) or not self.cache_rel_pos:
+            positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid = <a id="change">rearrange(</a>grid, <a id="change">&quotc ... -&gt; (...) c&quot</a><a id="change">)</a>
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos<a id="change"> = </a>torch.sign(rel_pos) * torch.log(rel_pos.abs() + 1)
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias<a id="change"> = </a><a id="change">bias[rel_dist_indices]</a>
+        return rearrange(bias, &quoti j h -&gt; h i j&quot)
+
+&#47&#47 helper classes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 860411</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize<a id="change"> = </a><a id="change">rearrange(</a>quantize, <a id="change">&quotb d n -&gt; b n d&quot</a><a id="change">)</a>
+
+        return quantize, embed_ind, loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        need_transpose = not self.channel_last and not self.accept_image_fmap
+
+        if self.accept_image_fmap:
+            height<a id="change">, width = </a><a id="change">x.shape[-2:]</a>
+            x = rearrange(x, &quotb c h w -&gt; b (h w) c&quot)
+
+        if need_transpose:
+            x = rearrange(x, &quotb d n -&gt; b n d&quot)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/c9725a6e2556251a8b8a5d73795dabdc59c7c0f4#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL300' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 860433</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: c9725a6e2556251a8b8a5d73795dabdc59c7c0f4</div><div id='time'> Time: 2021-12-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: VectorQuantize</div><div id='n_method'> N Class Name: VectorQuantize</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 303</div><div id='m_end'> M End Line: 331</div><div id='n_start'> N Start Line: 304</div><div id='n_end'> N End Line: 342</div><BR>

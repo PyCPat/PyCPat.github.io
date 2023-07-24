@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :3439
+</h3><img src='17530923.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(encoder.get_feature_size(), action_size)
+
+    def forward(self, x, with_logits=False):
+        h<a id="change"> = </a><a id="change">self.encoder(</a>x<a id="change">)</a>
+        logits<a id="change"> = </a>self.fc(h)
+        log_probs = F.log_softmax(logits, dim=1)
+        if with_logits:
+            return log_probs, logits</code></pre><h3>After Change</h3><pre><code class='java'>
+        self._fc = nn.Linear(encoder.get_feature_size(), action_size)
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        <a id="change">return </a>self.compute_log_probs_with_logits(x)[0]
+
+    def compute_log_probs_with_logits(
+        self, x: torch.Tensor</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/takuseno/d3rlpy/commit/9ccb6121c0baead0ffb85b64207c4fe6dc5fd5b5#diff-1f204a5aa28e1b00de05c92e64251262b1aa2c8a5dbcab075183cdfb6077937bL82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17530923</div><div id='project'> Project Name: takuseno/d3rlpy</div><div id='commit'> Commit Name: 9ccb6121c0baead0ffb85b64207c4fe6dc5fd5b5</div><div id='time'> Time: 2021-01-01</div><div id='author'> Author: takuma.seno@gmail.com</div><div id='file'> File Name: d3rlpy/models/torch/imitators.py</div><div id='m_class'> M Class Name: DiscreteImitator</div><div id='n_method'> N Class Name: DiscreteImitator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: d3rlpy/models/torch/imitators.py</div><div id='n_file'> N File Name: d3rlpy/models/torch/imitators.py</div><div id='m_start'> M Start Line: 82</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 83</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        &#47&#47 x: tensor of shape (batch_size, seq_length, hidden_size)
+        encoder_hidden<a id="change"> = </a><a id="change">self.encoder(</a>x<a id="change">)</a>
+
+        hidden<a id="change"> = </a>encoder_hidden
+        for t in range(self.length):
+            reconstruct_output, hidden = self.decoder(x, hidden)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 x: tensor of shape (batch_size, seq_length, hidden_size)
+        reconstruct_output, hidden = self.decoder(x, self.encoder(x))
+
+        <a id="change">return </a>reconstruct_output.view(x.shape[0], -1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tvs-ai/pytorch_rppgs/commit/f4f016c311e1e2e15b7fb36a7e161c8a8d4e394b#diff-ae89586ec363ed953ca5783459a0912ff6e39c44de9f9262fe0196db59bc774bL57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17530922</div><div id='project'> Project Name: tvs-ai/pytorch_rppgs</div><div id='commit'> Commit Name: f4f016c311e1e2e15b7fb36a7e161c8a8d4e394b</div><div id='time'> Time: 2023-01-02</div><div id='author'> Author: 57242033+najy97@users.noreply.github.com</div><div id='file'> File Name: vid2bp/nets/modules/LSTMAutoEncoder.py</div><div id='m_class'> M Class Name: LSTMAutoEncoder</div><div id='n_method'> N Class Name: LSTMAutoEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vid2bp/nets/modules/LSTMAutoEncoder.py</div><div id='n_file'> N File Name: vid2bp/nets/modules/LSTMAutoEncoder.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 57</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+
+        y<a id="change"> = </a><a id="change">self.encoder(</a>x<a id="change">)</a>
+        f = self.feature_maker(y)
+        y_<a id="change"> = </a>self.feature_demaker(f)
+        x_ = self.decoder(y_, self.encoder.pool_indeces)
+
+        return x_</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.decoder = Decoder(decoder_layers)
+
+    def forward(self, x):
+        <a id="change">return </a>self.decode(self.encode(x))
+
+    def encode(self, x):
+        return self.encoder(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anderzzz/monkey_caput/commit/030b5d74b285434e4b91e4727c0183f708c4443e#diff-1620bcb4e00b771ef2a1627cff2489ecd8ae6cff18fc61bc146b0469472db071L177' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17530927</div><div id='project'> Project Name: anderzzz/monkey_caput</div><div id='commit'> Commit Name: 030b5d74b285434e4b91e4727c0183f708c4443e</div><div id='time'> Time: 2020-10-08</div><div id='author'> Author: ohrn.anders@gmail.com</div><div id='file'> File Name: ae_cluster.py</div><div id='m_class'> M Class Name: AutoEncoder</div><div id='n_method'> N Class Name: AutoEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ae_cluster.py</div><div id='n_file'> N File Name: ae_cluster.py</div><div id='m_start'> M Start Line: 179</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 162</div><BR>

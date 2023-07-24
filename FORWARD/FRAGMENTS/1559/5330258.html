@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                top, down, left, right = self.query_neighbors(y_anchor=y_anchor, x_anchor=x_anchor, padding=padding)
+                mean_matrix = self.mean_table[top:down + 1, left:right + 1, :]
+                std_matrix = self.std_table[top:down + 1, left:right + 1, :]
+                x_mean = <a id="change">mean_matrix.mean(dim=0).mean(dim=0).unsqueeze(0</a><a id="change">)</a>.unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel *  &#47&#47 should deal with the boundary
+                x_std = std_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel * 
+                &#47&#47x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                &#47&#47x_std = x_std.unsqueeze(-1).unsqueeze(-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                top = y_anchor
+                down = y_anchor + 2 * padding + 1
+                left = x_anchor
+                right<a id="change"> = </a>x_anchor<a id="change"> + 2 *padding + 1</a>
+                x_mean = self.padded_mean_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                x_std = self.padded_std_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                assert self.kernel.shape == x.mean.shape
+                x_mean = x_mean<a id="change"> * </a>self.kernel &#47&#47 1, C, H, W
+                x_std = x_std * self.kernel &#47&#47 1, C, H, W
+                x_mean<a id="change"> = </a><a id="change">x_mean.flatten(start_dim=2).sum(dim=2)</a> &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_std = x_std.flatten(start_dim=2).sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]</code></pre>

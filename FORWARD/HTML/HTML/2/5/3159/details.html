@@ -1,0 +1,107 @@
+<html><h3>Pattern ID :3159
+</h3><img src='16871712.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            img_size = x.shape[-2:]  &#47&#47 height, width
+            s = [0.83, 0.67]  &#47&#47 scales
+            y = []
+            <a id="change">for </a>i, xi in <a id="change">enumerate(</a>(x,
+                                    torch_utils.scale_img(x.flip(3), s[0]),  &#47&#47 flip-lr and scale
+                                    torch_utils.scale_img(x, s[1]),  &#47&#47 scale
+                                    )<a id="change">):
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % i, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])
+                </a>y.append(self.forward_once(xi)[0])
+
+            y[1][..., :4] /= s[0]  &#47&#47 scale
+            y[1][..., 0] = img_size[1] - y[1][..., 0]  &#47&#47 flip lr</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % s, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])  &#47&#47 save
+                yi[..., :4] /= si  &#47&#47 de-scale
+                if fi is 2:
+                    yi[<a id="change">...</a><a id="change">, 1</a>] = img_size[0] - yi[<a id="change">...</a><a id="change">, 1</a>]  &#47&#47 de-flip ud
+                elif fi is 3:
+                    yi[..., 0] = img_size[1] - yi[..., 0]  &#47&#47 de-flip lr
+                y.append(yi)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wmcnally/kapao/commit/1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16871712</div><div id='project'> Project Name: wmcnally/kapao</div><div id='commit'> Commit Name: 1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 98</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if input_mask is None:
+            input_mask = torch.full_like(x, True, device=device, dtype=torch.bool)
+
+        <a id="change">for </a>ind, x in <a id="change">enumerate(</a>args<a id="change">):
+            </a>x, padding = pad_to_multiple(x, self.pad_multiple, dim=self.pad_dim)
+            args[ind] = x
+
+        if padding != 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, *args, **kwargs):
+        q, args = args[0], list(args)
+        b<a id="change">, h, t, _, device</a> = *q.shape, q.device
+
+        input_mask = kwargs.get(&quotinput_mask&quot)
+
+        if input_mask is None:
+            input_mask = torch.full((b<a id="change">, t</a>), True, device=device, dtype=torch.bool)
+
+        args = map(lambda t: pad_to_multiple(t, self.pad_multiple, dim=-2), args)
+        new_mask = pad_to_multiple(input_mask, self.pad_multiple, dim=-1, value=False)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/f93f7a6b829422e259a3e439f1bf0baa7abc2e30#diff-c04e8e361ce0b75e0cbf803f7b9344c299f315eb415e580c26a289c41a3c361eL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16871715</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: f93f7a6b829422e259a3e439f1bf0baa7abc2e30</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/autopadder.py</div><div id='m_class'> M Class Name: Autopadder</div><div id='n_method'> N Class Name: Autopadder</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/autopadder.py</div><div id='n_file'> N File Name: routing_transformer/autopadder.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 34</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input, encoder_outs=None):
+        &#47&#47 im branch
+        x = input
+        <a id="change">for </a>i, up_conv in <a id="change">enumerate(</a>self.up_convs<a id="change">):
+            </a>before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=self.im_atts[i])</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Decoder convs
+        x = x_im
+        for i, nets in enumerate(zip(self.up_convs, self.up_im_atts)):
+            up_conv<a id="change">, attn</a> = nets
+            before_pool = None
+            if im_encoder_outs is not None:
+                before_pool = im_encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=attn)
+        x_im = x
+
+        x = x_mask       
+        for i, nets in enumerate(zip(self.up_convs, self.up_mask_atts)):
+            up_conv<a id="change">, attn</a> = nets
+            before_pool = None
+            if mask_encoder_outs is not None:
+                before_pool = mask_encoder_outs[-(i+2)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-1599e3fabe6f8d9fdcda23a2f19a46bdeb3b09c3c28b82c490897e88308729a6L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16871701</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/resunet.py</div><div id='m_class'> M Class Name: SharedDecoder</div><div id='n_method'> N Class Name: SharedBottleNeck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/resunet.py</div><div id='n_file'> N File Name: src/networks/resunet.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            img_size = x.shape[-2:]  &#47&#47 height, width
+            s = [0.83, 0.67]  &#47&#47 scales
+            y = []
+            <a id="change">for </a>i, xi in <a id="change">enumerate(</a>(x,
+                                    torch_utils.scale_img(x.flip(3), s[0]),  &#47&#47 flip-lr and scale
+                                    torch_utils.scale_img(x, s[1]),  &#47&#47 scale
+                                    )<a id="change">):
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % i, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])
+                </a>y.append(self.forward_once(xi)[0])
+
+            y[1][..., :4] /= s[0]  &#47&#47 scale
+            y[1][..., 0] = img_size[1] - y[1][..., 0]  &#47&#47 flip lr</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % s, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])  &#47&#47 save
+                yi[..., :4] /= si  &#47&#47 de-scale
+                if fi is 2:
+                    yi[...<a id="change">, 1</a>] = img_size[0] - yi[...<a id="change">, 1</a>]  &#47&#47 de-flip ud
+                elif fi is 3:
+                    yi[..., 0] = img_size[1] - yi[..., 0]  &#47&#47 de-flip lr
+                y.append(yi)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/positive666/yolov5_research/commit/1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16871719</div><div id='project'> Project Name: positive666/yolov5_research</div><div id='commit'> Commit Name: 1d17b9af0f68ee97f9edc5f10fea51e9af9ef14e</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 98</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        <a id="change">for </a>i, att_timesteps in <a id="change">enumerate(</a>count<a id="change">):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            </a>self.c_t[i] = self.attentionStep(first_h_a, first_h_b, att_timesteps)
+
+        if self.drop &lt; 1.0:
+            self.c_t = self.dropout(self.c_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+        return out
+
+    def forward(self, x):
+        batch_size<a id="change">, time_steps, _</a> = x.size()
+        x = self.proj(x)
+        x = self.dropout(x)
+
+        out = torch.zeros((batch_size<a id="change">, time_steps, self.hidden_dim</a>))
+
+        for cur_time in range(time_steps):
+            cur_x = x[:, : cur_time + 1, :]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16871723</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>

@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1523
+</h3><img src='5104761.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for vq in self.vqs:
+            _xq, _diff, _codes = vq(x - xq)
+            diff = diff + _diff
+            <a id="change">xq</a><a id="change"> = </a>xq + _xq
+            codes.append(_codes)
+        codes = torch.cat(codes, 1)
+        <a id="change">return xq</a><a id="change">, (x - xq).pow(2).mean(), codes</a>
+
+    def encode(self, x):
+        return self.forward(x)[-1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        all_losses = []
+        all_indices = []
+
+        n_q = n_q or <a id="change">len(</a>self.layers<a id="change">)</a>
+
+        for layer in self.layers[:n_q]:
+            quantized, indices, loss = layer(residual)
+            residual = residual - quantized</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/acids-ircam/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5104761</div><div id='project'> Project Name: acids-ircam/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: ResidualVQ</div><div id='n_method'> N Class Name: ResidualVectorQuantization</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 289</div><div id='n_end'> N End Line: 307</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for vq in self.vqs:
+            _xq, _diff, _codes = vq(x - xq)
+            diff = diff + _diff
+            <a id="change">xq</a><a id="change"> = </a>xq + _xq
+            codes.append(_codes)
+        codes = torch.cat(codes, 1)
+        <a id="change">return </a>xq<a id="change">, (x - xq).pow(2).mean(), codes</a>
+
+    def encode(self, x):
+        return self.forward(x)[-1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        all_losses = []
+        all_indices = []
+
+        n_q = n_q or <a id="change">len(</a>self.layers<a id="change">)</a>
+
+        for layer in self.layers[:n_q]:
+            quantized, indices, loss = layer(residual)
+            residual = residual - quantized</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5104763</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: ResidualVQ</div><div id='n_method'> N Class Name: ResidualVectorQuantization</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 289</div><div id='n_end'> N End Line: 307</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        kl_loss = -0.5 * torch.sum(1 + log_vars - mus.pow(2) - log_vars.exp())
+
+        &#47&#47 Residual Attention Loss
+        <a id="change">attn_loss</a><a id="change"> = </a>self.guided_loss(attns.transpose(-2, -1), src_lens_targets, mel_lens_targets)
+
+        total_loss = (
+            mel_loss + duration_loss +<a id="change"> beta * kl_loss + </a>attn_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,
+            duration_loss,
+            kl_loss,
+            attn_loss,
+            beta</a>,
+        )
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mel_iter_comp = torch.sigmoid(mel_iter)
+            mel_iter_loss += self.sdtw_loss(mel_iter_comp, mel_targets_comp).mean()
+            &#47&#47 mel_iter_loss += self.sdtw_loss(mel_iter, mel_targets).mean()
+        mel_loss = (mel_iter_loss / (<a id="change">len(</a>mel_iters<a id="change">)</a> * mel_lens_targets)).mean()
+
+        &#47&#47 Duration Loss
+        duration_loss = self.lambda_ * (self.mae_loss(durations.sum(-1), mel_lens_targets) / src_lens_targets).mean()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/parallel-tacotron2/commit/2c2f8c0876192de39c8e6d3c4f579dc68a50a678#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5104762</div><div id='project'> Project Name: keonlee9420/parallel-tacotron2</div><div id='commit'> Commit Name: 2c2f8c0876192de39c8e6d3c4f579dc68a50a678</div><div id='time'> Time: 2021-05-25</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: ParallelTacotron2Loss</div><div id='n_method'> N Class Name: ParallelTacotron2Loss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 86</div><BR>

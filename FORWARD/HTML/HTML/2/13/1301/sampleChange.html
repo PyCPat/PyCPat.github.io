@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[..., None], 0.)
+
+        gate = rearrange(gate, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        gate = <a id="change">einsum(&quotb h n d, h n m -&gt; b h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate<a id="change"> = </a>gate + rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate<a id="change"> = </a><a id="change">rearrange(</a>gate, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+
+        return gate * res
+
+def gMLPBlock(</code></pre><h3>After Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[None, ...], 0.)
+
+        gate = rearrange(gate, &quotb w n (h d) -&gt; b w h n d&quot, h = h)
+        gate = <a id="change">einsum(&quotb w h n d, h m n -&gt; b w h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate = gate + rearrange(bias, &quoth n -&gt; () () h n ()&quot)
+
+        gate<a id="change"> = </a>rearrange(gate, &quotb w h n d -&gt; b w n (h d)&quot)
+
+        out<a id="change"> = </a>gate * res
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb w n d -&gt; b (w n) d&quot</a><a id="change">)</a>
+        return out[:, :n]
+
+def gMLPBlock(
+    *,</code></pre>

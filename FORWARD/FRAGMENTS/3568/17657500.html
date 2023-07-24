@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        else:
+            x = x + self.drop_path(
+                self.gamma_1 * self.attn(self.norm1(x), H, W))
+            x = x + self.drop_path(self.gamma_2 * <a id="change">self.mlp(</a>self.norm2(x)<a id="change">)</a>)
+        if not self.window and self.aggregation != &quotattn&quot:
+            x = self.conv_aggregation(x, H, W)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+            H, W = x.shape[1], x.shape[2]
+            x, pad_hw = window_partition(x, self.window_size)
+
+        x<a id="change"> = </a>self.attn(x)
+        &#47&#47 Reverse window partition
+        if self.window_size &gt; 0:
+            x<a id="change"> = </a>window_unpartition(x, self.window_size, pad_hw, (H, W))
+
+        x = shortcut + self.drop_path(x)
+        x = x + self.drop_path(self.mlp(self.norm2(x)))
+
+        <a id="change">if self.use_residual_block</a><a id="change">:
+            </a>x<a id="change"> = </a>self.residual(x.permute(0, 3, 1, 2)).permute(0, 2, 3, 1)
+
+        return x
+</code></pre>

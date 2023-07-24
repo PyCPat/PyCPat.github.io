@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            pred = pred * mask
+            target = target * mask
+
+        a<a id="change"> = </a><a id="change">torch.sum(</a>pred * target<a id="change">)</a>
+        b = torch.sum(pred)
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        pred = pred.contiguous().view(pred.size(0), -1)
+        gt = gt.contiguous().view(gt.size(0), -1)
+
+        mask = mask.contiguous().view(<a id="change">mask.size(0</a><a id="change">)</a>, -1)
+        pred = pred * mask
+        gt<a id="change"> = </a>gt<a id="change"> * </a>mask
+
+        dice_coeff = (2 * (pred * gt).sum()) / (
+            pred.sum() + gt.sum() + self.eps)</code></pre>

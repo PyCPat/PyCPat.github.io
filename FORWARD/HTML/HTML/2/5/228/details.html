@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :228
+</h3><img src='854286.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            gt_roi_label        = torch.Tensor(gt_roi_label).long()
+            sample_roi_index    = torch.zeros(len(sample_roi))
+            
+            <a id="change">if feature.is_cuda</a><a id="change">:
+                </a>sample_roi          = sample_roi.cuda()
+                sample_roi_index    = sample_roi_index.cuda()
+                gt_roi_loc          = gt_roi_loc.cuda()
+                gt_roi_label<a id="change">        = gt_roi_label.cuda()</a>
+
+            roi_cls_loc, roi_score = self.faster_rcnn([torch.unsqueeze(feature, 0), sample_roi, sample_roi_index, img_size], mode = &quothead&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            sample_roi          = torch.Tensor(sample_roi).type_as(rpn_locs)
+            gt_roi_loc          = torch.Tensor(gt_roi_loc).type_as(rpn_locs)
+            gt_roi_label        = torch.Tensor(gt_roi_label).type_as(rpn_locs).long()
+            sample_roi_index    = <a id="change">torch.zeros(len(sample_roi)).type_as(</a>rpn_locs<a id="change">)</a>.long()
+            
+            roi_cls_loc, roi_score = self.faster_rcnn([torch.unsqueeze(feature, 0), sample_roi, sample_roi_index, img_size], mode = &quothead&quot)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bubbliiiing/faster-rcnn-pytorch/commit/05e6e50b241e1ae4707e28c3b3fc388fd7141eb4#diff-c18f71fdc3c30323b9b5c1cfc26682b841f5799de388764d1193e8fcdac10af5L255' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854286</div><div id='project'> Project Name: bubbliiiing/faster-rcnn-pytorch</div><div id='commit'> Commit Name: 05e6e50b241e1ae4707e28c3b3fc388fd7141eb4</div><div id='time'> Time: 2022-04-20</div><div id='author'> Author: 3323290568@qq.com</div><div id='file'> File Name: nets/frcnn_training.py</div><div id='m_class'> M Class Name: FasterRCNNTrainer</div><div id='n_method'> N Class Name: FasterRCNNTrainer</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/frcnn_training.py</div><div id='n_file'> N File Name: nets/frcnn_training.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 299</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 286</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47   当图片中不存在真实框的时候，所有特征点均为负样本
+                &#47&#47-------------------------------------------------------&#47&#47
+                alpha_factor = torch.ones_like(classification) * alpha
+                <a id="change">if cuda</a><a id="change">:
+                    </a>alpha_factor<a id="change"> = alpha_factor.cuda()</a>
+                alpha_factor = 1. - alpha_factor
+                focal_weight = classification
+                focal_weight = alpha_factor * torch.pow(focal_weight, gamma)
+                </code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47   当图片中不存在真实框的时候，所有特征点均为负样本
+                &#47&#47-------------------------------------------------------&#47&#47
+                alpha_factor = torch.ones_like(classification) * alpha
+                alpha_factor = <a id="change">alpha_factor.type_as(</a>classification<a id="change">)</a>
+
+                alpha_factor = 1. - alpha_factor
+                focal_weight = classification
+                focal_weight = alpha_factor * torch.pow(focal_weight, gamma)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/efficientdet-pytorch/commit/6ddbe5b42ac0d8cbc3a0555f31d6f10f91a039b3#diff-beadcef9e59e2274c0e67c0f410111f88384261ba65e7c9dff07023d6fb559faL111' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854248</div><div id='project'> Project Name: bubbliiiing/efficientdet-pytorch</div><div id='commit'> Commit Name: 6ddbe5b42ac0d8cbc3a0555f31d6f10f91a039b3</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: 3323290568@qq.com</div><div id='file'> File Name: nets/efficientdet_training.py</div><div id='m_class'> M Class Name: FocalLoss</div><div id='n_method'> N Class Name: FocalLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/efficientdet_training.py</div><div id='n_file'> N File Name: nets/efficientdet_training.py</div><div id='m_start'> M Start Line: 120</div><div id='m_end'> M End Line: 232</div><div id='n_start'> N Start Line: 139</div><div id='n_end'> N End Line: 220</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47   当图片中不存在真实框的时候，所有特征点均为负样本
+                &#47&#47-------------------------------------------------------&#47&#47
+                alpha_factor = torch.ones_like(classification) * alpha
+                <a id="change">if </a>cuda<a id="change">:
+                    </a>alpha_factor<a id="change"> = alpha_factor.cuda()</a>
+                alpha_factor = 1. - alpha_factor
+                focal_weight = classification
+                focal_weight = alpha_factor * torch.pow(focal_weight, gamma)
+                </code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47   当图片中不存在真实框的时候，所有特征点均为负样本
+                &#47&#47-------------------------------------------------------&#47&#47
+                alpha_factor = torch.ones_like(classification) * alpha
+                alpha_factor = <a id="change">alpha_factor.type_as(</a>classification<a id="change">)</a>
+
+                alpha_factor = 1. - alpha_factor
+                focal_weight = classification
+                focal_weight = alpha_factor * torch.pow(focal_weight, gamma)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/retinanet-pytorch/commit/38a6ae1801d6402c1b439fe0f96c8d531d884aad#diff-68cae4a4f719f6240fd3339592a15f2ac567077ffc1b3e4235ec05793f968bb2L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 854218</div><div id='project'> Project Name: bubbliiiing/retinanet-pytorch</div><div id='commit'> Commit Name: 38a6ae1801d6402c1b439fe0f96c8d531d884aad</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: 3323290568@qq.com</div><div id='file'> File Name: nets/retinanet_training.py</div><div id='m_class'> M Class Name: FocalLoss</div><div id='n_method'> N Class Name: FocalLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/retinanet_training.py</div><div id='n_file'> N File Name: nets/retinanet_training.py</div><div id='m_start'> M Start Line: 119</div><div id='m_end'> M End Line: 231</div><div id='n_start'> N Start Line: 139</div><div id='n_end'> N End Line: 220</div><BR>

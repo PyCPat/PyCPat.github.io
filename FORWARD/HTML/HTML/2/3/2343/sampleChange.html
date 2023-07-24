@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss = self.decoder(x, unet_number = unet_number, **kwargs)
+            scaled_loss = self.scale(loss / divisor, unet_number = unet_number)
+            scaled_loss.backward()
+        return <a id="change">loss.item()</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            with autocast(enabled = self.amp):
+                loss = self.decoder(*chunked_args, unet_number = unet_number, **chunked_kwargs)
+
+                total_loss += <a id="change">loss.item() * </a>chunk_size
+                total_samples += chunk_size
+
+                self.scale(loss * (chunk_size / batch_size), unet_number = unet_number).backward()</code></pre>

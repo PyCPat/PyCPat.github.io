@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return embedding
+
+    def forward(self, embedding, speed, command):
+        batch_size = <a id="change">embedding.size(0</a><a id="change">)</a>
+
+        if self._input_speed:
+            embedding += self._speed_in(speed)
+
+        control_pred = 0.
+        for i, branch in enumerate(self._branches):
+            &#47&#47 Choose control for branch of only active command
+            &#47&#47 We check for (command - 1) since navigational command 0 is ignored
+            control_pred += branch(embedding) * <a id="change">(i == (command - 1)).expand(</a>batch_size, 3<a id="change">)</a>
+
+        if self.predict_speed:
+            speed_pred = self._speed_out(embedding)
+            return control_pred, speed_pred</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i, branch in enumerate(self._branches):
+            &#47&#47 Choose control for branch of only active command
+            &#47&#47 We check for (command - 1) since navigational command 0 is ignored
+            control_pred += branch(embedding) * (i == (<a id="change">command.unsqueeze(1</a><a id="change">)</a> - 1))
+
+        if self.predict_speed:
+            speed_pred = self._speed_out(embedding)</code></pre>

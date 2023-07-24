@@ -2,45 +2,30 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv3 = nn.Conv2d(planes, out_planes, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn3 = nn.BatchNorm2d(out_planes)
 
-        self.use_res_connect = self.stride == 1 and in_channels == out_channels
+        self.shortcut = <a id="change">nn.Sequential()</a>
+        if stride == 1 and in_planes != out_planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.BatchNorm2d(out_planes),</code></pre><h3>After Change</h3><pre><code class='java'>
 
-        self.inv_block = <a id="change">nn.Sequential(
-            </a>nn.Conv2d(in_channels, in_channels * expand_ratio, 1, 1, 0, bias=False),
-            nn.BatchNorm2d(in_channels * expand_ratio),
-            nn.PReLU(),
-
-            nn.Conv2d(in_channels * expand_ratio, in_channels * expand_ratio, 3, stride, 1,
-                      groups=in_channels * expand_ratio, bias=False),
-            nn.BatchNorm2d(in_channels * expand_ratio),
-            nn.PReLU(),
-
-            nn.Conv2d(in_channels * expand_ratio, out_channels, 1, 1, 0, bias=False),
-            nn.BatchNorm2d(out_channels),
-            SELayer(out_channels, 8, nn.PReLU, outp_size)<a id="change">
-        )</a>
-
-    def forward(self, x):
-        if self.use_res_connect:
-            return x + self.inv_block(x)</code></pre><h3>After Change</h3><pre><code class='java'>
-        self.stride = stride
-        assert stride in [1, 2]
+        norm_layer = nn.BatchNorm2d
 
         hidden_dim = int(round(inp<a id="change"> * </a>expand_ratio))
         self.use_res_connect = self.stride == 1 and inp == oup
 
-        layers = <a id="change">[]</a>
+        layers: List[nn.Module] = <a id="change">[]</a>
         if expand_ratio != 1:
-            &#47&#47 pw
             layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
         <a id="change">layers.extend(</a>[
-            &#47&#47 dw
-            ConvBNReLU(hidden_dim, hidden_dim, stride=stride, groups=hidden_dim),
-            &#47&#47 pw-linear
+            ConvBNReLU(hidden_dim, hidden_dim,
+                       stride=stride, groups=hidden_dim),
             nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
-            nn.BatchNorm2d(oup),
+            norm_layer(oup),
         ]<a id="change">)</a>
         self.conv = nn.Sequential(*layers)
+        self.out_channels = oup
 
-    def forward(self, x):
-        if self.use_res_connect:</code></pre>
+    def forward(self, x: Tensor) -&gt; Tensor:</code></pre>

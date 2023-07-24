@@ -1,0 +1,45 @@
+<html><h3>Pattern ID :1873
+</h3><img src='13191673.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, item):
+        boxes, class_idx = item[&quotboxes&quot], item[&quotclass_idx&quot]
+        matches, match_labels = self.get_matches(boxes, class_idx)
+        <a id="change">item[&quotproposal_targets_cls&quot]</a> = self.get_cls_targets(match_labels)
+        item[&quotproposal_targets_reg&quot] = self.get_reg_targets(boxes, matches, match_labels)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        matches, match_labels = self.get_matches(boxes, class_idx)
+        G_cls, M_cls = self.get_cls_targets(match_labels)
+        G_reg, M_reg = self.get_reg_targets(boxes, matches, G_cls)
+        <a id="change">item.update(</a>dict(G_cls=G_cls, G_reg=G_reg, M_cls=M_cls, M_reg=M_reg)<a id="change">)</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/03a0b92af929371cce91e1666b92f92192e49129#diff-92d2f0a87d97561bf92bfb7209380b79a7e13e6266647bda36affc39e9cd48abL103' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13191673</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 03a0b92af929371cce91e1666b92f92192e49129</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/core/proposal_targets.py</div><div id='m_class'> M Class Name: ProposalTargetAssigner</div><div id='n_method'> N Class Name: ProposalTargetAssigner</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/core/proposal_targets.py</div><div id='n_file'> N File Name: pvrcnn/core/proposal_targets.py</div><div id='m_start'> M Start Line: 103</div><div id='m_end'> M End Line: 104</div><div id='n_start'> N Start Line: 103</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.ce = CELoss()
+
+    def forward(self, pred: torch.Tensor, batch: Dict[str, Any], device: torch.device):
+        targets = <a id="change">batch[&quottargets&quot]</a>.to(device)
+        dice_loss, _ = self.dice(pred, batch, device)
+        ce_loss, _ = self.ce(pred, batch, device)
+        total_loss = dice_loss + ce_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+        for weight, loss_fn in zip(self.weights, self.losses):
+          loss, loss_dict = loss_fn(pred, batch, device)
+          total_loss += (weight*loss)
+          <a id="change">total_loss_dict.update(</a>loss_dict<a id="change">)</a>
+
+        total_loss_dict.update({&quotTotal&quot: total_loss.item()})
+        return total_loss, total_loss_dict</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/bd701b96ee6d212c8fe26fc01dc12941460e5931#diff-eec95c9cf6af7919273a7eb43a6fdb6042fa755621df2c13b11bfe609d288b56L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13191669</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: bd701b96ee6d212c8fe26fc01dc12941460e5931</div><div id='time'> Time: 2022-02-17</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/segmentation/losses/multi_loss.py</div><div id='m_class'> M Class Name: BCEwithDiceLoss</div><div id='n_method'> N Class Name: MultiLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/segmentation/losses/multi_loss.py</div><div id='n_file'> N File Name: theseus/segmentation/losses/multi_loss.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 26</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask = kwargs.get(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask = mask[:, :-1]
+            <a id="change">kwargs[&quotmask&quot]</a> = mask
+
+        out = self.net(xi, **kwargs)
+        loss = F.cross_entropy(out.transpose(1, 2), xo, ignore_index = self.ignore_index)</code></pre><h3>After Change</h3><pre><code class='java'>
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask = ~torch.zeros_like(inp).scatter(1, indices, 1.).bool()
+            <a id="change">kwargs.update(context_mask = mask)</a>
+
+        out = self.net(inp, **kwargs)
+
+        out = out.transpose(1, 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13191671</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>

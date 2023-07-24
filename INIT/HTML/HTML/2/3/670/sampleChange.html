@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.out_channels = out_channels
+        assert self.out_channels in [1, 2,]
+        grayscale = nn.Conv2d(3, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        <a id="change">grayscale.weight.data.fill_(</a>1.0 / 3.0<a id="change">)</a>
+        sobel_filter = nn.Conv2d(
+            1, self.out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        w = 1.414214 if self.isotropic else 2
+        sobel_filter.weight.data[0, 0].copy_(</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.use_threshold = use_threshold
+        assert self.out_channels in [1, 2,]
+
+        <a id="change">if </a>to_grayscale<a id="change">:
+            </a>grayscale = nn.Conv2d(
+                in_channels=3, out_channels=1, kernel_size=1, bias=False)
+            <a id="change">grayscale.weight.data.fill_(</a>1.0 / 3.0<a id="change">)</a>
+        else:
+            grayscale = nn.Identity()
+        sobel_filter = nn.Conv2d(
+            in_channels=1, out_channels=self.out_channels, kernel_size=3, stride=1,</code></pre>

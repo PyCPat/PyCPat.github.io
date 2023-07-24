@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+
+        <a id="change">if </a>hasattr(self, &quotdbb_reparam&quot)<a id="change">:
+            </a>return self.nonlinear(self.dbb_reparam(inputs))
+
+        out = self.dbb_origin(inputs)
+        if hasattr(self, &quotdbb_1x1&quot):
+            out += self.dbb_1x1(inputs)
+        out += self.dbb_avg(inputs)
+        out += self.dbb_1x1_kxk(inputs)
+        <a id="change">return </a>self.nonlinear(out)
+
+    def init_gamma(self, gamma_value):
+        if hasattr(self, "dbb_origin"):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.cv1(x)
+        <a id="change">with </a><a id="change">warnings.catch_warnings():
+            </a>warnings.simplefilter(&quotignore&quot)  &#47&#47 suppress torch 1.9.0 max_pool2d() warning
+            y1 = self.m(x)
+            y2 = self.m(y1)
+            return self.cv2(torch.cat((x, y1, y2, self.m(y2)), 1))</code></pre>

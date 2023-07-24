@@ -1,0 +1,103 @@
+<html><h3>Pattern ID :2397
+</h3><img src='14506137.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        v = self.NIN_2(h)
+
+        w = torch.einsum(&quotbchw,bcij-&gt;bhwij&quot, q, k) * (int(C) ** (-0.5))
+        w = torch.reshape(w, (B<a id="change">, H, W, H * W</a>))
+        w = F.softmax(w, dim=-1)
+        w = torch.reshape(w, (B, H, W, H, W))
+        h = torch.einsum(&quotbhwij,bcij-&gt;bchw&quot, w, v)
+        h = self.NIN_3(h)
+        <a id="change">return </a>x + h
+
+
+class Upsample(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = attn.view(batch, n_head, height, width, height, width)
+
+        out = torch.einsum("bnhwyx, bncyx -&gt; bnchw", attn, value).contiguous()
+        out<a id="change"> = </a><a id="change">self.out(</a>out.view(batch, channel, height, width)<a id="change">)</a>
+
+        <a id="change">return </a>out + input
+
+
+class ResnetBlocWithAttn(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/1a5a8bc409a8b8e072eb2bf25330d4662fd279c4#diff-8f5ccf6b45f0af5991c777ec4c13895ab7943f03df8982ff0e1edd6b462d8d35L111' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14506137</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 1a5a8bc409a8b8e072eb2bf25330d4662fd279c4</div><div id='time'> Time: 2021-08-09</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/ddpm_modules/unet.py</div><div id='m_class'> M Class Name: AttnBlock</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/ddpm_modules/unet.py</div><div id='n_file'> N File Name: model/ddpm_modules/unet.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 111</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Collect valid
+        &#47&#47 valid_0 = (pers1 != 0).all(-1)
+
+        <a id="change">return </a>x + self.bn(x0)<a id="change">, x_dim1</a>
+
+
+class FakeSetTopoLayer(nn.Module):
+    def __init__(self, n_features, n_filtrations, mlp_hidden_dim, aggregation_fn):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.residual_and_bn:
+            x0 = x + self.bn(x0)
+        else:
+            x0<a id="change"> = </a><a id="change">self.out(</a>torch.cat([x, x0], dim=-1)<a id="change">)</a>
+
+        <a id="change">return </a>x0, x1
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/borgwardtlab/togl/commit/f6de25e187c5a78974edd07cec7fc20c675bbbc6#diff-1bcc83bc8c3847d0b5b3dec6be3a4c891b6976da3e071a7a73d3c3bf28d0141cL220' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14506136</div><div id='project'> Project Name: borgwardtlab/togl</div><div id='commit'> Commit Name: f6de25e187c5a78974edd07cec7fc20c675bbbc6</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: max.horn@bsse.ethz.ch</div><div id='file'> File Name: topognn/layers.py</div><div id='m_class'> M Class Name: SimpleSetTopoLayer</div><div id='n_method'> N Class Name: SimpleSetTopoLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: topognn/layers.py</div><div id='n_file'> N File Name: topognn/layers.py</div><div id='m_start'> M Start Line: 222</div><div id='m_end'> M End Line: 261</div><div id='n_start'> N Start Line: 238</div><div id='n_end'> N End Line: 270</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                bias=False)
+
+    def forward(self, x, c, c_):
+        c_onehot = torch.cat((c<a id="change">, c_</a>), dim=1).to(self.device)
+        width_size = x.size(3)
+
+        x = self.conv_layer_1(x)
+
+        x = self.down_sample_1(x)
+        x = self.down_sample_2(x)
+
+        x = x.contiguous().view(-1, 2304, width_size // 4)
+        x = self.down_conversion(x)
+
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_2(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+
+        x = self.up_conversion(x)
+        x = x.view(-1, 256, 9, width_size // 4)
+
+        x = self.up_sample_1(x)
+        x = self.up_sample_2(x)
+        
+        x = self.conv_1(x)
+        outputs_reshaped = x[:, :, : -1, :]
+        print(outputs_reshaped.shape)
+
+        <a id="change">return </a>outputs_reshaped
+
+class Discriminator(nn.Module):
+    def __init__(self, num_speakers=4):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.up_sample_1(x)
+        x = self.up_sample_2(x)
+        
+        out<a id="change"> = </a><a id="change">self.out(</a>x<a id="change">)</a>
+        <a id="change">return </a>out
+
+class Discriminator(nn.Module):
+    def __init__(self, num_speakers=4):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/oscarshu0719/pytorch-stargan-vc2/commit/3af590c49514eccd6ca436f239c67118add8a86d#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L248' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14506133</div><div id='project'> Project Name: oscarshu0719/pytorch-stargan-vc2</div><div id='commit'> Commit Name: 3af590c49514eccd6ca436f239c67118add8a86d</div><div id='time'> Time: 2020-05-15</div><div id='author'> Author: vm3y3rmp40719@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 248</div><div id='m_end'> M End Line: 280</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 269</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.conv4(x)
+        temp = x.view(x.shape[0], -1)
+        output = self.output(temp)
+        <a id="change">return </a>output<a id="change">, x</a>
+
+
+def train():
+    print(&quottrain......&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.view(x.shape[0], -1)
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x<a id="change"> = </a><a id="change">self.out(</a>x<a id="change">)</a>
+        <a id="change">return </a>x
+
+
+def train():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ki-ljl/cnn-dogs-vs-cats/commit/8377a6a38f25ba56195c2396838201aa05b2f5cd#diff-de0479bd04b1f73fbcde39b68cea26fe84b34dab7a5788fc2a0f641f2b9bb861L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14506135</div><div id='project'> Project Name: ki-ljl/cnn-dogs-vs-cats</div><div id='commit'> Commit Name: 8377a6a38f25ba56195c2396838201aa05b2f5cd</div><div id='time'> Time: 2022-03-26</div><div id='author'> Author: lijunliang.ki@gmail.com</div><div id='file'> File Name: CNN.py</div><div id='m_class'> M Class Name: cnn</div><div id='n_method'> N Class Name: cnn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: CNN.py</div><div id='n_file'> N File Name: CNN.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 85</div><BR>

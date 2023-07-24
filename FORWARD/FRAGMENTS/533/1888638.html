@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, action, with_variance=False):
+        mu, logstd = self.compute_stats(x, action)
+        dist = Normal(mu, <a id="change">logstd.exp()</a>)
+        <a id="change">pred</a><a id="change"> = </a>dist.rsample()
+        &#47&#47 residual prediction
+        next_x<a id="change"> = </a>x<a id="change"> + pred[:, :-1]</a>
+        next_reward = pred[:, -1].view(-1, 1)
+        if with_variance:
+            <a id="change">return </a>next_x<a id="change">, next_reward, dist.variance.sum(dim=1, keepdims=True)</a>
+        return next_x, next_reward
+
+    def compute_error(self, obs_t, act_t, rew_tp1, obs_tp1):
+        mu, logstd = self.compute_stats(obs_t, act_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(
+        self, x: torch.Tensor, action: torch.Tensor
+    ) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">return </a>self.predict_with_variance(x, action)[:2]
+
+    def predict_with_variance(
+        self, x: torch.Tensor, action: torch.Tensor</code></pre>

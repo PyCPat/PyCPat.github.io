@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = embbedings
+            sub_kernels = torch.chunk(self.kernel, len(self.device_id), dim=1)
+            temp_x = x.cuda(self.device_id[0])
+            kernel_norm = l2_norm(sub_kernels[0], axis=0).cuda(<a id="change">self.device_id[0]</a>)
+            cos_theta = torch.mm(temp_x, kernel_norm)
+            for i in range(1, len(self.device_id)):
+                temp_x = x.cuda(self.device_id[i])</code></pre><h3>After Change</h3><pre><code class='java'>
+        label = label.view(-1, 1)  &#47&#47 size=(B,1)
+        index = cos_theta.data * 0.0  &#47&#47 size=(B,Classnum)
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index<a id="change"> = </a><a id="change">index.bool()</a>
+        output = cos_theta * 1.0
+        output[index] = phi[index]  &#47&#47 Only change the correct predicted output
+        output *= self.s  &#47&#47 Scale up in order to make softmax work, first introduced in normface
+</code></pre>

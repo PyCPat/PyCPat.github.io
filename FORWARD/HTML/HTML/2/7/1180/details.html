@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1180
+</h3><img src='4138975.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, h, w, c] * [n, h, w, c]).sum(-1)
+                    interProduct<a id="change"> = </a>(features[i] * features[j]).sum(-1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct<a id="change"> = </a><a id="change">(features[i] * features[i]).sum(1</a><a id="change">)</a>
+                &#47&#47 weakDiversityLoss.append(F.mse_loss(quantizeds[i], features[i].detach()))
+                weakFeatureLoss.append(self._auxLoss(intraProduct, torch.ones_like(intraProduct)))
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())</code></pre><h3>After Change</h3><pre><code class='java'>
+        weakCodebookLoss = list()
+
+        for raws, codes, codebooks, k, logits, spread in zip(allFeatures, allCodes, allCodebooks, self._k, allLogits, self._spreadLoss):
+            <a id="change">for </a>raw, code, codebook, logit in <a id="change">zip(</a>raws, codes, codebooks, logits<a id="change">):
+                &#47&#47 weakFeatureLoss.append(self._alignLoss(raw, F.one_hot(code, k).float(), codebook))
+                </a>weakCodebookLoss.append(spread(codebook))
+                &#47&#47 weakCodebookLoss.append(self._l2Reg(raw, -1))
+
+        return dLoss, (sum(weakCodebookLoss), 0.0, 0.0), (restored, allTrues, allLogits)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/753fa7e4e7c9bf19e23ef12ea0062e240077eaf8#diff-24bbc42d530738d7fc1f7098f327db279f94db71606c6e135b122db05755da7cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4138975</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 753fa7e4e7c9bf19e23ef12ea0062e240077eaf8</div><div id='time'> Time: 2021-11-28</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/whole.py</div><div id='m_class'> M Class Name: WholePQBig</div><div id='n_method'> N Class Name: WholePQBig</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/whole.py</div><div id='n_file'> N File Name: src/mcqc/models/whole.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        weakDiversityLoss = list()
+        weakFeatureLoss = list()
+
+        for features, quantizeds, <a id="change">codebooks</a> in zip(allFeatures, allQuantizeds, allCodebooks):
+            for codebook in codebooks:
+                &#47&#47 [k, k] := [k, c] @ [c, k]
+                innerProduct<a id="change"> = </a>codebook @ codebook.T
+                &#47&#47 orthogonal regularization
+                weakCodebookLoss.append(self._auxLoss(innerProduct, torch.eye(innerProduct.shape[0], device=innerProduct.device, dtype=innerProduct.dtype)))
+            m = len(features)
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, h, w, c] * [n, h, w, c]).sum(-1)
+                    interProduct = (features[i] * features[j]).sum(-1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct<a id="change"> = </a><a id="change">(features[i] * features[i]).sum(1</a><a id="change">)</a>
+                &#47&#47 weakDiversityLoss.append(F.mse_loss(quantizeds[i], features[i].detach()))
+                weakFeatureLoss.append(self._auxLoss(intraProduct, torch.ones_like(intraProduct)))
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())</code></pre><h3>After Change</h3><pre><code class='java'>
+        weakCodebookLoss = list()
+
+        for raws, codes, codebooks, k, logits, spread in zip(allFeatures, allCodes, allCodebooks, self._k, allLogits, self._spreadLoss):
+            <a id="change">for </a>raw, code, codebook, logit in <a id="change">zip(</a>raws, codes, codebooks, logits<a id="change">):
+                &#47&#47 weakFeatureLoss.append(self._alignLoss(raw, F.one_hot(code, k).float(), codebook))
+                </a>weakCodebookLoss.append(spread(codebook))
+                &#47&#47 weakCodebookLoss.append(self._l2Reg(raw, -1))
+
+        return dLoss, (sum(weakCodebookLoss), 0.0, 0.0), (restored, allTrues, allLogits)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/753fa7e4e7c9bf19e23ef12ea0062e240077eaf8#diff-24bbc42d530738d7fc1f7098f327db279f94db71606c6e135b122db05755da7cL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4138974</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 753fa7e4e7c9bf19e23ef12ea0062e240077eaf8</div><div id='time'> Time: 2021-11-28</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/whole.py</div><div id='m_class'> M Class Name: WholePQBig</div><div id='n_method'> N Class Name: WholePQBig</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/whole.py</div><div id='n_file'> N File Name: src/mcqc/models/whole.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            distance_list.append(dist(x, y))
+
+        distance = torch.stack(distance_list, 0)
+        if <a id="change">self.average</a>:
+            distance<a id="change"> = </a>distance.mean(0)
+        else:
+            distance<a id="change"> = </a><a id="change">distance.sum(0</a><a id="change">)</a>
+
+        return distance</code></pre><h3>After Change</h3><pre><code class='java'>
+        stfts_y = self.multiscale_stft(y)
+        distance = 0.
+
+        <a id="change">for </a>x, y in <a id="change">zip(</a>stfts_x, stfts_y<a id="change">):
+            </a>distance = distance + lin_distance(x, y) + log_distance(x, y)
+
+
+@gin.register</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/c57a98c5145db1f44c6e5c540989494f696502ca#diff-aca7ec2a2422bb0681d3fcd464ed2c9c1a77d411f39d853fc5fb0b166f9108b1L283' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4138963</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: c57a98c5145db1f44c6e5c540989494f696502ca</div><div id='time'> Time: 2022-11-05</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/core.py</div><div id='m_class'> M Class Name: AudioDistance</div><div id='n_method'> N Class Name: AudioDistanceV1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/core.py</div><div id='n_file'> N File Name: rave/core.py</div><div id='m_start'> M Start Line: 284</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 276</div><div id='n_end'> N End Line: 284</div><BR>

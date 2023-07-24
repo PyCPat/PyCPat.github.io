@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :1791
+</h3><img src='13034950.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k = k if torch.is_tensor(k) else q
+
+        q = self.proj_q(q).view(-1, q.size(1), self._head_dims)
+        k = self.proj_k(k).view(-1, <a id="change">k.size(1</a><a id="change">)</a>, self._head_dims)
+        v = self.proj_v(v).view(-1, v.size(1), self._head_dims)
+
+        att = torch.bmm(q, k.transpose(1, 2)) / self._h_dims**0.5
+
+        if mask is not None:
+            mask = torch.where(mask &gt; 0, .0, float(&quot-inf&quot))
+            att += mask.repeat_interleave(self._heads, dim=0)
+
+        att = att.softmax(-1)
+
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = torch.bmm(att, v).view(-1, att.size(1), self._h_dims)
+        m<a id="change"> = </a>self.proj_m(m)
+
+        return m
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        b = q.size(1) * self._heads
+
+        q = <a id="change">self.q(q).view(-1, b, self._head_dims).transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+        k = self.k(k).view(-1, b, self._head_dims).transpose(0, 1)
+        v = self.v(v).view(-1, b, self._head_dims).transpose(0, 1)
+
+        att = torch.bmm(q, k.transpose(1, 2)) / self._h_dims**0.5</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yeliudev/nncore/commit/e58a22da4dce9778c38aae284b0c80d84937b04c#diff-b66764790ba7b310b71bcb990fc01ea802675de40cfbd1e8da361bbc4827b8c3L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13034950</div><div id='project'> Project Name: yeliudev/nncore</div><div id='commit'> Commit Name: e58a22da4dce9778c38aae284b0c80d84937b04c</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: yeliudev@outlook.com</div><div id='file'> File Name: nncore/nn/blocks/transformer.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nncore/nn/blocks/transformer.py</div><div id='n_file'> N File Name: nncore/nn/blocks/transformer.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        :param x: [x_len, batch_size, emb_size]
+        :return: [x_len, batch_size, emb_size]
+        
+        x<a id="change"> = </a>self.pe[:<a id="change">x.size(0</a><a id="change">)</a>, :]  &#47&#47 [src_len, 1, d_model]
+        return x  &#47&#47 [src_len, 1, d_model]
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param position_ids: [1,position_ids]
+        :return: [position_ids_len, 1, hidden_size]
+        
+        return <a id="change">self.embedding(position_ids).transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+    def _reset_parameters(self, initializer_range):
+        rInitiate parameters.
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/moon-hotel/bertwithpretrained/commit/1ffe961141e3cfb439c9b529e01357a35a8138ff#diff-05620303e997ab8fd01cf4b5f54c3c5bf64031e42ba3eb58ae2d59397fd62857L32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13034902</div><div id='project'> Project Name: moon-hotel/bertwithpretrained</div><div id='commit'> Commit Name: 1ffe961141e3cfb439c9b529e01357a35a8138ff</div><div id='time'> Time: 2021-08-02</div><div id='author'> Author: moon-hotel@hotmail.com</div><div id='file'> File Name: model/BasicBert/BertEmbedding.py</div><div id='m_class'> M Class Name: PositionalEmbedding</div><div id='n_method'> N Class Name: PositionalEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/BasicBert/BertEmbedding.py</div><div id='n_file'> N File Name: model/BasicBert/BertEmbedding.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 28</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = F.dropout(F.relu(conv(x)), 0.5, self.training)
+
+        x = x.transpose(1, 2)
+        total_length<a id="change"> = </a><a id="change">x.size(1</a><a id="change">)</a>
+
+        &#47&#47 pytorch tensor are not reversible, hence the conversion
+        input_lengths = input_lengths.cpu().numpy()
+        x = nn.utils.rnn.pack_padded_sequence(</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        &#47&#47 transpose to (B, embed_dim, T) for convolution,
+        &#47&#47 and then back
+        x = <a id="change">self.conv1ds(x.transpose(1, 2)).transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+
+        &#47&#47 (B, T, conv_channels)
+        &#47&#47 TODO: pack_padded, and pad_packed?
+        self.lstm.flatten_parameters()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/4c1680d50b9c91bf13e13c823df949895a3c77c6#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L209' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13034918</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: 4c1680d50b9c91bf13e13c823df949895a3c77c6</div><div id='time'> Time: 2021-03-17</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 209</div><div id='m_end'> M End Line: 227</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 58</div><BR>

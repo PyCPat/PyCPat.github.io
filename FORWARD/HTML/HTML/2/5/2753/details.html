@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :2753
+</h3><img src='15455839.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            values_ =  F.relu(self.linear_value(values.float().unsqueeze(1))).squeeze(1)
+            &#47&#47 variable_ =  F.relu(self.linear_sensor(variable.float().unsqueeze(1))).squeeze(1)
+
+            unit = <a id="change">torch.cat([</a>pe_, values_, variable_<a id="change"></a>]<a id="change">, dim=1)</a>
+            Add Normalization across samples here, to make all 48-dimensions are in similar scale
+            unit<a id="change"> = </a>F.normalize(unit, dim=1)
+
+            &#47&#47 use 2-layer transformer to get f&quot
+            &#47&#47 trans_unit = self.transformer_encoder_f_prime(unit.unsqueeze(1))</code></pre><h3>After Change</h3><pre><code class='java'>
+            pe_ = self.pos_encoder(time_points.unsqueeze(1)).squeeze(1)
+            variable = nonzero_index[:,1] &#47&#47 the dimensions of variables. The m value in SEFT paper.
+
+            unit = torch.cat([pe_, <a id="change">values.unsqueeze(1</a><a id="change">)</a>, variable.unsqueeze(1)], dim=1)
+
+            &#47&#47 &#47&#47 positional encoding  AUROC ~0.86 Why positional encoding works?
+            &#47&#47 &#47&#47 values_ = self.pos_encoder_value(values.unsqueeze(1)).squeeze(1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/raindrop/commit/0b0a19b4ba53c4a1303ef507483e994acffac9b8#diff-b7c638e744cc24cbf0e26b15a5dd347480335d7c3d444eb55d211866066c5266L304' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15455839</div><div id='project'> Project Name: mims-harvard/raindrop</div><div id='commit'> Commit Name: 0b0a19b4ba53c4a1303ef507483e994acffac9b8</div><div id='time'> Time: 2021-09-09</div><div id='author'> Author: xiang.alan.zhang@gmail.com</div><div id='file'> File Name: code/baselines/models.py</div><div id='m_class'> M Class Name: SEFT</div><div id='n_method'> N Class Name: SEFT</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/baselines/models.py</div><div id='n_file'> N File Name: code/baselines/models.py</div><div id='m_start'> M Start Line: 304</div><div id='m_end'> M End Line: 327</div><div id='n_start'> N Start Line: 311</div><div id='n_end'> N End Line: 318</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 masked by the missing entries
+        &#47&#47 note, different batch may contain different number of real entities
+        tensor_list = <a id="change">[]</a>
+        for i, batch in enumerate(out):
+            mean_entity = 0.
+            real_number = real_number_tensor[i]
+            real_number = real_number if real_number != 0 else 1
+            for j, entity in enumerate(batch):
+                if j &gt;= real_number_tensor[i]:
+                    break        
+                mean_entity = mean_entity + entity
+            mean_entity = mean_entity / (real_number)
+            tensor_list.append(mean_entity.reshape(1, -1))
+        tensor_mean<a id="change"> = </a><a id="change">torch.cat(</a>tensor_list<a id="change">, dim=0)</a>
+        print(&quottensor_mean:&quot, tensor_mean) if debug else None
+
+        &#47&#47 print(&quotout.shape:&quot, out.shape) if debug else None</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out * <a id="change">mask.unsqueeze(2</a><a id="change">)</a>
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L717' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15455837</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    apool = torch.mean(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+    mpool, _ = torch.max(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+
+    imgs_embed<a id="change"> = </a><a id="change">torch.cat([</a>apool, mpool<a id="change"></a>]<a id="change">, dim = 2)</a> &#47&#47 (N, block_num, embed_dim)
+
+    words_embed = self.__content_embed__(input_ids) &#47&#47 (N, seq_len, embed_dim)
+    indices  = torch.arange(self.seq_len + self.block_num).expand(batch, -1).to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+    &#47&#47batch_texts = self.__clip__.encode_text(text_input)
+
+    &#47&#47tags_embed = self.__text2embed__(self.__clip_drop__(batch_texts.float())).unsqueeze(1)
+    imgs_embed = <a id="change">self.__img2embed__(self.__clip_drop__(batch_features.float())).unsqueeze(1</a><a id="change">)</a>
+
+    words_embed = self.__content_embed__(input_ids) 
+    indices  = torch.arange(self.seq_len + self.tags_num + self.block_num).expand(batch, -1).to(device)
+    position_embed = self.__position_embed__(indices)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/siwooyong/codalab-microsoft-coco-image-captioning-challenge/commit/d24b22ec9f0be1acd2f307be20ec85f84f8d8795#diff-7c1ece53a18959b293126dd93f3cf0f768220f50d2c1201e1601681873e6f6e4L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15455842</div><div id='project'> Project Name: siwooyong/codalab-microsoft-coco-image-captioning-challenge</div><div id='commit'> Commit Name: d24b22ec9f0be1acd2f307be20ec85f84f8d8795</div><div id='time'> Time: 2021-07-08</div><div id='author'> Author: 68500343+yongsiwoo@users.noreply.github.com</div><div id='file'> File Name: models/base_model.py</div><div id='m_class'> M Class Name: decoder</div><div id='n_method'> N Class Name: decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base_model.py</div><div id='n_file'> N File Name: models/base_model.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 74</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+
+        with g.local_scope():
+            h_prime = <a id="change">[]</a>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                             Fn.sum(&quotm&quot, &quotemb&quot))
+                h_prime.append(g.ndata[&quotemb&quot])
+            h_output<a id="change"> = </a><a id="change">torch.cat(</a>h_prime<a id="change">, dim=1)</a>
+
+        g.edata[&quotalpha&quot] = edge_attention
+        if self.residual:
+            res = self.residual(h)</code></pre><h3>After Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+        if self.num_heads == 1:
+            edge_attention = edge_attention[:, 0]
+            edge_attention = <a id="change">edge_attention.unsqueeze(1</a><a id="change">)</a>
+
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()
+            g.edata[&quotalpha&quot] = edge_attention</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15455844</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>

@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :624
+</h3><img src='2345859.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if i == self.num_steps + 1: 
+                return loss 
+            &#47&#47 Compute noise gradient     
+            noise_gradient = <a id="change">torch.autograd.grad(loss, noise)[0]</a>
+            &#47&#47 Move noise towards gradient to change state as much as possible 
+            step = noise + self.step_size * noise_gradient 
+            step_norm = self.norm_fn(step)
+            noise = step / (step_norm + self.epsilon)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if i == self.num_steps: 
+                return self.loss_last_fn(state_perturbed, state) 
+            &#47&#47 Compute perturbation loss (detached state)
+            loss<a id="change"> = </a>self.loss_fn(state_perturbed, <a id="change">state.detach()</a>)
+            &#47&#47 Compute noise gradient ∂loss/∂noise
+            noise_gradient, = torch.autograd.grad(loss, noise)
+            &#47&#47 Move noise towards gradient to change state as much as possible </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/smart-pytorch/commit/a9e3a4332c293ad6c421b81ef10857f32e1818d8#diff-d3a700360d4e95f1072ab84f2988c9a0bd670bfc6c4b1940bba80dca9fb8e674L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2345859</div><div id='project'> Project Name: archinetai/smart-pytorch</div><div id='commit'> Commit Name: a9e3a4332c293ad6c421b81ef10857f32e1818d8</div><div id='time'> Time: 2022-05-25</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: smart_pytorch/smart_pytorch.py</div><div id='m_class'> M Class Name: SMARTLoss</div><div id='n_method'> N Class Name: SMARTLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: smart_pytorch/smart_pytorch.py</div><div id='n_file'> N File Name: smart_pytorch/smart_pytorch.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        u_hat = torch.einsum(&quotijk, jkl -&gt; ijl&quot, x, self.route_weights)
+
+        &#47&#47 Dynamic route
+        b = torch.zeros(<a id="change">x.shape[1]</a>, self.num_capsules, requires_grad=True)
+        for it in range(self.num_iterations):
+            c = b.softmax(dim=-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+        u_hat = torch.einsum(&quotijk, jlkm -&gt; iljm&quot, x, self.route_weights)
+        &#47&#47 Detatch u_hat during routing iterations
+        u_hat_temp = <a id="change">u_hat.detach()</a>
+
+        &#47&#47 Dynamic route
+        &#47&#47 b: (batch_size, num_capsules, num_route_nodes)
+        b = torch.zeros(batch_size, self.num_capsules, self.num_route_nodes).to(device)
+        for it in range(self.num_iterations - 1):
+            c = b.softmax(dim=1)
+
+            &#47&#47 c: (batch_size, num_capsules, num_route_nodes)
+            &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+            &#47&#47 s: (batch_size, num_capsules, out_channels)
+            s = torch.einsum(&quotijk, ijkl -&gt; ijl&quot, c, u_hat_temp)
+            v = squash(s)
+
+            &#47&#47 Update b
+            &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+            &#47&#47 v: (batch_size, num_capsules, out_channels)
+            &#47&#47 Shape of b: (batch_size, num_capsules, num_route_nodes)
+            uv = torch.einsum(&quotijkl, ijl -&gt; ijk&quot, u_hat_temp, v)
+            b<a id="change"> += </a>uv
+
+        &#47&#47 Last iteration with original u_hat to pass gradient
+        c = b.softmax(dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/riroaki/capsnet/commit/408b1e77f4e40589def9c313c0b11beaa88f2108#diff-903964c7bdce50a4b995b4520374f243c677f45b2f8c7ed7b15abeeb6f26af12L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2345858</div><div id='project'> Project Name: riroaki/capsnet</div><div id='commit'> Commit Name: 408b1e77f4e40589def9c313c0b11beaa88f2108</div><div id='time'> Time: 2020-03-08</div><div id='author'> Author: aki@akideMacBook-Pro.local</div><div id='file'> File Name: capsnet.py</div><div id='m_class'> M Class Name: DigitCaps</div><div id='n_method'> N Class Name: DigitCaps</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: capsnet.py</div><div id='n_file'> N File Name: capsnet.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 84</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pids = torch.FloatTensor(np.arange(len(anchor))).to(anchor.device)
+        dists = cdist(anchor, positive, metric=self.metric)
+        &#47&#47 add 10 to false negative
+        dist_keypts = np.eye(<a id="change">dist_keypts.shape[0]</a>) * 10 + dist_keypts.detach().cpu().numpy()
+        add_matrix = torch.zeros_like(dists)
+        add_matrix[np.where(dist_keypts &lt; self.safe_radius)] += 10
+        dists = dists + add_matrix</code></pre><h3>After Change</h3><pre><code class='java'>
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+
+        neg = dists - 1e5 * (~neg_mask).float()
+        neg_weight<a id="change"> =  </a><a id="change">(neg - self.neg_optimal).detach()</a>
+        neg_weight = torch.max(torch.zeros_like(neg_weight), neg_weight)
+        lse_negative = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-1)
+
+        loss = F.softplus(lse_positive + lse_negative) / self.log_scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/f19b93196387b22f1cb416f9a0214b2cffaf8e5e#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2345857</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: f19b93196387b22f1cb416f9a0214b2cffaf8e5e</div><div id='time'> Time: 2020-07-16</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = z.detach().permute(0, 2, 3, 1)
+            k = <a id="change">l.shape[-1]</a>
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()
+            hard = oneHot @ c</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, zq, soft in zip(latents, zqs, softs):
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = F.mse_loss(z, <a id="change">zq.detach()</a>, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = F.mse_loss(z, soft.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss<a id="change"> += </a>qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2345861</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>

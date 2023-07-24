@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss        += loss_loc * self.box_ratio + loss_cls * self.cls_ratio
+
+        if self.focal_loss:
+            ratio       = <a id="change">torch.where(</a>obj_mask, torch.ones_like(conf) * self.alpha, torch.ones_like(conf) * (1 - self.alpha)<a id="change">)</a> * torch.where(obj_mask, torch.ones_like(conf) - conf, conf) ** self.gamma
+            loss_conf   = torch.mean((self.BCELoss(conf, obj_mask.type_as(conf)) * ratio)[noobj_mask.bool() | obj_mask]) * self.focal_loss_ratio
+        else: 
+            loss_conf   = torch.mean(self.BCELoss(conf, obj_mask.type_as(conf))[noobj_mask.bool() | obj_mask])</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47   计算是否包含物体的置信度损失
+        &#47&#47---------------------------------------------------------------&#47&#47
+        if self.focal_loss:
+            pos_neg_ratio<a id="change">   = </a><a id="change">torch.where(</a>obj_mask, torch.ones_like(conf) * self.alpha, torch.ones_like(conf) * (1 - self.alpha)<a id="change">)</a> 
+            hard_easy_ratio = torch.where(obj_mask, torch.ones_like(conf) - conf, conf) ** self.gamma
+            loss_conf   = torch.mean((self.BCELoss(conf, obj_mask.type_as(conf)) * pos_neg_ratio * hard_easy_ratio)[noobj_mask.bool() | obj_mask]) * self.focal_loss_ratio
+        else: </code></pre>

@@ -2,17 +2,17 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-            )
-
-            &#47&#47 Number of output features from dense block
-            print(<a id="change">type(</a>features[f"dense_block_{idx}"]<a id="change">)</a>)
-            out_features = features[f"dense_block_{idx}"].out_features()
-
-            features[f"data_enc_level{idx}_bottleneck"] = nn.Conv3d(</code></pre><h3>After Change</h3><pre><code class='java'>
-        self.features_out_size = features[f"dense_block_{num_blocks-1}"].out_features()
-
-        &#47&#47 Final spatial dimensions (pre-global pooling)
-        D = <a id="change">input_dims[1] // </a>2 ** num_blocks
-        H = input_dims[2] // 2 ** num_blocks
-        W = input_dims[3] // 2 ** num_blocks
-</code></pre>
+        self.block_aggs = nn.ModuleList([])
+        drop_path_rates = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
+        for lix in range(self.num_levels):
+            dpr = drop_path_rates[<a id="change">sum(</a>depths[:lix]<a id="change">)</a>:sum(depths[:lix+1])]
+            self.levels.append(NestLevel(
+                self.num_blocks[lix], self.block_size, self.seq_length, num_heads[lix], depths[lix],
+                embed_dims[lix], mlp_ratio, qkv_bias, drop_rate, attn_drop_rate, dpr, norm_layer,</code></pre><h3>After Change</h3><pre><code class='java'>
+            levels.append(NestLevel(
+                self.num_blocks[i], self.block_size, self.seq_length, num_heads[i], depths[i], dim, prev_dim,
+                mlp_ratio, qkv_bias, drop_rate, attn_drop_rate, dp_rates[i], norm_layer, act_layer, pad_type=pad_type))
+            self.feature_info<a id="change"> += </a><a id="change">[</a>dict(num_chs=dim, reduction=curr_stride, module=f&quotlevels.{i}&quot)<a id="change"></a>]
+            prev_dim = dim
+            curr_stride *= 2
+        self.levels = nn.Sequential(*levels)</code></pre>

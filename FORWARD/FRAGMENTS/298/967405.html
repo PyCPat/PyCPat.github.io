@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        diff = 0
+        codes = []
+        for vq in self.vqs:
+            _xq<a id="change">, _diff, _codes</a> = vq(x - xq)
+            diff = diff + _diff
+            xq = xq + _xq
+            <a id="change">codes.append(</a>_codes<a id="change">)</a>
+        codes = torch.cat(codes, 1)
+        return xq, (x - xq).pow(2).mean(), codes
+
+    def encode(self, x):</code></pre><h3>After Change</h3><pre><code class='java'>
+        residual = x
+
+        all_losses = []
+        all_indices<a id="change"> = </a>[]
+
+        n_q = n_q or len(self.layers)
+
+        for layer in self.layers[:n_q]:
+            quantized, indices, loss = layer(residual)
+            residual = residual - quantized
+            quantized_out = quantized_out + quantized
+
+            all_indices.append(indices)
+            all_losses.append(loss)
+
+        out_losses<a id="change">, out_indices = </a><a id="change">map(</a>torch.stack, (all_losses<a id="change">, all_indices</a>)<a id="change">)</a>
+        return quantized_out, sum(out_losses), out_indices.permute(1, 0, 2)
+
+    def encode(self,
+               x: torch.Tensor,</code></pre>

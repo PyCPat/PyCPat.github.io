@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        multi_crops = []
+        &#47&#47 multi-crop all images in the batch
+        for i in range(len(self.transforms)):
+            crops = <a id="change">[self.transforms[i](image).unsqueeze_(0) for image, _, _ in batch]</a>
+            multi_crops.append(torch.cat(crops, 0))
+
+        &#47&#47 list of labels
+        labels = torch.LongTensor([item[1] for item in batch])</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        views = []
+        for transform in self.transforms:
+            view = <a id="change">torch.stack(</a>[transform(img) for img, _, _ in batch]<a id="change">)</a>
+            views.append(view)
+        &#47&#47 list of labels
+        labels = torch.LongTensor([label for _, label, _ in batch])
+        &#47&#47 list of filenames</code></pre>

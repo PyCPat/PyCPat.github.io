@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        Decompose into instances: why 72 features (36 feature + 36 mask)
+        src = src.permute(1, 0,2) &#47&#47 shape [128, 215, 36+36]
+        fea = src[:, :, <a id="change">:36</a>]  &#47&#47 [128, 215, 36]
+        &#47&#47 mask = src[:, :, 36:]
+
+        output = torch.zeros((batch_size, self.d_K)).cuda()  &#47&#47 68 = 2*(32+1+1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        Decompose into instances: why 72 features (36 feature + 36 mask)
+        src = src.permute(1, 0,2) &#47&#47 shape [128, 215, 36+36]
+        &#47&#47 fea = src[:, :, :36]  &#47&#47 [128, 215, 36]
+        fea = src[:, :, :<a id="change">int(</a>src.shape[2]<a id="change">/</a>2<a id="change">)</a>]
+        &#47&#47 mask = src[:, :, 36:]
+
+        output = torch.zeros((batch_size, self.d_K)).cuda()  &#47&#47 68 = 2*(32+1+1)</code></pre>

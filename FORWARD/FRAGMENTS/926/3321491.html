@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x[0]
+        if self.with_avg_pool:
+            x = self.avgpool(x)
+        return <a id="change">[</a>self.mlp(x.view(x.size(0), -1))<a id="change"></a>]
+
+
+@NECKS.register_module</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc0(x)
+        <a id="change">if </a>self.sync_bn<a id="change">:
+            </a>x<a id="change"> = </a>self._forward_syncbn(self.bn0, x)
+        else:
+            x = self.bn0(x)
+        x<a id="change"> = </a>self.relu(x)
+        x = self.drop(x)
+        x = self.fc1(x)
+        x = <a id="change">self.relu(</a>x<a id="change">)</a>
+        return [x]
+
+
+@NECKS.register_module</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, score, label):
+        return -torch.sum(torch.log(torch.clamp(score, 1e-10, 1.0)) * torch.clamp(label, 0.0, 1.0) + \
+            torch.log(torch.clamp(1-score, 1e-10, 1.0)) * <a id="change">torch.clamp(</a>-label, 0.0, 1.0<a id="change">)</a>)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, score, label):
+        pos = torch.log(torch.clamp(score, 1e-10, 1.0)) * torch.clamp(label, 0.0, 1.0)
+        neg<a id="change"> = </a>torch.log(torch.clamp(1-score, 1e-10, 1.0)) * <a id="change">torch.clamp(</a>-label, 0.0, 1.0<a id="change">)</a>
+        num_pos = torch.sum(torch.clamp(label, 0.0, 1.0), -1)
+        num_neg = torch.sum(torch.clamp(-label, 0.0, 1.0), -1)
+        loss = - torch.sum(torch.sum(pos, -1)/num_pos) - torch.sum(torch.sum(neg, -1)/num_neg)
+        <a id="change">return </a>loss
+</code></pre>

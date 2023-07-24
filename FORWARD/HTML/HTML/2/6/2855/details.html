@@ -1,0 +1,97 @@
+<html><h3>Pattern ID :2855
+</h3><img src='15676206.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        eps = self.eps
+
+        loss = - target * torch.log(input + eps) - (1 - target) * torch.log(1<a id="change"> - input + </a>eps)
+        loss = <a id="change">loss.squeeze(dim=1).mean(dim=1)</a>
+        
+        if batch_mean:
+            loss = loss.mean(dim=0)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        eps = self.eps
+
+        loss = - target * torch.log(input + eps)
+        loss<a id="change"> = </a>loss.sum(dim=self.class_dim)
+
+        n_dims = loss.dim()
+        dim = tuple(range(1, n_dims))
+
+        if reduction == "mean":
+            loss<a id="change"> = </a><a id="change">loss.mean(dim=dim)</a>
+        elif reduction == "sum":
+            loss = loss.sum(dim=dim)
+        
+        if batch_mean:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/56f95a42611aeaeb3499f097d347a17787656474#diff-2a4c3aaf8146961fbdd87138be7526003d69184f08241e083125003a6456c9a9L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15676206</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 56f95a42611aeaeb3499f097d347a17787656474</div><div id='time'> Time: 2021-12-04</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/entropy.py</div><div id='m_class'> M Class Name: CrossEntropy</div><div id='n_method'> N Class Name: CrossEntropy</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/entropy.py</div><div id='n_file'> N File Name: src/criterion/entropy.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            else:
+                &#47&#47 Generator step: corrupt context relations
+                logit = logit.permute(0, 2, 1).reshape(-1, k)
+                p<a id="change"> = </a>Categorical(logits=logit)
+                q = Categorical(logits=torch.zeros_like(logit))
+                loss<a id="change"> = </a><a id="change">kl_divergence(p, q).mean()</a>
+            losses.append(loss)
+        return sum(losses)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 p = Categorical(logits=logit)
+                &#47&#47 q = Categorical(logits=torch.zeros_like(logit))
+                &#47&#47 loss = kl_divergence(p, q).mean()
+                loss = -<a id="change">torch.minimum(self._ceLoss(logit, target), -torch.log(torch.ones_like(target, dtype=torch.float32) / k)).mean()</a>
+            losses.append(loss)
+        return sum(losses) / len(losses)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/006c18a0b581431293e06d75d72a1a5ec392d6f6#diff-f6d149510b121cea99b664a73b3b70efcc15fe8bff03ea07f229ff3d16bee4afL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15676174</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 006c18a0b581431293e06d75d72a1a5ec392d6f6</div><div id='time'> Time: 2021-05-29</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/mlm.py</div><div id='m_class'> M Class Name: ContextGANLoss</div><div id='n_method'> N Class Name: ContextGANLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/mlm.py</div><div id='n_file'> N File Name: src/mcqc/losses/mlm.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 69</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 70</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            inputs: prediction matrix (before softmax) with shape (batch_size, num_classes)
+            targets: ground truth labels with shape (num_classes)
+        
+        log_prob<a id="change"> = </a>self.logsoftmax(inputs)
+        targets = torch.zeros_like(log_prob).scatter_(1, targets.unsqueeze(1), 1)
+        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+        loss<a id="change"> = </a><a id="change">(- targets * log_prob).mean(</a>0<a id="change">)</a>.sum()
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        log_prob = self.log_softmax(y)
+        labels = torch.zeros_like(log_prob).scatter_(1, labels.unsqueeze(1), 1)
+        labels = (1 - self.epsilon) * labels + self.epsilon / self.num_classes
+        loss = <a id="change">(- labels * log_prob).mean(</a>0<a id="change">)</a>.sum()
+        return loss
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/c87131a7350967d7af5f9167eae4befc0f57b157#diff-3c0e5198c319a0e747e4dc4314623e2dc945e7d839f08f78d25f06f5b7a692a0L24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15676157</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: c87131a7350967d7af5f9167eae4befc0f57b157</div><div id='time'> Time: 2021-08-24</div><div id='author'> Author: chenbx18@mails.tsinghua.edu.cn</div><div id='file'> File Name: common/vision/models/reid/loss.py</div><div id='m_class'> M Class Name: CrossEntropyLabelSmooth</div><div id='n_method'> N Class Name: CrossEntropyLossWithLabelSmooth</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: common/vision/models/reid/loss.py</div><div id='n_file'> N File Name: common/vision/models/reid/loss.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 33</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 82</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for logit in logits:
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior<a id="change"> = </a>Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            regs.append(reg)
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w])
+        for code, logit, freqMap in zip(codes.permute(1, 0, 2, 3), logits, codeFreqMap):
+            needRegMask = (freqMap &gt; (float(h<a id="change"> * </a>w) / k)).float()
+            sample = torch.distributions.Categorical(logits=torch.zeros_like(logit)).sample()
+            logit = logit.permute(0, 3, 1, 2)
+            ceReg = F.cross_entropy(logit, sample, reduction="none")<a id="change"> * </a>needRegMask
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask)
+            regs.append(<a id="change">ceReg.mean()</a> + cePush.mean())
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies
+        &#47&#47 for code, logit, freq in zip(codes.permute(1, 0, 2, 3), logits, codeFreq):
+        &#47&#47     &#47&#47 perturb code by the most rare codes with 0.1 probability</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3b419aa2f7b4286b6ae991022fe7469650db4bbd#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15676156</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3b419aa2f7b4286b6ae991022fe7469650db4bbd</div><div id='time'> Time: 2021-08-01</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    
+
+    def forward(self, chosen_reward: torch.Tensor, reject_reward: torch.Tensor) -&gt; torch.Tensor:
+        probs<a id="change"> = </a>torch.sigmoid(chosen_reward - reject_reward)
+        log_probs = torch.log(probs)
+        loss<a id="change"> = </a>-<a id="change">log_probs.mean()</a>
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    Details: https://arxiv.org/abs/2204.05862
+    
+    def forward(self, chosen_reward: torch.Tensor, reject_reward: torch.Tensor) -&gt; torch.Tensor:
+        loss = <a id="change">torch.log(1 + torch.exp(reject_reward - chosen_reward)).mean()</a>
+        return loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hpcaitech/colossalai/commit/7548ca5a54ed117f03247dcb43ec1dd962ae04e0#diff-696c99967a2485cd7213f1d30101901d5cd35e832060e56662f1a7092f8618b1L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15676195</div><div id='project'> Project Name: hpcaitech/colossalai</div><div id='commit'> Commit Name: 7548ca5a54ed117f03247dcb43ec1dd962ae04e0</div><div id='time'> Time: 2023-03-19</div><div id='author'> Author: 70618399+ht-zhou@users.noreply.github.com</div><div id='file'> File Name: applications/ChatGPT/chatgpt/models/loss.py</div><div id='m_class'> M Class Name: PairWiseLoss</div><div id='n_method'> N Class Name: LogExpLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: applications/ChatGPT/chatgpt/models/loss.py</div><div id='n_file'> N File Name: applications/ChatGPT/chatgpt/models/loss.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 104</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 114</div><BR>

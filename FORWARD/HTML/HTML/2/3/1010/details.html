@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :1010
+</h3><img src='3658339.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.to_logits(x)
+
+        next_mem, next_lmem = map(torch.stack, (next_mem, next_lmem))
+        next_mem<a id="change">, next_lmem = </a><a id="change">map(</a>torch.detach, (next_mem, next_lmem)<a id="change">)</a>
+
+        return out, Memory(short = next_mem, long = next_lmem)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        hiddens = <a id="change">[]</a>
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L255' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658339</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sin = torch.cat((x_sinu.sin(), y_sinu.sin()), dim = -1)
+        cos = torch.cat((x_sinu.cos(), y_sinu.cos()), dim = -1)
+
+        sin<a id="change">, cos = </a><a id="change">map(</a>lambda t: rearrange(t, &quoti j d -&gt; (i j) d&quot), (sin, cos)<a id="change">)</a>
+        sin, cos = map(lambda t: repeat(t, &quotn d -&gt; () n (d j)&quot, j = 2), (sin, cos))
+        return sin, cos
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        cos = torch.cat((x_sinu.cos(), y_sinu.cos()), dim = -1)
+
+        sin, cos = map(lambda t: repeat(t, &quoti j d -&gt; () (i j) (d r)&quot, r = 2), (sin, cos))
+        return <a id="change">[</a>sin, cos<a id="change"></a>]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/9be6fd958ff5432932845aa3f1f9a23f4b203199#diff-46753fec5461ebc4d150c2c0a150758924540bc61b06a15759dbf2721ce48677L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658337</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 9be6fd958ff5432932845aa3f1f9a23f4b203199</div><div id='time'> Time: 2021-04-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/rotary.py</div><div id='m_class'> M Class Name: AxialRotaryEmbedding</div><div id='n_method'> N Class Name: AxialRotaryEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/rotary.py</div><div id='n_file'> N File Name: alphafold2_pytorch/rotary.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 67</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 67</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return loss
+
+    def forward(self, item):
+        G_cls<a id="change">, G_reg = </a><a id="change">map(</a>item.get, [&quotproposal_targets_cls&quot, &quotproposal_targets_reg&quot]<a id="change">)</a>
+        P_cls, P_reg = map(item.get, [&quotproposal_scores&quot, &quotproposal_boxes&quot])
+        G_cls, mask_cls = G_cls.split([self.cfg.NUM_CLASSES, 1], dim=1)
+        mask_reg = G_cls[:, :-1, ..., None].sum(1, keepdim=True)
+        cls_loss = self.cls_loss(P_cls, G_cls, mask_cls)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, item):
+        TODO: Decide on cleaner input representation.
+        keys = <a id="change">[</a>&quotG_cls&quot, &quotM_cls&quot, &quotP_cls&quot, &quotG_reg&quot, &quotM_reg&quot, &quotP_reg&quot<a id="change"></a>]
+        G_cls, M_cls, P_cls, G_reg, M_reg, P_reg = map(item.get, keys)
+        cls_loss = self.cls_loss(P_cls, G_cls, M_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, M_reg)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/03a0b92af929371cce91e1666b92f92192e49129#diff-a7f9867bfd9382b3a638afcaf0bf66ead18605d18caa50c991ce865b8b25f1ddL91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658335</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 03a0b92af929371cce91e1666b92f92192e49129</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/detector/proposal.py</div><div id='m_class'> M Class Name: ProposalLoss</div><div id='n_method'> N Class Name: ProposalLoss</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/detector/proposal.py</div><div id='n_file'> N File Name: pvrcnn/detector/proposal.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 85</div><BR>

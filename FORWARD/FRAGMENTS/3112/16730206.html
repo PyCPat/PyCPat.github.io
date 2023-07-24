@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        codes = self.encode(x)
+        quantized = self.decode(codes)
+
+        diff<a id="change"> = </a><a id="change">(x - quantized).pow(2</a><a id="change">)</a>.mean()
+        quantized = quantized + x - x.detach()
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_sum = x.t() @ embed_onehot
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = (laplace_smoothing(
+                self.cluster_size, self.codebook_size, self.epsilon)<a id="change"> *
+                            </a><a id="change">self.cluster_size.sum()</a>)
+            embed_normalized = self.embed_avg<a id="change"> / </a>cluster_size.unsqueeze(1)
+            self.embed.data.copy_(embed_normalized)
+
+        return quantize, embed_ind</code></pre>

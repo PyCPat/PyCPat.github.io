@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :2683
+</h3><img src='15148533.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bx_o = [b[o] for b, o in zip(boxes, bo)]
+        indices = self.matcher(bx_h, bx_o, objects, prior, logits, targets)
+
+        <a id="change">return </a>dict(
+            interaction_loss=self.interaction_loss(bx_h, bx_o, indices, prior, logits, targets)
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        boxes: List[Tensor], bh: List[Tensor], bo: List[Tensor], objects: List[Tensor],
+        prior: List[Tensor], logits: Tensor, bbox_deltas: Tensor, targets: List[dict]
+    ) -&gt; Dict[str, Tensor]:
+        n<a id="change"> = </a>[len(b) for b in bh]
+
+        bx_h = [b[h] for b, h in zip(boxes, bh)]
+        bx_o = [b[o] for b, o in zip(boxes, bo)]
+
+        bx_h_post, bx_o_post = self.box_pair_coder.decode(torch.cat(bx_h), torch.cat(bx_o), bbox_deltas)
+        bx_h_post<a id="change"> = </a><a id="change">bx_h_post.split(</a>n<a id="change">)</a>; bx_o_post = bx_o_post.split(n)
+
+        indices = self.matcher(bx_h_post, bx_o_post, objects, prior, logits, targets)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/fredzzhang/upt/commit/def79003d35c81f7efcbcdb738042ec18038995d#diff-a8e822d9473e7021e0ce9304decdbe40e9cad96b99e0282485f129f283b8bd86L277' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15148533</div><div id='project'> Project Name: fredzzhang/upt</div><div id='commit'> Commit Name: def79003d35c81f7efcbcdb738042ec18038995d</div><div id='time'> Time: 2021-10-28</div><div id='author'> Author: frederic.zhang@anu.edu.au</div><div id='file'> File Name: ops.py</div><div id='m_class'> M Class Name: SetCriterion</div><div id='n_method'> N Class Name: SetCriterion</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ops.py</div><div id='n_file'> N File Name: ops.py</div><div id='m_start'> M Start Line: 277</div><div id='m_end'> M End Line: 283</div><div id='n_start'> N Start Line: 305</div><div id='n_end'> N End Line: 322</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            attn_list = [attn]
+
+        <a id="change">return </a>causal_logits_list, attn_list
+
+
+    def construct_mask(self, N):</code></pre><h3>After Change</h3><pre><code class='java'>
+        dic_z = self.dic.to(device)
+        prior = self.prior.to(device)
+
+        box_size_list<a id="change"> = </a>[proposal.bbox.size(0) for proposal in proposals]
+        feature_split<a id="change"> = </a><a id="change">x.split(</a>box_size_list<a id="change">)</a>
+        xzs = [self.z_dic(feature_pre_obj, dic_z, prior) for feature_pre_obj in feature_split]
+
+        causal_logits_list = [self.causal_score(xz) for xz in xzs]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wangt-cn/vc-r-cnn/commit/51a882a36e8777715669773236cd8285b0d38986#diff-be62d5533104d4c97b3017be21afc11ab8aaaf90848ecea92447a04acbbb4e06L94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15148532</div><div id='project'> Project Name: wangt-cn/vc-r-cnn</div><div id='commit'> Commit Name: 51a882a36e8777715669773236cd8285b0d38986</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: wangt97@hotmail.com</div><div id='file'> File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='m_class'> M Class Name: CausalPredictor</div><div id='n_method'> N Class Name: CausalPredictor</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='n_file'> N File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 returing:
+        &#47&#47 GPT2Model/Block[2]/MLP[mlp]/Dropout[dropout]
+        &#47&#47 GPT2Model/Block[2]/aten::add5567
+        <a id="change">return </a>(self.l_29(self.l_28(torch.mul(input=torch.mul(input=t_33, other=0.5), other=torch.add(input=Tensor.tanh(torch.mul(input=torch.add(input=t_33, other=torch.mul(input=Tensor.pow(t_33, exponent=3), other=0.044715)), other=0.7978845608028654)), other=1)))), t_32)
+
+    def state_dict(self,device=None):
+        &#47&#47 we return the state dict of this part as it should be in the original model</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 calling torch.add with arguments:
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[2]/aten::add5663
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[2]/MLP[mlp]/Dropout[dropout]
+        t_34<a id="change"> = </a>torch.add(input=t_32, other=self.l_29(self.l_28(torch.mul(input=torch.mul(input=t_33, other=0.5), other=torch.add(input=Tensor.tanh(torch.mul(input=torch.add(input=t_33, other=torch.mul(input=Tensor.pow(t_33, exponent=3), other=0.044715)), other=0.7978845608028654)), other=1)))))
+        &#47&#47 calling torch.split with arguments:
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[3]/Attention[attn]/Conv1D[c_attn]
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[3]/Attention[attn]/prim::Constant5779
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[3]/Attention[attn]/prim::Constant5780
+        t_35 = <a id="change">Tensor.split(</a>self.l_31(self.l_30(t_34))<a id="change">, split_size=768, dim=2)</a>
+        t_36 = t_35[0]
+        t_37<a id="change"> = </a>t_35[1]
+        t_38 = t_35[2]
+        &#47&#47 calling torch.div with arguments:
+        &#47&#47 GPT2LMHeadModel/GPT2Model[transformer]/Block[3]/Attention[attn]/aten::matmul5854</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saareliad/ftpipe/commit/9ddf98456ca57cac3a4a982fc519c5a71642dc25#diff-4d93af50bd9b6dc7752538156bde96fadf361ac3f37eb0019e2bbf01206492abL311' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15148547</div><div id='project'> Project Name: saareliad/ftpipe</div><div id='commit'> Commit Name: 9ddf98456ca57cac3a4a982fc519c5a71642dc25</div><div id='time'> Time: 2020-03-10</div><div id='author'> Author: saareliad@campus.technion.ac.il</div><div id='file'> File Name: models/partitioned/gpt2.py</div><div id='m_class'> M Class Name: Partition0</div><div id='n_method'> N Class Name: Partition0</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/partitioned/gpt2.py</div><div id='n_file'> N File Name: models/partitioned/gpt2.py</div><div id='m_start'> M Start Line: 460</div><div id='m_end'> M End Line: 467</div><div id='n_start'> N Start Line: 396</div><div id='n_end'> N End Line: 430</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if hx is None:
+            hx = torch.zeros(input.size(0), self.h_channels, output_size, device=input.device)
+        &#47&#47 Run the optimized convgru-cell
+        <a id="change">return </a>_opt_convgrucell_1d(
+            input,
+            hx,
+            self.h_channels,</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input, h_prev=None):
+        &#47&#47 init hidden on forward
+        if h_prev is None:
+            h_prev<a id="change"> = </a>self.init_hidden(input)
+        print(f"input: {input.shape} prev: {h_prev.shape}")
+        combined = torch.cat((input, h_prev), dim=1)  &#47&#47 concatenate along channel axis
+
+        combined_conv = F.sigmoid(self.conv_zr(combined))
+
+        z<a id="change">, r = </a><a id="change">torch.split(</a>combined_conv, self.hidden_dim<a id="change">, dim=1)</a>
+
+        h_ = self.activation(self.conv_h1(input) + r * self.conv_h2(h_prev))
+
+        h_cur = (1 - z) * h_ + z * h_prev</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15148557</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU1DCell</div><div id='n_method'> N Class Name: ConvGRUCell</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 82</div><BR>

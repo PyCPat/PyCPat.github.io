@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            h = torch.sum(h, dim=[2,3])
+
+            if self.conditional_strategy == &quotno&quot:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                <a id="change">return </a>authen_output
+
+            elif self.conditional_strategy in <a id="change">[&quotContraGAN&quot</a>, <a id="change">&quotProxy_NCA_GAN&quot</a>, &quotNT_Xent_GAN&quot<a id="change"></a>]:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                cls_proxy = self.embedding(label)
+                <a id="change">cls_embed</a> = self.linear2(h)
+                <a id="change">if self.nonlinear_embed</a><a id="change">:
+                    </a>cls_embed<a id="change"> = </a><a id="change">self.linear3(self.activation(</a>cls_embed<a id="change">)</a><a id="change">)</a>
+                if self.normalize_embed:
+                    cls_proxy = F.normalize(cls_proxy, dim=1)
+                    cls_embed = F.normalize(cls_embed, dim=1)
+                return cls_proxy<a id="change">, cls_embed, authen_output</a>
+
+            elif self.conditional_strategy == &quotProjGAN&quot:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                proj = torch.sum(torch.mul(self.embedding(label), h), 1)
+                <a id="change">return </a>proj<a id="change"> + </a>authen_output
+
+            elif self.conditional_strategy == &quotACGAN&quot:
+                authen_output = torch.squeeze(self.linear1(h))
+                cls_output<a id="change"> = </a><a id="change">self.linear4(</a>h<a id="change">)</a>
+                return cls_output<a id="change">, authen_output</a>
+
+            else:
+                raise NotImplementedError
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, label, eval=False):
+        with torch.cuda.amp.autocast() if self.mixed_precision is True and eval is False else misc.dummy_context_mgr() as mp:
+            embed<a id="change">, proxy, cls_output</a> = None
+            h = x
+            for index, blocklist in enumerate(self.blocks):
+                for block in blocklist:</code></pre>

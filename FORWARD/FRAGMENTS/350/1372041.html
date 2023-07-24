@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+
+        cache = self._cached_x
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if cache is None:
+            if <a id="change">self.normalize</a>:
+                <a id="change">if </a><a id="change">is_edge_like:
+                    </a>edge_index<a id="change">, edge_weight = </a><a id="change">gcn_norm(  &#47&#47 yapf: disable
+                        </a>edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        <a id="change">self.add_self_loops</a><a id="change">, dtype=x.dtype)</a>
+                elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+                    </a>edge_index<a id="change"> = </a>gcn_norm(  &#47&#47 yapf: disable
+                        edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False,
+                        self.add_self_loops, dtype=x.dtype)
+                else:
+                    &#47&#47 N by N dense adjacency matrix
+                    edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(
+                        </a>edge_index<a id="change">, add_self_loops=self.add_self_loops)</a>
+
+            delta = self.t / self.K
+            for k in range(self.K):
+                out = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+        cache = self._cached_x
+
+        if cache is None:
+            if <a id="change">self.add_self_loops</a>:
+                edge_index<a id="change">, edge_weight = </a>make_self_loops(
+                    edge_index, edge_weight, num_nodes=x.size(0))
+
+            <a id="change">if self.normalize</a><a id="change">:
+                </a>edge_index<a id="change">, edge_weight = </a><a id="change">make_gcn_norm(
+                    </a>edge_index, edge_weight<a id="change">)</a>
+
+            delta = self.t / self.K
+            for k in range(self.K):
+                out = spmm(x, edge_index, edge_weight)</code></pre>

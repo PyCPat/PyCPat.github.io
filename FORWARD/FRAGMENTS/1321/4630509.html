@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            if flattened_dim:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = <a id="change">logits</a>[:, <a id="change">:</a>seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            if flattened_dim:
+                return logits
+
+            return <a id="change">rearrange(</a>logits, <a id="change">&quotb (s d) n -&gt; b s d n&quot</a><a id="change">, d = depth)</a>
+
+        logits = logits[..., :-1, :]
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+</code></pre>

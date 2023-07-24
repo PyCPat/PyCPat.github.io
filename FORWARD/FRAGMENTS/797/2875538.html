@@ -1,0 +1,101 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        all_box_pair_features = torch.cat(all_box_pair_features)
+        all_prior = torch.cat(all_prior)
+
+        <a id="change">return </a>all_box_pair_features<a id="change">, all_boxes_h, all_boxes_o, all_labels, all_prior</a>
+
+class BoxPairPredictor(nn.Module):
+    def __init__(self, input_size, representation_size, num_classes):
+        super().__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_boxes = [len(boxes_per_image) for boxes_per_image in box_coords]
+        
+        counter = 0
+        all_boxes_h = []; all_boxes_o = []; <a id="change">all_object_class</a><a id="change"> = </a><a id="change">[]</a>
+        all_labels = []; all_prior = []
+        all_box_pair_features = []
+        for b_idx, (coords, labels, scores) in enumerate(zip(box_coords, box_labels, box_scores)):
+            n = num_boxes[b_idx]
+            device = box_features.device
+
+            human_box_idx = torch.nonzero(labels == self.human_idx).squeeze(1).tolist()
+            n_h = len(human_box_idx)
+            &#47&#47 Skip image when there are no detected human or object instances
+            if n_h == 0 or n == 0:
+                continue
+            if n_h == n:
+                node_encodings = box_features[counter: counter+n]
+            else:
+                &#47&#47 Permute the boxes so that humans are on the top
+                permutation = torch.cat([
+                    torch.as_tensor(human_box_idx, device=device),
+                    torch.as_tensor([i for i in range(n) if i not in human_box_idx], device=device)
+                ])
+                coords = coords[permutation]
+                labels = labels[permutation]
+                scores = scores[permutation]
+                node_encodings = box_features[counter: counter+n][permutation]
+
+            &#47&#47 Duplicate human nodes
+            h_node_encodings = node_encodings[:n_h]
+            &#47&#47 Get the pairwise index between every human and object instance
+            x, y = torch.meshgrid(
+                torch.arange(n_h, device=device),
+                torch.arange(n, device=device)
+            )
+            &#47&#47 Remove pairs consisting of the same human instance
+            x_keep, y_keep = torch.nonzero(x != y).unbind(1)
+            &#47&#47 Human nodes have been duplicated and will be treated independently
+            &#47&#47 of the humans included amongst object nodes
+            x = x.flatten(); y = y.flatten()
+
+            for i in range(self.num_iter):
+                &#47&#47 Compute weights of each edge
+                weights = self.adjacency(torch.cat([
+                    h_node_encodings[x],
+                    node_encodings[y]
+                ], 1))
+                adjacency_matrix = weights.reshape(n_h, n)
+
+                &#47&#47 Update human nodes
+                h_node_encodings = self.sub_update(torch.cat([
+                    h_node_encodings,
+                    torch.mm(adjacency_matrix, self.obj_to_sub(node_encodings))
+                ], 1))
+
+                &#47&#47 Update object nodes (including human nodes)
+                node_encodings = self.obj_update(torch.cat([
+                    node_encodings,
+                    torch.mm(adjacency_matrix.t(), self.sub_to_obj(h_node_encodings))
+                ], 1))
+
+            if self.training:
+                all_labels.append(self.associate_with_ground_truth(
+                    coords[x_keep], coords[y_keep], targets[b_idx])
+                )
+                
+            all_box_pair_features.append(torch.cat([
+                h_node_encodings[x_keep], node_encodings[y_keep]
+            ], 1))
+            all_boxes_h.append(coords[x_keep])
+            all_boxes_o.append(coords[y_keep])
+            <a id="change">all_object_class.append(labels[y_keep]</a><a id="change">)</a>
+            &#47&#47 The prior score is the product between edge weights and the
+            &#47&#47 pre-computed object detection scores with LIS
+            all_prior.append(
+                adjacency_matrix[x_keep, y_keep, None] *
+                self.compute_prior_scores(x_keep, y_keep, scores, labels)
+            )
+
+            counter += n
+
+        all_box_pair_features = torch.cat(all_box_pair_features)
+        all_prior = torch.cat(all_prior)
+
+        <a id="change">return </a>all_box_pair_features<a id="change">, all_boxes_h, all_boxes_o, all_object_class, all_labels, all_prior</a>
+
+class BoxPairPredictor(nn.Module):
+    def __init__(self, input_size, representation_size, num_classes):
+        super().__init__()</code></pre>

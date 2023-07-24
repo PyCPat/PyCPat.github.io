@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_graph.node_features["rnn_emb"] = batch_graph.node_features[&quotnode_feat&quot]
+
+        batch_graph_list_decoder_input = from_batch(batch_graph)
+        <a id="change">if </a>self.use_copy and <a id="change">"token_id_oov" not in batch_graph.node_features.keys()</a><a id="change">:
+            </a>for g, g_ in zip(batch_graph_list_decoder_input, graph_list):
+                g.node_features[&quottoken_id_oov&quot]<a id="change"> = </a>g_.node_features[&quottoken_id_oov&quot]
+
+        loss = self.decoder(g=batch_graph_list_decoder_input,
+                            tgt_tree_batch=tgt_tree_batch, oov_dict=oov_dict)</code></pre><h3>After Change</h3><pre><code class='java'>
+                                      tgt_vocab=self.tgt_vocab)
+
+    def forward(self, batch_graph, tgt_tree_batch, oov_dict=None):
+        batch_graph.batch_node_features["token_id"]<a id="change"> = </a><a id="change">batch_graph.batch_node_features["token_id"].to(</a>self.device<a id="change">)</a>
+        batch_graph = self.graph_topology(batch_graph)
+        batch_graph = self.encoder(batch_graph)
+        batch_graph.node_features["rnn_emb"] = batch_graph.node_features[&quotnode_feat&quot]
+</code></pre>

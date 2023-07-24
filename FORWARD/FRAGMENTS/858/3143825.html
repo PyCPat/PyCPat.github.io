@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.conv_out3(x)
+        out = self.conv_out4(x)
+
+        <a id="change">return </a>x<a id="change">, out</a></code></pre><h3>After Change</h3><pre><code class='java'>
+        assert not xor(self.lmap_in is True, lmap is not None)
+        for i, f in enumerate(feat_maps):
+            if f.shape[-2:] != shape:
+                feat_maps[i]<a id="change"> = </a><a id="change">self.upsample(</a>f, shape<a id="change">)</a>
+        x = torch.cat(feat_maps, dim=1)
+        b, c, h, w = x.shape
+        
+        &#47&#47 compute class probability
+        smap = F.interpolate(smap, size=x.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+        smap = torch.sigmoid(smap)
+        p = smap - self.threshold
+
+        fg = torch.clip(p, 0, 1) &#47&#47 foreground
+        bg = torch.clip(-p, 0, 1) &#47&#47 background
+        cg = self.threshold - torch.abs(p) &#47&#47 confusion area
+
+        if self.lmap_in is True:
+            lmap = F.interpolate(lmap, size=x.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            lmap = torch.sigmoid(lmap)
+            lp = lmap - self.lthreshold
+            fp = torch.clip(lp, 0, 1) &#47&#47 foreground
+            bp = torch.clip(-lp, 0, 1) &#47&#47 background
+
+            prob = [fg, bg, cg, fp, bp]
+        else:
+            prob = [fg, bg, cg]
+
+        prob = torch.cat(prob, dim=1)
+
+        &#47&#47 reshape feature & prob
+        f = x.view(b, h * w, -1)
+        prob = prob.view(b, self.ctx, h * w)
+        
+        &#47&#47 compute context vector
+        context = torch.bmm(prob, f).permute(0, 2, 1).unsqueeze(3) &#47&#47 b, 3, c
+
+        &#47&#47 k q v compute
+        query = self.conv_query(x).view(b, self.channel, -1).permute(0, 2, 1)
+        key = self.conv_key(context).view(b, self.channel, -1)
+        value = self.conv_value(context).view(b, self.channel, -1).permute(0, 2, 1)
+
+        &#47&#47 compute similarity map
+        sim = torch.bmm(query, key) &#47&#47 b, hw, c x b, c, 2
+        sim = (self.channel ** -.5) * sim
+        sim = F.softmax(sim, dim=-1)
+
+        &#47&#47 compute refined feature
+        context = torch.bmm(sim, value).permute(0, 2, 1).contiguous().view(b, -1, h, w)
+        out = self.conv_out(context)
+        <a id="change">return </a>out</code></pre>

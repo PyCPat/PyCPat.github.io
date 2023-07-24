@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), (q, *kv))
+        dots = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * scale
+        attn = dots.softmax(dim = -1)
+        out = <a id="change">einsum(&quotb i j, b j d -&gt; b i d&quot</a>, attn, v<a id="change">)</a>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, *kv))
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * scale
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = rearrange(</a>mask, <a id="change">&quotb n -&gt; b () () n&quot</a><a id="change">)</a>
+            dots.masked_fill_(~mask, float(&quot-inf&quot))
+
+        attn = dots.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)</code></pre>

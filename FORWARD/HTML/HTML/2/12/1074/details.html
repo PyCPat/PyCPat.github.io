@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :1074
+</h3><img src='3933448.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h : tensor
+            The output features
+        
+        <a id="change">semantic_embeddings</a><a id="change"> = []</a>
+
+        if self._cached_graph is None or self._cached_graph is not g:
+            self._cached_graph = g
+            self._cached_coalesced_graph.clear()
+            for meta_path in self.meta_paths:
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+
+        <a id="change">for </a>i, meta_path in enumerate(self.meta_paths)<a id="change">:
+            </a>new_g<a id="change"> = </a>self._cached_coalesced_graph[meta_path]
+            <a id="change">semantic_embeddings.append(</a>self.gat_layers[i](new_g, h).flatten(1)<a id="change">)</a>
+        semantic_embeddings<a id="change"> = </a><a id="change">torch.stack(semantic_embeddings</a><a id="change">, dim=1)</a>                  &#47&#47 (N, M, D * K)
+
+        <a id="change">return </a>self.semantic_attention(semantic_embeddings)                            &#47&#47 (N, D * K)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            for meta_path in self.meta_paths:
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+        h<a id="change"> = </a>self.model(self._cached_coalesced_graph, h)
+        <a id="change">return </a>h
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/bd15d668053389800a158b521ef97860b18e3719#diff-2f354b81b662a7a8ee08913aaa88328a62ba33f16f029b2460e0cb581daf04e1L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3933448</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: bd15d668053389800a158b521ef97860b18e3719</div><div id='time'> Time: 2021-09-07</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/models/HAN.py</div><div id='m_class'> M Class Name: HANLayer</div><div id='n_method'> N Class Name: HANLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/HAN.py</div><div id='n_file'> N File Name: openhgnn/models/HAN.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 117</div><div id='n_end'> N End Line: 120</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        nums_nodes, id = graph.batch_num_nodes(), 0
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes.device))
+        <a id="change">batch_embedding</a><a id="change"> = []</a>
+        <a id="change">for </a><a id="change">num_nodes</a> in nums_nodes<a id="change">:
+            </a>output_node_features = nodes_output[id:id + num_nodes, :]
+            output_nodes = nodes[id: id + num_nodes]
+            beta = torch.zeros(self.items_total, 1).to(nodes.device)
+            beta[output_nodes] = 1
+            embed<a id="change"> = </a>(1 - beta * self.alpha) * items_embedding.clone()
+            embed[output_nodes, :] = embed[output_nodes, :] + self.alpha[output_nodes] * output_node_features
+            <a id="change">batch_embedding.append(</a>embed<a id="change">)</a>
+            id += num_nodes
+        batch_embedding<a id="change"> = </a><a id="change">torch.stack(</a>batch_embedding<a id="change">)</a>
+        <a id="change">return </a>batch_embedding
+
+
+class AggregateTemporalNodeFeatures(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes.device))
+        alpha = torch.sigmoid(self.alpha)
+        embed<a id="change"> = </a>(1 - alpha) * items_embedding.clone() + alpha * nodes_output
+        <a id="change">return </a>embed
+
+
+class AggregateTemporalNodeFeatures(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/c402d2a14167bceaa3c8d3845879f8056e8aead7#diff-781837fb12ee6ac1f0b89d83a2500544e486bd58832bd4e4a8d1a779b2a0950eL78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3933449</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: c402d2a14167bceaa3c8d3845879f8056e8aead7</div><div id='time'> Time: 2021-07-18</div><div id='author'> Author: benedek.rozemberczki@gmail.com</div><div id='file'> File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_class'> M Class Name: GlobalGatedUpdater</div><div id='n_method'> N Class Name: GlobalGatedUpdater</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 87</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        h : tensor
+            The output features
+        
+        <a id="change">semantic_embeddings</a><a id="change"> = []</a>
+        h = self.hidden(h)
+        if self._cached_graph is None or self._cached_graph is not g:
+            self._cached_graph = g
+            self._cached_coalesced_graph.clear()
+            for meta_path in self.meta_paths:
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+
+        <a id="change">for </a>i, <a id="change">meta_path</a> in enumerate(self.meta_paths)<a id="change">:
+
+            </a>new_g<a id="change"> = </a>self._cached_coalesced_graph[meta_path]
+            <a id="change">semantic_embeddings.append(</a>self.propagation_layers[i](new_g, h).flatten(1)<a id="change">)</a>
+        semantic_embeddings<a id="change"> = </a><a id="change">torch.stack(</a>semantic_embeddings<a id="change">, dim=1)</a>
+
+        <a id="change">return </a>self.semantic_fusion(semantic_embeddings)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+
+        h<a id="change"> = </a>self.model(self._cached_coalesced_graph, h)
+        <a id="change">return </a>h
+
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/bd15d668053389800a158b521ef97860b18e3719#diff-dcb3ada8373d1a7302711fab0b7c9bdcd8be5e440bde471c0babc84098fd2d37L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3933447</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: bd15d668053389800a158b521ef97860b18e3719</div><div id='time'> Time: 2021-09-07</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/models/HPN.py</div><div id='m_class'> M Class Name: HPNLayer</div><div id='n_method'> N Class Name: HPNLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/HPN.py</div><div id='n_file'> N File Name: openhgnn/models/HPN.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 144</div><BR>

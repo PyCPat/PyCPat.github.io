@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.trans2(self.dense2(x))
+        x = self.trans3(self.dense3(x))
+        x = self.dense4(x)
+        x = func.avg_pool2d(<a id="change">func.relu(</a>self.bn(x)<a id="change">)</a>, 4)
+        x<a id="change"> = </a><a id="change">x.view(x.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        x<a id="change"> = </a>self.linear(x)
+        <a id="change">return </a>x
+
+
+def DenseNet121():</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        features = self.features(x)
+        out = F.relu(features, inplace=True)
+        out = F.adaptive_avg_pool2d(out, (<a id="change">1</a><a id="change">, 1</a>)).view(features.size(0), -1)
+        out = self.classifier(out)
+        <a id="change">return </a>out
+
+
+def densenet121(pretrained=False, **kwargs):</code></pre>

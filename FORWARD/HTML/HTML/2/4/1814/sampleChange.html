@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1</a><a id="change">)</a>.to(device)
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = x.to(device)
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		embed = <a id="change">embed_enc_inputs.size(2</a><a id="change">)</a>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]</code></pre>

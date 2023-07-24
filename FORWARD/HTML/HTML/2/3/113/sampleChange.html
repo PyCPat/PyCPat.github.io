@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            preds = F.interpolate(preds, size=labels.shape[1:], mode=&quotbilinear&quot, align_corners=False)
+
+        n_min = labels[labels != self.ignore_label].numel() // 16
+        loss = <a id="change">self.criterion(</a>preds, labels<a id="change">)</a>.view(-1)
+        loss_hard = loss[loss &gt; self.thresh]
+
+        if loss_hard.numel() &lt; n_min:
+            loss_hard, _ = loss.topk(n_min)
+
+        <a id="change">return </a>torch.mean(loss_hard)
+
+
+class Dice(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            return sum([w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)])
+        <a id="change">return </a>self._forward(preds, labels)
+
+
+class Dice(nn.Module):</code></pre>

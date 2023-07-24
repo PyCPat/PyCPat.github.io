@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+	def forward(self, row_index, ind, x, y = None):
+		x = x.float()
+		hs = [<a id="change">torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(</a>self.device<a id="change">)</a> for _ in range(self.args[&quotnum_units&quot])]
+		cs = None
+		if self.args[&quotrnn_cell&quot] == &quotLSTM&quot:
+			cs = [torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(self.device) for _ in range(self.args[&quotnum_units&quot])]
+		xs = torch.split(x, 1, 1)
+		&#47&#47print(xs[0].size())
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		h<a id="change"> = </a>torch.cat(hs, dim = 1)
+		preds = self.Linear(h)
+		if y is not None:
+			y = y.long()</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		preds = self.Linear(hs.contiguous().view(<a id="change">x.size(0</a><a id="change">)</a>, -1))
+		if y is not None:
+			y = y.long()
+			probs = nn.Softmax(dim = -1)(preds)</code></pre>

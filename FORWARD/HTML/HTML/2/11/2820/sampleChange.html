@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv = ConvBnAct(2, 1, kernel_size, act_layer=None)
+
+    def forward(self, x):
+        x_avg = <a id="change">torch.mean(</a>x<a id="change">, dim=1, keepdim=True)</a>
+        x_max<a id="change"> = </a>torch.max(x, dim=1, keepdim=True)[0]
+        x_attn<a id="change"> = </a>torch.cat([x_avg, x_max], dim=1)
+        x_attn = self.conv(x_attn)
+        <a id="change">return </a>x<a id="change"> * x_attn.sigmoid()</a>
+
+
+class LightSpatialAttn(nn.Module):
+    An experimental &quotlightweight&quot variant that sums avg_pool and max_pool results.</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gate = create_act_layer(gate_layer)
+
+    def forward(self, x):
+        x_attn = torch.cat([<a id="change">x.mean(dim=1, keepdim=True)</a>, x.amax(dim=1, keepdim=True)], dim=1)
+        x_attn = self.conv(x_attn)
+        <a id="change">return x</a><a id="change"> * </a><a id="change">self.gate(</a>x_attn<a id="change">)</a>
+
+
+class LightSpatialAttn(nn.Module):
+    An experimental &quotlightweight&quot variant that sums avg_pool and max_pool results.</code></pre>

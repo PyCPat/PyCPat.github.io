@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        biases = [bias]
+
+        <a id="change">if </a><a id="change">(self.pair_bias and 
+            z is not None and                       &#47&#47 For the 
+            self.layer_norm_z is not None and       &#47&#47 benefit of
+            self.linear_z is not None               &#47&#47 TorchScript
+        ):
+            &#47&#47 [*, N_res, N_res, C_z]
+            </a>z<a id="change"> = </a>self.layer_norm_z(z)
+
+            &#47&#47 [*, N_res, N_res, no_heads]
+            z<a id="change"> = </a>self.linear_z(z)
+
+            &#47&#47 [*, 1, no_heads, N_res, N_res]
+            z = permute_final_dims(z, (2, 0, 1)).unsqueeze(-4)</code></pre><h3>After Change</h3><pre><code class='java'>
+                cost of slower execution. Chunking is not performed by default.
+                
+        
+        <a id="change">if</a>(_chunk_logits is not None)<a id="change">:
+            </a>return self._chunked_msa_attn(
+                m=m, z=z, mask=mask, 
+                chunk_logits=_chunk_logits, checkpoint=_checkpoint_chunks
+            )           
+
+        m, mask_bias, z = self._prep_inputs(m, z, mask)
+
+        biases<a id="change"> = </a>[mask_bias]
+        if(z is not None):
+            biases.append(z)
+</code></pre>

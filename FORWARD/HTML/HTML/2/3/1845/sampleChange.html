@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 [*, 4]
+        quats = torch.cat((ones.expand(*quats.shape[:-1], 1), quats), dim=-1)
+        quats = quats / <a id="change">norm_denom.unsqueeze(-1</a><a id="change">)</a>
+
+        &#47&#47 [*, 3, 3]
+        rots = quat_to_rot(quats)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 [*, 3] 
+        ones = (
+            <a id="change">s.new_ones((1,) * len(quats.shape)).expand(</a>quats.shape[:-1] + (1,)<a id="change">)
+        )</a>
+
+        &#47&#47 [*, 4]
+        quats = torch.cat([ones, quats], dim=-1)
+        quats = quats / norm_denom[..., None]</code></pre>

@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mid_channels = self.backbone.OUT_CHANNELS//2
+        
+        strides = [2,2,2]
+        head<a id="change"> = </a><a id="change">[]</a>
+        head.append(self._make_layer(self.backbone.OUT_CHANNELS, mid_channels, kernel_size=self.kernel_size, stride=strides[0]))
+        head.append(self._make_layer(mid_channels, mid_channels, kernel_size=self.kernel_size, stride=strides[1]))
+        head.append(self._make_layer(mid_channels, 1, kernel_size=self.kernel_size, stride=strides[2], bnrelu=False))
+        self.head = nn.Sequential(*head)        </code></pre><h3>After Change</h3><pre><code class='java'>
+        self.backbone = backbones.__dict__[settings[&quotblock_net&quot]](pretrained=False, in_channels=in_channels, width_factor=1)
+        
+        &#47&#47 mid_channels = self.backbone.OUT_CHANNELS//2
+        planes<a id="change"> = </a>96
+        kernel_sizes = [3,3,5,5,5,5,3]
+        strides      = [2,2,2,1,2,2,1]
+        assert len(strides) &gt; 3
+        layers<a id="change"> = </a><a id="change">[]</a>
+        layers.append(self._make_layer(in_channels, 32, kernel_size=kernel_sizes[0], stride=strides[0]))
+        layers.append(self._make_layer(32, planes, kernel_size=kernel_sizes[1], stride=strides[1]))
+        for i in range(2, len(strides)-2):
+            print(&quoti&quot, i)
+            print(&quotstrides&quot, strides[i])
+            layers.append(self._make_layer(planes, planes, kernel_size=kernel_sizes[i], stride=strides[i]))
+        <a id="change">layers.append(</a>self._make_layer(planes, 1, kernel_size=kernel_sizes[-1], stride=strides[-1], bnrelu=False)<a id="change">)</a>
+        self.layers = nn.Sequential(*layers)        
+        
+    def _make_layer(self, in_channels, out_channels, kernel_size=3, stride=1, bnrelu=True):
+        layers = []</code></pre>

@@ -1,0 +1,102 @@
+<html><h3>Pattern ID :2859
+</h3><img src='15722349.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        <a id="change">return </a>0.5 * (trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):
+        Perform forward on a single domain.</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = F.softmax(g,dim=1).detach()
+        h<a id="change"> = </a>self.grl(self.map(f, g))
+        d<a id="change"> = </a>self.domain_discriminator(h)
+        d_label<a id="change"> = </a>torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            <a id="change">torch.zeros(</a>(g_t.size(0)<a id="change">, 1</a>)<a id="change">)</a>.to(g_t.device),
+        ))
+        weight<a id="change"> = </a>1.0 + torch.exp(-entropy(g))
+        batch_size<a id="change"> = </a>f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15722349</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 it will be returned early.
+        &#47&#47 Note: during inference batch_size needs to be 1
+        if inference:
+            uncertain_infos<a id="change"> = </a>[]
+            for i, (layer_module, (k, layer_classifier_module)) in enumerate(
+                    zip(self.layer, self.layer_classifiers.items())):
+                hidden_states = layer_module(hidden_states[0], attention_mask)
+                logits = layer_classifier_module(hidden_states[0])
+                prob = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+                uncertain = torch.sum(prob * log_prob, 1) / (-torch.log(self.num_class))
+                uncertain_infos.append([uncertain, prob])
+
+                &#47&#47 return early results
+                if uncertain &lt; inference_speed:
+                    <a id="change">return </a>prob, i, uncertain_infos
+            return prob, i, uncertain_infos
+
+        &#47&#47 Training phase: the first phase corresponds to the backbone training</code></pre><h3>After Change</h3><pre><code class='java'>
+        if inference:
+            &#47&#47 positions will keep track of the original position of each element in the
+            &#47&#47 batch when elements will be removed
+            final_probs<a id="change"> = </a><a id="change">torch.zeros(</a>(hidden_states[0].shape[0]<a id="change">, 2</a>)<a id="change">, device=device)</a>
+            positions<a id="change"> = </a>torch.arange(start=0, end=hidden_states[0].shape[0], device=device).long()
+
+            for i, (layer_module, (k, layer_classifier_module)) in enumerate(
+                    zip(self.layer, self.layer_classifiers.items())):
+
+                hidden_states = layer_module(hidden_states[0], attention_mask)
+                logits = layer_classifier_module(hidden_states[0])
+                prob = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+                uncertain = torch.sum(prob * log_prob, 1) / (-torch.log(self.num_class))
+
+                &#47&#47 checking if there&quots enough information
+                enough_info = uncertain &lt; inference_speed
+
+                right_pos<a id="change"> = </a>positions[enough_info]
+                final_probs[right_pos]<a id="change"> = </a>prob[enough_info]
+
+                hidden_states = (hidden_states[0][~enough_info],)
+                attention_mask = attention_mask[~enough_info]
+
+                &#47&#47 if we have processed all the samples
+                if hidden_states[0].shape[0] == 0:
+                    <a id="change">return </a>final_probs, i
+
+                positions = positions[~enough_info]  &#47&#47 updating the positions to fit the new batch
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/julesbelveze/bert-squeeze/commit/3cb14b8f1e742b86fe609843f2779e3bb36de4aa#diff-aac748de92a29499c39463320f41c1eaeb283dae0ed8ead9584db8318265a4acL49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15722348</div><div id='project'> Project Name: julesbelveze/bert-squeeze</div><div id='commit'> Commit Name: 3cb14b8f1e742b86fe609843f2779e3bb36de4aa</div><div id='time'> Time: 2021-12-11</div><div id='author'> Author: 32683010+JulesBelveze@users.noreply.github.com</div><div id='file'> File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='m_class'> M Class Name: FastBertGraph</div><div id='n_method'> N Class Name: FastBertGraph</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='n_file'> N File Name: bert-squeeze/models/custom_transformers/fastbert.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 87</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        <a id="change">return </a>0.5 * (trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):
+        Perform forward on a single domain.</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = F.softmax(g,dim=1).detach()
+        h<a id="change"> = </a>self.grl(self.map(f, g))
+        d<a id="change"> = </a>self.domain_discriminator(h)
+        d_label<a id="change"> = </a>torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            <a id="change">torch.zeros(</a>(g_t.size(0)<a id="change">, 1</a>)<a id="change">)</a>.to(g_t.device),
+        ))
+        weight<a id="change"> = </a>1.0 + torch.exp(-entropy(g))
+        batch_size<a id="change"> = </a>f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15722347</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>

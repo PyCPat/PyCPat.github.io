@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.drop_prob = drop_prob
+
+    def forward(self, x):
+        <a id="change">return </a>drop_path(x, self.drop_prob, self.training)
+
+
+class Tokenizer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        batch, drop_prob, device, dtype = x.shape[0], self.drop_prob, x.device, x.dtype
+
+        <a id="change">if drop_prob &lt;= 0.</a><a id="change"> or not self.training:
+            </a>return x
+
+        keep_prob = 1 - self.drop_prob
+        shape = (batch, *((1,) * (x.ndim - 1)))
+
+        keep_mask<a id="change"> = </a>torch.zeros(shape, device = device).float().uniform_(0, 1) &lt; keep_prob
+        output = x.div(keep_prob) * keep_mask.float()
+        return output
+</code></pre>

@@ -1,29 +1,32 @@
 <html><h3>Pattern ID :105
-</h3><img src='470266.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='478222.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
-            self.conv2
-        )
-        self.bypass<a id="change"> = nn</a><a id="change">.Sequential()</a>
-        if stride != 1:
-            self.bypass = <a id="change">nn.Upsample(scale_factor=2)</a>
+        m.append(nn.ReLU(True))
+        m.append(nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True))
+        m.append(nn.Sigmoid())
+        m.append(<a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)</a>)
+        self.body<a id="change"> = nn</a><a id="change">.Sequential(</a>*<a id="change">m)</a>
 
-    def forward(self, x_in, noise_embed):
-        batch = x_in.shape[0]
-        x = self.model1(x_in)</code></pre><h3>After Change</h3><pre><code class='java'>
-            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
-            nn.Conv2d(out_channels, out_channels, 3, 1, padding=1)
-        )
-        self.bypass = <a id="change">nn.Sequential(
-            </a><a id="change">nn.Upsample(scale_factor=2)</a> if stride &gt; 1 else nn.Identity(),
-            nn.Conv2d(in_channels, out_channels, 1, 1)<a id="change">
+    def forward(self, x):
+        res = self.body(x)
+        if res.shape != x.shape:</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    def __init__(self, n_feats, reduction=4, stride=8):
+        super(AttentionBlock, self).__init__()
+        self.body = <a id="change">nn.Sequential(
+            </a>nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
+            nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True),
+            nn.Sigmoid(),
+            <a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)
         )</a>
 
-    def forward(self, x_in, noise_embed):
-        x = self.model1(x_in)
-        x = self.noise_func(x, noise_embed)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 470266</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: ResBlockUp</div><div id='n_method'> N Class Name: ResBlockUp</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        res = self.body(x)
+        if res.shape != x.shape:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coloquinte/torchsr/commit/eb00033f099346d72b412cf00e9291e4e2ee5738#diff-b06323d8779b12edf2f868604a520316bccb42fb9d2209b0aaacd98f739232f6L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 478222</div><div id='project'> Project Name: coloquinte/torchsr</div><div id='commit'> Commit Name: eb00033f099346d72b412cf00e9291e4e2ee5738</div><div id='time'> Time: 2021-04-17</div><div id='author'> Author: gabriel.gouvine_GIT@gmx.com</div><div id='file'> File Name: models/ninasr.py</div><div id='m_class'> M Class Name: AttentionBlock</div><div id='n_method'> N Class Name: AttentionBlock</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/ninasr.py</div><div id='n_file'> N File Name: models/ninasr.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 25</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
             nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
             self.conv2
         )
@@ -44,28 +47,25 @@
 
     def forward(self, x_in, noise_embed):
         x = self.model1(x_in)
-        x = self.noise_func(x, noise_embed)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/6424546b8d11bea9ffa4165b94c8c16c56a1de62#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 470265</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 6424546b8d11bea9ffa4165b94c8c16c56a1de62</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: ResBlockUp</div><div id='n_method'> N Class Name: ResBlockUp</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-        m.append(nn.ReLU(True))
-        m.append(nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True))
-        m.append(nn.Sigmoid())
-        m.append(<a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)</a>)
-        self.body<a id="change"> = </a><a id="change">nn.Sequential(</a>*<a id="change">m)</a>
+        x = self.noise_func(x, noise_embed)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 478221</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: eeae1c09083fea8dbb057a2ca7eb6b0e5e6a7e1b</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: ResBlockUp</div><div id='n_method'> N Class Name: ResBlockUp</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
+            self.conv2
+        )
+        self.bypass<a id="change"> = </a><a id="change">nn.Sequential()</a>
+        if stride != 1:
+            self.bypass = <a id="change">nn.Upsample(scale_factor=2)</a>
 
-    def forward(self, x):
-        res = self.body(x)
-        if res.shape != x.shape:</code></pre><h3>After Change</h3><pre><code class='java'>
-    
-    def __init__(self, n_feats, reduction=4, stride=8):
-        super(AttentionBlock, self).__init__()
-        self.body = <a id="change">nn.Sequential(
-            </a>nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
-            nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True),
-            nn.ReLU(True),
-            nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True),
-            nn.Sigmoid(),
-            <a id="change">nn.Upsample(scale_factor=stride, mode=&quotnearest&quot)
+    def forward(self, x_in, noise_embed):
+        batch = x_in.shape[0]
+        x = self.model1(x_in)</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
+            nn.Conv2d(out_channels, out_channels, 3, 1, padding=1)
+        )
+        self.bypass = <a id="change">nn.Sequential(
+            </a><a id="change">nn.Upsample(scale_factor=2)</a> if stride &gt; 1 else nn.Identity(),
+            nn.Conv2d(in_channels, out_channels, 1, 1)<a id="change">
         )</a>
 
-    def forward(self, x):
-        res = self.body(x)
-        if res.shape != x.shape:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coloquinte/torchsr/commit/eb00033f099346d72b412cf00e9291e4e2ee5738#diff-b06323d8779b12edf2f868604a520316bccb42fb9d2209b0aaacd98f739232f6L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 470264</div><div id='project'> Project Name: coloquinte/torchsr</div><div id='commit'> Commit Name: eb00033f099346d72b412cf00e9291e4e2ee5738</div><div id='time'> Time: 2021-04-17</div><div id='author'> Author: gabriel.gouvine_GIT@gmx.com</div><div id='file'> File Name: models/ninasr.py</div><div id='m_class'> M Class Name: AttentionBlock</div><div id='n_method'> N Class Name: AttentionBlock</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/ninasr.py</div><div id='n_file'> N File Name: models/ninasr.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 25</div><BR>
+    def forward(self, x_in, noise_embed):
+        x = self.model1(x_in)
+        x = self.noise_func(x, noise_embed)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/6424546b8d11bea9ffa4165b94c8c16c56a1de62#diff-4bdfc468725927169e03dc9680e3ce3bc173d78a388e68ef9f1571d8cee74d56L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 478220</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 6424546b8d11bea9ffa4165b94c8c16c56a1de62</div><div id='time'> Time: 2021-08-03</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/modules/unet.py</div><div id='m_class'> M Class Name: ResBlockUp</div><div id='n_method'> N Class Name: ResBlockUp</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules/unet.py</div><div id='n_file'> N File Name: model/modules/unet.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 88</div><BR>

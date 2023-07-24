@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class LinearAttentionTransformer(nn.Module):
+    def __init__(self, dim, depth, max_seq_len, heads = 8, bucket_size = 64, causal = False, one_kv_head = False):
+        super().__init__()
+        self.attn_layers = nn.ModuleList([<a id="change">PreNorm(dim</a>, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head)<a id="change">)</a> for _ in range(depth)])
+        self.ff_layers = nn.ModuleList([<a id="change">PreNorm(dim</a>, <a id="change">FeedForward(</a>dim<a id="change">))</a> for _ in range(depth)])
+
+    def forward(self, x, **kwargs):
+        for attn, ff in zip(self.attn_layers, self.ff_layers):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for _ in range(depth):
+            layer = nn.ModuleList([
+                <a id="change">PreNorm(dim</a>, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head)<a id="change">)</a>,
+                <a id="change">PreNorm(dim</a>, <a id="change">FeedForward(</a>dim<a id="change">))</a>
+            ])
+            layers.append(layer)
+
+        self.layers = ReversibleSequence(layers)</code></pre>

@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 We use the same vector as both a query and a key.
+        assert int(buckets.shape[1]) == self.n_hashes * seqlen
+
+        ticker = <a id="change">torch.arange(self.n_hashes * seqlen, device=device).unsqueeze(0</a><a id="change">)</a>.expand_as(buckets)
+        buckets_and_t = seqlen * buckets + (ticker % seqlen)
+        buckets_and_t = buckets_and_t.detach()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 We use the same vector as both a query and a key.
+        assert int(buckets.shape[1]) == self.n_hashes * seqlen
+
+        <a id="change">if self.n_local_attn_hashes &gt; 0</a><a id="change">:
+            </a>local_buckets = torch.zeros((batch_size, seqlen * self.n_local_attn_hashes), device = device, dtype=torch.long)
+            buckets<a id="change"> = </a><a id="change">torch.cat(</a>(buckets<a id="change">, local_buckets</a>)<a id="change">, dim=1)</a>
+
+        total_hashes = self.n_hashes + self.n_local_attn_hashes
+
+        ticker = torch.arange(total_hashes * seqlen, device=device).unsqueeze(0).expand_as(buckets)</code></pre>

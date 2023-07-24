@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x, padding = pad_to_multiple(x, self.pad_multiple, dim=self.pad_dim)
+            args[ind] = x
+
+        <a id="change">if </a>padding != 0<a id="change">:
+            </a>new_mask = F.pad(input_mask, (0, padding), value=False)
+            <a id="change">kwargs.update(input_mask=new_mask)</a>
+
+        out = self.net(*args, **kwargs)
+        return out[:, :, 0:t]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        args = map(lambda t: pad_to_multiple(t, self.pad_multiple, dim=-2), args)
+        new_mask = pad_to_multiple(input_mask, self.pad_multiple, dim=-1, value=False)
+        <a id="change">kwargs.update(input_mask=new_mask)</a>
+
+        out = self.net(*args, **kwargs)
+        return out[:, :, 0:t]
+</code></pre>

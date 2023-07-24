@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :754
+</h3><img src='2791274.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                            for i in source_ids]
+        source_alphas = F.softmax(source_alphas)
+
+        output_moe = sum(<a id="change">[ alpha.unsqueeze(1).repeat(1, 1) *
+                                F.softmax(classifier_outputs[id], dim=1)
+                        for alpha, id in zip(source_alphas, source_ids)]</a>)
+        return output_moe
+    
+    def compute_domain_encs(self, all_train_smiles):</code></pre><h3>After Change</h3><pre><code class='java'>
+        classifier_outputs = [self.classifiers[i](encodings) for i in range(self.num_sources)]
+
+        source_ids = range(self.num_sources)
+        source_alphas = [-<a id="change">self.mahalanobis_metric(encodings, 
+                            self.domain_encs[i], i).unsqueeze(0</a><a id="change">)</a>
+                            for i in source_ids]
+        source_alphas = F.softmax(torch.cat(source_alphas, dim=0), dim=0) &#47&#47 n_source x bs
+        output_moe = sum([ source_alphas[j].unsqueeze(1).repeat(1, 1) *
+                            classifier_outputs[j] for j in source_ids])</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/cf8ea2e781c32716964835d39a9cc4562c75b677#diff-eee12f70990be22455041e206b0ab84ff5903fea7888f4b78e4089cf96e59988L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2791274</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: cf8ea2e781c32716964835d39a9cc4562c75b677</div><div id='time'> Time: 2018-10-28</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: moe.py</div><div id='m_class'> M Class Name: MOE</div><div id='n_method'> N Class Name: MOE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: moe.py</div><div id='n_file'> N File Name: moe.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 cs = torch.cat(cs, dim=1)
+                &#47&#47 cs = F.one_hot(cs, self.nb_class).view(batch, -1, height, width).type_as(self.bg)
+                &#47&#47 TODO: Move this out into dataloader?
+                cs = <a id="change">[F.one_hot(c, self.nb_class).view(batch, -1, c.shape[1], c.shape[2]).float() for c in cs]</a>
+                cs = [F.interpolate(c, size=(height, width)) for c in cs]
+                cs = torch.cat(cs, dim=1)
+                cs = self.cond_net(cs)
+                cache[&quotcondition&quot] = cs.detach().clone()</code></pre><h3>After Change</h3><pre><code class='java'>
+                cs = cs[:, :, :height, :]
+            else:
+                up_fn = transforms.Resize((height, width), VF.InterpolationMode.NEAREST)
+                cs = [<a id="change">up_fn(c).unsqueeze(1</a><a id="change">)</a> for c in cs]
+                cs = torch.cat(cs, dim=1)
+                cs = F.one_hot(cs, self.nb_class).view(batch, -1, height, width).type_as(self.bg)
+                &#47&#47 cs = [F.one_hot(c, self.nb_class).view(batch, -1, c.shape[1], c.shape[2]).float() for c in cs]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vvvm23/vqvae-2/commit/4a4b60384da99c18bd08eef8c9a7bb9e79d7ed6c#diff-a112c46d500b0c8291c2990801b6878d4693377171a2ede123da1a50dcc72c61L238' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2791273</div><div id='project'> Project Name: vvvm23/vqvae-2</div><div id='commit'> Commit Name: 4a4b60384da99c18bd08eef8c9a7bb9e79d7ed6c</div><div id='time'> Time: 2021-06-07</div><div id='author'> Author: alexander.f.mckinney@durham.ac.uk</div><div id='file'> File Name: pixelsnail.py</div><div id='m_class'> M Class Name: PixelSnail</div><div id='n_method'> N Class Name: PixelSnail</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pixelsnail.py</div><div id='n_file'> N File Name: pixelsnail.py</div><div id='m_start'> M Start Line: 260</div><div id='m_end'> M End Line: 261</div><div id='n_start'> N Start Line: 255</div><div id='n_end'> N End Line: 258</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = mask.unsquuze(1) &#47&#47 [b, 1, l]
+            &#47&#47mask对conv操作没有影响，但是可能对max_pool操作产生影响，在max_pool之前对mask填充-inf
+            conv_res = <a id="change">[x.masked_fill_((1-mask).byte(), float(&quot-inf&quot)) for x in conv_res]</a>
+
+        tmp = [F.max_pool1d(input=x, kernel_size=x.size(2)).squeeze(2) for x in conv_res]
+        return torch.cat(tmp, dim=-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :params: mask torch.Tensor [batch_size, length]
+        
+        if mask is not None:
+            input = input * <a id="change">mask.unsqueeze(-1</a><a id="change">)</a>.float()
+
+        &#47&#47[b, l, d] -&gt; [b, d, l]
+        input = torch.transpose(input, 1, 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/waterzxj/unf/commit/c1f0328b5b9d505d77e008bf45e2f119945f17b1#diff-7555e84696efe507d515faae88b0e68bad2396f14a740ed860abe4e088f1a36dL51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2791276</div><div id='project'> Project Name: waterzxj/unf</div><div id='commit'> Commit Name: c1f0328b5b9d505d77e008bf45e2f119945f17b1</div><div id='time'> Time: 2020-02-16</div><div id='author'> Author: 1486459973@qq.com</div><div id='file'> File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_class'> M Class Name: CnnMaxpoolLayer</div><div id='n_method'> N Class Name: CnnMaxpoolLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='n_file'> N File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 60</div><BR>

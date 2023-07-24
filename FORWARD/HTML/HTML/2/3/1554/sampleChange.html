@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = self.neighbor_embedding(z, x, edge_index, edge_weight, edge_attr)
+
+        for attn in self.attention_layers:
+            x = x<a id="change"> + </a><a id="change">attn(</a>x, edge_index, edge_weight, edge_attr<a id="change">)</a>
+        x = self.out_norm(x)
+
+        return x, z, pos, batch
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        vec = torch.zeros(x.size(0), 3, x.size(1), device=x.device)
+
+        for attn in self.attention_layers:
+            dx<a id="change">, dvec</a> = attn(x, vec, edge_index, edge_weight, edge_attr, edge_vec)
+            x = x + dx
+            vec = vec + dvec
+        x = self.out_norm(x)</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x_paired[:, :1, :1] = torch.exp(x_paired[:, :1, :1])
+            x_unpaired[:, :1] = torch.exp(x_unpaired[:, :1])
+            w_u = torch.triu(x_paired[:, 1:, 1:], diagonal=1)
+            w_l = torch.tril(<a id="change">x_paired[:, 1:, 1:]</a>, diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            w = (w + w.transpose(1, 2)) / 2
+            if self.do_sampling:</code></pre><h3>After Change</h3><pre><code class='java'>
+                w = w + r
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            w_u = <a id="change">torch.triu(</a>w<a id="change">, diagonal=1)</a>
+            w_l = w_u.transpose(1, 2)
+            w = w_u<a id="change"> + </a>w_l
+            x_paired[:, 1:, 1:] = w
+        return x_paired, x_unpaired
+</code></pre>

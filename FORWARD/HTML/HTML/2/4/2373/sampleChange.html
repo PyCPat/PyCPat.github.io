@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h = self.block1(x)
+
+        if exists(self.mlp):
+            h += <a id="change">self.mlp(</a>time_emb<a id="change">)</a>[:, :, None, None]
+
+        h = self.block2(h)
+        return h + self.res_conv(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if exists(self.mlp):
+            assert exists(time_emb), &quottime emb must be passed in&quot
+            condition<a id="change"> = </a><a id="change">self.mlp(</a>time_emb<a id="change">)</a>
+            h = h<a id="change"> + </a>rearrange(condition, &quotb c -&gt; b c 1 1&quot)
+
+        h = self.net(h)
+        return h + self.res_conv(x)</code></pre>

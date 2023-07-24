@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        input: torch.Tensor = bchw_to_bhwc(input)
+        &#47&#47 Unfold input
+        input: torch.Tensor = input.unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        input: torch.Tensor = <a id="change">input.reshape(</a>batch_size, input.shape[1], input.shape[2], <a id="change">-1</a><a id="change">)</a>
+        &#47&#47 Normalize input
+        input: torch.Tensor = self.normalization(input)
+        &#47&#47 Perform linear mapping
+        output: torch.Tensor = bhwc_to_bchw(self.linear_mapping(input))</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x = bchw_to_bhwc(x).unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        x = x.permute(0, 1, 2, 5, 4, 3).flatten(3)  &#47&#47 permute maintains compat with ch order in official swin impl
+        x<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+        x = bhwc_to_bchw(self.reduction(x))
+        return x
+
+</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 该一步主要是获取sample_roi中每个roi所对应的修正系数loc.当然,正样本和负样本所获取的loc情况是不同的
+        &#47&#47 正样本:某个roi中类别概率最大的那个类别的loc;负样本:永远是第1个loc(背景类 index为0)
+        head_loc = head_loc[torch.arange(n_sample).long().cuda(), at.totensor(gt_head_label).long()]
+        gt_head_label<a id="change"> = </a><a id="change">at.totensor(gt_head_label).long()</a>
+        gt_head_loc = at.totensor(gt_head_loc)
+        &#47&#47 开始计算ROI_head网络的定位与分类损失
+        roi_loc_loss = _fast_rcnn_loc_loss(head_loc, gt_head_loc, gt_head_label, self.roi_sigma)
+        roi_cls_loss = F.cross_entropy(head_score, gt_head_label.cuda())</code></pre><h3>After Change</h3><pre><code class='java'>
+        head_loc = head_loc.reshape(n_sample, -1, 4)  &#47&#47 torch.Size([128, self.n_class, 4])
+        &#47&#47 该一步主要是获取sample_roi中每个roi所对应的修正系数loc.当然,正样本和负样本所获取的loc情况是不同的
+        &#47&#47 正样本:某个roi中类别概率最大的那个类别的loc;负样本:永远是第1个loc(背景类 index为0)
+        gt_head_label = <a id="change">gt_head_label.long()</a>
+        head_loc = head_loc[torch.arange(n_sample).long().cuda(), gt_head_label]
+        &#47&#47 开始计算ROI_head网络的定位与分类损失
+        roi_loc_loss = _fast_rcnn_loc_loss(head_loc, gt_head_loc, gt_head_label, self.roi_sigma)
+        roi_cls_loss = F.cross_entropy(head_score, gt_head_label.cuda())</code></pre>

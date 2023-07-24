@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47predict_vecs: batch_size, voc_dim, max_length
+        predict_vecs = torch.zeros(batch_size, self.voc_dim, tgt.size(1) ).to(self.device)
+        curr_sz = tgt.size(1)
+        predict_vecs[:,:,:curr_sz] = <a id="change">output[:,:,:curr_sz]</a>
+
+        return predict_vecs
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_, hidden = self.corr_rnn(x)
+
+        &#47&#47 hidden: n_layer*num_directions, batch_size, hidden_dim | if LSTM h_n
+        hidden = hidden<a id="change"> if </a>self.rnn_type != "lstm"<a id="change"> \
+                        else </a>hidden[0] &#47&#47h_n
+
+        &#47&#47 hidden: 1, batch_size, hidden_dim * directions -&gt;tking only last two layers
+        hidden = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = -1) if self.directions == 2 \</code></pre>

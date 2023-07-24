@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h : tensor
+            The output features
+        
+        <a id="change">semantic_embeddings</a><a id="change"> = []</a>
+
+        if self._cached_graph is None or self._cached_graph is not g:
+            self._cached_graph = g
+            self._cached_coalesced_graph.clear()
+            for meta_path in self.meta_paths:
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+
+        <a id="change">for </a>i, meta_path in enumerate(self.meta_paths)<a id="change">:
+            </a>new_g<a id="change"> = </a>self._cached_coalesced_graph[meta_path]
+            <a id="change">semantic_embeddings.append(</a>self.gat_layers[i](new_g, h).flatten(1)<a id="change">)</a>
+        semantic_embeddings<a id="change"> = </a><a id="change">torch.stack(semantic_embeddings</a><a id="change">, dim=1)</a>                  &#47&#47 (N, M, D * K)
+
+        <a id="change">return </a>self.semantic_attention(semantic_embeddings)                            &#47&#47 (N, D * K)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            for meta_path in self.meta_paths:
+                self._cached_coalesced_graph[meta_path] = dgl.metapath_reachable_graph(
+                        g, meta_path)
+        h<a id="change"> = </a>self.model(self._cached_coalesced_graph, h)
+        <a id="change">return </a>h
+</code></pre>

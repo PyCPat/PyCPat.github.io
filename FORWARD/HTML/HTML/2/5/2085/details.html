@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :2085
+</h3><img src='13902293.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, last=False, freeze=False):
+        if freeze:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                </a>x = self.conv1(x)
+                x = self.bn1(x)
+                x = self.activation(x)
+                x = self.bottlenecks(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, inputs, last=False, freeze=False):
+
+        if freeze:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                &#47&#47 first conv layer
+                </a>x<a id="change"> = </a>F.relu6(self.bn0(self.conv0(inputs)), inplace=True)
+                &#47&#47 assert x.shape[1:] == torch.Size([32, 32, 32])
+                &#47&#47 bottlenecks
+                x = self.bottlenecks(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/decile-team/cords/commit/8e7f9f1d840988cde6e0b5035ab6f9ba404f5485#diff-962b04c425700900ec47721136585a812886c33a48b76feb284dc77dd883a7f3L99' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13902293</div><div id='project'> Project Name: decile-team/cords</div><div id='commit'> Commit Name: 8e7f9f1d840988cde6e0b5035ab6f9ba404f5485</div><div id='time'> Time: 2021-03-25</div><div id='author'> Author: krishnatejakillamsetty@gmail.com</div><div id='file'> File Name: cords/utils/models/mobilenetv2tf.py</div><div id='m_class'> M Class Name: MobileNet2</div><div id='n_method'> N Class Name: MobileNet2</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cords/utils/models/mobilenetv2tf.py</div><div id='n_file'> N File Name: cords/utils/models/mobilenetv2tf.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 99</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        means = self.means.type(dtype)
+        x = F.normalize(x, 2, dim=-1).type(dtype)
+
+        <a id="change">with </a><a id="change">torch.no_grad():
+            </a>means, buckets, dists = kmeans(x, means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+            indices = indices.contiguous().view(*indices.size()[:2], -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        means = self.means.type(dtype)
+        x = F.normalize(x, 2, dim=-1).type(dtype)
+
+        <a id="change">with </a><a id="change">torch.no_grad():
+            </a>dists<a id="change">, buckets = </a>dists_and_buckets(x, means)
+
+        if update_means:
+            with torch.no_grad():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL394' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13902306</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: Kmeans</div><div id='n_method'> N Class Name: Kmeans</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 396</div><div id='m_end'> M End Line: 410</div><div id='n_start'> N Start Line: 367</div><div id='n_end'> N End Line: 384</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        self_cond = None
+        if random() &lt; 0.5:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                </a>self_cond = self.model(noised_img, noise_level).detach_()
+
+        &#47&#47 predict and take gradient step
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self_cond = self_latents = None
+
+        if random() &lt; self.train_prob_self_cond:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                </a>self_cond, self_latents = self.model(noised_img, noise_level, return_latents = True)
+                self_cond = self_cond.detach()
+                self_latents<a id="change"> = </a>self_latents.detach()
+
+        &#47&#47 predict and take gradient step
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL499' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13902301</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: GaussianDiffusion</div><div id='n_method'> N Class Name: GaussianDiffusion</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 515</div><div id='m_end'> M End Line: 532</div><div id='n_start'> N Start Line: 649</div><div id='n_end'> N End Line: 668</div><BR>

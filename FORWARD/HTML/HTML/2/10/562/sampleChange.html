@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x.reshape(B, inputs.shape[2] // self.patch_size,
+                      inputs.shape[3] // self.patch_size,
+                      C).permute(0, 3, 1, 2)
+        <a id="change">return </a><a id="change">[</a>x<a id="change"></a>]
+
+    def train(self, mode=True):
+        super(VisionTransformer, self).train(mode)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Remove class token for transformer input
+            x = x[:, 1:]
+
+        outs<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for </a>i, <a id="change">blk</a> in enumerate(self.blocks)<a id="change">:
+            </a>x<a id="change"> = </a>blk(x)
+            if i == len(self.blocks) - 1:
+                <a id="change">if </a>self.final_norm<a id="change">:
+                    </a>x = self.norm(x)
+            if i in self.out_indices:
+                if self.with_cls_token:
+                    &#47&#47 Remove class token and reshape token for decoder head
+                    out = x[:, 1:]
+                else:
+                    out = x
+                B, _, C = out.shape
+                out = out.reshape(B, inputs.shape[2] // self.patch_size,
+                                  inputs.shape[3] // self.patch_size,
+                                  C).permute(0, 3, 1, 2)
+                <a id="change">outs.append(</a>out<a id="change">)</a>
+
+        <a id="change">return </a>tuple(outs)
+
+    def train(self, mode=True):
+        super(VisionTransformer, self).train(mode)</code></pre>

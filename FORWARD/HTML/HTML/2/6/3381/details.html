@@ -1,0 +1,63 @@
+<html><h3>Pattern ID :3381
+</h3><img src='17434378.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, transformer=None):
+        if transformer is not None and not transformer.is_identity:
+            mus = [m.unsqueeze(0).expand(x.size(0), -1, -1, -1) for m in self.mus]
+            sigmas = [<a id="change">s.unsqueeze(0).expand(</a>x.size(0), <a id="change">-1</a>, -1, <a id="change">-1</a><a id="change">)</a> for s in self.sigmas]
+            beta = transformer.predict_parameters(x)
+            sigmas = transformer.apply_parameters(x, sigmas, beta, is_var=True)[1]
+            x, mus = transformer.apply_parameters(x, mus, beta)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, transformer=None):
+        if transformer is not None and not transformer.is_identity:
+            mus = self.mus.unsqueeze(1).expand(-1, x.size(0), -1, -1, -1)
+            sigmas = <a id="change">self.sigmas.unsqueeze(1).expand(-1</a>, x.size(0), -1, <a id="change">-1</a>, -1<a id="change">)</a>
+            beta = transformer.predict_parameters(x)
+            sigmas = transformer.apply_parameters(x, sigmas, beta, is_var=True)[1]
+            x, mus = transformer.apply_parameters(x, mus, beta)
+            sigmas = sigmas.permute(1, 0, 2, 3, 4)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/monniert/dti-clustering/commit/27e21a5a4c30488c074b02eb55b0cb5cf80b618f#diff-9a03a73b79a2577253a32f91554631b5d94aa8c3b12c7794b13d7c0898530290L50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17434378</div><div id='project'> Project Name: monniert/dti-clustering</div><div id='commit'> Commit Name: 27e21a5a4c30488c074b02eb55b0cb5cf80b618f</div><div id='time'> Time: 2020-09-06</div><div id='author'> Author: tom.monnier@hotmail.fr</div><div id='file'> File Name: src/model/gmm.py</div><div id='m_class'> M Class Name: GaussianMixtureModel</div><div id='n_method'> N Class Name: GaussianMixtureModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/model/gmm.py</div><div id='n_file'> N File Name: src/model/gmm.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth
+
+        if lmem.shape[2] == 0:
+            lmem = <a id="change">self.init_lmem.expand(</a>mem_depth, batch, <a id="change">-1</a>, <a id="change">-1</a><a id="change">)</a>
+
+        &#47&#47 clone weights to avoid inplace error
+
+        w_q, w_kv, w_out, rezero_g = map(torch.clone, (self.to_q, self.to_kv, self.to_out, self.rezero_g))</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth
+
+        if lmem.shape[2] == 0:
+            lmem = <a id="change">self.init_lmem.expand(</a>mem_depth, batch, <a id="change">-1</a>, <a id="change">-1</a><a id="change">)</a>.clone()
+
+        &#47&#47 clone weights to avoid inplace error
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/ac8692c07e7327c16cef521fbdbdeb7a8ed7c69a#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L230' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17434376</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: ac8692c07e7327c16cef521fbdbdeb7a8ed7c69a</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryAttentionNetwork</div><div id='n_method'> N Class Name: MemoryAttentionNetwork</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 231</div><div id='m_end'> M End Line: 264</div><div id='n_start'> N Start Line: 236</div><div id='n_end'> N End Line: 267</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        dx = self.l_relu(self.linear1(dx))
+        dx = torch.tanh(self.linear2(dx))
+        
+        dx_norm = torch.reciprocal(<a id="change">torch.norm(dx, dim=1, keepdim=True).expand(-1</a>, <a id="change">3</a><a id="change">)</a>)
+        x = torch.mul(dx, dx_norm)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        dx = self.l_relu(self.linear1(dx))
+        dx = torch.tanh(self.linear2(dx))
+        
+        dx_norm = torch.reciprocal(<a id="change">torch.norm(dx, dim=1, keepdim=True).expand(-1</a>, <a id="change">3</a><a id="change">)</a> + 1.0e-12)
+        x = torch.mul(dx, dx_norm)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/astaka-pe/dual-dmp/commit/e1c9b43d2c41c2bbc441685458713ed3bb9800db#diff-1124bd0154af388226a7828f8f3855c9878cb762814f023d5b171f245a7f513aL108' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17434386</div><div id='project'> Project Name: astaka-pe/dual-dmp</div><div id='commit'> Commit Name: e1c9b43d2c41c2bbc441685458713ed3bb9800db</div><div id='time'> Time: 2021-09-20</div><div id='author'> Author: astaka1119@g.ecc.u-tokyo.ac.jp</div><div id='file'> File Name: util/networks.py</div><div id='m_class'> M Class Name: NormalNet</div><div id='n_method'> N Class Name: NormalNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: util/networks.py</div><div id='n_file'> N File Name: util/networks.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 134</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            notes: LongTensor[batch, time]
+        
+        x = self.emb(notes) &#47&#47 batch, time, emb_size
+        h, _ = self.rnn(x, <a id="change">self.h0[None].expand(1</a>, x.shape[0], <a id="change">-1</a><a id="change">)</a>) &#47&#47batch, time, hidden_size
+        logits = self.proj(h[:,:-1]) &#47&#47 batch, time-1, 128
+        logits = F.log_softmax(logits, -1) &#47&#47 logits = logits - logits.logsumexp(-1, keepdim=True)
+        targets = notes[:,1:,None] &#47&#47batch, time-1, 1</code></pre><h3>After Change</h3><pre><code class='java'>
+            notes: LongTensor[batch, time]
+        
+        x = self.emb(notes) &#47&#47 batch, time, emb_size
+        h0 = <a id="change">self.h0[None].expand(1</a>, x.shape[0], <a id="change">-1</a><a id="change">)</a>.contiguous() &#47&#47 1 x batch x hidden_size
+        h, _ = self.rnn(x, h0) &#47&#47batch, time, hidden_size
+        logits = self.proj(h[:,:-1]) &#47&#47 batch, time-1, 128
+        logits = F.log_softmax(logits, -1) &#47&#47 logits = logits - logits.logsumexp(-1, keepdim=True)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/intelligent-instruments-lab/iil-python-tools/commit/d2354c1ab3771fda885583859cbfe6fec08b064d#diff-40cd3638789a4762e91c747bb354a0f97a8c9b7cfa59a76105a95a39e5005cecL33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17434374</div><div id='project'> Project Name: intelligent-instruments-lab/iil-python-tools</div><div id='commit'> Commit Name: d2354c1ab3771fda885583859cbfe6fec08b064d</div><div id='time'> Time: 2022-02-22</div><div id='author'> Author: victor.shepardson@gmail.com</div><div id='file'> File Name: notepredictor/notepredictor/model.py</div><div id='m_class'> M Class Name: PitchPredictor</div><div id='n_method'> N Class Name: PitchPredictor</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: notepredictor/notepredictor/model.py</div><div id='n_file'> N File Name: notepredictor/notepredictor/model.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 38</div><div id='n_end'> N End Line: 40</div><BR>

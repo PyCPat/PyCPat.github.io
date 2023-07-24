@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b = bh // h
+
+        Wsq = expand_dim(self.linear_sort_q, 0, b).reshape(bh, dim, dim_sort)
+        Wsk<a id="change"> = </a><a id="change">expand_dim(</a>self.linear_sort_k, <a id="change">0</a>, b<a id="change">)</a>.reshape(bh, dim, dim_sort)
+        nsk = expand_dim(self.null_sort_k, 0, b).reshape(bh, 1, dim_sort)
+
+        q_r = torch.cat((cumavg(q, dim=1), q), dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        bh, *_, h, buckets, dim, dim_sort = *q.shape, self.heads, self.buckets, self.dim, self.dim_sort
+        b = bh // h
+
+        Wsq, Wsk, pos_q, pos_k = map(partial(expand_batch_and_merge_head, b), (self.linear_sort_q<a id="change">, self.linear_sort_k, self.q_pos_emb, self.k_pos_emb</a>))
+
+        k_r = torch.cat((cumavg(k, dim=1), k), dim=-1)
+        k_r = bucket(buckets, k_r)</code></pre>

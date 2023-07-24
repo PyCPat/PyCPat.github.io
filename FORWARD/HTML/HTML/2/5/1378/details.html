@@ -1,0 +1,175 @@
+<html><h3>Pattern ID :1378
+</h3><img src='4731864.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 [BS, K, N]
+        if self.linear_layer_after_inter_intra:
+            intra = <a id="change">self.intra_linear(
+                </a>intra.contiguous().view(B * S * K, -1)<a id="change">
+            )</a>.view(B * S, K, -1)
+        &#47&#47 [B, S, K, N]
+        intra = intra.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra = intra.permute(0, 3, 2, 1).contiguous()
+        if self.norm is not None:
+            intra = self.intra_norm(intra)
+
+        &#47&#47 [B, N, K, S]
+        if self.skip_around_intra:
+            intra = intra + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter = intra.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        &#47&#47 [BK, S, H]
+        inter = self.inter_mdl(inter)
+
+        &#47&#47 [BK, S, N]
+        if self.linear_layer_after_inter_intra:
+            inter = <a id="change">self.inter_linear(
+                inter.contiguous()</a>.view(B * S * K, -1)<a id="change">
+            )</a>.view(B * K, S, -1)
+        &#47&#47 [B, K, S, N]
+        inter = inter.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 [BS, K, N]
+        if self.linear_layer_after_inter_intra:
+            intra = <a id="change">self.intra_linear(</a>intra<a id="change">)</a>
+
+        &#47&#47 [B, S, K, N]
+        intra = intra.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra = intra.permute(0, 3, 2, 1).contiguous()
+        if self.norm is not None:
+            intra = self.intra_norm(intra)
+
+        &#47&#47 [B, N, K, S]
+        if self.skip_around_intra:
+            intra = intra + x.permute(0, 3, 1, 2)
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter = intra.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        &#47&#47 [BK, S, H]
+        inter = self.inter_mdl(inter)
+
+        &#47&#47 [BK, S, N]
+        if self.linear_layer_after_inter_intra:
+            inter = <a id="change">self.inter_linear(</a>inter<a id="change">)</a>
+
+        &#47&#47 [B, K, S, N]
+        inter = inter.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/a34758d23ee7dcd9a7ec0c87063e9f8f06186985#diff-40b82ab7121b1425a4bf5a89e920ed2c1dc57a81e3c33ce594018e7387af16bcL838' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731864</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: a34758d23ee7dcd9a7ec0c87063e9f8f06186985</div><div id='time'> Time: 2020-12-10</div><div id='author'> Author: csubakan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_class'> M Class Name: Dual_Computation_Block</div><div id='n_method'> N Class Name: Dual_Computation_Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/dual_path.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_start'> M Start Line: 839</div><div id='m_end'> M End Line: 883</div><div id='n_start'> N Start Line: 838</div><div id='n_end'> N End Line: 881</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 [BS, K, N]
+        if self.linear_layer_after_inter_intra:
+            intra = <a id="change">self.intra_linear(
+                </a>intra.contiguous().view(B * S * K, -1)<a id="change">
+            )</a>.view(B * S, K, -1)
+        &#47&#47 [B, S, K, N]
+        intra = intra.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra = intra.permute(0, 3, 2, 1).contiguous()
+        if self.norm is not None:
+            intra = self.intra_norm(intra)
+
+        &#47&#47 [B, N, K, S]
+        if self.skip_around_intra:
+            intra = intra + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter = intra.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        &#47&#47 [BK, S, H]
+        inter = self.inter_mdl(inter)
+
+        &#47&#47 [BK, S, N]
+        if self.linear_layer_after_inter_intra:
+            inter = <a id="change">self.inter_linear(
+                inter.contiguous()</a>.view(B * S * K, -1)<a id="change">
+            )</a>.view(B * K, S, -1)
+        &#47&#47 [B, K, S, N]
+        inter = inter.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 intra = self.intra_linear(
+            &#47&#47    intra.contiguous().view(B * S * K, -1)
+            &#47&#47 ).view(B * S, K, -1)
+            intra = <a id="change">self.intra_linear(</a>intra<a id="change">)</a>
+
+        &#47&#47 [B, S, K, N]
+        intra = intra.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra = intra.permute(0, 3, 2, 1).contiguous()
+        if self.norm is not None:
+            intra = self.intra_norm(intra)
+
+        &#47&#47 [B, N, K, S]
+        if self.skip_around_intra:
+            intra = intra + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter = intra.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        &#47&#47 [BK, S, H]
+        inter = self.inter_mdl(inter)
+
+        &#47&#47 [BK, S, N]
+        if self.linear_layer_after_inter_intra:
+            &#47&#47 inter = self.inter_linear(
+            &#47&#47    inter.contiguous().view(B * S * K, -1)
+            &#47&#47 ).view(B * K, S, -1)
+            inter = <a id="change">self.inter_linear(</a>inter<a id="change">)</a>
+
+        &#47&#47 [B, K, S, N]
+        inter = inter.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/df5f0bb02e0f306298e8341e44348aa24c3bb304#diff-40b82ab7121b1425a4bf5a89e920ed2c1dc57a81e3c33ce594018e7387af16bcL820' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731866</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: df5f0bb02e0f306298e8341e44348aa24c3bb304</div><div id='time'> Time: 2020-12-21</div><div id='author'> Author: csubakan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_class'> M Class Name: Dual_Computation_Block</div><div id='n_method'> N Class Name: Dual_Computation_Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/dual_path.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_start'> M Start Line: 845</div><div id='m_end'> M End Line: 873</div><div id='n_start'> N Start Line: 845</div><div id='n_end'> N End Line: 876</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [BS, K, H]
+        intra_rnn, _ = self.intra_rnn(intra_rnn)
+        &#47&#47 [BS, K, N]
+        intra_rnn = <a id="change">self.intra_linear(</a>intra_rnn<a id="change">)</a>
+        &#47&#47 [BS, N, K]
+        intra_rnn = <a id="change">intra_rnn.permute(0, 2, 1).contiguous()</a>
+        intra_rnn = self.intra_norm(intra_rnn)
+        &#47&#47 [B, S, N, K]
+        intra_rnn = intra_rnn.view(B, S, N, K)
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous()
+        intra_rnn = intra_rnn + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B*K, S, N)
+        &#47&#47 [BK, S, H]
+        inter_rnn, _ = self.inter_rnn(inter_rnn)
+        &#47&#47 [BK, S, N]
+        inter_rnn = <a id="change">self.inter_linear(</a>inter_rnn<a id="change">)</a>
+        &#47&#47 [BK, N, S]
+        inter_rnn = inter_rnn.permute(0, 2, 1).contiguous()
+        inter_rnn = self.inter_norm(inter_rnn)
+        &#47&#47 [B, K, N, S]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [BS, K, H]
+        intra_rnn, _ = self.intra_rnn(intra_rnn)
+        &#47&#47 [BS, K, N]
+        intra_rnn = <a id="change">self.intra_linear(</a>intra_rnn.contiguous().view(B*S*K, -1)<a id="change">)</a>.view(B*S, K, -1)
+        &#47&#47 [B, S, K, N]
+        intra_rnn = intra_rnn.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn.permute(0, 3, 2, 1).contiguous()
+        intra_rnn = self.intra_norm(intra_rnn)
+        
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B*K, S, N)
+        &#47&#47 [BK, S, H]
+        inter_rnn, _ = self.inter_rnn(inter_rnn)
+        &#47&#47 [BK, S, N]
+        inter_rnn = <a id="change">self.inter_linear(</a>inter_rnn.contiguous().view(B*S*K, -1)<a id="change">)</a>.view(B*K, S, -1)
+        &#47&#47 [B, K, S, N]
+        inter_rnn = inter_rnn.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jusperlee/dual-path-rnn-pytorch/commit/0d21970cc8123a03685bac7a12eb70d317098c31#diff-63d7870c73412f2cc55179b742febe42b81455c6ba396d81c566cd22866d26beL176' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731869</div><div id='project'> Project Name: jusperlee/dual-path-rnn-pytorch</div><div id='commit'> Commit Name: 0d21970cc8123a03685bac7a12eb70d317098c31</div><div id='time'> Time: 2020-02-07</div><div id='author'> Author: Tsinghua.kaili@gmail.com</div><div id='file'> File Name: model/model_rnn.py</div><div id='m_class'> M Class Name: Dual_RNN_Block</div><div id='n_method'> N Class Name: Dual_RNN_Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/model_rnn.py</div><div id='n_file'> N File Name: model/model_rnn.py</div><div id='m_start'> M Start Line: 184</div><div id='m_end'> M End Line: 211</div><div id='n_start'> N Start Line: 198</div><div id='n_end'> N End Line: 223</div><BR>

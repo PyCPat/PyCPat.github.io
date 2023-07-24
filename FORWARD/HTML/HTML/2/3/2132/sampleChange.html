@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        v_img = rearrange(v_img, &quotB h (H W) Ch -&gt; B (h Ch) H W&quot, H=H, W=W)               &#47&#47 Shape: [B, h, H*W, Ch] -&gt; [B, h*Ch, H, W].
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [conv(x) for conv, x in <a id="change">zip(</a>self.conv_list, v_img_list<a id="change">)</a>]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v_img = v_img.transpose(-1, -2).reshape(B, h * Ch, H, W)
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = []
+        <a id="change">for </a>i, conv in <a id="change">enumerate(</a>self.conv_list<a id="change">):
+            </a>conv_v_img_list.append(conv(v_img_list[i]))
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+</code></pre>

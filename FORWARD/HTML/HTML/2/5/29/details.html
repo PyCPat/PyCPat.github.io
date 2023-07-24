@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :29
+</h3><img src='39191.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 bottom-up
+        inters = inters[::-1]           &#47&#47 feature maps from bottom to top, same order as input x
+        outputs = [inters[0]]
+        <a id="change">for </a>i, <a id="change">conv</a> in enumerate(self.output_convs)<a id="change">:
+            </a>out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            if i &lt; len(self.output_convs) - 1:
+                out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out = self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)
+            <a id="change">outputs.append(</a>conv(out)<a id="change">)</a>                                           &#47&#47 P4out = conv(P4in + P4td + resize(P3td))
+
+        return outputs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for </a>i in <a id="change">range(</a>self.num_levels - 2, -1 , -1<a id="change">):
+            </a>tds[i] = self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 39191</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 input is dim (N, T, in_channels)
+        x = input
+        raw, rel = [], []
+        <a id="change">for i</a> in range(self.att_num - 1)<a id="change">:
+            </a>x, re, ra = self.layers["attention_{}".format(i)](x, time_steps)
+            x = self.layers["tconv_{}".format(i)](x)
+            rel.append(re)
+            <a id="change">raw.append(</a>ra<a id="change">)</a>
+
+        x, re, ra = self.layers["attention_{}".format(self.att_num-1)](x, time_steps)
+        rel.append(re)
+        raw.append(ra)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input: t.Tensor, time_steps=None, additional=None):
+        &#47&#47 input is dim (N, T, in_channels)
+        x = input
+        <a id="change">for </a>i in <a id="change">range(</a>self.tc_num<a id="change">):
+            </a>x = self.layers["tconv_{}".format(i)](x)
+
+        x, rel, raw = self.layers["attention"](x, time_steps)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/iffix/machin/commit/5b8d4a14723b753d9ee9d6dece151e40b3531c98#diff-b99a43ebb8bdea7f7a9ff2be74dc2b460878eec11cb5e5374efa147eedc92cf6L143' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 39192</div><div id='project'> Project Name: iffix/machin</div><div id='commit'> Commit Name: 5b8d4a14723b753d9ee9d6dece151e40b3531c98</div><div id='time'> Time: 2020-04-25</div><div id='author'> Author: hanhanmumuqq@163.com</div><div id='file'> File Name: models/base/tcdnnet.py</div><div id='m_class'> M Class Name: TCDNNet</div><div id='n_method'> N Class Name: TCDNNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base/tcdnnet.py</div><div id='n_file'> N File Name: models/base/tcdnnet.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 181</div><div id='n_start'> N Start Line: 225</div><div id='n_end'> N End Line: 232</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hidden_state=None):
+        output = []
+        <a id="change">for step</a> in range(input.size(1))<a id="change">:
+            &#47&#47 Compute current time-step
+            </a>hidden_state = self.rnn_cell(input[:, step, :, :, :], hidden_state)
+            <a id="change">output.append(</a>hidden_state<a id="change">)</a>
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            <a id="change">for </a>t in <a id="change">range(</a>seq_len<a id="change">):
+                </a>h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 39198</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>

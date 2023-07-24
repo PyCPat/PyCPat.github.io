@@ -1,0 +1,138 @@
+<html><h3>Pattern ID :1110
+</h3><img src='4030524.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            output &lt;torch.Tensor&gt;: (batch_size,) or ()
+        
+        batch_size<a id="change">, num_classes</a> = input.size()
+        scale, margin = self.scale, self.margin
+        eps = self.eps
+
+        input = torch.clamp(input, -1+eps, 1-eps)
+        theta = torch.arccos(input) &#47&#47 (batch_size, num_classes)
+        theta_modified = theta + margin &#47&#47 (batch_size, num_classes)
+        mesh = torch.arange(0, num_classes).unsqueeze(dim=0) &#47&#47 (1, num_classes) 
+        mesh_target = target.unsqueeze(dim=1) &#47&#47 (batch_size, 1)
+        condition = mesh==mesh_target &#47&#47 (batch_size, num_classes)
+        theta_modified = torch.where(condition, theta_modified, theta)
+        cos = scale * torch.cos(theta_modified) &#47&#47 (batch_size, num_classes)
+
+        indices = <a id="change">num_classes</a><a id="change"> * </a>torch.arange(batch_size) + target &#47&#47 (batch_size,)
+        cos_target<a id="change"> = </a>torch.take(cos, indices) &#47&#47 (batch_size,)
+
+        loss = - cos_target + torch.logsumexp(cos, dim=1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        eps = self.eps
+
+        cos_th = input
+        sin_th = <a id="change">torch.sqrt(</a>1 - cos_th**2 + eps<a id="change">)</a>
+        cos_phi = cos_th * cos_m - sin_th * sin_m &#47&#47 (batch_size, num_classes)
+
+        &#47&#47 For target class
+        if self.easy_margin:
+            cos_phi = torch.where(cos_th &lt; 0, cos_th, cos_phi) &#47&#47 (batch_size, num_classes)
+        else:
+            cos_phi = torch.where(cos_th &gt; self.cos_pi_m, cos_th - margin, cos_phi) &#47&#47 (batch_size, num_classes)
+        
+        &#47&#47 For non-target class
+        mask = F.one_hot(target, num_classes=num_classes) &#47&#47 (batch_size, num_classes)
+        input = scale * (mask<a id="change"> * </a>cos_phi + (1.0 - mask) * cos_th)
+        loss = F.cross_entropy(input, target, reduction="none")
+
+        if batch_mean:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/a4bde6a5794ce4ec526ff846e07a4de4de24ab04#diff-3b1267acc6972219643a5bd026f7337eba5af922eb9445f208d8fc8b1a87fa1bL168' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4030524</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: a4bde6a5794ce4ec526ff846e07a4de4de24ab04</div><div id='time'> Time: 2022-02-10</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/metric_learn.py</div><div id='m_class'> M Class Name: AdditiveAngularMarginLoss</div><div id='n_method'> N Class Name: AdditiveAngularMarginLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/metric_learn.py</div><div id='n_file'> N File Name: src/criterion/metric_learn.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 199</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        v = self.NIN_2(h)
+
+        w = torch.einsum(&quotbchw,bcij-&gt;bhwij&quot, q, k) * (int(C) ** (-0.5))
+        w<a id="change"> = </a>torch.reshape(w, (B, H, W, H<a id="change"> * </a>W))
+        w = F.softmax(w, dim=-1)
+        w = torch.reshape(w, (B<a id="change">, H, W, H, W</a>))
+        h = torch.einsum(&quotbhwij,bcij-&gt;bchw&quot, w, v)
+        h = self.NIN_3(h)
+        return x + h</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        attn = torch.einsum(
+            "bnchw, bncyx -&gt; bnhwyx", query, key
+        ).contiguous() / <a id="change">math.sqrt(</a>channel<a id="change">)</a>
+        attn = attn.view(batch, n_head, height, width, -1)
+        attn = torch.softmax(attn, -1)
+        attn = attn.view(batch, n_head, height, width, height, width)
+
+        out = torch.einsum("bnhwyx, bncyx -&gt; bnchw", attn, value).contiguous()
+        out = self.out(out.view(batch, channel, height, width))
+
+        return out<a id="change"> + </a>input
+
+
+class ResnetBlocWithAttn(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/1a5a8bc409a8b8e072eb2bf25330d4662fd279c4#diff-8f5ccf6b45f0af5991c777ec4c13895ab7943f03df8982ff0e1edd6b462d8d35L123' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4030509</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 1a5a8bc409a8b8e072eb2bf25330d4662fd279c4</div><div id='time'> Time: 2021-08-09</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/ddpm_modules/unet.py</div><div id='m_class'> M Class Name: AttnBlock</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/ddpm_modules/unet.py</div><div id='n_file'> N File Name: model/ddpm_modules/unet.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 111</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            output &lt;torch.Tensor&gt;: (batch_size,) or ()
+        
+        batch_size<a id="change">, num_classes</a> = input.size()
+        scale, margin = self.scale, self.margin
+        eps = self.eps
+
+        input = torch.clamp(input, -1+eps, 1-eps)
+        theta = torch.arccos(input) &#47&#47 (batch_size, num_classes)
+        theta_modified = theta + margin &#47&#47 (batch_size, num_classes)
+        mesh = torch.arange(0, num_classes).unsqueeze(dim=0) &#47&#47 (1, num_classes) 
+        mesh_target = target.unsqueeze(dim=1) &#47&#47 (batch_size, 1)
+        condition = mesh==mesh_target &#47&#47 (batch_size, num_classes)
+        theta_modified = torch.where(condition, theta_modified, theta)
+        cos = scale * torch.cos(theta_modified) &#47&#47 (batch_size, num_classes)
+
+        indices = num_classes<a id="change"> * </a>torch.arange(batch_size) + target &#47&#47 (batch_size,)
+        cos_target = torch.take(cos, indices) &#47&#47 (batch_size,)
+
+        loss<a id="change"> = </a>- cos_target + torch.logsumexp(cos, dim=1)
+
+        if batch_mean:
+            loss = loss.mean(dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        eps = self.eps
+
+        cos_th = input
+        sin_th = <a id="change">torch.sqrt(</a>1 - cos_th**2 + eps<a id="change">)</a>
+        cos_phi = cos_th * cos_m - sin_th * sin_m &#47&#47 (batch_size, num_classes)
+
+        &#47&#47 For target class
+        if self.easy_margin:
+            cos_phi = torch.where(cos_th &lt; 0, cos_th, cos_phi) &#47&#47 (batch_size, num_classes)
+        else:
+            cos_phi = torch.where(cos_th &gt; self.cos_pi_m, cos_th - margin, cos_phi) &#47&#47 (batch_size, num_classes)
+        
+        &#47&#47 For non-target class
+        mask = F.one_hot(target, num_classes=num_classes) &#47&#47 (batch_size, num_classes)
+        input = scale * (mask<a id="change"> * </a>cos_phi + (1.0 - mask) * cos_th)
+        loss = F.cross_entropy(input, target, reduction="none")
+
+        if batch_mean:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/a4bde6a5794ce4ec526ff846e07a4de4de24ab04#diff-3b1267acc6972219643a5bd026f7337eba5af922eb9445f208d8fc8b1a87fa1bL160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4030526</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: a4bde6a5794ce4ec526ff846e07a4de4de24ab04</div><div id='time'> Time: 2022-02-10</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/metric_learn.py</div><div id='m_class'> M Class Name: AdditiveAngularMarginLoss</div><div id='n_method'> N Class Name: AdditiveAngularMarginLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/metric_learn.py</div><div id='n_file'> N File Name: src/criterion/metric_learn.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 199</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            loss () or (batch_size,)
+        
+        batch_size<a id="change">, embedded_dims, n_bins, n_frames</a> = input.size()
+        batch_size, n_sources, n_bins, n_frames = target.size()
+
+        input = input.view(batch_size, embedded_dims, n_bins * n_frames)
+        target = target.view(batch_size, n_sources, n_bins<a id="change"> * </a>n_frames)
+        input_transposed = input.permute(0, 2, 1).contiguous() &#47&#47 (batch_size, n_bins * n_frames, embedded_dims)
+        target_transposed = target.permute(0, 2, 1).contiguous() &#47&#47 (batch_size, n_bins * n_frames, n_sources)
+
+        affinity_input = torch.bmm(input, input_transposed) &#47&#47 (batch_size, embedded_dims, embedded_dims)
+        affinity_target = torch.bmm(target, target_transposed) &#47&#47 (batch_size, n_sources, n_sources)
+        affinity_correlation = torch.bmm(input, target_transposed) &#47&#47 (batch_size, embedded_dims, n_sources)
+
+        loss_input = torch.sum(affinity_input**2, dim=(1,2))
+        loss_target = torch.sum(affinity_target**2, dim=(1,2))
+        loss_correlation = torch.sum(affinity_correlation**2, dim=(1,2))
+        loss<a id="change"> = </a>loss_input + loss_target - 2 * loss_correlation &#47&#47 (batch_size,)
+        
+        if batch_mean:
+            loss = loss.mean(dim=0) &#47&#47 ()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        YY = torch.bmm(Y, trans_Y) &#47&#47 (batch_size, n_samples, n_samples)
+        YY1 = YY.sum(dim=-1) &#47&#47 (batch_size, n_samples)
+        D = torch.diag_embed(1<a id="change"> / </a><a id="change">torch.sqrt(</a>YY1 + eps<a id="change">)</a>) &#47&#47 (batch_size, n_samples, n_samples)
+        VD, YD = torch.bmm(trans_V, D), torch.bmm(trans_Y, D) &#47&#47 (batch_size, embed_dim1, n_samples), (batch_size, embed_dim2, n_samples)
+        VDV, YDY = torch.bmm(VD, V), torch.bmm(YD, Y) &#47&#47 (batch_size, embed_dim1, embed_dim1), (batch_size, embed_dim2, embed_dim2)
+        VDY = torch.bmm(VD, Y) &#47&#47 (batch_size, embed_dim, embed_dim2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8860d8d92de4ba4390fa89247619810b0c821fe6#diff-e2cc7f74cfa50821fd0e4693e1689af9f7ab375350e3754dcdec261e800a6ba1L10' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4030521</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8860d8d92de4ba4390fa89247619810b0c821fe6</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/deep_clustering.py</div><div id='m_class'> M Class Name: AffinityLoss</div><div id='n_method'> N Class Name: AffinityLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/deep_clustering.py</div><div id='n_file'> N File Name: src/criterion/deep_clustering.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 37</div><BR>

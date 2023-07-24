@@ -1,0 +1,93 @@
+<html><h3>Pattern ID :1907
+</h3><img src='13374797.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        inputs = F.softmax(predict, dim=1)       
+        
+        &#47&#47flatten label and prediction tensors
+        inputs = <a id="change">inputs.contiguous().view(</a>-1<a id="change">)</a>
+        targets = targets.contiguous().view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice = (2.*intersection + self.eps)/(<a id="change">inputs.sum()</a><a id="change"> + targets.sum() + </a>self.eps)  
+        
+        loss =  1 - dice
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        inputs = F.softmax(predict, dim=1)  
+
+        tp = torch.sum(labels*inputs, dim=(2, 3))
+        fn = <a id="change">torch.sum(</a>labels*(1-inputs)<a id="change">, dim=(2, 3))</a>
+        fp = torch.sum((1-labels)<a id="change">*</a>inputs, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp<a id="change"> +  </a>fn + fp + 1e-6)
+        dice_score = torch.sum(1 - dice_score, dim=-1)
+
+        loss = dice_score<a id="change"> / </a>labels.shape[1]
+
+        loss_dict = {"DICE": loss.item()}
+        return loss, loss_dict</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/c3db2b8a1f42a342eede55c654350ea11a6a6c6e#diff-c33fddfda59fb31025b7efb608e2ea11df0d60719d122e26169f874c2e9f3c2dL12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13374797</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: c3db2b8a1f42a342eede55c654350ea11a6a6c6e</div><div id='time'> Time: 2022-02-19</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/segmentation/losses/dice_loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/segmentation/losses/dice_loss.py</div><div id='n_file'> N File Name: theseus/segmentation/losses/dice_loss.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 23</div><div id='n_start'> N Start Line: 14</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            loss: An average loss value masked by the length.
+        
+        input = <a id="change">input.contiguous()</a>
+        target = target.contiguous()
+
+        &#47&#47 logits_flat: (batch * max_len, dim)
+        input = input.view(-1, input.shape[-1])
+        &#47&#47 target_flat: (batch * max_len, dim)
+        target_flat = target.view(-1, target.shape[-1])
+        &#47&#47 losses_flat: (batch * max_len, dim)
+        losses_flat = functional.mse_loss(
+            input, target_flat, size_average=False, reduce=False)
+        &#47&#47 losses: (batch, max_len, dim)
+        losses = <a id="change">losses_flat.view(</a>*<a id="change">target.size())</a>
+
+        &#47&#47 mask: (batch, max_len, 1)
+        mask = sequence_mask(
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2)
+        losses = losses * mask.float()
+        loss = <a id="change">losses.sum()</a><a id="change"> / </a>(<a id="change">length.float().sum() * </a>float(target.shape[2]))
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2).float()
+        mask = mask.expand_as(input)
+        loss = functional.mse_loss(
+            input<a id="change"> * </a>mask, target * mask, reduction="sum")
+        loss = loss<a id="change"> / </a><a id="change">mask.sum()</a>
+        return loss
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/4326582bb1e68480ef79a02abbf4bfacc3aadede#diff-e2062370456db62dc9af5481873d2fcfe1d6e8a959459063dd6233f61d3f66d5L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13374970</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 4326582bb1e68480ef79a02abbf4bfacc3aadede</div><div id='time'> Time: 2019-03-06</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/losses.py</div><div id='m_class'> M Class Name: MSELossMasked</div><div id='n_method'> N Class Name: MSELossMasked</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/losses.py</div><div id='n_file'> N File Name: layers/losses.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            loss: An average loss value masked by the length.
+        
+        input = <a id="change">input.contiguous()</a>
+        target = target.contiguous()
+
+        &#47&#47 logits_flat: (batch * max_len, dim)
+        input = input.view(-1, input.shape[-1])
+        &#47&#47 target_flat: (batch * max_len, dim)
+        target_flat = target.view(-1, target.shape[-1])
+        &#47&#47 losses_flat: (batch * max_len, dim)
+        losses_flat = functional.l1_loss(
+            input, target_flat, size_average=False, reduce=False)
+        &#47&#47 losses: (batch, max_len, dim)
+        losses = <a id="change">losses_flat.view(</a>*<a id="change">target.size())</a>
+
+        &#47&#47 mask: (batch, max_len, 1)
+        mask = sequence_mask(
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2)
+        losses = losses * mask.float()
+        loss = <a id="change">losses.sum()</a><a id="change"> / </a>(<a id="change">length.float().sum() * </a>float(target.shape[2]))
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2).float()
+        mask = mask.expand_as(input)
+        loss = functional.l1_loss(
+            input * mask, target<a id="change"> * </a>mask, reduction="sum")
+        loss = loss<a id="change"> / </a><a id="change">mask.sum()</a>
+        return loss
+
+
+class MSELossMasked(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/a15b3ec9a18377bf67356a9b5c29f4b767001d05#diff-e2062370456db62dc9af5481873d2fcfe1d6e8a959459063dd6233f61d3f66d5L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13374964</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: a15b3ec9a18377bf67356a9b5c29f4b767001d05</div><div id='time'> Time: 2018-08-13</div><div id='author'> Author: erengolge@gmail.com</div><div id='file'> File Name: layers/losses.py</div><div id='m_class'> M Class Name: L1LossMasked</div><div id='n_method'> N Class Name: L1LossMasked</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/losses.py</div><div id='n_file'> N File Name: layers/losses.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 31</div><BR>

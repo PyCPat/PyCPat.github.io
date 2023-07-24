@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k = self.NIN_1(h)
+        v = self.NIN_2(h)
+
+        w = torch.einsum(&quotbchw,bcij-&gt;bhwij&quot, q, k) * (int(C)<a id="change"> ** (-0.5)</a>)
+        w<a id="change"> = </a><a id="change">torch.reshape(</a>w, (B<a id="change">, H, W, H * W</a>)<a id="change">)</a>
+        w = F.softmax(w, dim=-1)
+        w = torch.reshape(w, (B, H, W, H, W))
+        h = torch.einsum(&quotbhwij,bcij-&gt;bchw&quot, w, v)
+        h<a id="change"> = </a>self.NIN_3(h)
+        return x + h
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = torch.einsum(
+            "bnchw, bncyx -&gt; bnhwyx", query, key
+        ).contiguous() / math.sqrt(channel)
+        attn = <a id="change">attn.view(</a>batch, n_head, height, width, <a id="change">-1</a><a id="change">)</a>
+        attn = torch.softmax(attn, -1)
+        attn<a id="change"> = </a>attn.view(batch, n_head, height, width, height, width)
+
+        out = torch.einsum("bnhwyx, bncyx -&gt; bnchw", attn, value).contiguous()
+        out<a id="change"> = </a>self.out(<a id="change">out.view(</a>batch, channel, height, width<a id="change">)</a>)
+
+        return out + input
+</code></pre>

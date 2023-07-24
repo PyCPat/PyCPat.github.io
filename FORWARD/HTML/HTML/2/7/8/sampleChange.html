@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not return_loss:
+            logits = logits[..., 1:, :]
+
+            <a id="change">if </a>flattened_dim<a id="change">:
+                </a>logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits<a id="change"> = </a>logits[:, :seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 bump space by one to account for a boundary case
+
+        ids<a id="change"> = </a><a id="change">F.pad(</a>ids, (0<a id="change">, 0, 0, 1</a>)<a id="change">)</a>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= (self.max_spatial_seq_len + 1), &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        assert depth == self.depth_seq_len, &quotdepth dimension must be equal to depth_seq_len&quot</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        action = a_distribution.rsample()
+
+        logp_pi = a_distribution.log_prob(action).sum(axis=-1)
+        logp_pi -= (2 * (<a id="change">np.log(2) - action - </a>F.softplus(-2 * action))).sum(axis=1)
+        logp_pi = torch.unsqueeze(logp_pi, dim=1)
+
+        action = self.max_action * torch.tanh(action)</code></pre><h3>After Change</h3><pre><code class='java'>
+        a_dist, a_tanh_mode = self._get_outputs(state)
+        action = a_dist.rsample()
+        logp_pi = a_dist.log_prob(action).sum(axis=-1)
+        return action<a id="change">, logp_pi, a_tanh_mode</a>
+
+    def get_log_density(self, state, action):
+        a_dist, _ = self._get_outputs(state)
+        action_clip = torch.clip(action, -1. + EPS, 1. - EPS)</code></pre>

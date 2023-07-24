@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, h_erb = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs = <a id="change">[</a>spec<a id="change"></a>]
+        &#47&#47 re/im into channel axis
+        spec_f = spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2)  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i, (stage, _lim) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(spec_f, h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :]<a id="change"> = </a><a id="change">spec_f.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>
+            &#47&#47 if lim &gt;= 100:
+            &#47&#47     spec_f, _ = stage(spec_f)
+            &#47&#47 else:
+            &#47&#47     idcs = torch.logical_and(lsnr &lt; lim, lsnr &gt; self.refinement_snr_min).squeeze(-1)</code></pre>

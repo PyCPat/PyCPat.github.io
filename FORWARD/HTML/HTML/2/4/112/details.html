@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :112
+</h3><img src='466215.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        d_2 = d // 2
+
+        &#47&#47 Create position indexes `[0, 1, ..., seq_len - 1]`
+        seq_idx = <a id="change">torch.arange(</a>seq_len<a id="change">, device=x.device)</a>.type_as(self.theta)
+
+        &#47&#47 Calculate the product of position index and $\theta_i$
+        idx_theta = torch.einsum(&quotn,d-&gt;nd&quot, seq_idx, self.theta)
+
+        &#47&#47 Concatenate so that for row $m$ we have
+        &#47&#47 $[m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}, m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}]$
+        idx_theta2 = torch.cat([idx_theta, idx_theta], dim=1)
+
+        &#47&#47 Calculate $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., -x^{(\frac{d}{2})}]$
+        neg_half_x = torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+
+        &#47&#47 Calculate
+        &#47&#47
+        &#47&#47 \begin{align}
+        &#47&#47 \begin{pmatrix}
+        &#47&#47 x^{(i)}_m \cos m \theta_i - x^{(i + \frac{d}{2})}_m \sin m \theta_i \\
+        &#47&#47 x^{(i + \frac{d}{2})}_m \cos m\theta_i + x^{(i)}_m \sin m \theta_i \\
+        &#47&#47 \end{pmatrix} \\
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        rx<a id="change"> = </a>(x * idx_theta2.cos()[:, None, None, :]) + (neg_half_x<a id="change"> * </a>idx_theta2.sin()[:, None, None, :])
+
+        &#47&#47
+        return rx</code></pre><h3>After Change</h3><pre><code class='java'>
+        self._build_cache(x)
+
+        &#47&#47 Split the features, we can choose to apply rotary embeddings only to a partial set of features.
+        x_rope, x_pass = <a id="change">x[..., :self.d]</a>, x[..., self.d:]
+
+        &#47&#47 Calculate
+        &#47&#47 $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., x^{(\frac{d}{2})}]$</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lab-ml/nn/commit/0ce65adf9e602321109528b05cf99fccb16cd2de#diff-637497eb531dcbf4c4fff534c48c9dc4ec23ef7b14699edc95d8b280b04de206L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 466215</div><div id='project'> Project Name: lab-ml/nn</div><div id='commit'> Commit Name: 0ce65adf9e602321109528b05cf99fccb16cd2de</div><div id='time'> Time: 2022-06-03</div><div id='author'> Author: vpjayasiri@gmail.com</div><div id='file'> File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_class'> M Class Name: RotaryPositionalEmbeddings</div><div id='n_method'> N Class Name: RotaryPositionalEmbeddings</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: labml_nn/transformers/rope/__init__.py</div><div id='n_file'> N File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 193</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.drop &lt; 1:
+            self.emb = self.dropout(self.emb)
+
+        count<a id="change"> = </a><a id="change">np.arange(</a>x.shape[0]<a id="change">) + </a>1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        for i, att_timesteps in enumerate(count):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = torch.zeros((batch_size, time_steps, self.hidden_dim))
+
+        for cur_time in range(time_steps):
+            cur_x = <a id="change">x[:, : cur_time + 1, :]</a>
+            out[:, cur_time, :] = self.retain_encoder(cur_x)
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 466211</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            k1, k2 = key_layer.chunk(2, dim=(key_layer.ndim - 1))
+            q1 = self.relative_positions_encoding(q1)
+            k1 = self.relative_positions_encoding(k1)
+            position_ids<a id="change"> = </a>torch.cat((torch.zeros(q1.shape[2]-1, dtype=torch.long, device=q1.device),
+                                     <a id="change">torch.arange(</a>1<a id="change">, dtype=torch.long, device=q1.device) + </a>1))
+            q2 = self.relative_positions_encoding(q2, position_ids)
+            k2 = self.relative_positions_encoding(k2, position_ids)
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+            k1, k2 = key_layer.chunk(2, dim=(key_layer.ndim - 1))
+            q1 = self.relative_positions_encoding(q1)
+            k1 = self.relative_positions_encoding(k1)
+            q2 = self.relative_positions_encoding(q2, <a id="change">model_kwargs[&quotposition_ids&quot]</a>)
+            k2 = self.relative_positions_encoding(k2, model_kwargs[&quotposition_ids&quot])
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))
+            key_layer = torch.concat([k1, k2], dim=(k1.ndim - 1))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tongjilibo/bert4torch/commit/8bfbd96fd50e1f9cd4f1b422c12ff13cd03e1357#diff-423158f6414177c50deaf8ff8d75202474ddccb543fca22c762f1c3c0e973f8eL141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 466221</div><div id='project'> Project Name: tongjilibo/bert4torch</div><div id='commit'> Commit Name: 8bfbd96fd50e1f9cd4f1b422c12ff13cd03e1357</div><div id='time'> Time: 2023-04-03</div><div id='author'> Author: tongjilibo@163.com</div><div id='file'> File Name: bert4torch/layers.py</div><div id='m_class'> M Class Name: MultiHeadAttentionLayer</div><div id='n_method'> N Class Name: MultiHeadAttentionLayer</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert4torch/layers.py</div><div id='n_file'> N File Name: bert4torch/layers.py</div><div id='m_start'> M Start Line: 175</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 183</div><BR>

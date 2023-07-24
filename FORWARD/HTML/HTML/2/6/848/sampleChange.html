@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+
+    def forward(self, x):
+        <a id="change">return </a>self.act(self.bn(<a id="change">self.conv(</a>x<a id="change">)</a>))
+
+    def fuseforward(self, x):
+        return self.act(self.conv(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Module) else nn.Identity())
+
+    def forward(self, x):
+        out<a id="change"> = </a><a id="change">self.conv(</a>x<a id="change">)</a>
+        if self.norm is not None:
+            if self.norm_type == &quotHIN&quot:
+                out1, out2 = torch.chunk(out, 2, dim = 1)
+                out2 = self.norm(out2)
+                out = torch.cat((out1, out2), dim = 1)
+            else:
+                out<a id="change"> = </a>self.norm(out)
+        out = self.act(out)
+        <a id="change">return </a>out
+
+    def fuseforward(self, x):
+        return self.act(self.conv(x))</code></pre>

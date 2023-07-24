@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+			factor_code = (
+				self.factor_embeddings[f](factors[:, f]) * label_masks[:, [f]]
+				+ torch.matmul(assignment.probs, <a id="change">self.factor_embeddings[f]</a>.weight) * (~label_masks[:, [f]])
+			)
+
+			assignments.append(assignment)</code></pre><h3>After Change</h3><pre><code class='java'>
+		for f in range(self.config[&quotn_factors&quot]):
+			assignment = Categorical(logits=self.img_factor_embeddings[f](img_id))
+
+			<a id="change">with torch.no_grad()</a><a id="change">:
+				</a>factor_values = torch.arange(self.config[&quotfactor_sizes&quot][f], dtype=torch.int64).to(img_id.device)
+				factor_embeddings = self.factor_embeddings[f](factor_values)
+
+			factor_code = (</code></pre>

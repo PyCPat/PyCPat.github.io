@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for i in range(self._levels):
+            head = self._heads[i]
+            z = head(latent)
+            <a id="change">if i &lt; self._levels - 1</a><a id="change">:
+                </a>mapper = self._mappers[i]
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard<a id="change"> = </a>self._deQuantizers[i](code)
+                latent = latent - hard
+            else:
+                code = self._quantizers[i](z)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor, cAndPadding: torch.Tensor) -&gt; Tuple[List[torch.LongTensor], torch.Tensor]:
+        codes = list()
+        latent = self._encoder(x)
+        for head, mapper, quantizer, <a id="change">deQuantizer</a> in <a id="change">zip(</a>self._heads, self._mappers, self._quantizers, self._deQuantizers<a id="change">)</a>:
+            z = head(latent)
+            latent = mapper(latent)
+            code<a id="change"> = </a>quantizer(z)
+            hard<a id="change"> = </a>deQuantizer(code)
+            latent = latent - hard
+            codes.append(code)
+        z<a id="change"> = </a>self._heads[-1](latent)
+        codes.append(self._quantizers[-1](z))
+        &#47&#47 codes from small to big
+        return codes[::-1], cAndPadding</code></pre>

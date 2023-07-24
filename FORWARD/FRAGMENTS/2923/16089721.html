@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, pred, target, mask=None):
+
+        pred = pred.contiguous().view(pred.size()[0], -1)
+        target<a id="change"> = </a><a id="change">target.contiguous()</a>.view(target.size()[0], -1)
+
+        if mask is not None:
+            mask = mask.contiguous().view(mask.size()[0], -1)
+            pred = pred * mask
+            target = target * mask
+
+        a<a id="change"> = </a>torch.sum(pred * target)
+        b = torch.sum(pred)
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)</code></pre><h3>After Change</h3><pre><code class='java'>
+            torch.Tensor: The loss value.
+        
+
+        <a id="change">assert </a>pred.size() == gt.size() and gt.numel() &gt; 0
+        if mask is None:
+            mask = torch.ones_like(gt)
+        assert mask.size() == gt.size()</code></pre>

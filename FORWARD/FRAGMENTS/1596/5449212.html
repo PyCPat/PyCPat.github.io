@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not exists(self.rel_pos) or not self.cache_rel_pos:
+            positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid<a id="change"> = </a>rearrange(grid, &quotc ... -&gt; (...) c&quot)
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos = torch.sign(rel_pos)<a id="change"> * </a><a id="change">torch.log(</a>rel_pos.abs()<a id="change"> + </a>1<a id="change">)</a>
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+
+        rel_pos = self.rel_pos.float()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        rel_dist += (shape - 1)  &#47&#47 make sure all positive
+        rel_dist *= strides
+        rel_dist_indices = <a id="change">rel_dist.sum(dim = -1)</a>
+
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias = bias[rel_dist_indices]</code></pre>

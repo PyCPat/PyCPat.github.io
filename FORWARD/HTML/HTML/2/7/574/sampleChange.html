@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = F.softplus(self.bn1(self.fc1(z)) + self.bn1_b)
+        x = F.softplus(self.bn2(self.fc2(x)) + self.bn2_b)
+        x = F.softplus(self.fc3(x))
+        <a id="change">return </a>x
+
+class ImprovedGAN(nn.Module):
+    def __init__(self, G=None, D=None,input_dim = 28 ** 2, output_dim = 10,z_dim=100,device=&quotcpu&quot):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, batch_size=10,z=None):
+        z = Variable(torch.rand(batch_size, self.z_dim), requires_grad = False).to(self.device) if z is None else z
+        for _ in range(self.num_hidden):
+            z<a id="change"> = self.activations[_](</a><a id="change">self.bn_layers[_](</a>self.layers[_](z)<a id="change">)</a> + self.bn_b[_]<a id="change">)</a>
+        if len(self.activations)==self.num_hidden+1:
+            z<a id="change"> = self.activations[self.num_hidden](</a>self.fc(z)<a id="change">)</a>
+        <a id="change">return </a>z
+
+class ImprovedGAN(nn.Module):
+    def __init__(self, G=None, D=None,dim_in = 28 ** 2,</code></pre>

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q = q.softmax(dim = -2)
+        k<a id="change"> = </a><a id="change">k.softmax(dim = -1)</a>
+
+        q = q * self.scale
+
+        context = torch.einsum(&quotb h d n, b h e n -&gt; b h d e&quot, k, v)
+
+        out = torch.einsum(&quotb h d e, b h d n -&gt; b h e n&quot, context, q)
+        out<a id="change"> = </a>rearrange(out, &quotb h c (x y) -&gt; b (h c) x y&quot, h = self.heads, x = h, y = w)
+        return self.to_out(out)
+
+class Attention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        context = torch.einsum(&quotb h n d, b h n e -&gt; b h d e&quot, k, v)
+
+        out = torch.einsum(&quotb h d e, b h n d -&gt; b h n e&quot, context, q)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out)
+
+class Attention(nn.Module):
+    def __init__(</code></pre>

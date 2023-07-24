@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.content_embedding = nn.Embedding(num_embeddings=config[&quotn_imgs&quot], embedding_dim=config[&quotcontent_depth&quot] * 16 * 16)
+		self.class_embedding = nn.Embedding(num_embeddings=config[&quotn_classes&quot], embedding_dim=config[&quotclass_dim&quot] * 16 * 16)
+
+		self.adains<a id="change"> = nn</a><a id="change">.Sequential(
+			</a>AdainResBlk(dim_in=config[&quotcontent_depth&quot] + config[&quotclass_dim&quot], dim_out=512, style_dim=config[&quotclass_dim&quot] * 16 * 16),
+			AdainResBlk(dim_in=512, dim_out=512, style_dim=config[&quotclass_dim&quot] * 16 * 16)<a id="change">
+		)</a>
+
+		self.convs = nn.Sequential(
+			nn.Upsample(scale_factor=2),
+			<a id="change">nn.ReflectionPad2d(padding=2)</a>,
+			<a id="change">nn.Conv2d(in_channels=512, out_channels=256, kernel_size=5, stride=1)</a>,
+			nn.InstanceNorm2d(num_features=256),
+			nn.ReLU(),
+
+			nn.Upsample(scale_factor=2),
+			nn.ReflectionPad2d(padding=2),
+			<a id="change">nn.Conv2d(in_channels=256, out_channels=128, kernel_size=5, stride=1)</a>,
+			nn.InstanceNorm2d(num_features=128),
+			nn.ReLU(),
+
+			nn.Upsample(scale_factor=2),
+			<a id="change">nn.ReflectionPad2d(padding=2)</a>,
+			nn.Conv2d(in_channels=128, out_channels=64, kernel_size=5, stride=1),
+			nn.InstanceNorm2d(num_features=64),
+			nn.ReLU(),
+
+			nn.ReflectionPad2d(padding=3),
+			<a id="change">nn.Conv2d(in_channels=64, out_channels=3, kernel_size=7, stride=1)</a>,
+			nn.Tanh()
+		)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.content_embedding = nn.Embedding(num_embeddings=config[&quotn_imgs&quot], embedding_dim=config[&quotcontent_depth&quot] * 16 * 16)
+		self.class_embedding = nn.Embedding(num_embeddings=config[&quotn_classes&quot], embedding_dim=config[&quotclass_depth&quot] * 16 * 16)
+
+		self.decoder = <a id="change">nn.Sequential(
+			</a>ResBlk(dim_in=config[&quotcontent_depth&quot] + config[&quotclass_depth&quot], dim_out=512, normalize=True, upsample=False),
+			ResBlk(dim_in=512, dim_out=512, normalize=True, upsample=False),
+			ResBlk(dim_in=512, dim_out=256, normalize=True, upsample=True),
+			ResBlk(dim_in=256, dim_out=128, normalize=True, upsample=True),
+
+			nn.InstanceNorm2d(num_features=128, affine=True),
+			nn.LeakyReLU(negative_slope=0.2),
+			nn.Conv2d(in_channels=128, out_channels=3, kernel_size=1, stride=1, padding=0),
+
+			nn.Tanh()<a id="change">
+		)</a>
+
+	def forward(self, content_img_id, class_id):
+		batch_size = content_img_id.shape[0]
+</code></pre>

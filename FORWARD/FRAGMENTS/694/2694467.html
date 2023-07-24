@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.safe_radius = safe_radius
+
+    def forward(self, anchor, positive, dist_keypts):
+        pids = torch.FloatTensor(<a id="change">np.arange(</a>len(anchor)<a id="change">)</a>)
+        if torch.cuda.is_available():
+            pids = pids.cuda()
+        &#47&#47 if self.metric == &quoteuclidean&quot:</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.safe_radius = safe_radius
+
+    def forward(self, anchor, positive, dist_keypts):
+        pids = <a id="change">torch.FloatTensor(np.arange(len(anchor))).to(</a>anchor.device<a id="change">)</a>
+        dist = cdist(anchor, positive, metric=self.metric)
+        dist_keypts = np.eye(dist_keypts.shape[0]) * 10 + dist_keypts.detach().cpu().numpy()
+        add_matrix = torch.zeros_like(dist)
+        add_matrix[np.where(dist_keypts &lt; self.safe_radius)] += 10</code></pre>

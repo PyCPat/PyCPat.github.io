@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, start: Tensor, keep_start: bool = False) -&gt; Tensor:
+        half_length = start.shape[2] // 2
+
+        spans = [start[:, :, :half_length]]<a id="change"> if </a>keep_start<a id="change"> else </a>[]
+        inpaint = start
+        inpaint_mask = sequential_mask(like=start, start=half_length)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        spans = list(start.chunk(chunks=2, dim=-1)) if keep_start else []
+        &#47&#47 Inpaint second half from first half
+        inpaint = torch.zeros_like(start)
+        inpaint[:, :, :half_length] = <a id="change">start[:, :, half_length:]</a>
+        inpaint_mask = sequential_mask(like=start, start=half_length)
+
+        for i in range(self.num_spans):
+            &#47&#47 Inpaint second half</code></pre>

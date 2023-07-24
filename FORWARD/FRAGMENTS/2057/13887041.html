@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.v_linear = nn.Linear(d_model, d_model, bias=bias)
+
+    def forward(self, q, k, v, mask=None):
+        bs = <a id="change">q.size(0</a><a id="change">)</a>
+
+        &#47&#47 perform linear operation and split into h heads
+        if not self.kq_same:
+            q = self.q_linear(q).view(bs, -1, self.h, self.d_k)</code></pre><h3>After Change</h3><pre><code class='java'>
+        output = self.scaled_dot_product_attention(q, k, v, self.d_k, mask)
+
+        &#47&#47 concatenate heads and put through final linear layer
+        output = torch.cat(<a id="change">torch.unbind(</a>output<a id="change">, dim=-3)</a>, dim=-1)
+        return output
+
+    @staticmethod</code></pre>

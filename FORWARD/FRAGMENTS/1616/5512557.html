@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.outermost:
+            return self.model(x)
+        else:  &#47&#47 add skip connections
+            return <a id="change">torch.cat(</a>[x, self.model(x)], 1<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        output = self.model[0](x)
+        return_feats = feats + [output]
+
+        for layer in <a id="change">self.model[1:]</a>:
+            if isinstance(layer, UnetSkipConnectionBlock):
+                output, return_feats = layer(output, return_feats)
+            else:</code></pre>

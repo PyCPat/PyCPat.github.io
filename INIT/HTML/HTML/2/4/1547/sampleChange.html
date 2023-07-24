@@ -2,28 +2,19 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        &#47&#47 setting the device
-
-        if not exists(accelerator) and not exists(device):
-            diffusion_prior_device = next(<a id="change">diffusion_prior.parameters()</a>).device
-            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
-            self.device = diffusion_prior_device
-        else:</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        &#47&#47 mixed precision checks
-
-        <a id="change">if </a>(
-            exists(self.accelerator) 
-            and <a id="change">self.accelerator.distributed_type == DistributedType.DEEPSPEED</a> 
-            and self.diffusion_prior.clip is not None
-            )<a id="change">:
-            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
-            </a>cast_type_map = {
-                "fp16": torch.half,
-                "bf16": torch.bfloat16,
-                "no": torch.float
-            }
-            precision_type<a id="change"> = </a>cast_type_map[accelerator.mixed_precision]
-            assert precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
-            self.diffusion_prior.clip.to(precision_type)
-</code></pre>
+            &#47&#47 Freeze all previous layers.
+            for param in self.features1.parameters():
+                param.requires_grad = False
+            for param in <a id="change">self.features2.parameters()</a>:
+                param.requires_grad = False
+            &#47&#47 Initialize the fc layers.
+            nn.init.kaiming_normal_(self.fc.weight.data)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.features1 = nn.Sequential(*list(self.features1.children())
+                                            [:-1])
+        scnn = SCNN(use_bn=use_bn)
+        <a id="change">if pretrained_scnn_path is not None</a><a id="change">:
+            </a>old_dict = torch.load(pretrained_scnn_path)
+            new_dict<a id="change"> = </a>{}
+            for k, v in old_dict.items():
+                new_dict[k.replace(&quotmodule.&quot, &quot&quot)] = v
+            scnn.load_state_dict(new_dict)</code></pre>

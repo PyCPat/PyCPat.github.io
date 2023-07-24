@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :2971
+</h3><img src='16236646.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l2QLoss.append(0.00001 * F.mse_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l1QLoss.append(0.00001<a id="change"> * </a>F.l1_loss(latent, <a id="change">q.detach()</a>, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+
+        l1QLoss = sum(l1QLoss)
+        l2QLoss = sum(l2QLoss)</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 summedProb = batchWiseLogit.sum(1)
+                posterior = OneHotCategorical(logits=batchWiseLogit)
+                prior = OneHotCategorical(probs=torch.ones_like(batchWiseLogit) / batchWiseLogit.shape[-1])
+                reg = <a id="change">torch.distributions.kl_divergence(posterior, prior).sum(-1</a><a id="change">)</a>
+                reg += compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)
+                &#47&#47 reg = reg / diversity
+                regs.append(reg)
+            regs = sum(regs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/6a7990547d3b9f68e7377cfc03ef1edd64929802#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236646</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 6a7990547d3b9f68e7377cfc03ef1edd64929802</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: CompressionLossTwoStage</div><div id='n_method'> N Class Name: CompressionLossTwoStage</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 90</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantized = self.decode(codes)
+
+        diff = (x - quantized).pow(2).mean()
+        quantized = quantized<a id="change"> + x - </a><a id="change">x.detach()</a>
+
+        if self.training:
+            self.replace_dead_codes(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 We do the expiry of code at that point as buffers are in sync
+            &#47&#47 and all the workers will take the same decision.
+            self.expire_codes_(x)
+            ema_inplace(self.cluster_size, <a id="change">embed_onehot.sum(0</a><a id="change">)</a>, self.decay)
+            embed_sum = x.t() @ embed_onehot
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = (laplace_smoothing(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236645</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: VQ</div><div id='n_method'> N Class Name: EuclideanCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 97</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 187</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for latent, q in zip(latents, quantizeds):
+            l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l2QLoss.append(0.01<a id="change"> * </a>F.mse_loss(latent, <a id="change">q.detach()</a>, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l1QLoss.append(0.01 * F.l1_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            &#47&#47 regs.append(-1e-4 * ((latent ** 2).mean((1, 2, 3)) + (q ** 2).mean((1, 2, 3))))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+                posterior = OneHotCategorical(logits=batchWiseLogit)
+                prior = OneHotCategorical(probs=torch.ones_like(batchWiseLogit) / batchWiseLogit.shape[-1])
+                reg = <a id="change">torch.distributions.kl_divergence(posterior, prior).sum(-1</a><a id="change">)</a> + compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=1.0, allowed_js=4.0, js_coeff=1.0, cv_coeff=1.0, eps=Consts.Eps)
+                regs.append(reg)
+                &#47&#47 reg = reg / diversity
+            regs = sum(regs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/8c71ec66b33adcc34c3c3769caf2b9087dd03ff1#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L125' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16236644</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 8c71ec66b33adcc34c3c3769caf2b9087dd03ff1</div><div id='time'> Time: 2021-03-31</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: CompressionLossTwoStage</div><div id='n_method'> N Class Name: CompressionLossTwoStage</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 146</div><div id='n_end'> N End Line: 151</div><BR>

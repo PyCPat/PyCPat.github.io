@@ -1,0 +1,89 @@
+<html><h3>Pattern ID :2731
+</h3><img src='15359656.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.shape = shape
+    def forward(self, input: torch.Tensor, shape):
+        <a id="change">return </a>torch.reshape(input, self.shape)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        inp_shape = torch.tensor(input.shape)
+        if self.initial_input_shape is None:
+            self.initial_input_shape = inp_shape
+        elif len(shape) == 2 and <a id="change">shape[-1]</a> == -1:
+            pass
+        elif torch.equal(self.initial_input_shape, inp_shape):
+            pass
+        print(tuple(shape))
+        <a id="change">return </a>torch.reshape(input, <a id="change">tuple(shape</a><a id="change">)</a>)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bbuf/onnx2nn/commit/1c38c809fe2ee466f62fecdf1b9a7c0730b604c8#diff-ed214b9a68e7f6981d9b3c4f0ac67b4be3b97a0ebd832d8a386b11bbfc98fd70L10' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359656</div><div id='project'> Project Name: bbuf/onnx2nn</div><div id='commit'> Commit Name: 1c38c809fe2ee466f62fecdf1b9a7c0730b604c8</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: 1182563586@qq.com</div><div id='file'> File Name: onnx2pytorch/operations/reshape.py</div><div id='m_class'> M Class Name: Reshape</div><div id='n_method'> N Class Name: Reshape</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: onnx2pytorch/operations/reshape.py</div><div id='n_file'> N File Name: onnx2pytorch/operations/reshape.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 10</div><div id='n_start'> N Start Line: 11</div><div id='n_end'> N End Line: 21</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = res_layer(x)
+            if i == 0 and self.with_pool2:
+                x = self.pool2(x)
+        <a id="change">return </a>x
+
+    def train(self, mode=True):
+        Set the optimization status when training.</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x = self.conv1(x)
+        x = self.maxpool(x)
+        <a id="change">outs</a> = []
+        for i, layer_name in enumerate(self.res_layers):
+            res_layer = getattr(self, layer_name)
+            x = res_layer(x)
+            if i == 0 and self.with_pool2:
+                x = self.pool2(x)
+            if i in self.out_indices:
+                outs.append(x)
+        if len(outs) == 1:
+            return <a id="change">outs[0]</a>
+        else:
+            <a id="change">return </a><a id="change">tuple(</a>outs<a id="change">)</a>
+
+    def train(self, mode=True):
+        Set the optimization status when training.
+        super().train(mode)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/c3330d39628adc9376ef1a008639c41a6655b4e7#diff-c3e0ef6991851a6c547d25760f20bdbd74cd6e937fee3b763e9ca89d6f3e4cd8L782' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359657</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: c3330d39628adc9376ef1a008639c41a6655b4e7</div><div id='time'> Time: 2020-09-30</div><div id='author'> Author: 528557675@qq.com</div><div id='file'> File Name: mmaction/models/backbones/resnet3d.py</div><div id='m_class'> M Class Name: ResNet3d</div><div id='n_method'> N Class Name: ResNet3d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/backbones/resnet3d.py</div><div id='n_file'> N File Name: mmaction/models/backbones/resnet3d.py</div><div id='m_start'> M Start Line: 796</div><div id='m_end'> M End Line: 799</div><div id='n_start'> N Start Line: 798</div><div id='n_end'> N End Line: 811</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for layer_name in self.res_layers:
+            res_layer = getattr(self, layer_name)
+            x = res_layer(x)
+        <a id="change">return </a>x
+
+    def _freeze_stages(self):
+        Prevent all the parameters from being optimized before</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x = self.conv1(x)
+        x = self.maxpool(x)
+        <a id="change">outs</a> = []
+        for i, layer_name in enumerate(self.res_layers):
+            res_layer = getattr(self, layer_name)
+            x = res_layer(x)
+            if i in self.out_indices:
+                outs.append(x)
+        if len(outs) == 1:
+            return <a id="change">outs[0]</a>
+        else:
+            <a id="change">return </a><a id="change">tuple(</a>outs<a id="change">)</a>
+
+    def _freeze_stages(self):
+        Prevent all the parameters from being optimized before
+        ``self.frozen_stages``.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/c3330d39628adc9376ef1a008639c41a6655b4e7#diff-a6fae43587f169e640cc74ca4d5e7fecce30dfdceb70d69702fdb856fd098d6eL525' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359654</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: c3330d39628adc9376ef1a008639c41a6655b4e7</div><div id='time'> Time: 2020-09-30</div><div id='author'> Author: 528557675@qq.com</div><div id='file'> File Name: mmaction/models/backbones/resnet.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/backbones/resnet.py</div><div id='n_file'> N File Name: mmaction/models/backbones/resnet.py</div><div id='m_start'> M Start Line: 537</div><div id='m_end'> M End Line: 540</div><div id='n_start'> N Start Line: 541</div><div id='n_end'> N End Line: 552</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.shape = shape
+    def forward(self, input: torch.Tensor, shape):
+        <a id="change">return </a>torch.reshape(input, self.shape)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.initial_input_shape = None
+    def forward(self, input: torch.Tensor, shape=None):
+        shape = shape if shape is not None else self.shape
+        <a id="change">shape</a> = [x if x != 0 else input.size(i) for i, x in enumerate(shape)]
+        inp_shape = torch.tensor(input.shape)
+        if self.initial_input_shape is None:
+            self.initial_input_shape = inp_shape
+        elif len(shape) == 2 and <a id="change">shape[-1]</a> == -1:
+            pass
+        elif torch.equal(self.initial_input_shape, inp_shape):
+            pass
+        print(tuple(shape))
+        <a id="change">return </a>torch.reshape(input, <a id="change">tuple(</a>shape<a id="change">)</a>)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bbuf/onnx2x/commit/1c38c809fe2ee466f62fecdf1b9a7c0730b604c8#diff-ed214b9a68e7f6981d9b3c4f0ac67b4be3b97a0ebd832d8a386b11bbfc98fd70L9' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359655</div><div id='project'> Project Name: bbuf/onnx2x</div><div id='commit'> Commit Name: 1c38c809fe2ee466f62fecdf1b9a7c0730b604c8</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: 1182563586@qq.com</div><div id='file'> File Name: onnx2pytorch/operations/reshape.py</div><div id='m_class'> M Class Name: Reshape</div><div id='n_method'> N Class Name: Reshape</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: onnx2pytorch/operations/reshape.py</div><div id='n_file'> N File Name: onnx2pytorch/operations/reshape.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 10</div><div id='n_start'> N Start Line: 11</div><div id='n_end'> N End Line: 21</div><BR>

@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size = fv.shape[0]
+        seq_len = fi.shape[1]
+
+        <a id="change">if fv_alter is None</a><a id="change">:
+            </a>v_in<a id="change"> = </a>fv
+        else:
+            v_in<a id="change"> = </a>fv * dec[:, :, 0].unsqueeze(-1) + fv_alter * dec[:, :, 1].unsqueeze(-1)
+
+        fused = self.fuse(v_in, fi)
+        out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)</code></pre><h3>After Change</h3><pre><code class='java'>
+            prev = (prev[0].transpose(1, 0).contiguous(), prev[1].transpose(1, 0).contiguous())
+        
+        &#47&#47 Select between fv and fv_alter
+        v_in = fv * dec[:, :, :1] + fv_alter * <a id="change">dec[:, :, -1:]</a> if fv_alter is not None else fv
+        fused = self.fuse(v_in, fi)
+        out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)
+        out = self.rnn_drop_out(out)</code></pre>

@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :2990
+</h3><img src='16343257.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = logit.diag().view(-1, 1).expand_as(logit) - logit
+        loss = <a id="change">-torch.log(torch.mean(logit_softmax * torch.sigmoid(diff)))</a>
+        &#47&#47 add regularization
+        loss += self.lambda_ * torch.mean(logit_softmax * (logit ** 2))
+        <a id="change">return </a>loss
+
+
+class TOP1Loss(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = F.sigmoid(diff)
+        logit_softmax = torch.softmax(logits_scores, dim = 1)
+        loss = logit_softmax * loss
+        reg<a id="change"> = </a>logit_softmax<a id="change"> * </a>(logits_scores<a id="change">**2</a>)
+        &#47&#47 set to zeros the diff scores of positive targets present in the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        reg = reg.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = <a id="change">-torch.log(loss.sum(1))</a><a id="change"> + </a>self.lambda_ * reg.sum(1)
+        <a id="change">return </a>torch.mean(loss)
+
+
+class TOP1(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/58b4bf9dfdc2fe5ce6c90ac57f4db71224268942#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16343257</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: 58b4bf9dfdc2fe5ce6c90ac57f4db71224268942</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: BPR_max_reg</div><div id='n_method'> N Class Name: BPR_max_reg</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = logit.diag().view(-1, 1).expand_as(logit) - logit
+        loss = <a id="change">-torch.log(torch.mean(logit_softmax * torch.sigmoid(diff)))</a>
+        &#47&#47 add regularization
+        loss += self.lambda_ * torch.mean(logit_softmax * (logit ** 2))
+        <a id="change">return </a>loss
+
+
+class TOP1Loss(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = F.sigmoid(diff)
+        logit_softmax = torch.softmax(logits_scores, dim = 1)
+        loss = logit_softmax * loss
+        reg<a id="change"> = </a>logit_softmax<a id="change"> * </a>(logits_scores<a id="change">**2</a>)
+        &#47&#47 set to zeros the diff scores of positive targets present in the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        reg = reg.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = <a id="change">-torch.log(loss.sum(1))</a><a id="change"> + </a>self.lambda_ * reg.sum(1)
+        <a id="change">return </a>torch.mean(loss)
+
+
+class TOP1(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/da9442ba125855b2a0630c905ad4da0def19be70#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16343256</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: da9442ba125855b2a0630c905ad4da0def19be70</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: BPR_max_reg</div><div id='n_method'> N Class Name: BPR_max_reg</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_target = target_ball_position[:, :self.w]
+        y_target = target_ball_position[:, self.w: (self.w + self.h)]
+
+        loss_ball = -<a id="change"> torch.sum(x_target * torch.log(x_pred + self.epsilon), dim=-1) / self.w - </a>torch.sum(
+            y_target * <a id="change">torch.log(</a>y_pred + self.epsilon<a id="change">)</a>, dim=-1) / self.h
+
+        <a id="change">return </a>loss_ball
+
+
+class Events_Spotting_Loss(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_target = target_ball_position[:, :self.w]
+        y_target = target_ball_position[:, self.w: (self.w + self.h)]
+
+        loss_ball_x<a id="change"> = </a>- torch.mean(
+            x_target * torch.log(x_pred + self.epsilon) + (1 - x_target) * torch.log(<a id="change">1</a><a id="change"> - x_pred + </a>self.epsilon), dim=-1)
+        loss_ball_y = - torch.mean(
+            y_target<a id="change"> * torch.log(y_pred + self.epsilon) + </a>(1 - y_target) * torch.log(1 - y_pred + self.epsilon), dim=-1)
+        <a id="change">return </a>loss_ball_x<a id="change"> + </a>loss_ball_y
+
+
+class Events_Spotting_Loss(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch/commit/c805eab1f8d8591c31a394d6d9e2bcc73745152e#diff-0d89008c37bd69970c90004e1b37ca995ea748a6781eedac37cb48f677139849L12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16343261</div><div id='project'> Project Name: maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch</div><div id='commit'> Commit Name: c805eab1f8d8591c31a394d6d9e2bcc73745152e</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: nguyenmaudung93.kstn@gmail.com</div><div id='file'> File Name: src/losses/losses.py</div><div id='m_class'> M Class Name: Ball_Detection_Loss</div><div id='n_method'> N Class Name: Ball_Detection_Loss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/losses/losses.py</div><div id='n_file'> N File Name: src/losses/losses.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 13</div><div id='n_end'> N End Line: 23</div><BR>

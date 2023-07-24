@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        w = torch.einsum(&quotbchw,bcij-&gt;bhwij&quot, q, k) * (int(C) ** (-0.5))
+        w = torch.reshape(w, (B, H, W, H * W))
+        w = <a id="change">F.softmax(</a>w<a id="change">, dim=-1)</a>
+        w = torch.reshape(w, (B, H, W, H, W))
+        h = torch.einsum(&quotbhwij,bcij-&gt;bchw&quot, w, v)
+        h<a id="change"> = </a>self.NIN_3(h)
+        <a id="change">return </a>x + h
+
+
+class Upsample(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        ).contiguous() / math.sqrt(channel)
+        attn = attn.view(batch, n_head, height, width, -1)
+        attn = torch.softmax(attn, -1)
+        attn<a id="change"> = </a>attn.view(batch, n_head, height, width, height, width)
+
+        out = torch.einsum("bnhwyx, bncyx -&gt; bnchw", attn, value).contiguous()
+        out<a id="change"> = </a>self.out(out.view(batch, channel, height, width))
+
+        <a id="change">return </a>out + input
+
+
+class ResnetBlocWithAttn(nn.Module):</code></pre>

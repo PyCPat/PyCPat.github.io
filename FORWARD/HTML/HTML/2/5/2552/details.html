@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :2552
+</h3><img src='14790451.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+			content_code = content_code + noise
+
+		x = content_code
+		<a id="change">for </a>block in self.decoder<a id="change">:
+			</a>x<a id="change"> = </a>block(x, style_code)
+
+		return self.to_rgb(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+			content_code = content_code + noise
+
+		class_code = self.class_embedding(class_id)
+		class_code_repeated = class_code.view((batch_size<a id="change">, -1, 1, 1</a>)).repeat((1, 1, 16, 16))
+		x<a id="change"> = </a><a id="change">torch.cat(</a>(content_code, class_code_repeated)<a id="change">, dim=1)</a>
+
+		for block in self.adains:
+			x = block(x, class_code)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14790451</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: 3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0</div><div id='time'> Time: 2020-07-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 63</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		else:
+			out = content_code
+
+		<a id="change">for </a>layer in self.layers<a id="change">:
+			</a>out<a id="change"> = </a>layer(out, class_code, None)
+
+		out = self.to_rgb(out)
+		return out</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.n_latent = self.log_size * 2 - 2
+
+	def forward(self, content_codes, class_codes):
+		styles = <a id="change">torch.cat(</a>(content_codes<a id="change">, class_codes</a>)<a id="change">, dim=1)</a>
+		latent = styles.unsqueeze(dim=1).repeat(1, self.n_latent, 1)
+		&#47&#47 latent = styles.view((-1, self.n_latent, 512))
+
+		out = self.input(latent)
+		out = self.conv1(out, latent[:, 0])
+
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], self.convs[1::2], self.to_rgbs):
+			out = conv1(out, latent[:, i])
+			out<a id="change"> = </a>conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)
+
+			i += 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14790450</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.norm:
+            z = z / self.frame_length
+        <a id="change">for </a>_ in range(3 - d)<a id="change">:
+            </a>z<a id="change"> = </a>z.squeeze(0)
+        return z
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        
+        x = torch.sign(x)
+        x<a id="change"> = </a><a id="change">torch.cat(</a>(x[..., :1]<a id="change">, x</a>)<a id="change">, dim=-1)</a>
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)
+        z = 0.5 * torch.abs(x[..., 1:] - x[..., :-1]).sum(-1)
+        if self.norm:
+            z = z / self.frame_length</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/c71e34ed516f1d63687f4f2135d421d08cedfd44#diff-3d2136b6eab363c825aa063298d2778a1ef04444522749238d8d95629ba95f7aL45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14790457</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: c71e34ed516f1d63687f4f2135d421d08cedfd44</div><div id='time'> Time: 2022-04-15</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/core/zcross.py</div><div id='m_class'> M Class Name: ZeroCrossingAnalysis</div><div id='n_method'> N Class Name: ZeroCrossingAnalysis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/zcross.py</div><div id='n_file'> N File Name: diffsptk/core/zcross.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 68</div><BR>

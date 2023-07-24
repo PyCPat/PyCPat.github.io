@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :3279
+</h3><img src='17201846.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.model.forward(x)
+        x = x[..., 0].transpose(-1, -2)
+        x<a id="change"> = </a><a id="change">self.backbone(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>self.neck(x)
+        <a id="change">return </a>x
+
+    def init_weights(self):
+        pass</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.model.forward(x)
+        assert x.shape[-1] == 1
+        <a id="change">return </a>[x[..., 0].transpose(-1, -2)]
+
+    def init_weights(self):
+        pass</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/saic-vul/imvoxelnet/commit/2f1075a9efa981f84cc0e8e08f75bd9a85b21e79#diff-90dc34daf134c4cdd90d04ebf03d26461ff481ed846c197859ea3ada3a98efa7L117' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17201846</div><div id='project'> Project Name: saic-vul/imvoxelnet</div><div id='commit'> Commit Name: 2f1075a9efa981f84cc0e8e08f75bd9a85b21e79</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: danrukh@gmail.com</div><div id='file'> File Name: mmdet3d/models/necks/atlas.py</div><div id='m_class'> M Class Name: NuScenesAtlasNeck</div><div id='n_method'> N Class Name: NuScenesAtlasNeckV3</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet3d/models/necks/atlas.py</div><div id='n_file'> N File Name: mmdet3d/models/necks/atlas.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 121</div><div id='n_start'> N Start Line: 117</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		img: torch.FloatTensor,
+		source_mask: torch.BoolTensor
+		) :
+		feats<a id="change"> = </a><a id="change">self.backbone(</a>img<a id="change">)</a>
+		feats = torch.einsum(&quotn e h s -&gt; s n e&quot, feats)
+		feats = self.pe(feats)
+		feats = self.encoders(feats, src_key_padding_mask = source_mask)
+		feats = torch.einsum(&quots n e -&gt; n s e&quot, feats)
+		pred_char_logits = self.char_pred(feats)
+		pred_color_values<a id="change"> = </a>self.color_pred1(feats)
+		<a id="change">return </a>pred_char_logits, pred_color_values
+
+	def decode(self, img: torch.Tensor, img_widths: List[int], blank) -&gt; List[List[Tuple[str, float, int, int, int, int, int, int]]] :
+		N, C, H, W = img.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+		recurrent, _ = self.rnn(input)  &#47&#47 batch_size x T x input_size -&gt; batch_size x T x (2*hidden_size)
+		recurrent, _ = torch.nn.utils.rnn.pad_packed_sequence(recurrent, batch_first=True)
+		output = self.linear(recurrent)  &#47&#47 batch_size x T x output_size
+		<a id="change">return </a>output
+
+class ResNet(nn.Module):
+	def __init__(self, input_channel, output_channel, block, layers):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zyddnys/manga-image-translator/commit/028e20af903e17ea1d74a3c8dd71e60995c425c8#diff-abb0a66a6713892dc78680bb8975dc9cf3bca0e2f233937e310d6f00a8826562L194' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17201847</div><div id='project'> Project Name: zyddnys/manga-image-translator</div><div id='commit'> Commit Name: 028e20af903e17ea1d74a3c8dd71e60995c425c8</div><div id='time'> Time: 2021-11-30</div><div id='author'> Author: zyddnys@outlook.com</div><div id='file'> File Name: ocr/model_48px_ctc.py</div><div id='m_class'> M Class Name: OCR</div><div id='n_method'> N Class Name: BidirectionalLSTM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ocr/model_48px_ctc.py</div><div id='n_file'> N File Name: ocr/model_48px_ctc.py</div><div id='m_start'> M Start Line: 195</div><div id='m_end'> M End Line: 205</div><div id='n_start'> N Start Line: 19</div><div id='n_end'> N End Line: 29</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x0, x1):
+        &#47&#47 get representations
+        f0<a id="change"> = </a><a id="change">self.backbone(</a>x0<a id="change">)</a>.flatten(start_dim=1)
+        f1 = self.backbone(x1).flatten(start_dim=1)
+        &#47&#47 get projections
+        z0 = self.projection_head(f0)
+        z1 = self.projection_head(f1)
+        &#47&#47 get predictions
+        p0 = self.prediction_head(z0)
+        p1 = self.prediction_head(z1)
+        &#47&#47 stop gradient
+        z0<a id="change"> = </a>z0.detach()
+        z1 = z1.detach()
+        <a id="change">return </a>p0, p1, z0, z1
+
+
+&#47&#47 we use a pretrained resnet for this tutorial to speed</code></pre><h3>After Change</h3><pre><code class='java'>
+        p = self.prediction_head(z)
+        &#47&#47 stop gradient
+        z = z.detach()
+        <a id="change">return </a>z, p
+
+
+&#47&#47 we use a pretrained resnet for this tutorial to speed</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lightly-ai/lightly/commit/5e5f5faa828a7f4a134963bae4e8c54856e46400#diff-593d1e989c518b28597fb01810521061fe38815bf71024750fc36150a2a51732L170' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17201841</div><div id='project'> Project Name: lightly-ai/lightly</div><div id='commit'> Commit Name: 5e5f5faa828a7f4a134963bae4e8c54856e46400</div><div id='time'> Time: 2021-11-29</div><div id='author'> Author: 43336610+guarin@users.noreply.github.com</div><div id='file'> File Name: docs/source/tutorials_source/package/tutorial_simsiam_esa.py</div><div id='m_class'> M Class Name: SimSiam</div><div id='n_method'> N Class Name: SimSiam</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: docs/source/tutorials_source/package/tutorial_simsiam_esa.py</div><div id='n_file'> N File Name: docs/source/tutorials_source/package/tutorial_simsiam_esa.py</div><div id='m_start'> M Start Line: 170</div><div id='m_end'> M End Line: 183</div><div id='n_start'> N Start Line: 174</div><div id='n_end'> N End Line: 179</div><BR>

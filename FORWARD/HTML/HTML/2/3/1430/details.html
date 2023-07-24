@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1430
+</h3><img src='4891931.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.update_location_attention(alignment)
+        &#47&#47 apply forward attention if enabled
+        if self.forward_attn:
+            context<a id="change">, self.attention_weights</a> = self.apply_forward_attention(
+                inputs, alignment, query)
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 compute transition agent
+        if self.forward_attn and self.trans_agent:
+            ta_input<a id="change"> = </a>torch.cat([context, query.squeeze(1)], dim=-1)
+            self.u = <a id="change">torch.sigmoid(</a>self.ta(ta_input)<a id="change">)</a>
+        return context
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/40f56f9b000bb03384ebe883c03380b260a6a205#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L255' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4891931</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 40f56f9b000bb03384ebe883c03380b260a6a205</div><div id='time'> Time: 2019-07-24</div><div id='author'> Author: thomas@twerkmeister.com</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 262</div><div id='m_end'> M End Line: 267</div><div id='n_start'> N Start Line: 255</div><div id='n_end'> N End Line: 266</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.layer_4 = nn.Linear(config["lin3_size"], 10)
+
+    def forward(self, x):
+        batch_size<a id="change">, channels, width, height</a> = x.size()
+
+        &#47&#47 (b, 1, 28, 28) -&gt; (b, 1*28*28)
+        x = x.view(batch_size, -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.drop1(x)
+        x = self.lin_1(x)
+        x = F.relu(x)
+        x<a id="change"> = </a>self.drop2(x)
+        x = self.lin_2(x)
+        return <a id="change">torch.sigmoid(</a>x<a id="change">)</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hobogalaxy/lightning-hydra-template/commit/e694cd0164e92dee9a451b8df20260fdf9bec4e2#diff-3a0ebb1b65c298f993c1c380f3f8fb3af71d7351417b77de111ae136deaddb31L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4891929</div><div id='project'> Project Name: hobogalaxy/lightning-hydra-template</div><div id='commit'> Commit Name: e694cd0164e92dee9a451b8df20260fdf9bec4e2</div><div id='time'> Time: 2020-11-15</div><div id='author'> Author: zalewski.ukas@gmail.com</div><div id='file'> File Name: project/pipeline_modules/models.py</div><div id='m_class'> M Class Name: ModelMNISTv2</div><div id='n_method'> N Class Name: EfficientNetPretrained</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: project/pipeline_modules/models.py</div><div id='n_file'> N File Name: project/pipeline_modules/models.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = torch.stack(mel_outputs).transpose(0, 1).contiguous()
+
+        return mel_outputs<a id="change">, attn_scores</a>
+
+
+def is_end_of_frames(output, eps=-3.4):
+    return (output.data &lt;= eps).all()</code></pre><h3>After Change</h3><pre><code class='java'>
+            output = self.mel_proj(decoder_output)
+
+            &#47&#47 Stop token prediction
+            stop<a id="change"> = </a>self.stop_proj(decoder_output)
+            stop = <a id="change">torch.sigmoid(</a>stop<a id="change">)</a>
+
+            &#47&#47 Store predictions
+            mel_outputs += [output]
+            attn_scores += [attention_score]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/34e667ab8dfa8ce50329b538965b161efb3f9aaa#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4891933</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: 34e667ab8dfa8ce50329b538965b161efb3f9aaa</div><div id='time'> Time: 2021-03-14</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 167</div><div id='n_start'> N Start Line: 116</div><div id='n_end'> N End Line: 176</div><BR>

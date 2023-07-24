@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :274
+</h3><img src='924075.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, item):
+        G_cls, G_reg = map(item.get, [&quotproposal_targets_cls&quot, &quotproposal_targets_reg&quot])
+        P_cls, P_reg = map(item.get, [&quotproposal_scores&quot, &quotproposal_boxes&quot])
+        G_cls<a id="change">, mask_cls = </a><a id="change">G_cls.split(</a>[self.cfg.NUM_CLASSES, 1]<a id="change">, dim=1)</a>
+        mask_reg = G_cls[:, :-1, ..., None].sum(1, keepdim=True)
+        cls_loss = self.cls_loss(P_cls, G_cls, mask_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, mask_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, item):
+        TODO: Decide on cleaner input representation.
+        keys = <a id="change">[</a>&quotG_cls&quot, &quotM_cls&quot, &quotP_cls&quot, &quotG_reg&quot, &quotM_reg&quot, &quotP_reg&quot<a id="change"></a>]
+        G_cls, M_cls, P_cls, G_reg, M_reg, P_reg = map(item.get, keys)
+        cls_loss = self.cls_loss(P_cls, G_cls, M_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, M_reg)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/03a0b92af929371cce91e1666b92f92192e49129#diff-a7f9867bfd9382b3a638afcaf0bf66ead18605d18caa50c991ce865b8b25f1ddL84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 924075</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 03a0b92af929371cce91e1666b92f92192e49129</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/detector/proposal.py</div><div id='m_class'> M Class Name: ProposalLoss</div><div id='n_method'> N Class Name: ProposalLoss</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/detector/proposal.py</div><div id='n_file'> N File Name: pvrcnn/detector/proposal.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        bx_o = [b[o] for b, o in zip(boxes, bo)]
+
+        bx_h_post, bx_o_post = self.box_pair_coder.decode(torch.cat(bx_h), torch.cat(bx_o), bbox_deltas)
+        bx_h_post<a id="change"> = </a><a id="change">bx_h_post.split(</a>n<a id="change">)</a>; bx_o_post = bx_o_post.split(n)
+
+        indices = self.matcher(bx_h_post, bx_o_post, objects, prior, logits, targets)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        indices = self.matcher(bx_h, bx_o, objects, prior, logits, targets)
+
+        loss_dict = <a id="change">{</a>"focal_loss": self.focal_loss(bx_h, bx_o, indices, prior, logits, targets)<a id="change">}</a>
+        &#47&#47 loss_dict.update(self.regression_loss(
+        &#47&#47     bx_h, bx_o, bx_h_post, bx_o_post, indices, targets, bbox_deltas.split(n)
+        &#47&#47 ))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/fredzzhang/upt/commit/5fe7b3e7e4674115b7fe18551f68a632d7255b13#diff-a8e822d9473e7021e0ce9304decdbe40e9cad96b99e0282485f129f283b8bd86L342' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 924073</div><div id='project'> Project Name: fredzzhang/upt</div><div id='commit'> Commit Name: 5fe7b3e7e4674115b7fe18551f68a632d7255b13</div><div id='time'> Time: 2021-10-29</div><div id='author'> Author: frederic.zhang@anu.edu.au</div><div id='file'> File Name: ops.py</div><div id='m_class'> M Class Name: SetCriterion</div><div id='n_method'> N Class Name: SetCriterion</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ops.py</div><div id='n_file'> N File Name: ops.py</div><div id='m_start'> M Start Line: 346</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 357</div><div id='n_end'> N End Line: 365</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        g = g.local_var()
+        if self.use_weight:
+            weight = self.basis() if self.use_basis else self.weight
+            wdict<a id="change"> = </a>{self.rel_names[i]: {&quotweight&quot: w.squeeze(0)}
+                     for i, w in enumerate(<a id="change">th.split(</a>weight, 1<a id="change">, dim=0)</a>)}
+        else:
+            wdict = {}
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, g, h_dict):
+        h_dict = self.conv(g, h_dict)
+        out_put = <a id="change">{}</a>
+        for n_type, h in h_dict.items():
+            out_put[n_type] = h.squeeze()
+        return out_put</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/2b130ff0cd0fbbebda2e07166b048edfc9a63ed2#diff-479e9e5e220b1988d7aba6fec6d6ca5f50a1556fbb4efa423ebf6c1510641a84L95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 924068</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 2b130ff0cd0fbbebda2e07166b048edfc9a63ed2</div><div id='time'> Time: 2021-09-11</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/models/RGAT.py</div><div id='m_class'> M Class Name: RGATLayer</div><div id='n_method'> N Class Name: RGATLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/RGAT.py</div><div id='n_file'> N File Name: openhgnn/models/RGAT.py</div><div id='m_start'> M Start Line: 108</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 68</div><BR>

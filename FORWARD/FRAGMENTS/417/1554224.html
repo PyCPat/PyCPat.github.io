@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return softmax
+
+    def forward(self, logits, samples, soft):
+        <a id="change">if samples is None</a><a id="change">:
+            </a>return self.gumbel_softmax(logits, self._temperature, self._eps, hard=True)
+        else:
+            return -torch.sum(-samples * F.log_softmax(logits, -1), -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if hard:
+            &#47&#47 Straight through.
+            index = y_soft.max(dim, keepdim=True)[1]
+            y_hard = <a id="change">torch.zeros_like(logits, memory_format=torch.legacy_contiguous_format).scatter_(</a>dim, index, <a id="change">1.0</a><a id="change">)</a>
+            ret = y_hard - y_soft.detach() + y_soft
+        else:
+            &#47&#47 Reparametrization trick.
+            ret = y_soft</code></pre>

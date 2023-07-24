@@ -6,18 +6,17 @@
 		self.config = config
 
 		layers = <a id="change">[]</a>
-		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotdiscriminator&quot][&quotn_layers&quot]<a id="change">):
-			</a>in_channels = self.config[&quotdiscriminator&quot][&quotfilters&quot]<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(<a id="change">i</a><a id="change"> - 1</a>))<a id="change"> if i</a><a id="change"> &gt; 0 else </a>3
-			out_channels = <a id="change">2</a><a id="change"> * in_channels</a><a id="change"> if i</a><a id="change"> &gt; 0 else </a>self.config[&quotdiscriminator&quot][&quotfilters&quot]
+		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotstyle_encoder&quot][&quotn_layers&quot]<a id="change">):
+			</a>in_channels = self.config[&quotstyle_encoder&quot][&quotfilters&quot]<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(<a id="change">i</a><a id="change"> - 1</a>))<a id="change"> if i</a><a id="change"> &gt; 0 else </a>3
+			out_channels = <a id="change">2</a><a id="change"> * in_channels</a><a id="change"> if i</a><a id="change"> &gt; 0 else </a>self.config[&quotstyle_encoder&quot][&quotfilters&quot]
 
 			layers<a id="change"> += </a><a id="change">[
-				</a>nn.ReflectionPad2d(padding=1),
-				<a id="change">nn.Conv2d(in_channels</a>, out_channels<a id="change">, kernel_size=4, stride=2)</a>,
+				nn.Conv2d(in_channels</a>, out_channels<a id="change">, kernel_size=4, stride=2, padding=1)</a>,
 				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
 			]
 
-		layers += [
-			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.convs = nn.Sequential(*layers)
+</code></pre><h3>After Change</h3><pre><code class='java'>
 		img_size = config[&quotimg_shape&quot][0]
 
 		dim_in = 2**14 // img_size
@@ -31,9 +30,8 @@
 			dim_in<a id="change"> = dim_out</a>
 
 		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
-		blocks += [nn.Conv2d(dim_out, dim_out, 4, 1, 0)]
+		blocks<a id="change"> += </a><a id="change">[nn</a><a id="change">.Conv2d(</a>dim_out, dim_out, <a id="change">4</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
 		blocks<a id="change"> += </a><a id="change">[nn</a><a id="change">.LeakyReLU(0.2</a><a id="change">)</a>]
-		blocks<a id="change"> += </a><a id="change">[nn</a><a id="change">.Conv2d(</a>dim_out, config[&quotn_classes&quot], <a id="change">1</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
-		self.main = nn.Sequential(*blocks)
+		self.shared = nn.Sequential(*blocks)
 
-	def forward(self, x, y):</code></pre>
+		self.unshared = nn.ModuleList()</code></pre>

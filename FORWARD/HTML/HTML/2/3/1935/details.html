@@ -1,0 +1,97 @@
+<html><h3>Pattern ID :1935
+</h3><img src='13435375.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            rois = rois.cuda()
+        indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1)
+        
+        xy_indices_and_rois = indices_and_rois[:, <a id="change">[</a>0, 1, 2, 3, 4<a id="change"></a>]]
+        indices_and_rois =  xy_indices_and_rois.contiguous()
+        &#47&#47 利用建议框对公用特征层进行截取
+        pool = self.roi(x, indices_and_rois)</code></pre><h3>After Change</h3><pre><code class='java'>
+            roi_indices = roi_indices.cuda()
+            rois = rois.cuda()
+
+        rois_feature_map<a id="change"> = </a><a id="change">torch.zeros_like(</a>rois<a id="change">)</a>
+        rois_feature_map[:, [0,2]] = rois[:, [0,2]] / img_size[1] * x.size()[3]
+        rois_feature_map[:, [1,3]] = rois[:, [1,3]] / img_size[0] * x.size()[2]
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bubbliiiing/faster-rcnn-pytorch/commit/d456f02a402fd8cf8db1d991aa612439b3c0ffb2#diff-e9af117e882e879caed77569c76b6d4c9a00e932a2844fed75b18ec08abfd3fbL31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13435375</div><div id='project'> Project Name: bubbliiiing/faster-rcnn-pytorch</div><div id='commit'> Commit Name: d456f02a402fd8cf8db1d991aa612439b3c0ffb2</div><div id='time'> Time: 2021-01-30</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/classifier.py</div><div id='m_class'> M Class Name: VGG16RoIHead</div><div id='n_method'> N Class Name: VGG16RoIHead</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/classifier.py</div><div id='n_file'> N File Name: nets/classifier.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.out_dim = out_channels
+
+    def forward(self, x, edge_index, edge_weight=None):
+        return ZeroConvFunc.apply(torch.zeros(<a id="change">[</a>x.size(0), self.out_dim<a id="change"></a>]).to(x.device))
+
+    def __repr__(self):
+        return &quot{}({}, {})&quot.format(self.__class__.__name__, self.in_channels,</code></pre><h3>After Change</h3><pre><code class='java'>
+class ZeroConv(nn.Module):
+
+    def forward(self, x, edge_index, edge_weight=None):
+        out<a id="change"> = </a><a id="change">torch.zeros_like(</a>x<a id="change">)</a>
+        out.requires_grad = True
+        return out
+
+    def __repr__(self):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thumnlab/autogl/commit/ff02f3a951d55e796e385682eb94c50212f885c2#diff-c1c03673b6dbdd5edd829cf27ecf9fad1abeb9425f274d1ec21132255576bf85L116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13435374</div><div id='project'> Project Name: thumnlab/autogl</div><div id='commit'> Commit Name: ff02f3a951d55e796e385682eb94c50212f885c2</div><div id='time'> Time: 2021-06-23</div><div id='author'> Author: frozenmad2015@outlook.com</div><div id='file'> File Name: autogl/module/nas/space/operation.py</div><div id='m_class'> M Class Name: ZeroConv</div><div id='n_method'> N Class Name: ZeroConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: autogl/module/nas/space/operation.py</div><div id='n_file'> N File Name: autogl/module/nas/space/operation.py</div><div id='m_start'> M Start Line: 117</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 37</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            
+        indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1)
+
+        xy_indices_and_rois = indices_and_rois[:, <a id="change">[</a>0, 1, 2, 3, 4<a id="change"></a>]]
+        indices_and_rois =  xy_indices_and_rois.contiguous()
+        &#47&#47 利用建议框对公用特征层进行截取
+        pool = self.roi(x, indices_and_rois)</code></pre><h3>After Change</h3><pre><code class='java'>
+            roi_indices = roi_indices.cuda()
+            rois = rois.cuda()
+
+        rois_feature_map = <a id="change">torch.zeros_like(</a>rois<a id="change">)</a>
+        rois_feature_map[:, [0,2]] = rois[:, [0,2]] / img_size[1] * x.size()[3]
+        rois_feature_map[:, [1,3]] = rois[:, [1,3]] / img_size[0] * x.size()[2]
+
+        indices_and_rois = torch.cat([roi_indices[:, None], rois_feature_map], dim=1)
+        &#47&#47-----------------------------------&#47&#47
+        &#47&#47   利用建议框对公用特征层进行截取
+        &#47&#47-----------------------------------&#47&#47
+        pool = self.roi(x, indices_and_rois)
+        &#47&#47-----------------------------------&#47&#47
+        &#47&#47   利用classifier网络进行特征提取
+        &#47&#47-----------------------------------&#47&#47
+        fc7 = self.classifier(pool)
+        &#47&#47 当输入为一张图片的时候，这里获得的f7的shape为[300, 2048]
+        fc7 = fc7.view(fc7.size(0), -1)
+
+        roi_cls_locs = self.cls_loc(fc7)
+        roi_scores = self.score(fc7)
+        roi_cls_locs = roi_cls_locs.view(n, -1, roi_cls_locs.size(1))
+        roi_scores<a id="change"> = </a>roi_scores.view(n, -1, roi_scores.size(1))
+        return roi_cls_locs, roi_scores
+
+def normal_init(m, mean, stddev, truncated=False):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/faster-rcnn-pytorch/commit/d456f02a402fd8cf8db1d991aa612439b3c0ffb2#diff-e9af117e882e879caed77569c76b6d4c9a00e932a2844fed75b18ec08abfd3fbL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13435384</div><div id='project'> Project Name: bubbliiiing/faster-rcnn-pytorch</div><div id='commit'> Commit Name: d456f02a402fd8cf8db1d991aa612439b3c0ffb2</div><div id='time'> Time: 2021-01-30</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/classifier.py</div><div id='m_class'> M Class Name: Resnet50RoIHead</div><div id='n_method'> N Class Name: Resnet50RoIHead</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/classifier.py</div><div id='n_file'> N File Name: nets/classifier.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, proba, targets):
+        n_classes = proba.size(1)
+        loss = <a id="change">{}</a>
+        for i in range(n_classes):
+            pi = proba[:, i] * (targets == i) + (1 - proba[:, i]) * (targets != i)
+            ai = self.alpha[i]
+            loss += -ai * (1 - pi) ** self.gamma * torch.log(pi)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, logits, targets):
+        proba = self.softmax(logits)
+        n_classes = proba.size(1)
+        loss<a id="change"> = </a><a id="change">torch.zeros_like(</a>targets<a id="change">)</a>.type(torch.float)
+        for i in range(n_classes):
+            pi = proba[:, i] * (targets == i) + (1 - proba[:, i]) * (targets != i)
+            ai = self.alpha[i]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ignf/lidar-deep-segmentation/commit/323659b3af8b12e9f9e2c0a64026900bb3bab2f9#diff-d4b24282354fb3ea49de32b16a9593baf8cbe9ba0821bfce4bab4455aa3bf33dL33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13435386</div><div id='project'> Project Name: ignf/lidar-deep-segmentation</div><div id='commit'> Commit Name: 323659b3af8b12e9f9e2c0a64026900bb3bab2f9</div><div id='time'> Time: 2021-10-11</div><div id='author'> Author: charles.gaydon@gmail.com</div><div id='file'> File Name: semantic_val/models/point_net_model.py</div><div id='m_class'> M Class Name: WeightedFocalLoss</div><div id='n_method'> N Class Name: WeightedFocalLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: semantic_val/models/point_net_model.py</div><div id='n_file'> N File Name: semantic_val/models/point_net_model.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 38</div><div id='n_end'> N End Line: 44</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        encoder_mask = encoder_mask.unsqueeze(-1)
+
+        level = encoder_y[:, -1:].repeat(1, self.prediction_length, 1)  &#47&#47 Level with Naive1
+        block_forecasts = <a id="change">[</a>level<a id="change"></a>]
+        block_backcasts = [encoder_y[:, -1:].repeat(1, self.context_length, 1)]
+
+        forecast = level</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            block_forecasts = []
+            block_backcasts = []
+            forecast<a id="change"> = </a><a id="change">torch.zeros_like(</a>forecast_level<a id="change">, device=forecast_level.device)</a>
+
+        &#47&#47 forecast by block
+        for block in self.blocks:
+            block_backcast, block_forecast = block(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/e7175c98af01f4c8f9aadb90c53aa4f0d1540931#diff-e15aa407f75975260ffed738d20639620726fe06ff7533b115426860e6eea826L312' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13435378</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: e7175c98af01f4c8f9aadb90c53aa4f0d1540931</div><div id='time'> Time: 2022-03-30</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_class'> M Class Name: NHiTS</div><div id='n_method'> N Class Name: NHiTS</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_start'> M Start Line: 328</div><div id='m_end'> M End Line: 332</div><div id='n_start'> N Start Line: 342</div><div id='n_end'> N End Line: 357</div><BR>

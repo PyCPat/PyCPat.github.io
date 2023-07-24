@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2845
+</h3><img src='15658094.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            input (batch_size, n_sources, *)
+        
+        n_dims = input.dim()
+        dims<a id="change"> = </a><a id="change">list(</a>range(n_dims)<a id="change">)</a>
+
+        input_permuted = input.permute(1, 0, *dims[2:])
+
+        left, right = self.left, self.right</code></pre><h3>After Change</h3><pre><code class='java'>
+        input_left, input_right = torch.abs(input_permuted[left]), torch.abs(input_permuted[right])
+        loss = - F.cosine_similarity(input_left, input_right, dim=2, eps=self.eps)
+
+        loss = <a id="change">loss.permute(1</a>, <a id="change">0</a>, <a id="change">2</a><a id="change">)</a>.contiguous() / self.n_combinations
+        loss = loss.sum(dim=2)
+        loss = loss.mean(dim=1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/9ae9e0e761dbe8b27ced4dbd676bf9fdada629f9#diff-5e81ba5dcfff436f2946933f18b5717af27c5d0c9c395b4054133ea1ff643d13L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15658094</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 9ae9e0e761dbe8b27ced4dbd676bf9fdada629f9</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: egs/musdb18/meta-tasnet/src/adhoc_criterion.py</div><div id='m_class'> M Class Name: MultiDissimilarityLoss</div><div id='n_method'> N Class Name: MultiDissimilarityLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: egs/musdb18/meta-tasnet/src/adhoc_criterion.py</div><div id='n_file'> N File Name: egs/musdb18/meta-tasnet/src/adhoc_criterion.py</div><div id='m_start'> M Start Line: 28</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        allCodewords<a id="change"> = </a><a id="change">list()</a>
+        &#47&#47 probability = mixin / (mixin + 1.0)
+        &#47&#47 rolloutDistribution = Bernoulli(probs=torch.tensor(probability).to(latents[0].device))
+        for xRaw, prob, squeeze, codebook, k in zip(latents, self._prob, self._squeeze, self._codebook, self._k):
+            n, c, h, w = xRaw.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(<a id="change">logit.permute(1</a>, <a id="change">0</a>, <a id="change">2</a><a id="change">)</a>.reshape(n, h, w, k))
+        return quantizeds, codes, logits
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/594ba7cd5c9d147e95ba5bd0b842270302dea2a2#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15658124</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 594ba7cd5c9d147e95ba5bd0b842270302dea2a2</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 282</div><div id='m_end'> M End Line: 342</div><div id='n_start'> N Start Line: 295</div><div id='n_end'> N End Line: 320</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, latents, coeff, transform):
+        quantizeds = list()
+        codes = list()
+        logits<a id="change"> = </a><a id="change">list()</a>
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            samples = [s.argmax(-1).permute(1, 0).reshape(n, h, w) for s in samples]
+            logits = [<a id="change">l.permute(1</a>, <a id="change">0</a>, <a id="change">2</a><a id="change">)</a>.reshape(n, h, w, k) for l in logits]
+            &#47&#47 codes.append(samples.argmax(-1).permute(1, 0).reshape(n, h, w))
+            &#47&#47 logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))
+        return quantizeds, codes, logits</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/36075d9c06641e76ffab1b363262368618d53912#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15658121</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 36075d9c06641e76ffab1b363262368618d53912</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 162</div><BR>

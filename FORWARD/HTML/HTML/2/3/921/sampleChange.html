@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [*, H, Q, K]
+        a = torch.matmul(
+            permute_final_dims(q, (1, 0, 2)),  &#47&#47 [*, H, Q, C_hidden]
+            <a id="change">permute_final_dims(</a>k, (1, 2, 0)<a id="change">)</a>,  &#47&#47 [*, H, C_hidden, K]
+        )
+
+        del q, k</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = permute_final_dims(q, (1, 0, 2))
+
+        &#47&#47 [*, H, C_hidden, K]
+        k = <a id="change">permute_final_dims(</a>k, (1, 2, 0)<a id="change">)</a>
+
+        &#47&#47 [*, H, Q, K]
+        a = torch.matmul(q, k)
+
+        del q, k
+
+        norm = 1 / math.sqrt(self.c_hidden)  &#47&#47 [1]
+        a *= norm
+        if biases is not None:
+            for b in biases:
+                a = a + b
+        a = self.softmax(a)
+
+        &#47&#47 [*, H, V, C_hidden]
+        v = permute_final_dims(v, (1, 0, 2))
+
+        &#47&#47 [*, H, Q, C_hidden]
+        o<a id="change"> = </a>torch.matmul(a, v)
+
+        &#47&#47 [*, Q, H, C_hidden]
+        o = o.transpose(-2, -3)</code></pre>

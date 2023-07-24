@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 master_state = self.W_master_in(self.act_func(nei_message.sum(dim=0))) &#47&#47try something like this to preserve invariance for master node
+                &#47&#47 master_state = self.GRU_master(nei_message.unsqueeze(1))
+                &#47&#47 master_state = master_state[-1].squeeze(0) &#47&#47this actually doesn&quott preserve order invariance anymore
+                master_state = <a id="change">self.act_func(self.W_master_in(nei_message.sum(dim=0))).unsqueeze(0</a><a id="change">)</a>
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state).repeat((nei_message.size(0), 1)))
+                message = self.layer_norm(message)
+            else:
+                message = self.act_func(binput + nei_message)</code></pre><h3>After Change</h3><pre><code class='java'>
+                for start, size in bscope:
+                    mol_vec = nei_message.narrow(0, start, size)
+                    mol_vec = mol_vec.sum(dim=0) / size
+                    mol_vecs<a id="change"> += </a><a id="change">[mol_vec for _ in range(size)]</a>
+                master_state = self.act_func(self.W_master_in(torch.stack(mol_vecs, dim=0)))  &#47&#47 (num_bonds, hidden_size)
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state))
+                &#47&#47 message = self.layer_norm(message)
+            else:</code></pre>

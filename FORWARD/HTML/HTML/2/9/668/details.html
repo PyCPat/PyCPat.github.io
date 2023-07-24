@@ -1,0 +1,95 @@
+<html><h3>Pattern ID :668
+</h3><img src='2482532.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.token_emb(x)
+        out = self.layers(x)
+        out = self.to_logits(x)
+        <a id="change">return </a>out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.token_emb(x)
+        b, t, d = x.shape
+
+        mem<a id="change"> = </a>default(mem, torch.empty(self.depth, b, 0, d))
+        hidden_states<a id="change"> = </a>[]
+
+        <a id="change">for </a>attn, ff, <a id="change">m</a> in zip(self.attn_layers, self.ff_layers, mem)<a id="change">:
+            </a>hidden_states.append(x)
+            x = attn(x, mem = m)
+            x<a id="change"> = </a>ff(x)
+
+        out = self.to_logits(x)
+
+        hidden_states<a id="change"> = </a>torch.stack(hidden_states)
+        new_mem<a id="change"> = </a>torch.cat((mem, hidden_states), dim=2)[:, :, -self.mem_len:, :].detach()
+        <a id="change">return </a>out, new_mem
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/47a5b8448090fce7ca1f7356001fb2ac381c2239#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2482532</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 47a5b8448090fce7ca1f7356001fb2ac381c2239</div><div id='time'> Time: 2020-06-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        check_shape(proprio, &quotb d&quot, d = self.proprio_dim)
+        check_shape(extero, &quotb n d&quot, n = self.num_legs, d = self.extero_dim)
+
+        latent_extero<a id="change"> = </a>self.extero_encoder(extero)
+        latent_extero<a id="change"> = </a>rearrange(latent_extero, &quotb ... -&gt; b (...)&quot)
+
+        &#47&#47 RNN
+
+        if not exists(hiddens):
+            hiddens<a id="change"> = </a>(None,) * len(self.gru_cells)
+
+        gru_input = torch.cat((proprio, latent_extero), dim = -1)
+
+        next_hiddens<a id="change"> = </a>[]
+        <a id="change">for </a>gru_cell, <a id="change">prev_hidden</a> in zip(self.gru_cells, hiddens)<a id="change">:
+            </a>gru_input<a id="change"> = </a>gru_cell(gru_input, prev_hidden)
+            next_hiddens.append(gru_input)
+
+        gru_output = gru_input
+
+        &#47&#47 attention gating of exteroception
+
+        attention_gate = self.to_extero_attn_gate(gru_output)
+        gated_extero = latent_extero * attention_gate.sigmoid()
+
+        &#47&#47 belief state and add gated exteroception
+
+        belief_state = self.belief_state_encoder(gru_output)
+        belief_state = sum_with_zeropad(belief_state, gated_extero)
+
+        &#47&#47 to action logits
+
+        action_logits = self.to_action_logits(belief_state)
+        <a id="change">return </a>action_logits, next_hiddens
+
+class Teacher(nn.Module):
+    def __init__(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/anymal-belief-state-encoder-decoder-pytorch/commit/31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea#diff-73be6483f8f8caa2ae70e99ad4ab6af1d1c938d94af55a7444fe6a52139b298bL74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2482516</div><div id='project'> Project Name: lucidrains/anymal-belief-state-encoder-decoder-pytorch</div><div id='commit'> Commit Name: 31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_class'> M Class Name: Student</div><div id='n_method'> N Class Name: Student</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='n_file'> N File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        u = x.mean(-1, keepdim=True)
+        s = (x - u).pow(2).mean(-1, keepdim=True)
+        x = (x - u) / torch.sqrt(s + self.variance_epsilon)
+        <a id="change">return </a>self.gamma * x + self.beta
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            return self.weight * x + self.bias
+        else :
+            inputs = x[0]
+            cond<a id="change"> = </a>x[1]
+            <a id="change">for _</a> in range(len(inputs.shape) - len(cond.shape))<a id="change">:
+                </a>cond<a id="change"> = </a>cond.unsqueeze(dim=1)
+           
+            weight = self.weight + self.weight_dense(cond)
+            bias = self.bias + self.bias_dense(cond)
+            u<a id="change"> = </a>inputs.mean(-1, keepdim=True)
+            s<a id="change"> = </a>(inputs - u).pow(2).mean(-1, keepdim=True)
+            x<a id="change"> = </a>(inputs - u) / torch.sqrt(s + self.variance_epsilon)
+           
+            <a id="change">return </a>weight * x + bias
+
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/920232796/bert_seq2seq/commit/76a9cf45cad987e423a9cc511eef0d4eb49620ac#diff-fb4c9ea7027099b8043655760b5df4374d6e6d5e94db0fa50111bfeee0ad7912L64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2482524</div><div id='project'> Project Name: 920232796/bert_seq2seq</div><div id='commit'> Commit Name: 76a9cf45cad987e423a9cc511eef0d4eb49620ac</div><div id='time'> Time: 2020-06-22</div><div id='author'> Author: xingzhaohu@xingzhaohudeMacBook-Pro.local</div><div id='file'> File Name: bert_seq2seq/model/bert_model.py</div><div id='m_class'> M Class Name: BertLayerNorm</div><div id='n_method'> N Class Name: BertLayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert_seq2seq/model/bert_model.py</div><div id='n_file'> N File Name: bert_seq2seq/model/bert_model.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 72</div><div id='n_end'> N End Line: 93</div><BR>

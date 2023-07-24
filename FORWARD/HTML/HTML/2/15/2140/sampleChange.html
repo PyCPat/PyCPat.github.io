@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+        assert not (return_loss and not self.training), &quotmust be training if returning loss&quot
+
+        <a id="change">n</a><a id="change">, device</a> = seq.shape[-1], seq.device
+
+        &#47&#47 use 0 as bos
+
+        seq = F.pad(seq, (1, 0), value = 0)
+
+        &#47&#47 if training, derive labels
+
+        if return_loss:
+            seq, labels = seq[:, :-1], seq[:, 1:]
+
+        &#47&#47 embed both sequence and retrieved chunks
+
+        embed<a id="change"> = self.token_emb(</a>seq<a id="change">)</a>
+        retrieved = self.token_emb(retrieved)
+
+        &#47&#47 get positional embedding
+
+        pos_emb<a id="change"> = self.pos_emb(</a><a id="change">torch.arange(n</a><a id="change">, device = device))</a>
+        pos_emb = <a id="change">rearrange(</a>pos_emb, <a id="change">&quotn d -&gt; 1 n d&quot</a><a id="change">)</a>
+        embed<a id="change"> = </a>embed<a id="change"> + </a>pos_emb
+
+        logits = <a id="change">self.to_logits(</a>embed<a id="change">)</a>
+
+        if not return_loss:
+            <a id="change">return </a>logits
+
+        loss = F.cross_entropy(rearrange(logits, &quotb n c -&gt; b c n&quot), labels)
+        return loss</code></pre>

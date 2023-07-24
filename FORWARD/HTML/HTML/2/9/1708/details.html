@@ -1,0 +1,125 @@
+<html><h3>Pattern ID :1708
+</h3><img src='5805018.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 (batch, 1, dim)
+        &#47&#47 c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+        context_vec = torch.bmm(alignment.unsqueeze(1), inputs)
+        context_vec<a id="change"> = </a><a id="change">context_vec.squeeze(1</a><a id="change">)</a>
+
+        &#47&#47 Concat input query and previous context_vec context
+        cell_input = torch.cat((query, context_vec), -1)
+        &#47&#47cell_input = cell_input.unsqueeze(1)
+
+        &#47&#47 Feed it to RNN
+        &#47&#47 s_i = f(y_{i-1}, c_{i}, s_{i-1})
+        cell_output = self.rnn_cell(cell_input, cell_state)
+
+        context_vec = context_vec.squeeze(1)
+        <a id="change">return </a>cell_output<a id="change">, context_vec, alignment</a>
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 (batch, 1, dim)
+        &#47&#47 c_i = \sum_{j=1}^{T_x} \alpha_{ij} h_j
+        context = torch.bmm(alignment.unsqueeze(1), annotations)
+        context<a id="change"> = </a>context.squeeze(1)
+
+        &#47&#47 Concat input query and previous context context
+        rnn_input = torch.cat((memory, context), -1)
+        &#47&#47rnn_input = rnn_input.unsqueeze(1)
+
+        &#47&#47 Feed it to RNN
+        &#47&#47 s_i = f(y_{i-1}, c_{i}, s_{i-1})
+        rnn_output = self.rnn_cell(rnn_input, rnn_state)
+
+        context<a id="change"> = </a>context.squeeze(1)
+        <a id="change">return </a>rnn_output<a id="change">, context, alignment</a>
+
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/b4032e8dffc2addf976468826129edea2b459ead#diff-d280da42b761c3f70383c398535500cfb7dcb7e40c79196cc732c1f2bd12bf39L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5805018</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: b4032e8dffc2addf976468826129edea2b459ead</div><div id='time'> Time: 2018-03-07</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/attention.py</div><div id='m_class'> M Class Name: AttentionWrapper</div><div id='n_method'> N Class Name: AttentionRNN</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/attention.py</div><div id='n_file'> N File Name: layers/attention.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 92</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 89</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        attention = torch.bmm(alignment.unsqueeze(1), memory)
+
+        &#47&#47 (batch, dim)
+        attention<a id="change"> = </a><a id="change">attention.squeeze(1</a><a id="change">)</a>
+
+        <a id="change">return </a>cell_output<a id="change">, attention, alignment</a>
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Alignment
+        &#47&#47 (batch, max_time)
+        alignment<a id="change"> = </a>self.alignment_model(cell_output, processed_inputs)
+
+        if mask is not None:
+            mask = mask.view(query.size(0), -1)
+            alignment.data.masked_fill_(mask, self.score_mask_value)
+
+        &#47&#47 Normalize context_vec weight
+        alignment = F.softmax(alignment, dim=-1)
+
+        &#47&#47 Attention context vector
+        &#47&#47 (batch, 1, dim)
+        context_vec = torch.bmm(alignment.unsqueeze(1), memory)
+
+        &#47&#47 (batch, dim)
+        context_vec<a id="change"> = </a>context_vec.squeeze(1)
+
+        <a id="change">return </a>cell_output<a id="change">, context_vec, alignment</a>
+
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/2fd37a5bad9374002873db26927694dd0d329e90#diff-d280da42b761c3f70383c398535500cfb7dcb7e40c79196cc732c1f2bd12bf39L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5805024</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 2fd37a5bad9374002873db26927694dd0d329e90</div><div id='time'> Time: 2018-02-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/attention.py</div><div id='m_class'> M Class Name: AttentionWrapper</div><div id='n_method'> N Class Name: AttentionWrapper</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/attention.py</div><div id='n_file'> N File Name: layers/attention.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 89</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, _ = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs<a id="change"> = </a>[<a id="change">spec.squeeze(1</a><a id="change">)</a>.clone() for _ in range(len(self.refinement_stages) + 1)]
+        &#47&#47 re/im into channel axis
+        spec_f = (
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()
+        )  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None
+        for i, (stage, _) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(self.cplx_comp(spec_f), h_conv)
+            spec_f<a id="change"> = </a>spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :]<a id="change"> = </a>spec_f.permute(0, 2, 3, 1)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec<a id="change">, m, lsnr, out_specs</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec<a id="change">, m, lsnr, None</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/946b362aa406f8a1808a252393351d0e7523130a#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L527' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5805009</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 946b362aa406f8a1808a252393351d0e7523130a</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 534</div><div id='m_end'> M End Line: 547</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 510</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Newly trained models should pad the full spectrum, which enables to already include the
+        &#47&#47 delay in the masking stage.
+        if not self.pad_specf:
+            spec<a id="change"> = </a>self.pad_spec(spec)
+        m = <a id="change">self.pad_out(m.unsqueeze(-1)).squeeze(-1</a><a id="change">)</a>
+        spec = self.mask(spec, m)
+
+        if self.run_df:
+            df_coefs, _ = self.df_dec(emb, c0)
+            df_coefs<a id="change"> = </a>self.pad_out(df_coefs)
+
+            if self.pad_specf:
+                &#47&#47 Only pad the lower part of the spectrum.
+                spec_f<a id="change"> = </a>self.pad_spec(spec)
+                spec_f = self.df_op(spec_f, df_coefs)
+                spec[..., : self.nb_df, :] = spec_f[..., : self.nb_df, :]
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        <a id="change">return </a>spec<a id="change">, m, lsnr, df_coefs</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        <a id="change">return </a>spec<a id="change">, m, lsnr, df_alpha</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/3e554333e5a3f0802f8df5a00e07de517dfe6561#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL410' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5804999</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 3e554333e5a3f0802f8df5a00e07de517dfe6561</div><div id='time'> Time: 2022-10-18</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 428</div><div id='m_end'> M End Line: 455</div><div id='n_start'> N Start Line: 486</div><div id='n_end'> N End Line: 502</div><BR>

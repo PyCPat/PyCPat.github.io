@@ -2,19 +2,23 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        get_attn = lambda: SinkhornSelfAttention(dim, causal = causal, heads = heads, buckets = buckets, kv_buckets = kv_buckets, non_permutative = non_permutative, sinkhorn_iter = sinkhorn_iter, n_sortcut = n_sortcut, temperature = temperature, attn_dropout = attn_dropout, dropout = attn_layer_dropout, attn_sort_net = attn_sort_net)
-        get_ff = lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
-
-        <a id="change">if weight_tie</a><a id="change">:
-            </a>get_attn<a id="change"> = </a>cache_fn(get_attn)
-            get_ff<a id="change"> = </a>cache_fn(get_ff)
-
-        for _ in range(depth):
-            layers.append(nn.ModuleList([</code></pre><h3>After Change</h3><pre><code class='java'>
-        execute_type = Reversible if reversible else Sequential
-
-        context_map = ((False, False), (True, False)) * depth
-        args_route = {&quotcontext&quot: context_map}<a id="change"> if </a>receives_context<a id="change"> else </a>{}
-        self.layers = execute_type(layers, args_route = args_route)
-        self.receives_context = receives_context
-</code></pre>
+            raise RuntimeError("Please `pip install transformers` to use pre-trained HuggingFace models")
+        if config is None:
+            self.config = AutoConfig.from_pretrained(model_name_or_path)
+            <a id="change">if pretrained</a><a id="change">:
+                &#47&#47 TODO: do all model configs have this attribute? PretrainedConfig does so yes??
+                </a>if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                    self.transformer = AutoModel.from_pretrained(model_name_or_path)
+                    self.transformer<a id="change"> = </a>self.transformer.encoder
+                else:
+                    self.transformer<a id="change"> = </a>AutoModel.from_pretrained(model_name_or_path, add_pooling_layer=uses_transformer_pooler)
+            else:
+                if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                    self.transformer = AutoModel.from_config(self.config)</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise RuntimeError("Please `pip install transformers` to use pre-trained HuggingFace models")
+        if config is None:
+            self.config = AutoConfig.from_pretrained(model_name_or_path)
+            create_func, model_args = (AutoModel.from_pretrained, model_name_or_path)<a id="change"> if </a>pretrained<a id="change"> else </a>(AutoModel.from_config, self.config)
+            &#47&#47 TODO: do all model configs have this attribute? PretrainedConfig does so yes??
+            if hasattr(self.config, "is_encoder_decoder") and self.config.is_encoder_decoder:
+                self.transformer = create_func(model_args)</code></pre>

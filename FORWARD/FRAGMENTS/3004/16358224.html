@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            outputs[processor.name] = signal &#47&#47 audio/control signal output
+
+        &#47&#47Use the output of final processor as signal
+        output_name = <a id="change">self.dag[-1][0]</a>.name
+        outputs[&quotoutput&quot] = outputs[output_name]
+        
+        return outputs[&quotoutput&quot], outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+            dict: Final output of processor
+        
+        outputs = dag_inputs
+        for processor, connections in <a id="change">zip(</a>self.processors, self.connections<a id="change">)</a>:
+            &#47&#47 fixed params are not in 0~1 and do not need to be scaled
+            scaled: List[str] = []
+            <a id="change">for k</a> in connections<a id="change">:
+                if </a>connections[k] in self.conditioned_params<a id="change">:
+                    </a>scaled.append(k)
+            inputs = {key: outputs[connections[key]] for key in connections}
+
+            signal = processor.process(inputs, n_samples, scaled_params=scaled)</code></pre>

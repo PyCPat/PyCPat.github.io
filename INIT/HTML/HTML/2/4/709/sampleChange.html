@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        pad_size = [get_padding(filt_size, stride, dilation=1)] * 4
+        self.padding = nn.ReflectionPad2d(pad_size)
+        self._coeffs = torch.tensor((np.poly1d((0.5, 0.5)) ** (self.filt_size - 1)).coeffs)  &#47&#47 for torchscript compat
+        self.filt = <a id="change">{}</a>  &#47&#47 lazy init by device for DataParallel compat
+
+    def _create_filter(self, like: torch.Tensor):
+        blur_filter = (self._coeffs[:, None] * self._coeffs[None, :]).to(dtype=like.dtype, device=like.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+        self.padding = [get_padding(filt_size, stride, dilation=1)] * 4
+        coeffs = torch.tensor((np.poly1d((0.5, 0.5)) ** (self.filt_size - 1)).coeffs.astype(np.float32))
+        blur_filter = (coeffs[:, None]<a id="change"> * </a>coeffs[None, :])[None, None, :, :].repeat(self.channels, 1, 1, 1)
+        <a id="change">self.register_buffer(&quotfilt&quot</a>, blur_filter<a id="change">, persistent=False)</a>
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x = F.pad(x, self.padding, &quotreflect&quot)
+        return F.conv2d(x, self.filt, stride=self.stride, groups=x.shape[1])</code></pre>

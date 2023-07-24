@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            embed_sum = flatten.t() @ embed_onehot
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = (embed_sum / <a id="change">bins.unsqueeze(0</a><a id="change">)</a>).t()
+            embed_normalized = l2norm(embed_normalized)
+            embed_normalized = torch.where(zero_mask[..., None], embed,
+                                           embed_normalized)</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_normalized = l2norm(embed_normalized)
+
+            embed_normalized = torch.where(
+                <a id="change">rearrange(</a>zero_mask, <a id="change">&quot... -&gt; ... 1&quot</a><a id="change">)</a>,
+                embed,
+                embed_normalized
+            )</code></pre>

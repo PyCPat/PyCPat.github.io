@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        x = -self.aff_x(x) / (1e-8 + 0.1 * x_std)
+        x = x.mean(1, keepdim=True)
+        x<a id="change"> = </a><a id="change">F.softmax(</a>x, 2<a id="change">)</a>
+
+        for _ in range(self.num_iter):
+            m = self.aff_m(mask)  &#47&#47 [BxCxPxHxW]
+            mask = (m * x).sum(2)
+
+        &#47&#47 xvals: [BxCxHxW]
+        <a id="change">return </a>mask
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.aff_ide = LocalIdentity(dilations)
+
+    def forward(self, x, m):
+        distance<a id="change"> = </a>self.aff_abs(x)
+        std = self.aff_std(x)
+
+        &#47&#47 distance.size() = torch.Size([1, 3, 48, 256, 383])
+        &#47&#47 std.size() = torch.Size([1, 3, 1, 256, 383])
+
+        &#47&#47 print(distance.size())
+        &#47&#47 print(std.size())
+        
+        aff<a id="change"> = </a>-distance / (self.sigma * std + self.eps)
+        aff = torch.mean(aff, dim=1, keepdim=True)
+        aff = torch.softmax(aff, dim=2)
+
+        &#47&#47 aff.size() = torch.Size([1, 1, 48, 256, 383])
+        &#47&#47 mask.size() = torch.Size([1, K, 256, 383])
+
+        &#47&#47 print(aff.size())
+        &#47&#47 print(mask.size())
+
+        for _ in range(self.num_iter):
+            &#47&#47 m.size() = torch.Size([1, K, 48, 256, 383])
+            m = self.aff_ide(m)
+            m = (aff * m).sum(dim=2)
+        
+        <a id="change">return </a>m
+</code></pre>

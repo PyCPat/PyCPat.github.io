@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        device = x.device
+        half_dim = self.dim<a id="change"> // 2</a>
+        emb<a id="change"> = </a>math.log(10000) / (half_dim - 1)
+        emb<a id="change"> = </a>torch.exp(torch.arange(half_dim, device=device) * -emb)
+        emb = x[:, None]<a id="change"> * </a>emb[None, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
+        <a id="change">return </a>emb
+
+
+class Mish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input):
+        shape = input.shape
+        sinusoid_in<a id="change"> = </a>torch.ger(<a id="change">input.view(-1</a><a id="change">)</a>.float(), self.inv_freq)
+        pos_emb = torch.cat([sinusoid_in.sin(), sinusoid_in.cos()], dim=-1)
+        pos_emb = <a id="change">pos_emb.view(</a>*shape, self.dim<a id="change">)</a>
+        <a id="change">return </a>pos_emb
+
+
+class Swish(nn.Module):</code></pre>

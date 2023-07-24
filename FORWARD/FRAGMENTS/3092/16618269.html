@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for i in range(len(self.cfg.strides)):
+            voxel_features_i, voxel_coords_i = out[i]
+            voxel_coords_i = voxel_coords_i.unsqueeze(0).contiguous()
+            voxel_features_i<a id="change"> = </a><a id="change">voxel_features_i.unsqueeze(0</a><a id="change">)</a>.permute(0, 2, 1).contiguous()
+            keypoints_xyz<a id="change"> = </a>keypoints_xyz.unsqueeze(0).contiguous()
+            _<a id="change">, out = </a>self.pnets[i](voxel_coords_i, voxel_features_i, keypoints_xyz)
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        points, features, coordinates, voxel_population = self.voxelize(points)
+        cnn_out = self.cnn(features, coordinates, batch_size=1)
+        point_xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        cnn_out = <a id="change">[</a>(point_xyz<a id="change">, point_features</a>)<a id="change"></a>] + cnn_out
+        keypoint_xyz, keypoint_features = self.sample_keypoints(point_xyz, point_features)
+        keypoint_xyz = keypoint_xyz.unsqueeze(0).contiguous()
+        pnet_out<a id="change"> = </a>self.pnet_forward(cnn_out, keypoint_xyz)
+        return pnet_out
+
+</code></pre>

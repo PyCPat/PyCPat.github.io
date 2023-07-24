@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k_img, v_img = map(lambda t: F.unfold(t, kernel_size, padding = padding, dilation = dilation), (k_img, v_img))
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        k_text<a id="change">, v_text = </a>map(lambda t: repeat(t, &quotb j d -&gt; b i j d&quot, i = img_seq_len), (k_text<a id="change">, v_text</a>))
+
+        &#47&#47 let image attend to all of text
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 aggregate
+
+        attn_image_to_text, attn_image = attn[..., :text_len], <a id="change">attn[..., text_len:]</a>
+
+        out_image_to_image = einsum(&quotb i j, b i j d -&gt; b i d&quot, attn_image, v_img)
+        out_image_to_text = einsum(&quotb i j, b j d -&gt; b i d&quot, attn_image_to_text, v_text)
+</code></pre>

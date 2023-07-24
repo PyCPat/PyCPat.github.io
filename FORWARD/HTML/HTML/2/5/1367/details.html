@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1367
+</h3><img src='4731195.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[..., None], 0.)
+
+        gate = rearrange(gate, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        gate = <a id="change">einsum(&quotb h n d, h n m -&gt; b h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate = gate<a id="change"> + </a>rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate = rearrange(gate, &quotb h n d -&gt; b n (h d)&quot)
+
+        return gate * res</code></pre><h3>After Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        gate = F.pad(gate, (0, 0, 0, 0, 1, 0), value = 0.)
+        gate = torch.cat((gate[:, <a id="change">:-1</a>], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731195</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        qk, v = self.to_qk(x), self.to_v(v_input)
+
+        sim = <a id="change">einsum(&quotb i d, b j d -&gt; b i j&quot</a>, qk, qk<a id="change">)</a>
+
+        sim = sim<a id="change"> * </a>self.scale
+        sim = sim + self.rel_pos_bias(sim)
+
+        if self.causal:</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, x, v_input = None):
+        seq_len, dim = x.shape[<a id="change">-2:</a>]
+
+        is_softmax_attn = not self.laplacian_attn_fn
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/mega-pytorch/commit/00004b223f22e1f2f7057ede038dde6c1f6e022e#diff-e0160bc5f71bfa738a21ad7ff9fd9c6ff825b84b3bffaa2ad30d75630ae3316fL136' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731196</div><div id='project'> Project Name: lucidrains/mega-pytorch</div><div id='commit'> Commit Name: 00004b223f22e1f2f7057ede038dde6c1f6e022e</div><div id='time'> Time: 2022-09-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: mega_pytorch/mega_pytorch.py</div><div id='m_class'> M Class Name: SingleHeadedAttention</div><div id='n_method'> N Class Name: SingleHeadedAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mega_pytorch/mega_pytorch.py</div><div id='n_file'> N File Name: mega_pytorch/mega_pytorch.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 150</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(self.to_pos):
+            p = self.to_pos(pos_emb)
+            pos_attn = <a id="change">einsum(&quotb h i d, j d -&gt; b h i j&quot</a>, q, p<a id="change">) * </a>scale
+            pos_attn = rel_shift(pos_attn)
+            dots += pos_attn
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * scale
+
+        if exists(pos_emb):
+            pos_emb_bias = pos_emb(*dots.shape[<a id="change">-2:</a>])
+            dots += pos_emb_bias
+
+        if self.causal:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4731197</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 121</div><BR>

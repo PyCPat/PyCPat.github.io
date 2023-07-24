@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.attn(x, mask = mask) + x
+        x = self.ff(x) + x
+
+        return x<a id="change">, self.to_halt_logits(x)</a>
+
+class PonderTransformer(nn.Module):
+    def __init__(
+        self,</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.attn(x, mask = mask) + x
+        x = self.ff(x) + x
+
+        <a id="change">if </a>self.causal<a id="change">:
+            </a>denom<a id="change"> = </a>torch.arange(x.shape[-2], device = x.device)
+            denom<a id="change"> = </a><a id="change">rearrange(</a>denom, <a id="change">&quotn -&gt; () n ()&quot</a><a id="change">)</a>
+            halt_input<a id="change"> = </a>x.cumsum(dim = -1) / (denom + 1)
+        else:
+            halt_input = x
+</code></pre>

@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :479
+</h3><img src='1722906.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                mean_matrix = self.mean_table[top:down + 1, left:right + 1, :]
+                std_matrix = self.std_table[top:down + 1, left:right + 1, :]
+                x_mean = mean_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel *  &#47&#47 should deal with the boundary
+                x_std<a id="change"> = </a><a id="change">std_matrix.mean(dim=0)</a>.mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel * 
+                &#47&#47x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                &#47&#47x_std = x_std.unsqueeze(-1).unsqueeze(-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                assert x.shape[0] == 1 &#47&#47 currently, could support batch size = 1 for kernelized instance normalization
+                top = y_anchor
+                down = y_anchor + 2 * padding + 1
+                left<a id="change"> = </a>x_anchor
+                right = x_anchor + 2 *padding + 1
+                x_mean = self.padded_mean_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                x_std = self.padded_std_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                assert self.kernel.shape == x.mean.shape
+                x_mean = x_mean<a id="change"> * </a>self.kernel &#47&#47 1, C, H, W
+                x_std = x_std * self.kernel &#47&#47 1, C, H, W
+                x_mean<a id="change"> = </a><a id="change">x_mean.flatten(start_dim=2).sum(dim=2)</a> &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_std = x_std.flatten(start_dim=2).sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaminyou/urust/commit/63159b688ad053bad7fd41015170f131d547439d#diff-a975422337f96b3fbd8d66278ef6f8ddcf4a1907e7f6fec6d44ff39c9836145eL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1722906</div><div id='project'> Project Name: kaminyou/urust</div><div id='commit'> Commit Name: 63159b688ad053bad7fd41015170f131d547439d</div><div id='time'> Time: 2022-01-27</div><div id='author'> Author: kaminyouho@aetherai.com</div><div id='file'> File Name: models/kin.py</div><div id='m_class'> M Class Name: KernelizedInstanceNorm</div><div id='n_method'> N Class Name: KernelizedInstanceNorm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/kin.py</div><div id='n_file'> N File Name: models/kin.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 115</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        log_prob = self.logsoftmax(inputs)
+        targets = torch.zeros_like(log_prob).scatter_(1, targets.unsqueeze(1), 1)
+        targets = (1 - self.epsilon) * targets + self.epsilon / self.num_classes
+        loss<a id="change"> = </a><a id="change">(- targets * log_prob).mean(</a>0<a id="change">)</a>.sum()
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.log_softmax = nn.LogSoftmax(dim=1).cuda()
+
+    def forward(self, y, labels):
+        log_prob<a id="change"> = </a>self.log_softmax(y)
+        labels = torch.zeros_like(log_prob).scatter_(1, labels.unsqueeze(1), 1)
+        labels = (1 - self.epsilon) * labels + self.epsilon / self.num_classes
+        loss<a id="change"> = </a><a id="change">(- labels * log_prob).mean(0).sum()</a>
+        return loss
+
+
+class TripletLoss(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/c87131a7350967d7af5f9167eae4befc0f57b157#diff-3c0e5198c319a0e747e4dc4314623e2dc945e7d839f08f78d25f06f5b7a692a0L24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1722686</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: c87131a7350967d7af5f9167eae4befc0f57b157</div><div id='time'> Time: 2021-08-24</div><div id='author'> Author: chenbx18@mails.tsinghua.edu.cn</div><div id='file'> File Name: common/vision/models/reid/loss.py</div><div id='m_class'> M Class Name: CrossEntropyLabelSmooth</div><div id='n_method'> N Class Name: CrossEntropyLossWithLabelSmooth</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: common/vision/models/reid/loss.py</div><div id='n_file'> N File Name: common/vision/models/reid/loss.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 33</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 82</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = -(logit.diag().view(-1, 1).expand_as(logit) - logit)
+        loss = <a id="change">torch.mean(</a>logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2))<a id="change">)</a>
+        &#47&#47 add regularization
+        loss<a id="change"> += </a>self.lambda_ * torch.mean(logit_softmax * (logit ** 2))
+        return loss
+
+&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        positive_mask = ~negative_mask
+        positives = logits_scores.diag().view(-1, 1).expand_as(logits_scores)
+        diff<a id="change"> = </a>positives - logits_scores
+        penalization = torch.sigmoid(logits_scores ** 2)
+        loss = torch.sigmoid(<a id="change">-diff</a>) + penalization
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss<a id="change"> = </a><a id="change">loss.sum(</a>1<a id="change">)</a> / negative_mask.sum(1)
+        return torch.mean(loss)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/da9442ba125855b2a0630c905ad4da0def19be70#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L111' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1722400</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: da9442ba125855b2a0630c905ad4da0def19be70</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: TOP1_max_reg</div><div id='n_method'> N Class Name: TOP1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 93</div><div id='n_end'> N End Line: 109</div><BR>

@@ -3,24 +3,20 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        self.down3_2 = nn.Sequential(*[
-            nn.Conv2d(ngf*4, ngf*1, 3,1,1),
-            <a id="change">nn.InstanceNorm2d(</a>ngf<a id="change">)</a>,
-            nn.LeakyReLU(0.2),
-            <a id="change">nn.Conv2d(</a>ngf, ngf,1,<a id="change">1</a>,0<a id="change">)</a>
-        ])
+        &#47&#47 Initial convolution block
+        down_layers = [nn.ReflectionPad2d(3),
+                       <a id="change">nn.Conv2d(</a>in_channels, <a id="change">64</a><a id="change">, kernel_size=7, stride=1, padding=0, bias=False)</a>,
+                       <a id="change">nn.InstanceNorm2d(</a>64<a id="change">)</a>,
+                       nn.ReLU(inplace=True)]
 
-        self.down3_1 = nn.Sequential(*[
-            nn.Conv2d(ngf*4, ngf*1, 3,1,1),</code></pre><h3>After Change</h3><pre><code class='java'>
-        self.down2 = down(ngf, ngf*2)
-        self.down3 = down(ngf*2, ngf*4, pooling=False, dilation=True)
+        &#47&#47 Downsampling</code></pre><h3>After Change</h3><pre><code class='java'>
 
-        self.conv22 = nn.Sequential(*<a id="change">[
-            </a>nn.Conv2d(ngf*2, ngf, 3,1,1),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(ngf, ngf, 3,1,1),
-            nn.LeakyReLU(0.2)<a id="change"></a>
-        ])
-
-        self.conv33 = nn.Sequential(*[
-            nn.Conv2d(ngf*4,ngf*2, 3, 1, 1),</code></pre>
+        &#47&#47 Gamma, Beta block
+        if self.light:
+            fc = <a id="change">[</a>nn.Linear(256, 256, bias=False),
+                  nn.ReLU(inplace=True),
+                  nn.Linear(256, 256, bias=False),
+                  nn.ReLU(inplace=True)<a id="change"></a>]
+        else:
+            fc = [nn.Linear(image_size * image_size * 16, 256, bias=False),
+                  nn.ReLU(inplace=True),</code></pre>

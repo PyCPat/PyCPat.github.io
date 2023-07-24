@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                class_queries_probs = batch_queries_probs[tgt_id]
+
+                &#47&#47 Determine individual costs
+                cost_class = -<a id="change">class_queries_probs[:, tgt_id]</a>
+                cost_bbox = torch.cdist(class_queries_boxes, tgt_box[None], p=1).squeeze()
+                cost_giou = -generalized_bbox_iou_3d(box_cxcyczwhd_to_xyzxyz(class_queries_boxes.clip(min=0)), box_cxcyczwhd_to_xyzxyz(tgt_box[None])).squeeze()
+
+                &#47&#47 Determine final cost and best performing query</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Split queries in individual classes   TODO: don&quott hardcode any information
+        if self.anchor_matching:
+            classes_queries_boxes = <a id="change">[torch.split(anchors, 27 * 3, dim=0) for _ in range(bs)]</a>
+        else:
+            classes_queries_boxes = [torch.split(batch_boxes, 27 * 3, dim=0) for batch_boxes in torch.unbind(outputs["pred_boxes"], dim=0)]
+
+        classes_queries_probs = [[logits.softmax(-1) for logits in torch.split(batch_logits, 27 * 3, dim=0)] for batch_logits in torch.unbind(outputs["pred_logits"], dim=0)]</code></pre>

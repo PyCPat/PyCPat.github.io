@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if additional is not None:
+            &#47&#47 additional should be (B, additional_size)
+            additional = <a id="change">t.cat(</a>[t.unsqueeze(additional, dim=1)] * x.shape[1]<a id="change">, dim=1)</a>
+            x = t.cat((x, additional), dim=2)
+
+        for i in range(self.fc_num):
+            x = self.layers["fc_{}".format(i)](x)
+            if i != self.fc_num - 1:
+                x = self.activation(x)
+
+        if self.final_procecss is not None:
+            if self.final_procecss == "softmax":
+                x = t.softmax(x, dim=1).clone()
+            elif self.final_procecss == "tanh":
+                x = t.tanh(x).clone()
+            elif self.final_procecss == "sigmoid":
+                x = t.sigmoid(x).clone()
+            else:
+                x = self.final_procecss(x).clone()
+
+        if only_use_last:
+            &#47&#47 we do not need to output a sequence, so only the last element is needed
+            x<a id="change"> = </a>t.squeeze(x[:, -1, :], dim=1)
+
+        return x, rel, raw
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input: t.Tensor, time_steps=None, additional=None):
+        &#47&#47 input is dim (N, T, in_channels)
+        x = input
+        for i in <a id="change">range(</a>self.tc_num<a id="change">)</a>:
+            x = self.layers["tconv_{}".format(i)](x)
+
+        x, rel, raw = self.layers["attention"](x, time_steps)</code></pre>

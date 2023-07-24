@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (dec_h0, dec_c0) = self.Encoder(embed_enc_inputs, None)
+		dec_state = (dec_h0, dec_c0)
+		pred_tour_list, neg_log = [], 0
+		dec_i1 = <a id="change">torch.rand(</a>batch, 1, embed<a id="change">)</a>.to(device)
+		for i in range(city_t):
+			dec_h, dec_state = self.Decoder(dec_i1, dec_state)
+			logits, probs, dec_i1 = self.pointing_mechanism(</code></pre><h3>After Change</h3><pre><code class='java'>
+			logits, dec_input = self.pointer(query, ref, mask)	
+			log_p = torch.log_softmax(logits, dim = -1)
+			&#47&#47 next_node = torch.argmax(log_p, dim = 1).type(torch.long)
+			next_node = <a id="change">torch.multinomial(log_p.exp(), 1).type(torch.long).squeeze(1</a><a id="change">)</a>
+			
+			pi_list.append(next_node)
+			log_ps.append(log_p)
+			mask += torch.zeros(batch,city_t).to(device).scatter_(dim = 1, index = next_node.unsqueeze(1), value = 1)</code></pre>

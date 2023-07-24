@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :2948
+</h3><img src='16147184.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        n, device, h, g, causal = x.shape[2], x.device, self.heads, self.groups, self.causal
+
+        q, k, v = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = rearrange_all((q, k, v), &quotb (g h d) n -&gt; (b g h) n d&quot, g = g, h = h)
+
+        q = q * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None, context = None):
+        n, device, h, g, causal = x.shape[2], x.device, self.heads, self.groups, self.causal
+        context<a id="change"> = default(</a>context, <a id="change">x</a><a id="change">)</a>
+
+        q, k, v = (<a id="change">self.to_q(x</a><a id="change">), *self.to_kv(context).chunk(2, dim = 1)</a>)
+        q, k, v = rearrange_all((q, k, v), &quotb (g h d) n -&gt; (b g h) n d&quot, g = g, h = h)
+
+        q = q * self.scale</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/multistream-transformers/commit/90cb1c52cfa96cfa3a2de0e94cd9f5c346a8e144#diff-e81141685efabebecc465bdbe0fb5f026c1b47e7c282daeaaf1d717b13d5d981L97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16147184</div><div id='project'> Project Name: lucidrains/multistream-transformers</div><div id='commit'> Commit Name: 90cb1c52cfa96cfa3a2de0e94cd9f5c346a8e144</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: multistream_transformers/multistream_transformers.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multistream_transformers/multistream_transformers.py</div><div id='n_file'> N File Name: multistream_transformers/multistream_transformers.py</div><div id='m_start'> M Start Line: 97</div><div id='m_end'> M End Line: 97</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 102</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        h, device = self.heads, x.device
+        q, k, v = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        q = q * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, context = None):
+        h, device = self.heads, x.device
+        kv_input<a id="change"> = default(</a>context, x<a id="change">)</a>
+
+        q, k, v = <a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(kv_input).chunk(2, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        q = q * self.scale
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/hourglass-transformer-pytorch/commit/44ad24d1a9673a2d953ffc39afe455d42d56fbb1#diff-2ad25fce867cbbc4b5c9b8826f8be84c94e4f3654138256031bd2a247c91e715L74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16147182</div><div id='project'> Project Name: lucidrains/hourglass-transformer-pytorch</div><div id='commit'> Commit Name: 44ad24d1a9673a2d953ffc39afe455d42d56fbb1</div><div id='time'> Time: 2021-11-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='n_file'> N File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_start'> M Start Line: 76</div><div id='m_end'> M End Line: 76</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q = q * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        context = None
+    ):
+        b, c, h, w = x.shape
+        context<a id="change"> = default(</a>context, x<a id="change">)</a>
+
+        qkv = (<a id="change">self.to_q(</a>x<a id="change">), *self.to_kv(context).chunk(2, dim = 1)</a>)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q = q * self.scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/16601b85b676c770230ed1ccdfc82c77919f22c8#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL143' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16147183</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 16601b85b676c770230ed1ccdfc82c77919f22c8</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 145</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 152</div><BR>

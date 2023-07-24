@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        heads, r = self.heads, self.reduction_ratio
+
+        q, k, v = self.to_qkv(x).chunk(3, dim = 1)
+        k<a id="change">, v = </a><a id="change">map(</a>lambda t: reduce(t, &quotb c (h r1) (w r2) -&gt; b c h w&quot, &quotmean&quot, r1 = r, r2 = r), (k<a id="change">, v</a>)<a id="change">)</a>
+
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = heads), (q, k, v))
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * self.scale</code></pre><h3>After Change</h3><pre><code class='java'>
+        h, w = x.shape[-2:]
+        heads = self.heads
+
+        q, k, v = (self.to_q(x)<a id="change">, *self.to_kv(x).chunk(2, dim = 1)</a>)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = heads), (q, k, v))
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * self.scale</code></pre>

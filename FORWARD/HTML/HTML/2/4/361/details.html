@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :361
+</h3><img src='1383653.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, y_s: torch.Tensor, y_s_adv: torch.Tensor, y_t: torch.Tensor, y_t_adv: torch.Tensor) -&gt; torch.Tensor:
+        _, prediction_s = y_s.max(dim=1)
+        _<a id="change">, prediction_t = </a><a id="change">y_t.max(dim=1)</a>
+        return self.margin * F.cross_entropy(y_s_adv, prediction_s, reduction=self.reduction) \
+               + F.nll_loss(shift_log(1. - F.softmax(y_t_adv, dim=1)), prediction_t, reduction=self.reduction)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = -self.margin * self.source_disparity(y_s, y_s_adv) + self.target_disparity(y_t, y_t_adv)
+        if self.reduction == &quotmean&quot:
+            loss = loss.mean()
+        elif <a id="change"></a>self.reduction == &quotsum&quot<a id="change">:
+            </a>loss<a id="change"> = </a>loss.sum()
+        return loss
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/58bbc2031a2503955c79eff24797de49ee7d7ee7#diff-75629d4a6842bee5234184342a8805cc34f89995082f6ceea63da88c3fdf16c2L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383653</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 58bbc2031a2503955c79eff24797de49ee7d7ee7</div><div id='time'> Time: 2021-01-07</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/mdd.py</div><div id='m_class'> M Class Name: MarginDisparityDiscrepancy</div><div id='n_method'> N Class Name: MarginDisparityDiscrepancy</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/mdd.py</div><div id='n_file'> N File Name: dalib/adaptation/mdd.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        if self._pooling_func_name == &quotmax&quot:
+            out = <a id="change">torch.max(</a>out, -1<a id="change">, keepdim=True)</a>[0]
+        elif self._pooling_func_name == &quotmean&quot:
+            out = torch.mean(out, keepdim=True, dim=-1)
+        elif self._pooling_func_name == &quotsum&quot:
+            out = torch.sum(out, keepdim=True, dim=-1)
+        else:
+            raise ValueError(f"Pooling function {self._pooling_func_name} is not yet supported!")
+
+        &#47&#47 out: (BB, embedding_dim, 1)
+        out<a id="change"> = </a>torch.flatten(out, start_dim=-2)
+
+        &#47&#47 out: (BB, embedding_dim)
+        out = self.fc1(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        masking_input = {&quotin_tensor&quot: out.transpose(2, 1)}
+        <a id="change">if </a>self.use_masking<a id="change">:
+            </a>masking_input[&quotmask_tensor&quot]<a id="change"> = </a>masking_tensor
+        out = self.pooling_block(masking_input)[&quotmasking_out&quot]
+        &#47&#47 output_tensor: (BB, embedding_dim)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/enlite-ai/maze/commit/53a9f4e4997b8a5451f14fb57dd6c5cb9becd110#diff-a18d0890711efadf10cc7ee9bb175629d673020f907726acc13ab53e8a7f2617L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383652</div><div id='project'> Project Name: enlite-ai/maze</div><div id='commit'> Commit Name: 53a9f4e4997b8a5451f14fb57dd6c5cb9becd110</div><div id='time'> Time: 2021-04-15</div><div id='author'> Author: office@enlite.ai</div><div id='file'> File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_class'> M Class Name: PointNetFeatureTransformNet</div><div id='n_method'> N Class Name: PointNetFeatureTransformNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='n_file'> N File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        loss        = loss_loc * self.box_ratio + loss_conf * self.balance[l] * self.obj_ratio + loss_cls * self.cls_ratio
+        num_pos = torch.sum(y_true[..., 4])
+        num_pos<a id="change"> = </a><a id="change">torch.max(</a>num_pos, torch.ones_like(num_pos)<a id="change">)</a>
+        return loss, num_pos
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        loss    = 0
+        n       = torch.sum(y_true[..., 4] == 1)
+        <a id="change">if </a>n != 0<a id="change">:
+            &#47&#47---------------------------------------------------------------&#47&#47
+            &#47&#47   计算预测结果和真实结果的giou
+            &#47&#47----------------------------------------------------------------&#47&#47
+            </a>giou        = self.box_giou(pred_boxes, y_true[..., :4])
+            loss_loc    = torch.mean((1 - giou)[y_true[..., 4] == 1])
+            loss_cls    = torch.mean(self.BCELoss(pred_cls[y_true[..., 4] == 1], self.smooth_labels(y_true[..., 5:][y_true[..., 4] == 1], self.label_smoothing, self.num_classes)))
+            loss<a id="change">        += </a>loss_loc * self.box_ratio + loss_cls * self.cls_ratio
+            &#47&#47-----------------------------------------------------------&#47&#47
+            &#47&#47   计算置信度的loss
+            &#47&#47-----------------------------------------------------------&#47&#47</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/yolov5-pytorch/commit/27ae9bd10c96138c60752d1da4fa965c0b7372f3#diff-25623619f282444dafcdada7a0706865483da83457ebd0cd33af314f6adcfca9L104' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1383654</div><div id='project'> Project Name: bubbliiiing/yolov5-pytorch</div><div id='commit'> Commit Name: 27ae9bd10c96138c60752d1da4fa965c0b7372f3</div><div id='time'> Time: 2022-01-21</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/yolo_training.py</div><div id='m_class'> M Class Name: YOLOLoss</div><div id='n_method'> N Class Name: YOLOLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/yolo_training.py</div><div id='n_file'> N File Name: nets/yolo_training.py</div><div id='m_start'> M Start Line: 156</div><div id='m_end'> M End Line: 200</div><div id='n_start'> N Start Line: 159</div><div id='n_end'> N End Line: 201</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            output = torch.cat(output, 1)  &#47&#47 cat 3 layers 85 x (507, 2028, 8112) to 85 x 10647
+            return output[5:85].t(), output[:4].t()  &#47&#47 ONNX scores, boxes
+        else:
+            return output<a id="change"> if </a>self.training<a id="change"> else </a>torch.cat(output, 1)
+
+
+def get_yolo_layers(model):</code></pre><h3>After Change</h3><pre><code class='java'>
+            output = torch.cat(output, 1)  &#47&#47 cat 3 layers 85 x (507, 2028, 8112) to 85 x 10647
+            return output[5:85].t(), output[:4].t()  &#47&#47 ONNX scores, boxes
+        else:
+            io<a id="change">, p = </a><a id="change">list(zip(</a>*<a id="change">output)</a><a id="change">)</a>  &#47&#47 inference output, training output
+            return torch.cat(io, 1), p
+
+</code></pre>

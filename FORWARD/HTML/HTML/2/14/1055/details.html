@@ -1,0 +1,153 @@
+<html><h3>Pattern ID :1055
+</h3><img src='3799865.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            enc_logvar_t = self.enc_logvar(enc_t)  &#47&#47 .view(batch_size, self.z_dim, self.n_mixtures)
+
+            &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+            prior_mean_t<a id="change"> = torch</a><a id="change">.zeros_like(enc_mean_t</a><a id="change">)</a>
+            prior_logvar_t<a id="change"> = torch</a><a id="change">.zeros_like(enc_mean_t</a><a id="change">)</a>
+
+            &#47&#47 sampling and reparameterization: get a new z_t
+            temp = tdist.Normal(enc_mean_t, enc_logvar_t.exp().sqrt())
+            z_t = tdist.Normal.rsample(temp)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 constant so can be outside of loop
+        &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+        prior_mean_t<a id="change"> = torch</a><a id="change">.zeros(</a><a id="change">[batch_size</a>, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+        prior_logvar_t<a id="change"> = torch.zeros(</a><a id="change">[batch_size</a>, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+
+        &#47&#47 for all time steps
+        for t in range(seq_len):
+            &#47&#47 feature extraction: y_t</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dgedon/deepssm_sysid/commit/9da4223a5d4c4ce23d92721a9014c5a6d6e3032a#diff-b44eb8afb0897a058ec311a058ca821523e9eea1507b770a469b845f28d6603dL81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3799865</div><div id='project'> Project Name: dgedon/deepssm_sysid</div><div id='commit'> Commit Name: 9da4223a5d4c4ce23d92721a9014c5a6d6e3032a</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: daniel.gedon@gmx.de</div><div id='file'> File Name: models/model_vrnn_gmm_I.py</div><div id='m_class'> M Class Name: VRNN_GMM_I</div><div id='n_method'> N Class Name: VRNN_GMM_I</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_vrnn_gmm_I.py</div><div id='n_file'> N File Name: models/model_vrnn_gmm_I.py</div><div id='m_start'> M Start Line: 98</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47 encoder: y_t, h_t -&gt; z_t
+            enc_t = self.enc(torch.cat([phi_y_t, h[-1]], 1))
+            <a id="change">enc_mean_t</a> = self.enc_mean(enc_t)  &#47&#47 .view(batch_size, self.z_dim, self.n_mixtures)
+            enc_logvar_t = self.enc_logvar(enc_t)  &#47&#47 .view(batch_size, self.z_dim, self.n_mixtures)
+
+            &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+            prior_mean_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+            prior_logvar_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+
+            &#47&#47 sampling and reparameterization: get a new z_t
+            temp = tdist.Normal(enc_mean_t, enc_logvar_t.exp().sqrt())
+            z_t = tdist.Normal.rsample(temp)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, u, y):
+
+        <a id="change">batch_size</a> = y.size(0)
+        seq_len = y.shape[-1]
+
+        &#47&#47 allocation
+        loss = 0
+        &#47&#47 initialization
+        h = torch.zeros(self.n_layers, batch_size, self.h_dim, device=self.device)
+
+        &#47&#47 constant so can be outside of loop
+        &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+        prior_mean_t<a id="change"> = </a><a id="change">torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+        prior_logvar_t<a id="change"> = torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+
+        &#47&#47 for all time steps
+        for t in range(seq_len):
+            &#47&#47 feature extraction: y_t</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dgedon/deepssm_sysid/commit/9da4223a5d4c4ce23d92721a9014c5a6d6e3032a#diff-b44eb8afb0897a058ec311a058ca821523e9eea1507b770a469b845f28d6603dL79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3799864</div><div id='project'> Project Name: dgedon/deepssm_sysid</div><div id='commit'> Commit Name: 9da4223a5d4c4ce23d92721a9014c5a6d6e3032a</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: daniel.gedon@gmx.de</div><div id='file'> File Name: models/model_vrnn_gmm_I.py</div><div id='m_class'> M Class Name: VRNN_GMM_I</div><div id='n_method'> N Class Name: VRNN_GMM_I</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_vrnn_gmm_I.py</div><div id='n_file'> N File Name: models/model_vrnn_gmm_I.py</div><div id='m_start'> M Start Line: 98</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47 encoder: y_t, h_t -&gt; z_t
+            enc_t = self.enc(torch.cat([phi_y_t, h[-1]], 1))
+            <a id="change">enc_mean_t</a> = self.enc_mean(enc_t)
+            enc_logvar_t = self.enc_logvar(enc_t)
+
+            &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+            prior_mean_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+            prior_logvar_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+
+            &#47&#47 sampling and reparameterization: get a new z_t
+            temp = tdist.Normal(enc_mean_t, enc_logvar_t.exp().sqrt())
+            z_t = tdist.Normal.rsample(temp)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, u, y):
+        &#47&#47  batch size
+        <a id="change">batch_size</a> = y.shape[0]
+        seq_len = y.shape[2]
+        &#47&#47 allocation
+        loss = 0
+        KLD_total = 0
+        &#47&#47 initialization
+        h = torch.zeros(self.n_layers, batch_size, self.h_dim, device=self.device)
+
+        &#47&#47 constant so can be outside of loop
+        &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+        prior_mean_t<a id="change"> = torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+        prior_logvar_t<a id="change"> = </a><a id="change">torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+
+        &#47&#47 for all time steps
+        for t in range(seq_len):
+            &#47&#47 feature extraction: y_t</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dgedon/deepssm_sysid/commit/9da4223a5d4c4ce23d92721a9014c5a6d6e3032a#diff-aacde90b8a52afea56bf3a3b16eabc566601e6058207fe52013bbe67d6ddc9e9L64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3799867</div><div id='project'> Project Name: dgedon/deepssm_sysid</div><div id='commit'> Commit Name: 9da4223a5d4c4ce23d92721a9014c5a6d6e3032a</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: daniel.gedon@gmx.de</div><div id='file'> File Name: models/model_vrnn_gauss_I.py</div><div id='m_class'> M Class Name: VRNN_Gauss_I</div><div id='n_method'> N Class Name: VRNN_Gauss_I</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_vrnn_gauss_I.py</div><div id='n_file'> N File Name: models/model_vrnn_gauss_I.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 77</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47 encoder: d_t -&gt; z_t
+            enc_t = self.enc(d[-1])
+            <a id="change">enc_mean_t</a> = self.enc_mean(enc_t)
+            enc_logvar_t = self.enc_logvar(enc_t)
+
+            &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+            prior_mean_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+            prior_logvar_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+
+            &#47&#47 sampling and reparameterization: get a new z_t
+            temp = tdist.Normal(enc_mean_t, enc_logvar_t.exp().sqrt())
+            z_t = tdist.Normal.rsample(temp)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, u, y):
+        &#47&#47  batch size
+        <a id="change">batch_size</a> = y.shape[0]
+        seq_len = y.shape[2]
+
+        &#47&#47 allocation
+        loss = 0
+        &#47&#47 initialization
+        h = torch.zeros(self.n_layers, batch_size, self.h_dim, device=self.device)
+        d = torch.zeros(self.n_layers, batch_size, self.d_dim, device=self.device)
+
+        &#47&#47 constant so can be outside of loop
+        &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+        prior_mean_t<a id="change"> = </a><a id="change">torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+        prior_logvar_t<a id="change"> = torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+
+        &#47&#47 for all time steps
+        for t in range(seq_len):
+            &#47&#47 feature extraction: y_t</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dgedon/deepssm_sysid/commit/9da4223a5d4c4ce23d92721a9014c5a6d6e3032a#diff-7ec77523474dd8f0f4d42157ed65ac99655857748784f7a77e90a96e45a8ed92L77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3799869</div><div id='project'> Project Name: dgedon/deepssm_sysid</div><div id='commit'> Commit Name: 9da4223a5d4c4ce23d92721a9014c5a6d6e3032a</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: daniel.gedon@gmx.de</div><div id='file'> File Name: models/model_storn.py</div><div id='m_class'> M Class Name: STORN</div><div id='n_method'> N Class Name: STORN</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_storn.py</div><div id='n_file'> N File Name: models/model_storn.py</div><div id='m_start'> M Start Line: 100</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 91</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47 encoder: d_t -&gt; z_t
+            enc_t = self.enc(d[-1])
+            <a id="change">enc_mean_t</a> = self.enc_mean(enc_t)
+            enc_logvar_t = self.enc_logvar(enc_t)
+
+            &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+            prior_mean_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+            prior_logvar_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>enc_mean_t<a id="change">)</a>
+
+            &#47&#47 sampling and reparameterization: get a new z_t
+            temp = tdist.Normal(enc_mean_t, enc_logvar_t.exp().sqrt())
+            z_t = tdist.Normal.rsample(temp)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, u, y):
+        &#47&#47  batch size
+        <a id="change">batch_size</a> = y.shape[0]
+        seq_len = y.shape[2]
+
+        &#47&#47 allocation
+        loss = 0
+        &#47&#47 initialization
+        h = torch.zeros(self.n_layers, batch_size, self.h_dim, device=self.device)
+        d = torch.zeros(self.n_layers, batch_size, self.d_dim, device=self.device)
+
+        &#47&#47 constant so can be outside of loop
+        &#47&#47 prior: z_t ~ N(0,1) (for KLD loss)
+        prior_mean_t<a id="change"> = </a><a id="change">torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+        prior_logvar_t<a id="change"> = torch.zeros(</a><a id="change">[</a>batch_size, self.z_dim<a id="change"></a>]<a id="change">, device=self.device)</a>
+
+        &#47&#47 for all time steps
+        for t in range(seq_len):
+            &#47&#47 feature extraction: y_t</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dgedon/deepssm_sysid/commit/9da4223a5d4c4ce23d92721a9014c5a6d6e3032a#diff-e0b0fd7cd34fe0ae73bdf5f48e11e7619ca1af722fdc119a050739ee6c2a0839L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3799871</div><div id='project'> Project Name: dgedon/deepssm_sysid</div><div id='commit'> Commit Name: 9da4223a5d4c4ce23d92721a9014c5a6d6e3032a</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: daniel.gedon@gmx.de</div><div id='file'> File Name: models/model_storn_narli.py</div><div id='m_class'> M Class Name: STORN_narli</div><div id='n_method'> N Class Name: STORN_narli</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_storn_narli.py</div><div id='n_file'> N File Name: models/model_storn_narli.py</div><div id='m_start'> M Start Line: 129</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 120</div><BR>

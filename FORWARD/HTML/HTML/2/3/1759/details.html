@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1759
+</h3><img src='12946831.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        inputs = F.softmax(predict, dim=1)  
+
+        tp = torch.sum(labels*inputs, dim=(2, 3))
+        fn = <a id="change">torch.sum(</a>labels*(1-inputs)<a id="change">, dim=(2, 3))</a>
+        fp = torch.sum((1-labels)*inputs, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp<a id="change"> +  fn + </a>fp + 1e-6)
+        dice_score = torch.sum(1 - dice_score, dim=-1)
+
+        loss = dice_score / labels.shape[1]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 have to use contiguous since they may from a torch.view op
+        iflat = prediction.contiguous().view(-1)
+        tflat = <a id="change">targets.contiguous()</a>.view(-1)
+        intersection = (iflat * tflat).sum()
+        union = prediction.sum() + targets.sum()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaylode/theseus/commit/6e30c49ffbad632b045fccd171cb327554b02eee#diff-c33fddfda59fb31025b7efb608e2ea11df0d60719d122e26169f874c2e9f3c2dL14' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12946831</div><div id='project'> Project Name: kaylode/theseus</div><div id='commit'> Commit Name: 6e30c49ffbad632b045fccd171cb327554b02eee</div><div id='time'> Time: 2022-02-20</div><div id='author'> Author: pmkhoi@selab.hcmus.edu.vn</div><div id='file'> File Name: theseus/segmentation/losses/dice_loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: theseus/segmentation/losses/dice_loss.py</div><div id='n_file'> N File Name: theseus/segmentation/losses/dice_loss.py</div><div id='m_start'> M Start Line: 14</div><div id='m_end'> M End Line: 25</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            target = target * mask
+
+        a = torch.sum(pred * target)
+        b = <a id="change">torch.sum(</a>pred<a id="change">)</a>
+        c = torch.sum(target)
+        d = (2 * a) / (b + c + self.eps)
+
+        return 1<a id="change"> - </a>d
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert mask.size() == gt.size()
+
+        pred = pred.contiguous().view(pred.size(0), -1)
+        gt = <a id="change">gt.contiguous()</a>.view(gt.size(0), -1)
+
+        mask = mask.contiguous().view(mask.size(0), -1)
+        pred = pred * mask</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmocr/commit/1cbc42eceb40334c56474b979b1ac5be0065280a#diff-3e14d2946351cc46726adfb31ba17279be5fb04d0e8431385396357532b4cf87L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12946919</div><div id='project'> Project Name: open-mmlab/mmocr</div><div id='commit'> Commit Name: 1cbc42eceb40334c56474b979b1ac5be0065280a</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: gaotongxiao@gmail.com</div><div id='file'> File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: MaskedDiceLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmocr/models/common/losses/dice_loss.py</div><div id='n_file'> N File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.C_in = C_in
+
+    def forward(self, features, num_voxels, coors=None):
+        points_mean = <a id="change">features[:, :, : self.C_in].sum(
+            dim=1, keepdim=False
+        ) / </a>num_voxels.type_as(features).view(-1, 1)
+        return points_mean.contiguous()
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :return FloatTensor of shape (N, C)
+        
+        denominator = occupancy.type_as(feature).view(-1, 1)
+        feature = <a id="change">(feature.sum(1) / denominator).contiguous()</a>
+        return feature
+
+
+class SparseCNN(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/1736771fde51c478418ee6b5bb8b783fb604b064#diff-678424cc8e3d16b428f9821c522ec01e04fcdd2acd6612c40ca447dc4bb31a56L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 12946827</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 1736771fde51c478418ee6b5bb8b783fb604b064</div><div id='time'> Time: 2020-02-09</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/backbone.py</div><div id='m_class'> M Class Name: VoxelFeatureExtractor</div><div id='n_method'> N Class Name: VoxelFeatureExtractor</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/backbone.py</div><div id='n_file'> N File Name: pvrcnn/backbone.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 51</div><BR>

@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1064
+</h3><img src='3824527.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return x
+
+    def forward(self, x):
+        <a id="change">assert </a>x.shape[-1] % self.block_size == 0 and x.shape[-2] % self.block_size == 0
+        B, C, H, W = x.shape
+        out = self.conv1(x)
+        rp = F.adaptive_max_pool2d(out, (self.block_size, 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        return x
+
+    def forward(self, x):
+        <a id="change">torch._assert(</a>fx_and(<a id="change">x.shape[-1] % self.block_size == 0</a>, x.shape[-2] % self.block_size == 0), <a id="change">&quot&quot</a><a id="change">)</a>
+        B, C, H, W = x.shape
+        out = self.conv1(x)
+        rp = F.adaptive_max_pool2d(out, (self.block_size, 1))
+        cp = F.adaptive_max_pool2d(out, (1, self.block_size))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-9bba149e5fe003955f000acb088b1d5d57634705c7264f81678185fc7de509cdL98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3824527</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/layers/non_local_attn.py</div><div id='m_class'> M Class Name: BilinearAttnTransform</div><div id='n_method'> N Class Name: BilinearAttnTransform</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/non_local_attn.py</div><div id='n_file'> N File Name: timm/models/layers/non_local_attn.py</div><div id='m_start'> M Start Line: 98</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 99</div><div id='n_end'> N End Line: 99</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        <a id="change">assert </a>H % self.block_size == 0
+        assert W % self.block_size == 0
+        num_h_blocks = H // self.block_size
+        num_w_blocks = W // self.block_size</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, C, H, W = x.shape
+        torch._assert(H % self.block_size == 0, &quot&quot)
+        <a id="change">torch._assert(W % self.block_size == 0</a>, <a id="change">&quot&quot</a><a id="change">)</a>
+        num_h_blocks = H // self.block_size
+        num_w_blocks = W // self.block_size
+        num_blocks = num_h_blocks * num_w_blocks
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-30ee8896b7bd3b1d5f48d400856957d0ac56e899b5bbb00927a59fb797d077ceL168' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3824530</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/layers/halo_attn.py</div><div id='m_class'> M Class Name: HaloAttn</div><div id='n_method'> N Class Name: HaloAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/halo_attn.py</div><div id='n_file'> N File Name: timm/models/layers/halo_attn.py</div><div id='m_start'> M Start Line: 170</div><div id='m_end'> M End Line: 171</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        assert x.dim() == 4, &quotexpected 4D input&quot
+        B, C, H, W = x.shape
+        <a id="change">assert </a>C % self.groups == 0
+        if self.apply_act:
+            n = x * (x * self.v).sigmoid()
+            x = x.reshape(B, self.groups, -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        torch._assert(x.dim() == 4, &quotexpected 4D input&quot)
+        B, C, H, W = x.shape
+        <a id="change">torch._assert(C % self.groups == 0</a>, <a id="change">&quot&quot</a><a id="change">)</a>
+        if self.apply_act:
+            n = x * (x * self.v).sigmoid()
+            x = x.reshape(B, self.groups, -1)
+            x = n.reshape(B, self.groups, -1) / (x.var(dim=-1, unbiased=False, keepdim=True) + self.eps).sqrt()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc#diff-97e9dbe8a8e74973472905a010c491c0085119b054b12f05dec867d45c4852faL74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3824534</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: bc3d4eb403b9f40c23ed5bedd8875bba911e3cdc</div><div id='time'> Time: 2021-11-12</div><div id='author'> Author: alexander.soare159@gmail.com</div><div id='file'> File Name: timm/models/layers/evo_norm.py</div><div id='m_class'> M Class Name: EvoNormSample2d</div><div id='n_method'> N Class Name: EvoNormSample2d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/evo_norm.py</div><div id='n_file'> N File Name: timm/models/layers/evo_norm.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 77</div><BR>

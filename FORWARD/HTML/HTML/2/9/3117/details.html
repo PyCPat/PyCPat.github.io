@@ -1,0 +1,125 @@
+<html><h3>Pattern ID :3117
+</h3><img src='16773119.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        shape = x.shape
+        n, c, h, w = shape
+        if c == 1:
+            x<a id="change"> = </a>x.expand(1, 3, 1, 1)
+        hPad<a id="change"> = </a>max(0, 32 - h)
+        wPad<a id="change"> = </a>max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        <a id="change">return </a>self._quantizer(self._encoder(x))<a id="change">, torch.tensor([h, w], dtype=torch.int)</a>
+
+
+class RefDecoder(nn.Module):
+    def __init__(self, m, k, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for </a>i in range(self._levels)<a id="change">:
+            </a>head = self._heads[i]
+            z = head(latent)
+            if i &lt; self._levels - 1:
+                mapper = self._mappers[i]
+                latent<a id="change"> = </a>mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard
+            else:
+                code = self._quantizers[i](z)
+            <a id="change">codes.append(</a>code<a id="change">)</a>
+        return codes
+
+
+class RefDecoder(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16773119</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        out1 = self.mpd1(x)
+        out2<a id="change"> = </a>self.mpd2(x)
+        out3<a id="change"> = </a>self.mpd3(x)
+        out4 = self.mpd4(x)
+        out5<a id="change"> = </a>self.mpd5(x)
+        <a id="change">return </a>out1<a id="change">, out2, out3, out4, out5</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        scores, feats = self.msd(x)
+        <a id="change">for </a>key, <a id="change">disc</a> in enumerate(self.discriminators)<a id="change">:
+            </a>score<a id="change">, feat = </a>disc(x)
+            <a id="change">scores.append(</a>score<a id="change">)</a>
+            feats.append(feat)
+        return scores, feats
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/7b7c5d635fc42be520f86524c6d3c79d7ef48d39#diff-01777bc1a956fe851406465c2565783da4b44574ab3626ed1651d6f230ec6ec6L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16773118</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 7b7c5d635fc42be520f86524c6d3c79d7ef48d39</div><div id='time'> Time: 2021-04-08</div><div id='author'> Author: rishikksh20@gmail.com</div><div id='file'> File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='m_class'> M Class Name: MPD</div><div id='n_method'> N Class Name: HiFiDiscriminator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='n_file'> N File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='m_start'> M Start Line: 46</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 62</div><div id='n_end'> N End Line: 67</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 im branch
+        x = input
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool<a id="change"> = </a>None
+            if encoder_outs is not None:
+                before_pool<a id="change"> = </a>encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool,se=self.im_atts[i])
+        x_im = x
+
+        x<a id="change"> = </a>input        
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se = self.mask_atts[i])
+        x_mask = x
+
+        x = input
+        for i, up_conv in enumerate(self.up_convs):
+            before_pool = None
+            if encoder_outs is not None:
+                before_pool = encoder_outs[-(i+2)]
+            x = up_conv(x, before_pool, se=self.wm_atts[i])
+        x_wm = x
+
+        <a id="change">return </a>x_im<a id="change">,x_mask,x_wm</a>
+
+class CoarseDecoder(nn.Module):
+    def __init__(self, args, in_channels=512, out_channels=3, norm=&quotbn&quot,act=F.relu, depth=5, blocks=1, residual=True,</code></pre><h3>After Change</h3><pre><code class='java'>
+        im_encoder_outs = []
+        mask_encoder_outs = []
+        x = input
+        <a id="change">for </a>i, <a id="change">d_conv</a> in enumerate(self.down_convs)<a id="change">:
+            &#47&#47 d_conv, attn = nets
+            </a>x<a id="change">, before_pool = </a>d_conv(x)
+            im_encoder_outs.append(before_pool)
+            <a id="change">mask_encoder_outs.append(</a>before_pool<a id="change">)</a>
+        x_im = x
+        x_mask = x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-1599e3fabe6f8d9fdcda23a2f19a46bdeb3b09c3c28b82c490897e88308729a6L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16773085</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/resunet.py</div><div id='m_class'> M Class Name: SharedDecoder</div><div id='n_method'> N Class Name: SharedBottleNeck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/resunet.py</div><div id='n_file'> N File Name: src/networks/resunet.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        shape = x.shape
+        n, c, h, w = shape
+        if c == 1:
+            x<a id="change"> = </a>x.expand(1, 3, 1, 1)
+        hPad<a id="change"> = </a>max(0, 32 - h)
+        wPad<a id="change"> = </a>max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        <a id="change">return </a>self._quantizer(self._encoder(x))<a id="change">, torch.tensor([h, w], dtype=torch.int)</a>
+
+
+class RefDecoder(nn.Module):
+    def __init__(self, m, k, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for i</a> in range(self._levels)<a id="change">:
+            </a>head = self._heads[i]
+            z = head(latent)
+            if i &lt; self._levels - 1:
+                mapper = self._mappers[i]
+                latent = mapper(latent)
+                code<a id="change"> = </a>self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard
+            else:
+                code = self._quantizers[i](z)
+            <a id="change">codes.append(</a>code<a id="change">)</a>
+        return codes
+
+
+class RefDecoder(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16773114</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>

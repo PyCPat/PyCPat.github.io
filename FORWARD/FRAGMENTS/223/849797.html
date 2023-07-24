@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size = output.size(0)
+        num_joints = output.size(1)
+
+        heatmaps_pred = <a id="change">output.reshape(
+            (batch_size, num_joints, -1)).split(1</a>, 1<a id="change">)</a>
+        heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+
+        loss = 0.
+
+        for idx in range(num_joints):
+            heatmap_pred = <a id="change">heatmaps_pred[idx].squeeze(1</a><a id="change">)</a>
+            heatmap_gt = heatmaps_gt[idx].squeeze(1)
+            target_weight = target_weights[:, idx, None]
+            if self.use_target_weight:
+                loss += self.criterion(heatmap_pred * target_weight,</code></pre><h3>After Change</h3><pre><code class='java'>
+            Tensor: The calculated loss.
+        
+        if self.use_target_weight:
+            loss = self.criterion(output * <a id="change">target_weights[..., None, None]</a>,
+                                  target * target_weights[..., None, None])
+        else:
+            loss = self.criterion(output, target)</code></pre>

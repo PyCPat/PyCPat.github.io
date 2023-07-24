@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :1584
+</h3><img src='5440019.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            <a id="change">pass</a>
+            &#47&#47 return self.forward_train(feats, targets)
+        else:
+            seg_masks, cate_labels, cate_scores, bbox_num = self.forward_eval(cate_pred_list, kernel_pred_list,
+                                                                              seg_pred, im_shape, ori_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            ins_labels = []
+            cate_labels<a id="change"> = </a><a id="change">[]</a>
+            grid_order_list = []
+            i = 0
+            for lvl in range(len(self.seg_num_grids)):
+                ins_labels.append(targets[i]); i += 1
+            <a id="change">for lvl</a> in <a id="change">range(</a>len(self.seg_num_grids)<a id="change">):
+                </a><a id="change">cate_labels.append(</a>targets[i].to(torch.int32)<a id="change">)</a>; i += 1
+            for lvl in range(len(self.seg_num_grids)):
+                grid_order_list.append(targets[i].to(torch.int32)); i += 1
+            return self.forward_train(cate_pred_list, kernel_pred_list, seg_pred, ins_labels, cate_labels, grid_order_list, fg_nums)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/miemie2013/miemiedetection/commit/49afa0099c63a554923f16bc24439bc547d1d52e#diff-98ac090aef281f7c2786c2bcd91e53b06b803895c6162d23b442cdd72a2dde30L330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5440019</div><div id='project'> Project Name: miemie2013/miemiedetection</div><div id='commit'> Commit Name: 49afa0099c63a554923f16bc24439bc547d1d52e</div><div id='time'> Time: 2022-07-15</div><div id='author'> Author: 53960695+miemie2013@users.noreply.github.com</div><div id='file'> File Name: mmdet/models/heads/solov2_head.py</div><div id='m_class'> M Class Name: SOLOv2Head</div><div id='n_method'> N Class Name: SOLOv2Head</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/heads/solov2_head.py</div><div id='n_file'> N File Name: mmdet/models/heads/solov2_head.py</div><div id='m_start'> M Start Line: 351</div><div id='m_end'> M End Line: 351</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 362</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    @abstractmethod
+    def forward(self, *inputs: torch.Tensor) -&gt; torch.Tensor:
+        <a id="change">pass</a>
+
+    @abstractmethod
+    def loss_function(self, *inputs: Any, **kwargs) -&gt; torch.Tensor:
+        pass</code></pre><h3>After Change</h3><pre><code class='java'>
+        input, norm_consts = self.assemble_input(data)
+
+        if self.num_samples &gt; 1:
+            samples<a id="change"> = </a><a id="change">[]</a>
+            <a id="change">for i</a> in <a id="change">range(</a>self.num_samples<a id="change">):
+                </a><a id="change">samples.append(</a>self.forward_pass(input=input, data=data)<a id="change">)</a>
+
+            mean = torch.mean(torch.stack(samples), dim=0)
+            var = torch.var(torch.stack(samples), dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mstoelzle/solving-occlusion/commit/0845934f79262774ac310af9512f495ff8deba9f#diff-3c5bb78946d5aca93a8340f5fa53de2140ee57263a8d66801c5513823e80c198L38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5440016</div><div id='project'> Project Name: mstoelzle/solving-occlusion</div><div id='commit'> Commit Name: 0845934f79262774ac310af9512f495ff8deba9f</div><div id='time'> Time: 2020-12-09</div><div id='author'> Author: maximilian@stoelzle.ch</div><div id='file'> File Name: src/learning/models/base_model.py</div><div id='m_class'> M Class Name: BaseModel</div><div id='n_method'> N Class Name: BaseModel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: ABC,nn.Module</div><div id='n_parent_class'> N Parent Class: ABC,nn.Module</div><div id='m_file'> M File Name: src/learning/models/base_model.py</div><div id='n_file'> N File Name: src/learning/models/base_model.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pass
+        
+    def forward(self, x):
+        <a id="change">pass</a>
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        if self.num_D == 1:
+            return self.model(input)
+        result<a id="change"> = </a><a id="change">[]</a>
+        down = input
+        <a id="change">for i</a> in <a id="change">range(</a>self.num_D<a id="change">):
+            </a>model = getattr(self, "model_%d" % i)
+            <a id="change">result.append(</a>model(down)<a id="change">)</a>
+            if i != self.num_D - 1:
+                down = self.down(down)
+        return result</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lotayou/cocosnet/commit/3dcf714c258ea399239d1362db5247110f254fd7#diff-6d9b374f05f7a4bfbfe2f4733c678f434ee0a86d663f3cf72e4f1e9111c41b25L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5440015</div><div id='project'> Project Name: lotayou/cocosnet</div><div id='commit'> Commit Name: 3dcf714c258ea399239d1362db5247110f254fd7</div><div id='time'> Time: 2020-05-24</div><div id='author'> Author: lotayou@pku.edu.cn</div><div id='file'> File Name: model/discriminator.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/discriminator.py</div><div id='n_file'> N File Name: model/discriminator.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 12</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 71</div><BR>

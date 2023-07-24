@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :3511
+</h3><img src='17597229.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        new_mem = mem
+        new_lmem = lmem
+
+        <a id="change">if </a><a id="change">self.seq_len &gt; t or not calc_memory:
+            </a>return logits, Memory(new_mem, new_lmem)
+
+        &#47&#47 calculate memory and compressed memory
+
+        old_mem<a id="change">, new_mem = </a>split_at_index(1, <a id="change">-self.mem_len</a>, torch.cat((mem, x), dim=1))
+
+        if old_mem.shape[1] != 0 and self.lmem_len &gt; 0:
+            pass</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, memories = None, pos_emb = None, input_mask = None, calc_memory = True, **kwargs):
+        b, t, e, h, dim_h = *x.shape, self.heads, self.dim_head
+
+        memories = default(memories, (None<a id="change">, None</a>))
+        mem, lmem = memories
+
+        init_mem = lambda: torch.empty(b, 0, e, **to(x))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17597229</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 217</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, *dimensions):
+        device = self.device
+
+        <a id="change">if </a><a id="change">not exists(self.rel_pos) or not self.cache_rel_pos:
+            </a>positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid = rearrange(grid, &quotc ... -&gt; (...) c&quot)
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos<a id="change"> = </a>torch.sign(rel_pos) * torch.log(rel_pos.abs()<a id="change"> + </a>1)
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 calculate strides
+
+        strides = torch.flip(rel_pos_shape, (0,)).cumprod(dim = -1)
+        strides = torch.flip(F.pad(strides, (1<a id="change">, -1</a>), value = 1), (0,))
+
+        &#47&#47 get all positions and calculate all the relative distances
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17597214</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        B, D, H, W, C = x.shape
+
+        &#47&#47 padding
+        pad_input = <a id="change">(H % 2 == 1) or (W % 2 == 1)</a>
+        <a id="change">if </a>pad_input<a id="change">:
+            </a>x<a id="change"> = </a>F.pad(x, (0, 0, 0, W % 2, 0, H<a id="change"> % </a>2))
+
+        x0 = x[:, :, 0::2, 0::2, :]  &#47&#47 B D H/2 W/2 C
+        x1 = x[:, :, 1::2, 0::2, :]  &#47&#47 B D H/2 W/2 C</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x: B, H*W, C
+        
+        H<a id="change">, W</a> = self.input_resolution
+        B, L, C = x.shape
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/829a2ecf6cd071bfc222fe830ebca1ed7a9cd8c4#diff-e237dac88e7ea9172f4d3310b0f37332bce40b9f8893b1e30b30feaddce55e94L287' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17597218</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: 829a2ecf6cd071bfc222fe830ebca1ed7a9cd8c4</div><div id='time'> Time: 2021-11-08</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/backbones/swin_transformer.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/backbones/swin_transformer.py</div><div id='n_file'> N File Name: transoar/models/backbones/swin_transformer.py</div><div id='m_start'> M Start Line: 292</div><div id='m_end'> M End Line: 299</div><div id='n_start'> N Start Line: 307</div><div id='n_end'> N End Line: 319</div><BR>

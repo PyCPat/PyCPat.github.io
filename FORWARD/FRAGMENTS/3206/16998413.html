@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 his_vector = his_vectors[torch.arange(batch_size), lengths - 1, :]
+
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>intent_pred
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, history, lengths, t_history, user_min_t):
+        valid_his = (history &gt; 0).long()
+        his_vectors = self.i_embeddings(history)
+        his_vector<a id="change"> = </a><a id="change">self.encoder(</a>his_vectors, lengths, valid_his, t_history, user_min_t<a id="change">)</a>
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>his_vector<a id="change">, intent_pred</a>
+
+
+class GRUEncoder(nn.Module):
+    def __init__(self, emb_size):</code></pre>

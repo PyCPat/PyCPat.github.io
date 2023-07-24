@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = self.encoder[idx](x)
+            skips.append(x)
+
+        for idx in <a id="change">range(</a>self.num_stacks - 1<a id="change">)</a>:
+            skip_idx = self.num_stacks - idx - 1
+            skip<a id="change"> = </a>skips[skip_idx]
+            x = self.decoder[idx](x, skip=skip)
+
+        output = self.bottleneck_conv2d(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.conv2d(input)
+        x, skip = self.encoder(x)
+        x = self.bottleneck_conv2d(x)
+        x = self.decoder(x, skip[<a id="change">::-1</a>])
+
+        if self.pointwise_conv2d:
+            output = self.pointwise_conv2d(x)</code></pre>

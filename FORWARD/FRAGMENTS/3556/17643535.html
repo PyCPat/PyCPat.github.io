@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.l6 = nn.Linear(hidden_dim, 1)
+
+    def forward(self, state, action, hidden1, hidden2):
+        <a id="change">self.l1.flatten_parameters()</a>
+        self.l4.flatten_parameters()
+
+        sa = torch.cat([state, action], -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, state, action, hidden1, hidden2):
+        sa = torch.cat([state, action], -1)
+        <a id="change">if self.recurrent</a><a id="change">:
+            </a><a id="change">self.l1.flatten_parameters()</a>
+            self.l4.flatten_parameters()
+            q1, hidden1 = self.l1(sa, hidden1)
+            q2, hidden2 = self.l4(sa, hidden2)
+        else:
+            q1, hidden1 = <a id="change">self.l1(</a>sa<a id="change">), None</a>
+            q2<a id="change">, hidden2</a> = self.l4(sa), None
+
+        q1 = F.relu(self.l2(q1))
+        q1 = self.l3(q1)</code></pre>

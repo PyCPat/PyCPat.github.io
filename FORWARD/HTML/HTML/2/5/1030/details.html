@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :1030
+</h3><img src='3688872.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if x.dtype == torch.long:
+            x = F.one_hot(x, num_classes = self.num_alphabet)
+
+        x = self._trunk(<a id="change">x.float()</a>)
+        out = map_values(lambda fn: fn(x), self._heads)
+
+        if no_batch:</code></pre><h3>After Change</h3><pre><code class='java'>
+        no_batch = x.ndim == 2
+
+        if no_batch:
+            x<a id="change"> = </a>rearrange(x, &quot... -&gt; () ...&quot)
+
+        x = self._trunk(x)
+        out = map_values(lambda fn: fn(x), self._heads)
+
+        if no_batch:
+            out = map_values(lambda t: rearrange(t, &quot() ... -&gt; ...&quot), out)
+            x<a id="change"> = </a><a id="change">rearrange(</a>x, <a id="change">&quot() ... -&gt; ...&quot</a><a id="change">)</a>
+
+        if return_embeddings:
+            return out, x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/enformer-pytorch/commit/cf8d4440cc67d8b83d4e70906be27f54087158ec#diff-d41824114176cf139e53af298fee855401c92b5fbb8c782f4eb1dd3fbf56fe10L348' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3688872</div><div id='project'> Project Name: lucidrains/enformer-pytorch</div><div id='commit'> Commit Name: cf8d4440cc67d8b83d4e70906be27f54087158ec</div><div id='time'> Time: 2021-12-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_class'> M Class Name: Enformer</div><div id='n_method'> N Class Name: Enformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enformer_pytorch/enformer_pytorch.py</div><div id='n_file'> N File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_start'> M Start Line: 348</div><div id='m_end'> M End Line: 355</div><div id='n_start'> N Start Line: 350</div><div id='n_end'> N End Line: 372</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        target = torch.bucketize(target, channel_bins, right=True)
+        target = <a id="change">target.float()</a>.mean(dim=3)
+
+        predicted_patches = predicted_patches[mask]
+        target = target[mask]</code></pre><h3>After Change</h3><pre><code class='java'>
+        p = self.patch_size
+        target = rearrange(target, "b c (h p1) (w p2) -&gt; b (h w) c (p1 p2) ", p1 = p, p2 = p)
+
+        avg_target<a id="change"> = </a>target.mean(dim=3)
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        descritized_target = torch.bucketize(avg_target, channel_bins, right=True)
+        descritized_target = F.one_hot(descritized_target, self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits
+        descritized_target<a id="change"> = </a><a id="change">rearrange(</a>descritized_target, <a id="change">"b n c bi -&gt; b n (c bi)"</a><a id="change">, c = c, bi = bi)</a>
+
+        predicted_patches = predicted_patches[mask]
+        descritized_target = descritized_target[mask]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/be5d560821bb5ae4dff823272118eea4a5dc7d07#diff-1dcf8cf01d06ecd12207392ed2c0b4e7dbccdcba9bced068108922a8ac87a94fL34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3688904</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: be5d560821bb5ae4dff823272118eea4a5dc7d07</div><div id='time'> Time: 2021-02-12</div><div id='author'> Author: zackankner@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+
+        rel_pos = <a id="change">self.rel_pos.float()</a>
+
+        for layer in self.net:
+            rel_pos = layer(rel_pos)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 get all relative positions across all dimensions
+
+        rel_positions = [torch.arange(-d + 1, d, device = device) for d in dimensions]
+        rel_pos_grid<a id="change"> = </a>torch.stack(torch.meshgrid(*rel_positions, indexing = &quotij&quot), dim = -1)
+        rel_pos_grid = <a id="change">rearrange(</a>rel_pos_grid, <a id="change">&quot... c -&gt; (...) c&quot</a><a id="change">)</a>
+
+        &#47&#47 mlp input
+
+        bias = rel_pos_grid.float()
+
+        for layer in self.net:
+            bias = layer(bias)
+
+        &#47&#47 convert relative distances to indices of the bias
+
+        rel_dist += (shape - 1)  &#47&#47 make sure all positive
+        rel_dist *= strides
+        rel_dist_indices = rel_dist.sum(dim = -1)
+
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias<a id="change"> = </a>bias[rel_dist_indices]
+        return rearrange(bias, &quoti j h -&gt; h i j&quot)
+
+&#47&#47 helper classes</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3688878</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>

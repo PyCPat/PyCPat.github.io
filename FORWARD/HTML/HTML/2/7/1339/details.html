@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :1339
+</h3><img src='4647878.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 b(hc)1q -&gt; bchq
+        shape = (batch_count, self.head_count, self.head_dim, -1)
+        values<a id="change"> = </a>values.reshape(shape)
+        values = values.transpose(1, 2)
+        queries = queries.reshape(shape)
+        queries<a id="change"> = </a><a id="change">queries.transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+
+        &#47&#47 print(keys.shape, "keys", values.shape, "values", queries.shape, "queries")
+
+        attention_bias = torch.where(
+            attention_mask,
+            torch.zeros([1, 1]),
+            torch.ones([1, 1]) * (-torch.inf),
+        )
+        attention_weights: FloatTensor = torch.einsum(
+            &quotbchq,bkhc-&gt;bkhq&quot,
+            queries / self.head_dim ** 0.5, 
+            keys
+        )
+        attention_weights += attention_bias[:, :, None, None]
+        attention_weights = torch.softmax(attention_weights, 1)
+        &#47&#47 print(attention_weights.shape, "attention_weights")
+        hidden_state: FloatTensor = torch.einsum(
+            "bkhq,bchk-&gt;bchq",
+            attention_weights, 
+            values
+        )
+        &#47&#47 bchq -&gt; b(hc)1q
+        &#47&#47 print(hidden_state.shape, "hidden_state")
+        hidden_state<a id="change"> = </a>hidden_state.transpose(1, 2)
+        hidden_state = hidden_state.reshape(batch_count, self.embed_count, 1, -1)
+        hidden_state = self.out_proj.forward(hidden_state)
+        &#47&#47 print(hidden_state.shape, "hidden_state")</code></pre><h3>After Change</h3><pre><code class='java'>
+            attention_weights, 
+            values
+        )
+        shape = attention_output.shape[:2] + (self.embed_count<a id="change"></a>,)
+        attention_output = attention_output.reshape(shape)
+        attention_output = self.out_proj.forward(attention_output)
+        return attention_output</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/c936d261021f0f38d064e146a2167cf3daeeb0db#diff-722632c2506383b8dc00c81914b9d7066a94dfb2b6295335e1218166a6c05cfcL42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4647878</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: c936d261021f0f38d064e146a2167cf3daeeb0db</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_class'> M Class Name: AttentionTorch</div><div id='n_method'> N Class Name: AttentionTorch</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [B, T, C]
+        x_emb = self.emb(x)
+        &#47&#47 [B, C, T]
+        x_emb<a id="change"> = </a><a id="change">torch.transpose(</a>x_emb, <a id="change">1</a>, <a id="change">-1</a><a id="change">)</a>
+
+        &#47&#47 compute sequence masks
+        x_mask = torch.unsqueeze(sequence_mask(x_lengths, x.shape[1]),
+                                 1).to(x.dtype)
+
+        y_mask<a id="change"> = </a>torch.unsqueeze(sequence_mask(y_lengths, None),
+                                 1).to(x_mask.dtype)
+
+        &#47&#47 encoder pass
+        o_en = self.encoder(x_emb, x_mask)
+
+        &#47&#47 duration predictor pass
+        o_dr_log = self.duration_predictor(o_en.detach(), x_mask)
+
+        &#47&#47 expand o_en with durations
+        o_en_ex<a id="change">, attn = </a>self.expand_encoder_outputs(o_en, dr, x_mask, y_mask)
+
+        &#47&#47 positional encoding
+        if hasattr(self, &quotpos_encoder&quot):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, x_lengths, y_lengths, dr, g=None):  &#47&#47 pylint: disable=unused-argument
+        o_en, o_en_dp, x_mask, g = self._forward_encoder(x, x_lengths, g)
+        o_dr_log = self.duration_predictor(o_en_dp.detach(), x_mask)
+        o_de<a id="change">, attn</a>= self._forward_decoder(o_en, o_en_dp, dr, x_mask, y_lengths, g=g)
+        return o_de, o_dr_log.squeeze(1), attn
+
+    def inference(self, x, x_lengths, g=None):  &#47&#47 pylint: disable=unused-argument</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/aa40fe1aa0382bf5148d1475dd647def1d2ed332#diff-f338be1a7b6e47e5fd87f0f1eb704ddb47c9329b9a9ab9f21c4b45d1ff29f3b2L59' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4648004</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: aa40fe1aa0382bf5148d1475dd647def1d2ed332</div><div id='time'> Time: 2021-01-06</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: TTS/tts/models/speedy_speech.py</div><div id='m_class'> M Class Name: SpeedySpeech</div><div id='n_method'> N Class Name: SpeedySpeech</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/tts/models/speedy_speech.py</div><div id='n_file'> N File Name: TTS/tts/models/speedy_speech.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 89</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 127</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_<a id="change"> = </a><a id="change">torch.transpose(</a>preds, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+			&#47&#47print(preds.size())
+
+			y<a id="change"> = </a>y.long()
+			loss<a id="change"> = </a>self.Loss(preds_, torch.squeeze(y))
+			return preds, loss
+		return preds
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=len(xs)
+			return preds_<a id="change">, loss</a>
+		return preds_
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4647875</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>

@@ -1,0 +1,108 @@
+<html><h3>Pattern ID :3368
+</h3><img src='17390843.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        emb = self.segment_head(x)
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            return <a id="change">{</a>&quotpred&quot: pred<a id="change">}</a>
+        else:
+            emb = self.fc(emb)
+            return {&quotemb&quot: emb}
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            <a id="change">dict_outputs.update(</a>{"pred": pred}<a id="change">)</a>
+
+        else:
+            emb = self.fc(emb)
+            <a id="change">dict_outputs.update(</a>{"emb": emb}<a id="change">)</a>
+        return dict_outputs
+
+    def _init_weight(self):
+        for m in self.modules():</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/noelshin/pixelpick/commit/0a7e51c1131e51d19bc5a92b43f6d2248e666e54#diff-5282218a1ec333ec3cbb9134f231387ad824ee5cb70e7622da8164855faae96cL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17390843</div><div id='project'> Project Name: noelshin/pixelpick</div><div id='commit'> Commit Name: 0a7e51c1131e51d19bc5a92b43f6d2248e666e54</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: gyungin@robots.ox.ac.uk</div><div id='file'> File Name: segmentation/networks/decoders.py</div><div id='m_class'> M Class Name: SegmentHead</div><div id='n_method'> N Class Name: SegmentHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: segmentation/networks/decoders.py</div><div id='n_file'> N File Name: segmentation/networks/decoders.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        emb = self.segment_head(x)
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            return <a id="change">{</a>&quotpred&quot: pred<a id="change">}</a>
+        else:
+            emb = self.fc(emb)
+            return {&quotemb&quot: emb}
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.use_softmax = args.use_softmax
+
+    def forward(self, x):
+        <a id="change">dict_outputs</a> = {}
+        emb = self.segment_head(x)
+        if self.use_img_inp or self.use_visual_acuity:
+            img_inp = self.fc_img_inp(emb)
+            <a id="change">dict_outputs.update(</a>{"img_inp": img_inp}<a id="change">)</a>
+
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            <a id="change">dict_outputs.update(</a>{"pred": pred}<a id="change">)</a>
+
+        else:
+            emb = self.fc(emb)
+            dict_outputs.update({"emb": emb})</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/noelshin/pixelpick/commit/0a7e51c1131e51d19bc5a92b43f6d2248e666e54#diff-5282218a1ec333ec3cbb9134f231387ad824ee5cb70e7622da8164855faae96cL132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17390845</div><div id='project'> Project Name: noelshin/pixelpick</div><div id='commit'> Commit Name: 0a7e51c1131e51d19bc5a92b43f6d2248e666e54</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: gyungin@robots.ox.ac.uk</div><div id='file'> File Name: segmentation/networks/decoders.py</div><div id='m_class'> M Class Name: SegmentHead</div><div id='n_method'> N Class Name: SegmentHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: segmentation/networks/decoders.py</div><div id='n_file'> N File Name: segmentation/networks/decoders.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        images, targets = self.transform(images, targets)
+        features = self.backbone(images.tensors)
+        if isinstance(features, torch.Tensor):
+            features = OrderedDict(<a id="change">[</a>(0, features)<a id="change"></a>])
+
+        proposals= self.rpn(images, features, targets)
+        &#47&#47 Alex: RoI layer returns only detections</code></pre><h3>After Change</h3><pre><code class='java'>
+           detections, detector_losses = self.roi_heads(features, proposals, images.image_sizes, targets)
+           detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+
+           <a id="change">losses</a> = {}
+           <a id="change">losses.update(</a>detector_losses<a id="change">)</a>
+           <a id="change">losses.update(</a>proposal_losses<a id="change">)</a>
+
+           if self.training:
+              return losses
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alexts1980/covid-ct-mask-net/commit/02dc8b837503ec73aea3b9e2db35669c9cccff6f#diff-984289fd7aa71d3860361daf00b63170f7d5e9bfdc8aea3f0fcf7ce7ae68589fL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17390847</div><div id='project'> Project Name: alexts1980/covid-ct-mask-net</div><div id='commit'> Commit Name: 02dc8b837503ec73aea3b9e2db35669c9cccff6f</div><div id='time'> Time: 2020-11-01</div><div id='author'> Author: ater1980@gmail.com</div><div id='file'> File Name: models/mask_net/generalized_rcnn.py</div><div id='m_class'> M Class Name: GeneralizedRCNN</div><div id='n_method'> N Class Name: GeneralizedRCNN</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mask_net/generalized_rcnn.py</div><div id='n_file'> N File Name: models/mask_net/generalized_rcnn.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        ]
+        bboxes = torch.cat(
+            [
+                torch.cat([torch.tensor(<a id="change">[</a>idx<a id="change"></a>]), roi_row])
+                for idx, roi in enumerate(bboxes)
+                for roi_row in roi
+            ]</code></pre><h3>After Change</h3><pre><code class='java'>
+            )
+            losses.update(polygonrnn_loss)
+            return losses, acc
+        <a id="change">detections</a> = self.obj_detection_model(x)
+        empty_entries = self._get_empty_entries(detections)
+        if len(empty_entries) == len(detections):
+            for idx, _ in enumerate(detections):
+                <a id="change">detections[idx].update(
+                    </a>{key: [] for key in ["min_row", "min_col", "scale_h", "scale_w"]}<a id="change">
+                )</a>
+            return detections
+        bboxes = [
+            item["boxes"]
+            for idx, item in enumerate(detections)
+            if idx not in empty_entries
+        ]
+        bboxes = torch.cat(
+            [
+                torch.column_stack([idx * torch.ones(bbox.shape[0]), bbox])
+                for idx, bbox in enumerate(bboxes)
+            ]
+        )  &#47&#47 num_rois, 5
+        polygonrnn_output = self.polygonrnn_model.test(
+            x, bboxes, self.val_seq_len
+        )  &#47&#47 type: ignore
+        min_bound = 0
+        for idx, det in enumerate(detections):
+            if idx in empty_entries:
+                <a id="change">detections[idx].update(
+                    </a>{key: [] for key in ["min_row", "min_col", "scale_h", "scale_w"]}<a id="change">
+                )</a>
+                continue
+            n_items = len(det["boxes"])
+            detections[idx].update(
+                {</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/phborba/pytorch_segmentation_models_trainer/commit/e46df78f6ad1ae19339f4c0e3e32c5c755cc070a#diff-6ad2f6a95132d412ed4122712f4af8d39d7dd3b86811ca3d8e428d84d08ebba4L374' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17390851</div><div id='project'> Project Name: phborba/pytorch_segmentation_models_trainer</div><div id='commit'> Commit Name: e46df78f6ad1ae19339f4c0e3e32c5c755cc070a</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: philipeborba@gmail.com</div><div id='file'> File Name: pytorch_segmentation_models_trainer/custom_models/mod_polymapper/modpolymapper.py</div><div id='m_class'> M Class Name: GenericModPolyMapper</div><div id='n_method'> N Class Name: GenericModPolyMapper</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_segmentation_models_trainer/custom_models/mod_polymapper/modpolymapper.py</div><div id='n_file'> N File Name: pytorch_segmentation_models_trainer/custom_models/mod_polymapper/modpolymapper.py</div><div id='m_start'> M Start Line: 393</div><div id='m_end'> M End Line: 395</div><div id='n_start'> N Start Line: 378</div><div id='n_end'> N End Line: 412</div><BR>

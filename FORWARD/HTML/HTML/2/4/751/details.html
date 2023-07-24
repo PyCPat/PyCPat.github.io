@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :751
+</h3><img src='2766971.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            y = torch.cat((priv_obses, pub_obses,), dim=-1)
+
+        final = self._relu(self.final_cn_1(y))
+        final = <a id="change">final.flatten(</a>1<a id="change">)</a>
+        final = self._relu(self.final_fc_1(final))
+
+        &#47&#47 Standartize last layer
+        if self.args.normalize:</code></pre><h3>After Change</h3><pre><code class='java'>
+        priv_obses[pf_mask] = self.lut_range_idx_2_priv_o_pf[range_idxs][pf_mask]
+
+        if self.args.use_pre_layers:
+            priv_obses = torch.reshape(priv_obses, (-1<a id="change">, 2, 17</a>))
+            _board_obs = pub_obses[:, self.board_start:self.board_stop]
+            _board_obs = torch.reshape(_board_obs, (-1, 5, 17))
+            _card_obs = torch.cat((priv_obses, _board_obs), dim=1)
+            _hist_and_state_obs = torch.cat([
+                pub_obses[:, :self.board_start],
+                pub_obses[:, self.board_stop:]
+            ],
+                dim=-1
+            )
+            _hist_and_state_obs.unsqueeze_(1)
+            _card_obs = nn.ZeroPad2d((0, 7, 0, 0))(_card_obs)
+            _card_obs<a id="change"> = </a><a id="change">torch.cat(</a>(_card_obs, _hist_and_state_obs)<a id="change">, dim=1)</a>
+            &#47&#47 Add dimension for convolution channels
+            _card_obs.unsqueeze_(1)
+            y = self._feed_through_pre_layers(card_obs=_card_obs,
+                                              hist_and_state_obs=_hist_and_state_obs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/diditforlulz273/pokerrl-omaha/commit/f8f7fc33d1444fc61ddf7045fe2cc2b5c80dd2f8#diff-dc72063602d3f8e5e38e9d1d0ddc62238692d858ae2db66c7b75332a8f9440a4L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2766971</div><div id='project'> Project Name: diditforlulz273/pokerrl-omaha</div><div id='commit'> Commit Name: f8f7fc33d1444fc61ddf7045fe2cc2b5c80dd2f8</div><div id='time'> Time: 2020-06-13</div><div id='author'> Author: diditforlulz@gmail.com</div><div id='file'> File Name: PokerRL/rl/neural/MainPokerModuleCNN.py</div><div id='m_class'> M Class Name: MainPokerModuleCNN</div><div id='n_method'> N Class Name: MainPokerModuleCNN</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: PokerRL/rl/neural/MainPokerModuleCNN.py</div><div id='n_file'> N File Name: PokerRL/rl/neural/MainPokerModuleCNN.py</div><div id='m_start'> M Start Line: 99</div><div id='m_end'> M End Line: 121</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 115</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x = self.net(x)  &#47&#47 batch, 512, 1, 1
+        &#47&#47 Add fc layer for final prediction
+        x = <a id="change">torch.flatten(</a>x<a id="change">, start_dim=1)</a>  &#47&#47 batch, 512
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 256
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_l = self.net(x[:, :3, :, :]).squeeze()
+        x_r = self.net(x[:, 3:, :, :]).squeeze()
+        x<a id="change"> = </a><a id="change">torch.cat(</a>(x_l<a id="change">, x_r</a>)<a id="change">, dim=-1)</a>
+        &#47&#47 Add fc layer for final prediction
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 512
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mees/calvin/commit/bc70db3b8fa41fbc694ceffffd549a0f8b2afe27#diff-73468122dbd496adcd5540d38d88327041031bccc3e84e8e7d187fa193d182a5L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2766959</div><div id='project'> Project Name: mees/calvin</div><div id='commit'> Commit Name: bc70db3b8fa41fbc694ceffffd549a0f8b2afe27</div><div id='time'> Time: 2021-10-19</div><div id='author'> Author: oier.mees@gmail.com</div><div id='file'> File Name: calvin/models/encoders/tactile_encoder.py</div><div id='m_class'> M Class Name: TactileEncoder</div><div id='n_method'> N Class Name: TactileEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: calvin/models/encoders/tactile_encoder.py</div><div id='n_file'> N File Name: calvin/models/encoders/tactile_encoder.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.final_procecss = final_process
+
+    def forward(self, input: t.Tensor, additional=None):
+        x = <a id="change">t.flatten(</a>input, 2, -1<a id="change">)</a>
+        raw, rel = [], []
+        for i in range(self.att_num - 1):
+            x, re, ra = self.layers["attention_{}".format(i)](x)
+            x = self.layers["tconv_{}".format(i)](x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if additional is not None:
+            additional = t.cat([t.unsqueeze(additional, dim=1)] * x.shape[1], dim=1)
+            x<a id="change"> = </a><a id="change">t.cat(</a>(x<a id="change">, additional</a>)<a id="change">, dim=2)</a>
+        for i in range(self.fc_num):
+            x = self.layers["fc_{}".format(i)](x)
+            if i != self.fc_num - 1:
+                x = self.activation(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/iffix/machin/commit/afd28b6f8aec78ee14891633a07c0bedcecf303c#diff-b99a43ebb8bdea7f7a9ff2be74dc2b460878eec11cb5e5374efa147eedc92cf6L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2766960</div><div id='project'> Project Name: iffix/machin</div><div id='commit'> Commit Name: afd28b6f8aec78ee14891633a07c0bedcecf303c</div><div id='time'> Time: 2020-04-19</div><div id='author'> Author: hanhanmumuqq@163.com</div><div id='file'> File Name: models/base/tcdnnet.py</div><div id='m_class'> M Class Name: TCDNNet</div><div id='n_method'> N Class Name: TCDNNet</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base/tcdnnet.py</div><div id='n_file'> N File Name: models/base/tcdnnet.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 146</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x = self.net(x)  &#47&#47 batch, 512, 1, 1
+        &#47&#47 Add fc layer for final prediction
+        x = <a id="change">torch.flatten(</a>x<a id="change">, start_dim=1)</a>  &#47&#47 batch, 512
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 256
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_l = self.net(x[:, :3, :, :]).squeeze()
+        x_r = self.net(x[:, 3:, :, :]).squeeze()
+        x<a id="change"> = </a><a id="change">torch.cat(</a>(x_l<a id="change">, x_r</a>)<a id="change">, dim=-1)</a>
+        &#47&#47 Add fc layer for final prediction
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 512
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mees/calvin/commit/dc512d655e9dbaaea4f8f71529955dd9c11d5652#diff-73468122dbd496adcd5540d38d88327041031bccc3e84e8e7d187fa193d182a5L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2766961</div><div id='project'> Project Name: mees/calvin</div><div id='commit'> Commit Name: dc512d655e9dbaaea4f8f71529955dd9c11d5652</div><div id='time'> Time: 2021-10-26</div><div id='author'> Author: oier.mees@gmail.com</div><div id='file'> File Name: calvin/models/encoders/tactile_encoder.py</div><div id='m_class'> M Class Name: TactileEncoder</div><div id='n_method'> N Class Name: TactileEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: calvin/models/encoders/tactile_encoder.py</div><div id='n_file'> N File Name: calvin/models/encoders/tactile_encoder.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 24</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not isinstance(feat, tuple):
+            feat = (feat, )
+        if len(feat) &gt;= 2:
+            <a id="change">assert </a>self.with_temporal_pool
+        if self.with_temporal_pool:
+            feat = [torch.mean(x, 2, keepdim=True) for x in feat]
+        feat = torch.cat(feat, axis=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            feat = (feat, )
+
+        if len(feat) &gt;= 2:
+            maxT = max([<a id="change">x.shape[2]</a> for x in feat])
+            max_shape = (maxT, ) + feat[0].shape[3:]
+            &#47&#47 resize each feat to the largest shape (w. nearest)
+            feat = [F.interpolate(x, max_shape).contiguous() for x in feat]</code></pre>

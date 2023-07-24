@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :172
+</h3><img src='721258.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            hidden = self.init_hidden(x.shape[-2:], x.shape[:-3])
+
+        hs = [hidden[0][i] for i in range(self.num_layers)]
+        cs<a id="change"> = </a><a id="change">[hidden[1][i] for i in range(self.num_layers)]</a>
+        for _ in range(num_repeats):
+            for i, block in enumerate(self.blocks):
+                hs[i], cs[i] = block(x, (hs[i], cs[i]))
+
+        return hs[-1], (torch.stack(hs)<a id="change">, torch.stack(cs)</a>)
+
+
+&#47&#47 simple model</code></pre><h3>After Change</h3><pre><code class='java'>
+            for i, block in enumerate(self.blocks):
+                hs[i], cs[i] = block(x, (hs[i], cs[i]))
+
+        return hs[-1], (hs<a id="change">, cs</a>)
+
+
+&#47&#47 simple model</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dena/handyrl/commit/f0fa9d91bc830bf06ce1085da48f0a164d32c1df#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L218' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 721258</div><div id='project'> Project Name: dena/handyrl</div><div id='commit'> Commit Name: f0fa9d91bc830bf06ce1085da48f0a164d32c1df</div><div id='time'> Time: 2020-12-12</div><div id='author'> Author: a.a.b.a.b.c.a.b.c.d.abcd1234@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: DRC</div><div id='n_method'> N Class Name: DRC</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 218</div><div id='m_end'> M End Line: 226</div><div id='n_start'> N Start Line: 218</div><div id='n_end'> N End Line: 225</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, _ = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs<a id="change"> = </a><a id="change">[spec.squeeze(1).clone() for _ in range(len(self.refinement_stages) + 1)]</a>
+        &#47&#47 re/im into channel axis
+        spec_f = (
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()
+        )  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None
+        for i, (stage, _) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(self.cplx_comp(spec_f), h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :] = spec_f.permute(0, 2, 3, 1)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        return spec<a id="change">, m, lsnr, out_specs</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        return spec<a id="change">, m, lsnr, None</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/946b362aa406f8a1808a252393351d0e7523130a#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L527' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 721257</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 946b362aa406f8a1808a252393351d0e7523130a</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 534</div><div id='m_end'> M End Line: 547</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 510</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        v_img = rearrange(v_img, &quotB h (H W) Ch -&gt; B (h Ch) H W&quot, H=H, W=W)               &#47&#47 Shape: [B, h, H*W, Ch] -&gt; [B, h*Ch, H, W].
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = <a id="change">[conv(x) for conv, x in zip(self.conv_list, v_img_list)]</a>
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img<a id="change"> = </a>rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+
+        EV_hat_img = q_img * conv_v_img
+        zero = torch.zeros((B, h, 1, Ch), dtype=q.dtype, layout=q.layout, device=q.device)
+        EV_hat = torch.cat((zero<a id="change">, EV_hat_img</a>), dim=2)                                &#47&#47 Shape: [B, h, N, Ch].
+
+        return EV_hat
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+
+        EV_hat = q_img * conv_v_img
+        EV_hat = F.pad(EV_hat, (0<a id="change">, 0, 1, 0, 0, 0</a>))  &#47&#47 [B, h, N, Ch].
+        return EV_hat
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 721261</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>

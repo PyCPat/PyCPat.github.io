@@ -1,0 +1,156 @@
+<html><h3>Pattern ID :168
+</h3><img src='720538.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.token_emb(x)
+        out = self.layers(x)
+        out = self.to_logits(x)
+        <a id="change">return </a>out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, t, d = x.shape
+
+        mem = default(mem, torch.empty(self.depth, b, 0, d))
+        <a id="change">hidden_states</a><a id="change"> = </a><a id="change">[]</a>
+
+        <a id="change">for </a>attn, ff, <a id="change">m</a> in zip(self.attn_layers, self.ff_layers, mem)<a id="change">:
+            hidden_states</a><a id="change">.append(</a>x<a id="change">)</a>
+            x = attn(x, mem = m)
+            x = ff(x)
+
+        out = self.to_logits(x)
+
+        hidden_states = <a id="change">torch.stack(hidden_states</a><a id="change">)</a>
+        new_mem<a id="change"> = </a>torch.cat((mem, hidden_states), dim=2)[:, :, -self.mem_len:, :].detach()
+        <a id="change">return </a>out<a id="change">, new_mem</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/47a5b8448090fce7ca1f7356001fb2ac381c2239#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720538</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 47a5b8448090fce7ca1f7356001fb2ac381c2239</div><div id='time'> Time: 2020-06-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)
+        <a id="change">return </a>output
+
+
+&#47&#47 --------------------------------------------------------------------------</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_len = len(cur_layer_input)
+
+        layer_output_list = []
+        <a id="change">last_state_list</a><a id="change"> = </a><a id="change">[]</a>
+
+        <a id="change">for l</a>, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps))<a id="change">:
+            </a>h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)
+            <a id="change">last_state_list.append(</a>h<a id="change">)</a>
+
+        layer_output = torch.stack(output_inner, dim=int(self.batch_first))
+        last_state_list<a id="change"> = </a><a id="change">torch.stack(</a>last_state_list<a id="change">, dim=0)</a>
+        <a id="change">return </a>layer_output<a id="change">, last_state_list</a>
+
+    def reset_parameters(self):
+        for c in self.cell_list:
+            c.reset_parameters()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720539</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = self.fc(output.flatten())
+        &#47&#47 print(output)
+        &#47&#47 return torch.mean(output, dim=0)
+        <a id="change">return </a>output
+
+    def name(self):
+        return "RhythmNet"</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(100, 1)
+
+    def forward(self, st_maps, target):
+        <a id="change">output_per_clip</a><a id="change"> = </a><a id="change">[]</a>
+        &#47&#47 so as to reflect a batch_size = 1
+        st_maps = st_maps.unsqueeze(0)
+        <a id="change">for t</a> in range(st_maps.size(1))<a id="change">:
+            </a>with torch.no_grad():
+                x = self.resnet18(st_maps[:, t, :, :, :])
+                &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+                x = x.view(x.size(0), -1)
+            &#47&#47 output dim: BSx1
+            x = self.fc_resnet(x)
+            &#47&#47 For now since we&quotre working with BS = 1, lets collapse that dimension
+            <a id="change">output_per_clip.append(</a>x.squeeze(0)<a id="change">)</a>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>output_per_clip<a id="change">, dim=0)</a>.transpose_(0, 1)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        <a id="change">return </a>output_seq<a id="change">, gru_output.squeeze(0)</a>
+
+    def name(self):
+        return "RhythmNet"
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/5486b317570359a6ab1971196350ee70894b19db#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720537</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: 5486b317570359a6ab1971196350ee70894b19db</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 32</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.token_emb(x)
+        out = self.layers(x)
+        out = self.to_logits(x)
+        <a id="change">return </a>out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, t, d = x.shape
+
+        mem = default(mem, torch.empty(self.depth, b, 0, d))
+        <a id="change">hidden_states</a><a id="change"> = </a><a id="change">[]</a>
+
+        <a id="change">for </a>attn, ff, <a id="change">m</a> in zip(self.attn_layers, self.ff_layers, mem)<a id="change">:
+            </a><a id="change">hidden_states.append(</a>x<a id="change">)</a>
+            x = attn(x, mem = m)
+            x = ff(x)
+
+        out = self.to_logits(x)
+
+        hidden_states<a id="change"> = </a><a id="change">torch.stack(</a>hidden_states<a id="change">)</a>
+        new_mem = torch.cat((mem<a id="change">, hidden_states</a>), dim=2)[:, :, -self.mem_len:, :].detach()
+        <a id="change">return </a>out, new_mem
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/47a5b8448090fce7ca1f7356001fb2ac381c2239#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720542</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 47a5b8448090fce7ca1f7356001fb2ac381c2239</div><div id='time'> Time: 2020-06-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out
+        <a id="change">return </a>output_seq, gru_output
+
+    def name(self):
+        return "RhythmNet"</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, st_maps, target):
+        batched_output_per_clip = []
+        <a id="change">hr_per_clip</a><a id="change"> = </a><a id="change">[]</a>
+
+        &#47&#47 Need to have so as to reflect a batch_size = 1 // if batched then comment out
+        st_maps = st_maps.unsqueeze(0)
+        for t in range(st_maps.size(1)):
+            &#47&#47 with torch.no_grad():
+            x = self.resnet18(st_maps[:, t, :, :, :])
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            &#47&#47 if t == 0:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1))
+            &#47&#47 else:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            &#47&#47 x = self.fc_resnet(gru_output.squeeze(1))
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL
+            &#47&#47 x = x*25.0
+            batched_output_per_clip.append(x.squeeze(0))
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        &#47&#47 the features extracted from the backbone CNN are fed to a one-layer GRU structure.
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        <a id="change">for i</a> in range(gru_output.size(0))<a id="change">:
+            </a>hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            <a id="change">hr_per_clip.append(</a>hr<a id="change">)</a>
+
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>hr_per_clip<a id="change">, dim=0)</a>.permute(1,0)
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out
+        <a id="change">return </a>output_seq<a id="change">, output_seq.squeeze(0)[:6]</a>
+
+    def name(self):
+        return "RhythmNet"
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/deed748087f19356d297fe57e439b967a6a3e617#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 720541</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: deed748087f19356d297fe57e439b967a6a3e617</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 66</div><BR>

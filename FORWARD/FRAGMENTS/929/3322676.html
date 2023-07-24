@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        y = self.avg_pool(x)
+        
+        &#47&#47manually implement circular padding
+        y = torch.cat((y[:,:self.padding,:,:], y, <a id="change">y[:,-self.padding:,:,:]</a>),dim=1)
+        
+
+        &#47&#47 Two different branches of ECA module</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.avg_pool(x)
+        
+        &#47&#47manually implement circular padding, F.pad does not seemed to be bugged
+        y = <a id="change">F.pad(</a>y.view(x.shape[0],1,-1),(self.padding<a id="change">,self.padding</a>)<a id="change">,mode=&quotcircular&quot)</a>
+
+        &#47&#47 Two different branches of ECA module
+        y = self.conv(y)
+</code></pre>

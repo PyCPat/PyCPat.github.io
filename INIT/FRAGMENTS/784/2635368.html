@@ -1,0 +1,67 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU(),
+            nn.Linear(node_encoding_size, node_encoding_size),
+            nn.ReLU(),
+            <a id="change">nn.LayerNorm(node_encoding_size</a><a id="change">)</a>
+        )
+
+        &#47&#47 Spatial head to process spatial encodings
+        self.spatial_head = nn.Sequential(
+            nn.Conv2d(2, 64, 5),
+            nn.MaxPool2d(2),
+            nn.Conv2d(64, 32, 5),
+            nn.MaxPool2d(2),
+            Flatten(start_dim=1),
+            nn.Linear(5408, 2048)
+        )
+
+        &#47&#47 Bipartite graph
+        self.bipartite_graph = <a id="change">BipartiteGraph(
+            node_encoding_size</a>,
+            representation_size,
+            num_iter<a id="change">
+        )</a>
+
+    def associate_with_ground_truth(self, boxes_h, boxes_o, targets):
+        
+        Arguements:</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        &#47&#47 Compute adjacency matrix
+        self.adjacency = <a id="change">nn.Sequential(
+            </a>nn.Linear(<a id="change">node_encoding_size</a><a id="change">*2</a>, representation_size),
+            <a id="change">nn.ReLU()</a>,
+            <a id="change">nn.Linear(representation_size</a>, <a id="change">int(representation_size</a><a id="change">/2</a><a id="change">))</a>,
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(<a id="change">int(representation_size</a><a id="change">/2</a><a id="change">)</a>, 1),
+            <a id="change">nn.Sigmoid()</a><a id="change">
+        )</a>
+
+        &#47&#47 Compute messages
+        self.sub_to_obj<a id="change"> = nn</a><a id="change">.Sequential(
+            </a>nn.Linear(node_encoding_size, representation_size),
+            <a id="change">nn.ReLU()</a><a id="change">
+        )</a>
+        self.obj_to_sub<a id="change"> = nn</a><a id="change">.Sequential(
+            </a>nn.Linear(node_encoding_size, representation_size),
+            <a id="change">nn.ReLU()</a><a id="change">
+        )</a>
+
+        &#47&#47 Update node hidden states
+        self.sub_update<a id="change"> = nn.Linear(
+            node_encoding_size</a><a id="change"> + representation_size</a>,
+            <a id="change">node_encoding_size</a><a id="change">,
+            bias=False
+        )</a>
+        self.obj_update<a id="change"> = nn</a><a id="change">.Linear(
+            node_encoding_size</a><a id="change"> + representation_size</a>,
+            <a id="change">node_encoding_size</a><a id="change">,
+            bias=False
+        )</a>
+
+    def associate_with_ground_truth(self, boxes_h, boxes_o, targets):
+        
+        Arguements:</code></pre>

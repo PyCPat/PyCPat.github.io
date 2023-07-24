@@ -2,44 +2,66 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        super().__init__()
 
-        inner_dim = int(dim * ff_mult)
-        <a id="change">if </a>ffn_type == "GEGLU"<a id="change">:
-            </a>self.net = nn.Sequential(
-                GEGLU(dim, inner_dim),
-                nn.Dropout(dropout),
-                nn.Linear(inner_dim, dim)
-            )
-        elif ffn_type == "standard":
-            self.net<a id="change"> = </a>nn.Sequential(
-                nn.Linear(dim, inner_dim),
-                nn.GELU(),
-                nn.Dropout(dropout),
-                nn.Linear(inner_dim, dim)
-            )
-        elif ffn_type == "bilinear":
-            self.net<a id="change"> = </a>nn.Sequential(
-                Bilinear(dim, inner_dim),
-                nn.Dropout(dropout),
-                nn.Linear(inner_dim, dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if bilinear_upsample:
+            upsample_klass = partial(InterpolateUpsample, mode = &quotbilinear&quot)
+        elif <a id="change"></a>nearest_neighbor_upsample<a id="change">:
+            </a>upsample_klass<a id="change"> = </a>partial(InterpolateUpsample, mode = &quotnearest&quot)
+        else:
+            upsample_klass<a id="change"> = </a>Upsample
 
-        self.heads = heads
+        &#47&#47 upsampling layers
+</code></pre><h3>After Change</h3><pre><code class='java'>
 
-        rows<a id="change"> = []</a>
-        for i in range(max_length):  &#47&#47 build the full Alibi relative position bias matrix
-            <a id="change">rows.append(</a>torch.LongTensor([x for x in range(0 - i, max_length - i)]).view(1, -1).abs()<a id="change">)</a>
+        &#47&#47 downsampling layers
 
-        &#47&#47 This implementation alternates between upper triangular and lower triangular biases. Using the full matrix
-        &#47&#47 doesn&quott seem to work as well - likely since the forward and backward biases would be identical (i.e. attention
-        &#47&#47 wouldn&quott be able to tell the difference between a token X spots after or X spots before). However, the lead
-        &#47&#47 author of Alibi claims that using different biases on forward vs backward positions may work.
+        skip_connect_dims<a id="change"> = []</a> &#47&#47 keep track of skip connection dimensions
 
-        lower_tri_rows = -torch.cat(rows, 0).tril()
-        upper_tri_rows = -torch.cat(rows, 0).triu()
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(in_out, *layer_params)):
+            is_last = ind &gt;= (num_resolutions - 1)
 
-        lower_tri_rows = rearrange(lower_tri_rows, &quoti j -&gt; () i j&quot)
-        upper_tri_rows<a id="change"> = </a>rearrange(upper_tri_rows, &quoti j -&gt; () i j&quot)
-        slopes = self._get_slopes(heads=int(heads / 2))
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
 
-        all_rows = []</code></pre>
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            current_dim = dim_in
+
+            &#47&#47 whether to pre-downsample, from memory efficient unet
+
+            pre_downsample = None
+
+            if memory_efficient:
+                pre_downsample = downsample_klass(dim_in, dim_out)
+                current_dim = dim_out
+
+            <a id="change">skip_connect_dims.append(</a>current_dim<a id="change">)</a>
+
+            self.downs.append(nn.ModuleList([
+                pre_downsample,
+                ResnetBlock(current_dim, current_dim, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(current_dim, current_dim, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = current_dim, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),
+                downsample_klass(current_dim, dim_out) if not memory_efficient and not is_last else None,
+            ]))
+
+        &#47&#47 middle layers
+
+        mid_dim = dims[-1]
+
+        self.mid_block1 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+        self.mid_attn = EinopsToAndFrom(&quotb c h w&quot, &quotb (h w) c&quot, Residual(Attention(mid_dim, **attn_kwargs))) if attend_at_middle else None
+        self.mid_block2 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+
+        &#47&#47 upsampling layers
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(reversed(in_out), *reversed_layer_params)):
+            is_last = ind == (len(in_out) - 1)
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            skip_connect_dim<a id="change"> = </a>skip_connect_dims.pop()
+
+            self.ups.append(nn.ModuleList([
+                ResnetBlock(dim_out + skip_connect_dim, dim_out, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),</code></pre>

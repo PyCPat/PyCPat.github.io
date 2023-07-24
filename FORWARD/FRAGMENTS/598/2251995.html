@@ -1,0 +1,15 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        proposals = self.mlp(features)
+        _, indices = torch.topk(proposals[..., -1:], k=self.cfg.PROPOSAL.TOPK, dim=1)
+        indices = indices.expand(-1, -1, proposals.shape[-1])
+        proposals<a id="change"> = </a><a id="change">proposals.gather(1</a>, indices<a id="change">)</a>
+        return proposals[..., :-1], proposals[..., -1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        proposals = self.mlp(features)
+        boxes, scores = self.reorganize_proposals(proposals)
+        scores = F.softmax(scores, dim=-1)
+        return boxes<a id="change">, scores</a>
+</code></pre>

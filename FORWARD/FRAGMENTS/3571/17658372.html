@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    
+    def forward(self, input):
+        n_units = input.size(1)
+        real, imag = <a id="change">input[:,:n_units//2]</a>, <a id="change">input[:,n_units//2:]</a>
+        
+        condition = torch.logical_and(real &gt; 0, imag &gt; 0)
+        output_real = torch.where(condition, real, torch.zeros_like(real))
+        output_imag = torch.where(condition, imag, torch.zeros_like(imag))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = input.size(1)
+        
+        real, imag = torch.split(input, <a id="change">[</a>n_units // 2, n_units // 2<a id="change"></a>], dim=1)
+        
+        condition = torch.logical_and(real &gt; 0, imag &gt; 0)
+        output_real = torch.where(condition, real, torch.zeros_like(real))</code></pre>

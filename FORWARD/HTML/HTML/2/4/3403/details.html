@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :3403
+</h3><img src='17489609.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        Decompose into instances: why 72 features (36 feature + 36 mask)
+        src = src.permute(1, 0,2) &#47&#47 shape [128, 215, 36+36]
+        fea = src[:, :, <a id="change">:36</a>]  &#47&#47 [128, 215, 36]
+        &#47&#47 mask = src[:, :, 36:]
+
+        output = torch.zeros((batch_size, self.d_K)).cuda()  &#47&#47 68 = 2*(32+1+1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        Decompose into instances: why 72 features (36 feature + 36 mask)
+        src = src.permute(1, 0,2) &#47&#47 shape [128, 215, 36+36]
+        &#47&#47 fea = src[:, :, :36]  &#47&#47 [128, 215, 36]
+        fea = src[:, :, :<a id="change">int(</a>src.shape[2]<a id="change">/</a>2<a id="change">)</a>]
+        &#47&#47 mask = src[:, :, 36:]
+
+        output = torch.zeros((batch_size, self.d_K)).cuda()  &#47&#47 68 = 2*(32+1+1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/raindrop/commit/114a0fa4619c5b2094807ebd7de0cbd30564c895#diff-b7c638e744cc24cbf0e26b15a5dd347480335d7c3d444eb55d211866066c5266L321' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17489609</div><div id='project'> Project Name: mims-harvard/raindrop</div><div id='commit'> Commit Name: 114a0fa4619c5b2094807ebd7de0cbd30564c895</div><div id='time'> Time: 2021-09-24</div><div id='author'> Author: mz4730@student.uni-lj.si</div><div id='file'> File Name: code/baselines/models.py</div><div id='m_class'> M Class Name: SEFT</div><div id='n_method'> N Class Name: SEFT</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/baselines/models.py</div><div id='n_file'> N File Name: code/baselines/models.py</div><div id='m_start'> M Start Line: 321</div><div id='m_end'> M End Line: 370</div><div id='n_start'> N Start Line: 331</div><div id='n_end'> N End Line: 398</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask = mask[:, <a id="change">:-1</a>]
+            kwargs[&quotmask&quot] = mask
+
+        out = self.net(xi, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.mask_prob &gt; 0.:
+            rand = torch.randn(inp.shape, device = x.device)
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(<a id="change">int(</a>seq<a id="change"> * </a>self.mask_prob<a id="change">)</a>, seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask = ~torch.zeros_like(inp).scatter(1, indices, 1.).bool()
+            kwargs.update(context_mask = mask)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17489603</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 GET SCORES for pseudo point locations
+        pseudo_norm = normalize_coords(pseudo_coords, height, width).unsqueeze(1)          &#47&#47 B x 1 x N x 2
+        tgt_scores_dense = scores_dense[<a id="change">1::self.window_size</a>]
+        pseudo_scores = F.grid_sample(tgt_scores_dense, pseudo_norm, mode=&quotbilinear&quot)           &#47&#47 B x 1 x 1 x N
+        pseudo_scores = pseudo_scores.reshape(batch_size, 1, n_points)                          &#47&#47 B x 1 x N
+        &#47&#47 GET DESCRIPTORS for pseudo point locations</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        &#47&#47 TODO: loop if window_size is greater than 2 (for cycle loss)
+        BW, encoder_dim, n_points = keypoint_desc.size()
+        batch_size = <a id="change">int(</a>BW<a id="change"> / </a>self.window_size<a id="change">)</a>
+        _, _, height, width = desc_dense.size()
+        kp_inds, dense_inds = get_indices(batch_size, self.window_size)
+
+        src_desc = keypoint_desc[kp_inds]  &#47&#47 B x C x N</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/utiasasrl/hero_radar_odometry/commit/3393ae645f3b4eea057784a2cd3746aefb0c81b1#diff-23e0da2f9fd5de38a06280e99a19331414bae7133b397e03cf546a99b3ddce20L17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17489606</div><div id='project'> Project Name: utiasasrl/hero_radar_odometry</div><div id='commit'> Commit Name: 3393ae645f3b4eea057784a2cd3746aefb0c81b1</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: keenburn2004@gmail.com</div><div id='file'> File Name: networks/softmax_matcher.py</div><div id='m_class'> M Class Name: SoftmaxMatcher</div><div id='n_method'> N Class Name: SoftmaxMatcher</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks/softmax_matcher.py</div><div id='n_file'> N File Name: networks/softmax_matcher.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 66</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[..., None], 0.)
+
+        gate = rearrange(gate, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        gate<a id="change"> = </a><a id="change">einsum(&quotb h n d, h n m -&gt; b h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate = gate + rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate = rearrange(gate, &quotb h n d -&gt; b n (h d)&quot)
+
+        return gate * res</code></pre><h3>After Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        gate = F.pad(gate, (0, 0, 0, 0, 1, 0), value = 0.)
+        gate = torch.cat((<a id="change">gate[:, :-1], gate[:, 1:]</a>), dim = 2)
+
+        weight, bias = self.weight, self.bias
+</code></pre>

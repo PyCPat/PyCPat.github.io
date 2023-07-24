@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :2911
+</h3><img src='16004309.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.transformer = transformer
+    
+    def forward(self, x):
+        attn_mask = <a id="change">causal_attn_mask(x.shape[1]).unsqueeze(0).repeat(x.shape[0]</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        predictions, _, _ = self.transformer(x, attn_mask)
+        return predictions
+    
+    def get_loss(self, x):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.device = device
+    
+    def forward(self, x):
+        attn_mask = <a id="change">causal_attn_mask(x.shape[1]).unsqueeze(0).repeat(x.shape[0]</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>.to(self.device)
+        predictions, attns, _ = self.transformer(x, attn_mask)
+        return predictions, attns
+    </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sea-snell/grokking/commit/9652db76d1cbdbe66e24e709168b12fa25ba00fc#diff-601195e54340df60afd6346c05531b81d795c30602d21642e3abfc7e3c22cff6L12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16004309</div><div id='project'> Project Name: sea-snell/grokking</div><div id='commit'> Commit Name: 9652db76d1cbdbe66e24e709168b12fa25ba00fc</div><div id='time'> Time: 2021-11-18</div><div id='author'> Author: sea_snell@icloud.com</div><div id='file'> File Name: grokk_replica/grokk_model.py</div><div id='m_class'> M Class Name: GrokkModel</div><div id='n_method'> N Class Name: GrokkModel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grokk_replica/grokk_model.py</div><div id='n_file'> N File Name: grokk_replica/grokk_model.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 14</div><div id='n_start'> N Start Line: 14</div><div id='n_end'> N End Line: 16</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            alibi = build_alibi_tensor(hidden_states.shape[1], n_head=self.num_heads, dtype=hidden_states.dtype)
+        &#47&#47 hidden_states: [batch_size, seq_length, hidden_size]
+        &#47&#47 repeat alibi tensor with the batch size
+        alibi = <a id="change">alibi.repeat(hidden_states.shape[0]</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>.to(hidden_states.device)  &#47&#47 TODO eliminate cpu-gpu transfer!
+
+        &#47&#47 apply preprocessing if the input is padded
+        if attention_mask is not None and 0 in attention_mask:  &#47&#47 TODO REMOVE CUDA SYNC</code></pre><h3>After Change</h3><pre><code class='java'>
+            alibi = pre_process_alibi_for_pad(alibi, attention_mask)
+        &#47&#47 otherwise repeat alibi tensor with the batch size
+        else:
+            alibi = <a id="change">alibi.repeat(hidden_states.shape[0]</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+
+        mixed_x_layer = self.query_key_value(hidden_states)
+
+        &#47&#47 [batch_size, seq_length, 3 x hidden_size] --&gt; [batch_size, seq_length, num_heads, 3 x head_dim]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bigscience-workshop/distributed-bloom/commit/5d8f7be5466b7a40fb777bde973ca773b378e83a#diff-942e96302c7f82db77b5638f6cdebbce3222fb8d600cca877056f1e1ee9b1da3L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16004311</div><div id='project'> Project Name: bigscience-workshop/distributed-bloom</div><div id='commit'> Commit Name: 5d8f7be5466b7a40fb777bde973ca773b378e83a</div><div id='time'> Time: 2022-06-20</div><div id='author'> Author: justheuristic@gmail.com</div><div id='file'> File Name: src/bloom/block.py</div><div id='m_class'> M Class Name: BloomAttention</div><div id='n_method'> N Class Name: BloomAttention</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/bloom/block.py</div><div id='n_file'> N File Name: src/bloom/block.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        emb[:, :, : self.channels] = emb_x
+        emb[:, :, self.channels : 2 * self.channels] = emb_y
+
+        return <a id="change">emb[None, :, :, :orig_ch].repeat(tensor.shape[0]</a>, 1, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+
+
+class PositionalEncodingPermute2D(nn.Module):
+    def __init__(self, channels):</code></pre><h3>After Change</h3><pre><code class='java'>
+        emb[:, :, : self.channels] = emb_x
+        emb[:, :, self.channels : 2 * self.channels] = emb_y
+
+        self.cached_penc = <a id="change">emb[None, :, :, :orig_ch].repeat(tensor.shape[0]</a>, 1, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        return self.cached_penc
+
+
+class PositionalEncodingPermute2D(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tatp22/multidim-positional-encoding/commit/6d0ad50ae049a71cfa97f9c731ce2653b0b928b6#diff-a9a63c2407adfb9e442446bd9861217ddc9a827e0d376be56f8bcd241f658692L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16004306</div><div id='project'> Project Name: tatp22/multidim-positional-encoding</div><div id='commit'> Commit Name: 6d0ad50ae049a71cfa97f9c731ce2653b0b928b6</div><div id='time'> Time: 2022-03-07</div><div id='author'> Author: peter.tatkowski@1plusx.com</div><div id='file'> File Name: positional_encodings/positional_encodings.py</div><div id='m_class'> M Class Name: PositionalEncoding2D</div><div id='n_method'> N Class Name: PositionalEncoding2D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: positional_encodings/positional_encodings.py</div><div id='n_file'> N File Name: positional_encodings/positional_encodings.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 85</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 99</div><BR>

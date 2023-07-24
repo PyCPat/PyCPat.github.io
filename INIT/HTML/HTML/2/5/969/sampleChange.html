@@ -12,8 +12,16 @@ class LinearAttentionTransformer(nn.Module):
 class LinearAttentionTransformer(nn.Module):
     def __init__(self, dim, depth, max_seq_len, heads = 8, bucket_size = 64, causal = False, one_kv_head = False):
         super().__init__()
-        layers<a id="change"> = </a><a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
+        layers = <a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
 
         for _ in range(depth):
             layer = nn.ModuleList([
-                PreNorm(dim, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head)),</code></pre>
+                PreNorm(dim, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head)),
+                PreNorm(dim, FeedForward(dim))
+            ])
+            layers.append(layer)
+
+        self.layers<a id="change"> = </a>ReversibleSequence(layers)
+
+    def forward(self, x, **kwargs):
+        x = torch.cat([x, x], dim = -1)</code></pre>

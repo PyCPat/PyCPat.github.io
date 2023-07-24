@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b, t, d, h = *x.shape, self.heads
+        assert divisible_by(t, self.buckets), f&quotsequence {t} needs to be divisible by bucket size {self.buckets}&quot
+
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim=2)</a>
+
+        merge_heads_fn = partial(merge_heads, h)
+        q, k, v = map(merge_heads_fn, qkv)
+        out = self.sinkhorn_attention(q, k, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = self.to_q(x)
+        kv = self.to_kv(x).chunk(2, dim=-1) if not self.context_only else (context, context)
+
+        qkv = (q<a id="change">, *kv</a>)
+        merge_heads_fn = partial(merge_heads, h)
+        q, k, v = map(merge_heads_fn, qkv)
+        out = self.sinkhorn_attention(q, k, v)</code></pre>

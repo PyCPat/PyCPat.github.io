@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.final_procecss = final_process
+
+    def forward(self, input: t.Tensor, additional=None):
+        x = <a id="change">t.flatten(</a>input, 2, <a id="change">-1</a><a id="change">)</a>
+        raw, rel = [], []
+        for i in range(self.att_num - 1):
+            x, re, ra = self.layers["attention_{}".format(i)](x)
+            x = self.layers["tconv_{}".format(i)](x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        raw.append(ra)
+
+        if additional is not None:
+            additional = t.cat([t.unsqueeze(additional, dim=1)] * <a id="change">x.shape[1]</a>, dim=1)
+            x = t.cat((x, additional), dim=2)
+        for i in range(self.fc_num):
+            x = self.layers["fc_{}".format(i)](x)</code></pre>

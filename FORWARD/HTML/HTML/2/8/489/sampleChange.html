@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        _, _, _, f = x.shape
+        x, h = self.gru(x.transpose(1, 2).flatten(2), h)
+        x = self.fc(self.norm(x))
+        x<a id="change"> = </a><a id="change">x.unflatten(2, (-1, f)).transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+        return x, h
+
+
+def _is_contiguous(tensor: torch.Tensor) -&gt; bool:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input: Tensor, h=None) -&gt; Tuple[Tensor, Tensor]:
+        &#47&#47 x: [B, C, T, F]
+        x<a id="change"> = </a>input.mean(dim=self.avg_dim)  &#47&#47 [B, C, T]
+        x = x.transpose(1, 2)  &#47&#47 [B, T, C]
+        x, h = self.gru(x, h)
+        x = self.fc(x).transpose(1, 2).unsqueeze(-1)
+        if self.skip is not None:
+            x = self.skip(input) + x  &#47&#47 a regular skip connection
+        elif <a id="change">self.scale is not None</a><a id="change">:
+            </a>x<a id="change"> = </a>input * self.scale(x)  &#47&#47 like in SqueezeExcitation
+        return x, h
+
+</code></pre>

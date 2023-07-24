@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if self.training and use_grad_ckpt:
+                x = torch.utils.checkpoint.checkpoint(
+                    transformer,
+                    x, past[i]<a id="change"> if </a>past is not None<a id="change"> else </a>None, mask)
+            else:
+                x, p = transformer(
+                    x, past[i] if past is not None else None, mask)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            x = transformer(x, past[i] if past is not None else None, mask)
+
+            <a id="change">if </a>not self.training<a id="change">:
+                </a>present.append(x[1])
+                x<a id="change"> = </a><a id="change">x[0]</a>
+
+        x = self.ln_head(x)
+        x = self.token_embedding(x, transposed=True)
+</code></pre>

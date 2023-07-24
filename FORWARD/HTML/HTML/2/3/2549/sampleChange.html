@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 point_features_list.append(pooled_features.view(batch_size, num_keypoints, -1))
+            point_features_list.append(pooled_features)
+        if self.model_cfg[&quotadd_ego_mask_feature&quot]:
+            ego_mask = <a id="change">torch.ones(</a>(len(new_xyz), 1)<a id="change">, device=point_features_list[0].device)</a>
+            ego_mask[new_xyz_batch_cnt[0]:] = 0
+            point_features_list.append(ego_mask)
+
+        point_features = torch.cat(point_features_list, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            boxes = torch.zeros((len(dets_list), max_len, 7), dtype=dets_list[0].dtype,
+                                device=dets_list[0].device)
+            for i, dets in enumerate(dets_list):
+                <a id="change">if len(dets)==0</a><a id="change">:
+                    </a>continue
+                cur_dets = dets.clone()
+                if self.model_cfg[&quotenlarge_selection_boxes&quot]:
+                    cur_dets[:, 3:6] += 0.5</code></pre>

@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :310
+</h3><img src='1001001.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 master_state = self.W_master_in(self.act_func(nei_message.sum(dim=0))) &#47&#47try something like this to preserve invariance for master node
+                &#47&#47 master_state = self.GRU_master(nei_message.unsqueeze(1))
+                &#47&#47 master_state = master_state[-1].squeeze(0) &#47&#47this actually doesn&quott preserve order invariance anymore
+                master_state = <a id="change">self.act_func(self.W_master_in(nei_message.sum(dim=0))).unsqueeze(0</a><a id="change">)</a>
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state).repeat((nei_message.size(0), 1)))
+                message = self.layer_norm(message)
+            else:
+                message = self.act_func(binput + nei_message)</code></pre><h3>After Change</h3><pre><code class='java'>
+                for start, size in bscope:
+                    mol_vec = nei_message.narrow(0, start, size)
+                    mol_vec = mol_vec.sum(dim=0) / size
+                    mol_vecs<a id="change"> += </a><a id="change">[mol_vec for _ in range(size)]</a>
+                master_state = self.act_func(self.W_master_in(torch.stack(mol_vecs, dim=0)))  &#47&#47 (num_bonds, hidden_size)
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state))
+                &#47&#47 message = self.layer_norm(message)
+            else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/9cce90e26bd82213412ec7fcb72225feb3cc0b15#diff-91b4e1ef89fbd915183928818e07287d60ba2d013478779025955bb686f6410dL355' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1001001</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: 9cce90e26bd82213412ec7fcb72225feb3cc0b15</div><div id='time'> Time: 2018-10-04</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: mpn.py</div><div id='m_class'> M Class Name: MPN</div><div id='n_method'> N Class Name: MPN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpn.py</div><div id='n_file'> N File Name: mpn.py</div><div id='m_start'> M Start Line: 373</div><div id='m_end'> M End Line: 380</div><div id='n_start'> N Start Line: 355</div><div id='n_end'> N End Line: 389</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0</a><a id="change">)</a>.repeat(batch,1).unsqueeze(1).to(device)
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h</code></pre><h3>After Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h<a id="change">, process_c = </a><a id="change">[torch.zeros((1, batch, embed), device = device) for _ in range(2)]</a>
+		for i in range(self.n_process):
+			query, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			query = query.squeeze(1)
+			for i in range(self.n_glimpse):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/ab78416ee96de7b4b780b38a77f4956518afa19c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1001000</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: ab78416ee96de7b4b780b38a77f4956518afa19c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x = x.mean(-2) / <a id="change">x_len.float().unsqueeze(-1</a><a id="change">)</a>
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.pre_proj(x)
+
+        if x_len is not None:
+            x = <a id="change">[x[b, : x_len[b]].mean(0) for b in range(len(x))]</a>
+            x = torch.stack(x, dim=0)
+        else:
+            x = x.mean(1)
+
+        if self.post_proj is not None:
+            x<a id="change"> = </a>self.post_proj(x)
+
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/atosystem/speechclip/commit/b2d7d1450922b5f68626bcc7751faf4feca14ed5#diff-36cf0d2ba2e002faba923e96cac943aa23122917b021c2258ac13f6f611ab652L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1000999</div><div id='project'> Project Name: atosystem/speechclip</div><div id='commit'> Commit Name: b2d7d1450922b5f68626bcc7751faf4feca14ed5</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: b06901020@ntu.edu.tw</div><div id='file'> File Name: avssl/module/pooling.py</div><div id='m_class'> M Class Name: MeanPoolingLayer</div><div id='n_method'> N Class Name: MeanPoolingLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: avssl/module/pooling.py</div><div id='n_file'> N File Name: avssl/module/pooling.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 58</div><BR>

@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :1571
+</h3><img src='5396051.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, latents, codebooks, logits, codes):
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = <a id="change">z.detach().permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>
+            k = l.shape[-1]
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()</code></pre><h3>After Change</h3><pre><code class='java'>
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = F.mse_loss(z, <a id="change">soft.detach()</a>, reduction=&quotnone&quot).mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss<a id="change"> += </a>qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5396051</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = <a id="change">xRaw.permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            if True:
+                encoderIn = self._position(encoderIn).reshape(-1, n, c)
+                &#47&#47 encoderIn = encoderIn.reshape(-1, n, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+             *************** TODO: NEED DETACH? ******************* 
+            encoderIn<a id="change"> = </a><a id="change">xRaw.detach()</a>.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            if True:
+                encoderIn = self._position(encoderIn).reshape(-1, n, c)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/28313e33915798d976881600e6b2bb79ae016589#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L129' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5396035</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 28313e33915798d976881600e6b2bb79ae016589</div><div id='time'> Time: 2021-03-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 136</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 137</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantized_input = torch.matmul(encoding_one_hot, self.embedding.weight) &#47&#47 [BHW, D]
+        quantized_input = quantized_input.view(input_shape) &#47&#47 [B x H x W x D]
+
+        return <a id="change">quantized_input.permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a> &#47&#47 [B x D x H x W]
+
+
+class VQVAE(BaseVAE):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute the VQ Losses
+        commitment_loss = F.mse_loss(quantized_latents.detach(), latents)
+        embedding_loss<a id="change"> = </a>F.mse_loss(quantized_latents, <a id="change">latents.detach()</a>)
+
+        vq_loss = commitment_loss * self.beta + embedding_loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/antixk/pytorch-vae/commit/330681d5b01126be50ee4d64433252591e50452e#diff-d886e8949de3b9b5bf99d61736c8bcb8525ea1e0ff2e12be13feb9227801c96eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5396058</div><div id='project'> Project Name: antixk/pytorch-vae</div><div id='commit'> Commit Name: 330681d5b01126be50ee4d64433252591e50452e</div><div id='time'> Time: 2020-02-14</div><div id='author'> Author: anandkrish894@gmail.com</div><div id='file'> File Name: models/vq_vae.py</div><div id='m_class'> M Class Name: VectorQuantizer</div><div id='n_method'> N Class Name: VectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/vq_vae.py</div><div id='n_file'> N File Name: models/vq_vae.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 55</div><BR>

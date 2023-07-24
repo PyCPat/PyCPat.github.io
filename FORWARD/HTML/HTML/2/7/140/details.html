@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :140
+</h3><img src='497603.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        :param h: Input features
+        :return: The output feature
+        
+        semantic_embeddings = <a id="change">[]</a>
+        <a id="change">for </a>i, g in enumerate(gs)<a id="change">:
+            </a><a id="change">semantic_embeddings.append(</a>self.gat_layers[i](g, h).flatten(1)<a id="change">)</a>
+        semantic_embeddings = torch.stack(semantic_embeddings, dim=1)  &#47&#47 (N, M, D * K)
+        return self.semantic_attention(semantic_embeddings)  &#47&#47 (N, D * K)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param h: tensor(N, d_in) 输入顶点特征
+        :return: tensor(N, K*d_out) 输出顶点特征
+        
+        zp = <a id="change">[gat(g, h).flatten(start_dim=1) for gat, g in zip(self.gats, gs)]</a>  &#47&#47 基于元路径的嵌入
+        zp = torch.stack(zp, dim=1)  &#47&#47 (N, M, K*d_out)
+        z<a id="change"> = </a>self.semantic_attention(zp)  &#47&#47 (N, K*d_out)
+        return z
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zzy979/pytorch-tutorial/commit/682a28dce444c6fd981b26ee917632039a76a610#diff-d920ffba827d039ba56238ed573baa117795916b55b879a829d38d76b6a02c80L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 497603</div><div id='project'> Project Name: zzy979/pytorch-tutorial</div><div id='commit'> Commit Name: 682a28dce444c6fd981b26ee917632039a76a610</div><div id='time'> Time: 2021-01-06</div><div id='author'> Author: 979481894@qq.com</div><div id='file'> File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_class'> M Class Name: HANLayer</div><div id='n_method'> N Class Name: HANLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_tutorial/gnn/han/model.py</div><div id='n_file'> N File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 70</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = <a id="change">[]</a>
+
+        <a id="change">for i</a> in range(used_backbone_levels-1)<a id="change">:
+            </a><a id="change">fpn_outs.append(</a>self.fpn_convs[i](laterals[i])<a id="change">)</a>
+
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels-1, 0, -1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs<a id="change"> = </a><a id="change">[self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]</a>
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels-1, 0, -1):
+            fpn_outs[i] = F.interpolate(fpn_outs[i], size=fpn_outs[0].shape[2:], mode=&quotbilinear&quot, align_corners=False)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/f07c22810a11b16fda279f6936cc10f30012b810#diff-932c247246e92aca0f79ac2e2a4151eff9650181a7db93d796be8b2b613fb3fcL62' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 497615</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: f07c22810a11b16fda279f6936cc10f30012b810</div><div id='time'> Time: 2021-08-19</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/uperhead.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/uperhead.py</div><div id='n_file'> N File Name: models/heads/uperhead.py</div><div id='m_start'> M Start Line: 63</div><div id='m_end'> M End Line: 85</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if len(x) &gt; self.split_block:
+                x[-2] = torch.cat(x[-2:], dim=2)
+
+        ret_segments = <a id="change">[]</a>
+        <a id="change">for i</a> in range(self.split_block)<a id="change">:
+            </a><a id="change">ret_segments.append(</a>self.blocks[i]([x[i] for x in segmented_x])<a id="change">)</a>
+
+        ret = [torch.cat([r[m] for r in ret_segments], dim=2) for m in range(self.num_modality)]
+
+        return ret</code></pre><h3>After Change</h3><pre><code class='java'>
+        segment_shapes = [[x.shape[2] // self.split_block] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            seg_shape[-1] += x.shape[2] % self.split_block
+        segmented_x<a id="change"> = </a><a id="change">[torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]</a>
+
+        &#47&#47 apply MSAF
+        ret_segments = [self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 497614</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>

@@ -1,0 +1,132 @@
+<html><h3>Pattern ID :659
+</h3><img src='2399136.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not isinstance(feat, tuple):
+            feat = (feat, )
+        if len(feat) &gt;= 2:
+            <a id="change">assert </a>self.with_temporal_pool
+        if self.with_temporal_pool:
+            feat = [torch.mean(x, 2, keepdim=True) for x in feat]
+        feat = torch.cat(feat, axis=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            feat = (feat, )
+
+        if len(feat) &gt;= 2:
+            maxT = max([<a id="change">x.shape[2]</a> for x in feat])
+            max_shape = (maxT, ) + feat[0].shape[3:]
+            &#47&#47 resize each feat to the largest shape (w. nearest)
+            feat = [F.interpolate(x, max_shape).contiguous() for x in feat]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 9</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/7ea0e01d94fc6b3665c3df4386af570047d98396#diff-96d95e27d9c9619405cf21c5fdc4b23664f806d3c1f87596b4cccc0822769c16L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399136</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: 7ea0e01d94fc6b3665c3df4386af570047d98396</div><div id='time'> Time: 2021-05-31</div><div id='author'> Author: 34324155+kennymckormick@users.noreply.github.com</div><div id='file'> File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='m_class'> M Class Name: SingleRoIExtractor3D</div><div id='n_method'> N Class Name: SingleRoIExtractor3D</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='n_file'> N File Name: mmaction/models/roi_extractors/single_straight3d.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= self.max_spatial_seq_len, &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        <a id="change">assert </a>depth &lt;= self.max_depth_seq_len, &quotdepth dimension is greater than the max_depth_seq_len set&quot
+
+        tokens = self.token_emb(ids)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb s d -&gt; b (s d)&quot)
+        labels = labels[:, :<a id="change">preds.shape[-1]</a>]
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)
+        return loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/5fc63c38f993876eddaa22ed38455f6bd38875d4#diff-0a4b6eb83a8d12dd7ed6dbd313edb989a9d2c9072f4b9f4bb83441f4996bffb7L152' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399124</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 5fc63c38f993876eddaa22ed38455f6bd38875d4</div><div id='time'> Time: 2022-03-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/rq_transformer.py</div><div id='m_class'> M Class Name: RQTransformer</div><div id='n_method'> N Class Name: RQTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/rq_transformer.py</div><div id='n_file'> N File Name: rq_transformer/rq_transformer.py</div><div id='m_start'> M Start Line: 153</div><div id='m_end'> M End Line: 197</div><div id='n_start'> N Start Line: 153</div><div id='n_end'> N End Line: 214</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        enc_output: batch_size, max_length, dec_embed_dim
+        hidden: n_layer, batch_size, hidden_size
+        &quot&quot&quot
+        <a id="change">assert </a>(hidden is not None) or self.use_attention, "No use of a decoder with No attention and No Hidden"
+
+        batch_sz = x.shape[0]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            hid_for_att = torch.zeros((self.dec_layers, batch_sz,
+                                    self.dec_hidden_dim )).to(self.device)
+        elif self.dec_rnn_type == &quotlstm&quot:
+            hid_for_att = <a id="change">hidden[1]</a> &#47&#47 c_n
+
+        &#47&#47 x (batch_size, 1, dec_embed_dim) -&gt; after embedding
+        x = self.embedding(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ai4bharat/indiannlp-transliteration/commit/6c10e8866b04a68a182182d1f291591320471d50#diff-2e968f438383750c4a8bcd4c9c6be4f873196e13588f94531d9140122aa144e4L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399126</div><div id='project'> Project Name: ai4bharat/indiannlp-transliteration</div><div id='commit'> Commit Name: 6c10e8866b04a68a182182d1f291591320471d50</div><div id='time'> Time: 2020-05-30</div><div id='author'> Author: josephgeobenjamin@gmail.com</div><div id='file'> File Name: algorithms/recurrent_nets.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/recurrent_nets.py</div><div id='n_file'> N File Name: algorithms/recurrent_nets.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 150</div><div id='n_end'> N End Line: 175</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = attn(x) + x
+
+            if exists(cross_attn):
+                <a id="change">assert </a>exists(context), &quotcontext must be passed in for cross attention&quot
+                x = cross_attn(x, context = context) + x
+
+            x = ff(x) + x</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.norm_out = RMSNorm(dim) if final_norm else nn.Identity()
+
+    def forward(self, x, *, context):
+        device, n = x.device, <a id="change">x.shape[-2]</a>
+        pos_emb = self.rotary_pos_emb(n, device = device)
+
+        for attn, cross_attn, ff in self.layers:
+            x = attn(x, pos_emb = pos_emb) + x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/0bc63436fc6fde40e0a97f78ef6c4e03fdfc93cd#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L185' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399127</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: 0bc63436fc6fde40e0a97f78ef6c4e03fdfc93cd</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 240</div><div id='n_end'> N End Line: 241</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        <a id="change">assert </a>channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x = x.reshape(batch_size, 1, channels * repetitions, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = x.unsqueeze(-1)
+
+        if x.dim() == 4:  &#47&#47 [N, C, H, W]
+            x = x.view(<a id="change">x.shape[0]</a>, self.config.num_channels, -1)
+
+        assert x.dim() == 3
+        assert x.shape[1] == self.config.num_channels</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/e657fc668bd0f87f5e622a8b2549cd9e8ade437a#diff-b07179cedca4d239e2586e9cb6fff9e541bc16eec55c28d6d2537cfebff90289L115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399122</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: e657fc668bd0f87f5e622a8b2549cd9e8ade437a</div><div id='time'> Time: 2022-01-11</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: simple_einet/einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_einet/einet.py</div><div id='n_file'> N File Name: simple_einet/einet.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.assert_shapes: tg.guard(x, "B, C, W, H")
+        if self.assert_shapes:
+            tg.guard(c, "B, NUMCLASSES")
+            <a id="change">assert </a>c.mean().item() in [1/c.shape[1], 0.0] &#47&#47 i.e. every row has only one el with value 1 or all 0
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        if self.assert_shapes: tg.guard(time_embedding, "B, TE")
+        hs = []</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.FloatTensor, t: torch.Tensor, c: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x_channels = x.shape[1]
+        class_embedding = self.linear_class_embedding(c).reshape(<a id="change">x.shape[0]</a>, self.class_embed_size, self.width, self.height)
+        x = torch.cat([x, class_embedding], dim=1)
+        time_embedding = self.time_embed(timestep_embedding(t, self.time_embed_size))
+        hs = []</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/michedev/ddpms-pytorch/commit/51d7ed31108f8d035371afbaa6e36b0fe04016b1#diff-a5d868609fc74698673e4480043bfdb30c0cd88bd12c32a453f25e282ea95cf5L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399132</div><div id='project'> Project Name: michedev/ddpms-pytorch</div><div id='commit'> Commit Name: 51d7ed31108f8d035371afbaa6e36b0fe04016b1</div><div id='time'> Time: 2022-09-02</div><div id='author'> Author: mdv1994@gmail.com</div><div id='file'> File Name: ddpm_pytorch/model/unet_class.py</div><div id='m_class'> M Class Name: UNetTimeStepClassConditioned</div><div id='n_method'> N Class Name: UNetTimeStepClassConditioned</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ddpm_pytorch/model/unet_class.py</div><div id='n_file'> N File Name: ddpm_pytorch/model/unet_class.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 78</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = block(x)
+        x = self.suffix(x)
+        if not self.classification:
+            <a id="change">assert </a>len(x.size()) == 3
+            &#47&#47 here x.shape = (bs, n_features, n_vertices)
+            x = x.permute(0, 2, 1)
+            &#47&#47 here x.shape = (bs,n_vertices, n_features)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        &#47&#47here x.shape = (bs, n_vertices, n_vertices, n_features)
+        if <a id="change">x.shape[3]</a> != self.original_features_num:
+            print("expected input feature {} and got {}".format(self.original_features_num,x.shape[3]))
+            return
+        x = x.permute(0, 3, 1, 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mlelarge/graph_neural_net/commit/6ad0d5bc998e20791e358053678d38d8ea866bf8#diff-7c1ece53a18959b293126dd93f3cf0f768220f50d2c1201e1601681873e6f6e4L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399133</div><div id='project'> Project Name: mlelarge/graph_neural_net</div><div id='commit'> Commit Name: 6ad0d5bc998e20791e358053678d38d8ea866bf8</div><div id='time'> Time: 2020-02-10</div><div id='author'> Author: marc.lelarge@gmail.com</div><div id='file'> File Name: models/base_model.py</div><div id='m_class'> M Class Name: BaseModel</div><div id='n_method'> N Class Name: BaseModel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base_model.py</div><div id='n_file'> N File Name: models/base_model.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 41</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            classification (torch.Tensor): Classification of the shape (B, num_classes)
+        
+        &#47&#47 Check input resolution
+        <a id="change">assert </a>input.shape[2:] == self.input_resolution, \
+            "Input resolution and utilized resolution does not match. Please update the models resolution by calling " \
+            "update_resolution the provided method."
+        &#47&#47 Perform patch embedding</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        _assert(H == <a id="change">self.img_size[0]</a>, f"Input image height ({H}) doesn&quott match model ({self.img_size[0]}).")
+        _assert(W == self.img_size[1], f"Input image width ({W}) doesn&quott match model ({self.img_size[1]}).")
+        x = self.proj(x)
+        x = self.norm(x.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3#diff-ed4e73b2f003b1bf594949d63e8066b203ff134a32665c27fe72e45e3a6607afL1021' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399134</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3</div><div id='time'> Time: 2022-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_class'> M Class Name: SwinTransformerV2CR</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer_v2_cr.py</div><div id='n_file'> N File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_start'> M Start Line: 1022</div><div id='m_end'> M End Line: 1044</div><div id='n_start'> N Start Line: 476</div><div id='n_end'> N End Line: 482</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, *args):
+        self.root._forward_edge(*args)
+        <a id="change">assert </a>len(self.output_leaves) &gt; 0
+
+        if len(self.output_leaves) == 1:
+            return self.output_leaves[0].outs</code></pre><h3>After Change</h3><pre><code class='java'>
+                    root._forward_edge(arg)
+
+        if len(self.outputs) == 1:
+            return <a id="change">self.outputs[0]</a>.outs
+        else:
+            return tuple(output_leaf.outs for output_leaf in self.outputs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gahaalt/pytorch-functional/commit/345469355fd6903b5396d0bee3705d8c6860ae0f#diff-2bf02389bdd16122f7ed6e2a77bc986f90859d69723d067c75931bbef5a41c34L32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2399129</div><div id='project'> Project Name: gahaalt/pytorch-functional</div><div id='commit'> Commit Name: 345469355fd6903b5396d0bee3705d8c6860ae0f</div><div id='time'> Time: 2021-03-10</div><div id='author'> Author: sjmikler@gmail.com</div><div id='file'> File Name: source/functional_model.py</div><div id='m_class'> M Class Name: FunctionalModel</div><div id='n_method'> N Class Name: FunctionalModel</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: source/functional_model.py</div><div id='n_file'> N File Name: source/functional_model.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 146</div><div id='n_end'> N End Line: 160</div><BR>

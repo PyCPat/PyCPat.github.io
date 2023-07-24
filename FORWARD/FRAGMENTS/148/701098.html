@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.layer_norm:
+            x = self.layer_norm1(x)
+        x = <a id="change">self.linear1(</a>x<a id="change">)</a>
+        x = self.activation(x)
+        x = F.dropout(x, dropout)
+        if self.layer_norm:
+            x<a id="change"> = </a>self.layer_norm2(x)
+        x<a id="change"> = self</a><a id="change">.linear2(</a>x<a id="change">)</a>
+        x = F.dropout(x, dropout)
+        for i in range(self.k):
+            if self.edge_drop != 0:
+                adj = self.dropout(adj, dropout_prob=self.edge_drop)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        for layer in self.layers:
+            <a id="change">if </a>isinstance(layer, nn.LayerNorm)<a id="change">:
+                </a>x<a id="change"> = </a>layer(x)
+            else:
+                x = layer(x)
+                x = self.activation(x)</code></pre>

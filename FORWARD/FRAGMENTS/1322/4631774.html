@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        N, M, D = self.embedding.size()
+        assert C == N * D
+
+        x<a id="change"> = </a><a id="change">x.view(B, N, D, L).permute(1</a>, 0, 3, <a id="change">2</a><a id="change">)</a>  &#47&#47 N, B, L, D
+        x_flat = x.detach().reshape(N, -1, D)
+
+        distances = torch.cdist(x_flat, self.embedding)</code></pre><h3>After Change</h3><pre><code class='java'>
+                                x_flat, self.embedding.t(),
+                                alpha=-2.0, beta=1.0)
+
+        indices = torch.argmin(<a id="change">distances.float()</a>, dim=-1)
+        encodings = F.one_hot(indices, M).float()
+        quantized = F.embedding(indices, self.embedding)
+        quantized = quantized.view_as(x)</code></pre>

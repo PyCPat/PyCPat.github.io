@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 get labels for input patches that were masked
+        bool_mask = mask == True
+        labels = <a id="change">input[bool_mask]</a>
+
+        &#47&#47 get generator output and get mpp loss
+        cls_logits = self.transformer(masked_input, mpp=True, **kwargs)
+        logits = cls_logits[:,1:,:]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 add cls token to input sequence
+        b, n, _ = masked_input.shape
+        cls_tokens<a id="change"> = </a>repeat(self.transformer.cls_token, &quot() n d -&gt; b n d&quot, b = b)
+        masked_input = torch.cat((cls_tokens, masked_input), dim=1)
+
+        &#47&#47 add positional embeddings to input
+        masked_input<a id="change"> += self.transformer.pos_embedding[:, :(n + 1)]</a>
+        masked_input = self.transformer.dropout(masked_input)
+
+        &#47&#47 get generator output and get mpp loss
+        masked_input = self.transformer.transformer(masked_input, **kwargs)</code></pre>

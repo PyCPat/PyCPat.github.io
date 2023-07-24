@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if identity is None:
+            identity = query
+        if key_pos is None:
+            <a id="change">if query_pos is not None</a><a id="change">:
+                &#47&#47 use query_pos if key_pos is not available
+                </a>if query_pos.shape == key.shape:
+                    key_pos<a id="change"> = </a>query_pos
+                else:
+                    warnings.warn(
+                        f"position encoding of key is" f"missing in {self.__class__.__name__}."</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+        output = tgt
+
+        <a id="change">intermediate = []</a>
+
+        for layer in self.layers:
+            output<a id="change"> = </a>layer(
+                output,
+                memory,
+                tgt_mask=tgt_mask,
+                memory_mask=memory_mask,
+                tgt_key_padding_mask=tgt_key_padding_mask,
+                memory_key_padding_mask=memory_key_padding_mask,
+                pos=pos,
+                query_pos=query_pos,
+            )
+            if self.return_intermediate:
+                <a id="change">intermediate.append(</a>self.norm(output)<a id="change">)</a>
+
+        if self.norm is not None:
+            output = self.norm(output)
+            if self.return_intermediate:
+                intermediate.pop()
+                intermediate.append(output)
+
+        if self.return_intermediate:
+            return <a id="change">torch.stack(intermediate</a><a id="change">)</a>
+
+        return output.unsqueeze(0)
+
+</code></pre>

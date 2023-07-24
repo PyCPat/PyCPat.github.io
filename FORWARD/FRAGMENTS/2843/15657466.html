@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = None 
+        if labels is not None:
+            loss_fn = nn.CrossEntropyLoss()
+            loss = loss_fn(logits.reshape(-1, <a id="change">logits.shape[-1]</a>), labels.reshape(-1))
+            &#47&#47 CRF
+            &#47&#47 loss = -self.crf(emissions=logits, 
+            &#47&#47                 tags=labels,</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 loss = loss_fn(logits.reshape(-1, logits.shape[-1]), labels.reshape(-1))
+            &#47&#47 CRF
+            mask = labels != -100
+            labels<a id="change"> = </a>labels * <a id="change">mask.to(</a>torch.long<a id="change">)</a>
+            loss = -self.crf(emissions=logits, 
+                            tags=labels,
+                            mask=mask,
+                            reduction = "token_mean")</code></pre>

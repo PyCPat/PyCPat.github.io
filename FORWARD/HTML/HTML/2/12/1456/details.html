@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :1456
+</h3><img src='4980555.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            w_u = torch.triu(x_paired[:, 1:, 1:], diagonal=1)
+            w_l = torch.tril(x_paired[:, 1:, 1:], diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            w = (w<a id="change"> + </a>w.transpose(1, 2)) / 2
+            if self.do_sampling:
+                w<a id="change"> = </a>w<a id="change"> + </a>self.gumbel_sampling(w.shape).to(w.device)
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            x_paired[:, 1:, 1:] = torch.triu(w, diagonal=1)<a id="change"> + </a><a id="change">torch.tril(</a>w<a id="change">, diagonal=-1)</a>
+        return x_paired, x_unpaired
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            w_l = w_u.transpose(1, 2) &#47&#47 torch.tril(w, diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            if self.do_sampling:
+                r<a id="change"> = </a>self.gumbel_sampling(w.shape).to(w.device)
+                <a id="change">r</a> = torch.triu(r, diagonal=0)
+                r = (<a id="change">r</a><a id="change"> + r</a><a id="change">.transpose(1</a>, <a id="change">2</a><a id="change">)</a>) / 2
+                w = w + r
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            w_u<a id="change"> = </a>torch.triu(w, diagonal=1)
+            w_l = w_u.transpose(1, 2)
+            w = w_u + w_l
+            x_paired[:, 1:, 1:] = w</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keio-bioinformatics/mxfold2/commit/faf443d1fead7a339b969485a96514d618ddb477#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4980555</div><div id='project'> Project Name: keio-bioinformatics/mxfold2</div><div id='commit'> Commit Name: faf443d1fead7a339b969485a96514d618ddb477</div><div id='time'> Time: 2020-02-18</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: Sinkhorn</div><div id='n_method'> N Class Name: SinkhornLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 263</div><div id='n_start'> N Start Line: 260</div><div id='n_end'> N End Line: 276</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            w_u = torch.triu(x_paired[:, 1:, 1:], diagonal=1)
+            w_l = torch.tril(x_paired[:, 1:, 1:], diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            w = (w + w.transpose(1, 2))<a id="change"> / </a>2
+            if self.do_sampling:
+                w<a id="change"> = </a>w<a id="change"> + </a>self.gumbel_sampling(w.shape).to(w.device)
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            x_paired[:, 1:, 1:] = torch.triu(w, diagonal=1)<a id="change"> + </a><a id="change">torch.tril(</a>w<a id="change">, diagonal=-1)</a>
+        return x_paired, x_unpaired
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            w_l = w_u.transpose(1, 2) &#47&#47 torch.tril(w, diagonal=-1)
+            w = w_u + w_l + torch.diag_embed(x_unpaired[:, 1:])
+            if self.do_sampling:
+                r<a id="change"> = </a>self.gumbel_sampling(w.shape).to(w.device)
+                <a id="change">r</a> = torch.triu(r, diagonal=0)
+                r = (r<a id="change"> + </a><a id="change">r.transpose(1</a>, <a id="change">2</a><a id="change">)</a>) / 2
+                w = w + r
+            w = torch.exp(self.sinkhorn_logsumexp(w/self.tau))
+            x_unpaired[:, 1:] = torch.diagonal(w, dim1=1, dim2=2)
+            w_u = torch.triu(w, diagonal=1)
+            w_l = w_u.transpose(1, 2)
+            w<a id="change"> = </a>w_u + w_l
+            x_paired[:, 1:, 1:] = w
+        return x_paired, x_unpaired
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mxfold/mxfold2/commit/faf443d1fead7a339b969485a96514d618ddb477#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL249' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4980553</div><div id='project'> Project Name: mxfold/mxfold2</div><div id='commit'> Commit Name: faf443d1fead7a339b969485a96514d618ddb477</div><div id='time'> Time: 2020-02-18</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: Sinkhorn</div><div id='n_method'> N Class Name: SinkhornLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 263</div><div id='n_start'> N Start Line: 260</div><div id='n_end'> N End Line: 276</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.n_iter &gt; 0:
+            x_p = torch.clamp(x_p, min=self.eps) &#47&#47 for numerical stability
+            x_u = torch.clamp(x_u, min=self.eps) 
+            x_p = (x_p<a id="change"> + </a>x_p.transpose(1, 2)) / 2
+            w<a id="change"> = </a>torch.triu(x_p, diagonal=1)<a id="change"> + </a>torch.tril(x_p, diagonal=1)
+            w = w + torch.diag_embed(x_u)
+            w = self.sinkhorn(w)
+            x_u = torch.diagonal(w, dim1=1, dim2=2)
+            x_p = torch.triu(w, diagonal=1)<a id="change"> + </a><a id="change">torch.tril(</a>w<a id="change">, diagonal=1)</a>
+        return x_p, x_u
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                x_p = torch.clamp(x_p, min=self.eps) &#47&#47 for numerical stability
+                x_u = torch.clamp(x_u, min=self.eps) 
+
+            w<a id="change"> = </a>torch.triu(x_p, diagonal=1)
+            w = w + w.transpose(1, 2) 
+            w = w + torch.diag_embed(x_u)
+            w = self.sinkhorn(w)
+            x_u = torch.diagonal(w, dim1=1, dim2=2)
+            <a id="change">w</a> = torch.triu(w, diagonal=1)
+            x_p<a id="change"> = </a>w<a id="change"> + </a><a id="change">w.transpose(1</a>, <a id="change">2</a><a id="change">)</a> 
+        return x_p, x_u
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mxfold/mxfold2/commit/c5ec9bb71ef934322e385a0476a471dc2ed8f6d1#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL209' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4980547</div><div id='project'> Project Name: mxfold/mxfold2</div><div id='commit'> Commit Name: c5ec9bb71ef934322e385a0476a471dc2ed8f6d1</div><div id='time'> Time: 2019-12-01</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: Sinkhorn</div><div id='n_method'> N Class Name: Sinkhorn</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 211</div><div id='m_end'> M End Line: 218</div><div id='n_start'> N Start Line: 219</div><div id='n_end'> N End Line: 229</div><BR>

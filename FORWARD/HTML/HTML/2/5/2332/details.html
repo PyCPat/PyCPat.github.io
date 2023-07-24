@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :2332
+</h3><img src='14396139.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_id = 0
+            <a id="change">for </a>mod in x<a id="change">:
+                </a>for x_mod in mod:
+                    x_mod *= mask[mask_id]
+                    mask_id += 1
+            return x, mask</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_shapes = [list(x.shape[:2]) + [1] * (x.dim() - 2) for x in X]
+            grouped_masks = torch.split(mask, blocks_per_mod, dim=1)
+            grouped_masks = <a id="change">[m.reshape(s) for m, s in zip(grouped_masks, mask_shapes)]</a>
+            X<a id="change"> = </a>[x * m for x, m in zip(X, grouped_masks)]
+            return X, grouped_masks
+        return X, None
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/a2c91bd6e186680ca2c41bbf22c9b57aff4654d2#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14396139</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: a2c91bd6e186680ca2c41bbf22c9b57aff4654d2</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: BlockDropout</div><div id='n_method'> N Class Name: BlockDropout</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        :return: The output feature
+        
+        semantic_embeddings = []
+        <a id="change">for </a>i, g in enumerate(gs)<a id="change">:
+            </a>semantic_embeddings.append(self.gat_layers[i](g, h).flatten(1))
+        semantic_embeddings = torch.stack(semantic_embeddings, dim=1)  &#47&#47 (N, M, D * K)
+        return self.semantic_attention(semantic_embeddings)  &#47&#47 (N, D * K)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param h: tensor(N, d_in) 输入顶点特征
+        :return: tensor(N, K*d_out) 输出顶点特征
+        
+        zp = <a id="change">[gat(g, h).flatten(start_dim=1) for gat, g in zip(self.gats, gs)]</a>  &#47&#47 基于元路径的嵌入
+        zp = torch.stack(zp, dim=1)  &#47&#47 (N, M, K*d_out)
+        z<a id="change"> = </a>self.semantic_attention(zp)  &#47&#47 (N, K*d_out)
+        return z
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zzy979/pytorch-tutorial/commit/682a28dce444c6fd981b26ee917632039a76a610#diff-d920ffba827d039ba56238ed573baa117795916b55b879a829d38d76b6a02c80L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14396128</div><div id='project'> Project Name: zzy979/pytorch-tutorial</div><div id='commit'> Commit Name: 682a28dce444c6fd981b26ee917632039a76a610</div><div id='time'> Time: 2021-01-06</div><div id='author'> Author: 979481894@qq.com</div><div id='file'> File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_class'> M Class Name: HANLayer</div><div id='n_method'> N Class Name: HANLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_tutorial/gnn/han/model.py</div><div id='n_file'> N File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 70</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                x[-2] = torch.cat(x[-2:], dim=2)
+
+        ret_segments = []
+        <a id="change">for </a>i in range(self.split_block)<a id="change">:
+            </a>ret_segments.append(self.blocks[i]([x[i] for x in segmented_x]))
+
+        ret = [torch.cat([r[m] for r in ret_segments], dim=2) for m in range(self.num_modality)]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        segment_shapes = [[x.shape[2] // self.split_block] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            seg_shape[-1] += x.shape[2] % self.split_block
+        segmented_x<a id="change"> = </a><a id="change">[torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]</a>
+
+        &#47&#47 apply MSAF
+        ret_segments = [self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14396133</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        eps = 1e-5 if x.dtype == torch.float32 else 1e-3
+        var<a id="change"> = </a>torch.var(x, dim = 1, unbiased = False, keepdim = True)
+        mean<a id="change"> = </a><a id="change">torch.mean(</a>x<a id="change">, dim = 1, keepdim = True)</a>
+        <a id="change">return </a>(x - mean) * var.clamp(min = eps).rsqrt() * self.g
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer("beta", torch.zeros(dim))
+
+    def forward(self, x):
+        return F.layer_norm(x, <a id="change">x.shape[-1:]</a>, self.gamma, self.beta)
+
+&#47&#47 positional embeds
+</code></pre>

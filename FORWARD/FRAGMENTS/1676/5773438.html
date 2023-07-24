@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = 0
+        for i in range(3):
+            if self.is_ssim:
+                loss += pytorch_ssim.ssim(x_vgg[i], <a id="change">y_vgg[i].detach()</a>)
+            else:
+                if self.relative:
+                    loss += self.criterion(x_vgg[i],y_vgg[i].detach(),resize_to_match(mask,x_vgg[i]))</code></pre><h3>After Change</h3><pre><code class='java'>
+                loss += self.criterion(resize_to_match(mask,x_vgg[i])*x_vgg[i],resize_to_match(mask,y_vgg[i])*y_vgg[i].detach()) &#47&#47 
+                &#47&#47 loss += self.criterion(x_vgg[i], y_vgg[i].detach())
+            &#47&#47 VGG Style Loss
+            <a id="change">if </a><a id="change">self.use_style:
+                </a>x_gram = self.gram_matrix(x_vgg[i])
+                y_gram = self.gram_matrix(<a id="change">y_vgg[i].detach()</a>)
+                style_loss<a id="change"> += </a>F.l1_loss(x_gram, y_gram)
+
+        return {"content":loss, "style":style_loss}
+</code></pre>

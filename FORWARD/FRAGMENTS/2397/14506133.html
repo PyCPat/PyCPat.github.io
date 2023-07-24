@@ -1,0 +1,50 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                bias=False)
+
+    def forward(self, x, c, c_):
+        c_onehot = torch.cat((c<a id="change">, c_</a>), dim=1).to(self.device)
+        width_size = x.size(3)
+
+        x = self.conv_layer_1(x)
+
+        x = self.down_sample_1(x)
+        x = self.down_sample_2(x)
+
+        x = x.contiguous().view(-1, 2304, width_size // 4)
+        x = self.down_conversion(x)
+
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_2(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+        x = self.residual_1(x, c_onehot)
+
+        x = self.up_conversion(x)
+        x = x.view(-1, 256, 9, width_size // 4)
+
+        x = self.up_sample_1(x)
+        x = self.up_sample_2(x)
+        
+        x = self.conv_1(x)
+        outputs_reshaped = x[:, :, : -1, :]
+        print(outputs_reshaped.shape)
+
+        <a id="change">return </a>outputs_reshaped
+
+class Discriminator(nn.Module):
+    def __init__(self, num_speakers=4):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.up_sample_1(x)
+        x = self.up_sample_2(x)
+        
+        out<a id="change"> = </a><a id="change">self.out(</a>x<a id="change">)</a>
+        <a id="change">return </a>out
+
+class Discriminator(nn.Module):
+    def __init__(self, num_speakers=4):</code></pre>

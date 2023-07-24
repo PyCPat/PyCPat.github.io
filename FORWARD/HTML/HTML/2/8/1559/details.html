@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1559
+</h3><img src='5331539.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if prediction.size() != target.size() or target.ndim &lt; 3:
+            raise TypeError(fInputs must be of the same shape (batch_size,channels,samples) 
+                            got {prediction.size()} and {target.size()} instead)
+        prediction,target = <a id="change">prediction.unsqueeze(1</a><a id="change">)</a>,target.unsqueeze(1)
+
+class Avergeloss(nn.Module):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise TypeError(fInputs must be of the same shape (batch_size,channels,samples) 
+                            got {prediction.size()} and {target.size()} instead)
+        
+        target_energy = torch.sum(target<a id="change">**2</a>,keepdim=True,dim=-1)
+        scaling_factor = torch.sum(prediction*target,keepdim=True,dim=-1) / target_energy
+        target_projection = target * scaling_factor
+        noise<a id="change"> = </a>prediction - target_projection
+        ratio = torch.sum(target_projection**2,dim=-1) / torch.sum(noise**2,dim=-1)
+        si_sdr = 10<a id="change">*</a>torch.log10(ratio).mean(dim=-1)
+
+        if self.reduction == "sum":
+            si_sdr<a id="change"> = </a><a id="change">si_sdr.sum()</a>
+        elif self.reduction == "mean":
+            si_sdr = si_sdr.mean()
+        else:
+            pass</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/shahules786/mayavoz/commit/838b7d2357c75c14e09bc7c4daef1518269fae63#diff-1216cd6e4983e226a4c9132377d64d3e0ec559180fde7d155e97f769dc93791cL49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5331539</div><div id='project'> Project Name: shahules786/mayavoz</div><div id='commit'> Commit Name: 838b7d2357c75c14e09bc7c4daef1518269fae63</div><div id='time'> Time: 2022-09-28</div><div id='author'> Author: shahules786@gmail.com</div><div id='file'> File Name: enhancer/loss.py</div><div id='m_class'> M Class Name: Si_SDR</div><div id='n_method'> N Class Name: Si_SDR</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enhancer/loss.py</div><div id='n_file'> N File Name: enhancer/loss.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                top, down, left, right = self.query_neighbors(y_anchor=y_anchor, x_anchor=x_anchor, padding=padding)
+                mean_matrix = self.mean_table[top:down + 1, left:right + 1, :]
+                std_matrix = self.std_table[top:down + 1, left:right + 1, :]
+                x_mean = <a id="change">mean_matrix.mean(dim=0).mean(dim=0).unsqueeze(0</a><a id="change">)</a>.unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel *  &#47&#47 should deal with the boundary
+                x_std = std_matrix.mean(dim=0).mean(dim=0).unsqueeze(0).unsqueeze(-1).unsqueeze(-1) &#47&#47self.kernel * 
+                &#47&#47x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                &#47&#47x_std = x_std.unsqueeze(-1).unsqueeze(-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                top = y_anchor
+                down = y_anchor + 2 * padding + 1
+                left = x_anchor
+                right<a id="change"> = </a>x_anchor<a id="change"> + 2 *padding + 1</a>
+                x_mean = self.padded_mean_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                x_std = self.padded_std_table[:,:,top:down + 1, left:right + 1] &#47&#47 1, C, H, W
+                assert self.kernel.shape == x.mean.shape
+                x_mean = x_mean<a id="change"> * </a>self.kernel &#47&#47 1, C, H, W
+                x_std = x_std * self.kernel &#47&#47 1, C, H, W
+                x_mean<a id="change"> = </a><a id="change">x_mean.flatten(start_dim=2).sum(dim=2)</a> &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_std = x_std.flatten(start_dim=2).sum(dim=2) &#47&#47 [1, C, H, W] -&gt; [1, C, H * W] -&gt; [1, C]
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1) &#47&#47 [1, C] -&gt; [1, C, 1, 1]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaminyou/urust/commit/63159b688ad053bad7fd41015170f131d547439d#diff-a975422337f96b3fbd8d66278ef6f8ddcf4a1907e7f6fec6d44ff39c9836145eL74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5330258</div><div id='project'> Project Name: kaminyou/urust</div><div id='commit'> Commit Name: 63159b688ad053bad7fd41015170f131d547439d</div><div id='time'> Time: 2022-01-27</div><div id='author'> Author: kaminyouho@aetherai.com</div><div id='file'> File Name: models/kin.py</div><div id='m_class'> M Class Name: KernelizedInstanceNorm</div><div id='n_method'> N Class Name: KernelizedInstanceNorm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/kin.py</div><div id='n_file'> N File Name: models/kin.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 115</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        a.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        sigma = torch.ones_like(inp, device=inp.device, dtype=inp.dtype) * self.m
+        src = torch.ones_like(<a id="change">label.unsqueeze(1</a><a id="change">)</a>, dtype=inp.dtype, device=inp.device) - self.m
+        sigma.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        return self.loss(a * (inp - sigma) * self.gamma, label)</code></pre><h3>After Change</h3><pre><code class='java'>
+        ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
+        an = torch.clamp_min(sn.detach() + self.m, min=0.)
+
+        sigma_p = <a id="change">1</a><a id="change"> - </a>self.m
+        sigma_n = self.m
+
+        logit_p<a id="change"> = </a>ap * (sp - sigma_p) * self.gamma
+        logit_n = an * (sn - sigma_n) * self.gamma
+
+        loss = torch.log(1 + torch.clamp_max(torch.exp(logit_n).sum() * <a id="change">torch.exp(- logit_p).sum()</a>, max=1e38))
+        z<a id="change"> = </a>- torch.exp(- loss) + 1
+
+        sp.backward(gradient=z * ap * torch.softmax(logit_p, dim=0))
+        sn.backward(gradient=z * an * torch.softmax(logit_n, dim=0))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tinyzeamays/circleloss/commit/9c909ec6274b1c9c139a62f9f84ecf91c5edee35#diff-ee4498af95089c1dacb3bbdedbf8cffa6eecc60617a8a1d405b07f6f81510abbL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5332024</div><div id='project'> Project Name: tinyzeamays/circleloss</div><div id='commit'> Commit Name: 9c909ec6274b1c9c139a62f9f84ecf91c5edee35</div><div id='time'> Time: 2020-04-03</div><div id='author'> Author: 1049793129@qq.com</div><div id='file'> File Name: circle_loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLossBackward</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: circle_loss.py</div><div id='n_file'> N File Name: circle_loss.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 58</div><BR>

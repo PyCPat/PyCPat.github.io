@@ -1,0 +1,92 @@
+<html><h3>Pattern ID :938
+</h3><img src='3446055.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+           input from Prediction Network.
+        
+        assert input_TN.shape != 4, "Arg 1 must be a 4 dim tensor"
+        <a id="change">assert </a>input_PN.shape != 4, "Arg 2 must be a 4 dim tensor"
+
+        if self.joint == "sum":
+            joint = input_TN + input_PN</code></pre><h3>After Change</h3><pre><code class='java'>
+        input_PN: torch.Tensor
+           input from Prediction Network.
+        
+        <a id="change">if input_TN.shape != 4</a><a id="change">:
+            </a>raise ValueError("Arg 1 must be a 4 dim tensor")
+        if <a id="change">input_PN.shape != 4</a>:
+            <a id="change">raise </a><a id="change">ValueError("Arg 2 must be a 4 dim tensor"</a><a id="change">)</a>
+
+        if self.joint == "sum":
+            joint = input_TN + input_PN
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/6f004e0c5f965f306a75432392157bdbf525a623#diff-5828fbc2b3eebaa0ebd2aaaabb5e0b595b7f58b8ff82f97041f598ee21380132L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3446055</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 6f004e0c5f965f306a75432392157bdbf525a623</div><div id='time'> Time: 2020-07-14</div><div id='author'> Author: a.heba@irit.fr</div><div id='file'> File Name: speechbrain/nnet/transducer/transducer_joint.py</div><div id='m_class'> M Class Name: Transducer_joint</div><div id='n_method'> N Class Name: Transducer_joint</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/nnet/transducer/transducer_joint.py</div><div id='n_file'> N File Name: speechbrain/nnet/transducer/transducer_joint.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 74</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        else:
+            assert y_anchor is not None
+            <a id="change">assert </a>x_anchor is not None
+
+            if self.collection_mode:
+                x_var, x_mean = torch.var_mean(x, dim=(2, 3))  &#47&#47 [B, C]</code></pre><h3>After Change</h3><pre><code class='java'>
+            return self.forward_normal(x)
+
+        else:
+            <a id="change">if mode == self.Mode.PHASE_CACHING</a><a id="change">:
+                </a>x_var, x_mean = torch.var_mean(x, dim=(2, 3))  &#47&#47 [B, C]
+                x_std = torch.sqrt(x_var + self.eps)
+                &#47&#47 x_anchor, y_anchor = [B], [B]
+                &#47&#47 table = [H, W, C]
+                &#47&#47 update std and mean to corresponing coordinates
+                self.mean_table[y_anchor, x_anchor] = x_mean
+                self.std_table[y_anchor, x_anchor] = x_std
+                x_mean = x_mean.unsqueeze(-1).unsqueeze(-1)
+                x_std = x_std.unsqueeze(-1).unsqueeze(-1)
+
+            elif <a id="change">mode == self.Mode.PHASE_INFERENCE</a>:
+
+                def multiply_kernel(x):
+                    x = x * self.kernel  &#47&#47 [1, C, H, W] * [H, W] = [1, C, H, W]
+                    x = x.sum(dim=(2, 3), keepdim=True)  &#47&#47 [1, C, 1, 1]
+                    return x
+
+                &#47&#47 currently, could support batch size = 1 for
+                &#47&#47 kernelized instance normalization
+                assert x.shape[0] == 1
+
+                top = y_anchor
+                down = y_anchor + 2 * self.padding + 1
+                left = x_anchor
+                right = x_anchor + 2 * self.padding + 1
+                x_mean = self.padded_mean_table[
+                    :, :, top:down, left:right
+                ]  &#47&#47 1, C, H, W
+                x_std = self.padded_std_table[
+                    :, :, top:down, left:right
+                ]  &#47&#47 1, C, H, W
+                x_mean = multiply_kernel(x_mean)
+                x_std = multiply_kernel(x_std)
+
+            else:
+                <a id="change">raise </a><a id="change">ValueError(f&quotUnknown mode: {mode}.&quot</a><a id="change">)</a>
+
+            x = (x - x_mean) / x_std * self.weight + self.bias
+            return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaminyou/urust/commit/c9d42dadce2543138d4c7acb172f9b96b8bb4f33#diff-59268e83655d0def42705adae136a430b0eb0dcb84d232f718df4fd30b46e3fdL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3446049</div><div id='project'> Project Name: kaminyou/urust</div><div id='commit'> Commit Name: c9d42dadce2543138d4c7acb172f9b96b8bb4f33</div><div id='time'> Time: 2022-07-15</div><div id='author'> Author: uno@aetherai.com</div><div id='file'> File Name: F-LSeSim/models/kin.py</div><div id='m_class'> M Class Name: KernelizedInstanceNorm</div><div id='n_method'> N Class Name: KernelizedInstanceNorm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: F-LSeSim/models/kin.py</div><div id='n_file'> N File Name: F-LSeSim/models/kin.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 160</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        H, W = self.input_resolution
+        B, L, C = x.shape
+        <a id="change">assert </a>L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."
+
+        x = x.view(B, H, W, C)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        H, W = self.input_resolution
+        B, L, C = x.shape
+        <a id="change">if  L != H * W</a><a id="change">:
+            </a>raise ValueError(&quotPatchMerging forward method, input feature has wrong size.&quot)
+        if <a id="change">H % 2 != 0</a> or W % 2 != 0:
+            <a id="change">raise </a><a id="change">ValueError(f"PatchMerging forward method, x size ({H}*{W}) are not even."</a><a id="change">)</a>
+
+        x = x.view(B, H, W, C)
+
+        x0 = x[:, 0::2, 0::2, :]  &#47&#47 B H/2 W/2 C</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c#diff-698ef303146f83333dbef91357773726560288f0e3fb7831ae9727aff9b7965bL33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3446050</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: 5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: rashit.bayazitov.1995@gmail.co</div><div id='file'> File Name: src/models/modules/blocks/patch_merging.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/modules/blocks/patch_merging.py</div><div id='n_file'> N File Name: src/models/modules/blocks/patch_merging.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 60</div><BR>

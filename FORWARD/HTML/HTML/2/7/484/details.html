@@ -1,0 +1,68 @@
+<html><h3>Pattern ID :484
+</h3><img src='1732602.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        src_flatten<a id="change"> = </a><a id="change">srcs.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>                                &#47&#47 [Batch, Patches, HiddenDim] 
+        pos_embed_flatten = pos_embeds.flatten(2).transpose(1, 2)                    &#47&#47 [Batch, Patches, HiddenDim] 
+        
+        bs, _, c = src_flatten.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        <a id="change">for </a>idx in range(len(srcs))<a id="change">:
+            </a>srcs[idx] = srcs[idx].flatten(2).transpose(1, 2)
+            pos[idx]<a id="change"> = </a>pos[idx].flatten(2).transpose(1, 2)
+            
+        bs, _, c = srcs[0].shape
+        query_embed, tgt = torch.split(query_embed, c, dim=1)       &#47&#47 Tgt in contrast to detr not zeros, but learnable</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/b13e8b2db58100e624031db6b1f256e65dd68a87#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1732602</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: b13e8b2db58100e624031db6b1f256e65dd68a87</div><div id='time'> Time: 2022-05-07</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedDecoder</div><div id='n_method'> N Class Name: FocusedDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 109</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        seq_length = seg.size(1)
+        device = seg.device
+        emb<a id="change"> = </a><a id="change">self.pe[: seq_length].transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        return emb.to(device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            no_pad_num = (src != 0).sum(dim=-1)
+        
+        emb =  torch.zeros(batch_size, seq_length, self.emb_size)
+        <a id="change">for i</a> in range(batch_size)<a id="change">:
+            </a>emb[i, :no_pad_num[i], :]<a id="change"> = </a>self.emb[2: no_pad_num[i]+2]
+
+        return emb.to(device)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tencent/tencentpretrain/commit/2bc6d47065d7a5e6907d449cf5114248000274fe#diff-41324f66c261d89709c738adf53f3dddb45e587991d1f8c895e23d2dedb742dbL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1732603</div><div id='project'> Project Name: tencent/tencentpretrain</div><div id='commit'> Commit Name: 2bc6d47065d7a5e6907d449cf5114248000274fe</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: 40569026+JINGZIjingzi@users.noreply.github.com</div><div id='file'> File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_class'> M Class Name: SinusoidalposEmbedding</div><div id='n_method'> N Class Name: SinusoidalposEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='n_file'> N File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        src_flatten<a id="change"> = </a><a id="change">srcs.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>                                &#47&#47 [Batch, Patches, HiddenDim] 
+        pos_embed_flatten = pos_embeds.flatten(2).transpose(1, 2)                    &#47&#47 [Batch, Patches, HiddenDim] 
+        
+        bs, _, c = src_flatten.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        <a id="change">for idx</a> in range(len(srcs))<a id="change">:
+            </a>srcs[idx] = srcs[idx].flatten(2).transpose(1, 2)
+            pos[idx]<a id="change"> = </a>pos[idx].flatten(2).transpose(1, 2)
+            
+        bs, _, c = srcs[0].shape
+        query_embed, tgt = torch.split(query_embed, c, dim=1)       &#47&#47 Tgt in contrast to detr not zeros, but learnable</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/b13e8b2db58100e624031db6b1f256e65dd68a87#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1732600</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: b13e8b2db58100e624031db6b1f256e65dd68a87</div><div id='time'> Time: 2022-05-07</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedDecoder</div><div id='n_method'> N Class Name: FocusedDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 109</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, input_lengths):
+        x = self.convolutions(x)
+        x<a id="change"> = </a><a id="change">x.transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+        x = nn.utils.rnn.pack_padded_sequence(x,
+                                              input_lengths,
+                                              batch_first=True)
+        self.lstm.flatten_parameters()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, input_lengths):
+        o = x
+        <a id="change">for layer</a> in self.convolutions<a id="change">:
+            </a>o<a id="change"> = </a>layer(o)
+        o = o.transpose(1, 2)
+        o = nn.utils.rnn.pack_padded_sequence(o,
+                                              input_lengths,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/d282222553c97821f1028495fb7161d2f60b491d#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1732604</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: d282222553c97821f1028495fb7161d2f60b491d</div><div id='time'> Time: 2020-05-12</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 76</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 78</div><BR>

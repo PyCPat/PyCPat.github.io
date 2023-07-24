@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(ScaledDotProductAttention, self).__init__()
+
+    def forward(self):
+        <a id="change">pass</a>
+
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mask = None
+
+    def forward(self, query, key, value, mask):
+        score = torch.bmm(query, key.transpose(1, 2))<a id="change"> / </a>np.sqrt(self.dim)
+
+        if mask is not None:
+            score.masked_fill_(mask, -float(&quotinf&quot))
+
+        attn = F.softmax(score, -1)
+        context<a id="change"> = </a>torch.bmm(attn, value)
+        return context<a id="change">, attn</a>
+
+    def set_mask(self, mask):
+        
+        Sets indices to be masked</code></pre>

@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :1232
+</h3><img src='4389478.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                if self.dynamic or self.grid[i].shape[2:4] != x[i].shape[2:4]:
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y<a id="change"> = </a><a id="change">x[i].clone()</a>
+                y[..., :5 + self.nc].sigmoid_()
+                if self.inplace:
+                    y[..., 0:2] = (y[..., 0:2] * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh</code></pre><h3>After Change</h3><pre><code class='java'>
+                    wh = (wh.sigmoid() * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf.sigmoid(), mask), 4)
+                else:  &#47&#47 Detect (boxes only)
+                    xy, wh, conf = <a id="change">x[i]</a>.sigmoid().split((2, 2, self.nc + 1), 4)
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (wh * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf), 4)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ultralytics/yolov5/commit/060837406542c5c65301b8fde641f4d92a1f395e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4389478</div><div id='project'> Project Name: ultralytics/yolov5</div><div id='commit'> Commit Name: 060837406542c5c65301b8fde641f4d92a1f395e</div><div id='time'> Time: 2022-09-17</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Detect</div><div id='n_method'> N Class Name: Detect</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 77</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            -1, 1
+        )  &#47&#47 for numerical stability
+        with torch.no_grad():
+            origin_cos<a id="change"> = </a><a id="change">cos_theta.clone()</a>
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = (</code></pre><h3>After Change</h3><pre><code class='java'>
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index = index.byte().bool()
+        output = cos_theta * 1.0
+        output[index] = <a id="change">cos_theta_m[index]</a>
+        output *= self.s
+        return output
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cavalleria/cavaface/commit/98a21048f5dce435a6639a288dafc4c6be61be05#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4389479</div><div id='project'> Project Name: cavalleria/cavaface</div><div id='commit'> Commit Name: 98a21048f5dce435a6639a288dafc4c6be61be05</div><div id='time'> Time: 2021-08-25</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, prediction, target, printable=False):
+        &#47&#47preprocessing
+        prediction = prediction.clone()
+        target<a id="change"> = </a><a id="change">target.clone()</a>
+
+        mask = target &gt; 0
+        target[mask] = (target[mask] - target[mask].min()) / (target[mask].max() - target[mask].min()) * 9 + 1
+        target[mask] = 10. / target[mask]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print(mask2.type(torch.float32).mean())
+        &#47&#47prediction[mask2] = (prediction[mask2] - prediction[mask2].min()) / (prediction[mask2].max() - prediction[mask2].min()) * 9 + 1
+        &#47&#47prediction[mask2] = 10. / prediction[mask2]
+        <a id="change">prediction[~mask2]</a> = 0.
+
+        if printable:
+            print("******************************************************")</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/antocad/focusondepth/commit/2ec64cb2e594f726f9cbddf07ff72d3be1a47fdc#diff-794a8c94157304263f269787005a800f5b8a7f0cae0d6ca2bf0fe59f6913053eL125' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4389470</div><div id='project'> Project Name: antocad/focusondepth</div><div id='commit'> Commit Name: 2ec64cb2e594f726f9cbddf07ff72d3be1a47fdc</div><div id='time'> Time: 2021-12-30</div><div id='author'> Author: antoine.cadiou@icloud.com</div><div id='file'> File Name: FOD/Loss.py</div><div id='m_class'> M Class Name: ScaleAndShiftInvariantLoss</div><div id='n_method'> N Class Name: ScaleAndShiftInvariantLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: FOD/Loss.py</div><div id='n_file'> N File Name: FOD/Loss.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 144</div><BR>

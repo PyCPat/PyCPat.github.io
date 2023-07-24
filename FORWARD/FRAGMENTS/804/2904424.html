@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        :return:
+        
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes_output.device))
+        alpha = <a id="change">torch.sigmoid(</a>self.alpha<a id="change">)</a>
+        embed = (1<a id="change"> - </a>alpha) * items_embedding.clone() + alpha * nodes_output
+        return embed
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_nodes = self.items_total
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes_output.device))
+        batch_embedding = []
+        for <a id="change">_</a> in range(batch_size):
+            output_node_features = nodes_output[id:id + num_nodes, :]
+            embed = (<a id="change">1</a><a id="change"> - </a>self.alpha) * items_embedding
+
+            embed = embed + self.alpha * output_node_features
+            <a id="change">batch_embedding.append(</a>embed<a id="change">)</a>
+            id += num_nodes
+        batch_embedding = torch.stack(batch_embedding)
+        return batch_embedding
+</code></pre>

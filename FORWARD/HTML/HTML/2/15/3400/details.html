@@ -1,0 +1,119 @@
+<html><h3>Pattern ID :3400
+</h3><img src='17480459.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.embedding.weight.data.uniform_(1./self.K, 1./self.K)
+
+    def forward(self, input: Tensor):
+        input = <a id="change">input.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a> &#47&#47 [B x D x H x W] -&gt; [B x H x W x D]
+        input_shape = input.shape
+        flat_input = input.contiguous().view(-1, self.D)    &#47&#47 [BHW x D]
+
+        &#47&#47 Compute L2 distance between input and embedding weights
+        dist = torch.sum(flat_input**2, dim = 1, keepdim=True) + \
+               torch.sum(self.embedding.weight ** 2, dim = 1) - \
+               2 * torch.matmul(flat_input, self.embedding.weight.t()) &#47&#47 [BHW x K]
+
+        &#47&#47 Get the encoding that has the min distance
+        encoding_inds = torch.argmin(dist, dim = 1).view(-1, 1) &#47&#47 [BHW, 1]
+
+        &#47&#47 Convert to one-hot encodings
+        device = input.device
+        encoding_one_hot = torch.zeros(encoding_inds.size(0), self.K, device=device)
+        encoding_one_hot.scatter_(1, encoding_inds, 1.) &#47&#47 [BHW x K]
+
+        &#47&#47 Quantize the input
+        quantized_input = torch.matmul(encoding_one_hot, self.embedding.weight) &#47&#47 [BHW, D]
+        quantized_input = quantized_input.view(input_shape) &#47&#47 [B x H x W x D]
+
+        <a id="change">return </a>quantized_input.permute(0, 3, 1, 2) &#47&#47 [B x D x H x W]
+
+
+class VQVAE(BaseVAE):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.embedding.weight.data.uniform_(-1 / self.K, 1 / self.K)
+
+    def forward(self, latents: Tensor) -&gt; Tensor:
+        latents = <a id="change">latents.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>.contiguous()  &#47&#47 [B x D x H x W] -&gt; [B x H x W x D]
+        latents_shape = latents.shape
+        flat_latents = latents.view(-1, self.D)  &#47&#47 [BHW x D]
+
+        &#47&#47 Compute L2 distance between latents and embedding weights
+        dist = torch.sum(flat_latents ** 2, dim=1, keepdim=True) + \
+               torch.sum(self.embedding.weight ** 2, dim=1) - \
+               2 * torch.matmul(flat_latents, self.embedding.weight.t())  &#47&#47 [BHW x K]
+
+        &#47&#47 Get the encoding that has the min distance
+        encoding_inds = torch.argmin(dist, dim=1).unsqueeze(1)  &#47&#47 [BHW, 1]
+
+        &#47&#47 Convert to one-hot encodings
+        device = latents.device
+        encoding_one_hot = torch.zeros(encoding_inds.size(0), self.K, device=device)
+        encoding_one_hot.scatter_(1, encoding_inds, 1)  &#47&#47 [BHW x K]
+
+        &#47&#47 Quantize the latents
+        quantized_latents = torch.matmul(encoding_one_hot, self.embedding.weight)  &#47&#47 [BHW, D]
+        quantized_latents = quantized_latents.view(latents_shape)  &#47&#47 [B x H x W x D]
+
+        &#47&#47 Compute the VQ Losses
+        commitment_loss<a id="change"> = </a>F.mse_loss(quantized_latents.detach(), latents)
+        embedding_loss = F.mse_loss(quantized_latents, latents.detach())
+
+        vq_loss<a id="change"> = </a>commitment_loss<a id="change"> * </a>self.beta + embedding_loss
+
+        &#47&#47 Add the residue back to the latents
+        quantized_latents = latents + (quantized_latents - latents).detach()
+
+        <a id="change">return </a>quantized_latents.permute(0, 3, 1, 2).contiguous(), vq_loss  &#47&#47 [B x D x H x W]
+
+
+&#47&#47 class VectorQuantizer(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/antixk/pytorch-vae/commit/330681d5b01126be50ee4d64433252591e50452e#diff-d886e8949de3b9b5bf99d61736c8bcb8525ea1e0ff2e12be13feb9227801c96eL19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17480459</div><div id='project'> Project Name: antixk/pytorch-vae</div><div id='commit'> Commit Name: 330681d5b01126be50ee4d64433252591e50452e</div><div id='time'> Time: 2020-02-14</div><div id='author'> Author: anandkrish894@gmail.com</div><div id='file'> File Name: models/vq_vae.py</div><div id='m_class'> M Class Name: VectorQuantizer</div><div id='n_method'> N Class Name: VectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/vq_vae.py</div><div id='n_file'> N File Name: models/vq_vae.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for i in range(self.Local_B):
+            col_output = self.inter_transformer[i](col_input.permute(1, 0, 2)).permute(1, 0, 2)
+
+        col_output = <a id="change">col_output.reshape(B, K, P, N).permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+
+        output = output + col_output
+
+        <a id="change">return </a>output
+
+
+class Separator(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        row_f = row_z3 + row_z
+
+        row_output<a id="change"> = row_f.reshape(B, P, K, N).permute(0</a>, <a id="change">3</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>
+
+        &#47&#47 inter DPT
+        col_z = row_output.permute(0, 2, 3, 1).reshape(B*K, P, N)
+        col_z1 = col_z + self.inter_PositionalEncoding(col_z)
+
+        for i in range(self.Local_B):
+            col_z3 = self.inter_transformer[i](col_z1.permute(1, 0, 2)).permute(1, 0, 2)
+
+        col_f = col_z3<a id="change"> + </a>col_z
+        col_output<a id="change"> = </a>col_f.reshape(B, K, P, N).permute(0, 3, 1, 2)
+
+        <a id="change">return </a>col_output
+
+
+class Separator(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhongyang-debug/attention-is-all-you-need-in-speech-separation/commit/1496ec5ecbb700c2e354cfa41d21d735e281ff01#diff-7c8acbb8793a584bfe2ae80520bfb2e801e64479bf65e6f723edd575961f9c17L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17480456</div><div id='project'> Project Name: zhongyang-debug/attention-is-all-you-need-in-speech-separation</div><div id='commit'> Commit Name: 1496ec5ecbb700c2e354cfa41d21d735e281ff01</div><div id='time'> Time: 2021-12-23</div><div id='author'> Author: 68770882+Zhongyang-debug@users.noreply.github.com</div><div id='file'> File Name: model/sepformer.py</div><div id='m_class'> M Class Name: DPTBlock</div><div id='n_method'> N Class Name: DPTBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/sepformer.py</div><div id='n_file'> N File Name: model/sepformer.py</div><div id='m_start'> M Start Line: 166</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            Tensor: batch x 3 x height x width
+        
+        result = torch.tensordot(image + self.shift, self.matrix, dims=1)
+        <a id="change">return </a><a id="change">result.view(image.shape).permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+
+
+class DeCompressJpeg(nn.Module):
+    Full JPEG decompression algorithm</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.matrix = nn.Parameter(torch.from_numpy(matrix))
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x<a id="change"> = x.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>
+        out = torch.tensordot(x, self.matrix, dims=1)<a id="change"> + </a>self.shift
+        out<a id="change"> = </a>out.view(x.shape)
+
+        <a id="change">return </a>out
+
+
+class _ChromaSubsampling(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/real_esrgan-pytorch/commit/edfbb6820fc2084c2ffe132e9b64a348a323d1e7#diff-91082468503b154b2d3c94cbaadeb7add2ea070f5f30593233516dd4b7e2ac5bL1803' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17480454</div><div id='project'> Project Name: lornatang/real_esrgan-pytorch</div><div id='commit'> Commit Name: edfbb6820fc2084c2ffe132e9b64a348a323d1e7</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: imgproc.py</div><div id='m_class'> M Class Name: YCbCr2RGBJpeg</div><div id='n_method'> N Class Name: _RGBToYCbCr</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imgproc.py</div><div id='n_file'> N File Name: imgproc.py</div><div id='m_start'> M Start Line: 1803</div><div id='m_end'> M End Line: 1811</div><div id='n_start'> N Start Line: 1202</div><div id='n_end'> N End Line: 1207</div><BR>

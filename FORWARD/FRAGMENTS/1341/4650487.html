@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        indexing = &quotij&quot))
+
+        grid.requires_grad = False
+        grid = <a id="change">grid.type_as(</a>x<a id="change">)</a>
+
+        vgrid = grid + offsets
+
+        vgrid_h, vgrid_w = vgrid.unbind(dim = 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 relative positional bias
+
+        grid<a id="change"> = </a>create_grid_like(x)
+        rel_pos_bias = self.rel_pos_bias(grid, vgrid)
+        sim<a id="change"> = </a>sim<a id="change"> + </a>rel_pos_bias
+
+        &#47&#47 numerical stability
+
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+
+        &#47&#47 attention
+
+        attn = sim.softmax(dim = -1)
+        attn = self.dropout(attn)
+
+        &#47&#47 aggregate and combine heads
+
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)
+        out = self.to_out(out)
+
+        if return_vgrid:
+            return out, vgrid
+
+        <a id="change">return </a>out
+</code></pre>

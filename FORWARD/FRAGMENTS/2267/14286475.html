@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        content_q = q if not self.norm_queries else q.softmax(dim=-2)
+
+        content_out = einsum(&quotbhde,bhdn-&gt;bhen&quot, context, content_q)
+        content_out = <a id="change">content_out.reshape(</a>b, <a id="change">-1</a>, x, y<a id="change">)</a>
+        content_out = self.to_out(content_out)
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+
+            Yh = <a id="change">self.norm(</a>Yh<a id="change">)</a>
+
+            Iy = calc_reindexing_tensor(y, L, device)
+            Py = einsum(&quotxir,rd-&gt;xid&quot, Iy, self.rel_columns)
+            Sy = einsum(&quotndxy,xid-&gt;nixy&quot, q, Py)
+            rel_pos_out = einsum(&quotnixy,neiy-&gt;nexy&quot, Sy, Yh)
+            del Iy
+
+            content_out<a id="change"> = </a>content_out + rel_pos_out
+
+        content_out = rearrange(content_out, &quot(b h) c x y -&gt; b (h c) x y&quot, b = b, h = h)
+        return self.to_out(content_out)</code></pre>

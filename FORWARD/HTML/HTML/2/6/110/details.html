@@ -1,0 +1,96 @@
+<html><h3>Pattern ID :110
+</h3><img src='464135.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.band_split(input)
+
+        for idx, key in enumerate(<a id="change">self.bands[:-1]</a>):
+            _x = self.net[key](x[idx])
+            stacked.append(_x)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 TODO: scale
+        x = self.nonlinear2d(x)
+
+        output<a id="change"> = </a><a id="change">torch.cat([</a>x, x_invalid<a id="change"></a>]<a id="change">, dim=2)</a>
+
+        return output
+
+    </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 464135</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 70</div><div id='m_end'> M End Line: 85</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(<a id="change">stacked[1:]</a>, dim=1)
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        key = self.bands[-1] &#47&#47 &quotfull&quot
+        x = self.net[key](input)
+        x<a id="change"> = </a><a id="change">torch.cat([</a>stacked, x<a id="change"></a>]<a id="change">, dim=1)</a>
+        x = self.d2block(x)
+        output = self.gated_conv2d(x)
+
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/628cce12054e3d56f6fd72af21cdb87a520f32ae#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 464133</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 628cce12054e3d56f6fd72af21cdb87a520f32ae</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = <a id="change">self.blocks[:1]</a> if len(blocks) == 0 else blocks
+
+        block_args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, block_args))
+        return _ReversibleFunction.apply(x, blocks, block_args)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x, **kwargs):
+        x = <a id="change">torch.cat([</a>x, x<a id="change"></a>]<a id="change">, dim=-1)</a>
+
+        blocks = self.blocks
+        args = route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out<a id="change"> =  </a>_ReversibleFunction.apply(x, blocks, args)
+        return torch.stack(out.chunk(2, dim=-1)).sum(dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/d5b9c649e59290b15c15f85d0bb182cb20b699fb#diff-27d52caf7b4f725ff9fe7d9e57172c62a7c8744ebafb23663512e7990a5ed131L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 464130</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: d5b9c649e59290b15c15f85d0bb182cb20b699fb</div><div id='time'> Time: 2020-04-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/reversible.py</div><div id='n_file'> N File Name: sinkhorn_transformer/reversible.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 process in chunks of heads
+
+        out = <a id="change">[]</a>
+
+        max_heads = self.max_heads_process
+
+        for q_chunk, k_chunk, v_chunk in zip(q.split(max_heads, dim = 1), k.split(max_heads, dim = 1), v.split(max_heads, dim = 1)):
+            sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q_chunk, k_chunk)
+
+            if exists(context_mask):
+                sim = sim.masked_fill(~context_mask, mask_value)
+
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+            attn = sim.softmax(dim = -1)
+            attn = self.dropout(attn)
+
+            out_chunk = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v_chunk)
+            out.append(out_chunk)
+
+        &#47&#47 concat all the heads together
+
+        out<a id="change"> = </a><a id="change">torch.cat(</a>out<a id="change">, dim = 1)</a>
+
+        &#47&#47 merge heads and then combine with linear
+
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-ar-pytorch/commit/be3765300f5aae03b779edf0e256b7a74bda5fc8#diff-5ab51011b3cb840590737cf5342761683a8f59ac8817bfe6b989cf9e213218e4L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 464136</div><div id='project'> Project Name: lucidrains/perceiver-ar-pytorch</div><div id='commit'> Commit Name: be3765300f5aae03b779edf0e256b7a74bda5fc8</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_class'> M Class Name: CausalPrefixAttention</div><div id='n_method'> N Class Name: CausalPrefixAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='n_file'> N File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 178</div><BR>

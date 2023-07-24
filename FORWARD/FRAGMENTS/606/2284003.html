@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        log_p = self.leaf(x)
+
+        &#47&#47 Forward through all layers, bottom up
+        <a id="change">for </a><a id="change">layer</a> in self.layers<a id="change">:
+            </a>log_p<a id="change"> = </a><a id="change">layer(</a>log_p<a id="change">)</a>
+
+        &#47&#47 Root layer merges all scopes that are left
+        log_p = self.prod(log_p)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self._forward_layers(x)
+
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size<a id="change">, features, channels, repetitions</a> = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        assert channels == 1  &#47&#47 number of channels should be 1 at this point
+        x = x.view(batch_size, 1, repetitions, 1)</code></pre>

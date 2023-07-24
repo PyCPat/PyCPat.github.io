@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for (self_attn, cross_attn, ff) in self.layers:
+            x = self_attn(x)
+            if exists(cross_attn):
+                <a id="change">x</a> = cross_attn(x, context = context, mask = mask, context_mask = context_mask)
+            x = <a id="change">ff(</a>x<a id="change">)</a>
+        return x
+
+class TransformerWrapper(nn.Module):
+    def __init__(self, *, num_tokens, max_seq_len, layer_blocks, heads = 8, return_logits = True):</code></pre><h3>After Change</h3><pre><code class='java'>
+        for (self_attn, cross_attn, ff) in self.layers:
+            x = self_attn(x) + x
+            if exists(cross_attn):
+                <a id="change">x</a> = cross_attn(x, context = context, mask = mask, context_mask = context_mask)<a id="change"> + </a>x
+            x = <a id="change">ff(</a>x<a id="change">) + </a>x
+        return x
+
+class TransformerWrapper(nn.Module):</code></pre>

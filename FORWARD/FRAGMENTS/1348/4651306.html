@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        )  &#47&#47 for numerical stability
+        with torch.no_grad():
+            origin_cos = cos_theta.clone()
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0))<a id="change">, label</a>].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = (</code></pre><h3>After Change</h3><pre><code class='java'>
+            cos_theta_m = cos_theta_m.half()
+        index = torch.zeros_like(cos_theta)
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index<a id="change"> = </a><a id="change">index.byte().bool()</a>
+        output = cos_theta * 1.0
+        output[index] = cos_theta_m[index]
+        output *= self.s
+        return output</code></pre>

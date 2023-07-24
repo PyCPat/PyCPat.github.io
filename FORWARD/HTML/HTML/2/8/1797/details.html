@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :1797
+</h3><img src='13068695.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+
+        <a id="change">return </a>z_q<a id="change">, loss, (None, None, encoding_indices)</a>
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)
+        avg_probs<a id="change"> = </a><a id="change">torch.mean(</a>encodings<a id="change">, dim=0)</a>
+        perplexity<a id="change"> = </a>torch.exp(<a id="change">-torch.sum(avg_probs * torch.log(avg_probs + 1e-10))</a>)
+
+        <a id="change">return </a>z_q, loss, (perplexity<a id="change">, encodings, encoding_indices</a>)
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/39e8b24fa405a4320d7c683e7054ae18ef4563f4#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13068695</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 39e8b24fa405a4320d7c683e7054ae18ef4563f4</div><div id='time'> Time: 2021-07-28</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: GumbelQuantizer</div><div id='n_method'> N Class Name: GumbelQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            )
+        )
+
+        <a id="change">return </a>tight_loss<a id="change">, logs</a>
+
+    def get_distortion(self, Y_hat, targets):
+        raise NotImplementedError()
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 E_x[...]. shape: shape: []
+        rate = rate.mean(0)
+        distortion<a id="change"> = </a><a id="change">distortion.mean(</a>0<a id="change">)</a>
+        loss<a id="change"> = </a>distortion<a id="change"> + </a>self.beta * rate
+
+        logs.update(
+            dict(
+                loose_loss=loose_loss / math.log(BASE_LOG),
+                loss=loss / math.log(BASE_LOG),
+                rate=rate / math.log(BASE_LOG),
+                distortion=distortion / math.log(BASE_LOG),
+            )
+        )
+
+        <a id="change">return </a>loss<a id="change">, logs</a>
+
+    def get_distortion(self, Y_hat, targets):
+        raise NotImplementedError()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yanndubs/lossyless/commit/0a24755494712f360cfbc0e8b8ac9f6907157997#diff-a23e2e04059e40be395b9c191a83e67f186f919edfe19507cc3f4a8876a7a250L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13068693</div><div id='project'> Project Name: yanndubs/lossyless</div><div id='commit'> Commit Name: 0a24755494712f360cfbc0e8b8ac9f6907157997</div><div id='time'> Time: 2020-12-04</div><div id='author'> Author: yanndubois96@gmail.com</div><div id='file'> File Name: lossyless/losses.py</div><div id='m_class'> M Class Name: Loss</div><div id='n_method'> N Class Name: Loss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lossyless/losses.py</div><div id='n_file'> N File Name: lossyless/losses.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mel_loss + kl_loss + postnet_loss + duration_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,  &#47&#47 L_VG
+            kl_loss,  &#47&#47 L_KL
+            postnet_loss,  &#47&#47 L_PN
+            duration_loss</a>,  &#47&#47 L_dur
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif self.helper_type == "ctc":
+            for alignment_logprob in alignment_logprobs:
+                ctc_loss += self.sum_loss(alignment_logprob, src_lens, mel_lens)
+            ctc_loss<a id="change"> = </a><a id="change">ctc_loss.mean()</a>
+            helper_loss<a id="change"> = </a>(self.ctc_weight_start if step &lt;= self.ctc_step else self.ctc_weight_end)<a id="change"> * </a>ctc_loss
+
+        total_loss = (
+            mel_loss + kl_loss + postnet_loss + duration_loss + helper_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,  &#47&#47 L_VG
+            kl_loss,  &#47&#47 L_KL
+            postnet_loss,  &#47&#47 L_PN
+            duration_loss,  &#47&#47 L_dur
+            helper_loss</a>,
+        )
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/portaspeech/commit/814cdda1ebf7dc626708db2bcf20fdb9207f4345#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13068696</div><div id='project'> Project Name: keonlee9420/portaspeech</div><div id='commit'> Commit Name: 814cdda1ebf7dc626708db2bcf20fdb9207f4345</div><div id='time'> Time: 2022-02-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: PortaSpeechLoss</div><div id='n_method'> N Class Name: PortaSpeechLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 80</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 127</div><BR>

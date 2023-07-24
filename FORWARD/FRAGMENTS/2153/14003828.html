@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        n_dims = input.dim()
+        dims = list(range(n_dims))
+
+        input_permuted = input.permute(1, 0, *<a id="change">dims[2:]</a>)
+
+        left, right = self.left, self.right
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        input_left, input_right = torch.abs(input_permuted[left]), torch.abs(input_permuted[right])
+        loss = - F.cosine_similarity(input_left, input_right, dim=2, eps=self.eps)
+
+        loss = <a id="change">loss.permute(1</a>, 0, <a id="change">2</a><a id="change">)</a>.contiguous() / self.n_combinations
+        loss = loss.sum(dim=2)
+        loss = loss.mean(dim=1)
+</code></pre>

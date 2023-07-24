@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Self-attention
+        causality_mask = np.tril(np.ones((1, 1, seq_len, seq_len), dtype=np.int))
+        attn_mask<a id="change"> = torch.from_numpy(causality_mask).to(</a>self.device<a id="change">)</a>
+        &#47&#47 attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        for block in self.transformer_block:
+            seq = block(seq, attn_mask)
+        seq = seq * valid_mask[:, :, None].float()
+
+        his_vector<a id="change"> = (seq * (position == 1).float()[:, :, None]).sum(1</a><a id="change">)</a>
+        return his_vector
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        ])
+
+    def forward(self, seq, lengths):
+        batch_size, seq_len = seq.size(0)<a id="change">, seq.size(1)</a>
+        len_range = torch.from_numpy(np.arange(seq_len)).to(self.device)
+        valid_mask = len_range[None, :] &lt; lengths[:, None]
+
+        &#47&#47 Position embedding</code></pre>

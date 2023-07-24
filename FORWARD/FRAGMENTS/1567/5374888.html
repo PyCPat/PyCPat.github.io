@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        target_entropy_weight = entropy(g_t_temp_softmax).detach()
+        target_entropy_weight = 1 + torch.exp(-target_entropy_weight)
+        target_entropy_weight = train_bs * target_entropy_weight / torch.sum(target_entropy_weight)
+        c_matrix<a id="change"> = </a>g_t_temp_softmax.mul(<a id="change">target_entropy_weight.view(-1</a>,1<a id="change">)</a>).transpose(1,0).mm(g_t_temp_softmax)
+        c_matrix = c_matrix / torch.sum(c_matrix, dim=1)
+        mcc_loss = (torch.sum(c_matrix) - torch.trace(c_matrix)) / class_num
+        return mcc_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+        entropy_weight = entropy(predictions).detach()
+        entropy_weight = 1 + torch.exp(-entropy_weight)
+        entropy_weight = (batch_size * entropy_weight / torch.sum(entropy_weight)).unsqueeze(dim=1)  &#47&#47 batch_size x 1
+        class_confusion_matrix<a id="change"> = </a>torch.mm(<a id="change">(predictions * entropy_weight).transpose(1</a>, <a id="change">0</a><a id="change">)</a>, predictions)
+        class_confusion_matrix = class_confusion_matrix / torch.sum(class_confusion_matrix, dim=1)
+        mcc_loss = (torch.sum(class_confusion_matrix) - torch.trace(class_confusion_matrix)) / num_classes
+        return mcc_loss</code></pre>

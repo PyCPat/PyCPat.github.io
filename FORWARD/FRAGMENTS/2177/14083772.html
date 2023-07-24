@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        data = torch.cat((data, enc_pos), dim = -1)
+        data = rearrange(data, &quotb ... d -&gt; b (...) d&quot)
+
+        x = self.latents<a id="change"> + </a>self.pos_emb
+        x<a id="change"> = </a><a id="change">repeat(</a>x, <a id="change">&quotn d -&gt; b n d&quot</a><a id="change">, b = b)</a>
+
+        for cross_attn, cross_ff, latent_attn, latent_ff in self.layers:
+            x = cross_attn(x, context = data, mask = mask) + x
+            x = cross_ff(x) + x</code></pre><h3>After Change</h3><pre><code class='java'>
+        data = torch.cat((data, enc_pos), dim = -1)
+        data = rearrange(data, &quotb ... d -&gt; b (...) d&quot)
+
+        x = <a id="change">repeat(</a>self.latents, <a id="change">&quotn d -&gt; b n d&quot</a><a id="change">, b = b)</a>
+
+        for cross_attn, cross_ff, latent_attn, latent_ff in self.layers:
+            x = cross_attn(x, context = data, mask = mask) + x
+            x = cross_ff(x) + x</code></pre>

@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :455
+</h3><img src='1677378.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            probs = torch.exp(logits - torch.logsumexp(logits, dim=1, keepdims=True))
+            out = torch.sum(o * probs, dim=1)
+
+        <a id="change">assert </a>out.shape == v.shape
+        return out, buckets
+
+class LSHSelfAttention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, qk, v, query_len = None):
+        batch_size, seqlen, dim = qk.shape
+        query_len = seqlen<a id="change"> if query_len is None</a><a id="change"> else </a>query_len
+        device = qk.device
+
+        n_buckets = seqlen // self.bucket_size</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/1c17a6f2759dab1a8d81d153682eecd41ac8d64e#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL155' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677378</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 1c17a6f2759dab1a8d81d153682eecd41ac8d64e</div><div id='time'> Time: 2020-01-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: LSHAttention</div><div id='n_method'> N Class Name: LSHAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 204</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 295</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        enc_output: batch_size, max_length, dec_embed_dim
+        hidden: n_layer, batch_size, hidden_size
+        &quot&quot&quot
+        <a id="change">assert </a>(hidden is not None) or self.use_attention, "No use of a decoder with No attention and No Hidden"
+
+        batch_sz = x.shape[0]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 passing the concatenated vector to the GRU
+        &#47&#47 output: (batch_size, n_layers, hidden_size)
+        &#47&#47 hidden: n_layers, batch_size, hidden_size | if LSTM (h_n, c_n)
+        output, hidden = self.dec_rnn(x, hidden)<a id="change"> if hidden is not None</a><a id="change"> else </a>self.dec_rnn(x)
+
+        &#47&#47 output shape == (batch_size * 1, hidden_size)
+        output =  output.view(-1, output.size(2))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ai4bharat/indiannlp-transliteration/commit/6c10e8866b04a68a182182d1f291591320471d50#diff-2e968f438383750c4a8bcd4c9c6be4f873196e13588f94531d9140122aa144e4L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677380</div><div id='project'> Project Name: ai4bharat/indiannlp-transliteration</div><div id='commit'> Commit Name: 6c10e8866b04a68a182182d1f291591320471d50</div><div id='time'> Time: 2020-05-30</div><div id='author'> Author: josephgeobenjamin@gmail.com</div><div id='file'> File Name: algorithms/recurrent_nets.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/recurrent_nets.py</div><div id='n_file'> N File Name: algorithms/recurrent_nets.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 150</div><div id='n_end'> N End Line: 175</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, image, text = None, image_embed = None, text_encodings = None, unet_number = None):
+        assert not (len(self.unets) &gt; 1 and not exists(unet_number)), f&quotyou must specify which unet you want trained, from a range of 1 to {len(self.unets)}, if you are training cascading DDPM (multiple unets)&quot
+        unet_number = default(unet_number, 1)
+        <a id="change">assert </a>1 &lt;= unet_number &lt;= len(self.unets)
+
+        index = unet_number - 1
+        unet = self.unets[index]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        text_encodings = self.get_text_encodings(text) if exists(text) and not exists(text_encodings) else None
+
+        lowres_cond_img = image<a id="change"> if unet_number &gt; 1</a><a id="change"> else </a>None
+        ddpm_image = resize_image_to(image, target_image_size)
+        return self.p_losses(unet, ddpm_image, times, image_embed = image_embed, text_encodings = text_encodings, lowres_cond_img = lowres_cond_img)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/f37c26e85619161c86afec22dfc4879764c0b710#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL1271' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1677382</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: f37c26e85619161c86afec22dfc4879764c0b710</div><div id='time'> Time: 2022-04-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 1273</div><div id='m_end'> M End Line: 1292</div><div id='n_start'> N Start Line: 1278</div><div id='n_end'> N End Line: 1296</div><BR>

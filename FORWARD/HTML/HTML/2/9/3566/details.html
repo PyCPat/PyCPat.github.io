@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :3566
+</h3><img src='17654156.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        shape = x.shape
+        n, c, h, w = shape
+        if c == 1:
+            x = <a id="change">x.expand(1</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        return self._quantizer(self._encoder(x)), torch.tensor([h, w], dtype=torch.int)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(self._levels):
+            head = self._heads[i]
+            z = head(latent)
+            <a id="change">if </a>i &lt; self._levels - 1<a id="change">:
+                </a>mapper<a id="change"> = </a>self._mappers[i]
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent<a id="change"> - </a>hard
+            else:
+                code = self._quantizers[i](z)
+            codes.append(code)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17654156</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x = self.dropout(x)
+        x = <a id="change">x.unsqueeze(0).expand(</a>targets.size(0), <a id="change">-1</a>, <a id="change">-1</a>, <a id="change">-1</a>, <a id="change">-1</a><a id="change">)</a>
+
+        copies, bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)
+        predictions = x.new(bsz * copies * (tsz - self.offset + 1) * steps - ((steps + 1) * steps // 2) * copies * bsz)</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        start = end = 0
+        for <a id="change">i</a> in range(steps):
+            offset = i + self.offset
+            end = start + (tsz - offset) * bsz * copies
+            <a id="change">if </a>self.infonce<a id="change">:
+                </a>predictions[start:end] = torch.einsum(
+                    "bct,nbct-&gt;tbn", x[..., :-offset, i], targets[..., offset:]
+                ).flatten()
+            else:
+                pos_num = (end - start) // copies
+                predictions[start:end]<a id="change"> = </a>torch.einsum(
+                    "bct,nbct-&gt;nbt", x[..., :<a id="change">-offset</a>, i], targets[..., offset:]
+                ).flatten()
+                labels[start : start + pos_num] = 1.0
+                if weights is not None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mohammadkhalifa/fairseq-tagging/commit/3335de5f441ee1b3824e16dcd98db620e40beaba#diff-9b4dd2bdb515c86c631253c805af3041e9bbf4ce7f68af6a1900ef5b4ffa5c5aL408' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17654152</div><div id='project'> Project Name: mohammadkhalifa/fairseq-tagging</div><div id='commit'> Commit Name: 3335de5f441ee1b3824e16dcd98db620e40beaba</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: alexei.b@gmail.com</div><div id='file'> File Name: fairseq/models/wav2vec.py</div><div id='m_class'> M Class Name: Wav2VecPredictionsModel</div><div id='n_method'> N Class Name: Wav2VecPredictionsModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fairseq/models/wav2vec.py</div><div id='n_file'> N File Name: fairseq/models/wav2vec.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 439</div><div id='n_start'> N Start Line: 638</div><div id='n_end'> N End Line: 691</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        shape = x.shape
+        n, c, h, w = shape
+        if c == 1:
+            x = <a id="change">x.expand(1</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        return self._quantizer(self._encoder(x)), torch.tensor([h, w], dtype=torch.int)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        for <a id="change">i</a> in range(self._levels):
+            head = self._heads[i]
+            z = head(latent)
+            <a id="change">if </a>i &lt; self._levels - 1<a id="change">:
+                </a>mapper = self._mappers[i]
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent<a id="change"> - </a>hard
+            else:
+                code<a id="change"> = </a>self._quantizers[i](z)
+            codes.append(code)
+        return codes
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17654155</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>

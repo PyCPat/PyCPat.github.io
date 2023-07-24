@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b_k = bucket(buckets, k)
+
+        Wsq = expand_dim(self.linear_sort_q, 0, b).reshape(bh, dim, dim_sort)
+        Wsk<a id="change"> = </a><a id="change">expand_dim(self.linear_sort_k, 0, b).reshape(</a>bh, dim, dim_sort<a id="change">)</a>        
+
+        b_qi, b_ki = b_q.mean(dim=2), b_k.mean(dim=2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        Wsq, Wsk, pos_q, pos_k = map(partial(expand_batch_and_merge_head, b), (self.linear_sort_q, self.linear_sort_k, self.q_pos_emb, self.k_pos_emb))
+
+        b_qi = <a id="change">torch.cat(</a>(b_q.mean(dim=2), pos_q)<a id="change">, dim=-1)</a>
+        b_ki<a id="change"> = </a><a id="change">torch.cat(</a>(b_k.mean(dim=2), pos_k)<a id="change">, dim=-1)</a>
+
+        sq = b_qi @ Wsq
+        sk = b_ki @ Wsk
+</code></pre>

@@ -1,15 +1,45 @@
 <html><h3>Pattern ID :343
-</h3><img src='1202326.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='1196593.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        self.seq_len = seq_len
-        self.prob_survival = prob_survival
 
-        self.to_embed = nn.Embedding(num_tokens, dim)<a id="change"> if </a>exists(num_tokens)<a id="change"> else </a>nn.Identity()
+        for _ in range(depth):
+            attn = get_attn()
+            parallel_net = get_attn()<a id="change"> if </a>twin_attention<a id="change"> else </a>get_ff()
 
-        self.layers = nn.ModuleList([Residual(PreNorm(dim, gMLPBlock(dim = dim, dim_ff = dim_ff, seq_len = seq_len, heads = heads, window = window))) for i in range(depth)])
-</code></pre><h3>After Change</h3><pre><code class='java'>
+            f = residual_fn_wrapper(attn)
+            g = residual_fn_wrapper(parallel_net)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for ind in range(depth):
+            layer_num = ind + 1
+            use_pkm<a id="change"> = </a>layer_num in <a id="change">cast_tuple(</a>pkm_layers<a id="change">)</a>
+            parallel_net = None
+
+            attn = get_attn()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/fbae34221f4e2c2d777551a5e92b8bba5ae2385c#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL751' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1196593</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: fbae34221f4e2c2d777551a5e92b8bba5ae2385c</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: Reformer</div><div id='n_method'> N Class Name: Reformer</div><div id='m_method'> M Method Name: __init__(32)</div><div id='n_method'> N Method Name: __init__(30)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 757</div><div id='m_end'> M End Line: 772</div><div id='n_start'> N Start Line: 751</div><div id='n_end'> N End Line: 789</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                resnet_block(dim_out + dim_in, dim_out, time_emb_dim = time_dim),
+                resnet_block(dim_out + dim_in, dim_out, time_emb_dim = time_dim),
+                LinearAttention(dim_out),
+                Upsample(dim_out, dim_in)<a id="change"> if </a>not is_last<a id="change"> else  </a>nn.Conv2d(dim_out, dim_in, 3, padding = 1)
+            ]))
+
+        default_out_dim = input_channels</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 downsample factors
+
+        downsample_factor<a id="change"> = </a><a id="change">cast_tuple(</a>downsample_factor, len(dim_mults)<a id="change">)</a>
+        assert len(downsample_factor) == len(dim_mults)
+
+        &#47&#47 layers
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/54557120880bb9adbea9f93a29a2c432b67991c1#diff-932ae956742e2e7e4ca0d46053f9844b2504bc2cf2dca187505413a2f363e4a3L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1196578</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 54557120880bb9adbea9f93a29a2c432b67991c1</div><div id='time'> Time: 2023-02-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_class'> M Class Name: UViT</div><div id='n_method'> N Class Name: UViT</div><div id='m_method'> M Method Name: __init__(17)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_start'> M Start Line: 295</div><div id='m_end'> M End Line: 383</div><div id='n_start'> N Start Line: 309</div><div id='n_end'> N End Line: 409</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_logits = nn.Sequential(
+            nn.LayerNorm(dim),
+            nn.Linear(dim, num_tokens)
+        )<a id="change"> if </a>exists(num_tokens)<a id="change"> else </a>nn.Identity()
+
+    def forward(self, x):
+        x = self.to_embed(x)</code></pre><h3>After Change</h3><pre><code class='java'>
 
         self.to_embed = nn.Embedding(num_tokens, dim)
 
@@ -17,19 +47,18 @@
         layers = nn.ModuleList([])
 
         for ind, w in zip(range(depth), window):
-            layer_blocks = nn.ModuleList([</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/7642e36ff19c6b299a77e5c1ace038e9e6726202#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1202326</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: 7642e36ff19c6b299a77e5c1ace038e9e6726202</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: gMLPGPT</div><div id='n_method'> N Class Name: gMLPGPT</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 195</div><div id='n_start'> N Start Line: 194</div><div id='n_end'> N End Line: 215</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            layer_blocks = nn.ModuleList([</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/7642e36ff19c6b299a77e5c1ace038e9e6726202#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L171' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1196583</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: 7642e36ff19c6b299a77e5c1ace038e9e6726202</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: gMLPGPT</div><div id='n_method'> N Class Name: gMLPGPT</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 195</div><div id='n_start'> N Start Line: 194</div><div id='n_end'> N End Line: 215</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
             is_last = ind == (len(in_out) - 1)
             layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
             layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
-            transformer_block_klass = TransformerBlock<a id="change"> if </a>layer_attn<a id="change"> else </a>(LinearAttentionTransformerBlock if use_linear_attn else Identity)
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock<a id="change"> if </a>use_linear_attn<a id="change"> else </a>Identity)
 
             skip_connect_dim = skip_connect_dims.pop()
 </code></pre><h3>After Change</h3><pre><code class='java'>
-        layer_attns_depth = cast_tuple(layer_attns_depth, num_layers)
         layer_cross_attns = cast_tuple(layer_cross_attns, num_layers)
 
-        use_linear_attn = <a id="change">cast_tuple(</a>use_linear_attn, num_layers<a id="change">)</a>
-        use_linear_cross_attn = cast_tuple(use_linear_cross_attn, num_layers)
+        use_linear_attn = cast_tuple(use_linear_attn, num_layers)
+        use_linear_cross_attn = <a id="change">cast_tuple(</a>use_linear_cross_attn, num_layers<a id="change">)</a>
 
         assert all([layers == num_layers for layers in list(map(len, (resnet_groups, layer_attns, layer_cross_attns)))])
 
@@ -57,34 +86,4 @@
         layer_params<a id="change"> = </a>[num_resnet_blocks, resnet_groups, layer_attns, layer_attns_depth, layer_cross_attns, use_linear_attn, use_linear_cross_attn]
         reversed_layer_params = list(map(reversed, layer_params))
 
-        &#47&#47 downsampling layers</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/d4c45ab1c8380de71e5dd1044dc4100ef9ac76ce#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L1065' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1202327</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: d4c45ab1c8380de71e5dd1044dc4100ef9ac76ce</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1250</div><div id='m_end'> M End Line: 1343</div><div id='n_start'> N Start Line: 1246</div><div id='n_end'> N End Line: 1358</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-
-        for _ in range(depth):
-            attn = get_attn()
-            parallel_net = get_attn()<a id="change"> if </a>twin_attention<a id="change"> else </a>get_ff()
-
-            f = residual_fn_wrapper(attn)
-            g = residual_fn_wrapper(parallel_net)</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        for ind in range(depth):
-            layer_num = ind + 1
-            use_pkm<a id="change"> = </a>layer_num in <a id="change">cast_tuple(</a>pkm_layers<a id="change">)</a>
-            parallel_net = None
-
-            attn = get_attn()
-</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/fbae34221f4e2c2d777551a5e92b8bba5ae2385c#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL746' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1202331</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: fbae34221f4e2c2d777551a5e92b8bba5ae2385c</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: Reformer</div><div id='n_method'> N Class Name: Reformer</div><div id='m_method'> M Method Name: __init__(32)</div><div id='n_method'> N Method Name: __init__(30)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 757</div><div id='m_end'> M End Line: 772</div><div id='n_start'> N Start Line: 751</div><div id='n_end'> N End Line: 789</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-                resnet_block(dim_in, dim_in, time_emb_dim = time_dim),
-                resnet_block(dim_in, dim_in, time_emb_dim = time_dim),
-                LinearAttention(dim_in),
-                Downsample(dim_in, dim_out)<a id="change"> if </a>not is_last<a id="change"> else </a>nn.Conv2d(dim_in, dim_out, 3, padding = 1)
-            ]))
-
-        mid_dim = dims[-1]</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        &#47&#47 downsample factors
-
-        downsample_factor<a id="change"> = </a><a id="change">cast_tuple(</a>downsample_factor, len(dim_mults)<a id="change">)</a>
-        assert len(downsample_factor) == len(dim_mults)
-
-        &#47&#47 layers
-</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/54557120880bb9adbea9f93a29a2c432b67991c1#diff-932ae956742e2e7e4ca0d46053f9844b2504bc2cf2dca187505413a2f363e4a3L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1202329</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 54557120880bb9adbea9f93a29a2c432b67991c1</div><div id='time'> Time: 2023-02-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_class'> M Class Name: UViT</div><div id='n_method'> N Class Name: UViT</div><div id='m_method'> M Method Name: __init__(17)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_start'> M Start Line: 295</div><div id='m_end'> M End Line: 383</div><div id='n_start'> N Start Line: 309</div><div id='n_end'> N End Line: 409</div><BR>
+        &#47&#47 downsampling layers</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/d4c45ab1c8380de71e5dd1044dc4100ef9ac76ce#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L1065' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1196596</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: d4c45ab1c8380de71e5dd1044dc4100ef9ac76ce</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1250</div><div id='m_end'> M End Line: 1343</div><div id='n_start'> N Start Line: 1246</div><div id='n_end'> N End Line: 1358</div><BR>

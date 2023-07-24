@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, rois, roi_indices):
+        roi_indices = torch.Tensor(roi_indices).float()
+        rois<a id="change"> = </a>torch.Tensor(rois).float()
+        if x.is_cuda:
+            roi_indices = roi_indices.cuda()
+            rois = rois.cuda()
+            
+        indices_and_rois = torch.cat([roi_indices[:, None], rois], dim=1)
+
+        xy_indices_and_rois = indices_and_rois[:, [0, 1, 2, 3, 4]]
+        indices_and_rois =  <a id="change">xy_indices_and_rois.contiguous()</a>
+        &#47&#47 利用建议框对公用特征层进行截取
+        pool = self.roi(x, indices_and_rois)
+        fc7 = self.classifier(pool)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        roi_cls_locs = self.cls_loc(fc7)
+        roi_scores = self.score(fc7)
+        roi_cls_locs<a id="change"> = roi_cls_locs</a><a id="change">.view(</a>n, <a id="change">-1</a>, <a id="change">roi_cls_locs.size(1</a><a id="change">)</a><a id="change">)</a>
+        roi_scores = roi_scores.view(n, -1, roi_scores.size(1))
+        return roi_cls_locs, roi_scores
+</code></pre>

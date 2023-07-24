@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        valid_mask = len_range[None, :] &lt; lengths[:, None]
+
+        &#47&#47 Position embedding
+        position = (<a id="change">lengths[:, None]</a> - len_range[None, :]) * valid_mask.long()
+        pos_vectors = self.p_embeddings(position)
+        seq = seq + pos_vectors
+
+        &#47&#47 Self-attention
+        causality_mask = np.tril(np.ones((1<a id="change">, 1, seq_len, seq_len</a>), dtype=np.int))
+        attn_mask<a id="change"> = </a>torch.from_numpy(causality_mask).to(self.device)
+        &#47&#47 attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        for block in self.transformer_block:
+            seq = block(seq, attn_mask)
+        seq = seq * valid_mask[:, :, None].float()
+
+        his_vector<a id="change"> = </a>(seq * (position == 1).float()[:, :, None]).sum(1)
+        return his_vector
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            seq = block(seq, attn_mask)
+        seq = seq * valid_mask[:, :, None].float()
+
+        his_vector = seq[<a id="change">torch.arange(</a>batch_size<a id="change">)</a>, lengths - 1]
+        return his_vector
+</code></pre>

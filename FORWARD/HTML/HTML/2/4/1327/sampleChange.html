@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            k = k[idx_shuffle]
+
+            emb_k = self.key_features(k).squeeze()
+            out_k<a id="change"> = </a><a id="change">self.key_projection_head(emb_k).detach()</a>
+        
+            &#47&#47 unshuffle for batchnorm
+            idx_unshuffle = torch.argsort(idx_shuffle).to(x.device)
+            out_k = out_k[idx_unshuffle]</code></pre><h3>After Change</h3><pre><code class='java'>
+        with torch.no_grad():
+
+            &#47&#47 shuffle for batchnorm
+            <a id="change">if </a>self.batch_shuffle<a id="change">:
+                </a>k<a id="change">, shuffle = </a>self._batch_shuffle(k)
+
+            emb_k = self.momentum_backbone(k).squeeze()
+            out_k = self.momentum_projection_head(emb_k).detach()</code></pre>

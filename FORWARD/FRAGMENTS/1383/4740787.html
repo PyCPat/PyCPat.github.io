@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.upsampler = nn.PixelShuffle(self.scale)
+    
+    def forward(self, x):
+        y = <a id="change">self.backbone(</a>x<a id="change">)</a> + x
+        y = self.upsampler(y)
+        return y</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.quant(x)
+        y = self.shortcut.add(<a id="change">self.backbone(</a>x<a id="change">)</a>, x.repeat(1, self.colors*self.scale*self.scale, 1, 1).contiguous())
+        y = self.upsampler(y)
+        y<a id="change"> = </a>self.dequant(y)
+        return y</code></pre>

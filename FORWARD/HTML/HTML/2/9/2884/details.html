@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :2884
+</h3><img src='15897938.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 TODO: extend to more than 2 modalities
+        m1 = modalities[0]
+        m2 = modalities[1]
+        <a id="change">return</a>
+
+
+class TensorFusion(nn.Module):
+    &#47&#47 https://github.com/Justin1904/TensorFusionNetworks/blob/master/model.py</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif len(modalities) == 2:
+            m1 = modalities[0]
+            m2 = modalities[1]
+            t1<a id="change"> = torch.einsum(&quotbn, nmd -&gt; bmd&quot</a>, m1, self.W<a id="change">)</a>
+            t1<a id="change"> = torch</a><a id="change">.einsum(&quotbmd, bm -&gt; bd&quot</a>, t1, m2<a id="change">)</a>
+            t2 = torch.einsum(&quotbn, nd -&gt; bd&quot, m1, self.U)
+            t3 = torch.einsum(&quotbm, md -&gt; bd&quot, m2, self.V)
+            <a id="change">return </a>t1 + t2 + t3 + self.b
+        &#47&#47 TODO: extend to more than 2 modalities
+        else:
+            assert False</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/c57e40c8b3c267cf815fec92ca687af623828772#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15897938</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: c57e40c8b3c267cf815fec92ca687af623828772</div><div id='time'> Time: 2021-04-14</div><div id='author'> Author: paul.liangpu@gmail.com</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: MultiplicativeInteractions</div><div id='n_method'> N Class Name: MultiplicativeInteractions</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 73</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, inputs):
+        b, n, d, e = *inputs.shape, self.num_experts
+        dispatch_tensor, combine_tensor, loss = self.gate(inputs)
+        expert_inputs = <a id="change">torch.einsum(&quotbnd,bnec-&gt;ebcd&quot</a>, inputs, dispatch_tensor<a id="change">)</a>
+
+        orig_shape = expert_inputs.shape
+        expert_inputs = expert_inputs.reshape(e, -1, d)
+        expert_outputs<a id="change"> = </a>self.experts(expert_inputs)
+        expert_outputs = expert_outputs.reshape(*orig_shape)
+
+        output<a id="change"> = </a><a id="change">torch.einsum(&quotebcd,bnec-&gt;bnd&quot</a>, expert_outputs, combine_tensor<a id="change">)</a>
+        <a id="change">return </a>output, loss * self.loss_coef
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/mixture-of-experts/commit/a48cd5f5b877a2b7d65f5eec21d0b23a5ded2023#diff-d2fcbf22676a56b8a4ffda1a92c50fbda935ece9420ee77b5278fc7df61da574L9' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15897936</div><div id='project'> Project Name: lucidrains/mixture-of-experts</div><div id='commit'> Commit Name: a48cd5f5b877a2b7d65f5eec21d0b23a5ded2023</div><div id='time'> Time: 2020-07-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: mixture_of_experts/mixture_of_experts.py</div><div id='m_class'> M Class Name: MoE</div><div id='n_method'> N Class Name: MoE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mixture_of_experts/mixture_of_experts.py</div><div id='n_file'> N File Name: mixture_of_experts/mixture_of_experts.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 10</div><div id='n_start'> N Start Line: 170</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self):
+        super().__init__()
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class FastSelfAttention(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+        q_kernel = softmax_kernel(q, projection_matrix, is_query = True)
+        k_kernel = softmax_kernel(k, projection_matrix, is_query = False)
+
+        context<a id="change"> = torch.einsum(&quot...nd,...ne-&gt;...de&quot</a>, k_kernel, v<a id="change">)</a>
+        out<a id="change"> = </a><a id="change">torch.einsum(&quot...de,...nd-&gt;...ne&quot</a>, context, q_kernel<a id="change">)</a>
+
+        <a id="change">return </a>out
+
+class FastSelfAttention(nn.Module):
+    def __init__(self, dim, heads = 8, nb_features = 256, redraw_projection = True):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/performer-pytorch/commit/582e1eb1f6bbb03856d015ca73fbfe6b92a180bf#diff-d8fabb2cbac8a028d0e3ee5a86d45fbe1f1ba5506810e65bca1514617dafda61L51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15897937</div><div id='project'> Project Name: lucidrains/performer-pytorch</div><div id='commit'> Commit Name: 582e1eb1f6bbb03856d015ca73fbfe6b92a180bf</div><div id='time'> Time: 2020-10-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: performer_pytorch/performer_pytorch.py</div><div id='m_class'> M Class Name: FastAttention</div><div id='n_method'> N Class Name: FastAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: performer_pytorch/performer_pytorch.py</div><div id='n_file'> N File Name: performer_pytorch/performer_pytorch.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 129</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 TODO: extend to more than 2 modalities
+        m1 = modalities[0]
+        m2 = modalities[1]
+        <a id="change">return</a>
+
+
+class TensorFusion(nn.Module):
+    &#47&#47 https://github.com/Justin1904/TensorFusionNetworks/blob/master/model.py</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif len(modalities) == 2:
+            m1 = modalities[0]
+            m2 = modalities[1]
+            t1<a id="change"> = torch.einsum(&quotbn, nmd -&gt; bmd&quot</a>, m1, self.W<a id="change">)</a>
+            t1<a id="change"> = </a><a id="change">torch.einsum(&quotbmd, bm -&gt; bd&quot</a>, t1, m2<a id="change">)</a>
+            t2 = torch.einsum(&quotbn, nd -&gt; bd&quot, m1, self.U)
+            t3 = torch.einsum(&quotbm, md -&gt; bd&quot, m2, self.V)
+            <a id="change">return </a>t1 + t2 + t3 + self.b
+        &#47&#47 TODO: extend to more than 2 modalities
+        else:
+            assert False</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/80246f6556ca909a261709f9129fa33b82418647#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15897932</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 80246f6556ca909a261709f9129fa33b82418647</div><div id='time'> Time: 2021-04-14</div><div id='author'> Author: paul.liangpu@gmail.com</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: MultiplicativeInteractions</div><div id='n_method'> N Class Name: MultiplicativeInteractions</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 73</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 85</div><BR>

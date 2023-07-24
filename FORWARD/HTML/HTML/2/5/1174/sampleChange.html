@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 diversity = torch.minimum(var, torch.ones_like(var))
+                &#47&#47 reg -= diversity
+
+                diversity<a id="change"> = </a><a id="change">batchWiseLogit.std(1).mean(-1).sigmoid()</a>
+
+                &#47&#47 summedProb = batchWiseLogit.sum(1)
+                &#47&#47 posterior = OneHotCategorical(logits=summedProb)
+                &#47&#47 prior = OneHotCategorical(probs=torch.ones_like(summedProb) / summedProb.shape[-1])
+                &#47&#47 reg = torch.distributions.kl_divergence(posterior, prior) / diversity
+                reg = compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)
+                reg<a id="change"> = </a>reg<a id="change"> / </a>diversity
+                regs.append(reg)
+            regs = sum(regs)
+        return ssimLoss, l1Loss + l2Loss, l1QLoss + l2QLoss, regs &#47&#47 + 10 * stdReg</code></pre><h3>After Change</h3><pre><code class='java'>
+            for latent, q in zip(latents, quantizeds):
+                l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l2QLoss.append(0.00001 * <a id="change">F.mse_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3))</a>)
+                l1QLoss.append(0.00001 * F.l1_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+
+        l1QLoss = sum(l1QLoss)</code></pre>

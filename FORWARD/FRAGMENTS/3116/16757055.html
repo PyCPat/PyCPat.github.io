@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mel_loss + duration_loss + pitch_loss + energy_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,
+            pitch_loss,
+            energy_loss,
+            duration_loss</a>,
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        alpha = 1
+        D_s_loss = D_t_loss = torch.tensor([0.], device=mel_predictions.device, requires_grad=False)
+        <a id="change">if </a>D_s is not None and <a id="change">D_t is not None</a><a id="change">:
+            </a>D_s_loss = self.mse_loss(D_s, torch.ones_like(D_s, requires_grad=False))
+            D_t_loss = self.mse_loss(D_t, torch.ones_like(D_t, requires_grad=False))
+            alpha<a id="change"> = </a>self.alpha
+
+        recon_loss = alpha * (mel_loss + duration_loss + pitch_loss + energy_loss)
+        total_loss<a id="change"> = </a>(
+            recon_loss<a id="change"> + D_s_loss + </a>D_t_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,
+            pitch_loss,
+            energy_loss,
+            duration_loss,
+            D_s_loss,
+            D_t_loss</a>,
+        )
+
+</code></pre>

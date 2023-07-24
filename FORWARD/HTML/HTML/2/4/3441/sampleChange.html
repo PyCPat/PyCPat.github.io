@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 cln: mean,var N x 1 x L
+        &#47&#47 gln: mean,var N x 1 x 1
+        if x.dim() != 3:
+            raise RuntimeError(<a id="change">"{} accept 3D tensor as input".format(
+                </a>self.__name__<a id="change">)</a>)
+
+        mean = torch.mean(x, (1, 2), keepdim=True)
+        var = torch.mean((x-mean)**2, (1, 2), keepdim=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if x.dim() == 4:
+            mean = torch.mean(x, (1, 2, 3), keepdim=True)
+            var = torch.mean((x-mean)**2, (1, 2, 3), keepdim=True)
+            <a id="change">if </a>self.elementwise_affine<a id="change">:
+                </a>x = self.weight*(x-mean)/torch.sqrt(var+self.eps)+self.bias
+            else:
+                x<a id="change"> = </a>(x-mean)/torch.sqrt(var+self.eps)
+        if x.dim() == 3:
+            mean = torch.mean(x, (1, 2), keepdim=True)
+            var = torch.mean((x-mean)**2, (1, 2), keepdim=True)</code></pre>

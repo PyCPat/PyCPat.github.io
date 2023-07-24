@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            outs.append(out)
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.conv_bank_features * len(self.conv1d_banks)
+        x = <a id="change">self</a>.max_pool1d(x)[:, :, <a id="change">:</a>T]
+        for conv1d in self.conv1d_projections:
+            x = conv1d(x)
+        &#47&#47 (B, T_in, hid_feature)</code></pre><h3>After Change</h3><pre><code class='java'>
+            outs.append(out)
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.conv_bank_features * len(self.conv1d_banks)
+        x<a id="change"> = </a><a id="change">nn.functional.pad(</a>x, [0, 1]<a id="change">)</a>
+        x = self.max_pool1d(x)
+        for conv1d in self.conv1d_projections:
+            x = conv1d(x)
+        &#47&#47 (B, T_in, hid_feature)</code></pre>

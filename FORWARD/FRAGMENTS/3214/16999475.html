@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return cp.checkpoint(closure, *inputs)
+
+    def forward(self, inputs: Tensor):
+        <a id="change">if </a>isinstance(inputs, Tensor)<a id="change">:
+            </a>prev_features = [inputs]
+        else:
+            prev_features<a id="change"> = </a>inputs
+
+        if self.memory_efficient and self.any_requires_grad(prev_features):
+            if torch.jit.is_scripting():</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, inputs: Tensor):
+        concat_features = torch.cat(inputs, 1)
+        bottleneck_output<a id="change"> = </a>self.conv1(self.relu1(<a id="change">self.norm1(</a>concat_features<a id="change">)</a>))
+        new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        
+        if self.drop_rate &gt; 0:</code></pre>

@@ -1,0 +1,111 @@
+<html><h3>Pattern ID :1221
+</h3><img src='4385971.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        used_backbone_levels = len(laterals)
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(<a id="change">laterals[i]</a>, size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, features: Tuple[Tensor, Tensor, Tensor, Tensor]) -&gt; Tensor:
+        f = self.ppm(features[-1])
+        fpn_features<a id="change"> = </a><a id="change">[</a>f<a id="change"></a>]
+
+        <a id="change">for i</a> in reversed(range(len(features)-1))<a id="change">:
+            </a>feature = self.fpn_in[i](features[i])
+            f<a id="change"> = </a>feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            <a id="change">fpn_features.append(</a>self.fpn_out[i](f)<a id="change">)</a>
+
+        fpn_features.reverse()
+        for i in range(1, len(features)):
+            fpn_features[i] = F.interpolate(fpn_features[i], size=fpn_features[0].shape[-2:], mode=&quotbilinear&quot, align_corners=False)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4385971</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 process in chunks of heads
+
+        out<a id="change"> = </a><a id="change">[]</a>
+
+        max_heads = self.max_heads_process
+
+        <a id="change">for </a>q_chunk, k_chunk, <a id="change">v_chunk</a> in zip(q.split(max_heads, dim = 1), k.split(max_heads, dim = 1), v.split(max_heads, dim = 1))<a id="change">:
+            </a>sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q_chunk, k_chunk)
+
+            if exists(context_mask):
+                sim = sim.masked_fill(~context_mask, mask_value)
+
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+            attn = sim.softmax(dim = -1)
+            attn = self.dropout(attn)
+
+            out_chunk<a id="change"> = </a>einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v_chunk)
+            <a id="change">out.append(</a>out_chunk<a id="change">)</a>
+
+        &#47&#47 concat all the heads together
+
+        out = torch.cat(out, dim = 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-ar-pytorch/commit/be3765300f5aae03b779edf0e256b7a74bda5fc8#diff-5ab51011b3cb840590737cf5342761683a8f59ac8817bfe6b989cf9e213218e4L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4385973</div><div id='project'> Project Name: lucidrains/perceiver-ar-pytorch</div><div id='commit'> Commit Name: be3765300f5aae03b779edf0e256b7a74bda5fc8</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_class'> M Class Name: CausalPrefixAttention</div><div id='n_method'> N Class Name: CausalPrefixAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='n_file'> N File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 178</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = []
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(<a id="change">input[:, step, :, :, :]</a>, hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner<a id="change"> = </a><a id="change">[]</a>
+            <a id="change">for t</a> in range(seq_len)<a id="change">:
+                </a>h<a id="change"> = </a>gru_cell(input=cur_layer_input[t], h_prev=h)
+                <a id="change">output_inner.append(</a>h<a id="change">)</a>
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4385945</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if key_pos is not None:
+            key = key + key_pos
+
+        out = <a id="change">self.attn(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+            key_padding_mask=key_padding_mask,
+        )[0]</a>
+
+        return identity + self.proj_drop(out)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+        output = tgt
+
+        intermediate<a id="change"> = </a><a id="change">[]</a>
+
+        <a id="change">for layer</a> in self.layers<a id="change">:
+            </a>output<a id="change"> = </a>layer(
+                output,
+                memory,
+                tgt_mask=tgt_mask,
+                memory_mask=memory_mask,
+                tgt_key_padding_mask=tgt_key_padding_mask,
+                memory_key_padding_mask=memory_key_padding_mask,
+                pos=pos,
+                query_pos=query_pos,
+            )
+            if self.return_intermediate:
+                <a id="change">intermediate.append(</a>self.norm(output)<a id="change">)</a>
+
+        if self.norm is not None:
+            output = self.norm(output)
+            if self.return_intermediate:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/idea-research/detrex/commit/b8b4cd0723f75ae9d120d40381355c5dfa9915f1#diff-255531dfd26cdeaf5d286d8b8b6c9a29e4dea4c4cf8a9dad083d748fd7e212e4L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4385961</div><div id='project'> Project Name: idea-research/detrex</div><div id='commit'> Commit Name: b8b4cd0723f75ae9d120d40381355c5dfa9915f1</div><div id='time'> Time: 2022-08-08</div><div id='author'> Author: rentianhe@dgx061.scc.idea</div><div id='file'> File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ideadet/layers/transformer_rebuild.py</div><div id='n_file'> N File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 161</div><BR>

@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def __init__(self, n_channel: int) -&gt; None:
+        super(DummyEpsModel, self).__init__()
+        self.conv = <a id="change">nn.Sequential(  &#47&#47 with batchnorm
+            </a>nn.Conv2d(n_channel, 128, 7, padding=3),
+            <a id="change">nn.BatchNorm2d(</a>128<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Conv2d(128, 128, 7, padding=3),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.Conv2d(128, 64, 7, padding=3),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            <a id="change">nn.Conv2d(</a>64, 16, 7<a id="change">, padding=3)</a>,
+            <a id="change">nn.BatchNorm2d(</a>16<a id="change">)</a>,
+            <a id="change">nn.ReLU()</a>,
+            nn.Conv2d(16, n_channel, 3, padding=1)<a id="change">,
+        )</a>
+
+    def forward(self, x, t) -&gt; torch.Tensor:
+        &#47&#47 Lets think about using t later
+        return self.conv(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def __init__(self, n_channel: int) -&gt; None:
+        super(DummyEpsModel, self).__init__()
+        self.conv = <a id="change">nn.Sequential(  &#47&#47 with batchnorm
+            </a>blk(n_channel, 64),
+            blk(64, 128),
+            blk(128, 256),
+            blk(256, 512),
+            blk(512, 256),
+            blk(256, 128),
+            blk(128, 64),
+            nn.Conv2d(64, n_channel, 3, padding=1)<a id="change">,
+        )</a>
+
+    def forward(self, x, t) -&gt; torch.Tensor:
+        &#47&#47 Lets think about using t later
+        return self.conv(x)</code></pre>

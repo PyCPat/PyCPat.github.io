@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = input.mean(dim=self.avg_dim)  &#47&#47 [B, C, T]
+        x = x.transpose(1, 2)  &#47&#47 [B, T, C]
+        x, h = self.gru(x, h)
+        x = <a id="change">self.fc(</a>x<a id="change">)</a>.transpose(1, 2).unsqueeze(-1)
+        if self.skip is not None:
+            x = self.skip(input) + x  &#47&#47 a regular skip connection
+        elif self.scale is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            x = input.mean(dim=self.avg_dim).transpose(1, 2)  &#47&#47 [B, T, C]
+        x, h = self.gru(x, h)
+        x = <a id="change">self.fc(</a>x<a id="change">)</a>
+        if self.avg_dim == 1:
+            x<a id="change"> = </a>x.unsqueeze(1)
+        else:
+            x = x.transpose(1, 2).unsqueeze(-1)
+        if self.skip is not None:</code></pre>

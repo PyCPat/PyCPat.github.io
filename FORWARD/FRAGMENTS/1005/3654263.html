@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.mode == &quotmse&quot:
+            return ((fea_s-fea_t)**2).mean() * self.factor
+
+        <a id="change">if </a>self.mode == &quotpdf&quot<a id="change">:
+            </a>with torch.no_grad():
+                x1 = conf_t.sigmoid()
+                x2 = conf_s.sigmoid()
+                disagree = (x1 - x2) ** 2
+                disagree = disagree.sum(-1).unsqueeze(1).sqrt()
+                if self.multi_anchor:
+                    disagree = F.avg_pool1d(disagree, kernel_size=6, stride=6, padding=0)
+                disagree = disagree.permute(0,2,1).expand_as(fea_t)
+                weight = disagree / disagree.sum()
+            <a id="change">return </a>(weight*((fea_s-fea_t)**2)).sum() * self.factor
+
+        raise NotImplementedError</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, pred_t, pred_s, priors, targets):
+
+        loc_t<a id="change">, conf_t, fea_t</a> = pred_t[&quotloc&quot], pred_t[&quotconf&quot], pred_t[&quotfeature&quot]
+        loc_t, conf_t, fea_t = loc_t.detach(), <a id="change">conf_t.detach()</a>, fea_t.detach()
+        loc_s, conf_s, fea_s = pred_s[&quotloc&quot], pred_s[&quotconf&quot], pred_s[&quotfeature&quot]
+
+        if self.mode == &quotmse&quot:</code></pre>

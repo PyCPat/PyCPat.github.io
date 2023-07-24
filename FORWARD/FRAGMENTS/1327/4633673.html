@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss = 0
+            &#47&#47 Compute perturbation loss over all states 
+            for j in range(len(states)):
+                loss<a id="change"> += </a>self.loss_fn[j](states_perturbed[j], <a id="change">states[j].detach()</a>)
+            if i == self.num_steps + 1: 
+                return loss 
+            &#47&#47 Compute noise gradient     </code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_perturbed = embed + noise 
+            state_perturbed = self.eval_fn(embed_perturbed)
+            &#47&#47 Return final loss if last step (undetached state)
+            <a id="change">if </a>i == self.num_steps<a id="change">: 
+                </a>return self.loss_last_fn(state_perturbed, state) 
+            &#47&#47 Compute perturbation loss (detached state)
+            loss<a id="change"> = </a>self.loss_fn(state_perturbed, state.detach())
+            &#47&#47 Compute noise gradient ∂loss/∂noise
+            noise_gradient, = torch.autograd.grad(loss, noise)
+            &#47&#47 Move noise towards gradient to change state as much as possible </code></pre>

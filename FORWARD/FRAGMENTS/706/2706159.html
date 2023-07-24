@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss = self.loss_fn(classifications, regressions, anchors, targets)
+            return loss
+        else:
+            <a id="change">assert </a>targets is None, "targets is not None"
+            result = self.postprocess(image_list, classifications, regressions, anchors, score_thresh, nms_thresh)
+            return result
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 y_reg, x_reg, h_reg, w_reg -&gt; x_reg, y_reg, w_reg, h_reg
+        regressions[..., 0::2], regressions[..., 1::2] = regressions[..., 1::2], regressions[..., 0::2].clone()
+        if targets is not None:
+            <a id="change">if score_thresh is not None</a><a id="change"> or nms_thresh is not None:
+                </a>print("Warning: no need to transfer score_thresh or nms_thresh")
+            loss = self.loss_fn(classifications, regressions, anchors, targets)
+            return loss
+        else:</code></pre>

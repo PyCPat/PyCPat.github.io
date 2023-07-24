@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :1118
+</h3><img src='4039785.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        arange = torch.arange(n, device = device)
+        weights = alpha * (1 - alpha) ** torch.flip(arange, dims = (0,))
+
+        weights<a id="change"> = </a>repeat(weights, &quot... l -&gt; ... t l&quot, t = n)
+        indices = repeat(arange, &quotl -&gt; h t l&quot, h = h, t = n)
+
+        indices = (indices - rearrange(arange + 1, &quott -&gt; 1 t 1&quot)) % n
+
+        weights<a id="change"> = </a>weights.gather(-1, indices)
+        weights = <a id="change">self.dropout(</a>weights<a id="change">)</a>
+
+        &#47&#47 causal
+
+        weights<a id="change"> = </a>weights.tril()
+
+        &#47&#47 multiply
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        arange = torch.arange(n, device = device)
+        weights = alpha * (1 - alpha) ** torch.flip(arange, dims = (0,))
+
+        <a id="change">if </a>naive<a id="change">:
+            </a>output<a id="change"> = </a>self.naive_Aes(x, weights)
+        else:
+            output<a id="change"> = </a>conv1d_fft(x, weights)
+
+        &#47&#47 get initial state contribution
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/etsformer-pytorch/commit/f79029ce055d6735f29f2de73dd1ac17732c9275#diff-b4b8264f25f5dfdaf86bc5e5eff19dd88e54974eb3ebdbb09741da0265b56130L72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4039785</div><div id='project'> Project Name: lucidrains/etsformer-pytorch</div><div id='commit'> Commit Name: f79029ce055d6735f29f2de73dd1ac17732c9275</div><div id='time'> Time: 2022-03-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_class'> M Class Name: NaiveMHESA</div><div id='n_method'> N Class Name: MHESA</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='n_file'> N File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_start'> M Start Line: 72</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 135</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.layer_norm:
+            x = self.layer_norm1(x)
+        x = self.linear1(x)
+        x<a id="change"> = </a>self.activation(x)
+        x<a id="change"> = </a>F.dropout(x, dropout)
+        if self.layer_norm:
+            x = self.layer_norm2(x)
+        x = self.linear2(x)
+        x<a id="change"> = </a><a id="change">F.dropout(</a>x, dropout<a id="change">)</a>
+        for i in range(self.k):
+            if self.edge_drop != 0:
+                adj = self.dropout(adj, dropout_prob=self.edge_drop)
+            x = (1 - self.alpha) * torch.spmm(adj, x) + self.alpha * x</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        for layer in self.layers:
+            <a id="change">if </a>isinstance(layer, nn.LayerNorm)<a id="change">:
+                </a>x<a id="change"> = </a>layer(x)
+            else:
+                x = layer(x)
+                x<a id="change"> = </a>self.activation(x)
+                if self.dropout is not None:
+                    x = self.dropout(x)
+        for i in range(self.k):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thudm/grb/commit/108220c07da3133bdf46f45290f138787f8695c1#diff-b6790a61fe64ac9b0ce46ad8b5eb5581db9b734049aedcfa60cfb8da281be316L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4039781</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: 108220c07da3133bdf46f45290f138787f8695c1</div><div id='time'> Time: 2021-08-13</div><div id='author'> Author: 2363471925@qq.com</div><div id='file'> File Name: grb/model/torch/appnp.py</div><div id='m_class'> M Class Name: APPNP</div><div id='n_method'> N Class Name: APPNP</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/torch/appnp.py</div><div id='n_file'> N File Name: grb/model/torch/appnp.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 106</div><div id='n_end'> N End Line: 117</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, adj, dropout=0):
+        for layer in self.layers:
+            x<a id="change"> = </a>layer(x, adj, dropout=dropout)
+        x<a id="change"> = </a>F.relu(self.linear1(x))
+        x<a id="change"> = </a><a id="change">F.dropout(</a>x, dropout<a id="change">)</a>
+        x = self.linear2(x)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, adj, dropout=0):
+        for layer in self.layers:
+            <a id="change">if </a>isinstance(layer, nn.LayerNorm)<a id="change">:
+                </a>x<a id="change"> = </a>layer(x)
+            else:
+                x<a id="change"> = </a>layer(x, adj, dropout=dropout)
+
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thudm/grb/commit/db17c727118b739bab08e20c8a3b338dedc12253#diff-bdd2d692acfa319dae7cba85f1cf79b2b55b310dffca1e4b5c2056b51c6db3e2L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4039812</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: db17c727118b739bab08e20c8a3b338dedc12253</div><div id='time'> Time: 2021-05-30</div><div id='author'> Author: qinkai.zheng1028@gmail.com</div><div id='file'> File Name: grb/model/torch/gin.py</div><div id='m_class'> M Class Name: GIN</div><div id='n_method'> N Class Name: GIN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/torch/gin.py</div><div id='n_file'> N File Name: grb/model/torch/gin.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 76</div><BR>

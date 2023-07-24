@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :278
+</h3><img src='926767.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans = x.new_ones(x.shape[:-1]+(1,)) / <a id="change">x.shape[1]</a>
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+        L = u.size(-1)
+        if lengths is not None:
+            assert isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = torch.where(<a id="change">torch.arange(</a>L<a id="change">, device=lengths.device)</a> &lt; lengths[:, None, None], 1., 0.)
+            u = u<a id="change"> * </a>mask
+
+        device = u.device
+        batch_size = u.size(0)
+        seq_len<a id="change"> = </a>u.size(1)
+        hidden_state = [
+            torch.zeros((batch_size, self.d_hidden), device=device),
+            torch.zeros((batch_size, self.d_hidden), device=device),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 926767</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			inputs_embeds	= inputs_embeds,
+		)
+
+		pooled_wiki = <a id="change">out_wiki[1]</a>
+
+		out_pubmed = self.bert_pubmed(
+			input_ids 	= input_ids,
+			attention_mask	= attention_mask,</code></pre><h3>After Change</h3><pre><code class='java'>
+		tok_embed	= out_pubmed[0]
+		bsz, mtok, dim  = tok_embed.shape
+		tok_embed_flat	= tok_embed.reshape(-1, dim)
+		men_idx<a id="change"> 	= </a><a id="change">torch.arange(</a>bsz<a id="change">)</a>.to(tok_embed.device)<a id="change"> * </a>mtok + mention_pos_idx
+		pubmed_embed 	= tok_embed_flat[men_idx]
+
+		pooled_output 	= torch.cat([wiki_embed, pubmed_embed], dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/svjan5/medtype/commit/160813be93a76d6c1b00fdb9c8a86726c73e1803#diff-ecd89146d5ea8532d0cd052abc01d2726061de92b7ef9d7d352a62d5d2541086L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 926762</div><div id='project'> Project Name: svjan5/medtype</div><div id='commit'> Commit Name: 160813be93a76d6c1b00fdb9c8a86726c73e1803</div><div id='time'> Time: 2021-03-19</div><div id='author'> Author: shikharvashishth@gmail.com</div><div id='file'> File Name: medtype-as-service/server/medtype_serving/server/medtype/models.py</div><div id='m_class'> M Class Name: BertCombined</div><div id='n_method'> N Class Name: BertCombined</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: medtype-as-service/server/medtype_serving/server/medtype/models.py</div><div id='n_file'> N File Name: medtype-as-service/server/medtype_serving/server/medtype/models.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.register_buffer(&quotinv_freq&quot, inv_freq)
+
+    def forward(self, x, context_len = 0):
+        n, device = <a id="change">x.shape[1]</a>, x.device
+        l = n + context_len
+        t = torch.arange(l - 1, -1, -1, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, qlen, klen):
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos = <a id="change">torch.arange(</a>klen<a id="change">, dtype = torch.long, device = device)</a>
+        rel_pos = k_pos[None, :]<a id="change"> - </a>q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values<a id="change"> = </a>self.relative_attention_bias(rp_bucket)
+        return rearrange(values, &quoti j h -&gt; () h i j&quot)
+
+&#47&#47 main classes</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 926774</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: SinusoidalEmbedding</div><div id='n_method'> N Class Name: RelativePositionBias</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 77</div><BR>

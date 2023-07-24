@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :2094
+</h3><img src='13921239.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = <a id="change">torch.bmm(</a>att, v<a id="change">)</a>.view(-1, att.size(1), self._h_dims)
+        m = self.proj_m(m)
+
+        return m</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = <a id="change">torch.bmm(</a>att, v<a id="change">)</a>.transpose(0, 1).contiguous()
+        m<a id="change"> = </a>self.m(m).view(m.size(0), -1, self._h_dims).transpose(0, 1)
+
+        return m
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yeliudev/nncore/commit/e58a22da4dce9778c38aae284b0c80d84937b04c#diff-b66764790ba7b310b71bcb990fc01ea802675de40cfbd1e8da361bbc4827b8c3L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13921239</div><div id='project'> Project Name: yeliudev/nncore</div><div id='commit'> Commit Name: e58a22da4dce9778c38aae284b0c80d84937b04c</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: yeliudev@outlook.com</div><div id='file'> File Name: nncore/nn/blocks/transformer.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nncore/nn/blocks/transformer.py</div><div id='n_file'> N File Name: nncore/nn/blocks/transformer.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Reshape value mapping
+        value_mapping = value_mapping.view(batch_size, -1, height * width)
+        &#47&#47 Attention features
+        attention_features = <a id="change">torch.bmm(</a>value_mapping, attention<a id="change">)</a>
+        &#47&#47 Reshape to original shape
+        attention_features = attention_features.view(batch_size, channels, height, width)
+        &#47&#47 Residual mapping and gamma multiplication
+        output = self.gamma * attention_features + input</code></pre><h3>After Change</h3><pre><code class='java'>
+        key = key.view(-1, channels // 8, height * width // 4)
+        value = value.view(-1, channels // 2, height * width // 4)
+        &#47&#47 Calc attention map
+        attention_map = <a id="change">torch.bmm(</a>query, key<a id="change">)</a>.softmax(dim=-1).permute(0, 2, 1)
+        &#47&#47 Apply attention map to value to obtain the attention output features
+        attention_features<a id="change"> = </a>torch.bmm(value, attention_map)
+        &#47&#47 Reshape attention features
+        attention_features = attention_features.view(-1, channels // 2, height, width)
+        &#47&#47 Get output features</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/christophreich1996/semantic_pyramid_for_image_generation/commit/8d56a34edd21d5874a8d45af97eba926a6f171c0#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL242' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13921232</div><div id='project'> Project Name: christophreich1996/semantic_pyramid_for_image_generation</div><div id='commit'> Commit Name: 8d56a34edd21d5874a8d45af97eba926a6f171c0</div><div id='time'> Time: 2021-03-29</div><div id='author'> Author: 34400551+ChristophReich1996@users.noreply.github.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 252</div><div id='m_end'> M End Line: 267</div><div id='n_start'> N Start Line: 257</div><div id='n_end'> N End Line: 272</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        print("shape of key: {};".format(key.shape))
+        scores = torch.bmm(query, key.transpose(1, 2))
+        attention_weights = self.masked_softmax(scores, valid_len)
+        return <a id="change">torch.bmm(</a>attention_weights, value<a id="change">)</a>
+
+    def masked_softmax(self, X, valid_len):
+        
+        masked softmax for attention scores</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print("shape of key: {};".format(key.shape))
+        scores = torch.bmm(query, key.transpose(1, 2))
+        attention_weights = self.masked_softmax(scores, valid_len)
+        x<a id="change"> = </a><a id="change">torch.bmm(</a>attention_weights, value<a id="change">)</a>.reshape(-1, self.in_channels)
+        return x
+
+    @staticmethod</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/328345919733a749a456f6b5b9168b4abbdf1319#diff-bd24ef8819c89b1625b56e34744b51851008aad60a754b2883dccb9d99515997L147' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13921248</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: 328345919733a749a456f6b5b9168b4abbdf1319</div><div id='time'> Time: 2022-02-06</div><div id='author'> Author: liu.jb.henry@gmail.com</div><div id='file'> File Name: core/model/layers/global_graph.py</div><div id='m_class'> M Class Name: SelfAttentionFCLayer</div><div id='n_method'> N Class Name: SelfAttentionFCLayer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/layers/global_graph.py</div><div id='n_file'> N File Name: core/model/layers/global_graph.py</div><div id='m_start'> M Start Line: 153</div><div id='m_end'> M End Line: 158</div><div id='n_start'> N Start Line: 154</div><div id='n_end'> N End Line: 159</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output = torch.cat([output_a, output_b, output_a - output_b], dim=1)
+        logits<a id="change"> = </a><a id="change">self.linear(</a>output<a id="change">)</a>
+        loss = self.loss_fct(logits, labels)
+        return loss, logits
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        embeddings_a = mean_pooling(output_a,  <a id="change">a[&quotattention_mask&quot]</a>)
+        embeddings_b = mean_pooling(output_b, b[&quotattention_mask&quot])
+        output = torch.cat([embeddings_a, embeddings_b, embeddings_a-embeddings_b], dim=1)
+        logits = self.classifier(output)</code></pre>

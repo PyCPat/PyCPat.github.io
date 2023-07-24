@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for i, im in enumerate(imgs):
+            f = f&quotimage{i}&quot  &#47&#47 filename
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = <a id="change">np.asarray(</a><a id="change">Image.open(</a>requests.get(im, stream=True).raw<a id="change"> if </a>im.startswith(&quothttp&quot)<a id="change"> else </a>im<a id="change">))</a>, im
+            elif isinstance(im, Image.Image):  &#47&#47 PIL Image
+                im, f = np.asarray(<a id="change">im</a>), getattr(im, &quotfilename&quot, f) or f
+            files.append(Path(f).with_suffix(&quot.jpg&quot).name)
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Pre-process
+        n, imgs = (len(imgs), imgs) if isinstance(imgs, list) else (1, [imgs])  &#47&#47 number of images, list of images
+        shape0, shape1, files = [], [], []  &#47&#47 image and inference shapes, filenames
+        for i, <a id="change">im</a> in enumerate(imgs):
+            f = f&quotimage{i}&quot  &#47&#47 filename
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = <a id="change">Image.open(</a>requests.get(im, stream=True).raw<a id="change"> if </a>im.startswith(&quothttp&quot)<a id="change"> else </a>im<a id="change">)</a>, im
+                im<a id="change"> = np.asarray(exif_transpose(im</a><a id="change">)</a><a id="change">)</a>
+            elif isinstance(im, Image.Image):  &#47&#47 PIL Image
+                im, f = np.asarray(<a id="change">exif_transpose(im</a><a id="change">)</a>), getattr(im, &quotfilename&quot) or f
+            files.append(Path(f).with_suffix(&quot.jpg&quot).name)
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)</code></pre>

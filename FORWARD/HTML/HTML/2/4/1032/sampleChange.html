@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            logit = logit.permute(0, 3, 1, 2)
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask)
+            regs.append(<a id="change">ceReg.mean() + </a>cePush.mean())
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies
+        &#47&#47 for code, logit, freq in zip(codes.permute(1, 0, 2, 3), logits, codeFreq):
+        &#47&#47     &#47&#47 perturb code by the most rare codes with 0.1 probability</code></pre><h3>After Change</h3><pre><code class='java'>
+            sample = torch.distributions.Categorical(probs=prob).sample((h, w)).permute(2, 0, 1)
+            logit = logit.permute(0, 3, 1, 2)
+            &#47&#47 [n, 1, 1]
+            weight = freqMap / <a id="change">maxFreq[:, None]</a>
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask * weight
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask) * weight
+            regs.append((ceReg + cePush).mean())
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies</code></pre>

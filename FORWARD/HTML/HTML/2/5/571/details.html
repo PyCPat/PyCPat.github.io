@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :571
+</h3><img src='2226229.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        <a id="change">return </a>context, alignment
+
+
+class Postnet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        if self.forward_attn:
+            &#47&#47 forward attention
+            prev_alpha<a id="change"> = </a>F.pad(<a id="change">self.alpha[:, :-1].clone()</a>, (1, 0, 0, 0)).to(inputs.device)
+            self.alpha = (((1-self.u) * self.alpha.clone().to(inputs.device) + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm = self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context
+            context<a id="change"> = </a>torch.bmm(alpha_norm.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            <a id="change">return </a>context, alpha_norm, alignment
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)
+            context = context.squeeze(1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/961af0f5cdefbb5f267671f6847cf05659962d6c#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL173' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2226229</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 961af0f5cdefbb5f267671f6847cf05659962d6c</div><div id='time'> Time: 2019-04-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 208</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self,
+        img
+    ):
+        <a id="change">return </a>img
+
+&#47&#47 normalizations
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self,
+        img
+    ):
+        fmap = <a id="change">img.clone()</a>
+
+        for enc in self.encoders:
+            fmap<a id="change"> = </a>enc(fmap)
+
+        fmap, indices, commit_loss = self.vq(fmap)
+
+        for dec in self.decoders:
+            fmap = dec(fmap)
+
+        recon_loss = F.mse_loss(fmap, img)
+        loss<a id="change"> = </a>recon_loss + commit_loss
+        <a id="change">return </a>loss
+
+&#47&#47 normalizations
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/4073052ab45b04004497892b750d79ee3ab9bd39#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL27' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2226273</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: 4073052ab45b04004497892b750d79ee3ab9bd39</div><div id='time'> Time: 2021-12-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: VQGanVAE</div><div id='n_method'> N Class Name: VQGanVAE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+&#47&#47 relative positional bias
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if x.ndim == 2:
+            x = rearrange(x, &quotb n -&gt; b 1 n&quot)
+
+        orig_x<a id="change"> = </a><a id="change">x.clone()</a>
+
+        x = self.encoder(x)
+
+        x = rearrange(x, &quotb c n -&gt; b n c&quot)
+        x, indices, commit_loss = self.rq(x)
+        x = rearrange(x, &quotb n c -&gt; b c n&quot)
+
+        recon_x = self.decoder(x)
+
+        recon_loss<a id="change"> = </a>F.mse_loss(orig_x, recon_x)
+        <a id="change">return </a>recon_loss
+
+&#47&#47 relative positional bias
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/audiolm-pytorch/commit/3bdca3666a6b5b9d018c80d1111698feb112f078#diff-96a5ee045c1df07f3125d9b4189130620f229785b36cebb86c95b0646f0d744dL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2226304</div><div id='project'> Project Name: lucidrains/audiolm-pytorch</div><div id='commit'> Commit Name: 3bdca3666a6b5b9d018c80d1111698feb112f078</div><div id='time'> Time: 2022-10-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='m_class'> M Class Name: SoundStream</div><div id='n_method'> N Class Name: SoundStream</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='n_file'> N File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 138</div><BR>

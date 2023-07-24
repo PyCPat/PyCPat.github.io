@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        tokens = tokens + rearrange(pos_emb, &quotn d -&gt; 1 n d&quot)
+
+        text_embeds = self.text_transformer(tokens, mask = text_mask)
+        <a id="change">return </a>text_embeds
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        frame_embeddings = self.image_embedding(frame_indices_input)
+        frame_embeddings = self.video_pos_emb(frame_embeddings) + frame_embeddings
+
+        bos<a id="change"> = </a><a id="change">repeat(</a>self.video_bos, <a id="change">&quotd -&gt; b 1 d&quot</a><a id="change">, b = batch)</a>
+        frame_embeddings<a id="change"> = </a>torch.cat((bos, frame_embeddings), dim = 1)
+        frame_embeddings = self.video_transformer(frame_embeddings)
+
+        logits = self.to_logits(frame_embeddings)
+
+        if not return_loss:
+            return logits
+
+        loss = F.cross_entropy(<a id="change">rearrange(</a>logits, <a id="change">&quotb n c -&gt; b c n&quot</a><a id="change">)</a>, frame_indices)
+        <a id="change">return </a>loss
+</code></pre>

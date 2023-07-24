@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = <a id="change">torch.bmm(</a>att, v<a id="change">)</a>.view(-1, att.size(1), self._h_dims)
+        m = self.proj_m(m)
+
+        return m</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = <a id="change">torch.bmm(</a>att, v<a id="change">)</a>.transpose(0, 1).contiguous()
+        m<a id="change"> = </a>self.m(m).view(m.size(0), -1, self._h_dims).transpose(0, 1)
+
+        return m
+</code></pre>

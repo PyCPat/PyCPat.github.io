@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :3287
+</h3><img src='17218614.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                            mask=mask,
+                            reduction = "token_mean")
+        else:
+            preds = <a id="change">self.crf.decode(emissions=logits, mask=mask)</a>
+            logits = torch.LongTensor(preds)
+
+        return dict(loss=loss, logits=logits)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = None 
+        if labels is not None:
+            loss_fn = nn.CrossEntropyLoss()
+            loss = loss_fn(logits.reshape(-1, <a id="change">logits.shape[-1]</a>), labels.reshape(-1))
+            &#47&#47 CRF
+            &#47&#47 loss = -self.crf(emissions=logits, 
+            &#47&#47                 tags=labels,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thu-keg/omnievent/commit/c9528cb88242cc5deb54f138d9b2bd2b987979d7#diff-3f2d93f6f901b9ae25b8805ca3ecd136e06ddaaf2b1b0c0ba64202d69aa2fe54L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218614</div><div id='project'> Project Name: thu-keg/omnievent</div><div id='commit'> Commit Name: c9528cb88242cc5deb54f138d9b2bd2b987979d7</div><div id='time'> Time: 2022-05-09</div><div id='author'> Author: penghao20170136@163.com</div><div id='file'> File Name: src/OpenEE/model/model.py</div><div id='m_class'> M Class Name: ModelForSequenceLabeling</div><div id='n_method'> N Class Name: ModelForSequenceLabeling</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/OpenEE/model/model.py</div><div id='n_file'> N File Name: src/OpenEE/model/model.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        target_size = targets.size()[1]
+        t_self_mask = utils.create_trg_self_mask(target_size,
+                                                 device=targets.device)
+        return <a id="change">self.decode(</a>targets, enc_output, i_mask, t_self_mask, t_mask<a id="change">)</a>
+
+    def initialize(self):
+        &#47&#47 weight init
+        for p in self.parameters():</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Reshaping features
+        sizes = padded_input.size() &#47&#47 B x H_1 (channel?) x H_2 x T
+        padded_input = padded_input.view(sizes[0], sizes[1] * sizes[2], <a id="change">sizes[3]</a>)
+        padded_input = padded_input.transpose(1, 2).contiguous()  &#47&#47 BxTxH
+
+        encoder_padded_outputs, _ = self.encoder(padded_input, input_lengths)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qute012/kosr/commit/b7d24b0d835254fd425224eba3421a3b7224e55f#diff-c6b6e8084627536e70fdb6e8be5c81f8520937c01028e9bb6ea65a82014b023eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218615</div><div id='project'> Project Name: qute012/kosr</div><div id='commit'> Commit Name: b7d24b0d835254fd425224eba3421a3b7224e55f</div><div id='time'> Time: 2021-01-12</div><div id='author'> Author: ejrwls012@gmail.com</div><div id='file'> File Name: model/transformer/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/transformer/transformer.py</div><div id='n_file'> N File Name: model/transformer/transformer.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 34</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                       mask=data_item[&quotmask_tokens&quot])
+            loss_ner = -log_likelihood
+            
+        pred_ner = <a id="change">crf_model.decode(</a>ner_score<a id="change">)</a>  &#47&#47 , mask=data_item[&quotmask_tokens&quot]
+        
+        &#47&#47 下面使用的是Softmax
+        &#47&#47 loss_ner = F.softmax(ner_score, data_item[&quotner_type&quot])</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 这样计算交叉熵有问题吗
+            &#47&#47 交叉熵计算不适用 rel_score_prob， 应该是rel_score_matrix
+            loss_rel = F.cross_entropy(rel_score_prob.permute(0, 3, 1, 2), data_item[&quotpred_rel_matrix&quot], self.weights_rel)  &#47&#47 要把分类放在第二维度
+            loss_rel *= <a id="change">rel_score_prob.shape[1]</a>
+        rel_score_prob = rel_score_prob - (self.config.threshold_rel - 0.5)  &#47&#47 超过了一定阈值之后才能判断关系
+        pred_rel = torch.round(rel_score_prob).to(torch.int64)
+        &#47&#47 print("hello2")
+        if is_test:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mangonihao/multiheadjointentityrelationextraction_simple/commit/3a8d46652627013ee302506e87489ee75fea8ae9#diff-11eebc726596bfe963ef6f272a32530164721eb5c2c8e1df5102b38a690f4f92L104' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17218613</div><div id='project'> Project Name: mangonihao/multiheadjointentityrelationextraction_simple</div><div id='commit'> Commit Name: 3a8d46652627013ee302506e87489ee75fea8ae9</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: 2075419247@qq.com</div><div id='file'> File Name: modules/joint_model.py</div><div id='m_class'> M Class Name: JointModel</div><div id='n_method'> N Class Name: JointModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: modules/joint_model.py</div><div id='n_file'> N File Name: modules/joint_model.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 165</div><BR>

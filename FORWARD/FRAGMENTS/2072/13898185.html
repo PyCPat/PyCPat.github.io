@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            wsz = min(wsz, t)
+            c_wsz = min(c_wsz, kv_t)
+
+            <a id="change">if wsz &lt; self.window_size</a><a id="change">:
+                </a>c_wsz = (self.window_size * self.context_window_size) // wsz
+            indices, loss_1 = self.kmeans(q, wsz)
+            kv_indices, loss_2 = self.kmeans(k, c_wsz)
+            aux_loss = loss_1 + loss_2</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, q, k, v, query_mask = None, key_mask = None, **kwargs):
+        b, h, t, d, kv_t, wsz, c_wsz, nc, device, dtype = *q.shape, k.shape[2], self.window_size, self.context_window_size, self.num_clusters, q.device, q.dtype
+        is_reverse = <a id="change">kwargs.pop(</a>&quot_reverse&quot, False<a id="change">)</a>
+
+        out = torch.zeros_like(q, dtype=dtype)
+
+        update_kmeans<a id="change"> = </a>self.training and not is_reverse
+
+        if self.shared_qk:
+            wsz = min(wsz, t)</code></pre>

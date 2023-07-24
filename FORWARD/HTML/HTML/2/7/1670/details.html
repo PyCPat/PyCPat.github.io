@@ -1,0 +1,117 @@
+<html><h3>Pattern ID :1670
+</h3><img src='5770584.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        <a id="change">return </a>context<a id="change">, alignment</a>
+
+
+class Postnet(nn.Module):
+    def __init__(self, mel_dim, num_convs=5):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.forward_attn:
+            &#47&#47 forward attention
+            prev_alpha = F.pad(self.alpha[:, :-1].clone(), (1, 0, 0, 0)).to(inputs.device)
+            self.alpha<a id="change"> = </a>(((1-self.u) * <a id="change">self.alpha.clone().to(</a>inputs.device<a id="change">)</a> + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm = self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context
+            context = torch.bmm(alpha_norm.unsqueeze(1), inputs)
+            context<a id="change"> = </a>context.squeeze(1)
+            <a id="change">return </a>context<a id="change">, alpha_norm, alignment</a>
+        else:
+            context = torch.bmm(alignment.unsqueeze(1), inputs)
+            context = context.squeeze(1)
+            return context, alignment, alignment</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/961af0f5cdefbb5f267671f6847cf05659962d6c#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL173' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5770584</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 961af0f5cdefbb5f267671f6847cf05659962d6c</div><div id='time'> Time: 2019-04-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 208</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mel_loss + kl_loss + postnet_loss + duration_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,  &#47&#47 L_VG
+            kl_loss,  &#47&#47 L_KL
+            postnet_loss,  &#47&#47 L_PN
+            duration_loss</a>,  &#47&#47 L_dur
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        z, logdet = postnet_outputs
+        postnet_loss = self.mle_loss(z, logdet, mel_masks.unsqueeze(1))
+
+        helper_loss = attn_loss = ctc_loss<a id="change"> = </a><a id="change">torch.zeros(1).to(</a>mel_targets.device<a id="change">)</a>
+        if self.helper_type == "dga":
+            for alignment in alignments[1]: &#47&#47 DGA should be applied on attention without mapping mask
+                attn_loss += self.guided_attn_loss(alignment, src_lens, mel_lens)
+            &#47&#47 attn_loss = self.guided_attn_loss(alignments[1][0], src_lens, mel_lens)
+            helper_loss = self.guided_attn_weight * attn_loss
+        elif self.helper_type == "ctc":
+            for alignment_logprob in alignment_logprobs:
+                ctc_loss += self.sum_loss(alignment_logprob, src_lens, mel_lens)
+            ctc_loss<a id="change"> = </a>ctc_loss.mean()
+            helper_loss = (self.ctc_weight_start if step &lt;= self.ctc_step else self.ctc_weight_end) * ctc_loss
+
+        total_loss = (
+            mel_loss + kl_loss + postnet_loss + duration_loss + helper_loss
+        )
+
+        <a id="change">return </a>(
+            total_loss<a id="change">,
+            mel_loss,  &#47&#47 L_VG
+            kl_loss,  &#47&#47 L_KL
+            postnet_loss,  &#47&#47 L_PN
+            duration_loss,  &#47&#47 L_dur
+            helper_loss</a>,
+        )
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/portaspeech/commit/814cdda1ebf7dc626708db2bcf20fdb9207f4345#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5770527</div><div id='project'> Project Name: keonlee9420/portaspeech</div><div id='commit'> Commit Name: 814cdda1ebf7dc626708db2bcf20fdb9207f4345</div><div id='time'> Time: 2022-02-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: PortaSpeechLoss</div><div id='n_method'> N Class Name: PortaSpeechLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 80</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 127</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        del features
+
+        self.fpn_feature_sizes<a id="change"> = </a><a id="change">torch.tensor(
+            self.fpn_feature_sizes).to(</a>device<a id="change">)</a>
+
+        batch_positions<a id="change"> = </a>self.positions(self.batch_size,
+                                         self.fpn_feature_sizes)
+
+        &#47&#47 if input size:[B,3,640,640]
+        &#47&#47 features shape:[[B, 256, 80, 80],[B, 256, 40, 40],[B, 256, 20, 20],[B, 256, 10, 10],[B, 256, 5, 5]]
+        &#47&#47 cls_heads shape:[[B, 80, 80, 80],[B, 40, 40, 80],[B, 20, 20, 80],[B, 10, 10, 80],[B, 5, 5, 80]]
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+        &#47&#47 batch_positions shape:[[B, 80, 80, 2],[B, 40, 40, 2],[B, 20, 20, 2],[B, 10, 10, 2],[B, 5, 5, 2]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads, batch_positions</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zgcr/pytorch-imagenet-cifar-coco-voc-training/commit/d271077f312fa0d2bf7456c3b5edc63e49aa3a39#diff-6b560ed73e116d61747b3731c97901ea8e7ab1c3ed66961b7b39383395fa0851L76' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5770576</div><div id='project'> Project Name: zgcr/pytorch-imagenet-cifar-coco-voc-training</div><div id='commit'> Commit Name: d271077f312fa0d2bf7456c3b5edc63e49aa3a39</div><div id='time'> Time: 2020-07-19</div><div id='author'> Author: zgcr@mail.ustc.edu.cn</div><div id='file'> File Name: public/detection/models/fcos.py</div><div id='m_class'> M Class Name: FCOS</div><div id='n_method'> N Class Name: FCOS</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: public/detection/models/fcos.py</div><div id='n_file'> N File Name: public/detection/models/fcos.py</div><div id='m_start'> M Start Line: 109</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            return loss, None
+
+        else:
+            <a id="change">return </a>None<a id="change">, self.decode(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                     context_limited, question_limited,
+                                     decoder_vocab, rnn_state=context_rnn_state).data</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre><h3>After Change</h3><pre><code class='java'>
+                decoder_wrapper = self.decoder_wrapper(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                                    context_limited, question_limited, decoder_vocab, rnn_state=context_rnn_state)
+            else:
+                current_token_id<a id="change"> = </a><a id="change">current_token_id.cpu().apply_(self.map_to_full).to(</a>current_token_id.device<a id="change">)</a>
+            &#47&#47 return (next_token_logits, past) where `past` includes all the states needed to continue generation
+            logits<a id="change"> = </a>decoder_wrapper.next_token_probs(current_token_id)
+            &#47&#47 print(&quotlogits&quot, logits.shape)
+            <a id="change">return </a>logits<a id="change">, decoder_wrapper</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stanford-oval/genienlp/commit/8750a12fd1be465524e5aa235e507dd421607034#diff-006b4d33956687d03abcca19226871777a55013fbed4a456e2f142a52d52d4fcL81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5770548</div><div id='project'> Project Name: stanford-oval/genienlp</div><div id='commit'> Commit Name: 8750a12fd1be465524e5aa235e507dd421607034</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: s.j.semnani@gmail.com</div><div id='file'> File Name: genienlp/models/mqan_decoder.py</div><div id='m_class'> M Class Name: MQANDecoder</div><div id='n_method'> N Class Name: MQANDecoder</div><div id='m_method'> M Method Name: forward(10)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: genienlp/models/mqan_decoder.py</div><div id='n_file'> N File Name: genienlp/models/mqan_decoder.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 149</div><BR>

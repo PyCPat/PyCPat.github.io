@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x<a id="change"> = </a>x.mean(-2)<a id="change"> / x_len.float().unsqueeze(-1</a><a id="change">)</a>
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.pre_proj is not None:
+            x = self.pre_proj(x)
+
+        if <a id="change">x_len is not None</a>:
+            x<a id="change"> = </a>[x[b, : x_len[b]].mean(0) for b in range(len(x))]
+            x = torch.stack(x, dim=0)
+        else:
+            x = x.mean(1)
+
+        <a id="change">if self.post_proj is not None</a><a id="change">:
+            </a>x<a id="change"> = </a>self.post_proj(x)
+
+        return x
+</code></pre>

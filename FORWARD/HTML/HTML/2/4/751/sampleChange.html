@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            y = torch.cat((priv_obses, pub_obses,), dim=-1)
+
+        final = self._relu(self.final_cn_1(y))
+        final = <a id="change">final.flatten(</a>1<a id="change">)</a>
+        final = self._relu(self.final_fc_1(final))
+
+        &#47&#47 Standartize last layer
+        if self.args.normalize:</code></pre><h3>After Change</h3><pre><code class='java'>
+        priv_obses[pf_mask] = self.lut_range_idx_2_priv_o_pf[range_idxs][pf_mask]
+
+        if self.args.use_pre_layers:
+            priv_obses = torch.reshape(priv_obses, (-1<a id="change">, 2, 17</a>))
+            _board_obs = pub_obses[:, self.board_start:self.board_stop]
+            _board_obs = torch.reshape(_board_obs, (-1, 5, 17))
+            _card_obs = torch.cat((priv_obses, _board_obs), dim=1)
+            _hist_and_state_obs = torch.cat([
+                pub_obses[:, :self.board_start],
+                pub_obses[:, self.board_stop:]
+            ],
+                dim=-1
+            )
+            _hist_and_state_obs.unsqueeze_(1)
+            _card_obs = nn.ZeroPad2d((0, 7, 0, 0))(_card_obs)
+            _card_obs<a id="change"> = </a><a id="change">torch.cat(</a>(_card_obs, _hist_and_state_obs)<a id="change">, dim=1)</a>
+            &#47&#47 Add dimension for convolution channels
+            _card_obs.unsqueeze_(1)
+            y = self._feed_through_pre_layers(card_obs=_card_obs,
+                                              hist_and_state_obs=_hist_and_state_obs)</code></pre>

@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :3483
+</h3><img src='17580352.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        encoded: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The encoded embedding for each series and time step.
+        
+        <a id="change">pass</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Treat the various time steps as a batch dimension
+            mod_series = self.layer_series[i]
+            data = <a id="change">data.transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+            &#47&#47 [series, batch, time steps, embedding]
+            data = data.flatten(start_dim=1, end_dim=2)
+            &#47&#47 [series, batch * time steps, embedding] Correct order for PyTorch module
+            data = mod_series(data)
+            data<a id="change"> = </a>data.unflatten(dim=1, sizes=(num_batches, num_timesteps))
+            &#47&#47 [series, batch, time steps, embedding]
+            data<a id="change"> = </a>data.transpose(0, 1)
+            &#47&#47 [batch, series, time steps, embedding]
+
+        &#47&#47 The resulting tensor may not be contiguous, which can cause problems further down the line.
+        output<a id="change"> = </a>data.contiguous()
+
+        <a id="change">return </a>output
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/servicenow/tactis/commit/0ba7dc5856d92dd6b1809b0a34a89bfed9086738#diff-359f80214ebbb3d54906470271f38934e825eb5142fe784be60c2deeff917579L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580352</div><div id='project'> Project Name: servicenow/tactis</div><div id='commit'> Commit Name: 0ba7dc5856d92dd6b1809b0a34a89bfed9086738</div><div id='time'> Time: 2022-06-06</div><div id='author'> Author: etienne.marcotte@servicenow.com</div><div id='file'> File Name: tactis/model/encoder.py</div><div id='m_class'> M Class Name: TemporalEncoder</div><div id='n_method'> N Class Name: TemporalEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tactis/model/encoder.py</div><div id='n_file'> N File Name: tactis/model/encoder.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 255</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        encoded: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The encoded embedding for each series and time step.
+        
+        <a id="change">pass</a>
+
+
+class TemporalEncoder(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        encoded = encoded.view(num_batches, num_series * num_timesteps, self.embedding_dim)
+
+        &#47&#47 The PyTorch implementation wants the following order: [tokens, batch, embedding]
+        encoded<a id="change"> = </a><a id="change">encoded.transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        output = self.transformer_encoder(
+            encoded, mask=torch.zeros(encoded.shape[0], encoded.shape[0], device=encoded.device)
+        )
+
+        &#47&#47 Reset to the original shape
+        output<a id="change"> = </a>output.transpose(0, 1)
+        output<a id="change"> = </a>output.view(num_batches, num_series, num_timesteps, self.embedding_dim)
+
+        <a id="change">return </a>output
+
+
+class TemporalEncoder(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/servicenow/tactis/commit/2be3c24d698d2ec447e2a7b8e85cafbbbfa74f67#diff-359f80214ebbb3d54906470271f38934e825eb5142fe784be60c2deeff917579L38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580353</div><div id='project'> Project Name: servicenow/tactis</div><div id='commit'> Commit Name: 2be3c24d698d2ec447e2a7b8e85cafbbbfa74f67</div><div id='time'> Time: 2022-06-06</div><div id='author'> Author: etienne.marcotte@servicenow.com</div><div id='file'> File Name: tactis/model/encoder.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tactis/model/encoder.py</div><div id='n_file'> N File Name: tactis/model/encoder.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 119</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super(ScaledDotProductAttention, self).__init__()
+
+    def forward(self):
+        <a id="change">pass</a>
+
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mask = None
+
+    def forward(self, query, key, value, mask):
+        score<a id="change"> = </a>torch.bmm(query, <a id="change">key.transpose(1</a>, <a id="change">2</a><a id="change">)</a>) / np.sqrt(self.dim)
+
+        if mask is not None:
+            score.masked_fill_(mask, -float(&quotinf&quot))
+
+        attn<a id="change"> = </a>F.softmax(score, -1)
+        context<a id="change"> = </a>torch.bmm(attn, value)
+        <a id="change">return </a>context, attn
+
+    def set_mask(self, mask):
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sooftware/transformer-pytorch/commit/0575f499d8274be068a1c11b315b59ac7be67dad#diff-d15d98be0976be9e25f3baacbbd84bfee55dd684325f14927852a9f192df85a1L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580354</div><div id='project'> Project Name: sooftware/transformer-pytorch</div><div id='commit'> Commit Name: 0575f499d8274be068a1c11b315b59ac7be67dad</div><div id='time'> Time: 2020-07-04</div><div id='author'> Author: sh951011@gmail.com</div><div id='file'> File Name: transformer/model.py</div><div id='m_class'> M Class Name: ScaledDotProductAttention</div><div id='n_method'> N Class Name: ScaledDotProductAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer/model.py</div><div id='n_file'> N File Name: transformer/model.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 45</div><BR>

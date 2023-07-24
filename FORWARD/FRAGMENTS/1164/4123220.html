@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+
+    def forward(self, state):
+        x = <a id="change">self.net(</a>state<a id="change">)</a>
+
+        mean = self.mean_linear(x)
+        log_std = self.log_std_linear(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, state):
+        x = state
+        <a id="change">for operator</a> in self.operators<a id="change">:
+            </a>x<a id="change"> = </a>operator(x)
+
+        mean, log_std = torch.split(x, <a id="change">x.shape[1]</a> // 2, dim=1)
+
+        log_std = self.std_clamp(log_std)
+</code></pre>

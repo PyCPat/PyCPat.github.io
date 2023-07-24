@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Confidence Loss(cosine distance to classes center)
+        &#47&#47 pos [num, num_priors]
+        &#47&#47 conf_data [num, num_priors, feature_dim]
+        conf_data<a id="change"> = </a>conf_data / <a id="change">torch.norm(</a>conf_data<a id="change">, dim=2, keepdim=True)</a>  &#47&#47 [num, num_priors, feature_dim]
+        batch_conf = conf_data.view(-1, self.num_classes).mm(self.imprinted_matrix.t()) * self.scale  &#47&#47 [n_way, num_classes]
+
+        &#47&#47 Compute max conf across batch for hard negative mining (logit-combined)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 conf_data [num, num_priors, feature_dim]
+        features = [conf_data.view(-1, self.num_classes)]
+        for i in range(3):
+            new_features = (self.denselayer1<a id="change">, self.denselayer2, self.denselayer3</a>)[i](*features)
+            features.append(new_features)
+        batch_conf = new_features * self.scale  &#47&#47 [n_way, num_classes]
+</code></pre>

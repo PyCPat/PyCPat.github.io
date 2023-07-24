@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 x = self.bn(x)
+
+        x = self.transformer_encoder(x)
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.proj(x)
+        out = torch.zeros((batch_size, time_steps, self.hidden_dim))
+        for cur_time in range(time_steps):
+            cur_x = <a id="change">x</a>[:, <a id="change">:</a> cur_time<a id="change"> + 1</a>, :]
+            cur_x = self.transformer_encoder(cur_x)
+            out[:, cur_time, :] = torch.mean(cur_x, dim=1)
+        return out</code></pre>

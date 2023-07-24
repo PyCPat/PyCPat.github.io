@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        with torch.cuda.device_of(x):
+
+            disp_u = torch.reshape(
+                <a id="change">torch.arange(
+                    </a>-self.max_u,
+                    self.max_u + 1<a id="change">,
+                    dtype=torch.float32,
+                )</a>,
+                [1, sizeU, 1, 1, 1],
+            )
+            disp_u = disp_u.expand(B, -1, sizeV, H, W).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.squeeze(1)
+        B, _, _, H, W = x.shape
+
+        disp_u = <a id="change">torch.reshape(
+            torch.arange(
+                -self.max_u,
+                self.max_u + 1,
+                dtype=torch.float32,
+            ),
+            [1, sizeU, 1, 1, 1],
+        ).to(</a>x.device<a id="change">)</a>
+        disp_u = disp_u.expand(B, -1, sizeV, H, W).contiguous()
+        disp_u = disp_u.view(B, sizeU * sizeV, H, W)
+
+        disp_v = torch.reshape(</code></pre>

@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :661
+</h3><img src='2405909.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        block_forecasts = torch.stack(block_forecasts)
+        block_forecasts = block_forecasts.permute(1, 0, 2)
+
+        <a id="change">return </a>forecast, block_forecasts
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        encoder_mask = encoder_mask.unsqueeze(-1)
+
+        level = encoder_y[:, -1:].repeat(1, decoder_x_t.size(1), 1)  &#47&#47 Level with Naive1
+        block_forecasts<a id="change"> = </a>[level]
+        block_backcasts = [<a id="change">encoder_y[:, -1:]</a>.repeat(1, encoder_y.size(1), 1)]
+
+        forecast = level
+        for block in self.blocks:
+            block_backcast, block_forecast = block(
+                encoder_y=residuals, encoder_x_t=encoder_x_t, decoder_x_t=decoder_x_t, x_s=x_s
+            )
+            residuals = (residuals - block_backcast) * encoder_mask
+
+            forecast = forecast + block_forecast
+            block_forecasts.append(block_forecast)
+            block_backcasts.append(block_backcast)
+
+        &#47&#47 (n_batch, n_t, n_outputs, n_blocks)
+        block_forecasts = torch.stack(block_forecasts, dim=-1)
+        block_backcasts = torch.stack(block_backcasts, dim=-1)
+        backcast<a id="change"> = </a>residuals
+
+        <a id="change">return </a>forecast<a id="change">, backcast, block_forecasts, block_backcasts</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/a60fea51988c95548f47dd9fb76fa57258201160#diff-e15aa407f75975260ffed738d20639620726fe06ff7533b115426860e6eea826L343' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2405909</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: a60fea51988c95548f47dd9fb76fa57258201160</div><div id='time'> Time: 2022-03-20</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_class'> M Class Name: NHiTS</div><div id='n_method'> N Class Name: NHiTS</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_start'> M Start Line: 343</div><div id='m_end'> M End Line: 363</div><div id='n_start'> N Start Line: 353</div><div id='n_end'> N End Line: 379</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        outputs = self.head_forward(self.backbone(input_image))
+        parsed_results = self.parsing_outputs(outputs)
+
+        <a id="change">return </a>parsed_results
+
+if __name__ == &quot__main__&quot:
+    model = ROMPv1().cuda()</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.backbone(image)
+        x = torch.cat((x, self.coordmaps.to(x.device).repeat(x.shape[0],1,1,1)), 1)
+
+        params_maps<a id="change"> = </a>self.final_layers[1](x)
+        center_maps<a id="change"> = </a>self.final_layers[2](x)
+        cam_maps = self.final_layers[3](x)
+        &#47&#47 to make sure that scale is always a positive value
+        <a id="change">cam_maps[:, 0]</a> = torch.pow(1.1,cam_maps[:, 0])
+        params_maps = torch.cat([cam_maps, params_maps], 1)
+        <a id="change">return </a>center_maps<a id="change">, params_maps</a> 
+
+
+def export_model_to_onnx_static(model, save_file, bs=1):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/arthur151/centerhmr/commit/623687a37cb7d1ba4538baf1e3c6f65808a36e2c#diff-dc60c0c31942deda06f4f21166d0c1927d2a6858240f6d89a0fee9e7bba4efa7L472' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2405957</div><div id='project'> Project Name: arthur151/centerhmr</div><div id='commit'> Commit Name: 623687a37cb7d1ba4538baf1e3c6f65808a36e2c</div><div id='time'> Time: 2022-03-18</div><div id='author'> Author: yusun@stu.hit.edu.cn</div><div id='file'> File Name: simple_romp/romp/model.py</div><div id='m_class'> M Class Name: ROMPv1</div><div id='n_method'> N Class Name: ROMPv1</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_romp/romp/model.py</div><div id='n_file'> N File Name: simple_romp/romp/model.py</div><div id='m_start'> M Start Line: 473</div><div id='m_end'> M End Line: 476</div><div id='n_start'> N Start Line: 472</div><div id='n_end'> N End Line: 481</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Reverse order, so if we stack MAFs, correct things happen.
+        z = z.flip(dims=(1,)) if self.parity else z
+        log_det = torch.sum(s, dim=1)
+        <a id="change">return </a>z, log_det
+
+    def inverse(self, z):
+        &#47&#47 we have to decode the x one at a time, sequentially</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, z):
+        &#47&#47 we have to decode the x one at a time, sequentially
+        x<a id="change"> = </a>torch.zeros_like(z)
+        log_det<a id="change"> = </a>torch.zeros(z.size(0))
+        z = z.flip(dims=(1,)) if self.parity else z
+        for i in range(self.dim):
+            st = self.net(x.clone())  &#47&#47 clone to avoid in-place op errors if using IAF
+            s, t = st.split(self.dim, dim=1)
+            x[:, i] = (z[:, i] - t[:, i]) * torch.exp(-<a id="change">s[:, i]</a>)
+            log_det += -s[:, i]
+        <a id="change">return </a>x<a id="change">, log_det</a>
+
+
+class IAF(MAF):
+    Reverses the flow of MAF, giving an Inverse Autoregressive Flow (IAF)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janosh/torch-mnf/commit/89ce9b3eb1de8e735e68602768c84ad28cbdd251#diff-9cf596a23e82fecb1f0de25f5c6da1317126d0764ce1287b505ed3b9dcc9ed01L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2405926</div><div id='project'> Project Name: janosh/torch-mnf</div><div id='commit'> Commit Name: 89ce9b3eb1de8e735e68602768c84ad28cbdd251</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: janosh.riebesell@gmail.com</div><div id='file'> File Name: torch_mnf/flows/maf.py</div><div id='m_class'> M Class Name: MAF</div><div id='n_method'> N Class Name: MAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_mnf/flows/maf.py</div><div id='n_file'> N File Name: torch_mnf/flows/maf.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 51</div><BR>

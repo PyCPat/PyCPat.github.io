@@ -1,0 +1,111 @@
+<html><h3>Pattern ID :232
+</h3><img src='857549.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(<a id="change">mask[..., None]</a>, 0.)
+
+        gate = F.conv1d(gate, weight, bias)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(mask, 0.)
+
+        gate<a id="change"> = </a><a id="change">einsum(&quotb n d, m n -&gt; b m d&quot</a>, gate, weight<a id="change">)</a>
+        gate<a id="change"> = </a>gate + rearrange(bias, &quotn -&gt; () n ()&quot)
+
+        if exists(gate_res):
+            gate = gate + gate_res</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-pytorch/commit/9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f#diff-44034403ad35d2d6dad50e7e4379a1df7da10aa3cd01d85a3d96b8361931c8b1L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 857549</div><div id='project'> Project Name: lucidrains/g-mlp-pytorch</div><div id='commit'> Commit Name: 9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f</div><div id='time'> Time: 2021-08-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_class'> M Class Name: SpatialGatingUnit</div><div id='n_method'> N Class Name: SpatialGatingUnit</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='n_file'> N File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        gate = self.norm(gate)
+
+        weight, bias = self.weight, self.bias
+        weight, bias = <a id="change">weight[:, :n, :n]</a>, bias[:, :n]
+
+        mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+        weight = weight.masked_fill(mask[..., None], 0.)</code></pre><h3>After Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[None, ...], 0.)
+
+        gate = rearrange(gate, &quotb w n (h d) -&gt; b w h n d&quot, h = h)
+        gate = <a id="change">einsum(&quotb w h n d, h m n -&gt; b w h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate<a id="change"> = </a>gate + rearrange(bias, &quoth n -&gt; () () h n ()&quot)
+
+        gate = rearrange(gate, &quotb w h n d -&gt; b w n (h d)&quot)
+
+        out = gate * res
+        out<a id="change"> = </a>rearrange(out, &quotb w n d -&gt; b (w n) d&quot)
+        return out[:, :n]
+
+def gMLPBlock(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 857548</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            embed_normalized = (embed_sum / bins.unsqueeze(0)).t()
+            embed_normalized = l2norm(embed_normalized)
+            embed_normalized = torch.where(<a id="change">zero_mask[..., None]</a>, embed,
+                                           embed_normalized)
+            ema_inplace(self.embed, embed_normalized, self.decay)
+            self.expire_codes_(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+        embed = l2norm(embed)
+
+        dist<a id="change"> = </a><a id="change">einsum(&quoth n d, h c d -&gt; h n c&quot</a>, flatten, embed<a id="change">)</a>
+        embed_ind = gumbel_sample(dist, dim = -1, temperature = self.sample_codebook_temp)
+        embed_onehot = F.one_hot(embed_ind, self.codebook_size).type(dtype)
+        embed_ind = embed_ind.view(*shape[:-1])
+
+        quantize = batched_embedding(embed_ind, self.embed)
+
+        if self.training:
+            bins = embed_onehot.sum(dim = 1)
+            self.all_reduce_fn(bins)
+
+            ema_inplace(self.cluster_size, bins, self.decay)
+
+            zero_mask = (bins == 0)
+            bins = bins.masked_fill(zero_mask, 1.)
+
+            embed_sum = einsum(&quoth n d, h n c -&gt; h c d&quot, flatten, embed_onehot)
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = embed_sum / rearrange(bins, &quot... -&gt; ... 1&quot)
+            embed_normalized = l2norm(embed_normalized)
+
+            embed_normalized = torch.where(
+                rearrange(zero_mask, &quot... -&gt; ... 1&quot),
+                embed,
+                embed_normalized
+            )
+
+            ema_inplace(self.embed, embed_normalized, self.decay)
+            self.expire_codes_(x)
+
+        if needs_codebook_dim:
+            quantize<a id="change">, embed_ind = </a>map(lambda t: rearrange(t, &quot1 ... -&gt; ...&quot), (quantize, embed_ind))
+
+        return quantize, embed_ind
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL325' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 857550</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: CosineSimCodebook</div><div id='n_method'> N Class Name: CosineSimCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 330</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 397</div><div id='n_end'> N End Line: 448</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+        max_heads = self.max_heads_process
+
+        for q_chunk, k_chunk, v_chunk in zip(q.split(max_heads, dim = 1), k.split(max_heads, dim = 1), v.split(max_heads, dim = 1)):
+            sim<a id="change"> = </a><a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q_chunk, k_chunk<a id="change">)</a>
+
+            if exists(context_mask):
+                sim = sim.masked_fill(~context_mask, mask_value)
+
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+            attn = sim.softmax(dim = -1)
+            attn = self.dropout(attn)
+
+            out_chunk<a id="change"> = </a>einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v_chunk)
+            out.append(out_chunk)
+
+        &#47&#47 concat all the heads together</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-ar-pytorch/commit/be3765300f5aae03b779edf0e256b7a74bda5fc8#diff-5ab51011b3cb840590737cf5342761683a8f59ac8817bfe6b989cf9e213218e4L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 857595</div><div id='project'> Project Name: lucidrains/perceiver-ar-pytorch</div><div id='commit'> Commit Name: be3765300f5aae03b779edf0e256b7a74bda5fc8</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_class'> M Class Name: CausalPrefixAttention</div><div id='n_method'> N Class Name: CausalPrefixAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='n_file'> N File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 178</div><BR>

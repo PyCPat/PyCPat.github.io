@@ -2,21 +2,21 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-    def __init__(self):
-        super().__init__()
+        self.rho.data.fill_(0.)
 
-        self.conv_1 = nn.Conv1d(1, 16, (3<a id="change">, 1</a>))
-        self.conv_2 = nn.Conv2d(16, 32, (3, 1))
-        self.conv_3 = nn.Conv2d(32, 32, (3, 1))
-        self.conv_4 = nn.Conv2d(32, 64, (3, 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.instance_norm = nn.InstanceNorm2d(channels, eps=eps, affine=False)
+        self.layer_norm    = nn.LayerNorm((channels<a id="change">, resl, resl</a>), eps=eps, elementwise_affine=False)
 
-        self.max = nn.AdaptiveMaxPool2d(4)
+        self.gamma = nn.Parameter(torch.Tensor(1, channels, 1, 1))
+        self.beta  = nn.Parameter(torch.Tensor(1, channels, 1, 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.layer_norm = get_normalization(&quotln&quot, channels, affine=False)
+        self.instance_norm = get_normalization(&quotin&quot, channels, affine=False)
+        self.rho   = nn.Parameter(torch.ones(1, channels, 1, 1) * 0.5)
+        <a id="change">if affine</a><a id="change">:
+            </a>self.affine<a id="change"> = </a>True
+            self.gamma = nn.Parameter(torch.ones(1, channels, 1, 1))
+            self.beta  = nn.Parameter(torch.zeros(1, channels, 1, 1))
+        else: self.affine<a id="change"> = </a>False
 
-        <a id="change">if position</a><a id="change">:
-            </a>if learnable:
-                self.position_embedding<a id="change"> = </a>LearnablePositionalEncoding(dict_size=num_patches, num_pos_feats=projection_dim)
-            else:
-                self.position_embedding<a id="change"> = </a>PositionalEncoding(projection_dim)
-
-
-    def forward(self, inputs):</code></pre>
+    def forward(self, x):
+        layer_norm = self.layer_norm(x)</code></pre>

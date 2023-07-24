@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :1240
+</h3><img src='4403840.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        weight = weight.masked_fill(mask[..., None], 0.)
+
+        gate = rearrange(gate, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        gate = <a id="change">einsum(&quotb h n d, h n m -&gt; b h m d&quot</a>, gate, weight<a id="change">)</a>
+        gate = gate + rearrange(bias, &quoth n -&gt; () h n ()&quot)
+        gate = rearrange(gate, &quotb h n d -&gt; b n (h d)&quot)
+
+        <a id="change">return </a>gate * res
+
+def gMLPBlock(
+    *,</code></pre><h3>After Change</h3><pre><code class='java'>
+        res, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+
+        gate<a id="change"> = </a>F.pad(gate, (0, 0, 0, 0, 1, 0), value = 0.)
+        gate<a id="change"> = </a>torch.cat((gate[:, :-1], gate[:, 1:]), dim = 2)
+
+        weight, bias = self.weight, self.bias
+
+        mask = torch.ones(weight.shape[-2:], device = device).triu_(1 + w).bool()
+        weight = weight.masked_fill(mask[None, ...], 0.)
+
+        gate = rearrange(gate, &quotb w n (h d) -&gt; b w h n d&quot, h = h)
+        gate = einsum(&quotb w h n d, h m n -&gt; b w h m d&quot, gate, weight)
+        gate = gate + rearrange(bias, &quoth n -&gt; () () h n ()&quot)
+
+        gate = <a id="change">rearrange(</a>gate, <a id="change">&quotb w h n d -&gt; b w n (h d)&quot</a><a id="change">)</a>
+
+        out = gate * res
+        out = rearrange(out, &quotb w n d -&gt; b (w n) d&quot)
+        <a id="change">return </a>out[:, :n]
+
+def gMLPBlock(
+    *,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-gpt/commit/a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d#diff-9e1c762f97dc7e52cf231d6bec8dbb8412bc9383faaf89eadd9b1c02e46fea80L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4403840</div><div id='project'> Project Name: lucidrains/g-mlp-gpt</div><div id='commit'> Commit Name: a2f065dfcf7be1d1e4b205ac1a55de4ad1b3327d</div><div id='time'> Time: 2021-05-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_class'> M Class Name: CausalSpatialGatingUnit</div><div id='n_method'> N Class Name: CausalLocalSGU</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='n_file'> N File Name: g_mlp_gpt/g_mlp_gpt.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads)
+        q = q * self.scale
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)
+        out = self.to_out(out)
+        <a id="change">return </a>rearrange(out, &quot(b f) c h w -&gt; b c f h w&quot, b = b)
+
+&#47&#47 model
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quot... n (h d) -&gt; ... h n d&quot, h = self.heads)
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quot... h i d, ... h j d -&gt; ... h i j&quot, q, k)
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quot... h i j, ... h j d -&gt; ... h i d&quot, attn, v)
+        out = <a id="change">rearrange(</a>out, <a id="change">&quot... h n d -&gt; ... n (h d)&quot</a><a id="change">)</a>
+        <a id="change">return </a>self.to_out(out)
+
+&#47&#47 model
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/video-diffusion-pytorch/commit/12fac4c86d51e844ecae1514568355d7be6b4833#diff-4ff1a95f5e6b9add82d0e523fd2d858ca38e67b393ea87c2ae88a8b14a0fbb1cL189' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4403798</div><div id='project'> Project Name: lucidrains/video-diffusion-pytorch</div><div id='commit'> Commit Name: 12fac4c86d51e844ecae1514568355d7be6b4833</div><div id='time'> Time: 2022-04-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='n_file'> N File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 204</div><div id='n_start'> N Start Line: 215</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        n, device = x.shape[1], x.device
+        l = n + context_len
+        t = torch.arange(l - 1, -1, -1, device = device).type_as(self.inv_freq)
+        sinusoid_inp = <a id="change">einsum(&quoti , j -&gt; i j&quot</a>, t, self.inv_freq<a id="change">)</a>
+        emb = torch.cat((sinusoid_inp.sin(), sinusoid_inp.cos()), dim = -1)
+        <a id="change">return </a>emb
+
+&#47&#47 main classes
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, qlen, klen):
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos<a id="change"> = </a>torch.arange(klen, dtype = torch.long, device = device)
+        rel_pos = k_pos[None, :] - q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values<a id="change"> = </a>self.relative_attention_bias(rp_bucket)
+        <a id="change">return rearrange(</a>values, <a id="change">&quoti j h -&gt; () h i j&quot</a><a id="change">)</a>
+
+&#47&#47 main classes
+
+class FeedForward(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4403812</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: 7ec1c1f60129a90b9abc6fd3b893a4ceb16f98e0</div><div id='time'> Time: 2020-10-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: SinusoidalEmbedding</div><div id='n_method'> N Class Name: RelativePositionBias</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 77</div><BR>

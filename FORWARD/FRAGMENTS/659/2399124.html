@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= self.max_spatial_seq_len, &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        <a id="change">assert </a>depth &lt;= self.max_depth_seq_len, &quotdepth dimension is greater than the max_depth_seq_len set&quot
+
+        tokens = self.token_emb(ids)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb s d -&gt; b (s d)&quot)
+        labels = labels[:, :<a id="change">preds.shape[-1]</a>]
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)
+        return loss</code></pre>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, ws, gs, E_features, noise_mode="random"):
+        &#47&#47 x = self.fc(x).view(x.shape[0], -1, 4, 4)
+        x = self.conv0(x)
+        x<a id="change"> = </a>x<a id="change"> + </a><a id="change">E_features[2]</a>
+        style = get_style_code(ws[:, 0], gs)
+        x = self.conv1(x, style, noise_mode=noise_mode)
+        style = get_style_code(ws[:, 1], gs)
+        img = self.toRGB(x, style, skip=None)</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, x, img, ws, gs, E_features, noise_mode="random"):
+        style<a id="change"> = get_style_code(</a><a id="change">ws[:, self.res * 2 - 9]</a>, gs<a id="change">)</a>
+        x = self.conv0(x, style, noise_mode=noise_mode)
+        x = x<a id="change"> + E_features[self.res]</a>
+        style<a id="change"> = </a><a id="change">get_style_code(</a><a id="change">ws[:, self.res * 2 - 8]</a>, gs<a id="change">)</a>
+        x = self.conv1(x, style, noise_mode=noise_mode)
+        style<a id="change"> = </a><a id="change">get_style_code(</a><a id="change">ws[:, self.res * 2 - 7]</a>, gs<a id="change">)</a>
+        img = self.toRGB(x, style, skip=img)
+
+        return x, img
+</code></pre>

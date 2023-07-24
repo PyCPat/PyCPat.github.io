@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2505
+</h3><img src='14753477.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.unwrapPool1(x)
+
+        y = x.view(self.outChans, self.imH, self.imW, -1)
+        y<a id="change"> = </a><a id="change">y.permute(3</a>, <a id="change">1</a>, <a id="change">2</a>, <a id="change">0</a><a id="change">)</a>
+        y = self.l_relu(self.decode(y))
+        return y
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = torch.zeros(b, self.outChans, self.imH, self.imW)
+        for i in range(self.imH):
+            for j in range(self.imW):
+                <a id="change">y[:, :, i, j]</a> = self.base_net(x[:, :, i:i+self.pH, j:j+self.pW])
+        return y
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/denguir/student-teacher-anomaly-detection/commit/c090d9290f3f98f7ae8d50ec88c203d90b253fb5#diff-8c53207c34b6a7ad93a4ee089693b4371ae02e1dbe7b8ad6154b3808db44fedbL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14753477</div><div id='project'> Project Name: denguir/student-teacher-anomaly-detection</div><div id='commit'> Commit Name: c090d9290f3f98f7ae8d50ec88c203d90b253fb5</div><div id='time'> Time: 2020-10-01</div><div id='author'> Author: anass.den@gmail.com</div><div id='file'> File Name: src/ExtendedAnomalyNet.py</div><div id='m_class'> M Class Name: ExtendedAnomalyNet</div><div id='n_method'> N Class Name: ExtendedAnomalyNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/ExtendedAnomalyNet.py</div><div id='n_file'> N File Name: src/ExtendedAnomalyNet.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                deTransformed = self._decoder(posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed<a id="change"> = </a><a id="change">quantized.reshape(h, w, n, c).permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed
+            &#47&#47 [n, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [k, 1, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [h*w, n, c]
+            quantized = sample @ <a id="change">codewords[:, 0, ...]</a>
+            &#47&#47 [h*w, n, c]
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+            &#47&#47 [k, 1, c]
+            decodedCodes = self._codebookDecoder(codebook)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/a4a40624c11a9779699f4a37cccb5b5ed8bc5048#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L263' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14753478</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: a4a40624c11a9779699f4a37cccb5b5ed8bc5048</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 298</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 534</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size,
+                                       self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        x = self.unpatch_emb(x)
+        x<a id="change"> = </a><a id="change">x.permute(0</a>, <a id="change">2</a>, 1, <a id="change">3</a>, <a id="change">4</a><a id="change">)</a>  &#47&#47 B x C x T x H x W -&gt; B x T x C x H x W
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.attention(x)  &#47&#47 1 x 21 x 256 x 64
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size, self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        if x.shape[2] &gt; 1:  &#47&#47 not only image training
+            image, video = x[:, :, 0], <a id="change">x[:, :, 1:]</a>
+            video = self.video_unpatch_emb(video)
+            image = self.image_unpatch_emb(image)
+            x = torch.cat([image.unsqueeze(2), video], dim=2).permute(0, 2, 1, 3, 4)  &#47&#47 B x C x T x H x W -&gt; B x T x C x H x W</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14753481</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: 04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2</div><div id='time'> Time: 2022-10-12</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 97</div><BR>

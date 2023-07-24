@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.encoder_layer(x, src_key_padding_mask=mask)
+
+        &#47&#47 concatenate static features to the flattened encoder layer
+        x = <a id="change">torch.flatten(</a>x<a id="change">, start_dim=1, end_dim=2)</a>
+        x = torch.cat((x, X_static), dim=1)
+
+        &#47&#47 pass through fully-connected part to lower dimension to 2 (binary classification)
+        return self.feed_forward(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.encoder_layer(x, src_key_padding_mask=mask)
+
+        &#47&#47 concatenate static features to the matrix (add additional row with the size 64)
+        static_x = <a id="change">self.static_feed_forward(X_static).unsqueeze(1</a><a id="change">)</a>
+        x = torch.cat((x, static_x), dim=1)
+
+        &#47&#47 take the mean of all time steps (rows) with additional row for static features; output size = (batch_size, 64)
+        x<a id="change"> = </a>torch.mean(x, 1)
+
+        &#47&#47 pass through fully-connected part to lower dimension to 2 (binary classification)
+        return self.feed_forward(x)</code></pre>

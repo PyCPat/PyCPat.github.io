@@ -3,17 +3,16 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
-        self.position_embedding = PositionalEmbedding(d_model=d_model)
-        self.dropout = <a id="change">nn.Dropout(p=dropout)</a>
+        self.node_mlp = nn.Sequential(
+            nn.Linear(dim + m_dim, dim * 2),
+            <a id="change">nn.Dropout(</a>dropout<a id="change">)</a>,
+            SiLU(),
+            nn.Linear(dim * 2, dim),
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fourier_features = fourier_features
 
-    def forward(self, x, x_mark):
-        x = self.value_embedding(x) + self.position_embedding(x)
-        return self.dropout(x)</code></pre><h3>After Change</h3><pre><code class='java'>
-    def __init__(self, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed_type=&quotfixed&quot):
-        super(TemporalEmbedding, self).__init__()
+        edge_input_dim = (fourier_features * 2) + (dim * 2) + edge_dim + 1
+        dropout = nn.Dropout(dropout)<a id="change"> if dropout &gt; 0</a><a id="change"> else </a>nn.Identity()
 
-        Embed = FixedEmbedding<a id="change"> if embed_type==&quotfixed&quot</a><a id="change"> else </a>nn.Embedding
-        self.time_of_day_embed = Embed(time_of_day_size, d_model)
-        self.day_of_week_embed = Embed(day_of_week_size, d_model)
-        self.day_of_month_embed = Embed(day_of_month_size, d_model)</code></pre>
+        self.edge_mlp = nn.Sequential(
+            nn.Linear(edge_input_dim, edge_input_dim * 2),</code></pre>

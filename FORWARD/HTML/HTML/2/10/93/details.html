@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :93
+</h3><img src='374532.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        with g.local_scope():
+            h_prime = []
+            emb<a id="change"> = </a><a id="change">emb.permute(1</a>, <a id="change">0</a>, <a id="change">2</a><a id="change">)</a>.contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})</code></pre><h3>After Change</h3><pre><code class='java'>
+            res_attn = g.edata[&quotalpha&quot]
+            edge_attention = edge_attention * \
+                             (1 - self.beta) + res_attn * self.beta
+        if <a id="change">self.num_heads == 1</a>:
+            edge_attention = <a id="change">edge_attention[:, 0]</a>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 374532</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size,
+                                       self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        x = self.unpatch_emb(x)
+        x<a id="change"> = </a><a id="change">x.permute(</a>0, <a id="change">2</a>, <a id="change">1</a>, 3, <a id="change">4</a><a id="change">)</a>  &#47&#47 B x C x T x H x W -&gt; B x T x C x H x W
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 example x: 1 x 21 x 256 x 64
+        x = self.attention(x)  &#47&#47 1 x 21 x 256 x 64
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size, self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        if <a id="change">x.shape[2] &gt; 1</a>:  &#47&#47 not only image training
+            image, video = <a id="change">x[:, :, 0]</a>, x[:, :, 1:]
+            video = self.video_unpatch_emb(video)
+            image = self.image_unpatch_emb(image)
+            x = torch.cat([image.unsqueeze(2), video], dim=2).permute(0, 2, 1, 3, 4)  &#47&#47 B x C x T x H x W -&gt; B x T x C x H x W</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 374535</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: 04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2</div><div id='time'> Time: 2022-10-12</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = self.ffnn(x)
+
+        &#47&#47output :shp: batch_size, voc_dim, mx_seq_length
+        output = <a id="change">output.permute(0</a>,<a id="change">2</a>,<a id="change">1</a><a id="change">)</a>
+
+        &#47&#47predict_vecs: batch_size, voc_dim, max_length
+        predict_vecs = torch.zeros(batch_size, self.voc_dim, tgt.size(1) ).to(self.device)
+        curr_sz = tgt.size(1)
+        predict_vecs[:,:,:curr_sz]<a id="change"> = </a>output[:,:,:curr_sz]
+
+        return predict_vecs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                        else hidden[0] &#47&#47h_n
+
+        &#47&#47 hidden: 1, batch_size, hidden_dim * directions -&gt;tking only last two layers
+        hidden = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = -1) if <a id="change">self.directions == 2</a> \
+                        else <a id="change">hidden[:,-1,:]</a>
+
+        &#47&#47output :shp: batch_size, word_voc_dim
+        output = self.ffnn(hidden.squeeze(0))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ai4bharat/indiannlp-transliteration/commit/dd71aab694ee1ae4c77b39cda0366d04f31f0909#diff-2e968f438383750c4a8bcd4c9c6be4f873196e13588f94531d9140122aa144e4L618' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 374545</div><div id='project'> Project Name: ai4bharat/indiannlp-transliteration</div><div id='commit'> Commit Name: dd71aab694ee1ae4c77b39cda0366d04f31f0909</div><div id='time'> Time: 2020-06-16</div><div id='author'> Author: josephgeobenjamin@gmail.com</div><div id='file'> File Name: algorithms/recurrent_nets.py</div><div id='m_class'> M Class Name: CorrectionBasicNet</div><div id='n_method'> N Class Name: VocabCorrectorNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/recurrent_nets.py</div><div id='n_file'> N File Name: algorithms/recurrent_nets.py</div><div id='m_start'> M Start Line: 618</div><div id='m_end'> M End Line: 640</div><div id='n_start'> N Start Line: 646</div><div id='n_end'> N End Line: 668</div><BR>

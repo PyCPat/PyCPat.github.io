@@ -1,0 +1,84 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 print("data batch size:", data.num_batch)
+
+        sub_graph_out = self.subgraph(data)
+        <a id="change">x</a> = sub_graph_out.x.view(-1, time_step_len, self.polyline_vec_shape)
+
+        &#47&#47 TODO: compute the adjacency matrix???
+        &#47&#47 reconstruct the batch global interaction graph data
+        if isinstance(data, Batch):
+            &#47&#47 mini-batch case
+            global_g_data = Batch()
+            batch_list = []
+            for idx in range(data.num_graphs):
+                node_list = torch.tensor([i for i in range(valid_lens[idx])]).long()
+                edge_index = torch.combinations(node_list, 2).transpose(1, 0)
+
+                &#47&#47 print(x[idx, :, :].size())
+                batch_list.append(Data(x=F.normalize(x[idx, :, :], dim=1).squeeze(0),
+                                       edge_index=edge_index,
+                                       valid_lens=valid_lens[idx],
+                                       time_step_len=time_step_len))
+            global_g_data = global_g_data.from_data_list(batch_list)
+        elif isinstance(data, Data):
+            &#47&#47 single batch case
+            node_list = torch.tensor([i for i in range(valid_lens[0])]).long()
+            edge_index = torch.combinations(node_list, 2).transpose(1, 0)
+            global_g_data = Data(x=F.normalize(x[0, :, :], dim=3).squeeze(0),
+                                 edge_index=edge_index,
+                                 valid_lens=valid_lens,
+                                 time_step_len=time_step_len)
+        else:
+            raise NotImplementedError
+
+        global_g_data.to(self.device)
+        if self.training:
+            &#47&#47 mask out the features for a random subset of polyline nodes
+            &#47&#47 for one batch, we mask the same polyline features
+
+            global_graph_out, mask_polyline_indices = self.global_graph(global_g_data)
+            global_graph_out = global_graph_out.view(-1, time_step_len, self.polyline_vec_shape)
+
+            pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
+            if self.with_aux:
+                <a id="change">aux_in</a> = torch.empty(
+                    (global_graph_out.size()[0], self.polyline_vec_shape),
+                    device=self.device
+                )
+                <a id="change">aux_gt</a> = torch.empty(
+                    (global_graph_out.size()[0], self.polyline_vec_shape),
+                    device=self.device
+                )
+                <a id="change">for </a><a id="change">i</a>, <a id="change">idx</a> in <a id="change">enumerate(</a>mask_polyline_indices<a id="change">):
+                    aux_in[i] = </a><a id="change">global_graph_out[i, idx].squeeze(0</a><a id="change">)</a>
+                    <a id="change">aux_gt[i] = </a><a id="change">x[i, idx].squeeze(0</a><a id="change">)</a>
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt
+            else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        args:
+            data (Data): [x, y, cluster, edge_index, valid_len]
+        
+        <a id="change">time_step_len</a> = int(data.time_step_len[0])
+        valid_lens = data.valid_len
+
+        &#47&#47 print("valid_lens type:", type(valid_lens).__name__)
+        &#47&#47 print("data batch size:", data.num_batch)
+
+        sub_graph_out = self.subgraph(data)
+        <a id="change">x</a> = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
+
+        <a id="change">if </a>self.training and self.with_aux<a id="change">:
+            </a>mask_polyline_indices = [random.randint(0, time_step_len<a id="change"> - </a>1)<a id="change"> + </a>i * time_step_len for i in
+                                     range(x.size()[0])]
+            <a id="change">x</a><a id="change"> = </a><a id="change">x.view(-1</a>, self.subgraph_width<a id="change">)</a>
+            aux_gt<a id="change"> = </a><a id="change">x[mask_polyline_indices]</a>
+            <a id="change">x[mask_polyline_indices] = 0.0</a>
+            x<a id="change"> = </a><a id="change">x.view(-1</a>, time_step_len, self.subgraph_width<a id="change">)</a>
+
+        &#47&#47 TODO: compute the adjacency matrix???
+        &#47&#47 reconstruct the batch global interaction graph data
+        if isinstance(data, Batch):</code></pre>

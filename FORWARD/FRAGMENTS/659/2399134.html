@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            classification (torch.Tensor): Classification of the shape (B, num_classes)
+        
+        &#47&#47 Check input resolution
+        <a id="change">assert </a>input.shape[2:] == self.input_resolution, \
+            "Input resolution and utilized resolution does not match. Please update the models resolution by calling " \
+            "update_resolution the provided method."
+        &#47&#47 Perform patch embedding</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        _assert(H == <a id="change">self.img_size[0]</a>, f"Input image height ({H}) doesn&quott match model ({self.img_size[0]}).")
+        _assert(W == self.img_size[1], f"Input image width ({W}) doesn&quott match model ({self.img_size[1]}).")
+        x = self.proj(x)
+        x = self.norm(x.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)</code></pre>

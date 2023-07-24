@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :1516
+</h3><img src='5086365.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 out_degree.
+        h = g.in_degrees().view(-1, 1).float()
+        for conv in self.layers:
+            h<a id="change"> = </a><a id="change">conv(</a>g, h<a id="change">)</a>
+        g.ndata[&quoth&quot] = h
+        hg = dgl.mean_nodes(g, &quoth&quot)
+        return self.classify(hg)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        h = g.in_degrees().view(-1, 1).float()
+        
+        <a id="change">for </a>name, <a id="change">param</a> in self.config<a id="change">:
+            </a>if name is &quotGraphConv&quot:
+                w, b = vars[idx], vars[idx + 1]
+                conv = self.graph_conv[idx_gcn]
+                h = conv(g, h, w, b)
+                g.ndata[&quoth&quot] = h
+
+                idx<a id="change"> += </a>2 
+                idx_gcn += 1
+                
+                if idx_gcn == len(self.graph_conv):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/g-meta/commit/aed3468b5f71c857f788169b34b97a411628930b#diff-bfc53d3f42fcfc13f05953bcea57cd8efdca40eea6586556bb44b5bda0745717L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5086365</div><div id='project'> Project Name: mims-harvard/g-meta</div><div id='commit'> Commit Name: aed3468b5f71c857f788169b34b97a411628930b</div><div id='time'> Time: 2020-03-02</div><div id='author'> Author: cosamhkx@gmail.com</div><div id='file'> File Name: src/learner.py</div><div id='m_class'> M Class Name: Classifier</div><div id='n_method'> N Class Name: Classifier</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/learner.py</div><div id='n_file'> N File Name: src/learner.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        scale_shift = None
+        if self.use_mapping:
+            scale_shift = self.to_scale_shift(mapping)
+        xs = torch.stack([<a id="change">conv(</a>x<a id="change">)</a> for conv in self.convs_in])
+        x<a id="change"> = </a>reduce(xs, "n b c t -&gt; b c t", "sum")
+        x = self.conv_mid(x, scale_shift)
+        x = self.conv_out(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, x: Tensor, mapping: Optional[Tensor] = None) -&gt; Tensor:
+        <a id="change">for layer</a> in self.layers<a id="change">:
+            </a>x<a id="change"> = </a>F.elu(layer(x, mapping))
+        x = self.to_out(x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/a87fdd64306dd80e71f4a737e556e9a4b6fb3ed1#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L251' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5086361</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: a87fdd64306dd80e71f4a737e556e9a4b6fb3ed1</div><div id='time'> Time: 2022-09-22</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: ConvOut1d</div><div id='n_method'> N Class Name: ConvOut1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 252</div><div id='m_end'> M End Line: 258</div><div id='n_start'> N Start Line: 245</div><div id='n_end'> N End Line: 247</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.FloatTensor) -&gt; torch.FloatTensor:
+        for conv in self._convs:
+            x<a id="change"> = </a><a id="change">conv(</a>x<a id="change">)</a>
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Return types:
+            * **X** (PyTorch Float Tensor) - Output tensor, with shape (batch_size, num_his, num_nodes, units[-1]).
+        
+        <a id="change">for conv</a> in self._conv2ds<a id="change">:
+            </a>X<a id="change"> = </a>conv(X)
+        return X
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/7fd78cd2d93919f7328eaffeb5f1a1bb0b25cc53#diff-23bf81031fa8655150b4674c51c7d6eefc8f0ab5b206b922158a4414e899aa8cL55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5086359</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 7fd78cd2d93919f7328eaffeb5f1a1bb0b25cc53</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: He_YX@outlook.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_class'> M Class Name: FC</div><div id='n_method'> N Class Name: FullyConnected</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 107</div><BR>

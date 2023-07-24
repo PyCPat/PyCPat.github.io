@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :556
+</h3><img src='2031198.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        <a id="change">print(</a>&quotentity_input is nan:&quot, torch.isnan(x).any()<a id="change">)</a> if debug else None
+
+        &#47&#47 calculate there are how many real entities in each batch
+        tmp_x = torch.mean(x, dim=2, keepdim=False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        print(&quotentity_num:&quot, entity_num) if debug else None
+
+        &#47&#47 generate the mask for transformer
+        mask = <a id="change">torch.arange(</a>0, self.max_entities<a id="change">)</a>.float()
+        mask<a id="change"> = </a>mask.repeat(batch_size, 1)
+        mask = mask &lt; entity_num.unsqueeze(dim=1)
+
+        print(&quotmask:&quot, mask) if debug else None
+        print(&quotmask.shape:&quot, mask.shape) if debug else None
+
+        &#47&#47 mask: [batch_size, max_entities]
+        device = next(self.parameters()).device
+        mask = mask.to(device)
+
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        &#47&#47 x is batch_entities_tensor (dim = 3). Shape: batch_seq_size x entities_size x embeding_size
+        x = self.embedd(x)
+        print(&quotx.shape:&quot, x.shape) if debug else None
+
+        &#47&#47 mask for transformer need a special format
+        mask_seq_len = mask.shape[-1]
+        tran_mask = mask.unsqueeze(1)
+
+        &#47&#47 tran_mask: [batch_seq_size x max_entities x max_entities]
+        tran_mask = tran_mask.repeat(1, mask_seq_len, 1)
+
+        &#47&#47 out: [batch_seq_size x entities_size x embeding_size]
+        out = self.transformer(x, mask=tran_mask)
+        print(&quotout.shape:&quot, out.shape) if debug else None
+
+        &#47&#47 entity_embeddings: [batch_seq_size x entities_size x conv1_output_size]
+        entity_embeddings = F.relu(self.conv1(F.relu(out).transpose(1, 2))).transpose(1, 2)
+        print(&quotentity_embeddings.shape:&quot, entity_embeddings.shape) if debug else None
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out<a id="change"> * </a>mask.unsqueeze(2)
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z = masked_out.sum(dim=1, keepdim=False)
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>z / entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L716' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2031198</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, seq):
+        &#47&#47 seq - [batch_size, seq_len]
+        <a id="change">print(</a>self.transformer(seq, seq).shape<a id="change">)</a></code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, seq):
+        &#47&#47 seq - [batch_size, seq_len]
+        pos<a id="change"> = </a><a id="change">torch.arange(</a>0, seq[1]<a id="change">)</a>.unsqueeze(0).repeat(seq[0], 1)
+        seq<a id="change"> = </a>self.dropout((self.tok_embed(seq) * self.scale)<a id="change"> + </a>self.pos_encoding(pos))
+        return self.transformer(seq, seq)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ammesatyajit/videobert/commit/8327374fe54e685ccb4dee5be64421b56903873d#diff-bfbdfcab00b44379d0d84330903c598d633961fc4e68d6adc21c8b9cea49fc5aL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2031319</div><div id='project'> Project Name: ammesatyajit/videobert</div><div id='commit'> Commit Name: 8327374fe54e685ccb4dee5be64421b56903873d</div><div id='time'> Time: 2020-09-19</div><div id='author'> Author: ammesatyajit@gmail.com</div><div id='file'> File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='m_class'> M Class Name: VideoTransformer</div><div id='n_method'> N Class Name: VideoTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='n_file'> N File Name: VideoBERT/train/custom_vid_transformer.py</div><div id='m_start'> M Start Line: 146</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, img):
+        b = img.shape[0]
+        tokens = self.image_to_tokens(img)
+        <a id="change">print(</a>tokens.shape<a id="change">)</a>
+        return tokens
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        tokens = self.image_to_tokens(img)
+        n = tokens.shape[1]
+
+        pos_embs<a id="change"> = </a>self.pos_emb(<a id="change">torch.arange(</a>n<a id="change">, device = device)</a>)
+        bottom_level<a id="change"> = </a>tokens<a id="change"> + </a>rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        return tokens</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/glom-pytorch/commit/1c1150caaaedba2741a925251a27a9efb7842644#diff-2bce7536af7c0a2fe47054a9c6dd00320e623412cf5c9d7e24a0b0b8c950a574L32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2031332</div><div id='project'> Project Name: lucidrains/glom-pytorch</div><div id='commit'> Commit Name: 1c1150caaaedba2741a925251a27a9efb7842644</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: glom_pytorch/glom_pytorch.py</div><div id='m_class'> M Class Name: Glom</div><div id='n_method'> N Class Name: Glom</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: glom_pytorch/glom_pytorch.py</div><div id='n_file'> N File Name: glom_pytorch/glom_pytorch.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 35</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 44</div><BR>

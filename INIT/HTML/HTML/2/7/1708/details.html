@@ -1,0 +1,111 @@
+<html><h3>Pattern ID :1708
+</h3><img src='4364049.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+
+        <a id="change">if </a>use_batch_norm<a id="change">:
+            </a>self.bn1 = nn.BatchNorm2d(32)
+            self.bn2 = nn.BatchNorm2d(64)
+            self.bn3<a id="change"> = </a>nn.BatchNorm2d(64)
+            self.bn4 = nn.BatchNorm1d(512)
+
+        self.fc = nn.Linear(self._get_linear_input_size(), 512)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 convolutional layers
+        in_channels = [observation_shape[0]] + [f[0] for f in filters[:-1]]
+        self.convs = nn.ModuleList()
+        self.conv_bns<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        <a id="change">for </a>in_channel, f in zip(in_channels, filters)<a id="change">:
+            </a>out_channel, kernel_size, stride = f
+            conv = nn.Conv2d(in_channel,
+                             out_channel,
+                             kernel_size=kernel_size,
+                             stride=stride)
+            self.convs.append(conv)
+
+            if use_batch_norm:
+                <a id="change">self.conv_bns.append(</a>nn.BatchNorm2d(out_channel)<a id="change">)</a>
+
+        &#47&#47 last dense layer
+        self.fc = nn.Linear(self._get_linear_input_size(), feature_size)
+        if use_batch_norm:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/takuseno/d3rlpy/commit/557b11a8d5cf75edfc0a2928399d5192d1757ddb#diff-9039460d6f630d68f293a43c69c5f66cf03d3a614353b7c827a27367930ff0b0L8' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4364049</div><div id='project'> Project Name: takuseno/d3rlpy</div><div id='commit'> Commit Name: 557b11a8d5cf75edfc0a2928399d5192d1757ddb</div><div id='time'> Time: 2020-06-16</div><div id='author'> Author: takuma.seno@gmail.com</div><div id='file'> File Name: skbrl/models/torch/heads.py</div><div id='m_class'> M Class Name: PixelHead</div><div id='n_method'> N Class Name: PixelHead</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: skbrl/models/torch/heads.py</div><div id='n_file'> N File Name: skbrl/models/torch/heads.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.trend_changepoints_t = torch.tensor(linear_t, requires_grad=False, dtype=torch.float)
+
+        &#47&#47 autoregression
+        <a id="change">if </a>self.n_lags &gt; 0<a id="change">:
+            </a>self.ar<a id="change"> = </a>nn.Linear(n_lags, n_forecasts, bias=False)
+            nn.init.kaiming_normal_(self.ar.weight, mode=&quotfan_in&quot)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47     self.ar_net = nn.Linear(n_lags, n_forecasts, bias=False)
+            &#47&#47     nn.init.kaiming_normal_(self.ar_net.weight, mode=&quotfan_in&quot)
+            &#47&#47 else:
+            self.ar_net<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+            d_inputs = self.n_lags
+            <a id="change">for i</a> in range(self.num_hidden_layers)<a id="change">:
+                </a><a id="change">self.ar_net.append(</a>nn.Linear(d_inputs, self.d_hidden, bias=True)<a id="change">)</a>
+                d_inputs = d_hidden
+            self.ar_net.append(nn.Linear(d_inputs, self.n_forecasts, bias=True))
+            for lay in self.ar_net:
+                nn.init.kaiming_normal_(lay.weight, mode=&quotfan_in&quot)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ourownstory/neural_prophet/commit/317690a96c24a1e73bff0877b8c712603c19a2ef#diff-3c68424fa3c3e2e27a6aed55b945978a3d2c11b63a551ebfa3e0426522ac0254L24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4364052</div><div id='project'> Project Name: ourownstory/neural_prophet</div><div id='commit'> Commit Name: 317690a96c24a1e73bff0877b8c712603c19a2ef</div><div id='time'> Time: 2020-05-25</div><div id='author'> Author: oskar.triebe@merantix.com</div><div id='file'> File Name: code/model.py</div><div id='m_class'> M Class Name: TimeNet</div><div id='n_method'> N Class Name: TimeNet</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/model.py</div><div id='n_file'> N File Name: code/model.py</div><div id='m_start'> M Start Line: 27</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 77</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.num_classes = num_classes
+        self.num_features = self.embed_dim = embed_dim  &#47&#47 num_features for consistency with other models
+
+        <a id="change">if </a>hybrid_backbone is not None<a id="change">:
+            </a>self.patch_embed<a id="change"> = </a>HybridEmbed(
+                hybrid_backbone,
+                img_size=img_size,
+                in_chans=in_chans,</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 stochastic depth decay rule
+        dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)]
+
+        self.blocks<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        <a id="change">for i</a> in range(depth)<a id="change">:
+            </a>block = Block(
+                dim=embed_dim,
+                num_heads=num_heads,
+                mlp_ratio=mlp_ratio,
+                qkv_bias=qkv_bias,
+                drop_path=dpr[i],
+                norm_layer=norm_layer,
+                act_layer=act_layer,
+                use_rel_pos=use_rel_pos,
+                rel_pos_zero_init=rel_pos_zero_init,
+                window_size=window_size if i in window_block_indexes else 0,
+                use_residual_block=i in residual_block_indexes,
+                input_size=(img_size // patch_size, img_size // patch_size),
+            )
+            <a id="change">self.blocks.append(</a>block<a id="change">)</a>
+
+        if self.pos_embed is not None:
+            trunc_normal_(self.pos_embed, std=0.02)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/9f01a37ad4df57b30430c41df08459025174e8fd#diff-78f05b57f42dcd5f7f060081ceac6dd4b971872c6edf8842805ae881484d5589L602' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4364053</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: 9f01a37ad4df57b30430c41df08459025174e8fd</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: 38110862+tuofeilunhifi@users.noreply.github.com</div><div id='file'> File Name: easycv/models/backbones/vitdet.py</div><div id='m_class'> M Class Name: ViTDet</div><div id='n_method'> N Class Name: ViTDet</div><div id='m_method'> M Method Name: __init__(22)</div><div id='n_method'> N Method Name: __init__(25)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/backbones/vitdet.py</div><div id='n_file'> N File Name: easycv/models/backbones/vitdet.py</div><div id='m_start'> M Start Line: 606</div><div id='m_end'> M End Line: 686</div><div id='n_start'> N Start Line: 357</div><div id='n_end'> N End Line: 440</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2)
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1)
+
+        <a id="change">if </a>use_batch_norm<a id="change">:
+            </a>self.bn1 = nn.BatchNorm2d(32)
+            self.bn2<a id="change"> = </a>nn.BatchNorm2d(64)
+            self.bn3 = nn.BatchNorm2d(64)
+            self.bn4 = nn.BatchNorm1d(512)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 convolutional layers
+        in_channels = [observation_shape[0]] + [f[0] for f in filters[:-1]]
+        self.convs = nn.ModuleList()
+        self.conv_bns<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        <a id="change">for </a>in_channel, <a id="change">f</a> in zip(in_channels, filters)<a id="change">:
+            </a>out_channel, kernel_size, stride = f
+            conv = nn.Conv2d(in_channel,
+                             out_channel,
+                             kernel_size=kernel_size,
+                             stride=stride)
+            self.convs.append(conv)
+
+            if use_batch_norm:
+                <a id="change">self.conv_bns.append(</a>nn.BatchNorm2d(out_channel)<a id="change">)</a>
+
+        &#47&#47 last dense layer
+        self.fc = nn.Linear(self._get_linear_input_size(), feature_size)
+        if use_batch_norm:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/takuseno/d3rlpy/commit/557b11a8d5cf75edfc0a2928399d5192d1757ddb#diff-9039460d6f630d68f293a43c69c5f66cf03d3a614353b7c827a27367930ff0b0L6' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4364046</div><div id='project'> Project Name: takuseno/d3rlpy</div><div id='commit'> Commit Name: 557b11a8d5cf75edfc0a2928399d5192d1757ddb</div><div id='time'> Time: 2020-06-16</div><div id='author'> Author: takuma.seno@gmail.com</div><div id='file'> File Name: skbrl/models/torch/heads.py</div><div id='m_class'> M Class Name: PixelHead</div><div id='n_method'> N Class Name: PixelHead</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: skbrl/models/torch/heads.py</div><div id='n_file'> N File Name: skbrl/models/torch/heads.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 43</div><BR>

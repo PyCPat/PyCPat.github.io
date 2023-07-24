@@ -1,0 +1,70 @@
+<html><h3>Pattern ID :831
+</h3><img src='2698409.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.project_in  = nn.Parameter(torch.randn(groups, dim, dim * 4))
+        self.nonlin      = nn.GELU()
+        self.project_out = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>groups, dim * 4, dim<a id="change">))</a>
+
+    def forward(self, levels):
+        x = einsum(&quotb n l d, l d e -&gt; b n l e&quot, levels, self.project_in)
+        x = self.nonlin(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, *, dim, groups, mult = 4):
+        super().__init__()
+        total_dim = dim * groups &#47&#47 levels * dim
+        self.net = <a id="change">nn.Sequential(
+            </a>nn.Conv1d(total_dim, total_dim * 4, 1, groups = groups),
+            nn.GELU(),
+            nn.Conv1d(total_dim<a id="change"> * 4</a>, total_dim, 1, groups = groups)<a id="change">
+        )</a>
+
+    def forward(self, levels):
+        b, n, l, d = levels.shape
+        levels = rearrange(levels, &quotb n l d -&gt; b (l d) n&quot)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/glom-pytorch/commit/570bc6667245f45ef03ad01b42cb335bda11d728#diff-2bce7536af7c0a2fe47054a9c6dd00320e623412cf5c9d7e24a0b0b8c950a574L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2698409</div><div id='project'> Project Name: lucidrains/glom-pytorch</div><div id='commit'> Commit Name: 570bc6667245f45ef03ad01b42cb335bda11d728</div><div id='time'> Time: 2021-03-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: glom_pytorch/glom_pytorch.py</div><div id='m_class'> M Class Name: GroupedFeedForward</div><div id='n_method'> N Class Name: GroupedFeedForward</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: glom_pytorch/glom_pytorch.py</div><div id='n_file'> N File Name: glom_pytorch/glom_pytorch.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 31</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            nn.LayerNorm(dim) if dual_patchnorm else None,
+        )
+
+        self.axial_pos_emb = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>2, patch_height_width, dim<a id="change">)</a> * 0.02<a id="change">)</a>
+
+        self.to_pixels = nn.Sequential(
+            LayerNorm(dim),
+            nn.Linear(dim, pixel_patch_dim),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 axial positional embeddings, parameterized by an MLP
+
+        pos_emb_dim = dim<a id="change"> // 2</a>
+
+        self.axial_pos_emb_height_mlp = <a id="change">nn.Sequential(
+            </a>Rearrange(&quot... -&gt; ... 1&quot),
+            nn.Linear(1, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, pos_emb_dim),
+            nn.SiLU(),
+            nn.Linear(pos_emb_dim, dim)<a id="change">
+        )</a>
+
+        self.axial_pos_emb_width_mlp = nn.Sequential(
+            Rearrange(&quot... -&gt; ... 1&quot),
+            nn.Linear(1, pos_emb_dim),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/b323532e40464af272a7a4e43275fb70579232ae#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL341' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2698410</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: b323532e40464af272a7a4e43275fb70579232ae</div><div id='time'> Time: 2023-03-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: RIN</div><div id='n_method'> N Class Name: RIN</div><div id='m_method'> M Method Name: __init__(12)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 363</div><div id='m_end'> M End Line: 392</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 412</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.scale = dim_head ** -0.5
+        self.dropout = nn.Dropout(dropout)
+
+        self.type_growth = <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>model_dim<a id="change">)</a> * 1e-5<a id="change">)</a>
+        self.type_seasonal = nn.Parameter(torch.randn(model_dim) * 1e-5)
+
+        self.queries = nn.Parameter(torch.randn(heads, dim_head))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Rearrange(&quot... (kv h d) n -&gt; kv ... h n d&quot, kv = 2, h = heads)
+        )
+
+        self.seasonal_to_kv = <a id="change">nn.Sequential(
+            </a>Rearrange(&quotb n d -&gt; b d n&quot),
+            nn.Conv1d(model_dim, inner_dim<a id="change"> * 2</a>, seasonal_kernel_size, bias = False, padding = seasonal_kernel_size // 2),
+            Rearrange(&quot... (kv h d) n -&gt; kv ... h n d&quot, kv = 2, h = heads)<a id="change">
+        )</a>
+
+        self.level_to_kv = nn.Sequential(
+            Rearrange(&quotb n t -&gt; b t n&quot),
+            nn.Conv1d(time_features, inner_dim * 2, level_kernel_size, bias = False, padding = level_kernel_size // 2),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/etsformer-pytorch/commit/efd13ff72791a8a937a7f61515cb8823d6642c18#diff-b4b8264f25f5dfdaf86bc5e5eff19dd88e54974eb3ebdbb09741da0265b56130L375' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2698415</div><div id='project'> Project Name: lucidrains/etsformer-pytorch</div><div id='commit'> Commit Name: efd13ff72791a8a937a7f61515cb8823d6642c18</div><div id='time'> Time: 2022-03-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_class'> M Class Name: ClassificationWrapper</div><div id='n_method'> N Class Name: ClassificationWrapper</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='n_file'> N File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_start'> M Start Line: 388</div><div id='m_end'> M End Line: 396</div><div id='n_start'> N Start Line: 390</div><div id='n_end'> N End Line: 409</div><BR>

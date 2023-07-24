@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        v = self.NIN_2(h)
+
+        w = torch.einsum(&quotbchw,bcij-&gt;bhwij&quot, q, k) * (int(C) ** (-0.5))
+        w<a id="change"> = </a><a id="change">torch.reshape(</a>w, (B, H, W, H * W)<a id="change">)</a>
+        w = F.softmax(w, dim=-1)
+        w = torch.reshape(w, (B, H, W, H, W))
+        h = torch.einsum(&quotbhwij,bcij-&gt;bchw&quot, w, v)
+        h = self.NIN_3(h)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        norm = self.norm(input)
+        qkv = self.qkv(norm).view(batch, n_head, head_dim * 3, height, width)
+        query, key, value = <a id="change">qkv.chunk(3</a><a id="change">, dim=2)</a>  &#47&#47 bhdyx
+
+        attn = torch.einsum(
+            "bnchw, bncyx -&gt; bnhwyx", query, key</code></pre>

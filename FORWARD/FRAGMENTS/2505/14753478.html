@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                deTransformed = self._decoder(posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed<a id="change"> = </a><a id="change">quantized.reshape(h, w, n, c).permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed
+            &#47&#47 [n, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [k, 1, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [h*w, n, c]
+            quantized = sample @ <a id="change">codewords[:, 0, ...]</a>
+            &#47&#47 [h*w, n, c]
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+            &#47&#47 [k, 1, c]
+            decodedCodes = self._codebookDecoder(codebook)</code></pre>

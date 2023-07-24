@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2735
+</h3><img src='15359899.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        input: torch.Tensor = bchw_to_bhwc(input)
+        &#47&#47 Unfold input
+        input: torch.Tensor = input.unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        input: torch.Tensor = <a id="change">input.reshape(</a>batch_size, input.shape[1], input.shape[2], -1<a id="change">)</a>
+        &#47&#47 Normalize input
+        input: torch.Tensor = self.normalization(input)
+        &#47&#47 Perform linear mapping
+        output<a id="change">: torch.Tensor = </a>bhwc_to_bchw(self.linear_mapping(input))
+        return output
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            output (torch.Tensor): Output tensor of the shape [B, 2 * C, H // 2, W // 2]
+        
+        x = bchw_to_bhwc(x).unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        x = <a id="change">x.permute(0, 1, 2, 5, 4, 3).flatten(3</a><a id="change">)</a>  &#47&#47 permute maintains compat with ch order in official swin impl
+        x = self.norm(x)
+        x = bhwc_to_bchw(self.reduction(x))
+        return x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3#diff-ed4e73b2f003b1bf594949d63e8066b203ff134a32665c27fe72e45e3a6607afL455' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359899</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3</div><div id='time'> Time: 2022-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer_v2_cr.py</div><div id='n_file'> N File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 722</div><div id='n_start'> N Start Line: 455</div><div id='n_end'> N End Line: 459</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        if self.flatten_channels_last:
+            &#47&#47 flatten patches with channels last like the paper (likely using TF)
+            x<a id="change"> = </a><a id="change">x.unfold(2, Ph, Ph).unfold(3, Pw, Pw).permute(0, 2, 3, 4, 5, 1).reshape(</a>B, -1, Ph * Pw * C<a id="change">)</a>
+        else:
+            x = x.permute(0, 2, 3, 1).unfold(1, Ph, Ph).unfold(2, Pw, Pw).reshape(B, -1, C * Ph * Pw)
+        x = self.proj(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 FIXME look at relaxing size constraints
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(x).flatten(2</a><a id="change">)</a>.transpose(1, 2)
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/736f209e7d7ebe9a6ac9acf9967a7aba0a86aa4e#diff-a457ded0c066f18843cce88854130edb587dffef98fef0189c9442093ac110abL158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359900</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 736f209e7d7ebe9a6ac9acf9967a7aba0a86aa4e</div><div id='time'> Time: 2020-10-26</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/vision_transformer.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/vision_transformer.py</div><div id='n_file'> N File Name: timm/models/vision_transformer.py</div><div id='m_start'> M Start Line: 160</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.conv(x)
+        &#47&#47 flatten_x = x.flatten(1)   &#47&#47 因为flatten()没有实现二阶梯度，所以用其它等价实现。
+        batch_size = x.shape[0]
+        flatten_x<a id="change"> = </a><a id="change">x.reshape(</a>(batch_size, -1)<a id="change">)</a>
+        x = self.fc(flatten_x)
+        x = self.out(x)
+
+        &#47&#47 Conditioning.</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.mbstd is not None:
+            x = self.mbstd(x)
+        x = self.conv(x)
+        x = self.fc(<a id="change">x.flatten(1</a><a id="change">)</a>)
+        x = self.out(x)
+
+        &#47&#47 Conditioning.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/miemie2013/miemiegan/commit/63c951d29f3763daf46302247e71d9401a4ff2e9#diff-aa478cb6ce9cc570dff4bc39f5a9663316aa20504103249ad5b5b03eb072da59L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15359893</div><div id='project'> Project Name: miemie2013/miemiegan</div><div id='commit'> Commit Name: 63c951d29f3763daf46302247e71d9401a4ff2e9</div><div id='time'> Time: 2022-02-22</div><div id='author'> Author: 53960695+miemie2013@users.noreply.github.com</div><div id='file'> File Name: mmgan/models/discriminators/discriminator_styleganv2ada.py</div><div id='m_class'> M Class Name: DiscriminatorEpilogue</div><div id='n_method'> N Class Name: DiscriminatorEpilogue</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmgan/models/discriminators/discriminator_styleganv2ada.py</div><div id='n_file'> N File Name: mmgan/models/discriminators/discriminator_styleganv2ada.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 139</div><div id='n_end'> N End Line: 152</div><BR>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        new_mem = mem
+        new_lmem = lmem
+
+        <a id="change">if </a><a id="change">self.seq_len &gt; t or not calc_memory:
+            </a>return logits, Memory(new_mem, new_lmem)
+
+        &#47&#47 calculate memory and compressed memory
+
+        old_mem<a id="change">, new_mem = </a>split_at_index(1, <a id="change">-self.mem_len</a>, torch.cat((mem, x), dim=1))
+
+        if old_mem.shape[1] != 0 and self.lmem_len &gt; 0:
+            pass</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, memories = None, pos_emb = None, input_mask = None, calc_memory = True, **kwargs):
+        b, t, e, h, dim_h = *x.shape, self.heads, self.dim_head
+
+        memories = default(memories, (None<a id="change">, None</a>))
+        mem, lmem = memories
+
+        init_mem = lambda: torch.empty(b, 0, e, **to(x))</code></pre>

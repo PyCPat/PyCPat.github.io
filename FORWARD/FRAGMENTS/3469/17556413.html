@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                         The first dimension corresponds to the batches, and the second
+                         dimension corresponds to the number of negative samples (N_B  or N_B + N_A)
+        
+        logit_softmax = <a id="change">F.softmax(</a>logit<a id="change">, dim = 1)</a>
+        diff = -(logit.diag().view(-1, 1).expand_as(logit) - logit)
+        loss = torch.mean(logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2)))
+        &#47&#47 add regularization
+        loss += self.lambda_<a id="change"> * </a>torch.mean(logit_softmax<a id="change"> * </a>(logit ** 2))
+        return loss
+
+&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = <a id="change">loss.sum(1</a><a id="change">)</a> / negative_mask.sum(1)
+        return torch.mean(loss)
+
+</code></pre>

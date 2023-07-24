@@ -1,0 +1,89 @@
+<html><h3>Pattern ID :802
+</h3><img src='2899004.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(out_channels + num_layers * hidden_size, 1)
+
+    def forward(self, x):
+        batch_size<a id="change"> = </a><a id="change">x.size(0</a><a id="change">)</a>
+        embedding = self.dropout(self.embed(x))
+        conv_in = embedding.permute(0, 2, 1)
+        conv_out = self.conv(conv_in)
+        values, indices = conv_out.max(dim=-1)
+        conv_out = conv_out.permute(2, 0, 1)
+        try:
+            _, (hidden, _) = self.rnn(conv_out)
+        except ValueError:
+            _, hidden = self.rnn(conv_out)
+        hidden<a id="change"> = </a>hidden.reshape(batch_size, -1)
+        fc_in = torch.cat((hidden, values), dim=-1)
+        output = self.fc(fc_in).squeeze(1)
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+        values, indices = conv_out.max(dim=-1)
+        conv_out = conv_out.permute(2, 0, 1)
+        rnn_out, _ = self.rnn(conv_out)
+        hidden<a id="change"> = </a><a id="change">rnn_out[-1]</a>
+        fc_in = torch.cat((hidden, values), dim=-1)
+        output = self.fc(fc_in).squeeze(1)
+        return output
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jaketae/deep-malware-detection/commit/f47900498ab32b4bde599d548ad57290443f0a8b#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2899004</div><div id='project'> Project Name: jaketae/deep-malware-detection</div><div id='commit'> Commit Name: f47900498ab32b4bde599d548ad57290443f0a8b</div><div id='time'> Time: 2020-11-27</div><div id='author'> Author: jaesungtae@gmail.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: ResRCNN</div><div id='n_method'> N Class Name: ResRCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 137</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if isinstance(factor, (int, float)):
+            out = image * (self.c_table * factor)
+        else:
+            b = <a id="change">factor.size(0</a><a id="change">)</a>
+            table<a id="change"> = </a>self.c_table.expand(b, 1, 8, 8) * factor.view(b, 1, 1, 1)
+            out<a id="change"> = </a>image * table
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor, height: int, width: int) -&gt; torch.Tensor:
+        k = 8
+        batch_size<a id="change"> = </a><a id="change">x.shape[0]</a>
+        x_reshaped = x.view(batch_size, height // k, width // k, k, k)
+        x_transposed = x_reshaped.permute(0, 1, 3, 2, 4)
+        out = x_transposed.contiguous().view(batch_size, height, width)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/real_esrgan-pytorch/commit/edfbb6820fc2084c2ffe132e9b64a348a323d1e7#diff-91082468503b154b2d3c94cbaadeb7add2ea070f5f30593233516dd4b7e2ac5bL1698' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2898975</div><div id='project'> Project Name: lornatang/real_esrgan-pytorch</div><div id='commit'> Commit Name: edfbb6820fc2084c2ffe132e9b64a348a323d1e7</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: imgproc.py</div><div id='m_class'> M Class Name: CDequantize</div><div id='n_method'> N Class Name: _DeBlockSplitting</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imgproc.py</div><div id='n_file'> N File Name: imgproc.py</div><div id='m_start'> M Start Line: 1698</div><div id='m_end'> M End Line: 1711</div><div id='n_start'> N Start Line: 1374</div><div id='n_end'> N End Line: 1379</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(num_layers * hidden_size, 1)
+
+    def forward(self, x):
+        batch_size<a id="change"> = </a><a id="change">x.size(0</a><a id="change">)</a>
+        embedding = self.dropout(self.embed(x))
+        conv_in = embedding.permute(0, 2, 1)
+        conv_out = self.conv(conv_in)
+        conv_out = conv_out.permute(2, 0, 1)
+        try:
+            _, (hidden, _) = self.rnn(conv_out)
+        except ValueError:
+            _, hidden = self.rnn(conv_out)
+        hidden<a id="change"> = </a>hidden.reshape(batch_size, -1)
+        output = self.fc(hidden).squeeze(1)
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        conv_out = self.conv(conv_in)
+        conv_out = conv_out.permute(2, 0, 1)
+        rnn_out, _ = self.rnn(conv_out)
+        hidden<a id="change"> = </a><a id="change">rnn_out[-1]</a>
+        output = self.fc(hidden).squeeze(1)
+        return output
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jaketae/deep-malware-detection/commit/f47900498ab32b4bde599d548ad57290443f0a8b#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2899001</div><div id='project'> Project Name: jaketae/deep-malware-detection</div><div id='commit'> Commit Name: f47900498ab32b4bde599d548ad57290443f0a8b</div><div id='time'> Time: 2020-11-27</div><div id='author'> Author: jaesungtae@gmail.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: RCNN</div><div id='n_method'> N Class Name: RCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 them together.
+        if not mems: mems = self.init_mems()
+
+        tgt_len<a id="change"> = </a><a id="change">target.size(0</a><a id="change">)</a>
+        hidden, new_mems = self._forward(data, mems=mems)
+
+        pred_hid<a id="change"> = </a>hidden[-tgt_len:]
+
+    parser = argparse.ArgumentParser(description=&quotunit test&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47       happening. We can instead just take the hidden output and push it to the
+        &#47&#47       2 MLP which are learning the policy
+        &#47&#47 pred_hid = hidden[-tgt_len:]
+        pred_hid<a id="change"> = </a><a id="change">hidden[-1]</a>
+        &#47&#47 TODO : Check if this should be -1 or the entire hidden itself?
+
+        &#47&#47 TODO : Jerrod : NEED TO CHANGE THIS (ADD MLP that maps to correct &#47&#47 actions
+        &#47&#47 TODO : Shakti : I dont think so since this output will be succeeded by 2 MLPs in</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jerrodparker20/adaptive-transformers-in-rl/commit/333fad51ae6344cec5ac341e6f304f40fcb028f5#diff-fa6bc1f27fcb2650947162d654bbfa0b14260f02704743b3aad6d8b62878e3d4L457' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2899003</div><div id='project'> Project Name: jerrodparker20/adaptive-transformers-in-rl</div><div id='commit'> Commit Name: 333fad51ae6344cec5ac341e6f304f40fcb028f5</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: shakti.shrivastava13@gmail.com</div><div id='file'> File Name: StableTransformersReplication/transformer_xl.py</div><div id='m_class'> M Class Name: MemTransformerLM</div><div id='n_method'> N Class Name: MemTransformerLM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: StableTransformersReplication/transformer_xl.py</div><div id='n_file'> N File Name: StableTransformersReplication/transformer_xl.py</div><div id='m_start'> M Start Line: 464</div><div id='m_end'> M End Line: 467</div><div id='n_start'> N Start Line: 485</div><div id='n_end'> N End Line: 493</div><BR>

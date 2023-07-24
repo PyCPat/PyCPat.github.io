@@ -3,20 +3,18 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
 
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(dim, hdim, 4, stride = 2, padding = 1),
-            <a id="change">nn.ReLU()</a>,
-            nn.ConvTranspose2d(hdim, hdim, 4, stride = 2, padding = 1),
-            nn.ReLU(),
-            nn.ConvTranspose2d(hdim, hdim, 4, stride = 2, padding = 1),
-            <a id="change">nn.ReLU()</a>,
-            nn.Conv2d(hdim, 3, 1)
+        &#47&#47 One Propagation layer for each meta path
+        self.propagation_layers = nn.ModuleList()
+        <a id="change">for i</a> in range(len(meta_paths))<a id="change">:
+            </a><a id="change">self.propagation_layers.append(</a>APPNPConv(k_layer, alpha, edge_drop)<a id="change">)</a>
+        self.semantic_fusion = SemanticFusion()
+        self.meta_paths = list(tuple(meta_path) for meta_path in meta_paths)
+        self._cached_graph = None
+        self._cached_coalesced_graph = {}</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 semantic projection function fΦ projects node into semantic space
+
+        self.hidden = nn.Sequential(
+            <a id="change">nn.Linear(in_features=in_size, out_features=out_embedsize, bias=True)</a>,
+            nn.ReLU()
         )
-</code></pre><h3>After Change</h3><pre><code class='java'>
-        super().__init__()
-        hdim = hidden_dim
-        
-        <a id="change">assert </a>num_layers &gt;= 1
-        
-        encoder_layers = []
-        decoder_layers = []</code></pre>
+        self.meta_paths = meta_paths</code></pre>

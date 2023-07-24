@@ -1,0 +1,99 @@
+<html><h3>Pattern ID :2783
+</h3><img src='15484524.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        u = x.mean(-1, keepdim=True)
+        s = (x - u).pow(2).mean(-1, keepdim=True)
+        x = (x - u) / torch.sqrt(s + self.variance_epsilon)
+        <a id="change">return </a>self<a id="change">.gamma * x + </a>self.beta
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            weight = self.weight + self.weight_dense(cond)
+            bias = self.bias + self.bias_dense(cond)
+            u = inputs.mean(-1, keepdim=True)
+            s<a id="change"> = </a><a id="change">(inputs - u).pow(2</a><a id="change">)</a>.mean(-1, keepdim=True)
+            x = (inputs - u) / torch.sqrt(s<a id="change"> + </a>self.variance_epsilon)
+           
+            <a id="change">return </a>weight * x + bias
+
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/920232796/bert_seq2seq/commit/76a9cf45cad987e423a9cc511eef0d4eb49620ac#diff-fb4c9ea7027099b8043655760b5df4374d6e6d5e94db0fa50111bfeee0ad7912L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15484524</div><div id='project'> Project Name: 920232796/bert_seq2seq</div><div id='commit'> Commit Name: 76a9cf45cad987e423a9cc511eef0d4eb49620ac</div><div id='time'> Time: 2020-06-22</div><div id='author'> Author: xingzhaohu@xingzhaohudeMacBook-Pro.local</div><div id='file'> File Name: bert_seq2seq/model/bert_model.py</div><div id='m_class'> M Class Name: BertLayerNorm</div><div id='n_method'> N Class Name: BertLayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert_seq2seq/model/bert_model.py</div><div id='n_file'> N File Name: bert_seq2seq/model/bert_model.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 72</div><div id='n_end'> N End Line: 93</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 attention GMM parameters
+        g_t = torch.softmax(g_t, dim=-1) + self.epsilon  &#47&#47 distribution weight
+        sig_t = torch.exp(b_t) + self.epsilon  &#47&#47 variance
+        mu_t = self.mu_tm1 + self.attention_alignment<a id="change"> * </a>torch.exp(k_t)  &#47&#47 mean
+
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights
+        phi_t = g_t * torch.exp(-0.5 * sig_t * (mu_t_ - j)**2)
+        alpha_t = self.COEF * torch.sum(phi_t, 1)
+
+        &#47&#47 apply masking
+        &#47&#47 if mask is not None:
+        &#47&#47     alpha_t.data.masked_fill_(~mask, self._mask_value)
+        
+        breakpoint()
+
+        c_t = torch.bmm(alpha_t.unsqueeze(1), inputs).squeeze(1)
+        self.mu_tm1 = mu_t
+        <a id="change">return </a>c_t, mu_t, alpha_t
+
+
+class Attention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 g_t = torch.softmax(g_t, dim=-1) + self.epsilon  &#47&#47 distribution weight
+        &#47&#47 sig_t = torch.exp(b_t) + self.epsilon  &#47&#47 variance
+        &#47&#47 mu_t = self.mu_prev + self.attention_alignment * torch.exp(k_t)  &#47&#47 mean
+        sig_t<a id="change"> = </a><a id="change">torch.pow(</a>torch.nn.functional.softplus(b_t), <a id="change">2</a><a id="change">)</a>
+        mu_t = self.mu_prev + torch.nn.functional.softplus(k_t)
+        g_t = (torch.softmax(g_t, dim=-1)<a id="change"> / </a>sig_t) * self.COEF
+
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights
+        phi_t = g_t * torch.exp(-0.5 * sig_t * (mu_t_ - j)**2)
+        alpha_t = torch.sum(phi_t, 1)
+
+        &#47&#47 apply masking
+        if mask is not None:
+            alpha_t.data.masked_fill_(~mask, self._mask_value)
+
+        context = torch.bmm(alpha_t.unsqueeze(1), inputs).squeeze(1)
+        self.attention_weights = alpha_t
+        self.mu_prev = mu_t
+        breakpoint()
+        <a id="change">return </a>context
+
+
+class OriginalAttention(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/adf9ebd629abc21e0969db2a1c29f389b5301c9d#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L129' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15484526</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: adf9ebd629abc21e0969db2a1c29f389b5301c9d</div><div id='time'> Time: 2019-11-12</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 169</div><div id='n_start'> N Start Line: 149</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        <a id="change">return </a>(x - x_mean) / x_std
+
+
+class DitherAudio(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = x.abs() &gt; 0.0
+        num_elements = mask.sum(dim=2, keepdim=True).detach()
+        x_mean = x.sum(dim=2, keepdim=True).detach() / num_elements
+        numerator<a id="change"> = </a><a id="change">(x - x_mean).pow(2</a><a id="change">)</a>.sum(dim=2, keepdim=True).detach()
+        x_std = (numerator<a id="change"> / </a>num_elements).sqrt()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        result = (x - x_mean) / x_std
+        <a id="change">return </a>torch.masked_fill(result, <a id="change">~mask</a>, 0.0)
+
+
+class DitherAudio(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/3d09ac6c7b268acc613d657986845cce31dacd26#diff-988ed1d06de8e388e1233174fd2b1ea861767922c675cfb84ba40ead641dfdf0L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15484529</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 3d09ac6c7b268acc613d657986845cce31dacd26</div><div id='time'> Time: 2021-06-17</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/transform.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/transform.py</div><div id='n_file'> N File Name: src/thunder/quartznet/transform.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 74</div><div id='n_end'> N End Line: 82</div><BR>

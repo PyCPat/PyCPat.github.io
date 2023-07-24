@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.register_buffer(&quotinv_freq&quot, inv_freq)
+
+    def forward(self, x, context_len = 0):
+        n, device = <a id="change">x.shape[1]</a>, x.device
+        l = n + context_len
+        t = torch.arange(l - 1, -1, -1, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, qlen, klen):
+        device = self.relative_attention_bias.weight.device
+        q_pos = torch.arange(qlen, dtype = torch.long, device = device)
+        k_pos = <a id="change">torch.arange(</a>klen<a id="change">, dtype = torch.long, device = device)</a>
+        rel_pos = k_pos[None, :]<a id="change"> - </a>q_pos[:, None]
+        rp_bucket = self._relative_position_bucket(rel_pos, causal = self.causal, num_buckets = self.num_buckets)
+        values<a id="change"> = </a>self.relative_attention_bias(rp_bucket)
+        return rearrange(values, &quoti j h -&gt; () h i j&quot)
+
+&#47&#47 main classes</code></pre>

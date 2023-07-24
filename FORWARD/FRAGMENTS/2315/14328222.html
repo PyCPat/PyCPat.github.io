@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for ind, image in enumerate(images):
+            is_first = ind == 0
+            encoded = self.encoder(image)
+            z<a id="change"> = </a>self.to_out(encoded.flatten(1))
+            hx, cx = self.rnn(kx, (hx, cx))
+            yt, gt, kwt = self.to_output(hx), self.to_gate(hx), self.to_key(hx)
+
+            if is_first:
+                kx = self.k0
+            else:
+                sim = einsum(&quotb n d, b d -&gt; b n&quot, Mv, z)
+                wkt = sim.softmax(dim = -1)
+                ck = self.to_confidence(sim.unsqueeze(dim = -1)).sigmoid()
+                kr = gt * (<a id="change">wkt.unsqueeze(-1</a><a id="change">)</a> * torch.cat((Mk, ck), dim = -1)).sum(dim = 1)
+
+            Mk = safe_cat(Mk, kwt.unsqueeze(1), dim = 1)
+            Mv = safe_cat(Mv, z.unsqueeze(1), dim = 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                wkt = sim.softmax(dim = -1)
+
+                &#47&#47 calculate confidence
+                sim<a id="change">, wkt = </a><a id="change">map(</a>lambda t: rearrange(t, &quotb n -&gt; b n ()&quot), (sim<a id="change">, wkt</a>)<a id="change">)</a>
+                ck = self.to_confidence(sim).sigmoid()
+
+                &#47&#47 concat confidence to memory keys
+                &#47&#47 then weighted sum of all memory keys by attention of memory values</code></pre>

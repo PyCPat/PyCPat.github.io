@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :568
+</h3><img src='2211649.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        base_shape = x.shape  &#47&#47 x -&gt; B x T x (H x W) x C
+        if self.pos_encodings:
+            x = x + self.spatial_positional_encoding + self.temporal_positional_encoding[:, <a id="change">:</a>x.shape[1]]
+        if self.spatial_first:
+            x = self._spatial_attn(x, base_shape)
+            x = self._temporal_attn(x, base_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                x = self.scaler(x)
+                if i == 1:
+                    x<a id="change"> = </a><a id="change">x[:, :, 1:]</a>
+        return x
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2211649</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: TemporalSpatialAttention</div><div id='n_method'> N Class Name: ResBlockvq</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 48</div><div id='n_start'> N Start Line: 29</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    num_missing_negatives = NUM_NEGATIVES - neg_list_idx.shape[0]
+                    if num_missing_negatives &gt; 0:
+                        hardest_easy_neg_idx = torch.topk(an_dists, NUM_NEGATIVES, largest=False)[1]
+                        added_negs = hardest_easy_neg_idx[<a id="change">neg_list_idx.shape[0]:NUM_NEGATIVES</a>]
+                        neg_list_idx = torch.cat((neg_list_idx, added_negs), 0)
+
+                    &#47&#47 randomly pick NUM_NEGATIVES of the neg_list_idx</code></pre><h3>After Change</h3><pre><code class='java'>
+                        num_missing_negatives = NUM_NEGATIVES - num_picked_negatives
+                    if num_missing_negatives &gt; 0:
+                        hardest_easy_neg_idx = torch.topk(an_dists, NUM_NEGATIVES, largest=False)[1]
+                        added_negs<a id="change"> = </a><a id="change">hardest_easy_neg_idx[num_picked_negatives:NUM_NEGATIVES]</a>
+                        if neg_list_idx is not None:
+                            neg_list_idx = torch.cat((neg_list_idx, added_negs), 0)
+                        else:
+                            neg_list_idx = added_negs</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rvl-lab-utoronto/video_similarity_search/commit/c4c07e007bc05f55fa3860fd6215d029d71ff0bb#diff-bc76f2fc546a70b6c9798c5dce931ad46d49b242a0ba19a5ae5ac664a2689fffL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2211648</div><div id='project'> Project Name: rvl-lab-utoronto/video_similarity_search</div><div id='commit'> Commit Name: c4c07e007bc05f55fa3860fd6215d029d71ff0bb</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: salar77h@gmail.com</div><div id='file'> File Name: loss/triplet_loss.py</div><div id='m_class'> M Class Name: OnlineTripleLoss</div><div id='n_method'> N Class Name: OnlineTripleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/triplet_loss.py</div><div id='n_file'> N File Name: loss/triplet_loss.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)
+
+        labels = rearrange(ids, &quotb ... -&gt; b (...)&quot)
+        labels = labels[:, <a id="change">:</a>preds.shape[-1]]
+
+        loss = F.cross_entropy(preds, labels, ignore_index = self.pad_id)
+        return loss</code></pre><h3>After Change</h3><pre><code class='java'>
+        logits = self.to_logits(attended)
+
+        if not return_loss:
+            logits<a id="change"> = </a><a id="change">logits[..., 1:, :]</a>
+
+            if flattened_dims:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = logits[:, :seq_len]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/56a8e24814d90cebb03454d9feed0bff4bee69ba#diff-6aad5c31d64c6b7a1a8cd103c9aceb7a4b5bb6c1b41d581e98e22e1a4473b554L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2211654</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 56a8e24814d90cebb03454d9feed0bff4bee69ba</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_class'> M Class Name: HierarchicalCausalTransformer</div><div id='n_method'> N Class Name: HierarchicalCausalTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='n_file'> N File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_start'> M Start Line: 279</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 293</div><div id='n_end'> N End Line: 344</div><BR>

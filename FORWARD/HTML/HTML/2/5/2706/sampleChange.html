@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x, padding):
+        <a id="change">pass</a>
+
+
+class QuantizerEncoder(nn.Module):
+    def __init__(self, m: int, k: int, d: int):</code></pre><h3>After Change</h3><pre><code class='java'>
+class PostProcess(nn.Module):
+    def forward(self, x: torch.Tensor, cAndPadding: torch.Tensor) -&gt; torch.Tensor:
+        x = x[:, :, cAndPadding[3]:(-cAndPadding[4]), cAndPadding[1]:(-cAndPadding[2])]
+        <a id="change">if cAndPadding[0] == 1</a><a id="change">:
+            </a>x = <a id="change">x.mean(</a>1<a id="change">, keepdim=True)</a>
+        return (x + 1) / 2
+
+
+class QuantizerEncoder(nn.Module):</code></pre>

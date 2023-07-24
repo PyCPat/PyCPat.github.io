@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            rel_dist = fourier_encode_dist(rel_dist, num_encodings = fourier_features)
+            rel_dist = rearrange(rel_dist, &quotb i j () d -&gt; b i j d&quot)
+
+        feats_i = <a id="change">repeat(</a>feats, <a id="change">&quotb i d -&gt; b i n d&quot</a><a id="change">, n = n)</a>
+        feats_j = repeat(feats, &quotb j d -&gt; b n j d&quot, n = n)
+        edge_input = torch.cat((feats_i, feats_j, rel_dist), dim = -1)
+
+        if exists(edges):</code></pre><h3>After Change</h3><pre><code class='java'>
+        i = j = n
+
+        if use_nearest:
+            nbhd_indices = rel_dist[...<a id="change">, 0</a>].topk(num_nearest, dim = -1, largest = False).indices
+            rel_coors = batched_index_select(rel_coors, nbhd_indices, dim = 2)
+            rel_dist = batched_index_select(rel_dist, nbhd_indices, dim = 2)
+</code></pre>

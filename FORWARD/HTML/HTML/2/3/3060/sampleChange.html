@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.transformer(input_ids=x, attention_mask=attn_mask)
+        pooled_out = self.pooler(out, attn_mask)
+
+        return <a id="change">self.proj(</a>pooled_out<a id="change">)</a>
+
+    def lock(self, unlocked_layers: int = 0, freeze_layer_norm: bool = True):
+        if not unlocked_layers:  &#47&#47 full freezing
+            for n, p in self.transformer.named_parameters():</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn_mask = (x != self.config.pad_token_id).long()
+        out = self.transformer(input_ids=x, attention_mask=attn_mask)
+        pooled_out = self.pooler(out, attn_mask)
+        projected<a id="change"> = </a><a id="change">self.proj(</a>pooled_out<a id="change">)</a>
+
+        seq_len = out.last_hidden_state.shape[1]
+        tokens = (
+            out.last_hidden_state[:, torch.arange(seq_len) != self.pooler.cls_token_position, :] </code></pre>

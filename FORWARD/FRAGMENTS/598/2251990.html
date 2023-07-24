@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        expanded_values = values[None, :, None, :, :].expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = <a id="change">expanded_values.gather(-2</a>, expanded_indices<a id="change">)</a>
+
+        out<a id="change"> = </a>(attn.unsqueeze(-1) * selected_values).sum(dim=-2)
+        out = out.transpose(1, 2).reshape(b, t, -1)
+        return self.to_out(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        all_topk = self.topk ** 2
+        shape = (b<a id="change">, t, h, all_topk</a>)
+
+        all_scores = (
+            scores[0][..., :, None] +</code></pre>

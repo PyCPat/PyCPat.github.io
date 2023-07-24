@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        qkv = <a id="change">self.to_qkv(</a>x<a id="change">)</a>
+        q, k, v = <a id="change">rearrange(</a>qkv, <a id="change">&quotb (qkv heads c) h w -&gt; qkv b heads c (h w)&quot</a><a id="change">, heads = self.heads, qkv=3)</a>
+        k = k.softmax(dim=-1)
+        context = torch.einsum(&quotbhdn,bhen-&gt;bhde&quot, k, v)
+        out = torch.einsum(&quotbhde,bhdn-&gt;bhen&quot, context, q)
+        out = rearrange(out, &quotb heads c (h w) -&gt; b (heads c) h w&quot, heads=self.heads, h=h, w=w)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = self.norm(x)
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb (heads c) h w -&gt; b heads c (h w)&quot, heads = self.heads), (q, k, v))
+        q = q * self.scale
+
+        k = k.softmax(dim=-1)</code></pre>

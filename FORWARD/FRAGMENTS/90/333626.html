@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out1 = x
+        &#47&#47 out2 = torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]
+        out2 = torch.exp(-alpha) * fac1
+        out<a id="change"> = torch.cat(</a><a id="change">[</a>out1, out2<a id="change"></a>]<a id="change">, dim=1)</a>
+        return self.fc_out(out)
+
+
+class GbsConvNet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, alpha, fac1):
+        out1 = x
+        if self.in_feat != self.n_a:
+            out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]</a> * fac1
+        else:
+            out2 = torch.exp(-alpha) * fac1
+        return self.fc_out(out1 * out2)</code></pre>

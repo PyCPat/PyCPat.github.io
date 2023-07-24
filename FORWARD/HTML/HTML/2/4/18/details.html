@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :18
+</h3><img src='35731.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        kv = torch.cat((x, mem, keys))
+
+        attn_shape = (t, kv.shape[0])
+        attn_mask<a id="change"> = </a><a id="change">torch.zeros(</a>*<a id="change">attn_shape, device=x.device)</a>
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)
+            attn_mask[i, j] = float(&quot-inf&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.causal = causal
+
+    def forward(self, qk, v, query_len = None):
+        query_len = default(query_len, <a id="change">qk.shape[1]</a>)
+        t = query_len
+
+        q = qk[:, 0:query_len]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/d2462f9b33944e20f5fbeaf19efaa9591378ba65#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 35731</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: d2462f9b33944e20f5fbeaf19efaa9591378ba65</div><div id='time'> Time: 2020-01-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 386</div><div id='m_end'> M End Line: 403</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 349</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h<a id="change">, process_c = </a>[<a id="change">torch.zeros(</a>(1, batch, embed)<a id="change">, device = device)</a> for _ in range(2)]
+		for i in range(self.n_process):
+			query, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			query = query.squeeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		&#47&#47 ~ query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		query = <a id="change">h[-1]</a>
+		&#47&#47 ~ process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]
+		for i in range(self.n_process):
+			&#47&#47 ~ _, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			&#47&#47 ~ _, (h, c) = self.Decoder(query, (h, c))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/6e79534a9be0ef30e0f97fcccf1addf22312462c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 35733</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: 6e79534a9be0ef30e0f97fcccf1addf22312462c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            values, indices = torch.topk(R, self.n_sortcut)
+            values = values.reshape(bh, self.n_sortcut, -1)
+            indices = indices.reshape(bh, self.n_sortcut, -1)
+            R<a id="change"> = </a><a id="change">torch.zeros(</a>bh, self.n_sortcut, buckets<a id="change">, device=device, dtype=dtype)</a>.scatter(2, indices, values)
+
+        return R.softmax(dim=-1) if self.non_permutative else gumbel_sinkhorn(F.relu(R), self.sinkhorn_iter, self.temperature)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        bh, *_, bucket_size, kv_bucket_size, device, dtype, dim = *q.shape, self.bucket_size, self.kv_bucket_size, q.device, q.dtype, self.dim
+        b = bh // self.heads
+
+        buckets = <a id="change">q.shape[1]</a> // bucket_size
+        kv_buckets = k.shape[1] // kv_bucket_size
+
+        b_q = bucket(buckets, q) if self.n_sortcut == 0 else bucket(1, q)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/661c2edf85ed877510c714a024b5332299a4ee00#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL367' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 35734</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 661c2edf85ed877510c714a024b5332299a4ee00</div><div id='time'> Time: 2020-05-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: AttentionSortNet</div><div id='n_method'> N Class Name: AttentionSortNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 370</div><div id='m_end'> M End Line: 386</div><div id='n_start'> N Start Line: 383</div><div id='n_end'> N End Line: 402</div><BR>

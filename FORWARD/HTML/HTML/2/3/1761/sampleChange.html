@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                x = pad(x)
+            return self.net(x, **kwargs)
+
+        <a id="change">if </a>isinstance(x, torch.Tensor)<a id="change">:
+            </a>xi = x[:, :-1]
+            xo = x[:, 1:]
+
+            &#47&#47 help auto-solve an area of confusion around input masks in auto-regressive
+            &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+            mask = kwargs.pop(&quotmask&quot, None)
+            if mask is not None and mask.shape[1] == x.shape[1]:
+                mask = mask[:, :-1]
+            <a id="change">kwargs.update(mask = mask)</a>
+        else:
+            xi = pad(list(map(lambda t: t[:-1], x)))
+            xo = pad(list(map(lambda t: t[1:], x)))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = kwargs.pop(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask = mask[:, :-1]
+        <a id="change">kwargs.update(mask = mask)</a>
+
+        out = self.net(xi, **kwargs)
+
+        loss = F.cross_entropy(out.transpose(1, 2), xo, ignore_index = self.ignore_index)</code></pre>

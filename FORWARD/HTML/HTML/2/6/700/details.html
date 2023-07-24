@@ -1,0 +1,95 @@
+<html><h3>Pattern ID :700
+</h3><img src='2703657.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            return {&quotpred&quot: pred}
+        else:
+            emb = self.fc(emb)
+            <a id="change">return </a>{&quotemb&quot: emb}
+
+    def _init_weight(self):
+        for m in self.modules():</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.use_softmax = args.use_softmax
+
+    def forward(self, x):
+        <a id="change">dict_outputs = </a><a id="change">{}</a>
+        emb = self.segment_head(x)
+        if self.use_img_inp or self.use_visual_acuity:
+            img_inp = self.fc_img_inp(emb)
+            dict_outputs.update({"img_inp": img_inp})
+
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            dict_outputs.update({"pred": pred})
+
+        else:
+            emb = self.fc(emb)
+            <a id="change">dict_outputs.update(</a>{"emb": emb}<a id="change">)</a>
+        <a id="change">return dict_outputs</a>
+
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/noelshin/pixelpick/commit/0a7e51c1131e51d19bc5a92b43f6d2248e666e54#diff-5282218a1ec333ec3cbb9134f231387ad824ee5cb70e7622da8164855faae96cL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2703657</div><div id='project'> Project Name: noelshin/pixelpick</div><div id='commit'> Commit Name: 0a7e51c1131e51d19bc5a92b43f6d2248e666e54</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: gyungin@robots.ox.ac.uk</div><div id='file'> File Name: segmentation/networks/decoders.py</div><div id='m_class'> M Class Name: SegmentHead</div><div id='n_method'> N Class Name: SegmentHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: segmentation/networks/decoders.py</div><div id='n_file'> N File Name: segmentation/networks/decoders.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = self.dense(x)
+
+        if labels is not None:
+            <a id="change">return </a>F.binary_cross_entropy_with_logits(out, labels.float())
+        else:
+            return torch.sigmoid(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.pcnn(x, mask)
+        out = self.dense(x)
+
+        <a id="change">result = </a><a id="change">{</a>"pred": torch.sigmoid(out)<a id="change">}</a>
+        if labels is not None:
+            <a id="change">result.update(</a>{"loss": F.binary_cross_entropy_with_logits(out, labels.float())}<a id="change">)</a>
+
+        <a id="change">return </a>result
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/spico197/rex/commit/3d53bde021c8bd91ee18c769f00319751168ce7d#diff-b2ba59176b72ddd8113ba39f155ae7d11a0fbcc391b8c608a2183c434bda38abL50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2703659</div><div id='project'> Project Name: spico197/rex</div><div id='commit'> Commit Name: 3d53bde021c8bd91ee18c769f00319751168ce7d</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: spico1026@gmail.com</div><div id='file'> File Name: rex/models/sent_pcnn.py</div><div id='m_class'> M Class Name: SentPCNN</div><div id='n_method'> N Class Name: SentPCNN</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rex/models/sent_pcnn.py</div><div id='n_file'> N File Name: rex/models/sent_pcnn.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        bx_o = [b[o] for b, o in zip(boxes, bo)]
+        indices = self.matcher(bx_h, bx_o, objects, prior, logits, targets)
+
+        <a id="change">return </a>dict(
+            interaction_loss=self.interaction_loss(bx_h, bx_o, indices, prior, logits, targets)
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        indices = self.matcher(bx_h_post, bx_o_post, objects, prior, logits, targets)
+
+        <a id="change">loss_dict = </a><a id="change">{</a>"focal_loss": self.interaction_loss(n, indices, prior, logits, targets)<a id="change">}</a>
+        <a id="change">loss_dict.update(</a>self.regression_loss(
+            bx_h, bx_o, bx_h_post, bx_o_post, indices, targets, bbox_deltas.split(n)
+        )<a id="change">)</a>
+
+        <a id="change">return </a>loss_dict
+
+def box_cxcywh_to_xyxy(x):
+    x_c, y_c, w, h = x.unbind(-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/fredzzhang/upt/commit/def79003d35c81f7efcbcdb738042ec18038995d#diff-a8e822d9473e7021e0ce9304decdbe40e9cad96b99e0282485f129f283b8bd86L273' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2703661</div><div id='project'> Project Name: fredzzhang/upt</div><div id='commit'> Commit Name: def79003d35c81f7efcbcdb738042ec18038995d</div><div id='time'> Time: 2021-10-28</div><div id='author'> Author: frederic.zhang@anu.edu.au</div><div id='file'> File Name: ops.py</div><div id='m_class'> M Class Name: SetCriterion</div><div id='n_method'> N Class Name: SetCriterion</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ops.py</div><div id='n_file'> N File Name: ops.py</div><div id='m_start'> M Start Line: 277</div><div id='m_end'> M End Line: 283</div><div id='n_start'> N Start Line: 305</div><div id='n_end'> N End Line: 322</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        emb = self.segment_head(x)
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            <a id="change">return </a>{&quotpred&quot: pred}
+        else:
+            emb = self.fc(emb)
+            return {&quotemb&quot: emb}</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.use_softmax = args.use_softmax
+
+    def forward(self, x):
+        <a id="change">dict_outputs = </a><a id="change">{}</a>
+        emb = self.segment_head(x)
+        if self.use_img_inp or self.use_visual_acuity:
+            img_inp = self.fc_img_inp(emb)
+            <a id="change">dict_outputs.update(</a>{"img_inp": img_inp}<a id="change">)</a>
+
+        if self.use_softmax:
+            pred = self.classifier(emb)
+            dict_outputs.update({"pred": pred})
+
+        else:
+            emb = self.fc(emb)
+            dict_outputs.update({"emb": emb})
+        <a id="change">return </a>dict_outputs
+
+    def _init_weight(self):
+        for m in self.modules():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/noelshin/pixelpick/commit/0a7e51c1131e51d19bc5a92b43f6d2248e666e54#diff-5282218a1ec333ec3cbb9134f231387ad824ee5cb70e7622da8164855faae96cL132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2703660</div><div id='project'> Project Name: noelshin/pixelpick</div><div id='commit'> Commit Name: 0a7e51c1131e51d19bc5a92b43f6d2248e666e54</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: gyungin@robots.ox.ac.uk</div><div id='file'> File Name: segmentation/networks/decoders.py</div><div id='m_class'> M Class Name: SegmentHead</div><div id='n_method'> N Class Name: SegmentHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: segmentation/networks/decoders.py</div><div id='n_file'> N File Name: segmentation/networks/decoders.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 149</div><BR>

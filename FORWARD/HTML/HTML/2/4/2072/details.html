@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :2072
+</h3><img src='13898177.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, observation):
+        <a id="change">if type(observation) is dict</a><a id="change">:
+            </a>observation = torch.cat([value for _, value in observation.items()], dim=-1)
+
+        &#47&#47 detach prevents gradient flowing into encoder.
+        obs_v = obs_pi = observation</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.features_embedding = nn.Linear(feature_size, embedding_size)
+
+    def forward(self, observation):
+        img<a id="change"> = </a><a id="change">observation.pop(</a>&quotimg&quot<a id="change">)</a>
+        conv_features = self.cnn(img)
+        obs_features = torch.cat([value for _, value in observation.items()], dim=-1)
+        features_emb = self.features_embedding(obs_features)
+        result = torch.cat([conv_features, features_emb], dim=-1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/cherrypiesexy/imitation_learning/commit/d3dbcfd6f84f83aa4be338202b6b4c22d8cdd13a#diff-01e92845078bbf7bccbf88d841e7aa8ebe12e50df805b2305f2da6d4e4f6215aL86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898177</div><div id='project'> Project Name: cherrypiesexy/imitation_learning</div><div id='commit'> Commit Name: d3dbcfd6f84f83aa4be338202b6b4c22d8cdd13a</div><div id='time'> Time: 2021-01-29</div><div id='author'> Author: interga@post-hardcore.ru</div><div id='file'> File Name: algorithms/nn/conv_encoders.py</div><div id='m_class'> M Class Name: TwoLayerActorCritic</div><div id='n_method'> N Class Name: FeaturesConvEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/nn/conv_encoders.py</div><div id='n_file'> N File Name: algorithms/nn/conv_encoders.py</div><div id='m_start'> M Start Line: 103</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 91</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            rst = th.matmul(feat_src, self.weight1) + th.matmul(rst, self.weight2)
+
+
+            <a id="change">if self.activation is not None</a><a id="change">:
+                </a>rst = self.activation(rst)
+
+            return rst
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                stype, etype, dtype = e
+                sub_graph = hg[stype, etype, dtype]
+                sub_graph.update_all(aggregate_fn, fn.sum(msg=&quotm&quot, out=&quotout&quot))
+                temp = <a id="change">hg.ndata[&quotout&quot].pop(</a>dtype<a id="change">)</a>
+                if isinstance(temp, dict):
+                    temp = temp[dtype]
+                if outputs.get(dtype) is None:
+                    outputs[dtype]<a id="change"> = </a>temp
+                else:
+                    outputs[dtype].add_(temp)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/8673a0f313e6be0f6f7ccaf65aaf993769e4adf9#diff-429162e7bcdfbbc409aabd0e6317a9f8bd71ecc0fdb9f27c08cab2cd0cda454cL156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898190</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 8673a0f313e6be0f6f7ccaf65aaf993769e4adf9</div><div id='time'> Time: 2021-05-23</div><div id='author'> Author: theheavenszhao@outlook.com</div><div id='file'> File Name: openhgnn/models/RSHN.py</div><div id='m_class'> M Class Name: GraphConv</div><div id='n_method'> N Class Name: GraphConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/RSHN.py</div><div id='n_file'> N File Name: openhgnn/models/RSHN.py</div><div id='m_start'> M Start Line: 170</div><div id='m_end'> M End Line: 179</div><div id='n_start'> N Start Line: 155</div><div id='n_end'> N End Line: 186</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            wsz = min(wsz, t)
+            c_wsz = min(c_wsz, kv_t)
+
+            <a id="change">if wsz &lt; self.window_size</a><a id="change">:
+                </a>c_wsz = (self.window_size * self.context_window_size) // wsz
+            indices, loss_1 = self.kmeans(q, wsz)
+            kv_indices, loss_2 = self.kmeans(k, c_wsz)
+            aux_loss = loss_1 + loss_2</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, q, k, v, query_mask = None, key_mask = None, **kwargs):
+        b, h, t, d, kv_t, wsz, c_wsz, nc, device, dtype = *q.shape, k.shape[2], self.window_size, self.context_window_size, self.num_clusters, q.device, q.dtype
+        is_reverse = <a id="change">kwargs.pop(</a>&quot_reverse&quot, False<a id="change">)</a>
+
+        out = torch.zeros_like(q, dtype=dtype)
+
+        update_kmeans<a id="change"> = </a>self.training and not is_reverse
+
+        if self.shared_qk:
+            wsz = min(wsz, t)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL429' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898185</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: KmeansAttention</div><div id='n_method'> N Class Name: KmeansAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 433</div><div id='m_end'> M End Line: 449</div><div id='n_start'> N Start Line: 405</div><div id='n_end'> N End Line: 431</div><BR>

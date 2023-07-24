@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            samples = [s.argmax(-1).permute(1, 0).reshape(n, h, w) for s in samples]
+            logits = <a id="change">[l.permute(1, 0, 2).reshape(n, h, w, k) for l in logits]</a>
+            &#47&#47 codes.append(samples.argmax(-1).permute(1, 0).reshape(n, h, w))
+            &#47&#47 logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))
+        return quantizeds, codes, logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [k, 1, c]
+            codebook = <a id="change">getattr(self, "codebook")[:, None, :]</a>
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]</code></pre>

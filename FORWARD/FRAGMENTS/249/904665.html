@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                            for i in source_ids]
+        source_alphas = F.softmax(source_alphas)
+
+        output_moe = sum([ <a id="change">alpha.unsqueeze(1).repeat(1</a>, <a id="change">1</a><a id="change">)</a> *
+                                F.softmax(classifier_outputs[id], dim=1)
+                        for alpha, id in zip(source_alphas, source_ids)])
+        return output_moe</code></pre><h3>After Change</h3><pre><code class='java'>
+                            for i in source_ids]
+        source_alphas = F.softmax(torch.cat(source_alphas, dim=0), dim=0) &#47&#47 n_source x bs
+        output_moe = sum([ source_alphas[j].unsqueeze(1).repeat(1, 1) *
+                            <a id="change">classifier_outputs[j]</a> for j in source_ids])
+        return output_moe
+    
+    def compute_domain_encs(self, all_train_smiles):</code></pre>

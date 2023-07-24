@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute scale and shift from time context
+        scale_shift = None
+        if exists(self.to_time_embedding) and exists(t):
+            time_embedding<a id="change"> = </a>self.to_time_embedding(t)
+            time_embedding = <a id="change">rearrange(</a>time_embedding, <a id="change">"b c -&gt; b c 1"</a><a id="change">)</a>
+            scale_shift<a id="change"> = </a>time_embedding.chunk(2, dim=1)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert_message = "context embedding required if context_embedding_features &gt; 0"
+        assert not (self.use_embedding ^ exists(embedding)), assert_message
+        assert_message = "context mapping required if context_mapping_features &gt; 0"
+        <a id="change">assert </a>not (self.use_mapping ^ exists(mapping)), assert_message
+
+        h = self.block1(x)
+</code></pre>

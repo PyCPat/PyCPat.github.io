@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 b(hc)1q -&gt; bchq
+        shape = (batch_count, self.head_count, self.head_dim, -1)
+        values<a id="change"> = </a>values.reshape(shape)
+        values = values.transpose(1, 2)
+        queries = queries.reshape(shape)
+        queries<a id="change"> = </a><a id="change">queries.transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+
+        &#47&#47 print(keys.shape, "keys", values.shape, "values", queries.shape, "queries")
+
+        attention_bias = torch.where(
+            attention_mask,
+            torch.zeros([1, 1]),
+            torch.ones([1, 1]) * (-torch.inf),
+        )
+        attention_weights: FloatTensor = torch.einsum(
+            &quotbchq,bkhc-&gt;bkhq&quot,
+            queries / self.head_dim ** 0.5, 
+            keys
+        )
+        attention_weights += attention_bias[:, :, None, None]
+        attention_weights = torch.softmax(attention_weights, 1)
+        &#47&#47 print(attention_weights.shape, "attention_weights")
+        hidden_state: FloatTensor = torch.einsum(
+            "bkhq,bchk-&gt;bchq",
+            attention_weights, 
+            values
+        )
+        &#47&#47 bchq -&gt; b(hc)1q
+        &#47&#47 print(hidden_state.shape, "hidden_state")
+        hidden_state<a id="change"> = </a>hidden_state.transpose(1, 2)
+        hidden_state = hidden_state.reshape(batch_count, self.embed_count, 1, -1)
+        hidden_state = self.out_proj.forward(hidden_state)
+        &#47&#47 print(hidden_state.shape, "hidden_state")</code></pre><h3>After Change</h3><pre><code class='java'>
+            attention_weights, 
+            values
+        )
+        shape = attention_output.shape[:2] + (self.embed_count<a id="change"></a>,)
+        attention_output = attention_output.reshape(shape)
+        attention_output = self.out_proj.forward(attention_output)
+        return attention_output</code></pre>

@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        ).detach()
+        a.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        sigma = <a id="change">torch.ones_like(</a>inp<a id="change">, device=inp.device, dtype=inp.dtype)</a> * self.m
+        src = torch.ones_like(label.unsqueeze(1), dtype=inp.dtype, device=inp.device) - self.m
+        sigma.scatter_(dim=1, index=label.unsqueeze(1), src=src)
+
+        <a id="change">return </a>self.loss(a * (inp - sigma) * self.gamma, label)
+
+
+def convert_label_to_similarity(normed_feature: Tensor, label: Tensor) -&gt; Tuple[Tensor, Tensor]:</code></pre><h3>After Change</h3><pre><code class='java'>
+        ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
+        an = torch.clamp_min(sn.detach() + self.m, min=0.)
+
+        delta_p = 1<a id="change"> - </a>self.m
+        delta_n = self.m
+
+        logit_p = - ap * (sp - delta_p) * self.gamma
+        logit_n = an<a id="change"> * (sn - delta_n) * </a>self.gamma
+
+        loss<a id="change"> = </a>self.soft_plus(torch.logsumexp(logit_n, dim=0)<a id="change"> + </a>torch.logsumexp(logit_p, dim=0))
+
+        <a id="change">return </a>loss
+
+
+if __name__ == "__main__":</code></pre>

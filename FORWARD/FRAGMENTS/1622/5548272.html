@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            to_zeros_mask = ones_mask & (w_abs &lt;= 0.9 * (mu - self.beta * std))
+            to_ones_mask = zeros_mask & (w_abs &gt;= 1.1 * (mu + self.beta * std))
+            self.mask[to_zeros_mask] = 0.0  &#47&#47 type: ignore
+            <a id="change">self.mask[to_ones_mask]</a> = 1.0  &#47&#47 type: ignore
+            mask = self.mask
+            del mu, std, ones_mask, zeros_mask, to_zeros_mask, to_ones_mask
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            ones_mask = self.mask == 1.0
+            to_zeros_mask = ones_mask & (w_abs &lt;= 0.9 * (mu - self.beta * std))
+            to_ones_mask = zeros_mask & (w_abs &gt;= 1.1 * (mu + self.beta * std))
+            <a id="change">self.mask.masked_fill(</a>to_zeros_mask, <a id="change">0.0</a><a id="change">)</a>  &#47&#47 type: ignore
+            self.mask.masked_fill(to_ones_mask, 1.0)  &#47&#47 type: ignore
+            mask = self.mask
+            del mu, std, ones_mask, zeros_mask, to_zeros_mask, to_ones_mask</code></pre>

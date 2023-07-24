@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47EMA cluster size
+            self.cluster_size.mul_(self.decay).add_(encodings_sum, alpha=1 - self.decay)
+
+            embed_sum = <a id="change">torch.matmul(</a>encodings.t(), z_flattened<a id="change">)</a>
+            &#47&#47EMA embedding average
+            self.embed_avg.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+
+            &#47&#47cluster size Laplace smoothing </code></pre><h3>After Change</h3><pre><code class='java'>
+            self.embedding.embed_avg.data.mul_(self.decay).add_(embed_sum, alpha=1 - self.decay)
+
+            &#47&#47cluster size Laplace smoothing 
+            n = <a id="change">self.embedding.cluster_size.sum()</a>
+            cluster_size = (
+                (self.embedding.cluster_size + self.eps)<a id="change"> / </a>(n<a id="change"> + </a>self.num_tokens<a id="change"> * </a>self.eps) * n
+            )
+            &#47&#47normalize embedding average with smoothed cluster size
+            embed_normalized = self.embedding.embed_avg / cluster_size.unsqueeze(0)</code></pre>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            <a id="change">pass</a>
+            &#47&#47 return self.forward_train(feats, targets)
+        else:
+            seg_masks, cate_labels, cate_scores, bbox_num = self.forward_eval(cate_pred_list, kernel_pred_list,
+                                                                              seg_pred, im_shape, ori_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            ins_labels = []
+            cate_labels<a id="change"> = </a><a id="change">[]</a>
+            grid_order_list = []
+            i = 0
+            for lvl in range(len(self.seg_num_grids)):
+                ins_labels.append(targets[i]); i += 1
+            <a id="change">for lvl</a> in <a id="change">range(</a>len(self.seg_num_grids)<a id="change">):
+                </a><a id="change">cate_labels.append(</a>targets[i].to(torch.int32)<a id="change">)</a>; i += 1
+            for lvl in range(len(self.seg_num_grids)):
+                grid_order_list.append(targets[i].to(torch.int32)); i += 1
+            return self.forward_train(cate_pred_list, kernel_pred_list, seg_pred, ins_labels, cate_labels, grid_order_list, fg_nums)</code></pre>

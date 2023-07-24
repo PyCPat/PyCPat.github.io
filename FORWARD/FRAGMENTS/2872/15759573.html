@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        b, n, _, h, img_size, axis, seq_len, device = *x.shape, self.heads, self.image_size, self.axis, self.seq_len, x.device
+
+        <a id="change">if n &lt; seq_len</a><a id="change">:
+            </a>padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, padding</a>)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+
+        mask = repeat(mask, &quotb j -&gt; (b r) i j&quot, r = (bh // b), i = i)
+        mask = torch.cat((~mask<a id="change">, causal_mask</a>), dim = -1)
+
+        dots_image.masked_fill_(mask, mask_value)
+</code></pre>

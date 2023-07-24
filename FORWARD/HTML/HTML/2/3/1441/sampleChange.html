@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        :return: attention result of shape (B, N, F) where B is the batch size, N the query sequence length
+            and F the number of output channels (= `num_output_channels`)
+        
+        <a id="change">if </a>attn_mask is not None<a id="change">:
+            </a>raise NotImplementedError("attention masks not supported yet")
+
+        q = self.q_proj(x_q)
+        k = self.k_proj(x_kv)</code></pre><h3>After Change</h3><pre><code class='java'>
+            i = q.shape[2]
+            j = k.shape[2]
+
+            causal_mask = <a id="change">torch.ones(</a>(i<a id="change">, j</a>)<a id="change">, device=x_q.device, dtype=torch.bool)</a>.triu(j - i + 1)
+            attn.masked_fill_(causal_mask, attn_max_neg)
+
+        attn = attn.softmax(dim=-1)</code></pre>

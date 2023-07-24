@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2641
+</h3><img src='15027076.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input):
+        &#47&#47 conv features
+        conv = self.cnn(input)
+        b<a id="change">, c, h, w = </a><a id="change">conv.size()</a>
+        assert h == 1, "the height of conv must be 1"
+        conv = conv.squeeze(2)
+        conv = conv.permute(2, 0, 1)  &#47&#47 [w, b, c]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 add log_softmax to converge output
+        output = F.log_softmax(cls, dim=2)
+        if self.return_cls:
+            return output, <a id="change">F.softmax(</a>cls, 2<a id="change">)</a>
+
+        return output
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pooya-mohammadi/crnn-pytorch/commit/3f16fcac9f51e991f8412b1e1e9b2338f28c8ae7#diff-6a07fa4a58c92e5d1172d4a0ace95b54649fea1a9488be1d9d8cd38b6b7028adL33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15027076</div><div id='project'> Project Name: pooya-mohammadi/crnn-pytorch</div><div id='commit'> Commit Name: 3f16fcac9f51e991f8412b1e1e9b2338f28c8ae7</div><div id='time'> Time: 2022-05-10</div><div id='author'> Author: pooyamohammadikazaj@gmail.com</div><div id='file'> File Name: models/crnn.py</div><div id='m_class'> M Class Name: CRNN</div><div id='n_method'> N Class Name: CRNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/crnn.py</div><div id='n_file'> N File Name: models/crnn.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 40</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(num_layers * hidden_size, 1)
+
+    def forward(self, x):
+        batch_size<a id="change"> = </a><a id="change">x.size(</a>0<a id="change">)</a>
+        embedding = self.dropout(self.embed(x))
+        conv_in = embedding.permute(0, 2, 1)
+        conv_out = self.conv(conv_in)
+        values, indices = conv_out.max(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        attention = torch.tanh(
+            self.local2attn(rnn_out) + self.global2attn(global_rnn_out)
+        ).permute(1, 0, 2)
+        alpha = <a id="change">F.softmax(</a>attention.matmul(self.attn_scale)<a id="change">, dim=-1)</a>
+        rnn_out = rnn_out.permute(1, 0, 2)
+        memory = (alpha * rnn_out).sum(dim=1)
+        output = self.fc(memory).squeeze(1)
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jaketae/deep-malware-detection/commit/e2f5ae102005c60e7e0db3dc31a8d9c23fce276b#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL185' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15027074</div><div id='project'> Project Name: jaketae/deep-malware-detection</div><div id='commit'> Commit Name: e2f5ae102005c60e7e0db3dc31a8d9c23fce276b</div><div id='time'> Time: 2020-11-26</div><div id='author'> Author: jaesungtae@gmail.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: AttentionRCNN</div><div id='n_method'> N Class Name: AttentionRCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 186</div><div id='m_end'> M End Line: 194</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if len(torch.unique(eos_mask.sum(1))) &gt; 1:
+            raise ValueError("All examples must have the same number of &lt;eos&gt; tokens.")
+        vec<a id="change"> = </a>hidden_states[eos_mask, :].view(hidden_states.size(0), -1,
+                                              <a id="change">hidden_states.size(</a>-1<a id="change">)</a>)[:, -1, :]
+
+        logits = self.classifier(vec)
+        prob = F.softmax(logits)</code></pre><h3>After Change</h3><pre><code class='java'>
+            vec = self.get_roberta_vec(source_ids)
+
+        logits = self.classifier(vec)
+        prob = <a id="change">nn.functional.softmax(</a>logits<a id="change">)</a>
+
+        if labels is not None:
+            loss_fct = nn.CrossEntropyLoss()
+            loss = loss_fct(logits, labels)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/salesforce/codet5/commit/0bf3c0c43e92fcf54d9df68c793ac22f2b60aad4#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15027069</div><div id='project'> Project Name: salesforce/codet5</div><div id='commit'> Commit Name: 0bf3c0c43e92fcf54d9df68c793ac22f2b60aad4</div><div id='time'> Time: 2021-10-29</div><div id='author'> Author: 337111657@qq.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: CloneModel</div><div id='n_method'> N Class Name: CloneModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 111</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 103</div><div id='n_end'> N End Line: 116</div><BR>

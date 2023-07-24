@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor):
+        shape = x.shape
+        if len(shape) == 4:
+            randShape = (<a id="change">x.shape[0], *self.grids</a>)
+        else:
+            randShape = self.grids
+        h, w = shape[-2], shape[-1]</code></pre><h3>After Change</h3><pre><code class='java'>
+        shape = x.shape
+        h, w = shape[-2], shape[-1]
+        randIdx = torch.randperm(len(self.permutePattern), device=x.device)
+        <a id="change">self.permutePattern.copy_(</a>self.permutePattern[randIdx]<a id="change">)</a>
+        permutePattern = self.permutePattern.reshape(self.grids)
+        eraseArea = tf.interpolate(permutePattern, (h, w))
+        return x * eraseArea
+</code></pre>

@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        embbedings = l2_norm(embbedings, axis = 1)
+        kernel_norm = l2_norm(self.kernel, axis = 0)
+        cos_theta = torch.mm(embbedings, kernel_norm)
+        cos_theta<a id="change"> = </a>cos_theta.clamp(-1, 1)  &#47&#47 for numerical stability
+        with torch.no_grad():
+            origin_cos = cos_theta.clone()
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m &#47&#47cos(target+margin)
+        if self.easy_margin:
+            final_target_logit<a id="change"> = </a><a id="change">torch.where(target_logit &gt; 0</a>, cos_theta_m, target_loit<a id="change">)</a>
+        else:
+            final_target_logit = torch.where(target_logit &gt; self.th, cos_theta_m, target_logit - self.mm)
+
+        cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)</code></pre><h3>After Change</h3><pre><code class='java'>
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m &#47&#47cos(target+margin)
+        
+        <a id="change">if </a>cfg[&quotUSE_APEX&quot] == True and cfg[&quotOPT_LEVEL&quot] == &quotO1&quot<a id="change">:
+            </a>target_logit<a id="change"> = </a>target_logit.float()
+        final_target_logit = torch.where(target_logit &gt; self.th, cos_theta_m, target_logit - self.mm)
+        if cfg[&quotUSE_APEX&quot] == True and cfg[&quotOPT_LEVEL&quot] == &quotO1&quot:
+            final_target_logit<a id="change"> = </a>final_target_logit.half()
+        cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
+        output = cos_theta * self.s
+        return output</code></pre>

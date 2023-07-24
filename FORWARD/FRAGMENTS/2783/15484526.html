@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 attention GMM parameters
+        g_t = torch.softmax(g_t, dim=-1) + self.epsilon  &#47&#47 distribution weight
+        sig_t = torch.exp(b_t) + self.epsilon  &#47&#47 variance
+        mu_t = self.mu_tm1 + self.attention_alignment<a id="change"> * </a>torch.exp(k_t)  &#47&#47 mean
+
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights
+        phi_t = g_t * torch.exp(-0.5 * sig_t * (mu_t_ - j)**2)
+        alpha_t = self.COEF * torch.sum(phi_t, 1)
+
+        &#47&#47 apply masking
+        &#47&#47 if mask is not None:
+        &#47&#47     alpha_t.data.masked_fill_(~mask, self._mask_value)
+        
+        breakpoint()
+
+        c_t = torch.bmm(alpha_t.unsqueeze(1), inputs).squeeze(1)
+        self.mu_tm1 = mu_t
+        <a id="change">return </a>c_t, mu_t, alpha_t
+
+
+class Attention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 g_t = torch.softmax(g_t, dim=-1) + self.epsilon  &#47&#47 distribution weight
+        &#47&#47 sig_t = torch.exp(b_t) + self.epsilon  &#47&#47 variance
+        &#47&#47 mu_t = self.mu_prev + self.attention_alignment * torch.exp(k_t)  &#47&#47 mean
+        sig_t<a id="change"> = </a><a id="change">torch.pow(</a>torch.nn.functional.softplus(b_t), <a id="change">2</a><a id="change">)</a>
+        mu_t = self.mu_prev + torch.nn.functional.softplus(k_t)
+        g_t = (torch.softmax(g_t, dim=-1)<a id="change"> / </a>sig_t) * self.COEF
+
+        g_t = g_t.unsqueeze(2).expand(g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1))
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+
+        &#47&#47 attention weights
+        phi_t = g_t * torch.exp(-0.5 * sig_t * (mu_t_ - j)**2)
+        alpha_t = torch.sum(phi_t, 1)
+
+        &#47&#47 apply masking
+        if mask is not None:
+            alpha_t.data.masked_fill_(~mask, self._mask_value)
+
+        context = torch.bmm(alpha_t.unsqueeze(1), inputs).squeeze(1)
+        self.attention_weights = alpha_t
+        self.mu_prev = mu_t
+        breakpoint()
+        <a id="change">return </a>context
+
+
+class OriginalAttention(nn.Module):</code></pre>

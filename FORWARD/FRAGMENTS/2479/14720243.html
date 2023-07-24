@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None):
+        b, n, _, h = *x.shape, self.heads
+        qkv = <a id="change">self.to_qkv(</a>x<a id="change">)</a>
+        q, k, v = <a id="change">rearrange(</a>qkv, <a id="change">&quotb n (qkv h d) -&gt; qkv b h n d&quot</a><a id="change">, qkv = 3, h = h)</a>
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+
+        if mask is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None):
+        b, n, _, h = *x.shape, self.heads
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+</code></pre>

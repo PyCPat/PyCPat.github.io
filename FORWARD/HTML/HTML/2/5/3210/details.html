@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :3210
+</h3><img src='16999083.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        return <a id="change">out.squeeze(dim=-1)</a>.squeeze(dim=-1)
+
+
+class GlobalMaxPool1d(_GlobalMaxPool):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        <a id="change">for </a>_ in range(len(<a id="change">out.shape[2:]</a>))<a id="change">:
+            </a>out.squeeze_(dim=-1)
+        return out
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kevinzakka/torchkit/commit/1992715461087834d8c405db37fa4790d8302c63#diff-9613c13e873f1fb026f991e4f969f06814b63d4a534d0bfbc881ac4762628661L188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16999083</div><div id='project'> Project Name: kevinzakka/torchkit</div><div id='commit'> Commit Name: 1992715461087834d8c405db37fa4790d8302c63</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: kevinarmandzakka@gmail.com</div><div id='file'> File Name: torchkit/layers.py</div><div id='m_class'> M Class Name: _GlobalMaxPool</div><div id='n_method'> N Class Name: _GlobalMaxPool</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchkit/layers.py</div><div id='n_file'> N File Name: torchkit/layers.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 189</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 191</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        return <a id="change">out.squeeze(dim=-1)</a>.squeeze(dim=-1)
+
+
+class GlobalAvgPool1d(_GlobalAvgPool):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        <a id="change">for </a>_ in range(len(<a id="change">out.shape[2:]</a>))<a id="change">:
+            </a>out.squeeze_(dim=-1)
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kevinzakka/torchkit/commit/1992715461087834d8c405db37fa4790d8302c63#diff-9613c13e873f1fb026f991e4f969f06814b63d4a534d0bfbc881ac4762628661L228' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16999082</div><div id='project'> Project Name: kevinzakka/torchkit</div><div id='commit'> Commit Name: 1992715461087834d8c405db37fa4790d8302c63</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: kevinarmandzakka@gmail.com</div><div id='file'> File Name: torchkit/layers.py</div><div id='m_class'> M Class Name: _GlobalAvgPool</div><div id='n_method'> N Class Name: _GlobalAvgPool</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchkit/layers.py</div><div id='n_file'> N File Name: torchkit/layers.py</div><div id='m_start'> M Start Line: 229</div><div id='m_end'> M End Line: 230</div><div id='n_start'> N Start Line: 231</div><div id='n_end'> N End Line: 234</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            features = F.silu(mlp(features))
+
+        &#47&#47 Outputlayer
+        features = <a id="change">self.fnn[-1](features).squeeze(</a>1<a id="change">)</a>
+
+        return features
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            features = scatter_mean(features, g_batch.batch, dim=0)
+
+            &#47&#47 MLP 2
+            <a id="change">for </a>mlp in <a id="change">self.fnn2[:-1]:
+                </a>features = F.silu(mlp(features))
+
+            &#47&#47 Outputlayer
+            features = self.fnn2[-1](features)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/josejimenezluna/delfta/commit/667f7dd83d60f5e358685babcf22cce13433447e#diff-9275af9c5a51ea859fcd84fa69ffe5bb0a87637d22daa8a1fea769321127ecc4L171' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16999084</div><div id='project'> Project Name: josejimenezluna/delfta</div><div id='commit'> Commit Name: 667f7dd83d60f5e358685babcf22cce13433447e</div><div id='time'> Time: 2021-06-10</div><div id='author'> Author: hawk31@gmail.com</div><div id='file'> File Name: delfta/net.py</div><div id='m_class'> M Class Name: DeltaNetAtomic</div><div id='n_method'> N Class Name: EGNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: delfta/net.py</div><div id='n_file'> N File Name: delfta/net.py</div><div id='m_start'> M Start Line: 192</div><div id='m_end'> M End Line: 195</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 145</div><BR>

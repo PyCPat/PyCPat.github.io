@@ -1,0 +1,68 @@
+<html><h3>Pattern ID :3060
+</h3><img src='16450783.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.transformer(input_ids=x, attention_mask=attn_mask)
+        pooled_out = self.pooler(out, attn_mask)
+
+        return <a id="change">self.proj(</a>pooled_out<a id="change">)</a>
+
+    def lock(self, unlocked_layers: int = 0, freeze_layer_norm: bool = True):
+        if not unlocked_layers:  &#47&#47 full freezing
+            for n, p in self.transformer.named_parameters():</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn_mask = (x != self.config.pad_token_id).long()
+        out = self.transformer(input_ids=x, attention_mask=attn_mask)
+        pooled_out = self.pooler(out, attn_mask)
+        projected<a id="change"> = </a><a id="change">self.proj(</a>pooled_out<a id="change">)</a>
+
+        seq_len = out.last_hidden_state.shape[1]
+        tokens = (
+            out.last_hidden_state[:, torch.arange(seq_len) != self.pooler.cls_token_position, :] </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mlfoundations/open_clip/commit/76c8f851a62526c55b273af6f5879acb83c8a36c#diff-a66e31e23b31202046233bccbcf48c023585d4cabe1448a47de1f3c34a93f35eL138' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450783</div><div id='project'> Project Name: mlfoundations/open_clip</div><div id='commit'> Commit Name: 76c8f851a62526c55b273af6f5879acb83c8a36c</div><div id='time'> Time: 2023-01-28</div><div id='author'> Author: romain.rom1@gmail.com</div><div id='file'> File Name: src/open_clip/hf_model.py</div><div id='m_class'> M Class Name: HFTextEncoder</div><div id='n_method'> N Class Name: HFTextEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/open_clip/hf_model.py</div><div id='n_file'> N File Name: src/open_clip/hf_model.py</div><div id='m_start'> M Start Line: 138</div><div id='m_end'> M End Line: 140</div><div id='n_start'> N Start Line: 139</div><div id='n_end'> N End Line: 152</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.conv_down = ReduceSize(dim=dim, keep_dim=True)
+
+    def forward(self, x):
+        x = <a id="change">self.proj(</a>x<a id="change">)</a>.permute(0, 2, 3, 1)
+        x = self.conv_down(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv_down = ReduceSize(dim=dim, keep_dim=True)
+
+    def forward(self, x):
+        x = <a id="change">self.proj(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>_to_channel_last(x)
+        x = self.conv_down(x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvlabs/gcvit/commit/eb3471ad0be5ec15c38323d3927ff50b6a260b4d#diff-ba76c7f7c618cefaf9459bdcf0c1645354892a2e302b37477c36b99a446f5af6L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450782</div><div id='project'> Project Name: nvlabs/gcvit</div><div id='commit'> Commit Name: eb3471ad0be5ec15c38323d3927ff50b6a260b4d</div><div id='time'> Time: 2022-07-26</div><div id='author'> Author: ahatamizadeh@nvidia.com</div><div id='file'> File Name: models/gc_vit.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gc_vit.py</div><div id='n_file'> N File Name: models/gc_vit.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 92</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 200</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+        return <a id="change">self.proj(</a>gate<a id="change">)</a> * x
+
+&#47&#47 main classes
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        res, gate = x.chunk(2, dim = -1)
+        gate = self.norm(gate)
+        gate = <a id="change">self.proj(</a>gate<a id="change">)</a>
+        if exists(self.attn):
+            gate<a id="change"> += </a>self.attn(x)
+        return gate * res
+
+&#47&#47 main classes</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-pytorch/commit/d6aeaaf62e30dbfe68164b9e60fd64dcad705139#diff-44034403ad35d2d6dad50e7e4379a1df7da10aa3cd01d85a3d96b8361931c8b1L27' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450781</div><div id='project'> Project Name: lucidrains/g-mlp-pytorch</div><div id='commit'> Commit Name: d6aeaaf62e30dbfe68164b9e60fd64dcad705139</div><div id='time'> Time: 2021-05-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_class'> M Class Name: SpatialGatingUnit</div><div id='n_method'> N Class Name: SpatialGatingUnit</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='n_file'> N File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_start'> M Start Line: 28</div><div id='m_end'> M End Line: 30</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        B, C, H, W = x.shape
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(</a>x<a id="change">)</a>.flatten(2).transpose(1, 2)
+        x = self.norm(x)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        B, C, H, W = x.shape
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(</a>x<a id="change">)</a>
+        if self.flatten:
+            x<a id="change"> = </a>x.flatten(2).transpose(1, 2)  &#47&#47 BCHW -&gt; BNC
+        x = self.norm(x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/ecc7552c5c5ab1d177705774e8e4efd16939852c#diff-65959474d3816c5eb9737a2e8bfdbdad5fcde39ae3f023ec9756d444af0dfd54L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16450786</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: ecc7552c5c5ab1d177705774e8e4efd16939852c</div><div id='time'> Time: 2021-05-14</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/layers/patch_embed.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/patch_embed.py</div><div id='n_file'> N File Name: timm/models/layers/patch_embed.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 38</div><BR>

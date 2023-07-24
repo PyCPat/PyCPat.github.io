@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :3469
+</h3><img src='17556443.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        positives = logits_scores.diag().view(-1, 1).expand_as(logits_scores)
+        diff = positives - logits_scores
+        loss = F.sigmoid(diff)
+        logit_softmax = <a id="change">torch.softmax(</a>logits_scores<a id="change">, dim = 1)</a>
+        loss = logit_softmax<a id="change"> * </a>loss
+        reg = logit_softmax * (logits_scores**2)
+        &#47&#47 set to zeros the diff scores of positive targets present in the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        reg = reg.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = <a id="change">-torch.log(loss.sum(1))</a> + self.lambda_ * reg.sum(1)
+        return torch.mean(loss)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = loss.sum(1) / <a id="change">negative_mask.sum(1</a><a id="change">)</a>
+        return -torch.mean(loss)
+
+
+class BPR_max(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/da9442ba125855b2a0630c905ad4da0def19be70#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17556443</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: da9442ba125855b2a0630c905ad4da0def19be70</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: NewBPR_max_reg</div><div id='n_method'> N Class Name: BPR</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 200</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 35</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        positives = logits_scores.diag().view(-1, 1).expand_as(logits_scores)
+        diff = positives - logits_scores
+        loss = F.sigmoid(diff)
+        logit_softmax = <a id="change">torch.softmax(</a>logits_scores<a id="change">, dim = 1)</a>
+        loss = logit_softmax * loss
+        reg = logit_softmax<a id="change"> * </a>(logits_scores**2)
+        &#47&#47 set to zeros the diff scores of positive targets present in the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        reg = reg.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = -torch.log(loss.sum(1)) + self.lambda_<a id="change"> * </a>reg.sum(1)
+        return torch.mean(loss)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = loss.sum(1) / <a id="change">negative_mask.sum(1</a><a id="change">)</a>
+        return torch.mean(loss)
+
+
+class TOP1_max(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/58b4bf9dfdc2fe5ce6c90ac57f4db71224268942#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L181' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17556425</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: 58b4bf9dfdc2fe5ce6c90ac57f4db71224268942</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: NewBPR_max_reg</div><div id='n_method'> N Class Name: TOP1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 199</div><div id='n_start'> N Start Line: 102</div><div id='n_end'> N End Line: 108</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                         The first dimension corresponds to the batches, and the second
+                         dimension corresponds to the number of negative samples (N_B  or N_B + N_A)
+        
+        logit_softmax = <a id="change">F.softmax(</a>logit<a id="change">, dim = 1)</a>
+        diff = -(logit.diag().view(-1, 1).expand_as(logit) - logit)
+        loss = torch.mean(logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2)))
+        &#47&#47 add regularization
+        loss += self.lambda_<a id="change"> * </a>torch.mean(logit_softmax<a id="change"> * </a>(logit ** 2))
+        return loss
+
+&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss = <a id="change">loss.sum(1</a><a id="change">)</a> / negative_mask.sum(1)
+        return torch.mean(loss)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nvidia-merlin/transformers4rec/commit/da9442ba125855b2a0630c905ad4da0def19be70#diff-c298881c8b46d459fe184a3d5d112eba28bf58f5e7af62142e37782e060c6a96L111' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17556413</div><div id='project'> Project Name: nvidia-merlin/transformers4rec</div><div id='commit'> Commit Name: da9442ba125855b2a0630c905ad4da0def19be70</div><div id='time'> Time: 2021-02-21</div><div id='author'> Author: gmoreira@nvidia.com</div><div id='file'> File Name: codes/loss_functions.py</div><div id='m_class'> M Class Name: TOP1_max_reg</div><div id='n_method'> N Class Name: TOP1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/loss_functions.py</div><div id='n_file'> N File Name: codes/loss_functions.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 93</div><div id='n_end'> N End Line: 109</div><BR>

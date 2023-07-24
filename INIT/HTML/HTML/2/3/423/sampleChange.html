@@ -2,18 +2,18 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU()
+        ])
 
-        if &quotraw_points&quot in self.model_cfg.FEATURES_SOURCE:
-            mlps = SA_cfg[&quotraw_points&quot].MLPS
-            <a id="change">for </a>k in <a id="change">range(</a>len(mlps)<a id="change">):
-                </a>mlps[k] = [num_rawpoint_features - 3] + mlps[k]
+        <a id="change">for </a>l in <a id="change">range(</a>num_layers_linear_hidden - 1<a id="change">):
+            </a>self.operators.append(nn.Linear(hidden_dim, hidden_dim))
+            self.operators.append(nn.ReLU())
 
-            self.SA_rawpoints = pointnet2_stack_modules.StackSAModuleMSG(
-                radii=SA_cfg[&quotraw_points&quot].POOL_RADIUS,</code></pre><h3>After Change</h3><pre><code class='java'>
-            else:
-                input_channels = SA_cfg[src_name][&quotINPUT_CHANNELS&quot]
-
-            cur_layer<a id="change">, cur_num_c_out</a> = pointnet2_stack_modules.build_local_aggregation_module(
-                input_channels=input_channels, config=SA_cfg[src_name]
-            )
-            self.SA_layers.append(cur_layer)</code></pre>
+        self.operators.append(nn.Linear(hidden_dim, 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        for layer, argument in value_structure[:-1]:
+            if layer == &quotlinear&quot:
+                self.operators.append(nn.Linear(prev_object[1], argument))
+                prev_object = (layer<a id="change">, argument</a>)
+            elif layer == &quotrelu&quot:
+                assert argument is None, &quotNo argument for ReLU please&quot
+                self.operators.append(nn.ReLU())</code></pre>

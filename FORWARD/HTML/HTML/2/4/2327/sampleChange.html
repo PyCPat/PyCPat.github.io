@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            weight = weight * norm.view(B, oC, 1, 1, 1)
+
+        out = F.conv2d(
+            <a id="change">x.contiguous()</a>.view(1, B*iC, H, W), weight.view(B*oC, iC, kH, kW),
+            stride=self.stride, padding=self.padding, groups=B
+        )
+
+        _, _, H, W = out.size()
+        out = <a id="change">out.view(</a>B, <a id="change">-1</a>, H, W<a id="change">)</a>
+        return out
+
+class Bias(nn.Module):
+    def __init__(self, out_channels, bias_init=0, lr=1.):</code></pre><h3>After Change</h3><pre><code class='java'>
+            weight = weight * d
+
+        &#47&#47 reshaping for conv input
+        x = <a id="change">x.reshape(</a>1, -1, H, W<a id="change">)</a>
+        _, _, *ws = weight.size()
+        weight = weight.reshape(B*self.out_channels, *ws)
+        pad = self._get_same_padding(H)
+</code></pre>

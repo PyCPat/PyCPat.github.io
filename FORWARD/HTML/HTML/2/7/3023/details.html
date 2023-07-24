@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :3023
+</h3><img src='16373653.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ml = self.ml(input=mask, clean=clean, noisy=noisy, max_bin=max_bin)
+        if self.sl_f != 0 and self.sl is not None:
+            sl = torch.zeros((), device=clean.device)
+            <a id="change">for </a>mss in multi_stage_specs<a id="change">:
+                </a>mss<a id="change"> = </a><a id="change">as_complex(mss.squeeze(1)).unsqueeze(1</a><a id="change">)</a>
+                sl += self.sl(input=mss, target=clean[..., : mss.shape[-1]])
+            else:
+                sl = self.sl(input=enhanced, target=clean)
+        if self.mrsl_f &gt; 0 and self.mrsl is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+                clean_td = self.istft(clean)
+                if multi_stage is not None:
+                    &#47&#47 leave out erb enhanced
+                    multi_stage_td = self.istft(<a id="change">multi_stage[:, 1:]</a>)
+
+        ml, sl, mrsl, cal = [torch.zeros((), device=clean.device)] * 4
+        if self.ml_f != 0 and self.ml is not None:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/2aacf4d049fc9e7b073c15d705c60f87f3d554f7#diff-bb896194128eb37561935a04f142d629f33c23c5617c6717dd129c556d97e5c3L456' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16373653</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 2aacf4d049fc9e7b073c15d705c60f87f3d554f7</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/loss.py</div><div id='m_class'> M Class Name: Loss</div><div id='n_method'> N Class Name: Loss</div><div id='m_method'> M Method Name: forward(10)</div><div id='n_method'> N Method Name: forward(10)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/loss.py</div><div id='n_file'> N File Name: DeepFilterNet/df/loss.py</div><div id='m_start'> M Start Line: 468</div><div id='m_end'> M End Line: 474</div><div id='n_start'> N Start Line: 456</div><div id='n_end'> N End Line: 485</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        
+        d = x.dim()
+        <a id="change">for </a><a id="change">_</a> in range(3 - d)<a id="change">:
+            </a>x<a id="change"> = </a><a id="change">x.unsqueeze(0</a><a id="change">)</a>
+
+        x = torch.sign(x)
+        x = self.pad(x)
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        
+        x = torch.sign(x)
+        x = torch.cat((<a id="change">x[..., :1]</a>, x), dim=-1)
+        x = x.unfold(-1, self.frame_length + 1, self.frame_length)
+        z = 0.5 * torch.abs(x[..., 1:] - x[..., :-1]).sum(-1)
+        if self.norm:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sp-nitech/diffsptk/commit/c71e34ed516f1d63687f4f2135d421d08cedfd44#diff-3d2136b6eab363c825aa063298d2778a1ef04444522749238d8d95629ba95f7aL45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16373652</div><div id='project'> Project Name: sp-nitech/diffsptk</div><div id='commit'> Commit Name: c71e34ed516f1d63687f4f2135d421d08cedfd44</div><div id='time'> Time: 2022-04-15</div><div id='author'> Author: takenori.yoshimura24@gmail.com</div><div id='file'> File Name: diffsptk/core/zcross.py</div><div id='m_class'> M Class Name: ZeroCrossingAnalysis</div><div id='n_method'> N Class Name: ZeroCrossingAnalysis</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: diffsptk/core/zcross.py</div><div id='n_file'> N File Name: diffsptk/core/zcross.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = torch.sort(self.weight_read, descending=True)[1].cpu()
+
+        <a id="change">for </a><a id="change">i_track</a> in range(self.num_prediction)<a id="change">:
+            </a>present = present_temp
+            prediction_single = torch.Tensor().cuda()
+            ind = self.index_max [:, i_track]
+
+            &#47&#47ablation study
+            &#47&#47 prediction_single = self.memory_count[ind]
+            &#47&#47 prediction = torch.cat((prediction, prediction_single.unsqueeze(1)), 1)
+
+            info_future = self.memory_fut[ind]
+            info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+            input_dec = info_total
+            state_dec = zero_padding
+            for i in range(self.future_len):
+                output_decoder, state_dec = self.decoder(input_dec, state_dec)
+                displacement_next = self.FC_output(output_decoder)
+                coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+                prediction_single = torch.cat((prediction_single, coords_next), 1)
+                present = coords_next
+                input_dec = zero_padding
+            prediction<a id="change"> = </a>torch.cat((prediction, <a id="change">prediction_single.unsqueeze(1</a><a id="change">)</a>), 1)
+        return prediction
+
+    def write_in_memory(self, past, future):</code></pre><h3>After Change</h3><pre><code class='java'>
+        past_normalized = F.normalize(self.memory_past, p=2, dim=1)
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = <a id="change">torch.sort(self.weight_read, descending=True)[1].cpu()[:,:self.num_prediction]</a>
+        present = present_temp.repeat_interleave(self.num_prediction, dim=0)
+        state_past = state_past.repeat_interleave(self.num_prediction, dim=1)
+        ind = self.index_max.flatten()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/04d7a063354c991d5aaa36f28a63df2ebbee9f78#diff-6ffca9b13cf6255ad4de971b4259c7aec5c8be0e8498858880e49c2bec255ddfL120' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16373654</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 04d7a063354c991d5aaa36f28a63df2ebbee9f78</div><div id='time'> Time: 2020-01-18</div><div id='author'> Author: francescom394@gmail.com</div><div id='file'> File Name: models/model_decoder.py</div><div id='m_class'> M Class Name: model_decoder</div><div id='n_method'> N Class Name: model_decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_decoder.py</div><div id='n_file'> N File Name: models/model_decoder.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 162</div><BR>

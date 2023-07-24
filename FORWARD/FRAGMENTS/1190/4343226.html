@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out<a id="change"> = </a>self.conv(x)
+        return out<a id="change">, self.get_seq_len(lens)</a>
+
+
+class MultiSequential(nn.Sequential):
+    def forward(self, x1, x2):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.training:
+            mask = x == 0.0
+            result = self.layer(x)
+            return <a id="change">torch.masked_fill(</a>result, mask, <a id="change">0.0</a><a id="change">)</a>
+        else:
+            return self.layer(x)
+
+</code></pre>

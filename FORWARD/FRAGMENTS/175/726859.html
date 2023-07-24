@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    outs.append(self.fpn_convs[used_backbone_levels](outs[-1]))
+                for i in range(used_backbone_levels + 1, self.num_outs):
+                    &#47&#47 BUG: we should add relu before each extra conv
+                    <a id="change">outs.append(</a>self.fpn_convs[i](outs[-1])<a id="change">)</a>
+        return tuple(outs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                else:
+                    outs.append(self.fpn_convs[used_backbone_levels](outs[-1]))
+                for i in range(used_backbone_levels + 1, self.num_outs):
+                    <a id="change">if self.relu_before_extra_convs</a><a id="change">:
+                        outs.append(self.fpn_convs[i](F.relu(outs</a><a id="change">[-1])</a><a id="change">)</a><a id="change">)</a>
+                    else:
+                        <a id="change">outs.append(</a>self.fpn_convs[i](outs[-1])<a id="change">)</a>
+        return tuple(outs)
+</code></pre>

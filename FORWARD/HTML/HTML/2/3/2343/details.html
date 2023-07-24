@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :2343
+</h3><img src='14429128.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            loss = self.decoder(x, unet_number = unet_number, **kwargs)
+            scaled_loss = self.scale(loss / divisor, unet_number = unet_number)
+            scaled_loss.backward()
+        return <a id="change">loss.item()</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            with autocast(enabled = self.amp):
+                loss = self.decoder(*chunked_args, unet_number = unet_number, **chunked_kwargs)
+
+                total_loss += <a id="change">loss.item() * </a>chunk_size
+                total_samples += chunk_size
+
+                self.scale(loss * (chunk_size / batch_size), unet_number = unet_number).backward()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/b0cd5f24b67fe7dda6bc5771ec9073a8556e7271#diff-74d733a4be46e85716fcb912aa9b2ab4a882115449b8a2d550dc26f89155c0a9L333' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14429128</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: b0cd5f24b67fe7dda6bc5771ec9073a8556e7271</div><div id='time'> Time: 2022-05-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/train.py</div><div id='m_class'> M Class Name: DecoderTrainer</div><div id='n_method'> N Class Name: DecoderTrainer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/train.py</div><div id='n_file'> N File Name: dalle2_pytorch/train.py</div><div id='m_start'> M Start Line: 333</div><div id='m_end'> M End Line: 337</div><div id='n_start'> N Start Line: 388</div><div id='n_end'> N End Line: 401</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            loss = self.diffusion_prior(*args, **kwargs)
+            scaled_loss = self.scaler.scale(loss / divisor)
+            scaled_loss.backward()
+        return <a id="change">loss.item()</a>
+
+&#47&#47 decoder trainer
+
+class DecoderTrainer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            with autocast(enabled = self.amp):
+                loss = self.diffusion_prior(*chunked_args, **chunked_kwargs)
+
+                total_loss += <a id="change">loss.item() * </a>chunk_size
+                total_samples += chunk_size
+
+                self.scaler.scale(loss * (chunk_size / batch_size)).backward()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/b0cd5f24b67fe7dda6bc5771ec9073a8556e7271#diff-74d733a4be46e85716fcb912aa9b2ab4a882115449b8a2d550dc26f89155c0a9L209' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14429129</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: b0cd5f24b67fe7dda6bc5771ec9073a8556e7271</div><div id='time'> Time: 2022-05-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/train.py</div><div id='m_class'> M Class Name: DiffusionPriorTrainer</div><div id='n_method'> N Class Name: DiffusionPriorTrainer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/train.py</div><div id='n_file'> N File Name: dalle2_pytorch/train.py</div><div id='m_start'> M Start Line: 215</div><div id='m_end'> M End Line: 219</div><div id='n_start'> N Start Line: 256</div><div id='n_end'> N End Line: 274</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            device=wav.device,
+            dtype=torch.long,
+        )
+        factor = self.config.num_negatives % <a id="change">dynamic_num_negatives.item()</a>
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices] * factor, dim=-1
+        )
+        print(negative_sample_indices.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            dtype=torch.long,
+        )
+        factor = (
+            int(self.config.num_negatives % <a id="change">dynamic_num_negatives.item()</a>)<a id="change"> - </a>1
+        )
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices] * factor, dim=-1</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/02f19dc4d78f453b912354eb2a17746c8cc4dc88#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14429130</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 02f19dc4d78f453b912354eb2a17746c8cc4dc88</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 391</div><div id='m_end'> M End Line: 391</div><div id='n_start'> N Start Line: 392</div><div id='n_end'> N End Line: 393</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices]
+            * (self.config.num_negatives % <a id="change">dynamic_num_negatives.item()</a>),
+            dim=-1,
+        )
+        print(negative_sample_indices.shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        negative_sample_indices = torch.cat(
+            [negative_sample_indices]
+            * ((self.config.num_negatives % <a id="change">dynamic_num_negatives.item()</a>)<a id="change"> - </a>1),
+            dim=-1,
+        )
+        print(negative_sample_indices.shape)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/3b2428cfdee057512e8433d6de918039757bae8f#diff-5c56730c1c9b3879981c9daec26fe8ec239883e07e6ff9ef738d0048ae813b70L339' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14429127</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 3b2428cfdee057512e8433d6de918039757bae8f</div><div id='time'> Time: 2021-12-10</div><div id='author'> Author: parcollet.titouan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_class'> M Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='n_method'> N Class Name: HuggingFaceWav2Vec2Pretrain</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/huggingface_wav2vec.py</div><div id='m_start'> M Start Line: 394</div><div id='m_end'> M End Line: 394</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 394</div><BR>

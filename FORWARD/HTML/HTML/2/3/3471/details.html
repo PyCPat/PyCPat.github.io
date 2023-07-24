@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :3471
+</h3><img src='17557114.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if self.master_node:
+                &#47&#47 master_state = self.W_master_in(self.act_func(nei_message.sum(dim=0))) &#47&#47try something like this to preserve invariance for master node
+                master_state = self.GRU_master(nei_message.unsqueeze(1))
+                master_state = <a id="change">master_state[-1].squeeze(0</a><a id="change">)</a> &#47&#47this actually doesn&quott preserve order invariance anymore
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state).repeat((nei_message.size(0), 1)))
+            else:
+                message = self.act_func(binput + nei_message)</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 master_state = self.W_master_in(self.act_func(nei_message.sum(dim=0))) &#47&#47try something like this to preserve invariance for master node
+                &#47&#47 master_state = self.GRU_master(nei_message.unsqueeze(1))
+                &#47&#47 master_state = master_state[-1].squeeze(0) &#47&#47this actually doesn&quott preserve order invariance anymore
+                master_state = self.act_func(self.W_master_in(<a id="change">nei_message.sum(dim=0)</a>)).unsqueeze(0)
+                message = self.act_func(binput + nei_message + self.W_master_out(master_state).repeat((nei_message.size(0), 1)))
+                message = self.layer_norm(message)
+            else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/46a619e6a5f81bdbf03fff664d6321d64fa57302#diff-91b4e1ef89fbd915183928818e07287d60ba2d013478779025955bb686f6410dL338' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17557114</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: 46a619e6a5f81bdbf03fff664d6321d64fa57302</div><div id='time'> Time: 2018-09-30</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: mpn.py</div><div id='m_class'> M Class Name: MPN</div><div id='n_method'> N Class Name: MPN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpn.py</div><div id='n_file'> N File Name: mpn.py</div><div id='m_start'> M Start Line: 338</div><div id='m_end'> M End Line: 343</div><div id='n_start'> N Start Line: 340</div><div id='n_end'> N End Line: 347</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                output = torch.sum(r_out * (1 - mask2), dim=0) / (lengths2 + 1)
+        elif masked_agg ==False:
+            Without masked aggregation across rows
+            output = <a id="change">r_out[-1, :, :].squeeze(0</a><a id="change">)</a> &#47&#47 take the last step&quots output, shape[128, 36]
+
+        concat static
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif masked_agg ==False:
+            Without masked aggregation across rows
+            &#47&#47 output = r_out[-1, :, :].squeeze(0) &#47&#47 take the last step&quots output, shape[128, 36]
+            output = <a id="change">torch.sum(</a>r_out<a id="change">, dim=0)</a> / (lengths.unsqueeze(1) + 1)
+
+        concat static
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mims-harvard/raindrop/commit/0b0a19b4ba53c4a1303ef507483e994acffac9b8#diff-b7c638e744cc24cbf0e26b15a5dd347480335d7c3d444eb55d211866066c5266L1328' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17557113</div><div id='project'> Project Name: mims-harvard/raindrop</div><div id='commit'> Commit Name: 0b0a19b4ba53c4a1303ef507483e994acffac9b8</div><div id='time'> Time: 2021-09-09</div><div id='author'> Author: xiang.alan.zhang@gmail.com</div><div id='file'> File Name: code/baselines/models.py</div><div id='m_class'> M Class Name: Simple_classifier</div><div id='n_method'> N Class Name: Simple_classifier</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/baselines/models.py</div><div id='n_file'> N File Name: code/baselines/models.py</div><div id='m_start'> M Start Line: 1329</div><div id='m_end'> M End Line: 1378</div><div id='n_start'> N Start Line: 1358</div><div id='n_end'> N End Line: 1385</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+
+        &#47&#47 distances from z to embeddings e_j
+        d = <a id="change">torch.cdist(z_flattened.unsqueeze(0), self.embedding.weight.unsqueeze(0)).squeeze(0</a><a id="change">)</a>
+
+        encoding_indices = torch.argmin(d, dim=1)
+        z_q = self.embedding(encoding_indices).view(z.shape)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)</code></pre><h3>After Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+        d = <a id="change">torch.sum(</a>z_flattened.pow(2)<a id="change">, dim=1, keepdim=True)</a> + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - 2 * \
+            torch.einsum(&quotbd,nd-&gt;bn&quot, z_flattened, self.embedding.weight)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/edff7106c21ca4e3912ed2499e38c1a26d63b032#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17557112</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: edff7106c21ca4e3912ed2499e38c1a26d63b032</div><div id='time'> Time: 2021-08-09</div><div id='author'> Author: j@doodlebot.ai</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: VectorQuantizer</div><div id='n_method'> N Class Name: VectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 41</div><BR>

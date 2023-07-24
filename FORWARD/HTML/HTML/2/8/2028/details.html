@@ -1,0 +1,96 @@
+<html><h3>Pattern ID :2028
+</h3><img src='13773522.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for logits, codes in zip(allLogits, allTrues):
+            &#47&#47 rand = torch.randint_like(codes, logits.shape[-1])
+            &#47&#47 regLoss.append(self._auxLoss(logits.permute(0, 4, 1, 2, 3), rand))
+            mleLoss.append(self._auxLoss(<a id="change">logits.permute(0</a>, <a id="change">4</a>, 1, <a id="change">2</a>, <a id="change">3</a><a id="change">)</a>, codes))
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())
+        &#47&#47 pLoss = self._pLoss(image, restored)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 regLoss = list()
+        weakCodebookLoss = list()
+        weakFeatureLoss<a id="change"> = list()</a>
+
+        for features, codebooks in zip(allFeatures, allCodebooks):
+            for codebook in codebooks:
+                &#47&#47 [k, k] := [k, c] @ [c, k]
+                innerProduct = codebook @ codebook.T
+                &#47&#47 orthogonal regularization
+                weakCodebookLoss.append(self._auxLoss(innerProduct, torch.eye(innerProduct.shape[0], device=innerProduct.device, dtype=innerProduct.dtype)))
+            m = len(features)
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, c, h, w] * [n, c, h, w]).sum(1)
+                    interProduct = (features[i] * features[j]).sum(1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct = (features[i] * features[i]).sum(1)
+                <a id="change">weakFeatureLoss.append(</a>self._auxLoss(intraProduct, torch.ones_like(intraProduct))<a id="change">)</a>
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())
+        &#47&#47 pLoss = self._pLoss(image, restored)
+        return dLoss, (sum(weakCodebookLoss), sum(weakFeatureLoss)), (restored, allTrues, allLogits)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/5967dc842a3104290343634f567426a0fd77febe#diff-24bbc42d530738d7fc1f7098f327db279f94db71606c6e135b122db05755da7cL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13773522</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 5967dc842a3104290343634f567426a0fd77febe</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/whole.py</div><div id='m_class'> M Class Name: WholePQBig</div><div id='n_method'> N Class Name: WholePQBig</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/whole.py</div><div id='n_file'> N File Name: src/mcqc/models/whole.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 63</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for x, net, codebook, k in zip(latents, self._prob, self._codebook, self._k):
+            n, c, h, w = x.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c] -&gt; [h*w, n, c]
+            x = self._encoder(<a id="change">x.permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>.reshape(-1, n, c))
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k]
+            logit = net(x).permute(1, 0, 2)
+            sample = F.gumbel_softmax(logit * self._d, temperature, hard)</code></pre><h3>After Change</h3><pre><code class='java'>
+        quantizeds = list()
+        samples = list()
+        logits = list()
+        targets<a id="change"> = list()</a>
+        for xRaw, net, codebook, k in zip(latents, self._prob, self._codebook, self._k):
+            <a id="change">targets.append(</a>xRaw<a id="change">)</a>
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1).reshape(-1, n, c)
+            x = self._encoder(encoderIn)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/1651f1f4f7d28d9afa1ca7abafa2af0d6140309a#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13773538</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 1651f1f4f7d28d9afa1ca7abafa2af0d6140309a</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                deTransformed = self._decoder(posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed = <a id="change">quantized.reshape(h, w, n, c).permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed
+            &#47&#47 [n, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, latents, temp, *_):
+        quantizeds = list()
+        codes = list()
+        logits<a id="change"> = list()</a>
+        for i, (xRaw, k) in enumerate(zip(latents, self._k)):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [k, 1, c]
+            codebook = getattr(self, "codebook")[:, None, :]
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn = self._position(encoderIn).reshape(-1, n, c)
+            &#47&#47 [h*w, n, c]
+            x = self._encoder(codebook, encoderIn)
+            &#47&#47 [h*w, n, k]
+            logit = self._select(x)
+            sample = F.gumbel_softmax(logit, temp, True)
+            &#47&#47 [k, 1, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [h*w, n, c]
+            quantized = sample @ codewords[:, 0, ...]
+            &#47&#47 [h*w, n, c]
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+            &#47&#47 [k, 1, c]
+            decodedCodes = self._codebookDecoder(codebook)
+            &#47&#47 [n, c, h, w]
+            deTransformed = self._decoder(decodedCodes, posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            <a id="change">logits.append(</a>logit.permute(1, 0, 2).reshape(n, h, w, k)<a id="change">)</a>
+        return quantizeds, codes, logits
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/a4a40624c11a9779699f4a37cccb5b5ed8bc5048#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L263' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13773511</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: a4a40624c11a9779699f4a37cccb5b5ed8bc5048</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 298</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 534</div><BR>

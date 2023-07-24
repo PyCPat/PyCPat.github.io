@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        images, targets = self.transform(images, targets)
+        features = self.backbone(images.tensors)
+        if isinstance(features, torch.Tensor):
+            features = OrderedDict(<a id="change">[</a>(0, features)<a id="change"></a>])
+
+        proposals= self.rpn(images, features, targets)
+        &#47&#47 Alex: RoI layer returns only detections</code></pre><h3>After Change</h3><pre><code class='java'>
+           detections, detector_losses = self.roi_heads(features, proposals, images.image_sizes, targets)
+           detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+
+           <a id="change">losses</a> = {}
+           <a id="change">losses.update(</a>detector_losses<a id="change">)</a>
+           <a id="change">losses.update(</a>proposal_losses<a id="change">)</a>
+
+           if self.training:
+              return losses
+</code></pre>

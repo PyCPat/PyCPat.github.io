@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            h = torch.sum(h, dim=[2,3])
+
+            if self.conditional_strategy == &quotno&quot:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                return authen_output
+
+            elif self.conditional_strategy in <a id="change">[</a>&quotContraGAN&quot, <a id="change">&quotProxy_NCA_GAN&quot</a>, <a id="change">&quotNT_Xent_GAN&quot</a>]:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                cls_proxy = self.embedding(label)
+                cls_embed = self.linear2(h)
+                <a id="change">if self.nonlinear_embed</a><a id="change">:
+                    </a>cls_embed<a id="change"> = self</a><a id="change">.linear3(self.activation(cls_embed</a><a id="change">)</a><a id="change">)</a>
+                if self.normalize_embed:
+                    cls_proxy = F.normalize(cls_proxy, dim=1)
+                    cls_embed = F.normalize(cls_embed, dim=1)
+                <a id="change">return </a>cls_proxy<a id="change">, cls_embed, authen_output</a>
+
+            elif self.conditional_strategy == &quotProjGAN&quot:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                proj = torch.sum(torch.mul(self.embedding(label), h), 1)
+                return authen_output<a id="change"> + </a>proj
+
+            elif self.conditional_strategy == &quotACGAN&quot:
+                authen_output = torch.squeeze(self.linear1(h))
+                cls_output<a id="change"> = self</a><a id="change">.linear4(</a>h<a id="change">)</a>
+                <a id="change">return </a>cls_output<a id="change">, authen_output</a>
+
+            else:
+                raise NotImplementedError
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                    proxy = F.normalize(proxy, dim=1)
+            else:
+                raise NotImplementedError
+            <a id="change">return </a><a id="change">{</a>"adv_output": adv_output, "embed": embed, "proxy": proxy, "cls_output": cls_output, "label": label<a id="change">}</a>
+</code></pre>

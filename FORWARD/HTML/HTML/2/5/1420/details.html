@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :1420
+</h3><img src='4849768.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.conv1(x)  &#47&#47 112x112
+        features.append(x)
+        x = self.bn1(x)
+        x = <a id="change">self.relu(</a>x<a id="change">)</a>
+        x = self.maxpool(x)  &#47&#47 56x56 ignore
+
+        x = self.layer1(x)  &#47&#47 56x56
+        features.append(x)
+        x = self.layer2(x)  &#47&#47 28x28
+        features.append(x)
+        x = self.layer3(x)  &#47&#47 14x14 ignore (maybe not)
+        features.append(x)
+        x<a id="change"> = </a>self.layer4(x)  &#47&#47 7x7
+        features.append(x)
+
+        if not self.include_top:
+            return features
+
+        x = self.avgpool(x)  &#47&#47 1x1
+        features.append(x)
+
+        x = x.view(x.size(0), -1)
+        x = self.fc(x)
+        <a id="change">return </a>x
+
+    @staticmethod
+    def norm_tensor(x):</code></pre><h3>After Change</h3><pre><code class='java'>
+        features = self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = [a * <a id="change">torch.abs(p[0] - p[1]).mean()</a> for a, p in zip(self.alphas, features)]
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]
+        <a id="change">return </a>sum(diffs)
+        &#47&#47 return sum(diffs) / len(diffs)
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/casualganpapers/make-a-scene/commit/89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0#diff-1ccb21e596d4cb9b26cee32d3e64f968bb2dc277d3d4514cc0cfe9ff65e9ef08L127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4849768</div><div id='project'> Project Name: casualganpapers/make-a-scene</div><div id='commit'> Commit Name: 89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0</div><div id='time'> Time: 2022-05-26</div><div id='author'> Author: 61938694+dome272@users.noreply.github.com</div><div id='file'> File Name: losses/face_loss.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: losses/face_loss.py</div><div id='n_file'> N File Name: losses/face_loss.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, frame, target):
+        x = x.view(-1, 28 * 28)
+        x = F.relu(self.fc1(x))
+        x<a id="change"> = </a><a id="change">F.relu(</a>self.fc2(x)<a id="change">)</a>
+        x = self.fc3(x)
+
+        <a id="change">return </a>x
+
+    def name(self):
+        return "RhythmNet"</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        output, h_n = self.rnn(x.unsqueeze(1))
+
+        <a id="change">return </a><a id="change">torch.mean(</a>output<a id="change">, dim=0)</a>
+
+    def name(self):
+        return "RhythmNet"
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/be723666bfcfc6953d1182af0b44f044f6a72cf1#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL14' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4849762</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: be723666bfcfc6953d1182af0b44f044f6a72cf1</div><div id='time'> Time: 2021-01-10</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 15</div><div id='m_end'> M End Line: 20</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 28</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        lower = F.relu(self._lower - distance) ** 2
+
+        upper<a id="change"> = </a><a id="change">F.relu(</a>distance - self._upper<a id="change">)</a> ** 2
+
+        <a id="change">return </a>(lower + upper).mean()
+
+class L2Regularization(nn.Module):
+    def forward(self, x, dim: int = -1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [k, k]
+        intra = (codebook @ codebook.T).triu(1)
+
+        loss = <a id="change">((inter - 1.0) ** 2).mean()</a> - intra.mean()
+
+        <a id="change">return </a>loss
+
+class L2Regularization(nn.Module):
+    def forward(self, x, dim: int = -1):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/bb99df4591b6c532ba2285a5a670f5f070e4e624#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4849763</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: bb99df4591b6c532ba2285a5a670f5f070e4e624</div><div id='time'> Time: 2021-11-29</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CodebookSpreading</div><div id='n_method'> N Class Name: CodebookSpreading</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 153</div><div id='n_end'> N End Line: 159</div><BR>

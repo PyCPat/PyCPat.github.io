@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if hx is None:
+            hx = torch.zeros(input.size(0), self.h_channels, output_size, device=input.device)
+        &#47&#47 Run the optimized convgru-cell
+        <a id="change">return </a>_opt_convgrucell_1d(
+            input,
+            hx,
+            self.h_channels,</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input, h_prev=None):
+        &#47&#47 init hidden on forward
+        if h_prev is None:
+            h_prev<a id="change"> = </a>self.init_hidden(input)
+        print(f"input: {input.shape} prev: {h_prev.shape}")
+        combined = torch.cat((input, h_prev), dim=1)  &#47&#47 concatenate along channel axis
+
+        combined_conv = F.sigmoid(self.conv_zr(combined))
+
+        z, r = torch.split(combined_conv, self.hidden_dim, dim=1)
+
+        h_<a id="change"> = </a><a id="change">self.activation(</a>self.conv_h1(input) + r * self.conv_h2(h_prev)<a id="change">)</a>
+
+        h_cur<a id="change"> = </a>(1 - z) * h_ + z * h_prev
+
+        <a id="change">return </a>h_cur
+
+    def init_hidden(self, input):
+        bs, ch, h, w = input.shape</code></pre>

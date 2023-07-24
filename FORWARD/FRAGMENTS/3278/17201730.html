@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask) or exists(context_mask):
+            if not exists(mask):
+                mask = torch.ones(b, <a id="change">q.shape[-2]</a>, dtype = torch.bool, device = device)
+
+            if not exists(context_mask):
+                context_mask = torch.ones(b, k.shape[-2], dtype = torch.bool, device = device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        k, v = self.to_kv(context).chunk(2, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        null_k<a id="change">, null_v = </a><a id="change">map(</a>lambda t: repeat(t, &quotd -&gt; b h () d&quot, b = b, h = h), (self.null_key<a id="change">, self.null_value</a>)<a id="change">)</a>
+        k = torch.cat((null_k, k), dim = -2)
+        v = torch.cat((null_v, v), dim = -2)
+
+        q, k = map(lambda t: self.qk_activation(t), (q, k))</code></pre>

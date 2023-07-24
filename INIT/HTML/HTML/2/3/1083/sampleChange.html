@@ -3,16 +3,19 @@
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
         for index in range(depth):
-            self.layers.append(nn.ModuleList([get_attn(max(1, dim_k - index*k_reduce_by_layer)),
+            self.layers.append([get_attn(),
                                 norm_attn(),
                                 <a id="change">get_ff()</a>,
-                                norm_ff()]))
+                                norm_ff()])
 
-    def forward(self, tensor, **kwargs):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, tensor):</code></pre><h3>After Change</h3><pre><code class='java'>
+        norm_ff = lambda: nn.LayerNorm(dim_ff)
+
         for index in range(depth):
-            self.layers.append(nn.ModuleList([get_attn(max(1, dim_k - index*k_reduce_by_layer)), get_norm()]))
-            if include_ff:
-                self.layers.append(<a id="change">nn.ModuleList(</a>[<a id="change">get_ff()</a>, get_norm()]<a id="change">)</a>)
+            self.layers.append(<a id="change">nn.ModuleList(</a>[get_attn(),
+                                norm_attn(),
+                                <a id="change">get_ff()</a>,
+                                norm_ff()]<a id="change">)</a>)
 
-    def forward(self, tensor, **kwargs):
+    def forward(self, tensor):
         </code></pre>

@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    h_node_encodings[x],
+                    node_encodings[y]
+                ], 1))
+                <a id="change">adjacency_matrix</a> = weights.reshape(n_h, n)
+
+                &#47&#47 Update human nodes
+                messages_to_h = F.relu(torch.mm(
+                    adjacency_matrix.softmax(dim=1),
+                    self.obj_to_sub(node_encodings)
+                ))
+                h_node_encodings = self.norm_h(
+                    h_node_encodings + messages_to_h
+                )
+
+                &#47&#47 Update object nodes (including human nodes)
+                messages_to_o = F.relu(torch.mm(
+                    adjacency_matrix.t().softmax(dim=1),
+                    self.sub_to_obj(h_node_encodings)
+                ))
+                node_encodings = self.norm_o(
+                    node_encodings + messages_to_o
+                )
+
+            if targets is not None:
+                all_labels.append(self.associate_with_ground_truth(
+                    coords[x_keep], coords[y_keep], targets[b_idx])
+                )
+                
+            all_box_pair_features.append(torch.cat([
+                h_node_encodings[x_keep], node_encodings[y_keep]
+            ], 1))
+            all_boxes_h.append(coords[x_keep])
+            all_boxes_o.append(coords[y_keep])
+            all_object_class.append(labels[y_keep])
+            &#47&#47 The prior score is the product between edge weights and the
+            &#47&#47 pre-computed object detection scores with LIS
+            all_prior.append(
+                <a id="change">adjacency_matrix[x_keep, y_keep, None]</a><a id="change"> *
+                </a><a id="change">self.compute_prior_scores(</a>x_keep, y_keep, scores, labels<a id="change">)</a>
+            )
+
+            counter += n
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 The prior score is the product between edge weights and the
+            &#47&#47 pre-computed object detection scores with LIS
+            all_prior.append(
+                <a id="change">self.compute_prior_scores(</a>x_keep, y_keep, scores, labels<a id="change">)</a>
+            )
+
+            counter += n
+</code></pre>

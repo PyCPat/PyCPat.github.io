@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :1574
+</h3><img src='5407195.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        p = p[torch.arange(p.shape[0]), target]
+
+        &#47&#47 Adapt formula as p is in log-scale
+        loss = <a id="change">torch.where(
+            </a>p &lt;= math.log(1 / self.tau),
+            -self.tau * torch.exp(p) + math.log(self.tau) + 1,
+            <a id="change">-p</a><a id="change">,
+        )</a>
+
+        return torch.mean(loss)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        loss = torch.empty_like(p)
+        clip = (p &lt;= 1 / self.tau)
+        loss[clip] = -self.tau * <a id="change">p[clip]</a> + math.log(self.tau) + 1
+        loss[~clip] = -torch.log(p[~clip])
+
+        return torch.mean(loss)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dmizr/phuber/commit/5a1fc62fd9e391b9d996cdfccd891202fa296e9d#diff-553b4f9a9ddeff2af46d5f61e02544fe47661528f0f071c9763746915810eeafL30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5407195</div><div id='project'> Project Name: dmizr/phuber</div><div id='commit'> Commit Name: 5a1fc62fd9e391b9d996cdfccd891202fa296e9d</div><div id='time'> Time: 2020-12-01</div><div id='author'> Author: david.mizrahi@epfl.ch</div><div id='file'> File Name: phuber/loss.py</div><div id='m_class'> M Class Name: PHuberCrossEntropy</div><div id='n_method'> N Class Name: PHuberCrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: phuber/loss.py</div><div id='n_file'> N File Name: phuber/loss.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 57</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pids = torch.FloatTensor(np.arange(len(anchor))).to(anchor.device)
+        dists = cdist(anchor, positive, metric=self.metric)
+        &#47&#47 add 10 to false negative
+        dist_keypts = np.eye(dist_keypts.shape[0])<a id="change"> * </a>10 + dist_keypts.detach().cpu().numpy()
+        add_matrix = torch.zeros_like(dists)
+        add_matrix[<a id="change">np.where(</a>dist_keypts &lt; self.safe_radius<a id="change">)</a>] += 10
+        dists = dists + add_matrix
+
+        pos_mask = torch.eq(torch.unsqueeze(pids, dim=1), torch.unsqueeze(pids, dim=0))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+
+        &#47&#47 pos = dists + 1e5 * (~pos_mask).float()
+        pos = <a id="change">furthest_positive[:, None]</a>
+        pos_weight = (self.pos_optimal - pos).detach()
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/f19b93196387b22f1cb416f9a0214b2cffaf8e5e#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5407204</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: f19b93196387b22f1cb416f9a0214b2cffaf8e5e</div><div id='time'> Time: 2020-07-16</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, target):
+        eps = np.finfo(float).eps
+        p_t = torch.where(target == 1, x, 1-x)
+        fl = -<a id="change"> 1 * (1 - p_t) ** self.gamma * </a>torch.log(p_t + eps)
+        fl = <a id="change">torch.where(</a>target == 1, fl * self.alpha, fl * (1 - self.alpha)<a id="change">)</a>
+        return self._reduce(fl)
+
+    def _reduce(self, x):
+        if self.reduction == &quotmean&quot:</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: Tensor, target: Tensor) -&gt; Tensor:
+        mask = target == self.ignore_index
+        x = self._process_preds(x)
+        num_classes = <a id="change">x.shape[-1]</a>
+        target = self._process_target(target, num_classes)
+        pt = self._calc_pt(target, x, mask)
+        focal = 1 - pt
+        nll = -torch.log(self.eps + pt)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mathiaszinnen/focal_loss_torch/commit/b178639bc64ed65ba7e8428a8d6be2a9517f4abf#diff-8597a8aa6916baa05fe31f694e8eda520b6b750779d7e3ff025b12aa121418aaL40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5407198</div><div id='project'> Project Name: mathiaszinnen/focal_loss_torch</div><div id='commit'> Commit Name: b178639bc64ed65ba7e8428a8d6be2a9517f4abf</div><div id='time'> Time: 2022-10-11</div><div id='author'> Author: mahmoud@salhab.work</div><div id='file'> File Name: focal_loss/focal_loss.py</div><div id='m_class'> M Class Name: FocalLoss</div><div id='n_method'> N Class Name: FocalLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: focal_loss/focal_loss.py</div><div id='n_file'> N File Name: focal_loss/focal_loss.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 58</div><BR>

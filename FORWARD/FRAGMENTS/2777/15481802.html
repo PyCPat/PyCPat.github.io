@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.to_logits = nn.Linear(latent_dim, num_classes)
+
+    def forward(self, data, mask = None):
+        b = <a id="change">data.shape[0]</a>
+        data = fourier_encode(data, self.num_fourier_features)
+        data = rearrange(data, &quotb n ... -&gt; b n (...)&quot)
+
+        x = self.latents + self.pos_emb</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos = torch.stack(torch.meshgrid(*axis_pos), dim = -1)
+        enc_pos = fourier_encode(pos, self.num_fourier_features)
+        enc_pos = rearrange(enc_pos, &quot... n d -&gt; ... (n d)&quot)
+        enc_pos<a id="change"> = </a><a id="change">repeat(</a>enc_pos, <a id="change">&quot... -&gt; b ...&quot</a><a id="change">, b = b)</a>
+
+        &#47&#47 concat to channels of data and flatten axis
+
+        data<a id="change"> = </a><a id="change">torch.cat(</a>(data<a id="change">, enc_pos</a>)<a id="change">, dim = -1)</a>
+        data<a id="change"> = </a>rearrange(data, &quotb ... d -&gt; b (...) d&quot)
+
+        x = self.latents + self.pos_emb
+        x = repeat(x, &quotn d -&gt; b n d&quot, b = b)</code></pre>

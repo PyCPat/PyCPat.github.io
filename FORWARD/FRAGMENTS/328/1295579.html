@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, tgt, memory=None, memory_mask=None):
+        tgt_mask = target_mask(tgt, ignore_id=self.pad_id).to(tgt.device).unsqueeze(-3)
+        
+        decoder_output = <a id="change">self.embed(</a>tgt<a id="change">)*</a>self.scale
+        for i, dec_layer in enumerate(self.layers):
+            decoder_output = dec_layer(decoder_output, tgt_mask, memory, memory_mask)
+        decoder_output = self.fc(self.last_norm(decoder_output))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, tgt, memory=None, memory_mask=None):
+        tgt_mask = target_mask(tgt, ignore_id=self.pad_id).to(tgt.device).unsqueeze(-3)
+        
+        decoder_output = <a id="change">self.embed(</a>tgt<a id="change">)*</a>self.scale + self.pos_enc(tgt)
+        for i, dec_layer in enumerate(self.layers):
+            decoder_output = dec_layer(decoder_output, tgt_mask, memory, memory_mask)
+        decoder_output = self.fc(self.last_norm(decoder_output))</code></pre>

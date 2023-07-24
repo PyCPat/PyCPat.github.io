@@ -1,0 +1,210 @@
+<html><h3>Pattern ID :851
+</h3><img src='3139246.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 masked by the missing entries
+        &#47&#47 note, different batch may contain different number of real entities
+        tensor_list = []
+        <a id="change">for </a>i, batch in enumerate(out)<a id="change">:
+            </a>mean_entity = 0.
+            real_number<a id="change"> = </a><a id="change">real_number_tensor[i]</a>
+            real_number = real_number if real_number != 0 else 1
+            for j, entity in enumerate(batch):
+                if j &gt;= real_number_tensor[i]:
+                    break        
+                mean_entity = mean_entity + entity
+            mean_entity = mean_entity / (real_number)
+            <a id="change">tensor_list.append(</a>mean_entity.reshape(1, -1)<a id="change">)</a>
+        tensor_mean = torch.cat(tensor_list, dim=0)
+        print(&quottensor_mean:&quot, tensor_mean) if debug else None
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        print(&quotentity_num:&quot, entity_num) if debug else None
+
+        &#47&#47 generate the mask for transformer
+        mask = <a id="change">torch.arange(0, self.max_entities).float()</a>
+        mask<a id="change"> = </a>mask.repeat(batch_size, 1)
+        mask = mask &lt; entity_num.unsqueeze(dim=1)
+
+        print(&quotmask:&quot, mask) if debug else None
+        print(&quotmask.shape:&quot, mask.shape) if debug else None
+
+        &#47&#47 mask: [batch_size, max_entities]
+        device = next(self.parameters()).device
+        mask = mask.to(device)
+
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        &#47&#47 x is batch_entities_tensor (dim = 3). Shape: batch_seq_size x entities_size x embeding_size
+        x = self.embedd(x)
+        print(&quotx.shape:&quot, x.shape) if debug else None
+
+        &#47&#47 mask for transformer need a special format
+        mask_seq_len = mask.shape[-1]
+        tran_mask = mask.unsqueeze(1)
+
+        &#47&#47 tran_mask: [batch_seq_size x max_entities x max_entities]
+        tran_mask<a id="change"> = </a>tran_mask.repeat(1, mask_seq_len, 1)
+
+        &#47&#47 out: [batch_seq_size x entities_size x embeding_size]
+        out = self.transformer(x, mask=tran_mask)
+        print(&quotout.shape:&quot, out.shape) if debug else None
+
+        &#47&#47 entity_embeddings: [batch_seq_size x entities_size x conv1_output_size]
+        entity_embeddings = F.relu(self.conv1(F.relu(out).transpose(1, 2))).transpose(1, 2)
+        print(&quotentity_embeddings.shape:&quot, entity_embeddings.shape) if debug else None
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out * mask.unsqueeze(2)
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z = masked_out.sum(dim=1, keepdim=False)
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>z<a id="change"> / </a>entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L716' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3139246</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 masked by the missing entries
+        &#47&#47 note, different batch may contain different number of real entities
+        tensor_list = []
+        <a id="change">for </a>i, <a id="change">batch</a> in enumerate(out)<a id="change">:
+            </a>mean_entity = 0.
+            real_number<a id="change"> = </a><a id="change">real_number_tensor[i]</a>
+            real_number = real_number if real_number != 0 else 1
+            for j, entity in enumerate(batch):
+                if j &gt;= real_number_tensor[i]:
+                    break        
+                mean_entity = mean_entity + entity
+            mean_entity = mean_entity / (real_number)
+            <a id="change">tensor_list.append(</a>mean_entity.reshape(1, -1)<a id="change">)</a>
+        tensor_mean = torch.cat(tensor_list, dim=0)
+        print(&quottensor_mean:&quot, tensor_mean) if debug else None
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        print(&quotentity_num:&quot, entity_num) if debug else None
+
+        &#47&#47 generate the mask for transformer
+        mask<a id="change"> = </a><a id="change">torch.arange(0, self.max_entities).float()</a>
+        mask = mask.repeat(batch_size, 1)
+        mask = mask &lt; entity_num.unsqueeze(dim=1)
+
+        print(&quotmask:&quot, mask) if debug else None
+        print(&quotmask.shape:&quot, mask.shape) if debug else None
+
+        &#47&#47 mask: [batch_size, max_entities]
+        device = next(self.parameters()).device
+        mask = mask.to(device)
+
+        &#47&#47 assert the input shape is : batch_seq_size x entities_size x embeding_size
+        &#47&#47 note: because the feature size of entity is not equal to 256, so it can not fed into transformer directly.
+        &#47&#47 thus, we add a embedding layer to transfer it to right size.
+        &#47&#47 x is batch_entities_tensor (dim = 3). Shape: batch_seq_size x entities_size x embeding_size
+        x = self.embedd(x)
+        print(&quotx.shape:&quot, x.shape) if debug else None
+
+        &#47&#47 mask for transformer need a special format
+        mask_seq_len = mask.shape[-1]
+        tran_mask<a id="change"> = </a>mask.unsqueeze(1)
+
+        &#47&#47 tran_mask: [batch_seq_size x max_entities x max_entities]
+        tran_mask = tran_mask.repeat(1, mask_seq_len, 1)
+
+        &#47&#47 out: [batch_seq_size x entities_size x embeding_size]
+        out = self.transformer(x, mask=tran_mask)
+        print(&quotout.shape:&quot, out.shape) if debug else None
+
+        &#47&#47 entity_embeddings: [batch_seq_size x entities_size x conv1_output_size]
+        entity_embeddings = F.relu(self.conv1(F.relu(out).transpose(1, 2))).transpose(1, 2)
+        print(&quotentity_embeddings.shape:&quot, entity_embeddings.shape) if debug else None
+
+        &#47&#47 AlphaStar: The mean of the transformer output across across the units (masked by the missing entries) 
+        &#47&#47 is fed through a linear layer of size 256 and a ReLU to yield `embedded_entity`
+        masked_out = out * mask.unsqueeze(2)
+
+        &#47&#47 sum over across the units
+        &#47&#47 masked_out: [batch_seq_size x entities_size x embeding_size]
+        &#47&#47 z: [batch_size, embeding_size]
+        z = masked_out.sum(dim=1, keepdim=False)
+
+        &#47&#47 here we should dived by the entity_num, not the cls.max_entities
+        &#47&#47 z: [batch_size, embeding_size]
+        z<a id="change"> = </a>z<a id="change"> / </a>entity_num
+
+        &#47&#47 note, dim=1 means the mean is across all entities in one timestep
+        &#47&#47 The mean of the transformer output across across the units  </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/612d42a7bf5ef827e1e919198d839fce106155cd#diff-71869e70f9cb835282d541d2d3529d25b6ed6795c79bc770e860e9318619f6b1L717' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3139117</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: 612d42a7bf5ef827e1e919198d839fce106155cd</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_class'> M Class Name: EntityEncoder</div><div id='n_method'> N Class Name: EntityEncoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/entity_encoder.py</div><div id='m_start'> M Start Line: 721</div><div id='m_end'> M End Line: 758</div><div id='n_start'> N Start Line: 716</div><div id='n_end'> N End Line: 778</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        else:
+            raise ValueError(&quotThis similarity is not implemented.&quot)
+        loss = list()
+        <a id="change">for </a><a id="change">i</a> in range(batch_size)<a id="change">:
+            </a>pos_index = labels == labels[i]
+            pos_index[i] = 0
+            neg_index = labels != labels[i]
+            pos_pair_<a id="change"> = </a><a id="change">sim_mat[i][pos_index]</a>
+            neg_pair_ = sim_mat[i][neg_index]
+
+            alpha_p = torch.relu(-pos_pair_ + 1 + self.margin)
+            alpha_n = torch.relu(neg_pair_ + self.margin)
+            margin_p = 1 - self.margin
+            margin_n = self.margin
+            loss_p = torch.sum(torch.exp(-self.scale * alpha_p * (pos_pair_ - margin_p)))
+            loss_n = torch.sum(torch.exp(self.scale * alpha_n * (neg_pair_ - margin_n)))
+            <a id="change">loss.append(</a>torch.log(1 + loss_p * loss_n)<a id="change">)</a>
+
+        loss = sum(loss) / batch_size
+        return loss</code></pre><h3>After Change</h3><pre><code class='java'>
+            f"feats.size(0): {feats.size(0)} is not equal to labels.size(0): {labels.size(0)}"
+
+        m = labels.size(0)
+        mask<a id="change"> = </a><a id="change">labels.expand(m, m).t().eq(labels.expand(m, m)).float()</a>
+        pos_mask = mask.triu(diagonal=1)
+        neg_mask = (mask<a id="change"> - </a>1).abs_().triu(diagonal=1)
+        if self.similarity == &quotdot&quot:
+            sim_mat = torch.matmul(feats, torch.t(feats))
+        elif self.similarity == &quotcos&quot:
+            feats = F.normalize(feats)
+            sim_mat = feats.mm(feats.t())
+        else:
+            raise ValueError(&quotThis similarity is not implemented.&quot)
+
+        pos_pair_<a id="change"> = </a>sim_mat[pos_mask == 1]
+        neg_pair_<a id="change"> = </a>sim_mat[neg_mask == 1]
+
+        alpha_p = torch.relu(-pos_pair_ + 1 + self.margin)
+        alpha_n = torch.relu(neg_pair_ + self.margin)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qianjinhao/circle-loss/commit/55a6035c552f781d6c761475f88b33b8f684fbe7#diff-ee4498af95089c1dacb3bbdedbf8cffa6eecc60617a8a1d405b07f6f81510abbL13' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3138989</div><div id='project'> Project Name: qianjinhao/circle-loss</div><div id='commit'> Commit Name: 55a6035c552f781d6c761475f88b33b8f684fbe7</div><div id='time'> Time: 2020-04-02</div><div id='author'> Author: qianjinhao@126.com</div><div id='file'> File Name: circle_loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: circle_loss.py</div><div id='n_file'> N File Name: circle_loss.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 38</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        else:
+            combined_embedding = []
+            trial_counts = torch.zeros(batch, 1)
+            <a id="change">for </a><a id="change">i</a> in range(batch)<a id="change">:
+                &#47&#47 remove NaNs
+                </a>valid_x<a id="change"> = </a><a id="change">x[i, ~torch.isnan(x[i, :, 0]), :]</a>
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                <a id="change">combined_embedding.append(
+                    </a>self.combining_function(trial_embeddings, dim=0)<a id="change">
+                )</a>
+
+            combined_embedding = torch.stack(combined_embedding, dim=0)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."</code></pre><h3>After Change</h3><pre><code class='java'>
+        masked_x = torch.nan_to_num(x, nan=0.0)
+        trial_embeddings = self.trial_net(masked_x)
+        &#47&#47 replace previous nan entries with zeros
+        trial_embeddings<a id="change"> = </a>trial_embeddings * <a id="change">(~is_nan.all(-1, keepdim=True)).float()</a>
+
+        &#47&#47 Take mean over permutation dimension divide by number of trials
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding<a id="change"> = </a>(
+                trial_embeddings.sum(dim=self.aggregation_dim)<a id="change"> / </a>trial_counts
+            )
+        else:
+            combined_embedding<a id="change"> = </a>trial_embeddings.sum(dim=self.aggregation_dim)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3139076</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>

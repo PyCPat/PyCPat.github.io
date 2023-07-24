@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :3064
+</h3><img src='16451881.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = self.n_units
+        
+        real, imag = input[:,:n_units//2], <a id="change">input</a>[:,<a id="change">n_units//2</a>:]
+        magnitude = torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = self.n_units
+        
+        real, imag = <a id="change">torch.split(</a>input, [n_units // 2, n_units // 2]<a id="change">, dim=1)</a>
+        magnitude = torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)
+        ratio = torch.where(output_magnitude &gt;= 0, ratio, torch.zeros_like(magnitude))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/cfba8237e0e4c034cf34bf507819bbfccb33b7cd#diff-d2a1aeb484b86497f04c4e8890fa4fda7abd429d423b8c7384bf31d50f69c476L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451881</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: cfba8237e0e4c034cf34bf507819bbfccb33b7cd</div><div id='time'> Time: 2021-09-23</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/activation.py</div><div id='m_class'> M Class Name: ModReLU1d</div><div id='n_method'> N Class Name: ModReLU1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/activation.py</div><div id='n_file'> N File Name: src/activation.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 33</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    
+    def forward(self, input):
+        n_units = input.size(1)
+        real, imag = <a id="change">input</a>[:,<a id="change">:</a>n_units//2], input[:,n_units//2:]
+        
+        condition = torch.logical_and(real &gt; 0, imag &gt; 0)
+        output_real = torch.where(condition, real, torch.zeros_like(real))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = input.size(1)
+        
+        real, imag = <a id="change">torch.split(</a>input, [n_units // 2, n_units // 2]<a id="change">, dim=1)</a>
+        
+        condition = torch.logical_and(real &gt; 0, imag &gt; 0)
+        output_real = torch.where(condition, real, torch.zeros_like(real))
+        output_imag = torch.where(condition, imag, torch.zeros_like(imag))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/cfba8237e0e4c034cf34bf507819bbfccb33b7cd#diff-d2a1aeb484b86497f04c4e8890fa4fda7abd429d423b8c7384bf31d50f69c476L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451880</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: cfba8237e0e4c034cf34bf507819bbfccb33b7cd</div><div id='time'> Time: 2021-09-23</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/activation.py</div><div id='m_class'> M Class Name: ZReLU1d</div><div id='n_method'> N Class Name: ZReLU1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/activation.py</div><div id='n_file'> N File Name: src/activation.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 82</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y = x[i].clone()
+                <a id="change">y</a>[..., <a id="change">:</a>5 + self.nc].sigmoid_()
+                if self.inplace:
+                    y[..., 0:2] = (y[..., 0:2] * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh</code></pre><h3>After Change</h3><pre><code class='java'>
+                    wh = (wh.sigmoid() * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf.sigmoid(), mask), 4)
+                else:  &#47&#47 Detect (boxes only)
+                    xy, wh, conf = <a id="change">x[i].sigmoid().split(</a>(2, 2, self.nc + 1), 4<a id="change">)</a>
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (wh * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf), 4)
+                z.append(y.view(bs, self.na * nx * ny, self.no))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ultralytics/yolov5/commit/060837406542c5c65301b8fde641f4d92a1f395e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 16451877</div><div id='project'> Project Name: ultralytics/yolov5</div><div id='commit'> Commit Name: 060837406542c5c65301b8fde641f4d92a1f395e</div><div id='time'> Time: 2022-09-17</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Detect</div><div id='n_method'> N Class Name: Detect</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 77</div><BR>

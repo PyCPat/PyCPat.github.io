@@ -1,0 +1,104 @@
+<html><h3>Pattern ID :2315
+</h3><img src='14328222.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for ind, image in enumerate(images):
+            is_first = ind == 0
+            encoded = self.encoder(image)
+            z<a id="change"> = </a>self.to_out(encoded.flatten(1))
+            hx, cx = self.rnn(kx, (hx, cx))
+            yt, gt, kwt = self.to_output(hx), self.to_gate(hx), self.to_key(hx)
+
+            if is_first:
+                kx = self.k0
+            else:
+                sim = einsum(&quotb n d, b d -&gt; b n&quot, Mv, z)
+                wkt = sim.softmax(dim = -1)
+                ck = self.to_confidence(sim.unsqueeze(dim = -1)).sigmoid()
+                kr = gt * (<a id="change">wkt.unsqueeze(-1</a><a id="change">)</a> * torch.cat((Mk, ck), dim = -1)).sum(dim = 1)
+
+            Mk = safe_cat(Mk, kwt.unsqueeze(1), dim = 1)
+            Mv = safe_cat(Mv, z.unsqueeze(1), dim = 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                wkt = sim.softmax(dim = -1)
+
+                &#47&#47 calculate confidence
+                sim<a id="change">, wkt = </a><a id="change">map(</a>lambda t: rearrange(t, &quotb n -&gt; b n ()&quot), (sim<a id="change">, wkt</a>)<a id="change">)</a>
+                ck = self.to_confidence(sim).sigmoid()
+
+                &#47&#47 concat confidence to memory keys
+                &#47&#47 then weighted sum of all memory keys by attention of memory values</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/esbn-pytorch/commit/70c3de8d1852e03232e49b3c05d492fd8e50ecca#diff-4a702caec822e23829763d2b36f609d801f91e254e51307d6c310c1e8e1be359L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14328222</div><div id='project'> Project Name: lucidrains/esbn-pytorch</div><div id='commit'> Commit Name: 70c3de8d1852e03232e49b3c05d492fd8e50ecca</div><div id='time'> Time: 2021-01-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: esbn_pytorch/esbn_pytorch.py</div><div id='m_class'> M Class Name: ESBN</div><div id='n_method'> N Class Name: ESBN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: esbn_pytorch/esbn_pytorch.py</div><div id='n_file'> N File Name: esbn_pytorch/esbn_pytorch.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 69</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+        embed = l2norm(embed)
+
+        dist<a id="change"> = </a>flatten @ embed.t()
+        embed_ind = gumbel_sample(dist, dim = -1, temperature = self.sample_codebook_temp)
+        embed_onehot = F.one_hot(embed_ind, self.codebook_size).type(dtype)
+        embed_ind = embed_ind.view(*shape[:-1])
+
+        quantize = F.embedding(embed_ind, self.embed)
+
+        if self.training:
+            bins = embed_onehot.sum(0)
+            self.all_reduce_fn(bins)
+
+            ema_inplace(self.cluster_size, bins, self.decay)
+
+            zero_mask = (bins == 0)
+            bins = bins.masked_fill(zero_mask, 1.)
+
+            embed_sum = flatten.t() @ embed_onehot
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = (embed_sum / <a id="change">bins.unsqueeze(0</a><a id="change">)</a>).t()
+            embed_normalized = l2norm(embed_normalized)
+            embed_normalized = torch.where(zero_mask[..., None], embed,
+                                           embed_normalized)</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.expire_codes_(x)
+
+        if needs_codebook_dim:
+            quantize<a id="change">, embed_ind = </a><a id="change">map(</a>lambda t: rearrange(t, &quot1 ... -&gt; ...&quot), (quantize<a id="change">, embed_ind</a>)<a id="change">)</a>
+
+        return quantize, embed_ind
+
+&#47&#47 main class</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL325' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14328223</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: CosineSimCodebook</div><div id='n_method'> N Class Name: CosineSimCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 330</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 397</div><div id='n_end'> N End Line: 448</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.init_embed_(flatten)
+
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+        embed<a id="change"> = </a>self.embed.t()
+
+        dist = -(
+            flatten.pow(2).sum(1, keepdim=True)
+            - 2 * flatten @ embed
+            + embed.pow(2).sum(0, keepdim=True)
+        )
+
+        embed_ind = gumbel_sample(dist, dim = -1, temperature = self.sample_codebook_temp)
+        embed_onehot = F.one_hot(embed_ind, self.codebook_size).type(dtype)
+        embed_ind = embed_ind.view(*shape[:-1])
+        quantize = F.embedding(embed_ind, self.embed)
+
+        if self.training:
+            cluster_size = embed_onehot.sum(0)
+            self.all_reduce_fn(cluster_size)
+
+            ema_inplace(self.cluster_size, cluster_size, self.decay)
+
+            embed_sum = flatten.t() @ embed_onehot
+            self.all_reduce_fn(embed_sum)
+
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = laplace_smoothing(self.cluster_size, self.codebook_size, self.eps) * self.cluster_size.sum()
+            embed_normalized = self.embed_avg / <a id="change">cluster_size.unsqueeze(1</a><a id="change">)</a>
+            self.embed.data.copy_(embed_normalized)
+            self.expire_codes_(x)
+
+        return quantize, embed_ind</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.expire_codes_(x)
+
+        if needs_codebook_dim:
+            quantize<a id="change">, embed_ind = </a><a id="change">map(</a>lambda t: rearrange(t, &quot1 ... -&gt; ...&quot), (quantize<a id="change">, embed_ind</a>)<a id="change">)</a>
+
+        return quantize, embed_ind
+
+class CosineSimCodebook(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL219' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14328221</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: EuclideanCodebook</div><div id='n_method'> N Class Name: EuclideanCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 223</div><div id='m_end'> M End Line: 252</div><div id='n_start'> N Start Line: 264</div><div id='n_end'> N End Line: 310</div><BR>

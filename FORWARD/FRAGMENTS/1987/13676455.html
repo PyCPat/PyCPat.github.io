@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, t):
+        freqs = t[..., None].float() * self.inv_freq[None, :]
+        emb = <a id="change">torch.cat(</a>(freqs<a id="change">, freqs</a>)<a id="change">, dim = -1)</a>
+        return emb
+
+def rotate_half(x):
+    x = rearrange(x, &quot... (j d) m -&gt; ... j d m&quot, j = 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, t):
+        freqs = t[..., None].float() * self.inv_freq[None, :]
+        return <a id="change">repeat(</a>freqs, <a id="change">&quot... d -&gt; ... (d r)&quot</a><a id="change">, r = 2)</a>
+
+def rotate_half(x):
+    x = rearrange(x, &quot... (d j) m -&gt; ... d j m&quot, j = 2)
+    x1, x2 = x.unbind(dim = -2)</code></pre>

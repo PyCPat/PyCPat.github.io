@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = rearrange(mask, &quotb n -&gt; b () n ()&quot)
+            k.masked_fill_(~mask, -torch.finfo(k.dtype).max)
+
+        q<a id="change"> = </a>q.softmax(dim = -1)
+        k<a id="change"> = </a><a id="change">k.softmax(dim = -2)</a>
+
+        q<a id="change"> = </a>q * self.scale
+
+        if exists(mask):
+            v.masked_fill_(~mask, 0.)
+
+        context = einsum(&quotb h n d, b h n e -&gt; b h d e&quot, k, v)
+        out = einsum(&quotb h d e, b h n d -&gt; b h n e&quot, context, q)
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        <a id="change">return </a>self.to_out(out), 0
+
+class EquivariantAttention(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, queries, mask = None):
+        induced = self.attn1(queries, x, mask = mask)
+        out     = self.attn2(x, induced)
+        <a id="change">return </a>out, 0
+
+class EquivariantAttention(nn.Module):
+    def __init__(</code></pre>

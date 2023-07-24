@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :714
+</h3><img src='2713164.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 properly chunk positional embeddings
+
+            q_pos_emb = repeat(q_pos_emb, &quot1 h (k n) d -&gt; (b k) h n d&quot, n = chunk_size, b = b)
+            k_pos_emb<a id="change"> = </a><a id="change">repeat(</a>k_pos_emb, <a id="change">&quot1 h (k n) d -&gt; (b k) h (r n) d&quot</a><a id="change">, n = chunk_size, b = b, r = num_retrieved)</a>
+
+            pos_emb = (q_pos_emb, k_pos_emb)
+
+        &#47&#47 reshape so we have chunk to chunk attention, without breaking causality</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, *, context, pos_emb = None, **kwargs):
+        &#47&#47 derive variables
+
+        b, n, num_chunks, num_retrieved, chunk_size = x.shape[0], x.shape[-2], *context.shape[<a id="change">-4:-1</a>]
+        causal_padding = chunk_size - 1
+
+        &#47&#47 causal padding</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/1ff2901fb9c7dd2ad49abd9dc643cb9fd7edac5e#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L167' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2713164</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: 1ff2901fb9c7dd2ad49abd9dc643cb9fd7edac5e</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: ChunkedCrossAttention</div><div id='n_method'> N Class Name: ChunkedCrossAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 167</div><div id='n_end'> N End Line: 192</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.valley_transformer(x)
+
+        x<a id="change"> = </a><a id="change">repeat(</a>x, <a id="change">&quotb n d -&gt; b (n r) d&quot</a><a id="change">, r = shorten_factor)</a>
+
+        x = x[:, :n]
+        x = x + x_residual
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        &#47&#47 b : batch, n : sequence length, d : feature dimension, s : shortening factor
+
+        s, b, n = self.shorten_factor, *x.shape[<a id="change">:2</a>]
+
+        &#47&#47 top half of hourglass, pre-transformer layers
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/hourglass-transformer-pytorch/commit/44ad24d1a9673a2d953ffc39afe455d42d56fbb1#diff-2ad25fce867cbbc4b5c9b8826f8be84c94e4f3654138256031bd2a247c91e715L182' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2713167</div><div id='project'> Project Name: lucidrains/hourglass-transformer-pytorch</div><div id='commit'> Commit Name: 44ad24d1a9673a2d953ffc39afe455d42d56fbb1</div><div id='time'> Time: 2021-11-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_class'> M Class Name: HourglassTransformer</div><div id='n_method'> N Class Name: HourglassTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='n_file'> N File Name: hourglass_transformer_pytorch/hourglass_transformer_pytorch.py</div><div id='m_start'> M Start Line: 183</div><div id='m_end'> M End Line: 200</div><div id='n_start'> N Start Line: 192</div><div id='n_end'> N End Line: 252</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        seq = seq * scales * pi
+
+        x_sinu<a id="change"> = </a><a id="change">repeat(</a>seq, <a id="change">&quoti d -&gt; i j d&quot</a><a id="change">, j = n)</a>
+        y_sinu = repeat(seq, &quotj d -&gt; i j d&quot, i = n)
+
+        sin = torch.cat((x_sinu.sin(), y_sinu.sin()), dim = -1)
+        cos = torch.cat((x_sinu.cos(), y_sinu.cos()), dim = -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer(&quotscales&quot, scales)
+
+    def forward(self, x):
+        device, dtype, h, w = x.device, x.dtype, *x.shape[<a id="change">-2:</a>]
+
+        seq_x = torch.linspace(-1., 1., steps = h, device = device)
+        seq_x = seq_x.unsqueeze(-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/uformer-pytorch/commit/a51da45df6271fc5fbb1dda68ae5605be25a8f70#diff-efdca9d0ec49f156ba27cc7f0a99637e60a1c05ecbf8b014d10510f5e6c511d8L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2713168</div><div id='project'> Project Name: lucidrains/uformer-pytorch</div><div id='commit'> Commit Name: a51da45df6271fc5fbb1dda68ae5605be25a8f70</div><div id='time'> Time: 2021-06-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: uformer_pytorch/uformer_pytorch.py</div><div id='m_class'> M Class Name: AxialRotaryEmbedding</div><div id='n_method'> N Class Name: AxialRotaryEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: uformer_pytorch/uformer_pytorch.py</div><div id='n_file'> N File Name: uformer_pytorch/uformer_pytorch.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 66</div><BR>

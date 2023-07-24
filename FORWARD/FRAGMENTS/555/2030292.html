@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        for i_track in range(self.num_prediction):
+            present = present_temp
+            prediction_single<a id="change"> = </a>torch.Tensor().cuda()
+            ind = self.index_max [:, i_track]
+
+            &#47&#47ablation study
+            &#47&#47 prediction_single = self.memory_count[ind]
+            &#47&#47 prediction = torch.cat((prediction, prediction_single.unsqueeze(1)), 1)
+
+            info_future = self.memory_fut[ind]
+            info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+            input_dec = info_total
+            state_dec = zero_padding
+            for i in range(self.future_len):
+                output_decoder, state_dec = self.decoder(input_dec, state_dec)
+                displacement_next = self.FC_output(output_decoder)
+                coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+                prediction_single = torch.cat((prediction_single, coords_next), 1)
+                present = coords_next
+                input_dec = zero_padding
+            prediction = torch.cat((prediction, <a id="change">prediction_single.unsqueeze(1</a><a id="change">)</a>), 1)
+        return prediction
+
+    def write_in_memory(self, past, future):</code></pre><h3>After Change</h3><pre><code class='java'>
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        self.weight_read = torch.matmul(past_normalized, state_normalized.transpose(0, 1)).transpose(0, 1)
+        self.index_max = torch.sort(self.weight_read, descending=True)[1].cpu()[:,:self.num_prediction]
+        present<a id="change"> = </a>present_temp.repeat_interleave(self.num_prediction, dim=0)
+        state_past = state_past.repeat_interleave(self.num_prediction, dim=1)
+        ind = self.index_max.flatten()
+
+        &#47&#47ablation study
+        &#47&#47pdb.set_trace()
+        &#47&#47 temp = self.memory_count[ind]
+        &#47&#47 prediction = temp.view(dim_batch, self.num_prediction, self.future_len, 2)
+
+
+        info_future = self.memory_fut[ind]
+        info_total = torch.cat((state_past, info_future.unsqueeze(0)), 2)
+        input_dec = info_total
+        state_dec = zero_padding
+        for i in range(self.future_len):
+            output_decoder, state_dec = self.decoder(input_dec, state_dec)
+            displacement_next = self.FC_output(output_decoder)
+            coords_next = present + displacement_next.squeeze(0).unsqueeze(1)
+            prediction = torch.cat((prediction, coords_next), 1)
+            present = coords_next
+            input_dec = zero_padding
+        prediction<a id="change"> = </a><a id="change">prediction.view(</a>dim_batch, self.num_prediction, self.future_len, <a id="change">2</a><a id="change">)</a>
+        return prediction
+
+    def write_in_memory(self, past, future):
+        </code></pre>

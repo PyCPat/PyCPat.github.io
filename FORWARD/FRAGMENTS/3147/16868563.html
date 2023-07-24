@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.args = args
+
+    def forward(self, x: torch.Tensor):
+        <a id="change">return </a>self.decoder.generate(torch.LongTensor(<a id="change">[</a>self.args.bos_token<a id="change"></a>]*len(x)).to(x.device),
+                                     self.args.max_seq_len, eos_token=self.args.eos_token, context=self.encoder(x))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor, tgt_seq: torch.Tensor, **kwargs):
+        encoded = self.encoder(x)
+        out = <a id="change">self.decoder(</a>tgt_seq<a id="change">, context=encoded, **kwargs)</a>
+        return out
+
+    @torch.no_grad()
+    def generate(self, x: torch.Tensor):</code></pre>

@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+        self.batch_size, _, _, _ = inputs.shape
+        device<a id="change"> = </a>inputs.device
+        [C3, C4, C5] = self.backbone(inputs)
+
+        del inputs
+
+        features = self.fpn([C3, C4, C5])
+
+        del C3, C4, C5
+
+        self.fpn_feature_sizes<a id="change"> = </a><a id="change">[]</a>
+        cls_heads, reg_heads, center_heads = [], [], []
+        for feature, scale in zip(features, self.scales):
+            <a id="change">self.fpn_feature_sizes.append(</a>[feature.shape[3], feature.shape[2]]<a id="change">)</a>
+            cls_outs = self.cls_head(feature)
+            &#47&#47 [N,num_classes,H,W] -&gt; [N,H,W,num_classes]
+            cls_outs = cls_outs.permute(0, 2, 3, 1).contiguous()
+            cls_heads.append(cls_outs)
+
+            reg_outs, center_outs = self.regcenter_head(feature)
+            &#47&#47 [N,4,H,W] -&gt; [N,H,W,4]
+            reg_outs = reg_outs.permute(0, 2, 3, 1).contiguous()
+            reg_outs = reg_outs * scale
+            reg_heads.append(reg_outs)
+            &#47&#47 [N,1,H,W] -&gt; [N,H,W,1]
+            center_outs = center_outs.permute(0, 2, 3, 1).contiguous()
+            center_heads.append(center_outs)
+
+        del features
+
+        self.fpn_feature_sizes<a id="change"> = </a>torch.tensor(
+            self.fpn_feature_sizes).to(device)
+
+        batch_positions = self.positions(self.batch_size,
+                                         self.fpn_feature_sizes)
+
+        &#47&#47 if input size:[B,3,640,640]
+        &#47&#47 features shape:[[B, 256, 80, 80],[B, 256, 40, 40],[B, 256, 20, 20],[B, 256, 10, 10],[B, 256, 5, 5]]
+        &#47&#47 cls_heads shape:[[B, 80, 80, 80],[B, 40, 40, 80],[B, 20, 20, 80],[B, 10, 10, 80],[B, 5, 5, 80]]
+        &#47&#47 reg_heads shape:[[B, 80, 80, 4],[B, 40, 40, 4],[B, 20, 20, 4],[B, 10, 10, 4],[B, 5, 5, 4]]
+        &#47&#47 center_heads shape:[[B, 80, 80, 1],[B, 40, 40, 1],[B, 20, 20, 1],[B, 10, 10, 1],[B, 5, 5, 1]]
+        &#47&#47 batch_positions shape:[[B, 80, 80, 2],[B, 40, 40, 2],[B, 20, 20, 2],[B, 10, 10, 2],[B, 5, 5, 2]]
+
+        <a id="change">return </a>cls_heads<a id="change">, reg_heads, center_heads, batch_positions</a>
+
+
+def _fcos(arch, pretrained, progress, **kwargs):
+    model = FCOS(arch, **kwargs)</code></pre>

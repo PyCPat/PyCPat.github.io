@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1905
+</h3><img src='13347659.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        seq_length = seg.size(1)
+        device = seg.device
+        emb = <a id="change">self.pe[: seq_length].transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        return emb.to(device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        emb =  torch.zeros(batch_size, seq_length, self.emb_size)
+        for i in range(batch_size):
+            emb[i, :no_pad_num[i], :] = <a id="change">self.emb[2: no_pad_num[i]+2]</a>
+
+        return emb.to(device)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tencent/tencentpretrain/commit/2bc6d47065d7a5e6907d449cf5114248000274fe#diff-41324f66c261d89709c738adf53f3dddb45e587991d1f8c895e23d2dedb742dbL45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13347659</div><div id='project'> Project Name: tencent/tencentpretrain</div><div id='commit'> Commit Name: 2bc6d47065d7a5e6907d449cf5114248000274fe</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: 40569026+JINGZIjingzi@users.noreply.github.com</div><div id='file'> File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_class'> M Class Name: SinusoidalposEmbedding</div><div id='n_method'> N Class Name: SinusoidalposEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='n_file'> N File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 b(hc)1q -&gt; bqhc
+        &#47&#47 print(keys.shape, "keys", values.shape, "values", queries.shape, "queries")
+        keys = <a id="change">keys.transpose(1</a>, <a id="change">3</a><a id="change">)</a>
+        keys = keys.reshape(keys.shape[:2] + (self.head_count, -1))
+
+        &#47&#47 b(hc)1q -&gt; bchq
+        shape = (batch_count, self.head_count, self.head_dim, -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            attention_weights, 
+            values
+        )
+        shape = <a id="change">attention_output.shape[:2]</a> + (self.embed_count,)
+        attention_output = attention_output.reshape(shape)
+        attention_output = self.out_proj.forward(attention_output)
+        return attention_output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/c936d261021f0f38d064e146a2167cf3daeeb0db#diff-722632c2506383b8dc00c81914b9d7066a94dfb2b6295335e1218166a6c05cfcL36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13347657</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: c936d261021f0f38d064e146a2167cf3daeeb0db</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_class'> M Class Name: AttentionTorch</div><div id='n_method'> N Class Name: AttentionTorch</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_encoder_torch.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mem = self.mem_kv.expand(m, b, e)
+        keys = default(keys, torch.empty(b, 0, e, device=device))
+
+        x, keys = x.transpose(0, 1), <a id="change">keys.transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        kv = torch.cat((x, mem, keys))
+
+        attn_shape = (t, kv.shape[0])</code></pre><h3>After Change</h3><pre><code class='java'>
+        query_len = default(query_len, qk.shape[1])
+        t = query_len
+
+        q = <a id="change">qk[:, 0:query_len]</a>
+        qk = F.normalize(qk, 2, dim=-1)
+
+        dot = torch.einsum(&quotbie,bje-&gt;bij&quot, q, qk)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/d2462f9b33944e20f5fbeaf19efaa9591378ba65#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL385' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13347651</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: d2462f9b33944e20f5fbeaf19efaa9591378ba65</div><div id='time'> Time: 2020-01-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 386</div><div id='m_end'> M End Line: 403</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 349</div><BR>

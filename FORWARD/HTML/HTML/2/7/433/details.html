@@ -1,0 +1,148 @@
+<html><h3>Pattern ID :433
+</h3><img src='1655288.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if memories is not None:
+            mem, lmem = memories
+
+        mem<a id="change"> = </a><a id="change">default(</a>mem, lambda: torch.empty(b, 0, e, **to(x))<a id="change">)</a>
+        lmem = default(lmem, lambda: torch.empty(b, 0, e, **to(x)))
+
+        mem_len = mem.shape[1]
+        lmem_len = lmem.shape[1]
+
+        q = self.to_q(x)
+
+        kv_input = torch.cat((lmem, mem, x), dim=1)
+        kv_len = kv_input.shape[1]
+        k, v = self.to_kv(kv_input).chunk(2, dim=-1)
+
+        merge_heads = lambda x: x.reshape(*x.shape[:2], -1, dim_h).transpose(1, 2)
+        q, k, v = map(merge_heads, (q, k, v))
+
+        k, v = map(lambda x: x.expand(-1, h, -1, -1), (k, v))
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+        mask_value = max_neg_value(dots)
+
+        if pos_emb is not None:
+            pos_emb = pos_emb[:, -kv_len:].type(q.dtype)
+            pos_dots = torch.einsum(&quotbhid,hjd-&gt;bhij&quot, q, pos_emb) * self.scale
+            pos_dots = shift(pos_dots)
+            dots = dots + pos_dots
+
+        if input_mask is not None:
+            mask = input_mask[:, None, :, None] * input_mask[:, None, None, :]
+            mask = F.pad(mask, (mem_len + lmem_len, 0), value = True)
+            dots.masked_fill_(~mask, mask_value)
+
+        total_mem_len = mem_len + lmem_len
+        mask = torch.ones(t, t + total_mem_len, **to(x)).triu_(diagonal = 1 + total_mem_len).bool()
+        dots.masked_fill_(mask[None, None, ...], mask_value)
+
+        attn = dots.softmax(dim=-1)
+        attn = self.attn_dropout(attn)
+
+        out = torch.einsum(&quotbhij,bhjd-&gt;bhid&quot, attn, v)
+        out = out.transpose(1, 2).reshape(b, t, -1)
+        logits = self.to_out(out)
+        logits = self.dropout(logits)
+
+        new_mem = mem
+        new_lmem = lmem
+
+        if self.seq_len &gt; t or not calc_memory:
+            return logits<a id="change">, Memory(new_mem, new_lmem)</a>
+
+        &#47&#47 calculate memory and compressed memory
+
+        old_mem<a id="change">, new_mem = </a>split_at_index(1, -self.mem_len, torch.cat((mem<a id="change">, x</a>), dim=1))
+
+        if old_mem.shape[1] != 0 and self.lmem_len &gt; 0:
+            pass</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem, lmem = memories
+
+        init_mem = lambda: torch.empty(b, 0, e, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_mem<a id="change">)</a>
+        lmem = default(lmem, init_mem)
+
+        mem_len = mem.shape[1]
+        lmem_len = lmem.shape[1]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1655288</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 217</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        init_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem = default(mem, init_mem)
+        lmem<a id="change"> = </a><a id="change">default(</a>lmem, init_mem<a id="change">)</a>
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter<a id="change">, lmem_iter = </a>map(iterate_tensor, (mem<a id="change">, lmem</a>))
+
+        hiddens = []
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        num_memory_layers = len(self.memory_layers)
+
+        mem = <a id="change">default(</a>mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))<a id="change">)</a>
+        lmem = default(lmem, lambda: torch.empty(b, 0, d, **to(x)))
+
+        mem_len, lmem_len = map(lambda t: t.shape[2], (mem, lmem))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+
+        mem_iter<a id="change"> = </a>iterate_tensor(mem)
+
+        hiddens = []
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = next(mem_iter)<a id="change">, lmem if use_memory else None</a>
+
+            if use_memory:
+                hiddens.append(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/288be75552a43b02c0c272ce7da8157e73c78d2d#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L368' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1655305</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: 288be75552a43b02c0c272ce7da8157e73c78d2d</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 379</div><div id='m_end'> M End Line: 395</div><div id='n_start'> N Start Line: 385</div><div id='n_end'> N End Line: 400</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mem, lmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        mem<a id="change"> = </a><a id="change">default(</a>mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))<a id="change">)</a>
+        lmem = default(lmem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))
+
+        total_len = mem.shape[2] + lmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_memory_layers = len(self.memory_layers)
+        init_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+
+        mem<a id="change"> = </a><a id="change">default(</a>mem, init_mem<a id="change">)</a>
+        lmem = default(lmem, init_mem)
+
+        mem_len<a id="change">, lmem_len = </a>map(lambda t: t.shape[2], (mem<a id="change">, lmem</a>))
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))
+
+        hiddens = []
+
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter, lmem_iter)) if use_memory else None
+
+            if use_memory:
+                hiddens.append(x)
+
+            x = attn(x, memories = memories, calc_memory = use_memory, input_mask = mask, pos_emb = pos_emb)
+            x = ff(x)
+
+        hiddens = torch.stack(hiddens)
+        out = self.to_logits(x)
+
+        &#47&#47 calculate next memory state
+
+        next_memory = self.memory_network(lmem, mem, hiddens)
+        return out<a id="change">, next_memory</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1655316</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>

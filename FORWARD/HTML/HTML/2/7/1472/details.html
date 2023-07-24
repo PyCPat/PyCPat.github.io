@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :1472
+</h3><img src='5015724.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 get labels for input patches that were masked
+        bool_mask = mask == True
+        labels = <a id="change">input[bool_mask]</a>
+
+        &#47&#47 get generator output and get mpp loss
+        cls_logits = self.transformer(masked_input, mpp=True, **kwargs)
+        logits = cls_logits[:,1:,:]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 add cls token to input sequence
+        b, n, _ = masked_input.shape
+        cls_tokens<a id="change"> = </a>repeat(self.transformer.cls_token, &quot() n d -&gt; b n d&quot, b = b)
+        masked_input = torch.cat((cls_tokens, masked_input), dim=1)
+
+        &#47&#47 add positional embeddings to input
+        masked_input<a id="change"> += self.transformer.pos_embedding[:, :(n + 1)]</a>
+        masked_input = self.transformer.dropout(masked_input)
+
+        &#47&#47 get generator output and get mpp loss
+        masked_input = self.transformer.transformer(masked_input, **kwargs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/be5d560821bb5ae4dff823272118eea4a5dc7d07#diff-1dcf8cf01d06ecd12207392ed2c0b4e7dbccdcba9bced068108922a8ac87a94fL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5015724</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: be5d560821bb5ae4dff823272118eea4a5dc7d07</div><div id='time'> Time: 2021-02-12</div><div id='author'> Author: zackankner@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_class'> M Class Name: MPP</div><div id='n_method'> N Class Name: MPP</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(<a id="change">stacked[1:]</a>, dim=1)
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            x_residual = x_residual + x
+            
+            in_channels<a id="change"> = </a>growth_rate[idx]
+            stacked_channels = sum(<a id="change">growth_rate[idx+1:]</a>)
+            sections<a id="change"> = </a>[in_channels, stacked_channels]
+
+            if idx != num_blocks - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L348' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5015723</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Block</div><div id='n_method'> N Class Name: D3Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 357</div><div id='m_end'> M End Line: 367</div><div id='n_start'> N Start Line: 414</div><div id='n_end'> N End Line: 430</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(<a id="change">stacked[1:]</a>, dim=1)
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            x_residual = x_residual + x
+            
+            in_channels<a id="change"> = </a>growth_rate[idx]
+            stacked_channels = sum(<a id="change">growth_rate[idx+1:]</a>)
+            sections<a id="change"> = </a>[in_channels, stacked_channels]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5015728</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 67</div><BR>

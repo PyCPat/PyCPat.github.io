@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		preds = []
+		for k in xs:
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			h = <a id="change">torch.cat(</a>hs<a id="change">, dim = 1)</a>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_ = torch.transpose(preds, 1, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+		for i,k in enumerate(xs):
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			
+			preds = self.Linear(<a id="change">hs.contiguous().view(</a>x.size(0), <a id="change">-1</a><a id="change">)</a>)
+			preds_.append(preds)
+			if y is not None:
+				loss+=self.Loss(preds, y[:,i].squeeze().long())</code></pre>

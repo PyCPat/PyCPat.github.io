@@ -1,0 +1,90 @@
+<html><h3>Pattern ID :2077
+</h3><img src='13898804.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 [*, N_res, N_res, c_z]
+        pair_emb = tf_emb_i[..., None, :] + tf_emb_j[..., None, :, :]
+        pair_emb = pair_emb + self.relpos(<a id="change">ri.type(</a>pair_emb.dtype<a id="change">)</a>)
+
+        &#47&#47 [*, N_clust, N_res, c_m]
+        n_clust = msa.shape[-3]</code></pre><h3>After Change</h3><pre><code class='java'>
+        tf_emb_j = self.linear_tf_z_j(tf)
+
+        &#47&#47 [*, N_res, N_res, c_z]
+        pair_emb = self.relpos(<a id="change">ri.type(</a>tf_emb_i.dtype<a id="change">)</a>)
+        pair_emb = add(pair_emb, 
+            tf_emb_i[..., None, :], 
+            inplace=inplace_safe
+        )
+        pair_emb<a id="change"> = </a>add(pair_emb, 
+            tf_emb_j[..., None, :, :], 
+            inplace=inplace_safe
+        )</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/5aa21eae97aacaf58193a0a3f3618b4267085552#diff-74131afd6f728ab8a99dfa7a643f1078fd2ddaaa88857f00a38da3b9aeeb93b6L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898804</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: 5aa21eae97aacaf58193a0a3f3618b4267085552</div><div id='time'> Time: 2022-06-20</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/embedders.py</div><div id='m_class'> M Class Name: InputEmbedder</div><div id='n_method'> N Class Name: InputEmbedder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/embedders.py</div><div id='n_file'> N File Name: openfold/model/embedders.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 129</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.weights = nn.Parameter(torch.zeros(length, heads, dim))
+
+    def forward(self, q):
+        emb = torch.einsum(&quotbhid,jhd-&gt;bhij&quot, q, <a id="change">self.weights.type(</a>q.dtype<a id="change">)</a>) * self.scale
+        return shift(emb)
+
+&#47&#47 feedforward</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, q, mem_len = 0):
+        seq_len = q.shape[2] + mem_len
+        weights<a id="change"> = </a><a id="change">self.weights[:seq_len].type(</a>q.dtype<a id="change">)</a>
+        emb = torch.einsum(&quotbhid,jhd-&gt;bhij&quot, q, weights) * self.scale
+        return shift(emb)
+
+&#47&#47 feedforward</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/180a94aabedb8da459f9fb4c7a3dc2e5858c4fb9#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898806</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 180a94aabedb8da459f9fb4c7a3dc2e5858c4fb9</div><div id='time'> Time: 2020-06-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: RelativePositionalEmbedding</div><div id='n_method'> N Class Name: RelativePositionalEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 basically swapping the order of summation and elementwise product
+        fused_tensor = 1
+        for (modality, factor) in zip(modalities, self.factors):
+            modality_withones = torch.cat((Variable(<a id="change">torch.ones(batch_size, 1).type(</a>modality.dtype<a id="change">)</a>, requires_grad=False), modality), dim=1)
+            modality_factor = torch.matmul(modality_withones, factor)
+            fused_tensor = fused_tensor * modality_factor
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 basically swapping the order of summation and elementwise product
+        fused_tensor = 1
+        for (modality, factor) in zip(modalities, self.factors):
+            ones = Variable(<a id="change">torch.ones(batch_size, 1).type(</a>modality.dtype<a id="change">)</a>, requires_grad=False).cuda()
+            if self.flatten:
+                modality_withones = torch.cat((ones, torch.flatten(modality,start_dim=1)), dim=1)
+            else:
+                modality_withones<a id="change"> = </a>torch.cat((ones, modality), dim=1)
+            modality_factor = torch.matmul(modality_withones, factor)
+            fused_tensor = fused_tensor * modality_factor
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/ae1abdad3e0c823a97d725100dba572f30fff33f#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898807</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: ae1abdad3e0c823a97d725100dba572f30fff33f</div><div id='time'> Time: 2021-05-16</div><div id='author'> Author: ylyu1@andrew.cmu.edu</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: LowRankTensorFusion</div><div id='n_method'> N Class Name: LowRankTensorFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 214</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 213</div><div id='n_end'> N End Line: 219</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 basically swapping the order of summation and elementwise product
+        fused_tensor = 1
+        for (modality, factor) in zip(modalities, self.factors):
+            modality_withones = torch.cat((Variable(<a id="change">torch.ones(batch_size, 1).type(</a>modality.dtype<a id="change">)</a>, requires_grad=False), modality), dim=1)
+            modality_factor = torch.matmul(modality_withones, factor)
+            fused_tensor = fused_tensor * modality_factor
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 basically swapping the order of summation and elementwise product
+        fused_tensor = 1
+        for (modality, factor) in zip(modalities, self.factors):
+            ones = Variable(<a id="change">torch.ones(batch_size, 1).type(</a>modality.dtype<a id="change">)</a>, requires_grad=False).cuda()
+            if self.flatten:
+                modality_withones = torch.cat((ones, torch.flatten(modality,start_dim=1)), dim=1)
+            else:
+                modality_withones<a id="change"> = </a>torch.cat((ones, modality), dim=1)
+            modality_factor = torch.matmul(modality_withones, factor)
+            fused_tensor = fused_tensor * modality_factor
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/071b5b8ec9919b474a6fdb69bf099c1314b02ab4#diff-822426b604ef6202e8b72966151ee344a67208bf28ef0bd1114ac6e72d8506b5L207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898801</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 071b5b8ec9919b474a6fdb69bf099c1314b02ab4</div><div id='time'> Time: 2021-05-16</div><div id='author'> Author: ylyu1@andrew.cmu.edu</div><div id='file'> File Name: fusions/common_fusions.py</div><div id='m_class'> M Class Name: LowRankTensorFusion</div><div id='n_method'> N Class Name: LowRankTensorFusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fusions/common_fusions.py</div><div id='n_file'> N File Name: fusions/common_fusions.py</div><div id='m_start'> M Start Line: 214</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 213</div><div id='n_end'> N End Line: 219</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.add_noise and self.noise_kind is not None and self.noise_amplitude is not None:
+            &#47&#47 Generate spectral noise
+            container_wav =  isdct_torch(container.squeeze(0).squeeze(0), frame_length=4096, frame_step=62, window=torch.hamming_window).cpu()
+            spectral_noise = sdct_torch(<a id="change">add_noise(container_wav, self.noise_kind, self.noise_amplitude).type(</a>torch.float32<a id="change">)</a>, frame_length=4096, frame_step=62).unsqueeze(0).cuda()
+            &#47&#47 Add noise in frequency
+            corrupted_container = container + spectral_noise
+            &#47&#47 Reveal image</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.add_noise and self.noise_kind is not None and self.noise_amplitude is not None:
+            &#47&#47 Generate spectral noise
+            container_wav =  isdct_torch(container.squeeze(0).squeeze(0), frame_length=4096, frame_step=62, window=torch.hamming_window).cpu()
+            noise = <a id="change">add_noise(container_wav, self.noise_kind, self.noise_amplitude).type(</a>torch.float32<a id="change">)</a>
+            spectral_noise<a id="change"> = </a>sdct_torch(noise, frame_length=4096, frame_step=62).unsqueeze(0).cuda()
+            &#47&#47 Add noise in frequency
+            corrupted_container = container + spectral_noise
+            &#47&#47 Reveal image</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/margaritageleta/pixinwav/commit/8aec2995540e4d354e464fc92b583f4bf63e11cf#diff-64f7debb3191d0fd28838ace396110273657c89a756b6f37307bfff6bd6b0528L173' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13898803</div><div id='project'> Project Name: margaritageleta/pixinwav</div><div id='commit'> Commit Name: 8aec2995540e4d354e464fc92b583f4bf63e11cf</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: noticiasmundiales99@gmail.com</div><div id='file'> File Name: src/umodel_rgb_shuffle.py</div><div id='m_class'> M Class Name: StegoUNet</div><div id='n_method'> N Class Name: StegoUNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/umodel_rgb_shuffle.py</div><div id='n_file'> N File Name: src/umodel_rgb_shuffle.py</div><div id='m_start'> M Start Line: 184</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 184</div><div id='n_end'> N End Line: 185</div><BR>

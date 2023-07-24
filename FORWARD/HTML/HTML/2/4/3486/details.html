@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :3486
+</h3><img src='17580604.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, pred, target, mask=None):
+
+        pred = pred.contiguous().view(pred.size()[0], -1)
+        target<a id="change"> = </a><a id="change">target.contiguous().view(</a>target.size()[0], <a id="change">-1</a><a id="change">)</a>
+
+        if mask is not None:
+            mask = mask.contiguous().view(mask.size()[0], -1)
+            pred = pred * mask</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert pred.size() == gt.size() and gt.numel() &gt; 0
+        if mask is None:
+            mask = torch.ones_like(gt)
+        <a id="change">assert </a>mask.size() == gt.size()
+
+        pred = pred.contiguous().view(pred.size(0), -1)
+        gt = gt.contiguous().view(gt.size(0), -1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmocr/commit/1cbc42eceb40334c56474b979b1ac5be0065280a#diff-3e14d2946351cc46726adfb31ba17279be5fb04d0e8431385396357532b4cf87L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580604</div><div id='project'> Project Name: open-mmlab/mmocr</div><div id='commit'> Commit Name: 1cbc42eceb40334c56474b979b1ac5be0065280a</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: gaotongxiao@gmail.com</div><div id='file'> File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: MaskedDiceLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmocr/models/common/losses/dice_loss.py</div><div id='n_file'> N File Name: mmocr/models/common/losses/dice_loss.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        assert channels == 1  &#47&#47 number of channels should be 1 at this point
+        x<a id="change"> = </a><a id="change">x.view(</a>batch_size, <a id="change">1</a>, repetitions, 1<a id="change">)</a>
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        <a id="change">assert </a>channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x = x.reshape(batch_size, 1, channels * repetitions, 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/1fb68845af9033ccf3b13e014d9efc0e5a4022a3#diff-35a1a2e89788f4224c6a113abf09018e54e13fa95eaadf95759c229412ed7a0dL158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580601</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: 1fb68845af9033ccf3b13e014d9efc0e5a4022a3</div><div id='time'> Time: 2021-11-24</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: einet.py</div><div id='n_file'> N File Name: einet.py</div><div id='m_start'> M Start Line: 169</div><div id='m_end'> M End Line: 181</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 144</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+
+        x_l<a id="change"> = </a><a id="change">x.view(</a>B, N, <a id="change">1</a>, C<a id="change">)</a>.expand(B, N, N, C)
+        x_r = x.view(B, 1, N, C).expand(B, N, N, C)
+        if self.join==&quotcat&quot:
+            v = torch.cat((x_l, x_r), dim=3) &#47&#47 (B, N, N, C*2)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x_l, x_r=None):
+        x_r = x_l if x_r is None else x_r
+        <a id="change">assert</a>(x_l.shape == x_r.shape)
+        B, N, C = x_l.shape
+
+        x_l = x_l.view(B, N, 1, C).expand(B, N, N, C)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mxfold/mxfold2/commit/b9b30f95972bd1505673b6a2e9fbc765329401a4#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17580596</div><div id='project'> Project Name: mxfold/mxfold2</div><div id='commit'> Commit Name: b9b30f95972bd1505673b6a2e9fbc765329401a4</div><div id='time'> Time: 2019-11-10</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCPairedLayer</div><div id='n_method'> N Class Name: FCPairedLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 95</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 103</div><div id='n_end'> N End Line: 109</div><BR>

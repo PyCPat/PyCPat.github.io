@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            coords = coords[permutation]
+            labels = labels[permutation]
+            scores = scores[permutation]
+            <a id="change">node_encodings</a> = box_features[counter: counter+n][permutation]
+
+            <a id="change">n_h</a> = len(human_box_idx)
+            &#47&#47 Get the pairwise index between every human and object instance
+            x, y = torch.meshgrid(
+                torch.arange(n_h, device=device),
+                torch.arange(n, device=device)
+            )
+            x, y = torch.nonzero(x != y).unbind(1)
+
+            for i in range(self.num_iter):
+                &#47&#47 Compute weights of each edge
+                weights = self.adjacency(torch.cat([
+                    node_encodings[x],
+                    node_encodings[y]
+                ], 1))
+                &#47&#47 Construct adjacency matrix
+                &#47&#47 Diagonal entries are set to zero
+                <a id="change">adjacency_matrix</a> = torch.zeros(<a id="change">[</a>n_h, n<a id="change"></a>], device=device)
+                <a id="change">adjacency_matrix[x, y] = </a><a id="change">torch.sigmoid(</a>weights<a id="change">)</a>
+
+                &#47&#47 Update human nodes
+                <a id="change">node_encodings[:n_h]</a> = self.sub_update(torch.cat([
+                    <a id="change">node_encodings[:n_h]</a>,
+                    torch.mm(adjacency_matrix, self.obj_to_sub(node_encodings))
+                ], 1))
+
+                &#47&#47 Update object nodes (including human nodes)
+                node_encodings = self.obj_update(torch.cat([
+                    node_encodings,
+                    torch.mm(adjacency_matrix.t(), self.sub_to_obj(<a id="change">node_encodings[:n_h]</a>))
+                ], 1))
+
+            if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+            coords = coords[permutation]
+            labels = labels[permutation]
+            scores = scores[permutation]
+            <a id="change">node_encodings</a> = box_features[counter: counter+n][permutation]
+
+            <a id="change">n_h</a> = len(human_box_idx)
+            &#47&#47 Duplicate human nodes
+            h_node_encodings<a id="change"> = </a><a id="change">node_encodings[:n_h]</a>
+            &#47&#47 Get the pairwise index between every human and object instance
+            x, y = torch.meshgrid(
+                torch.arange(n_h, device=device),
+                torch.arange(n, device=device)</code></pre>

@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        check_shape(proprio, &quotb d&quot, d = self.proprio_dim)
+        check_shape(extero, &quotb n d&quot, n = self.num_legs, d = self.extero_dim)
+
+        latent_extero<a id="change"> = </a>self.extero_encoder(extero)
+        latent_extero = <a id="change">rearrange(</a>latent_extero, <a id="change">&quotb ... -&gt; b (...)&quot</a><a id="change">)</a>
+
+        &#47&#47 RNN
+
+        if not exists(hiddens):
+            hiddens<a id="change"> = </a>(None,) * len(self.gru_cells)
+
+        gru_input<a id="change"> = </a>torch.cat((proprio, latent_extero), dim = -1)
+
+        next_hiddens = []
+        for gru_cell, prev_hidden in zip(self.gru_cells, hiddens):
+            gru_input = gru_cell(gru_input, prev_hidden)
+            next_hiddens.append(gru_input)
+
+        gru_output = gru_input
+
+        &#47&#47 attention gating of exteroception
+
+        attention_gate = self.to_extero_attn_gate(gru_output)
+        gated_extero<a id="change"> = </a>latent_extero<a id="change"> * </a>attention_gate.sigmoid()
+
+        &#47&#47 belief state and add gated exteroception
+
+        belief_state = self.belief_state_encoder(gru_output)
+        belief_state<a id="change"> = </a>sum_with_zeropad(belief_state, gated_extero)
+
+        &#47&#47 to action logits
+
+        action_logits<a id="change"> = </a>self.to_action_logits(belief_state)
+        <a id="change">return </a>action_logits, next_hiddens
+
+class Teacher(nn.Module):
+    def __init__(</code></pre>

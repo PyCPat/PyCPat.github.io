@@ -1,0 +1,84 @@
+<html><h3>Pattern ID :3526
+</h3><img src='17613645.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = <a id="change">inputs.reshape(-1</a>, self.raw_state_dim[0], self.raw_state_dim[1], <a id="change">self.raw_state_dim[2]</a><a id="change">)</a>.permute(0, 3, 1, 2)
+            x = self.encoder(x)
+            x<a id="change"> = </a>torch.mean(x, (2, 3))
+            x<a id="change"> = x.reshape(</a>inputs.shape[0], <a id="change">-1</a><a id="change">)</a>
+        else:
+            x = self.encoder(inputs)
+        h = hidden_state[0].reshape(-1, self.hidden_state_size) &#47&#47 fake a hidden state no use
+        x = self.mlp(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if len(self.full_obs_space.shape) == 3: &#47&#47 3D
+            inputs = inputs.reshape((-1<a id="change"></a>,) + self.full_obs_space.shape)
+        x = self.encoder(inputs)
+        h = hidden_state[0].reshape(-1, self.hidden_state_size) &#47&#47 fake a hidden state no use
+        x = self.mlp(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/b8e61fa5031b72cb8ce2321212fe3908f3468b83#diff-c1709e0b089bf66b79f80d158029c395b43af7ea071f27a23f50e5cb568efbb9L59' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17613645</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: b8e61fa5031b72cb8ce2321212fe3908f3468b83</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: marllib/marl/models/zoo/mlp/jointQ_mlp.py</div><div id='m_class'> M Class Name: JointQ_MLP</div><div id='n_method'> N Class Name: JointQ_MLP</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module,TorchModelV2</div><div id='n_parent_class'> N Parent Class: nn.Module,TorchModelV2</div><div id='m_file'> M File Name: marllib/marl/models/zoo/mlp/jointQ_mlp.py</div><div id='n_file'> N File Name: marllib/marl/models/zoo/mlp/jointQ_mlp.py</div><div id='m_start'> M Start Line: 104</div><div id='m_end'> M End Line: 111</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = <a id="change">inputs.reshape(-1</a>, self.raw_state_dim[0], self.raw_state_dim[1], <a id="change">self.raw_state_dim[2]</a><a id="change">)</a>.permute(0, 3, 1,
+                                                                                                                2)
+            x<a id="change"> = </a>self.encoder(x)
+            x = torch.mean(x, (2, 3))
+            x<a id="change"> = x.reshape(</a>inputs.shape[0], <a id="change">-1</a><a id="change">)</a>
+        else:
+            x = self.encoder(inputs)
+        h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
+        h = self.rnn(x, h_in)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if len(self.full_obs_space.shape) == 3: &#47&#47 3D
+            inputs = inputs.reshape((-1<a id="change"></a>,) + self.full_obs_space.shape)
+        x = self.encoder(inputs)
+        h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
+        h = self.rnn(x, h_in)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/b8e61fa5031b72cb8ce2321212fe3908f3468b83#diff-a3ae1807964184fc7bd5f50fd265417e9851578c4b06d73479a7675fa6f7ae88L103' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17613646</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: b8e61fa5031b72cb8ce2321212fe3908f3468b83</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: marllib/marl/models/zoo/rnn/jointQ_rnn.py</div><div id='m_class'> M Class Name: JointQ_RNN</div><div id='n_method'> N Class Name: JointQ_RNN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module,TorchModelV2</div><div id='n_parent_class'> N Parent Class: nn.Module,TorchModelV2</div><div id='m_file'> M File Name: marllib/marl/models/zoo/rnn/jointQ_rnn.py</div><div id='n_file'> N File Name: marllib/marl/models/zoo/rnn/jointQ_rnn.py</div><div id='m_start'> M Start Line: 104</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 57</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        batch_size = x.shape[0]
+        x = <a id="change">x.permute(0, 2, 1).reshape(-1</a>, <a id="change">x.shape[1]</a><a id="change">)</a>
+
+        codes<a id="change"> = </a>self.encode(x)
+        quantized = self.decode(codes)
+
+        diff = (x - quantized).pow(2).mean()
+        quantized = quantized + x - x.detach()
+
+        if self.training:
+            self.replace_dead_codes(x)
+
+            onehot = F.one_hot(codes, self.size).float()
+            usage = onehot.sum(0)
+            targets = (x.T @ onehot / usage).T
+
+            targets = torch.where(torch.isnan(targets), self.embedding,
+                                  targets)
+
+            ema_inplace(self.embedding, targets, self.ema)
+            ema_inplace(self.usage, usage, self.ema)
+
+        quantized = quantized.reshape(
+            batch_size,
+            -1,
+            quantized.shape[-1],
+        ).permute(0, 2, 1)
+        codes<a id="change"> = codes.reshape(</a>batch_size, <a id="change">-1</a><a id="change">)</a>
+        return quantized, diff.mean(), codes[:, None]
+
+
+class ResidualVQ(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            self.embed.data.copy_(embed_normalized)
+
+        return quantize<a id="change">, embed_ind</a>
+
+
+class VectorQuantization(nn.Module):
+    Vector quantization implementation.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/caillonantoine/rave/commit/b58cba5d330c227f2122bc07fcbf7ed068eb91be#diff-0642a8a2acbceb830eb07caddb975242233188021b9f16fec4b7168271bf7749L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17613637</div><div id='project'> Project Name: caillonantoine/rave</div><div id='commit'> Commit Name: b58cba5d330c227f2122bc07fcbf7ed068eb91be</div><div id='time'> Time: 2023-01-24</div><div id='author'> Author: caillon@ircam.fr</div><div id='file'> File Name: rave/quantization.py</div><div id='m_class'> M Class Name: VQ</div><div id='n_method'> N Class Name: EuclideanCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rave/quantization.py</div><div id='n_file'> N File Name: rave/quantization.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 97</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 187</div><BR>

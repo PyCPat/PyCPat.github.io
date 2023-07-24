@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :3339
+</h3><img src='17246822.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        key_layer = key_layer.transpose(1, 0).reshape(output_size[3], output_size[0] * output_size[1], -1)
+
+        &#47&#47 slice alibi tensor until the query length
+        sliced_alibi = <a id="change">alibi[: output_size[0] * output_size[1], :, : output_size[3]]</a>
+
+        &#47&#47 Raw attention scores. [batch_size * num_heads, q_length, k_length]
+        beta = 1.0 / self.layer_number
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_attentions=False,
+    ):
+        if alibi is None:
+            current_sequence_length = hidden_states.shape[1] + (0<a id="change"> if layer_past is None</a><a id="change"> else </a>layer_past[0].shape[1])
+            alibi = build_alibi_tensor(
+                current_sequence_length, n_head=self.num_heads, dtype=hidden_states.dtype, device=hidden_states.device
+            )</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bigscience-workshop/distributed-bloom/commit/5d8f7be5466b7a40fb777bde973ca773b378e83a#diff-942e96302c7f82db77b5638f6cdebbce3222fb8d600cca877056f1e1ee9b1da3L78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17246822</div><div id='project'> Project Name: bigscience-workshop/distributed-bloom</div><div id='commit'> Commit Name: 5d8f7be5466b7a40fb777bde973ca773b378e83a</div><div id='time'> Time: 2022-06-20</div><div id='author'> Author: justheuristic@gmail.com</div><div id='file'> File Name: src/bloom/block.py</div><div id='m_class'> M Class Name: BloomAttention</div><div id='n_method'> N Class Name: BloomAttention</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/bloom/block.py</div><div id='n_file'> N File Name: src/bloom/block.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if fv_alter is None:
+            v_in = fv
+        else:
+            v_in = fv * <a id="change">dec[:, :, 0]</a>.unsqueeze(-1) + fv_alter * dec[:, :, 1].unsqueeze(-1)
+
+        fused = self.fuse(v_in, fi)
+        out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)</code></pre><h3>After Change</h3><pre><code class='java'>
+            prev = (prev[0].transpose(1, 0).contiguous(), prev[1].transpose(1, 0).contiguous())
+        
+        &#47&#47 Select between fv and fv_alter
+        v_in = fv * dec[:, :, :1] + fv_alter * dec[:, :, -1:]<a id="change"> if fv_alter is not None</a><a id="change"> else </a>fv
+        fused = self.fuse(v_in, fi)
+        out, hc = self.rnn(fused) if prev is None else self.rnn(fused, prev)
+        out = self.rnn_drop_out(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mingyuyng/visual-selective-vio/commit/a8d443c68112716ac78b026ac1349e8f92c70641#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L176' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17246830</div><div id='project'> Project Name: mingyuyng/visual-selective-vio</div><div id='commit'> Commit Name: a8d443c68112716ac78b026ac1349e8f92c70641</div><div id='time'> Time: 2022-07-11</div><div id='author'> Author: mingyuy@umich.edu</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: Pose_RNN</div><div id='n_method'> N Class Name: Pose_RNN</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 181</div><div id='m_end'> M End Line: 189</div><div id='n_start'> N Start Line: 184</div><div id='n_end'> N End Line: 184</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47predict_vecs: batch_size, voc_dim, max_length
+        predict_vecs = torch.zeros(batch_size, self.voc_dim, tgt.size(1) ).to(self.device)
+        curr_sz = tgt.size(1)
+        <a id="change">predict_vecs[:,:,:curr_sz]</a> = output[:,:,:curr_sz]
+
+        return predict_vecs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                        else hidden[0] &#47&#47h_n
+
+        &#47&#47 hidden: 1, batch_size, hidden_dim * directions -&gt;tking only last two layers
+        hidden = torch.cat((hidden[-2,:,:], hidden[-1,:,:]), dim = -1)<a id="change"> if self.directions == 2</a><a id="change"> \
+                        else </a>hidden[:,-1,:]
+
+        &#47&#47output :shp: batch_size, word_voc_dim
+        output = self.ffnn(hidden.squeeze(0))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ai4bharat/indiannlp-transliteration/commit/dd71aab694ee1ae4c77b39cda0366d04f31f0909#diff-2e968f438383750c4a8bcd4c9c6be4f873196e13588f94531d9140122aa144e4L618' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 17246828</div><div id='project'> Project Name: ai4bharat/indiannlp-transliteration</div><div id='commit'> Commit Name: dd71aab694ee1ae4c77b39cda0366d04f31f0909</div><div id='time'> Time: 2020-06-16</div><div id='author'> Author: josephgeobenjamin@gmail.com</div><div id='file'> File Name: algorithms/recurrent_nets.py</div><div id='m_class'> M Class Name: CorrectionBasicNet</div><div id='n_method'> N Class Name: VocabCorrectorNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algorithms/recurrent_nets.py</div><div id='n_file'> N File Name: algorithms/recurrent_nets.py</div><div id='m_start'> M Start Line: 618</div><div id='m_end'> M End Line: 640</div><div id='n_start'> N Start Line: 646</div><div id='n_end'> N End Line: 668</div><BR>

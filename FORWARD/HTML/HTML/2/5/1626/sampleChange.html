@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                    inference_cuda_module.residual_add_bias_fp32
+
+    def forward(self, input, residual, residual_norm, bias):
+        <a id="change">return </a><a id="change">DeepSpeedMLPFunction.apply(</a>input,
+                                          residual,
+                                          residual_norm,
+                                          bias,
+                                          self.inter_w,
+                                          self.inter_b,
+                                          self.attn_nw,
+                                          self.attn_nb,
+                                          self.config,
+                                          self.mp_group,
+                                          self.output_b,
+                                          self.output_w,
+                                          self.q_scales,
+                                          self.q_groups,
+                                          self.merge_count,
+                                          self.mlp_gemm_func,
+                                          self.fused_gemm_gelu,
+                                          self.vector_matmul_func,
+                                          self.bias_residual_func,
+                                          self.residual_add_func<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            add_bias=bias is not None,
+            residual_add=residual_add)
+
+        <a id="change">if </a>self.mp_group is not None and <a id="change">dist.get_world_size(group=self.mp_group) &gt; 1</a><a id="change">:
+            </a>dist.all_reduce(residual, group=self.mp_group)
+
+        return residual
+</code></pre>

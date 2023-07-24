@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            for name, input_size in self.input_sizes.items():
+                &#47&#47 select slice of embedding belonging to a single input
+                variable_embedding = embedding[..., start : (start + input_size)]
+                variable_embedding_mean.append(<a id="change">variable_embedding.abs()</a>.mean(-1))
+                var_outputs.append(self.single_variable_grns[name](variable_embedding))
+                start += input_size
+            var_outputs = torch.stack(var_outputs, axis=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            for name in self.input_sizes.keys():
+                &#47&#47 select embedding belonging to a single input
+                variable_embedding = x[name]
+                <a id="change">if </a>name in self.prescalers<a id="change">:
+                    </a>variable_embedding<a id="change"> = </a>self.prescalers[name](variable_embedding)
+                weight_inputs.append(variable_embedding)
+                var_outputs.append(self.single_variable_grns[name](variable_embedding))
+            var_outputs = torch.stack(var_outputs, axis=-1)</code></pre>

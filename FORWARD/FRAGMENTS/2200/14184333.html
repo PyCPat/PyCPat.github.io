@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k_routing = torch.einsum(&quotbhtd,hdr-&gt;bhtr&quot, qk, self.router) if self.router is not None else qk
+        k_routing = F.normalize(qk, dim=-1)
+
+        <a id="change">with torch</a><a id="change">.no_grad():
+            </a>means<a id="change">, buckets, dists, se = </a>kmeans(k_routing, self.means, training=self.training, init=not self.initted)
+            indices<a id="change"> = </a>distribution(dists, window_size)
+
+        routed_means = batched_index_select(expand_dim(self.means, 0, b), buckets)
+        commitment_loss = F.mse_loss(k_routing, routed_means) * self.commitment</code></pre><h3>After Change</h3><pre><code class='java'>
+        k_routing = torch.einsum(&quotbhtd,hdr-&gt;bhtr&quot, qk, self.router) if self.router is not None else qk
+        k_routing = F.normalize(qk, dim=-1)
+
+        indices<a id="change">, commitment_loss</a> = self.kmeans(k_routing, wsz)
+        
+        qk = batched_index_select(qk, indices)
+        v = batched_index_select(v, indices)</code></pre>

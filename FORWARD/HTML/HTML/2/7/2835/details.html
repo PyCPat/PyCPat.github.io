@@ -1,0 +1,115 @@
+<html><h3>Pattern ID :2835
+</h3><img src='15655798.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47Step2:SE weight
+        SE_out=torch.zeros_like(SPC_out)
+        for idx,se in enumerate(self.se_blocks):
+            <a id="change">SE_out[:,idx,:,:,:]</a>=se(SPC_out[:,idx,:,:,:])
+        
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre><h3>After Change</h3><pre><code class='java'>
+            SPC_out[:,idx,:,:,:]=conv(SPC_out[:,idx,:,:,:])
+
+        &#47&#47Step2:SE weight
+        <a id="change">se_out</a>=<a id="change">[]</a>
+        for idx,se in enumerate(self.se_blocks):
+            <a id="change">se_out.append(</a>se(SPC_out[:,idx,:,:,:])<a id="change">)</a>
+        SE_out<a id="change">=</a><a id="change">torch.stack(se_out</a><a id="change">,dim=1)</a>
+        SE_out=SE_out.expand_as(SPC_out)
+
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xmu-xiaoma666/external-attention-pytorch/commit/34af00a5c7b83c174aca31c1b137a2b58ac21659#diff-a3a27992b2c2add6b7edb037abac1105d6ab3ce5d2cb98f8e0db13edabd218b7L51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15655798</div><div id='project'> Project Name: xmu-xiaoma666/external-attention-pytorch</div><div id='commit'> Commit Name: 34af00a5c7b83c174aca31c1b137a2b58ac21659</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: 775629340@qq.com</div><div id='file'> File Name: fightingcv/attention/PSA.py</div><div id='m_class'> M Class Name: PSA</div><div id='n_method'> N Class Name: PSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fightingcv/attention/PSA.py</div><div id='n_file'> N File Name: fightingcv/attention/PSA.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq = torch.stack(batched_output_per_clip, dim=0).transpose_(0, 1)
+        gru_output, h_n = self.rnn(<a id="change">output_seq.unsqueeze(1)[:, :, :config.GRU_TEMPORAL_WINDOW]</a>)
+
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, st_maps, target):
+        batched_output_per_clip = []
+        <a id="change">hr_per_clip</a> = <a id="change">[]</a>
+
+        &#47&#47 Need to have so as to reflect a batch_size = 1 // if batched then comment out
+        st_maps = st_maps.unsqueeze(0)
+        for t in range(st_maps.size(1)):
+            &#47&#47 with torch.no_grad():
+            x = self.resnet18(st_maps[:, t, :, :, :])
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            &#47&#47 if t == 0:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1))
+            &#47&#47 else:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            &#47&#47 x = self.fc_resnet(gru_output.squeeze(1))
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL
+            &#47&#47 x = x*25.0
+            batched_output_per_clip.append(x.squeeze(0))
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        &#47&#47 the features extracted from the backbone CNN are fed to a one-layer GRU structure.
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        for i in range(gru_output.size(0)):
+            hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            <a id="change">hr_per_clip.append(</a>hr<a id="change">)</a>
+
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>hr_per_clip<a id="change">, dim=0)</a>.permute(1,0)
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out
+        return output_seq, output_seq.squeeze(0)[:6]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/deed748087f19356d297fe57e439b967a6a3e617#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15655797</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: deed748087f19356d297fe57e439b967a6a3e617</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = []
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(<a id="change">input[:, step, :, :, :]</a>, hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_len = len(cur_layer_input)
+
+        layer_output_list = []
+        <a id="change">last_state_list</a> = <a id="change">[]</a>
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            for t in range(seq_len):
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array
+            if l != self.n_layers:
+                cur_layer_input = hid_dp(cur_layer_input)
+            <a id="change">last_state_list.append(</a>h<a id="change">)</a>
+
+        layer_output = torch.stack(output_inner, dim=int(self.batch_first))
+        last_state_list<a id="change"> = </a><a id="change">torch.stack(</a>last_state_list<a id="change">, dim=0)</a>
+        return layer_output, last_state_list
+
+    def reset_parameters(self):
+        for c in self.cell_list:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15655795</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47Step2:SE weight
+        SE_out=torch.zeros_like(SPC_out)
+        for idx,se in enumerate(self.se_blocks):
+            <a id="change">SE_out[:,idx,:,:,:]</a>=se(SPC_out[:,idx,:,:,:])
+        
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre><h3>After Change</h3><pre><code class='java'>
+            SPC_out[:,idx,:,:,:]=conv(SPC_out[:,idx,:,:,:])
+
+        &#47&#47Step2:SE weight
+        <a id="change">se_out</a>=<a id="change">[]</a>
+        for idx,se in enumerate(self.se_blocks):
+            <a id="change">se_out.append(</a>se(SPC_out[:,idx,:,:,:])<a id="change">)</a>
+        SE_out=<a id="change">torch.stack(</a>se_out<a id="change">,dim=1)</a>
+        SE_out<a id="change">=</a>SE_out.expand_as(SPC_out)
+
+        &#47&#47Step3:Softmax
+        softmax_out=self.softmax(SE_out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xmu-xiaoma666/external-attention-pytorch/commit/34af00a5c7b83c174aca31c1b137a2b58ac21659#diff-a3a27992b2c2add6b7edb037abac1105d6ab3ce5d2cb98f8e0db13edabd218b7L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15655793</div><div id='project'> Project Name: xmu-xiaoma666/external-attention-pytorch</div><div id='commit'> Commit Name: 34af00a5c7b83c174aca31c1b137a2b58ac21659</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: 775629340@qq.com</div><div id='file'> File Name: fightingcv/attention/PSA.py</div><div id='m_class'> M Class Name: PSA</div><div id='n_method'> N Class Name: PSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fightingcv/attention/PSA.py</div><div id='n_file'> N File Name: fightingcv/attention/PSA.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 58</div><BR>

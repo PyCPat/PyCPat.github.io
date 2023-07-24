@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        idx_theta2 = torch.cat([idx_theta, idx_theta], dim=1)
+
+        &#47&#47 Calculate $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., -x^{(\frac{d}{2})}]$
+        neg_half_x = torch.cat([-<a id="change">x[:, :, :, d_2:]</a>, x[:, :, :, :d_2]], dim=-1)
+
+        &#47&#47 Calculate
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        x_rope = (x_rope<a id="change"> * </a>self.cos_cached[:x.shape[0]])<a id="change"> + </a>(neg_half_x * self.sin_cached[:x.shape[0]])
+
+        &#47&#47
+        <a id="change">return </a>torch.cat((x_rope, x_pass), dim=-1)
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre>

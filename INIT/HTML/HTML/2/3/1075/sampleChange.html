@@ -2,32 +2,18 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        sparse_layer = cast_tuple(sparse_attn, depth)
 
-        self.to_q = nn.Linear(dim, dim, bias = False)
+        for _, sparse_attn in zip(range(depth), sparse_layer):
+            attn_class = Attention<a id="change"> if </a>not sparse_attn<a id="change"> else </a>partial(SparseAttention, sparse_attn_global_indices = sparse_attn_global_indices)
 
-        kv_dim = self.dim_head<a id="change"> if </a>one_kv_head<a id="change"> else </a>dim
-        self.to_k = nn.Linear(dim, kv_dim, bias = False)
-        self.proj_k = nn.Parameter(init_(torch.zeros(seq_len, k)))
-</code></pre><h3>After Change</h3><pre><code class='java'>
+            layers.append(nn.ModuleList([
+                PreNorm(dim, attn_class(dim, causal = causal, seq_len = seq_len, heads = heads, dim_head = dim_head, dropout = attn_dropout, noncausal_attn_len = noncausal_attn_len)),</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        layers = nn.ModuleList([])
+        sparse_layer = cast_tuple(sparse_attn, depth)
+        attn_types<a id="change"> = </a><a id="change">default(</a>attn_types, (&quotfull&quot,)<a id="change">)</a>
+        attn_type_layer = islice(cycle(attn_types), depth)
 
-        self.heads = heads
-
-        dim_head = <a id="change">default(</a>dim_head, dim // heads<a id="change">)</a>
-        self.dim_head = dim_head
-
-        self.to_q = nn.Linear(dim, dim_head * heads, bias = False)
-
-        kv_dim = dim_head if one_kv_head else (dim_head * heads)
-        self.to_k = nn.Linear(dim, kv_dim, bias = False)
-        self.proj_k = nn.Parameter(init_(torch.zeros(seq_len, k)))
-
-        self.share_kv = share_kv
-        if not share_kv:
-            self.to_v = nn.Linear(dim, kv_dim, bias = False)
-            self.proj_v = nn.Parameter(init_(torch.zeros(seq_len, k)))
-
-        self.dropout = nn.Dropout(dropout)
-        self.to_out<a id="change"> = </a>nn.Linear(dim_head * heads, dim)
-
-    def forward(self, x, context = None, **kwargs):
-        b, n, d, d_h, h, k = *x.shape, self.dim_head, self.heads, self.k</code></pre>
+        for _, sparse_attn, attn_type in zip(range(depth), sparse_layer, attn_type_layer):
+            if attn_type == &quotfull&quot:</code></pre>

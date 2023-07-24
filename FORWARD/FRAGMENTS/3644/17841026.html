@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size, x, y, orig_ch = tensor.shape
+        pos_x = torch.arange(x, device=tensor.device).type(self.inv_freq.type())
+        pos_y = torch.arange(y, device=tensor.device).type(self.inv_freq.type())
+        <a id="change">sin_inp_x</a> = torch.einsum("i,j-&gt;ij", pos_x, self.inv_freq)
+        sin_inp_y = torch.einsum("i,j-&gt;ij", pos_y, self.inv_freq)
+        emb_x = <a id="change">torch.cat(</a>(<a id="change">sin_inp_x.sin(), sin_inp_x.cos()</a>)<a id="change">, dim=-1)</a>.unsqueeze(1)
+        emb_y = torch.cat((sin_inp_y.sin(), sin_inp_y.cos()), dim=-1)
+        emb = torch.zeros((x, y, self.channels * 2), device=tensor.device).type(
+            tensor.type()</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch_size, x, y, orig_ch = tensor.shape
+        pos_x = torch.arange(x, device=tensor.device).type(self.inv_freq.type())
+        pos_y = torch.arange(y, device=tensor.device).type(self.inv_freq.type())
+        <a id="change">sin_inp_x</a> = torch.einsum("i,j-&gt;ij", pos_x, self.inv_freq)
+        sin_inp_y = torch.einsum("i,j-&gt;ij", pos_y, self.inv_freq)
+        emb_x = <a id="change">get_emb(</a>sin_inp_x<a id="change">)</a>.unsqueeze(1)
+        emb_y = get_emb(sin_inp_y)
+        emb = torch.zeros((x, y, self.channels * 2), device=tensor.device).type(
+            tensor.type()</code></pre>

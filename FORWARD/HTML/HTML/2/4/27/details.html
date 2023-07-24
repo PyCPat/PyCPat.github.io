@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :27
+</h3><img src='38416.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input):
+        n_units = self.n_units
+        
+        real, imag = torch.split(input, <a id="change">[</a>n_units // 2, n_units // 2<a id="change"></a>], dim=1)
+        magnitude = torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)</code></pre><h3>After Change</h3><pre><code class='java'>
+        magnitude = torch.abs(input)
+        angle = torch.angle(input)
+        magnitude = F.relu(magnitude + self.bias.unsqueeze(dim=-1))
+        output = magnitude<a id="change"> * </a><a id="change">torch.exp(</a>1j<a id="change"> * </a>angle<a id="change">)</a>
+        
+        if not is_complex:
+            output = torch.view_as_real(output)
+        </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/4663266b4fc0a2328bdc62039fb64bdb0beedbf3#diff-d2a1aeb484b86497f04c4e8890fa4fda7abd429d423b8c7384bf31d50f69c476L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38416</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 4663266b4fc0a2328bdc62039fb64bdb0beedbf3</div><div id='time'> Time: 2021-11-17</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/activation.py</div><div id='m_class'> M Class Name: ModReLU1d</div><div id='n_method'> N Class Name: ModReLU1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/activation.py</div><div id='n_file'> N File Name: src/activation.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = x
+        out2 = fac1 * torch.exp(-1.0 * alpha)
+        for i, layer in enumerate(self.fc_layers):
+            out = layer(torch.cat(<a id="change">[</a>out, out2<a id="change"></a>], dim=1))
+        return self.fc_out(torch.cat([out, out2], dim=1))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, alpha, fac1):
+        out = x
+        out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat)</a><a id="change">)</a>[:, 0]
+        out2 = out2<a id="change"> * </a>fac1 + (1 - fac1)
+        return self.fc_out(out * out2)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/d406d3694ab25140dafeb3f2af61335a50011a32#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38417</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: d406d3694ab25140dafeb3f2af61335a50011a32</div><div id='time'> Time: 2020-09-25</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 35</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out1 = x
+        &#47&#47 out2 = torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]
+        out2 = torch.exp(-alpha) * fac1
+        out = torch.cat(<a id="change">[</a>out1, out2<a id="change"></a>], dim=1)
+        return self.fc_out(out)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, alpha, fac1):
+        out1 = x
+        if self.in_feat != self.n_a:
+            out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat)</a><a id="change">)</a>[:, 0]<a id="change"> * </a>fac1
+        else:
+            out2 = torch.exp(-alpha) * fac1
+        return self.fc_out(out1 * out2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/e398255427327fff201f2d2e562bf00bec52783f#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 38422</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: e398255427327fff201f2d2e562bf00bec52783f</div><div id='time'> Time: 2020-09-28</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 38</div><BR>

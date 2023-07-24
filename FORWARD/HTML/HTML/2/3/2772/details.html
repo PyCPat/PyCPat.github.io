@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :2772
+</h3><img src='15464331.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                                       c=c,
+                                       bi=bi)
+
+        bin_mask = 2**<a id="change">torch.arange(c * bi - 1, -1,
+                                   -1).to(</a>discretized_target.device,
+                                          discretized_target.dtype<a id="change">)</a>
+        target_label = torch.sum(bin_mask * discretized_target, -1)
+        predicted_patches = predicted_patches[mask]
+        target_label<a id="change"> = </a>target_label[mask]
+        loss = F.cross_entropy(predicted_patches, target_label)
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 reshape target to patches
+        target = target.clamp(max = mpv) &#47&#47 clamp just in case
+        avg_target = <a id="change">reduce(target, &quotb c (h p1) (w p2) -&gt; b (h w) c&quot, &quotmean&quot, p1 = p, p2 = p).contiguous()</a>
+
+        channel_bins = torch.arange(bin_size, mpv, bin_size, device = device)
+        discretized_target = torch.bucketize(avg_target, channel_bins)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/64a2ef6462bde61db4dd8f0887ee71192b273692#diff-6b502c3fca9000d4ac485e72a6b6cb51b335fed8a8e158013b955ffed39c59abL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15464331</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 64a2ef6462bde61db4dd8f0887ee71192b273692</div><div id='time'> Time: 2021-06-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp.py</div><div id='n_file'> N File Name: vit_pytorch/mpp.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 82</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &quot&quot&quot
+            &#47&#47 conv for compare
+            escape_NaN = torch.Tensor([1e-4])
+            escape_NaN<a id="change"> = </a><a id="change">escape_NaN.to(</a>device<a id="change">)</a>
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+            max_wi = torch.sqrt(
+                torch.sum(torch.pow(wi, 2) + escape_NaN, dim=[1, 2, 3], keepdim=True))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                yi = F.conv2d(yi, fuse_weight, stride=1)
+                &#47&#47 (B=1, 32, 32, 32, 32)
+                yi = yi.contiguous().view(1, int_bs[2], int_bs[3], int_fs[2], int_fs[3])
+                yi = <a id="change">yi.permute(0, 2, 1, 4, 3).contiguous()</a>
+
+                yi = yi.view(1, 1, int_bs[2]*int_bs[3], int_fs[2]*int_fs[3])
+                yi = same_padding(yi, [k, k], [1, 1], [1, 1])
+                yi = F.conv2d(yi, fuse_weight, stride=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nipponjo/deepfillv2-pytorch/commit/b56ad8569aeea17343cedc9c7331223e134c228f#diff-e9366d4b0e74c6f58afc0e8ec64f4603739e8d75e0c63da5e728893a16a8c92dL302' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15464335</div><div id='project'> Project Name: nipponjo/deepfillv2-pytorch</div><div id='commit'> Commit Name: b56ad8569aeea17343cedc9c7331223e134c228f</div><div id='time'> Time: 2021-12-02</div><div id='author'> Author: 28433296+nipponjo@users.noreply.github.com</div><div id='file'> File Name: model/networks_tf.py</div><div id='m_class'> M Class Name: ContextualAttention</div><div id='n_method'> N Class Name: ContextualAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/networks_tf.py</div><div id='n_file'> N File Name: model/networks_tf.py</div><div id='m_start'> M Start Line: 309</div><div id='m_end'> M End Line: 467</div><div id='n_start'> N Start Line: 338</div><div id='n_end'> N End Line: 464</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+	def forward(self, row_index, ind, x, y = None):
+		x = x.float()
+		hs = [<a id="change">torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(</a>self.device<a id="change">)</a> for _ in range(self.args[&quotnum_units&quot])]
+		cs = None
+		if self.args[&quotrnn_cell&quot] == &quotLSTM&quot:
+			cs = [torch.randn(x.size(0), self.args[&quothidden_size&quot]).to(self.device) for _ in range(self.args[&quotnum_units&quot])]
+		xs = torch.split(x, 1, 1)
+		&#47&#47print(xs[0].size())
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		h<a id="change"> = </a>torch.cat(hs, dim = 1)
+		preds = self.Linear(h)
+		if y is not None:
+			y = y.long()</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		for x in xs:
+			hs, cs = self.rim_model(row_index, ind, x, hs, cs)
+		preds = self.Linear(<a id="change">hs.contiguous()</a>.view(x.size(0), -1))
+		if y is not None:
+			y = y.long()
+			probs = nn.Softmax(dim = -1)(preds)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L149' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 15464350</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: MnistModel</div><div id='n_method'> N Class Name: MnistModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 198</div><BR>

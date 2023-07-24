@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :2137
+</h3><img src='13983492.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                different transforms of the original images.
+        
+        batch_a = torch.cat(
+            <a id="change">[self.transform(item[0]).unsqueeze_(0) for item in batch]</a>, 0
+        )
+        batch_b = torch.cat(
+            [self.transform(item[0]).unsqueeze_(0) for item in batch], 0</code></pre><h3>After Change</h3><pre><code class='java'>
+                the first half. For the images, the two halves represent 
+                different transforms of the original images.
+        
+        batch_size = <a id="change">len(</a>batch<a id="change">)</a>
+
+        &#47&#47 list of transformed images
+        transforms = [self.transform(batch[i % batch_size][0]).unsqueeze_(0)
+                      for i in <a id="change">range(</a>2 * batch_size<a id="change">)</a>]
+        &#47&#47 list of labels
+        labels = [batch[i % batch_size][1] for i in range(2 * batch_size)]
+        &#47&#47 list of filenames</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lightly-ai/lightly/commit/bdbfa7bcfb3d306ec78c4c1302199af1a0510eb2#diff-bacf9bc1dab9e318873d7e84b2dff4fa5d1a46fa0479aabca52ef7c343872a5eL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13983492</div><div id='project'> Project Name: lightly-ai/lightly</div><div id='commit'> Commit Name: bdbfa7bcfb3d306ec78c4c1302199af1a0510eb2</div><div id='time'> Time: 2020-10-23</div><div id='author'> Author: philipp.m.wirth@gmail.com</div><div id='file'> File Name: lightly/data/collate.py</div><div id='m_class'> M Class Name: BaseCollateFunction</div><div id='n_method'> N Class Name: BaseCollateFunction</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lightly/data/collate.py</div><div id='n_file'> N File Name: lightly/data/collate.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            if self.args.pretrained_decoder_lm:
+                answer_pretrained_numerical = [
+                    <a id="change">[self.pretrained_decoder_vocab_stoi[w] for w in sentence]</a> for sentence in answer_tokens
+                ]
+
+                with torch.no_grad():</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.args.pretrained_decoder_lm:
+                &#47&#47 note that pretrained_decoder_embeddings is time first
+                answer_pretrained_numerical = [
+                    [self.pretrained_decoder_vocab_stoi[sentence[time]] for sentence in answer_tokens] for time in <a id="change">range(len(</a>answer_tokens[0]<a id="change">)</a><a id="change">)</a>
+                ]
+                answer_pretrained_numerical = torch.tensor(answer_pretrained_numerical, dtype=torch.long,
+                                                           device=self.device)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stanford-oval/genienlp/commit/fbe17b565e2621767c34bd65644085b52270e6ec#diff-76fc3531920e92a38c9519df875f23fec1913a25d8137871af4dc49e8405f588L148' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13983495</div><div id='project'> Project Name: stanford-oval/genienlp</div><div id='commit'> Commit Name: fbe17b565e2621767c34bd65644085b52270e6ec</div><div id='time'> Time: 2019-03-27</div><div id='author'> Author: gcampagn@cs.stanford.edu</div><div id='file'> File Name: decanlp/models/multitask_question_answering_network.py</div><div id='m_class'> M Class Name: MultitaskQuestionAnsweringNetwork</div><div id='n_method'> N Class Name: MultitaskQuestionAnsweringNetwork</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: decanlp/models/multitask_question_answering_network.py</div><div id='n_file'> N File Name: decanlp/models/multitask_question_answering_network.py</div><div id='m_start'> M Start Line: 212</div><div id='m_end'> M End Line: 216</div><div id='n_start'> N Start Line: 213</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = <a id="change">[self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]</a>
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels-1, 0, -1):
+            fpn_outs[i] = F.interpolate(fpn_outs[i], size=fpn_outs[0].shape[2:], mode=&quotbilinear&quot, align_corners=False)</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        for i in reversed(<a id="change">range(len(</a>features<a id="change">)</a>-1<a id="change">)</a>):
+            feature = self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL52' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13983494</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute the action probabilities and the value function estimate
+        &#47&#47 Apply action mask to the logits as well.
+        output_dims = [ph.out_features for ph in self.policy_head]
+        action_masks = <a id="change">[None for _ in range(len(output_dims))]</a>
+        if self.action_mask is not None:
+            start = 0
+            for idx, dim in enumerate(output_dims):
+                action_masks[idx] = self.action_mask[..., start : start + dim]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute the action probabilities and the value function estimate
+        &#47&#47 Apply action mask to the logits as well.
+        action_masks = [None for _ in <a id="change">range(len(</a>self.output_dims<a id="change">)</a><a id="change">)</a>]
+        if self.action_mask is not None:
+            start = 0
+            for idx, dim in enumerate(self.output_dims):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/salesforce/warp-drive/commit/0433121531b751f4a4d3ebbeed2aa9495d9d4b47#diff-87d36dc5f79d9ccd66e947e7b3a496a4906d722ee676c778c5121b83147c3186L188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13983490</div><div id='project'> Project Name: salesforce/warp-drive</div><div id='commit'> Commit Name: 0433121531b751f4a4d3ebbeed2aa9495d9d4b47</div><div id='time'> Time: 2022-02-07</div><div id='author'> Author: sunil.srinivasa@salesforce.com</div><div id='file'> File Name: warp_drive/training/models/fully_connected.py</div><div id='m_class'> M Class Name: FullyConnected</div><div id='n_method'> N Class Name: FullyConnected</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: warp_drive/training/models/fully_connected.py</div><div id='n_file'> N File Name: warp_drive/training/models/fully_connected.py</div><div id='m_start'> M Start Line: 222</div><div id='m_end'> M End Line: 226</div><div id='n_start'> N Start Line: 227</div><div id='n_end'> N End Line: 230</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input = torch.transpose(input, 1, 2)
+        conv_res = [self.activation(conv(input)) for conv in self.convs] &#47&#47[b, o, lout]
+
+        tmp = <a id="change">[F.max_pool1d(input=x, kernel_size=x.size(2)).squeeze(2) for x in conv_res]</a>
+        return torch.cat(tmp, dim=-1)
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47import pdb;pdb.set_trace()
+        tmp = []
+        for i in <a id="change">range(len(</a>conv_res<a id="change">)</a><a id="change">)</a>:
+            dim = conv_res[i].size(2)
+            if isinstance(dim, torch.Tensor):
+                &#47&#47trace 无法识别tuple的操作，会转成tensor</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/waterzxj/unf/commit/09694a5d28252c5e2327c1d695b8e7de6a965605#diff-7555e84696efe507d515faae88b0e68bad2396f14a740ed860abe4e088f1a36dL51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 13983496</div><div id='project'> Project Name: waterzxj/unf</div><div id='commit'> Commit Name: 09694a5d28252c5e2327c1d695b8e7de6a965605</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 1486459973@qq.com</div><div id='file'> File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_class'> M Class Name: CnnMaxpoolLayer</div><div id='n_method'> N Class Name: CnnMaxpoolLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='n_file'> N File Name: UNF/modules/encoder/cnn_maxpool.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 73</div><BR>

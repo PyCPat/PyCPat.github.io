@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :2291
+</h3><img src='14298511.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if key_pos is not None:
+            key = key + key_pos
+
+        out = <a id="change">self.attn(
+            query=query,
+            key=key,
+            value=value,
+            attn_mask=attn_mask,
+            key_padding_mask=key_padding_mask,
+        )[0]</a>
+
+        return identity + self.proj_drop(out)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                intermediate.append(self.norm(output))
+
+        if self.norm is not None:
+            output<a id="change"> = </a><a id="change">self.norm(</a>output<a id="change">)</a>
+            if self.return_intermediate:
+                intermediate.pop()
+                intermediate.append(output)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/idea-research/detrex/commit/b8b4cd0723f75ae9d120d40381355c5dfa9915f1#diff-255531dfd26cdeaf5d286d8b8b6c9a29e4dea4c4cf8a9dad083d748fd7e212e4L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14298511</div><div id='project'> Project Name: idea-research/detrex</div><div id='commit'> Commit Name: b8b4cd0723f75ae9d120d40381355c5dfa9915f1</div><div id='time'> Time: 2022-08-08</div><div id='author'> Author: rentianhe@dgx061.scc.idea</div><div id='file'> File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ideadet/layers/transformer_rebuild.py</div><div id='n_file'> N File Name: ideadet/layers/transformer_rebuild.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            features of the same shape after LN in each instance
+        
+        B, C = <a id="change">x.shape[:2]</a>
+        ori_shape = x.shape
+        x = x.transpose(-1, 1).reshape(B, -1, 3, C)
+        x = self.ln(x)
+        x = x.transpose(-1, 1).reshape(ori_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returns:
+            features of the same shape after LN in each instance
+        
+        norm = <a id="change">torch.norm(</a>x<a id="change">, dim=2)</a> + EPS  &#47&#47 [B, C, N, ...]
+        norm_ln = self.ln(norm.transpose(1, -1)).transpose(1, -1)
+        norm = norm.unsqueeze(2)
+        norm_ln<a id="change"> = </a>norm_ln.unsqueeze(2)
+        x = x / norm * norm_ln
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wuziyi616/multi_part_assembly/commit/7e1267aa33c2c264299bb4955ef23b3961b17693#diff-a90092c416276a22903e36e71bbaf25f682c8d025f0557e09c165773bb2b43b3L160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14298518</div><div id='project'> Project Name: wuziyi616/multi_part_assembly</div><div id='commit'> Commit Name: 7e1267aa33c2c264299bb4955ef23b3961b17693</div><div id='time'> Time: 2022-06-29</div><div id='author'> Author: dazitu616@gmail.com</div><div id='file'> File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_class'> M Class Name: VNLayerNorm</div><div id='n_method'> N Class Name: VNLayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='n_file'> N File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 168</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input: torch.Tensor = bchw_to_bhwc(input)
+        &#47&#47 Unfold input
+        input: torch.Tensor = input.unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        input: torch.Tensor = input.reshape(batch_size, <a id="change">input.shape[1]</a>, input.shape[2], -1)
+        &#47&#47 Normalize input
+        input: torch.Tensor = self.normalization(input)
+        &#47&#47 Perform linear mapping</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x = bchw_to_bhwc(x).unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        x = x.permute(0, 1, 2, 5, 4, 3).flatten(3)  &#47&#47 permute maintains compat with ch order in official swin impl
+        x<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+        x = bhwc_to_bchw(self.reduction(x))
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3#diff-ed4e73b2f003b1bf594949d63e8066b203ff134a32665c27fe72e45e3a6607afL701' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 14298516</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3</div><div id='time'> Time: 2022-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer_v2_cr.py</div><div id='n_file'> N File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 722</div><div id='n_start'> N Start Line: 455</div><div id='n_end'> N End Line: 459</div><BR>

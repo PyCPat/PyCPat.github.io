@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :533
+</h3><img src='1888637.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        device = x.device
+        half_dim = self.dim // 2
+        emb = math.log(10000) / (half_dim - 1)
+        <a id="change">emb</a><a id="change"> = </a><a id="change">torch.exp(</a>torch.arange(half_dim, device=device) * -emb<a id="change">)</a>
+        emb<a id="change"> = </a>x[:, None]<a id="change"> * emb[None, :]</a>
+        emb = torch.cat((emb.sin()<a id="change">, emb.cos()</a>), dim=-1)
+        <a id="change">return </a>emb
+
+
+class Mish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        sinusoid_in = torch.ger(input.view(-1).float(), self.inv_freq)
+        pos_emb = torch.cat([sinusoid_in.sin(), sinusoid_in.cos()], dim=-1)
+        pos_emb = pos_emb.view(*shape, self.dim)
+        <a id="change">return </a>pos_emb
+
+
+class Swish(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/519d366759ea639a68262c20661fa8af7e85cfc6#diff-0a0ed53caec8154b10aaf8cff729d26235fc883552cd766726dd8aaf9df50808L32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1888637</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 519d366759ea639a68262c20661fa8af7e85cfc6</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: jiangliangwei@tetras.com</div><div id='file'> File Name: model/unet.py</div><div id='m_class'> M Class Name: SinusoidalPosEmb</div><div id='n_method'> N Class Name: TimeEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/unet.py</div><div id='n_file'> N File Name: model/unet.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, action, with_variance=False):
+        mu, logstd = self.compute_stats(x, action)
+        dist = Normal(mu, <a id="change">logstd.exp()</a>)
+        <a id="change">pred</a><a id="change"> = </a>dist.rsample()
+        &#47&#47 residual prediction
+        next_x<a id="change"> = </a>x<a id="change"> + pred[:, :-1]</a>
+        next_reward = pred[:, -1].view(-1, 1)
+        if with_variance:
+            <a id="change">return </a>next_x<a id="change">, next_reward, dist.variance.sum(dim=1, keepdims=True)</a>
+        return next_x, next_reward
+
+    def compute_error(self, obs_t, act_t, rew_tp1, obs_tp1):
+        mu, logstd = self.compute_stats(obs_t, act_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(
+        self, x: torch.Tensor, action: torch.Tensor
+    ) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">return </a>self.predict_with_variance(x, action)[:2]
+
+    def predict_with_variance(
+        self, x: torch.Tensor, action: torch.Tensor</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/takuseno/d3rlpy/commit/9ccb6121c0baead0ffb85b64207c4fe6dc5fd5b5#diff-22be37d65fb97670d99ea5447aff62b9de05268ce0473195fea101ecff947388L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1888638</div><div id='project'> Project Name: takuseno/d3rlpy</div><div id='commit'> Commit Name: 9ccb6121c0baead0ffb85b64207c4fe6dc5fd5b5</div><div id='time'> Time: 2021-01-01</div><div id='author'> Author: takuma.seno@gmail.com</div><div id='file'> File Name: d3rlpy/models/torch/dynamics.py</div><div id='m_class'> M Class Name: ProbablisticDynamics</div><div id='n_method'> N Class Name: ProbablisticDynamics</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: d3rlpy/models/torch/dynamics.py</div><div id='n_file'> N File Name: d3rlpy/models/torch/dynamics.py</div><div id='m_start'> M Start Line: 137</div><div id='m_end'> M End Line: 146</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        device = x.device
+        half_dim = self.dim // 2
+        emb = math.log(10000) / (half_dim - 1)
+        <a id="change">emb</a><a id="change"> = </a><a id="change">torch.exp(</a>torch.arange(half_dim, device=device) * -emb<a id="change">)</a>
+        emb<a id="change"> = </a>x[:, None]<a id="change"> * emb[None, :]</a>
+        emb = torch.cat((emb.sin()<a id="change">, emb.cos()</a>), dim=-1)
+        <a id="change">return </a>emb
+
+
+class Mish(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        sinusoid_in = torch.ger(input.view(-1).float(), self.inv_freq)
+        pos_emb = torch.cat([sinusoid_in.sin(), sinusoid_in.cos()], dim=-1)
+        pos_emb = pos_emb.view(*shape, self.dim)
+        <a id="change">return </a>pos_emb
+
+
+class Swish(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/a843610e321ec7e1898e97dd495f8991182b8b87#diff-0a0ed53caec8154b10aaf8cff729d26235fc883552cd766726dd8aaf9df50808L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1888639</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: a843610e321ec7e1898e97dd495f8991182b8b87</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/unet.py</div><div id='m_class'> M Class Name: SinusoidalPosEmb</div><div id='n_method'> N Class Name: TimeEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/unet.py</div><div id='n_file'> N File Name: model/unet.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 36</div><BR>

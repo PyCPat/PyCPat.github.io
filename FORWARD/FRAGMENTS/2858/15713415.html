@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        kv = torch.cat((x, mem, keys))
+
+        attn_shape = (t, <a id="change">kv.shape[0]</a>)
+        attn_mask = torch.zeros(*attn_shape, device=x.device)
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            i, j = torch.triu_indices(t, t, 1)
+            dot[:, i, j] = float(&quot-inf&quot)
+
+        dot = <a id="change">dot.softmax(dim=-1)</a>
+        out = torch.einsum(&quotbij,bje-&gt;bie&quot, dot, v)
+        return out, dot
+
+&#47&#47 Shared qk attention, using either full or LSH attention</code></pre>

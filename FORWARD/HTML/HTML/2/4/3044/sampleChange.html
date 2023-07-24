@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        with torch.no_grad():
+            t = teacher.unsqueeze(0) - teacher.unsqueeze(1)
+            if normalize:
+                t = <a id="change">F.normalize(</a>t<a id="change">, p=2, dim=2)</a>
+            t = torch.bmm(t, t.transpose(1, 2)).view(-1)
+
+        s = student.unsqueeze(0) - student.unsqueeze(1)
+        if normalize:
+            s = <a id="change">F.normalize(</a>s<a id="change">, p=2, dim=2)</a>
+        s = torch.bmm(s, s.transpose(1, 2)).view(-1)
+        return F.smooth_l1_loss(s, t, reduction="mean")
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        with torch.no_grad():
+            t = pairwaise_distance(teacher)
+            t_mean = <a id="change">t[t &gt; 0]</a>.mean()
+            t = t / (t_mean + 1e-7)
+
+        s = pairwaise_distance(student)</code></pre>

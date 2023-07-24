@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if random.random() &lt; 0.2:
+            audio_mask = (torch.arange(audio.shape[1], device=audio.device)[None, :, None] &lt; audio_len[:, None, None]).float()
+            x = torch.exp(audio - 1e-6) * audio_mask
+            y<a id="change"> = </a>torch.cat(<a id="change">[</a>x[1:], x[:1]<a id="change"></a>])
+            return torch.log(0.9 * x + 0.1 * y + 1e-6) * audio_mask, audio_len
+        return audio, audio_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @torch.no_grad()
+    def forward(self, audio, audio_len):
+        <a id="change">assert </a>len(audio.shape) == 3
+
+        if self.do_timestretch and random.random() &lt; AUGUMENT_RATE:
+            audio, audio_len = self.timestretch(audio, audio_len)</code></pre>

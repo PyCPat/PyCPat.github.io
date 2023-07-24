@@ -1,0 +1,106 @@
+<html><h3>Pattern ID :232
+</h3><img src='903515.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert set(order) == set([&quotconv&quot, &quotnorm&quot, &quotact&quot])
+
+        self.with_norm = norm_cfg is not None
+        self.with_activatation = <a id="change">activation is not None</a>
+        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
+        if bias == &quotauto&quot:
+            bias = False if self.with_norm else True
+        self.with_bias = bias
+
+        if self.with_norm and self.with_bias:
+            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
+
+        &#47&#47 build convolution layer
+        self.conv = build_conv_layer(
+            conv_cfg,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        &#47&#47 export the attributes of self.conv to a higher level for convenience
+        self.in_channels = self.conv.in_channels
+        self.out_channels = self.conv.out_channels
+        self.kernel_size = self.conv.kernel_size
+        self.stride = self.conv.stride
+        self.padding = self.conv.padding
+        self.dilation = self.conv.dilation
+        self.transposed = self.conv.transposed
+        self.output_padding = self.conv.output_padding
+        self.groups = self.conv.groups
+
+        &#47&#47 build normalization layers
+        if self.with_norm:
+            &#47&#47 norm layer is after conv layer
+            if order.index(&quotnorm&quot) &gt; order.index(&quotconv&quot):
+                norm_channels = out_channels
+            else:
+                norm_channels = in_channels
+            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
+            self.add_module(self.norm_name, norm)
+
+        &#47&#47 build activation layer
+        if self.with_activatation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise </a><a id="change">ValueError(
+                    f&quot{self.activation} is currently not supported.&quot</a><a id="change">)</a>
+            if self.activation == &quotrelu&quot:
+                self.activate = nn.ReLU(inplace=inplace)
+
+        &#47&#47 Use msra init by default</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(ConvModule, self).__init__()
+        assert conv_cfg is None or isinstance(conv_cfg, dict)
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        <a id="change">assert </a>act_cfg is None or isinstance(act_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/a1efe4863eae67e6768e73fe70e7435995c3ef3e#diff-aa84006bb10d2bd27253b25093e59b7543c166c12e649307fb8f257fdf86be56L51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 903515</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: a1efe4863eae67e6768e73fe70e7435995c3ef3e</div><div id='time'> Time: 2020-03-16</div><div id='author'> Author: linjintao@sensetime.com</div><div id='file'> File Name: mmaction/models/common/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/common/conv_module.py</div><div id='n_file'> N File Name: mmaction/models/common/conv_module.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 continuous noise schedule related stuff
+
+        if <a id="change">noise_schedule == &quotlinear&quot</a>:
+            self.log_snr = beta_linear_log_snr
+        elif <a id="change">noise_schedule == &quotcosine&quot</a><a id="change">:
+            </a>self.log_snr = alpha_cosine_log_snr
+        else:
+            <a id="change">raise </a><a id="change">ValueError(f&quotunknown noise schedule {noise_schedule}&quot</a><a id="change">)</a>
+
+        &#47&#47 sampling
+
+        self.num_sample_steps = num_sample_steps</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 noise schedule
+
+        <a id="change">assert </a>not all([*map(exists, (noise_d, noise_d_low, noise_d_high))]), &quotyou must either set noise_d for shifted schedule, or noise_d_low and noise_d_high for shifted and interpolated schedule&quot
+
+        &#47&#47 determine shifting or interpolated schedules
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/91dea75a73e064840a43fdbd4c483ef7ad9a7e60#diff-932ae956742e2e7e4ca0d46053f9844b2504bc2cf2dca187505413a2f363e4a3L439' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 903508</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 91dea75a73e064840a43fdbd4c483ef7ad9a7e60</div><div id='time'> Time: 2023-01-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_class'> M Class Name: GaussianDiffusion</div><div id='n_method'> N Class Name: GaussianDiffusion</div><div id='m_method'> M Method Name: __init__(0)</div><div id='n_method'> N Method Name: __init__(0)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/simple_diffusion.py</div><div id='m_start'> M Start Line: 459</div><div id='m_end'> M End Line: 468</div><div id='n_start'> N Start Line: 484</div><div id='n_end'> N End Line: 500</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.combining_operation = combining_operation
+
+        &#47&#47 define function for permutation invariant embedding
+        if <a id="change">combining_operation == "mean"</a>:
+            self.combining_function = torch.mean
+        elif <a id="change">self.combining_operation == "sum"</a><a id="change">:
+            </a>self.combining_function = torch.sum
+        else:
+            <a id="change">raise </a><a id="change">ValueError("combining_operation must be in [&quotsum&quot, &quotmean&quot]."</a><a id="change">)</a>
+
+        &#47&#47 construct fully connected layers
+        self.fc_subnet = FCEmbedding(
+            input_dim=trial_net_output_dim + 1,  &#47&#47 +1 to encode number of trials</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        self.trial_net = trial_net
+        self.aggregation_dim = aggregation_dim
+        <a id="change">assert </a>aggregation_fn in [
+            "mean",
+            "sum",
+        ], "aggregation_fn must be &quotmean&quot or &quotsum&quot."</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 903510</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 260</div><div id='n_start'> N Start Line: 219</div><div id='n_end'> N End Line: 260</div><BR>

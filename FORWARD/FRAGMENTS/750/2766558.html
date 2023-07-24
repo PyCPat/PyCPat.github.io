@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        delta =  (input[:,None,:] - self.centers[None,...])
+
+        &#47&#47 Compute (INPUT-MU).T x Sigma^-1 * (INPUT-MU)-&gt; (Nbatch,Nrbf)
+        X<a id="change"> = </a>( torch.matmul(delta.unsqueeze(2),self.invCov).squeeze(2) * delta ).sum(2)
+
+        &#47&#47 slater kernel
+        if self.kernel == &quotslater&quot:
+            X = torch.sqrt(X)
+            self.detS[:,:] = 1.
+
+        &#47&#47 divide by the determinant of the cov mat
+        X = (torch.exp(-0.5*X).unsqueeze(2) / self.detS).squeeze()
+
+        <a id="change">return </a>X</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif self.kernel == &quotslater&quot:
+            return self._slater_kernel(input)
+        else:
+            <a id="change">raise </a><a id="change">ValueError(&quotKernel not recognized&quot</a><a id="change">)</a>
+
+    def _gaussian_kernel(self,input):
+
+        if self.sigma.requires_grad:</code></pre>
