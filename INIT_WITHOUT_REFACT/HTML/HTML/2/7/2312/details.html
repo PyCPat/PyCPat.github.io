@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :2312
+</h3><img src='7971167.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        greedy = inputs is None
+
+        &#47&#47 (B, T, mel_dim) -&gt; (B, T&quot, mel_dim*r)
+        <a id="change">if </a>inputs is not None<a id="change">:
+            &#47&#47 Grouping multiple frames if necessary
+            </a>if inputs.size(-1) == self.mel_dim:
+                inputs = inputs.reshape(B, <a id="change">inputs.size(1</a><a id="change">) // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Project to mel
+            &#47&#47 (B, mel_dim*r) -&gt; (B, r, mel_dim)
+            output = self.mel_proj(proj_input)
+            output<a id="change"> = </a>output.view(B, -1, self.mel_dim)
+
+            &#47&#47 Stop token prediction
+            stop = self.stop_proj(proj_input)
+            stop = torch.sigmoid(stop)
+
+            &#47&#47 Store predictions
+            <a id="change">mel_outputs.append(</a>output<a id="change">)</a>
+            attn_scores.append(attention_score.unsqueeze(1))
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7971167</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.has_mean = False
+
+    def forward(self, x):
+        <a id="change">if </a>self.has_mean<a id="change">:
+            </a>batch_size = <a id="change">x.data.size(0</a><a id="change">)</a>
+            x<a id="change"> = </a>x<a id="change"> - </a>torch.autograd.Variable(self.mean_img.repeat(batch_size, 1, 1, 1))
+
+        ind = -2
+        self.loss = None</code></pre><h3>After Change</h3><pre><code class='java'>
+                if self.training:
+                    pass
+                else:
+                    boxes<a id="change"> = </a>self.models[ind](x)
+                    <a id="change">out_boxes.append(</a>boxes<a id="change">)</a>
+            elif block[&quottype&quot] == &quotcost&quot:
+                continue
+            else:
+                print(&quotunknown type %s&quot % (block[&quottype&quot]))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tianxiaomo/pytorch-yolov4/commit/cf696adb6de3e2a8f68498ff9f2586f2ef62df3a#diff-979f6319c5a776a402674142f7f50a37662aa40399498541a9248a78a7a1ee51L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7971169</div><div id='project'> Project Name: tianxiaomo/pytorch-yolov4</div><div id='commit'> Commit Name: cf696adb6de3e2a8f68498ff9f2586f2ef62df3a</div><div id='time'> Time: 2020-04-25</div><div id='author'> Author: 1025568329@qq.com</div><div id='file'> File Name: tool/darknet2pytorch.py</div><div id='m_class'> M Class Name: Darknet</div><div id='n_method'> N Class Name: Darknet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tool/darknet2pytorch.py</div><div id='n_file'> N File Name: tool/darknet2pytorch.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 149</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        greedy = inputs is None
+
+        &#47&#47 (B, T, mel_dim) -&gt; (B, T&quot, mel_dim*r)
+        <a id="change">if </a>inputs is not None<a id="change">:
+            &#47&#47 Grouping multiple frames if necessary
+            </a>if inputs.size(-1) == self.mel_dim:
+                inputs<a id="change"> = </a>inputs.reshape(B, <a id="change">inputs.size(1</a><a id="change">) // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder = inputs.size(1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Project to mel
+            &#47&#47 (B, mel_dim*r) -&gt; (B, r, mel_dim)
+            output = self.mel_proj(proj_input)
+            output<a id="change"> = </a>output.view(B, -1, self.mel_dim)
+
+            &#47&#47 Stop token prediction
+            stop = self.stop_proj(proj_input)
+            stop = torch.sigmoid(stop)
+
+            &#47&#47 Store predictions
+            <a id="change">mel_outputs.append(</a>output<a id="change">)</a>
+            attn_scores.append(attention_score.unsqueeze(1))
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7971173</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

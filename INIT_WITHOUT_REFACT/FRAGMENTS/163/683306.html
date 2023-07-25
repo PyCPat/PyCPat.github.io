@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.cin = cin
+        self.cout = cout
+
+        self.AAD1 = <a id="change">AADLayer(</a>cin, c_attr, c_id<a id="change">)</a>
+        self.conv1<a id="change"> = </a><a id="change">nn.Conv2d(</a>cin, cin<a id="change">, kernel_size=3, stride=1, padding=1, bias=False)</a>
+        self.relu1 = <a id="change">nn.ReLU(inplace=True)</a>
+
+        self.AAD2<a id="change"> = </a><a id="change">AADLayer(</a>cin, c_attr, c_id<a id="change">)</a>
+        self.conv2<a id="change"> = </a><a id="change">nn.Conv2d(</a>cin, cout<a id="change">, kernel_size=3, stride=1, padding=1, bias=False)</a>
+        self.relu2<a id="change"> = </a><a id="change">nn.ReLU(inplace=True)</a>
+
+        if cin != cout:
+            self.AAD3 = <a id="change">AADLayer(</a>cin, c_attr, c_id<a id="change">)</a>
+            self.conv3<a id="change"> = </a><a id="change">nn.Conv2d(</a>cin, cout<a id="change">, kernel_size=3, stride=1, padding=1, bias=False)</a>
+            self.relu3<a id="change"> = </a><a id="change">nn.ReLU(inplace=True)</a>
+
+    def forward(self, h, z_attr, z_id):
+        x = self.AAD1(h, z_attr, z_id)
+        x = self.relu1(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.cin = cin
+        self.cout = cout
+        
+        add_blocks = <a id="change">[]</a>
+        <a id="change">for </a><a id="change">i</a> in <a id="change">range(</a>num_blocks<a id="change">):
+            </a>out = cin<a id="change"> if </a><a id="change">i &lt; (num_blocks-1) else </a>cout
+            <a id="change">add_blocks.extend(</a><a id="change">[AADLayer(</a>cin, c_attr, c_id<a id="change">)</a>,
+                               <a id="change">nn.ReLU(inplace=True)</a>,
+                               <a id="change">nn.Conv2d(</a>cin, out<a id="change">, kernel_size=3, stride=1, padding=1, bias=False)</a>
+                              ]<a id="change">)</a>
+        self.add_blocks = AddBlocksSequential(*add_blocks)
+        
+        if cin != cout:
+            last_add_block<a id="change"> = </a><a id="change">[AADLayer(</a>cin, c_attr, c_id<a id="change">)</a>, 
+                             <a id="change">nn.ReLU(inplace=True)</a>, 
+                             <a id="change">nn.Conv2d(</a>cin, cout<a id="change">, kernel_size=3, stride=1, padding=1, bias=False)</a>]
+            self.last_add_block = AddBlocksSequential(*last_add_block)
+            
+</code></pre>

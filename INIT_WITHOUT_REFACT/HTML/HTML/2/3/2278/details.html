@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :2278
+</h3><img src='7934649.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        maxlen, batch_size = src.shape[0], src.shape[1]  &#47&#47 src.shape = [215, 128, 72]
+
+        Question: why 72 features (36 feature + 36 mask)?
+        src = self.encoder(src)<a id="change"> * </a><a id="change">math.sqrt(</a>self.d_model<a id="change">)</a>  &#47&#47 linear layer: 72 --&gt; 32
+
+        pe = self.pos_encoder(times)  &#47&#47 times.shape = [215, 128], the values are hours.
+        &#47&#47 pe.shape = [215, 128, 32]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 feed through MLP
+        output = torch.cat([output, emb], dim=1)  &#47&#47 x.shape: [216, 128, 64]
+        output = self.mlp(output)  &#47&#47 two linears: 64--&gt;64--&gt;2
+        return output<a id="change">, 0, 0</a>
+
+&#47&#47 class HGT_latconcat(nn.Module):
+&#47&#47     ""
+&#47&#47     Implement the raindrop stratey one by one.</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/raindrop/commit/374ec29c5d9a02d9eea95cf7e681df1b9996406c#diff-db97f9cea8d826a284c0d1b1400d160c8ff39aec325b8bc0656d23d14f68d663L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7934649</div><div id='project'> Project Name: mims-harvard/raindrop</div><div id='commit'> Commit Name: 374ec29c5d9a02d9eea95cf7e681df1b9996406c</div><div id='time'> Time: 2021-09-15</div><div id='author'> Author: xiang.alan.zhang@gmail.com</div><div id='file'> File Name: code/models_rd.py</div><div id='m_class'> M Class Name: TransformerModel2</div><div id='n_method'> N Class Name: TransformerModel2</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/models_rd.py</div><div id='n_file'> N File Name: code/models_rd.py</div><div id='m_start'> M Start Line: 215</div><div id='m_end'> M End Line: 251</div><div id='n_start'> N Start Line: 215</div><div id='n_end'> N End Line: 258</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores = torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding)<a id="change"> / </a><a id="change">math.sqrt(</a>self.emb_dims<a id="change">)</a>
+		scores = torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)</code></pre><h3>After Change</h3><pre><code class='java'>
+        src = src.transpose(1,2).contiguous()
+        tgt = tgt.transpose(1,2).contiguous()
+
+        batch_size<a id="change">, _, _</a> = src.size()
+
+        src_embedding = self.emb_nn(src)
+        tgt_embedding = self.emb_nn(tgt)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L269' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7934648</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            Normalized audio tensor with same shape as input
+        
+        mean = audio.mean(1, keepdim=True).detach()
+        std = <a id="change">(audio.var(1, keepdim=True).detach() + self.div_guard).sqrt()</a>
+        return (audio - mean)<a id="change"> / </a>std
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            ).int()
+
+        return (
+            normalize_tensor(audio, attention_mask, div_guard=self.div_guard)<a id="change">,
+            audio_lengths</a>,
+        )
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/05cbe02b3779b4bafc6dbd1914e490e47893b6da#diff-6f21f8fa5be3ce7b1ffede013b84d050bde988efbbe1747432115d11fc285da4L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7934647</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 05cbe02b3779b4bafc6dbd1914e490e47893b6da</div><div id='time'> Time: 2021-11-30</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/wav2vec/transform.py</div><div id='m_class'> M Class Name: Wav2Vec2Preprocess</div><div id='n_method'> N Class Name: Wav2Vec2Preprocess</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/wav2vec/transform.py</div><div id='n_file'> N File Name: src/thunder/wav2vec/transform.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 49</div><BR>

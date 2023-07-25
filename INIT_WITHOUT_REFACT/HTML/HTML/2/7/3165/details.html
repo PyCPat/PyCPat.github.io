@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :3165
+</h3><img src='10213010.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        mask = rearrange(torch.eye(n).bool(), &quoti j -&gt; () () i j&quot)
+        coor_weights.masked_fill_(mask, mask_value)
+        coors_attn<a id="change"> = </a><a id="change">coor_weights.softmax(dim = -1)</a>
+
+        coors_out<a id="change"> = </a><a id="change">einsum(&quotb h i j, b i j c -&gt; b i c&quot</a>, coors_attn, rel_coors<a id="change">)</a> + coors
+
+        &#47&#47 derive attention
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        m_ij = self.edge_mlp(edge_input)
+
+        coor_weights = self.coors_mlp(m_ij)
+        coors_out = <a id="change">einsum(&quotb h i j, b i j c -&gt; b i c&quot</a>, coor_weights, rel_coors<a id="change">)</a> + coors
+
+        &#47&#47 derive attention
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/0f317742c6068d7ad7391f6037c1d2bb7aac2804#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213010</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 0f317742c6068d7ad7391f6037c1d2bb7aac2804</div><div id='time'> Time: 2021-02-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EGAT</div><div id='n_method'> N Class Name: EGAT</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 66</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 94</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sim = sim.masked_fill(causal_mask, mask_value)
+
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn<a id="change"> = </a><a id="change">sim.softmax(dim = -1)</a>
+        attn = self.dropout(attn)
+
+        local_values<a id="change"> = </a><a id="change">einsum(&quotb h i j, b h j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+
+        &#47&#47 calculate knn attention over memory, if index is passed in
+
+        if exists(index):</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = stable_softmax(sim)
+        attn = self.dropout(attn)
+
+        local_values = <a id="change">einsum(&quotb h i j, b j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+
+        &#47&#47 calculate knn attention over memory, if index is passed in
+
+        if exists(index):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memorizing-transformers-pytorch/commit/9f77fd5e4e449d70c02b9cd25a98e1d5ef5f0a72#diff-698d7ac098881cd330cfb9868699bcdf92d002f508c0204f7e40400664b526d1L167' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213009</div><div id='project'> Project Name: lucidrains/memorizing-transformers-pytorch</div><div id='commit'> Commit Name: 9f77fd5e4e449d70c02b9cd25a98e1d5ef5f0a72</div><div id='time'> Time: 2022-03-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='m_class'> M Class Name: KNNAttention</div><div id='n_method'> N Class Name: KNNAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='n_file'> N File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 208</div><div id='n_start'> N Start Line: 175</div><div id='n_end'> N End Line: 210</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sim = sim.masked_fill(causal_mask, -torch.finfo(sim.dtype).max)
+
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn<a id="change"> = </a><a id="change">sim.softmax(dim = -1)</a>
+        attn = self.dropout(attn)
+
+        out<a id="change"> = </a><a id="change">einsum(&quotb h i j, b h j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        return self.to_out(out)
+
+&#47&#47 approximate nearest neighbor attention</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = stable_softmax(sim)
+        attn = self.dropout(attn)
+
+        out = <a id="change">einsum(&quotb h i j, b j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        return self.to_out(out)
+
+&#47&#47 approximate nearest neighbor attention</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memorizing-transformers-pytorch/commit/9f77fd5e4e449d70c02b9cd25a98e1d5ef5f0a72#diff-698d7ac098881cd330cfb9868699bcdf92d002f508c0204f7e40400664b526d1L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213012</div><div id='project'> Project Name: lucidrains/memorizing-transformers-pytorch</div><div id='commit'> Commit Name: 9f77fd5e4e449d70c02b9cd25a98e1d5ef5f0a72</div><div id='time'> Time: 2022-03-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='n_file'> N File Name: memorizing_transformers_pytorch/memorizing_transformers_pytorch.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 137</div><BR>

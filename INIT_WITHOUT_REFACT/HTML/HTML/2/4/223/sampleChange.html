@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        f1 = self.mlp1(input)
+        f2 = self.mlp2(f1)
+        context_vector = self.maxpool(f2)
+        Gf1 = torch.cat((<a id="change">context_vector.repeat(1</a>, <a id="change">1</a>, self.input_cloud_size<a id="change">)</a>, f1), 1)
+        scores = self.mlp3(Gf1)
+        logits = self.softmax(scores)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        f1 = self.mlp1(input)
+        f2 = self.mlp2(f1)
+        context_vector = torch.max(f2, 1)[0]
+        input_size = <a id="change">f1.shape[1]</a>
+        expanded_context_vector = torch.unsqueeze(context_vector, 1).expand(-1, input_size, -1)
+        Gf1 = torch.cat((expanded_context_vector, f1), 2)
+        scores = self.mlp3(Gf1)
+        logits = self.softmax(scores)</code></pre>

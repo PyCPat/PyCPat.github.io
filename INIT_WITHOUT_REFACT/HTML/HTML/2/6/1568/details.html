@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1568
+</h3><img src='4443619.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            <a id="change">pass</a>
+            &#47&#47 return self.forward_train(feats, targets)
+        else:
+            seg_masks, cate_labels, cate_scores, bbox_num = self.forward_eval(cate_pred_list, kernel_pred_list,
+                                                                              seg_pred, im_shape, ori_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            ins_labels = []
+            cate_labels = []
+            grid_order_list = []
+            i<a id="change"> = </a>0
+            for lvl in range(len(self.seg_num_grids)):
+                ins_labels.append(targets[i]); i += 1
+            <a id="change">for lvl</a> in <a id="change">range(</a>len(self.seg_num_grids)<a id="change">)</a><a id="change">:
+                </a>cate_labels.append(targets[i].to(torch.int32)); i<a id="change"> += </a>1
+            for lvl in range(len(self.seg_num_grids)):
+                grid_order_list.append(targets[i].to(torch.int32)); i += 1
+            return self.forward_train(cate_pred_list, kernel_pred_list, seg_pred, ins_labels, cate_labels, grid_order_list, fg_nums)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/miemie2013/miemiedetection/commit/49afa0099c63a554923f16bc24439bc547d1d52e#diff-98ac090aef281f7c2786c2bcd91e53b06b803895c6162d23b442cdd72a2dde30L330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4443619</div><div id='project'> Project Name: miemie2013/miemiedetection</div><div id='commit'> Commit Name: 49afa0099c63a554923f16bc24439bc547d1d52e</div><div id='time'> Time: 2022-07-15</div><div id='author'> Author: 53960695+miemie2013@users.noreply.github.com</div><div id='file'> File Name: mmdet/models/heads/solov2_head.py</div><div id='m_class'> M Class Name: SOLOv2Head</div><div id='n_method'> N Class Name: SOLOv2Head</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/heads/solov2_head.py</div><div id='n_file'> N File Name: mmdet/models/heads/solov2_head.py</div><div id='m_start'> M Start Line: 351</div><div id='m_end'> M End Line: 351</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 362</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        encoded: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The encoded embedding for each series and time step.
+        
+        <a id="change">pass</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_series = encoded.shape[1]
+        num_timesteps = encoded.shape[2]
+
+        data<a id="change"> = </a>encoded
+
+        <a id="change">for i</a> in <a id="change">range(</a>self.attention_layers<a id="change">)</a><a id="change">:
+            &#47&#47 Treat the various series as a batch dimension
+            </a>mod_timesteps = self.layer_timesteps[i]
+            &#47&#47 [batch, series, time steps, embedding]
+            data = data.flatten(start_dim=0, end_dim=1)
+            &#47&#47 [batch * series, time steps, embedding]
+            data = data.transpose(0, 1)
+            &#47&#47 [time steps, batch * series, embedding] Correct order for PyTorch module
+            data = mod_timesteps(data)
+            data = data.transpose(0, 1)
+            &#47&#47 [batch * series, time steps, embedding]
+            data = data.unflatten(dim=0, sizes=(num_batches, num_series))
+            &#47&#47 [batch, series, time steps, embedding]
+
+            &#47&#47 Treat the various time steps as a batch dimension
+            mod_series = self.layer_series[i]
+            data<a id="change"> = </a>data.transpose(0, 1)
+            &#47&#47 [series, batch, time steps, embedding]
+            data = data.flatten(start_dim=1, end_dim=2)
+            &#47&#47 [series, batch * time steps, embedding] Correct order for PyTorch module</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/servicenow/tactis/commit/0ba7dc5856d92dd6b1809b0a34a89bfed9086738#diff-359f80214ebbb3d54906470271f38934e825eb5142fe784be60c2deeff917579L142' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4443618</div><div id='project'> Project Name: servicenow/tactis</div><div id='commit'> Commit Name: 0ba7dc5856d92dd6b1809b0a34a89bfed9086738</div><div id='time'> Time: 2022-06-06</div><div id='author'> Author: etienne.marcotte@servicenow.com</div><div id='file'> File Name: tactis/model/encoder.py</div><div id='m_class'> M Class Name: TemporalEncoder</div><div id='n_method'> N Class Name: TemporalEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tactis/model/encoder.py</div><div id='n_file'> N File Name: tactis/model/encoder.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 255</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        pass
+        
+    def forward(self, x):
+        <a id="change">pass</a>
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.num_D == 1:
+            return self.model(input)
+        result = []
+        down<a id="change"> = </a>input
+        <a id="change">for i</a> in <a id="change">range(</a>self.num_D<a id="change">)</a><a id="change">:
+            </a>model = getattr(self, "model_%d" % i)
+            result.append(model(down))
+            if i != self.num_D - 1:
+                down<a id="change"> = </a>self.down(down)
+        return result</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lotayou/cocosnet/commit/3dcf714c258ea399239d1362db5247110f254fd7#diff-6d9b374f05f7a4bfbfe2f4733c678f434ee0a86d663f3cf72e4f1e9111c41b25L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4443612</div><div id='project'> Project Name: lotayou/cocosnet</div><div id='commit'> Commit Name: 3dcf714c258ea399239d1362db5247110f254fd7</div><div id='time'> Time: 2020-05-24</div><div id='author'> Author: lotayou@pku.edu.cn</div><div id='file'> File Name: model/discriminator.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/discriminator.py</div><div id='n_file'> N File Name: model/discriminator.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 12</div><div id='n_start'> N Start Line: 61</div><div id='n_end'> N End Line: 71</div><BR>

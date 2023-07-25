@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1130
+</h3><img src='3528893.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x):
+        <a id="change">for i</a> in <a id="change">range(len(</a>self.convolutions<a id="change">)</a> - 1<a id="change">):
+            </a>x<a id="change"> = </a>F.dropout(torch.tanh(self.convolutions[i](x)), 0.5, self.training)
+        x = F.dropout(self.convolutions[-1](x), 0.5, self.training)
+
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        &#47&#47 transpose to (B, mel_dim, T) for convolution,
+        &#47&#47 and then back
+        <a id="change">return </a>self.conv1ds(x.transpose(1, 2)).transpose(1, 2)
+
+
+class Encoder(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/4c1680d50b9c91bf13e13c823df949895a3c77c6#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3528893</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: 4c1680d50b9c91bf13e13c823df949895a3c77c6</div><div id='time'> Time: 2021-03-17</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Postnet</div><div id='n_method'> N Class Name: Postnet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 178</div><div id='m_end'> M End Line: 182</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 31</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        keypoints_xyz, keypoints_features = self.sample_keypoints(xyz, point_features)
+        out = [(point_features, xyz)] + out
+        <a id="change">for i</a> in <a id="change">range(len(</a>self.cfg.strides<a id="change">)</a><a id="change">):
+            </a>voxel_features_i, voxel_coords_i = out[i]
+            voxel_coords_i = voxel_coords_i.unsqueeze(0).contiguous()
+            voxel_features_i = voxel_features_i.unsqueeze(0).permute(0, 2, 1).contiguous()
+            keypoints_xyz<a id="change"> = </a>keypoints_xyz.unsqueeze(0).contiguous()
+            _, out = self.pnets[i](voxel_coords_i, voxel_features_i, keypoints_xyz)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        keypoint_xyz, keypoint_features = self.sample_keypoints(point_xyz, point_features)
+        keypoint_xyz = keypoint_xyz.unsqueeze(0).contiguous()
+        pnet_out = self.pnet_forward(cnn_out, keypoint_xyz)
+        <a id="change">return </a>pnet_out
+
+
+def main():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/1d8a72fc38c04ef4a2ca6516f91c20cd89d4b46d#diff-acdbb7a8541d282e4e6bd0147d753b4b222401d39382c8be5223bd3ab78db7fcL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3528892</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 1d8a72fc38c04ef4a2ca6516f91c20cd89d4b46d</div><div id='time'> Time: 2020-02-03</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/main.py</div><div id='m_class'> M Class Name: PV_RCNN</div><div id='n_method'> N Class Name: PV_RCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/main.py</div><div id='n_file'> N File Name: pvrcnn/main.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 167</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            states_perturbed = to_list(self.eval_fn(embed_perturbed))
+            loss = 0
+            &#47&#47 Compute perturbation loss over all states 
+            <a id="change">for j</a> in <a id="change">range(len(</a>states<a id="change">)</a><a id="change">):
+                </a>loss<a id="change"> += </a>self.loss_fn[j](states_perturbed[j], states[j].detach())
+            if i == self.num_steps + 1: 
+                return loss 
+            &#47&#47 Compute noise gradient     </code></pre><h3>After Change</h3><pre><code class='java'>
+            state_perturbed = self.eval_fn(embed_perturbed)
+            &#47&#47 Return final loss if last step (undetached state)
+            if i == self.num_steps: 
+                <a id="change">return </a>self.loss_last_fn(state_perturbed, state) 
+            &#47&#47 Compute perturbation loss (detached state)
+            loss = self.loss_fn(state_perturbed, state.detach())
+            &#47&#47 Compute noise gradient ∂loss/∂noise</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/smart-pytorch/commit/a9e3a4332c293ad6c421b81ef10857f32e1818d8#diff-d3a700360d4e95f1072ab84f2988c9a0bd670bfc6c4b1940bba80dca9fb8e674L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3528894</div><div id='project'> Project Name: archinetai/smart-pytorch</div><div id='commit'> Commit Name: a9e3a4332c293ad6c421b81ef10857f32e1818d8</div><div id='time'> Time: 2022-05-25</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: smart_pytorch/smart_pytorch.py</div><div id='m_class'> M Class Name: SMARTLoss</div><div id='n_method'> N Class Name: SMARTLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: smart_pytorch/smart_pytorch.py</div><div id='n_file'> N File Name: smart_pytorch/smart_pytorch.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 58</div><BR>

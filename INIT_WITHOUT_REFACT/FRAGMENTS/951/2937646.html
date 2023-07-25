@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+			&#47&#47print(preds.size())
+
+			y = y.long()
+			loss<a id="change"> = </a>self.Loss(preds_, torch.squeeze(y))
+			<a id="change">return </a>preds<a id="change">, loss</a>
+		return preds
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		preds_ = []
+		loss = 0
+		for i,k in <a id="change">enumerate(</a>xs<a id="change">)</a>:
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			
+			preds = self.Linear(hs.contiguous().view(x.size(0), -1))
+			preds_.append(preds)
+			if y is not None:
+				loss<a id="change">+=</a>self.Loss(preds, y[:,i].squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=len(xs)</code></pre>

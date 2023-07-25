@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        values = self.values[None, :, None, :, :].expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=values.shape[-1])
+        selected_values<a id="change"> = </a><a id="change">values.gather(-2</a>, expanded_indices<a id="change">)</a>
+
+        out = (attn.unsqueeze(-1) * selected_values).sum(dim=-2)
+        out = out.transpose(1, 2).reshape(b, t, -1)
+        return self.to_out(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+        queries = self.to_queries(x).chunk(2, dim=-1)
+        queries = torch.stack(queries).reshape(2, b, t, h, -1)
+
+        keys<a id="change">, values</a> = map(lambda x: expand_dim(x, 0, h), (self.keys, self.values))
+
+
+        dots = torch.einsum(&quotpbthd,hnpd-&gt;bhtpn&quot, queries, keys)</code></pre>

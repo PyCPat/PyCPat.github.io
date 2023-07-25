@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if need_transpose:
+            quantize = rearrange(quantize, &quotb d n -&gt; b n d&quot)
+
+        <a id="change">return </a>quantize<a id="change">, embed_ind, commit_loss</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = torch.tensor([0.], device = device)
+
+        if self.training:
+            <a id="change">if self.commitment &gt; 0</a><a id="change">:
+                </a>commit_loss = F.mse_loss(quantize.detach(), x)
+                loss<a id="change"> = </a>loss + commit_loss * self.commitment
+
+            if self.orthogonal_reg_weight &gt; 0:
+                orthogonal_reg_loss = orthgonal_loss_fn(self.codebook)
+                loss<a id="change"> = </a>loss + orthogonal_reg_loss * self.orthogonal_reg_weight
+
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize = rearrange(quantize, &quotb d n -&gt; b n d&quot)
+
+        <a id="change">return </a>quantize<a id="change">, embed_ind, loss</a>
+</code></pre>

@@ -1,0 +1,116 @@
+<html><h3>Pattern ID :2180
+</h3><img src='7688086.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask = F.pad(x, (0<a id="change">, padding</a>), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 padding
+
+        padding = seq_len<a id="change"> - n + 1</a>
+        mask = default(mask, lambda: torch.ones(b, text_len, device = device).bool())
+
+        x = F.pad(x, (0, 0, 0, padding), value = 0)
+        mask = mask[:, :text_len]
+
+        &#47&#47 derive query / keys / values
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+
+        q *= self.scale
+
+        ((q_text, q_img), (k_text, k_img), (v_text, v_img)) = map(lambda t: (t[:, img_seq_len:], t[:, -img_seq_len:]), (q, k, v))
+
+        &#47&#47 text attention
+
+        dots_text = einsum(&quotb i d, b j d -&gt; b i j&quot, q_text, k_text)
+        mask_value = max_neg_value(dots_text)
+
+        i, j = dots_text.shape[-2:]
+        text_causal_mask = torch.ones(i, j, device = device).triu_(j - i + 1).bool()
+        dots_text.masked_fill(text_causal_mask, mask_value)
+
+        attn_text = dots_text.softmax(dim = -1)
+        out_text = einsum(&quotb i j, b j d -&gt; b i d&quot, attn_text, v_text)
+
+        &#47&#47 image attention
+
+        effective_kernel_size = (kernel_size - 1) * dilation + 1
+        padding = effective_kernel_size // 2
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.unfold(t, kernel_size, padding = padding, dilation = dilation), (k_img, v_img))
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (j d) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        k_text, v_text = map(lambda t: repeat(t, &quotb j d -&gt; b i j d&quot, i = img_seq_len), (k_text, v_text))
+
+        &#47&#47 let image attend to all of text
+
+        k_img = torch.cat((k_text, k_img), dim = 2)
+        v_img = torch.cat((v_text, v_img), dim = 2)
+
+        dots_image = einsum(&quotb i d, b i j d -&gt; b i j&quot, q_img, k_img)
+
+        &#47&#47 calculate causal attention for local convolution
+
+        i, j = dots_image.shape[-2:]
+        img_seq = torch.arange(img_seq_len, device = device)
+        k_img_indices = rearrange(img_seq.float(), &quot(h w) -&gt; () () h w&quot, h = img_size)
+        k_img_indices = F.pad(k_img_indices, (padding,) * 4, value = img_seq_len) &#47&#47 padding set to be max, so it is never attended to
+        k_img_indices = F.unfold(k_img_indices, kernel_size, dilation = dilation)
+        k_img_indices = rearrange(k_img_indices, &quotb j i -&gt; b i j&quot)
+
+        &#47&#47 mask image attention
+
+        q_img_indices = rearrange(img_seq, &quoti -&gt; () i ()&quot)
+        causal_mask =  q_img_indices &gt;= k_img_indices
+
+        &#47&#47 concat text mask with image causal mask
+
+        causal_mask = repeat(causal_mask, &quot() i j -&gt; b i j&quot, b = b * h)
+        mask<a id="change"> = </a><a id="change">repeat(</a>mask, <a id="change">&quotb j -&gt; (b h) i j&quot</a><a id="change">, i = i, h = h)</a>
+        mask<a id="change"> = </a>torch.cat((~mask, causal_mask), dim = -1)
+
+        &#47&#47 image can attend to all of text
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7688086</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(mask[...<a id="change">, None</a>], 0.)
+
+        gate = F.conv1d(gate, weight, bias)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.use_circulant_matrix:
+            dim_seq = weight.shape[-1]
+            weight = F.pad(weight, (0, dim_seq), value = 0)
+            weight<a id="change"> = </a><a id="change">repeat(</a>weight, <a id="change">&quot... n -&gt; ... (r n)&quot</a><a id="change">, r = dim_seq)</a>
+            weight = weight[:-dim_seq].reshape(dim_seq, 2<a id="change"> * dim_seq - 1</a>)
+            weight<a id="change"> = </a>weight[:, (dim_seq - 1):]
+
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-pytorch/commit/9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f#diff-44034403ad35d2d6dad50e7e4379a1df7da10aa3cd01d85a3d96b8361931c8b1L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7688080</div><div id='project'> Project Name: lucidrains/g-mlp-pytorch</div><div id='commit'> Commit Name: 9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f</div><div id='time'> Time: 2021-08-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_class'> M Class Name: SpatialGatingUnit</div><div id='n_method'> N Class Name: SpatialGatingUnit</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='n_file'> N File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask = F.pad(x, (0<a id="change">, padding</a>), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 mask so image has full attention to text, but causal along axis
+
+        bh, i, j = dots_image.shape
+        causal_mask = torch.ones(i, img_size, device = device).triu_(img_size<a id="change"> - i + 1</a>).bool()
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+
+        mask<a id="change"> = </a><a id="change">repeat(</a>mask, <a id="change">&quotb j -&gt; (b r) i j&quot</a><a id="change">, r = (bh // b), i = i)</a>
+        mask<a id="change"> = </a>torch.cat((~mask, causal_mask), dim = -1)
+
+        dots_image.masked_fill_(mask, mask_value)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7688095</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 191</div><div id='m_end'> M End Line: 241</div><div id='n_start'> N Start Line: 201</div><div id='n_end'> N End Line: 259</div><BR>

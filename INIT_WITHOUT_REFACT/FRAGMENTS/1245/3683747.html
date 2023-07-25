@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, inputs):
+        C4_lat = <a id="change">self.conv1(</a>inputs[0]<a id="change">)</a>
+        C5_lat = self.conv2(inputs[1])
+        Cglb_lat = self.conv3(inputs[1])
+        return self.relu(C4_lat + C5_lat + Cglb_lat)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+        out = None
+        <a id="change">for </a>i, <a id="change">x</a> in enumerate(inputs)<a id="change">:
+            </a>layer = <a id="change">getattr(</a>self, f&quotconv{i+1}&quot<a id="change">)</a>
+            x = layer(x)
+            out = x if out is None else x+out
+        layer = <a id="change">getattr(</a>self, f&quotconv{i+2}&quot<a id="change">)</a>
+        Cglb_lat = layer(inputs[-1])
+        return self.relu(out + Cglb_lat)
+
+</code></pre>

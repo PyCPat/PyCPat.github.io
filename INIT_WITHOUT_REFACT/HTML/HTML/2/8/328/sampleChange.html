@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores<a id="change"> = </a>torch.matmul(<a id="change">src_embedding.transpose(2, 1).contiguous()</a>, tgt_embedding) / math.sqrt(self.emb_dims)
+		scores<a id="change"> = </a>torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()
+            translation_ba = -torch.matmul(rotation_ba, <a id="change">translation_ab.unsqueeze(2</a><a id="change">)</a>).squeeze(2)
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))
+</code></pre>

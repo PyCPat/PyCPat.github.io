@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 point_features_list.append(pooled_features.view(batch_size, num_keypoints, -1))
+            point_features_list.append(pooled_features)
+        if self.model_cfg[&quotadd_ego_mask_feature&quot]:
+            ego_mask<a id="change"> = </a><a id="change">torch.ones(</a>(len(new_xyz), 1)<a id="change">, device=point_features_list[0].device)</a>
+            ego_mask[new_xyz_batch_cnt[0]:] = 0
+            point_features_list.append(ego_mask)
+
+        point_features = torch.cat(point_features_list, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        point_features_list = []
+        if &quotbev&quot in self.model_cfg[&quotfeatures_source&quot]:
+            point_bev_features = self.interpolate_from_bev_features(
+                keypoints[..., :3], <a id="change">batch_dict[&quotprocessed_lidar&quot]</a>[&quotspatial_features&quot], batch_dict[&quotbatch_size&quot],
+                bev_stride=batch_dict[&quotprocessed_lidar&quot][&quotspatial_features_stride&quot]
+            )
+            point_features_list.append(point_bev_features[kpt_mask])</code></pre>

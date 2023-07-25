@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+        regs = list()
+
+        <a id="change">for logit</a> in logits<a id="change">:
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            </a>posterior = Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            <a id="change">regs.append(</a>reg<a id="change">)</a>
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        n, h, w, k = logits[0].shape
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w])
+        <a id="change">for </a>code, logit, <a id="change">freqMap</a> in <a id="change">zip(</a>codes.permute(1, 0, 2, 3), logits, codeFreqMap<a id="change">):
+            </a>needRegMask<a id="change"> = </a>(freqMap &gt; (float(h * w) / k)).float()
+            sample = torch.distributions.Categorical(logits=torch.zeros_like(logit)).sample()
+            logit = logit.permute(0, 3, 1, 2)
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask
+            cePush<a id="change"> = </a>F.cross_entropy(logit, code, reduction="none") * (1<a id="change"> - </a>needRegMask)
+            <a id="change">regs.append(</a>ceReg.mean() + cePush.mean()<a id="change">)</a>
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies
+        &#47&#47 for code, logit, freq in zip(codes.permute(1, 0, 2, 3), logits, codeFreq):
+        &#47&#47     &#47&#47 perturb code by the most rare codes with 0.1 probability
+        &#47&#47     p = 1. / freq.shape[-1]</code></pre>

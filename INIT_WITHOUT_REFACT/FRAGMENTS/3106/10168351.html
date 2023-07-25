@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = inputs.reshape(-1, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]).permute(0, 3, 1, 2)
+            x = self.encoder(x)
+            x<a id="change"> = </a><a id="change">torch.mean(</a>x, (2, 3)<a id="change">)</a>
+            x = x.reshape(inputs.shape[0], -1)
+        else:
+            x = self.encoder(inputs)
+        h = hidden_state[0].reshape(-1, self.hidden_state_size) &#47&#47 fake a hidden state no use</code></pre><h3>After Change</h3><pre><code class='java'>
+    @override(ModelV2)
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if <a id="change">len(self.full_obs_space.shape) == 3</a>: &#47&#47 3D
+            inputs = inputs.reshape((-1,)<a id="change"> + </a>self.full_obs_space.shape)
+        x = self.encoder(inputs)
+        h = hidden_state[0].reshape(-1, self.hidden_state_size) &#47&#47 fake a hidden state no use
+        x = self.mlp(x)</code></pre>

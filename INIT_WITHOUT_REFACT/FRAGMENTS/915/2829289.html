@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Create target for events spotting and ball position (local and global)
+        batch_size = pred_ball_global.size(0)
+        target_ball_global = torch.zeros_like(pred_ball_global)
+        target_ball_local<a id="change"> = </a><a id="change">torch.zeros_like(</a>pred_ball_global<a id="change">)</a>
+        target_events = torch.zeros((batch_size, 2), device=self.device)
+        for idx in range(batch_size):
+            target_ball_global[idx] = create_target_ball(global_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            target_ball_local[idx] = create_target_ball(local_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+            log_vars_idx += 1
+            target_events = torch.zeros((batch_size, 2), device=self.device)
+            for sample_idx in range(batch_size):
+                target_events[sample_idx] = create_target_events(<a id="change">event_class[sample_idx]</a>, device=self.device)
+            event_loss = self.event_loss_criterion(pred_events, target_events)
+            total_loss += event_loss / (torch.exp(self.log_vars[log_vars_idx])) + self.log_vars[log_vars_idx]
+</code></pre>

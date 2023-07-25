@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, label):
+        &#47&#47 --------------------------- cos(theta) & phi(theta) ---------------------------
+        cosine = <a id="change">F.linear(</a>F.normalize(input), F.normalize(self.weight)<a id="change">)</a>
+        sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
+        phi = cosine * self.cos_m - sine * self.sin_m
+        if self.easy_margin:
+            phi = torch.where(cosine &gt; 0, phi, cosine)
+        else:
+            phi = torch.where(cosine &gt; self.th, phi, cosine - self.mm)
+        &#47&#47 --------------------------- convert label to one-hot ---------------------------
+        &#47&#47 one_hot = torch.zeros(cosine.size(), requires_grad=True, device=&quotcuda&quot)
+        one_hot<a id="change"> = </a>torch.zeros(cosine.size(), device = &quotcuda&quot)
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        &#47&#47 -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
+        output = (one_hot * phi) + ((1.0 - one_hot)<a id="change"> * </a>cosine)  &#47&#47 you can use torch.where if your torch.__version__ is 0.4
+        output<a id="change"> *= </a>self.s
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        kernel_norm = l2_norm(self.kernel, axis = 0)
+        cos_theta = torch.mm(embbedings, kernel_norm)
+        cos_theta = cos_theta.clamp(-1, 1)  &#47&#47 for numerical stability
+        <a id="change">with torch</a><a id="change">.no_grad():
+            </a>origin_cos = cos_theta.clone()
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))</code></pre>

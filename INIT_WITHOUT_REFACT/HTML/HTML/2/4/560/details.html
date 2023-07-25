@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :560
+</h3><img src='1988564.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            time_points = time_sequence[time_index]  &#47&#47 t in SEFT paper
+            pe_ = self.pos_encoder(time_points.unsqueeze(1)).squeeze(1)
+            variable = nonzero_index[:,1] &#47&#47 the dimensions of variables. The m value in SEFT paper.
+            unit = torch.cat(<a id="change">[</a>pe_, values.unsqueeze(1), variable.unsqueeze(1)<a id="change"></a>], dim=1)
+            f_prime = torch.mean(unit, dim=0) &#47&#47 [435, 34] --&gt; [1,34]
+
+            x = torch.cat([f_prime.repeat(unit.shape[0], 1), unit], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 positional encoding  AUROC ~0.86 Why positional encoding works?
+            &#47&#47 values_ = self.pos_encoder_value(values.unsqueeze(1)).squeeze(1)
+            variable_ = <a id="change">self.pos_encoder_sensor(variable.unsqueeze(1)).squeeze(1</a><a id="change">)</a>
+
+            linear mapping &#47&#47 AUROC~0.8
+            &#47&#47 values_ =  self.linear_value(values.float().unsqueeze(1)).squeeze(1)
+            &#47&#47 variable_ = self.linear_sensor(variable.float().unsqueeze(1)).squeeze(1)
+
+            Nonlinear transformation &#47&#47 AUROC ~0.8
+            values_ =  F.relu(self.linear_value(values.float().unsqueeze(1))).squeeze(1)
+            &#47&#47 variable_ =  F.relu(self.linear_sensor(variable.float().unsqueeze(1))).squeeze(1)
+
+            unit = torch.cat(<a id="change">[</a>pe_, values_, variable_<a id="change"></a>], dim=1)
+            Add Normalization across samples here, to make all 48-dimensions are in similar scale
+            unit = F.normalize(unit, dim=1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mims-harvard/raindrop/commit/20c471dc33bc76d29c2dd0a6c93b05529095cadf#diff-b7c638e744cc24cbf0e26b15a5dd347480335d7c3d444eb55d211866066c5266L278' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1988564</div><div id='project'> Project Name: mims-harvard/raindrop</div><div id='commit'> Commit Name: 20c471dc33bc76d29c2dd0a6c93b05529095cadf</div><div id='time'> Time: 2021-09-06</div><div id='author'> Author: xiang.alan.zhang@gmail.com</div><div id='file'> File Name: code/baselines/models.py</div><div id='m_class'> M Class Name: SEFT</div><div id='n_method'> N Class Name: SEFT</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/baselines/models.py</div><div id='n_file'> N File Name: code/baselines/models.py</div><div id='m_start'> M Start Line: 278</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 299</div><div id='n_end'> N End Line: 322</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            output, stop_token, attention = self.decode(inputs, mask)
+            outputs += [output]
+            attentions += [attention]
+            stop_tokens += <a id="change">[</a>stop_token<a id="change"></a>]
+            t += 1
+
+        return self._parse_outputs(outputs, attentions, stop_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+            output, stop_token, attention = self.decode(inputs, mask)
+            outputs += [output]
+            attentions += [attention]
+            stop_tokens += <a id="change">[</a><a id="change">stop_token.squeeze(1</a><a id="change">)</a>]
+            t += 1
+        return self._parse_outputs(outputs, attentions, stop_tokens)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/e83a4b07d2558a25b0ad84dea642385a61660bd6#diff-63415e5bdfe9c172be8a9cadb35d1f47d718fea5f15c6879f5715ebb9e331155L411' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1988565</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: e83a4b07d2558a25b0ad84dea642385a61660bd6</div><div id='time'> Time: 2019-10-28</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron.py</div><div id='n_file'> N File Name: layers/tacotron.py</div><div id='m_start'> M Start Line: 441</div><div id='m_end'> M End Line: 441</div><div id='n_start'> N Start Line: 440</div><div id='n_end'> N End Line: 440</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, h_erb = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs = <a id="change">[</a>spec<a id="change"></a>]
+        &#47&#47 re/im into channel axis
+        spec_f = spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2)  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None</code></pre><h3>After Change</h3><pre><code class='java'>
+        m, x_rnn, h_erb = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs = <a id="change">[</a><a id="change">spec.squeeze(1</a><a id="change">)</a>] * (len(self.refinement_stages) + 1)
+        &#47&#47 re/im into channel axis
+        spec_f = spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2)  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/2aacf4d049fc9e7b073c15d705c60f87f3d554f7#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L466' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1988563</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 2aacf4d049fc9e7b073c15d705c60f87f3d554f7</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 471</div><div id='m_end'> M End Line: 477</div><div id='n_start'> N Start Line: 471</div><div id='n_end'> N End Line: 480</div><BR>

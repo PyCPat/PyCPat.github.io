@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 TODO DEBUG : This line is giving all nans XD
+        core_output = self.core(core_input)   &#47&#47 core_input is of shape (T, B, ...)
+                                              &#47&#47 core_output is (B, ...)
+        <a id="change">print(</a>&quotCORE OUTPUT: &quot,core_output[0,:10]<a id="change">)</a>
+        print(&quotCore output shpae: &quot,core_output.shape)
+        &#47&#47 TODO : The current memory is put as None since I&quotve instantiated TransformerLM with
+        &#47&#47  mem_len = 0 above
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        baseline = self.baseline(core_output)
+
+        &#47&#47 print(&quotPOLICY SHAPE: &quot,policy_logits.shape)
+        policy_logits<a id="change"> = </a><a id="change">policy_logits.reshape(</a>T*B, self.num_actions<a id="change">)</a>
+        &#47&#47 print(&quotTMP : {} Original : {}&quot.format(policy_logits_tmp[:3, :], policy_logits[:3, :3, :]))
+        if self.training:
+            &#47&#47 Sample from multinomial distribution for explorationx
+            action = torch.multinomial(F.softmax(policy_logits, dim=1), num_samples=1)</code></pre>

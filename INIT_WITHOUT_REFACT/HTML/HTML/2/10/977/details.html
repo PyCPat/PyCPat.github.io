@@ -1,0 +1,91 @@
+<html><h3>Pattern ID :977
+</h3><img src='3051567.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        no_batch = (x.ndim == 1)
+        if no_batch:
+            x<a id="change"> = </a><a id="change">rearrange(</a>x, <a id="change">&quotn -&gt; () n&quot</a><a id="change">)</a>
+
+        if x.dtype == torch.long:
+            x = F.one_hot(x, num_classes = self.num_alphabet)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        no_batch = x.ndim == 2
+
+        <a id="change">if </a>no_batch<a id="change">:
+            </a>x<a id="change"> = rearrange(</a>x, <a id="change">&quot... -&gt; () ...&quot</a><a id="change">)</a>
+
+        x = self._trunk(x)
+        out = map_values(lambda fn: fn(x), self._heads)
+
+        if no_batch:
+            out = map_values(lambda t: rearrange(t, &quot() ... -&gt; ...&quot), out)
+            x<a id="change"> = </a><a id="change">rearrange(</a>x, <a id="change">&quot() ... -&gt; ...&quot</a><a id="change">)</a>
+
+        if return_embeddings:
+            return out, x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/enformer-pytorch/commit/cf8d4440cc67d8b83d4e70906be27f54087158ec#diff-d41824114176cf139e53af298fee855401c92b5fbb8c782f4eb1dd3fbf56fe10L348' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3051567</div><div id='project'> Project Name: lucidrains/enformer-pytorch</div><div id='commit'> Commit Name: cf8d4440cc67d8b83d4e70906be27f54087158ec</div><div id='time'> Time: 2021-12-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_class'> M Class Name: Enformer</div><div id='n_method'> N Class Name: Enformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enformer_pytorch/enformer_pytorch.py</div><div id='n_file'> N File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_start'> M Start Line: 348</div><div id='m_end'> M End Line: 355</div><div id='n_start'> N Start Line: 350</div><div id='n_end'> N End Line: 372</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 encode
+
+        retrieved<a id="change"> = </a><a id="change">rearrange(</a>retrieved, <a id="change">&quotb k n d -&gt; (b k) n d&quot</a><a id="change">)</a>
+        embed_as_context = rearrange(embed, &quotb (k n) d -&gt; (b k) n d&quot, n = chunk_size)
+
+        retrieved = self.encoder(retrieved, context = embed_as_context)
+        retrieved = rearrange(retrieved, &quot(b k) n d -&gt; b k n d&quot, k = n // chunk_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 handle some user inputs
+
+        <a id="change">if </a>retrieved.ndim == 3<a id="change">:
+            </a>retrieved<a id="change"> = rearrange(</a>retrieved, <a id="change">&quotb k n -&gt; b k 1 n&quot</a><a id="change">)</a> &#47&#47 1 neighbor retrieved
+
+        &#47&#47 if training, derive labels
+
+        if return_loss:
+            seq, labels = seq[:, :-1], seq[:, 1:]
+
+        &#47&#47 variables
+
+        n, chunk_size, num_retrieved, device = seq.shape[-1], retrieved.shape[-1], retrieved.shape[-2], seq.device
+
+        assert divisible_by(n, chunk_size), &quotsequence length must be divisible by chunk size&quot
+
+        &#47&#47 embed both sequence and retrieved chunks
+
+        embed = self.token_emb(seq)
+        retrieved = self.token_emb(retrieved)
+
+        &#47&#47 get absolute positional embedding
+
+        pos_emb = self.pos_emb(torch.arange(n, device = device))
+        pos_emb = rearrange(pos_emb, &quotn d -&gt; 1 n d&quot)
+        embed = embed + pos_emb
+
+        &#47&#47 encode
+
+        retrieved<a id="change"> = </a><a id="change">rearrange(</a>retrieved, <a id="change">&quotb k r n d -&gt; (b k r) n d&quot</a><a id="change">, r = num_retrieved)</a>
+        embed_as_context = repeat(embed, &quotb (k n) d -&gt; (b k r) n d&quot, n = chunk_size, r = num_retrieved)
+
+        retrieved = self.encoder(retrieved, context = embed_as_context)
+        retrieved = rearrange(retrieved, &quot(b k r) n d -&gt; b k r n d&quot, k = n // chunk_size, r = num_retrieved)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/0a43e49a6ce3bfbf1592d7a1b400840471628be7#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L297' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3051565</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: 0a43e49a6ce3bfbf1592d7a1b400840471628be7</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: RETRO</div><div id='n_method'> N Class Name: RETRO</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 319</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 319</div><div id='n_end'> N End Line: 355</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize<a id="change"> = </a><a id="change">rearrange(</a>quantize, <a id="change">&quotb d n -&gt; b n d&quot</a><a id="change">)</a>
+
+        return quantize, embed_ind, loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        quantize = self.project_out(quantize)
+
+        <a id="change">if </a>need_transpose<a id="change">:
+            </a>quantize<a id="change"> = rearrange(</a>quantize, <a id="change">&quotb n d -&gt; b d n&quot</a><a id="change">)</a>
+
+        if self.accept_image_fmap:
+            quantize<a id="change"> = </a><a id="change">rearrange(</a>quantize, <a id="change">&quotb (h w) c -&gt; b c h w&quot</a><a id="change">, h = height, w = width)</a>
+            embed_ind = rearrange(embed_ind, &quotb (h w) -&gt; b h w&quot, h = height, w = width)
+
+        return quantize, embed_ind, loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/c9725a6e2556251a8b8a5d73795dabdc59c7c0f4#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL300' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3051560</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: c9725a6e2556251a8b8a5d73795dabdc59c7c0f4</div><div id='time'> Time: 2021-12-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: VectorQuantize</div><div id='n_method'> N Class Name: VectorQuantize</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 303</div><div id='m_end'> M End Line: 331</div><div id='n_start'> N Start Line: 304</div><div id='n_end'> N End Line: 342</div><BR>

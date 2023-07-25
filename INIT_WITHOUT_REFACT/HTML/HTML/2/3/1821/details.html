@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :1821
+</h3><img src='7079934.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        laterals = [lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = <a id="change">len(</a>laterals<a id="change">)</a>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1]<a id="change"> += </a>F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        <a id="change">for </a>i in reversed(range(len(features)-1))<a id="change">:
+            </a>feature = self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7079934</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            if i &lt; <a id="change">len(</a>self.output_convs<a id="change">)</a> - 1:
+                out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out<a id="change"> = </a>self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)
+            outputs.append(conv(out))                                           &#47&#47 P4out = conv(P4in + P4td + resize(P3td))
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0] = tds[0]
+        <a id="change">for </a>i in range(self.num_levels - 2)<a id="change">:
+            </a>outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(tds[-2])])                &#47&#47 P7in + resize(P6td)
+
+        return outs</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7079935</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                innerProduct = codebook @ codebook.T
+                &#47&#47 orthogonal regularization
+                weakCodebookLoss.append(self._auxLoss(innerProduct, torch.eye(innerProduct.shape[0], device=innerProduct.device, dtype=innerProduct.dtype)))
+            m = <a id="change">len(</a>features<a id="change">)</a>
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, h, w, c] * [n, h, w, c]).sum(-1)
+                    interProduct<a id="change"> = </a>(features[i] * features[j]).sum(-1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct = (features[i] * features[i]).sum(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        weakCodebookLoss = list()
+
+        for raws, codes, codebooks, k, logits, spread in zip(allFeatures, allCodes, allCodebooks, self._k, allLogits, self._spreadLoss):
+            <a id="change">for </a>raw, code, codebook, logit in zip(raws, codes, codebooks, logits)<a id="change">:
+                &#47&#47 weakFeatureLoss.append(self._alignLoss(raw, F.one_hot(code, k).float(), codebook))
+                </a>weakCodebookLoss.append(spread(codebook))
+                &#47&#47 weakCodebookLoss.append(self._l2Reg(raw, -1))
+
+        return dLoss, (sum(weakCodebookLoss), 0.0, 0.0), (restored, allTrues, allLogits)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/753fa7e4e7c9bf19e23ef12ea0062e240077eaf8#diff-24bbc42d530738d7fc1f7098f327db279f94db71606c6e135b122db05755da7cL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7079940</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 753fa7e4e7c9bf19e23ef12ea0062e240077eaf8</div><div id='time'> Time: 2021-11-28</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/whole.py</div><div id='m_class'> M Class Name: WholePQBig</div><div id='n_method'> N Class Name: WholePQBig</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/whole.py</div><div id='n_file'> N File Name: src/mcqc/models/whole.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        nn.init.constant_(self.bias, val=0)
+        
+    def forward(self, x, node_embeddings):
+        if <a id="change">len(</a>node_embeddings.shape<a id="change">)</a>==2:
+            node_num<a id="change"> = </a>node_embeddings.shape[0]
+            supports = F.softmax(F.relu(torch.mm(node_embeddings, node_embeddings.transpose(0, 1))), dim=1)
+        else:
+            node_num = node_embeddings.shape[1]</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, supports):
+        x_g = []        
+        support_set = []
+        <a id="change">for </a>support in supports<a id="change">:
+            </a>support_ks = [torch.eye(support.shape[0]).to(support.device), support]
+            for k in range(2, self.cheb_k):
+                support_ks.append(torch.matmul(2 * support, support_ks[-1]) - support_ks[-2]) 
+            support_set.extend(support_ks)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zezhishao/basicts/commit/4adec9a0403655584de5a4e97e41611c179b0f1e#diff-424cddf60b4a90b983c982297ee1c07b3ddf2079e710a5d89b564b5a3d9a4b78L15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7079924</div><div id='project'> Project Name: zezhishao/basicts</div><div id='commit'> Commit Name: 4adec9a0403655584de5a4e97e41611c179b0f1e</div><div id='time'> Time: 2023-02-26</div><div id='author'> Author: 864453277@qq.com</div><div id='file'> File Name: basicts/archs/arch_zoo/megacrn/megacrn_arch.py</div><div id='m_class'> M Class Name: AGCN</div><div id='n_method'> N Class Name: AGCN</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: basicts/archs/arch_zoo/megacrn/megacrn_arch.py</div><div id='n_file'> N File Name: basicts/archs/arch_zoo/megacrn/megacrn_arch.py</div><div id='m_start'> M Start Line: 16</div><div id='m_end'> M End Line: 25</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 24</div><BR>

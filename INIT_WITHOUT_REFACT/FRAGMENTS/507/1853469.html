@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        features.append(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x<a id="change"> = </a>self.maxpool(x)  &#47&#47 56x56 ignore
+
+        x = self.layer1(x)  &#47&#47 56x56
+        features.append(x)
+        x = self.layer2(x)  &#47&#47 28x28
+        features.append(x)
+        x = self.layer3(x)  &#47&#47 14x14 ignore (maybe not)
+        features.append(x)
+        x = self.layer4(x)  &#47&#47 7x7
+        features.append(x)
+
+        if not self.include_top:
+            return features
+
+        x<a id="change"> = </a>self.avgpool(x)  &#47&#47 1x1
+        features.append(x)
+
+        x = x.view(x.size(0), -1)
+        x<a id="change"> = </a>self.fc(x)
+        <a id="change">return </a>x
+
+    @staticmethod
+    def norm_tensor(x):</code></pre><h3>After Change</h3><pre><code class='java'>
+        features = self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = <a id="change">[a * torch.abs(p[0] - p[1]).mean() for a, p in zip(self.alphas, features)]</a>
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]
+        <a id="change">return sum(</a>diffs<a id="change">)</a>
+        &#47&#47 return sum(diffs) / len(diffs)
+
+</code></pre>

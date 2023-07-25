@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :1597
+</h3><img src='6501649.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return self._mapping
+
+    def forward(self, *args, **kwargs):
+        <a id="change">if </a>self._compute_on_step<a id="change">:
+            </a>return self._metric(*args, **kwargs)
+        else:
+            <a id="change">self._metric.update(</a>*<a id="change">args, **kwargs)</a>
+
+    def compute(self):
+        value = self._metric.compute()
+        return value</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    def forward(self, *args, **kwargs):
+        Update metric states.
+        <a id="change">self._metric.update(</a>*<a id="change">args, **kwargs)</a>
+
+    def compute(self):
+        Compute metric.
+        value = self._metric.compute()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/c94b247f39a9b2c22c028f8354e559b4d1656291#diff-742b0bc5b9e3d0cee07fe7e47b38fdf9d56833a1c3e4d0ca4eb5a27f9201eea6L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501649</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: c94b247f39a9b2c22c028f8354e559b4d1656291</div><div id='time'> Time: 2022-07-05</div><div id='author'> Author: rashit.bayazitov.1995@gmail.com</div><div id='file'> File Name: src/metrics/metrics_manager.py</div><div id='m_class'> M Class Name: MetricWithUtils</div><div id='n_method'> N Class Name: MetricWithUtils</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/metrics/metrics_manager.py</div><div id='n_file'> N File Name: src/metrics/metrics_manager.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 44</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                x = pad(x)
+            return self.net(x, **kwargs)
+
+        <a id="change">if </a>isinstance(x, torch.Tensor)<a id="change">:
+            </a>xi = x[:, :-1]
+            xo = x[:, 1:]
+
+            &#47&#47 help auto-solve an area of confusion around input masks in auto-regressive
+            &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+            mask = kwargs.pop(&quotmask&quot, None)
+            if mask is not None and mask.shape[1] == x.shape[1]:
+                mask = mask[:, :-1]
+            <a id="change">kwargs.update(mask = mask)</a>
+        else:
+            xi = pad(list(map(lambda t: t[:-1], x)))
+            xo = pad(list(map(lambda t: t[1:], x)))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = kwargs.pop(&quotmask&quot, None)
+        if mask is not None and mask.shape[1] == x.shape[1]:
+            mask = mask[:, :-1]
+        <a id="change">kwargs.update(mask = mask)</a>
+
+        out = self.net(xi, **kwargs)
+
+        loss = F.cross_entropy(out.transpose(1, 2), xo, ignore_index = self.ignore_index)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/performer-pytorch/commit/0c92b80b089f36e6cf86713271708d467472769e#diff-192164ea998deaff038129dced1fc9dbccf034f70eaf2ffa88b31af860963378L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501647</div><div id='project'> Project Name: lucidrains/performer-pytorch</div><div id='commit'> Commit Name: 0c92b80b089f36e6cf86713271708d467472769e</div><div id='time'> Time: 2020-12-07</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: performer_pytorch/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: performer_pytorch/autoregressive_wrapper.py</div><div id='n_file'> N File Name: performer_pytorch/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 95</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x, padding = pad_to_multiple(x, self.pad_multiple, dim=self.pad_dim)
+            args[ind] = x
+
+        <a id="change">if </a>padding != 0<a id="change">:
+            </a>new_mask = F.pad(input_mask, (0, padding), value=False)
+            <a id="change">kwargs.update(input_mask=new_mask)</a>
+
+        out = self.net(*args, **kwargs)
+        return out[:, :, 0:t]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        args = map(lambda t: pad_to_multiple(t, self.pad_multiple, dim=-2), args)
+        new_mask = pad_to_multiple(input_mask, self.pad_multiple, dim=-1, value=False)
+        <a id="change">kwargs.update(input_mask=new_mask)</a>
+
+        out = self.net(*args, **kwargs)
+        return out[:, :, 0:t]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/f93f7a6b829422e259a3e439f1bf0baa7abc2e30#diff-c04e8e361ce0b75e0cbf803f7b9344c299f315eb415e580c26a289c41a3c361eL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501646</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: f93f7a6b829422e259a3e439f1bf0baa7abc2e30</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/autopadder.py</div><div id='m_class'> M Class Name: Autopadder</div><div id='n_method'> N Class Name: Autopadder</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/autopadder.py</div><div id='n_file'> N File Name: routing_transformer/autopadder.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 34</div><BR>

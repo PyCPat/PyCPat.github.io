@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.revert_projs.append(nn.Sequential(*tmp))
+
+    def forward(self, x):
+        outs_b = [block(x_) for x_, block in <a id="change">zip(</a>x, self.blocks<a id="change">)</a>]
+        &#47&#47 only take the cls token out
+        proj_cls_token = [proj(x[:, 0:1]) for x, proj in zip(outs_b, self.projs)]
+        &#47&#47 cross attention</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+
+        outs_b = []
+        <a id="change">for </a>i, block in <a id="change">enumerate(</a>self.blocks<a id="change">):
+            </a>outs_b.append(block(x[i]))
+
+        &#47&#47 only take the cls token out
+        proj_cls_token = torch.jit.annotate(List[torch.Tensor], [])</code></pre>

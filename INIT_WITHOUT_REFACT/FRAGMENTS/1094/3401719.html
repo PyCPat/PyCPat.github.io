@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mag = torch.sqrt(torch.sum(label ** 2, dim=1))
+
+        &#47&#47 Temp Fix
+        valid = <a id="change">(label[:, 0].abs() &lt; 1000)</a> & (label[:, 1].abs() &lt; 1000)
+        valid = valid.float()
+        valid = (valid &gt;= 0.5) & (mag &lt; self.max_flow)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        n_preds = len(pred)
+        flow_loss = 0.0
+
+        flow, valid = label[:, :2, :, :], <a id="change">label[:, 2:, :, :]</a>
+        valid = torch.squeeze(valid, dim=1)
+
+        mag = torch.sqrt(torch.sum(flow ** 2, dim=1))
+        valid = (valid &gt;= 0.5) & (mag &lt; self.max_flow)</code></pre>

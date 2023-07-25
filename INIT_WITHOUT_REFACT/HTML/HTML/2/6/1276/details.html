@@ -1,0 +1,82 @@
+<html><h3>Pattern ID :1276
+</h3><img src='3747177.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return "_decoder", "_quantizer"
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0], <a id="change">shape[1]</a>
+        return ((self._decoder(self._quantizer(codes)))[..., :h, :w].tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for </a>i in range(self._levels - 1, -1, -1)<a id="change">:
+            </a>q<a id="change"> = </a>self._scatters[i](<a id="change">self._quantizers[i](</a>codes[i]<a id="change">)</a>)
+            smallQ = self._reverses[i](q + smallQ)
+        <a id="change">return </a>self._decoder(smallQ).tanh()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3747177</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefDecoder</div><div id='n_method'> N Class Name: RefDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 185</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return "_decoder", "_quantizer"
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0], <a id="change">shape[1]</a>
+        return ((self._decoder(self._quantizer(codes)))[..., :h, :w].tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for </a><a id="change">i</a> in range(self._levels - 1, -1, -1)<a id="change">:
+            </a>q<a id="change"> = </a><a id="change">self._scatters[i](</a>self._quantizers[i](codes[i])<a id="change">)</a>
+            smallQ = self._reverses[i](q + smallQ)
+        <a id="change">return </a>self._decoder(smallQ).tanh()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3747176</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefDecoder</div><div id='n_method'> N Class Name: RefDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 185</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.embedding(x)  &#47&#47 (batch_size, target_seq_len, d_model)
+        x *= math.sqrt(self.d_model)
+        x += <a id="change">self.pos_encoding[:, :seq_len, :]</a>
+        x = self.dropout(x)
+
+        &#47&#47 Batch first = True in decoder
+        for i in range(self.num_layers):</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos_enc_tgt = self.positional_encoding(tgt)
+        output = pos_enc_tgt
+
+        <a id="change">for </a><a id="change">i</a> in range(self.num_layers)<a id="change">:
+            </a>normed_output = self.layer_norm(output)
+            output = output + self.dropout(
+                self.attention[i](normed_output, normed_output, normed_output, target_mask)
+            )
+            normed_output = self.layer_norm(output)
+            output = output + self.dropout(
+                <a id="change">self.source_attention[i](</a>normed_output, memory, memory, source_mask<a id="change">)</a>
+            )
+            normed_output<a id="change"> = </a>self.layer_norm(output)
+            output = output + self.dropout(self.position_feed_forward[i](normed_output))
+
+        <a id="change">return </a>self.layer_norm(output)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mindee/doctr/commit/fddceba7bee5098b4219b7ba6a0bdf4f4a98adfe#diff-5eb4b6b7a215017ac91351a0c5e665af04fa644ddf1ecd5037545ba096ec1337L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3747179</div><div id='project'> Project Name: mindee/doctr</div><div id='commit'> Commit Name: fddceba7bee5098b4219b7ba6a0bdf4f4a98adfe</div><div id='time'> Time: 2022-06-09</div><div id='author'> Author: felixdittrich92@gmail.com</div><div id='file'> File Name: doctr/models/recognition/transformer/pytorch.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: doctr/models/recognition/transformer/pytorch.py</div><div id='n_file'> N File Name: doctr/models/recognition/transformer/pytorch.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 167</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            inters.append(conv(out))                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            
+        &#47&#47 bottom-up
+        inters = <a id="change">inters[::-1]</a>           &#47&#47 feature maps from bottom to top, same order as input x
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for </a><a id="change">i</a> in range(self.num_levels - 2, -1 , -1)<a id="change">:
+            </a>tds[i]<a id="change"> = </a><a id="change">self.td_fuses[i](</a>[x[i], self.upsample(tds[i+1])]<a id="change">)</a>      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(tds[-2])])                &#47&#47 P7in + resize(P6td)
+
+        <a id="change">return </a>outs
+
+
+class WeightedFeatureFusion(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3747163</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>

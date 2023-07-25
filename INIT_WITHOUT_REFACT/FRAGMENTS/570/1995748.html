@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+                &#47&#47 Update human nodes
+                messages_to_h = F.relu(torch.mm(
+                    <a id="change">adjacency_matrix.softmax(dim=1)</a>,
+                    <a id="change">self.obj_to_sub(</a>node_encodings<a id="change">)</a>
+                ))
+                h_node_encodings = self.norm_h(
+                    h_node_encodings + messages_to_h
+                )
+
+                &#47&#47 Update object nodes (including human nodes)
+                messages_to_o = F.relu(torch.mm(
+                    adjacency_matrix.t().softmax(dim=1),
+                    <a id="change">self.sub_to_obj(</a>h_node_encodings<a id="change">)</a>
+                ))
+                node_encodings = self.norm_o(
+                    node_encodings + messages_to_o
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+
+                &#47&#47 Update human nodes
+                messages_to_h = F.relu(torch.sum(
+                    <a id="change">adjacency_matrix.softmax(dim=1)</a><a id="change"> *
+                    </a><a id="change">self.obj_to_sub(
+                        </a>node_encodings,
+                        <a id="change">box_pair_spatial_reshaped</a><a id="change">
+                    )</a>, dim=1)
+                )
+                h_node_encodings = self.norm_h(
+                    h_node_encodings + messages_to_h
+                )
+
+                &#47&#47 Update object nodes (including human nodes)
+                messages_to_o = F.relu(torch.sum(
+                    adjacency_matrix.t().softmax(dim=1)<a id="change"> *
+                    self.sub_to_obj(
+                        </a>h_node_encodings,
+                        <a id="change">box_pair_spatial_reshaped</a><a id="change">
+                    )</a>, dim=1)
+                )
+                node_encodings = self.norm_o(
+                    node_encodings + messages_to_o</code></pre>

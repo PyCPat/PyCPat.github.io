@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        m = self.model[-1]  &#47&#47 Detect()
+        m.stride = torch.tensor([128 / x.shape[-2] for x in self.forward(torch.zeros(1, ch, 128, 128))])  &#47&#47 forward
+        m.anchors /= m.stride.view(-1, 1, 1)
+        <a id="change">check_anchor_order(</a>m<a id="change">)</a>
+        self.stride = m.stride
+
+        &#47&#47 Init weights, biases
+        torch_utils.initialize_weights(self)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Build strides, anchors
+        m = self.model[-1]  &#47&#47 Detect()
+        <a id="change">if isinstance(m</a>, Detect<a id="change">)</a><a id="change">:
+            </a>s<a id="change"> = 128</a>  &#47&#47 2x min stride
+            m.stride = torch.tensor([s / x.shape[-2] for x in self.forward(torch.zeros(1, ch, s, s))])  &#47&#47 forward
+            m.anchors /= m.stride.view(-1, 1, 1)
+            <a id="change">check_anchor_order(</a>m<a id="change">)</a>
+            self.stride = m.stride
+            <a id="change">self._initialize_biases()</a>  &#47&#47 only run once
+            &#47&#47 print(&quotStrides: %s&quot % m.stride.tolist())
+
+        &#47&#47 Init weights, biases</code></pre>

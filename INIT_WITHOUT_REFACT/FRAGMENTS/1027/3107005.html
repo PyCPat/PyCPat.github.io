@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, lens):
+        if self.use_mask:
+            lens = <a id="change">lens.to(dtype=torch.long)</a>
+            max_len = x.size(2)
+            mask<a id="change"> = </a>torch.arange(max_len).to(lens.device).expand(
+                len(lens), max_len
+            ) &gt;= <a id="change">lens.unsqueeze(1</a><a id="change">)</a>
+            x<a id="change"> = </a>x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
+            &#47&#47 del mask
+            lens = self.get_seq_len(lens)
+
+        sh = x.shape
+        <a id="change">if </a><a id="change">self.heads != -1:
+            </a>x<a id="change"> = </a>x.view(-1, self.heads, sh[-1])
+
+        out = self.conv(x)
+
+        <a id="change">if self.heads != -1</a><a id="change">:
+            </a>out<a id="change"> = </a>out.view(sh[0], self.real_out_channels, -1)
+
+        <a id="change">return </a>out, lens
+
+
+class GroupShuffle(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out = self.conv(x)
+        return out<a id="change">, self.get_seq_len(lens)</a>
+
+
+def GroupShuffle(groups: int, channels: int) -&gt; nn.Module:
+    Group shuffle operator from shufflenet.</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.to_logits(x)
+
+        next_mem, next_lmem = map(torch.stack, (next_mem, next_lmem))
+        next_mem, next_lmem = <a id="change">map(</a>torch.detach, (next_mem<a id="change">, next_lmem</a>)<a id="change">)</a>
+
+        return out, Memory(short = next_mem, long = next_lmem)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for ind, (attn, ff) in enumerate(zip(self.attn_layers, self.ff_layers)):
+            layer_num = ind + 1
+            use_memory = layer_num in self.memory_layers
+            memories = map(next, (mem_iter, lmem_iter))<a id="change"> if </a>use_memory<a id="change"> else </a>None
+
+            if use_memory:
+                hiddens.append(x)</code></pre>

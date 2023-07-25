@@ -1,0 +1,91 @@
+<html><h3>Pattern ID :3035
+</h3><img src='10023420.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        outputs = []
+        for i in range(<a id="change">len(</a>output_a<a id="change">)</a>):
+            outputs.append(output_a[i] + output_b[i])
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output<a id="change"> = </a>torch.cat(<a id="change">[</a>output_a, output_b, output_a-output_b<a id="change"></a>], dim=1)
+        logits<a id="change"> = </a>self.linear(output)
+        loss = self.loss_fct(logits, labels)
+        <a id="change">return </a>loss, logits
+
+
+class SiameseTransformerAdd(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/prajjwal1/fluence/commit/384e5722f994d3a39d54cf057a0a48a996206bbf#diff-9b5227bea9875a2faa1f5803fb8bdaa8a1891793820bda7ba792e31c87a9e25fL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10023420</div><div id='project'> Project Name: prajjwal1/fluence</div><div id='commit'> Commit Name: 384e5722f994d3a39d54cf057a0a48a996206bbf</div><div id='time'> Time: 2020-08-03</div><div id='author'> Author: prajjwalin@protonmail.com</div><div id='file'> File Name: fluence/models/siamese_model.py</div><div id='m_class'> M Class Name: SiameseTransformer</div><div id='n_method'> N Class Name: SiameseTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fluence/models/siamese_model.py</div><div id='n_file'> N File Name: fluence/models/siamese_model.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 32</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        keypoints_xyz, keypoints_features = self.sample_keypoints(xyz, point_features)
+        out = [(point_features, xyz)] + out
+        for i in range(<a id="change">len(</a>self.cfg.strides<a id="change">)</a>):
+            voxel_features_i, voxel_coords_i = out[i]
+            voxel_coords_i = voxel_coords_i.unsqueeze(0).contiguous()
+            voxel_features_i = voxel_features_i.unsqueeze(0).permute(0, 2, 1).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        points, features, coordinates, voxel_population = self.voxelize(points)
+        cnn_out = self.cnn(features, coordinates, batch_size=1)
+        point_xyz, point_features = torch.split(points, [3, 1], dim=-1)
+        cnn_out<a id="change"> = </a><a id="change">[</a>(point_xyz, point_features)<a id="change"></a>] + cnn_out
+        keypoint_xyz, keypoint_features = self.sample_keypoints(point_xyz, point_features)
+        keypoint_xyz = keypoint_xyz.unsqueeze(0).contiguous()
+        pnet_out<a id="change"> = </a>self.pnet_forward(cnn_out, keypoint_xyz)
+        <a id="change">return </a>pnet_out
+
+
+def main():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/1d8a72fc38c04ef4a2ca6516f91c20cd89d4b46d#diff-acdbb7a8541d282e4e6bd0147d753b4b222401d39382c8be5223bd3ab78db7fcL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10023432</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 1d8a72fc38c04ef4a2ca6516f91c20cd89d4b46d</div><div id='time'> Time: 2020-02-03</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/main.py</div><div id='m_class'> M Class Name: PV_RCNN</div><div id='n_method'> N Class Name: PV_RCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/main.py</div><div id='n_file'> N File Name: pvrcnn/main.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 167</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)
+            if i &lt; <a id="change">len(</a>self.output_convs<a id="change">)</a> - 1:
+                out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:
+                out = self.fuse([inters[i+1], out])                             &#47&#47 P7in + resize(P6td)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+        &#47&#47 top-down
+        tds<a id="change"> = </a><a id="change">[</a>None<a id="change"></a>] * self.num_levels
+        tds[-1] = x[-1]
+        for i in range(self.num_levels - 2, -1 , -1):
+            tds[i]<a id="change"> = </a>self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(tds[-2])])                &#47&#47 P7in + resize(P6td)
+
+        <a id="change">return </a>outs
+
+
+class WeightedFeatureFusion(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10023436</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        block_args = route_args(self.args_route, kwargs, len(self.blocks))
+
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(<a id="change">len(</a>self.blocks<a id="change">)</a>).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = self.blocks[:1] if len(blocks) == 0 else blocks
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x, **kwargs):
+        x<a id="change"> = </a>torch.cat(<a id="change">[</a>x, x<a id="change"></a>], dim=-1)
+
+        blocks = self.blocks
+        args = route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out<a id="change"> =  </a>_ReversibleFunction.apply(x, blocks, args)
+        <a id="change">return </a>torch.stack(out.chunk(2, dim=-1)).sum(dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/d5b9c649e59290b15c15f85d0bb182cb20b699fb#diff-27d52caf7b4f725ff9fe7d9e57172c62a7c8744ebafb23663512e7990a5ed131L132' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10023422</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: d5b9c649e59290b15c15f85d0bb182cb20b699fb</div><div id='time'> Time: 2020-04-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/reversible.py</div><div id='n_file'> N File Name: sinkhorn_transformer/reversible.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 regLoss = list()
+        mleLoss = list()
+
+        for logits, codes in <a id="change">zip(</a>allLogits, allTrues<a id="change">)</a>:
+            &#47&#47 rand = torch.randint_like(codes, logits.shape[-1])
+            &#47&#47 regLoss.append(self._auxLoss(logits.permute(0, 4, 1, 2, 3), rand))
+            mleLoss.append(self._auxLoss(logits.permute(0, 4, 1, 2, 3), codes))</code></pre><h3>After Change</h3><pre><code class='java'>
+                    interProduct = (features[i] * features[j]).sum(1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct<a id="change"> = </a>(<a id="change">features[i] * </a>features[i]).sum(1)
+                weakFeatureLoss.append(self._auxLoss(intraProduct, torch.ones_like(intraProduct)))
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())</code></pre>

@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1446
+</h3><img src='4191838.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        eps = self.eps
+
+        loss = -<a id="change"> target * torch.log(input + eps) - </a>(1 - target) * <a id="change">torch.log(</a>1 - input + eps<a id="change">)</a>
+        loss = loss.squeeze(dim=1).mean(dim=1)
+        
+        if batch_mean:
+            loss = loss.mean(dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if reduction == "mean":
+            loss = loss.mean(dim=dim)
+        elif reduction == "sum":
+            loss<a id="change"> = </a><a id="change">loss.sum(dim=dim)</a>
+        
+        if batch_mean:
+            loss = loss.mean(dim=0)
+        </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/56f95a42611aeaeb3499f097d347a17787656474#diff-2a4c3aaf8146961fbdd87138be7526003d69184f08241e083125003a6456c9a9L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4191838</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 56f95a42611aeaeb3499f097d347a17787656474</div><div id='time'> Time: 2021-12-04</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/entropy.py</div><div id='m_class'> M Class Name: CrossEntropy</div><div id='n_method'> N Class Name: CrossEntropy</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/entropy.py</div><div id='n_file'> N File Name: src/criterion/entropy.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos = torch.sign(rel_pos)<a id="change"> * </a><a id="change">torch.log(</a>rel_pos.abs() + 1<a id="change">)</a>
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+
+        rel_pos = self.rel_pos.float()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        rel_dist += (shape - 1)  &#47&#47 make sure all positive
+        rel_dist *= strides
+        rel_dist_indices<a id="change"> = </a><a id="change">rel_dist.sum(dim = -1)</a>
+
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias = bias[rel_dist_indices]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4191842</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 compute scoring gt and loss
+        score_gt = F.softmax(-distance_metric(pred_dict[&quottraj&quot], gt_dict[&quoty&quot])/self.temper, dim=-1)
+        score_loss = torch.sum(torch.mul(<a id="change">- torch.log(pred_dict[&quotscore&quot])</a>, score_gt))
+        loss += self.lambda3 * score_loss
+
+        loss_dict = {"tar_cls_loss": cls_loss, "tar_offset_loss": offset_loss, "traj_loss": reg_loss, "score_loss": score_loss}</code></pre><h3>After Change</h3><pre><code class='java'>
+        offset = pred_dict[&quotoffset&quot][gt_idx[:, 0], gt_idx[:, 1]]
+
+        &#47&#47 cls_loss, indices = torch.topk(cls_loss, self.m, dim=1)    &#47&#47 largest 50
+        cls_loss<a id="change"> = </a><a id="change">cls_loss.sum()</a>
+        offset_loss = F.smooth_l1_loss(offset, gt_dict[&quotoffset&quot], reduction=&quotsum&quot)
+        &#47&#47 loss += self.lambda1 * (cls_loss + offset_loss) / (1.0 if self.reduction == "sum" else batch_size)
+        loss += self.lambda1 * (cls_loss + offset_loss)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/3407448e60091157b38747900b5a0131660c974c#diff-3cb8f127746df46ede66e9ddac497115292a2b2c75db4113e159b1910e63433eL76' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4191840</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: 3407448e60091157b38747900b5a0131660c974c</div><div id='time'> Time: 2022-03-21</div><div id='author'> Author: liu.jb.henry@gmail.com</div><div id='file'> File Name: core/loss.py</div><div id='m_class'> M Class Name: TNTLoss</div><div id='n_method'> N Class Name: TNTLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/loss.py</div><div id='n_file'> N File Name: core/loss.py</div><div id='m_start'> M Start Line: 97</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 128</div><BR>

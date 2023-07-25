@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :942
+</h3><img src='2863183.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x = <a id="change">x.mean(</a>-2<a id="change">) / </a>x_len.float().unsqueeze(-1)
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.pre_proj(x)
+
+        if x_len is not None:
+            x = [<a id="change">x[b, : x_len[b]]</a>.mean(0) for b in range(len(x))]
+            x = torch.stack(x, dim=0)
+        else:
+            x = x.mean(1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/atosystem/speechclip/commit/b2d7d1450922b5f68626bcc7751faf4feca14ed5#diff-36cf0d2ba2e002faba923e96cac943aa23122917b021c2258ac13f6f611ab652L22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2863183</div><div id='project'> Project Name: atosystem/speechclip</div><div id='commit'> Commit Name: b2d7d1450922b5f68626bcc7751faf4feca14ed5</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: b06901020@ntu.edu.tw</div><div id='file'> File Name: avssl/module/pooling.py</div><div id='m_class'> M Class Name: MeanPoolingLayer</div><div id='n_method'> N Class Name: MeanPoolingLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: avssl/module/pooling.py</div><div id='n_file'> N File Name: avssl/module/pooling.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47&#47&#47 Return average loss over classes and batch
+        &#47&#47 return 1 - loss.mean()
+        return <a id="change">-(loss.mean() - 1.)</a>
+
+
+&quot&quot&quot
+def IoULoss(pred, target):</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = inter / union
+
+        &#47&#47&#47&#47 Return average loss over classes and batch
+        return -(<a id="change">loss[:, -self.classes]</a>.mean() - 1.)
+
+
+&quot&quot&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/inhwanbae/enet-sad_pytorch/commit/887eb366af978823b44b4a2b477363a38214dbad#diff-9653b8c2ce917a6134298b00c8b3f7d4b7c4dc473a752303f37a870392742127L108' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2863182</div><div id='project'> Project Name: inhwanbae/enet-sad_pytorch</div><div id='commit'> Commit Name: 887eb366af978823b44b4a2b477363a38214dbad</div><div id='time'> Time: 2021-07-19</div><div id='author'> Author: InhwanBae@users.noreply.github.com</div><div id='file'> File Name: utils/utils.py</div><div id='m_class'> M Class Name: mIoULoss</div><div id='n_method'> N Class Name: mIoULoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/utils.py</div><div id='n_file'> N File Name: utils/utils.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 117</div><div id='n_end'> N End Line: 135</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            logit = logit.permute(0, 3, 1, 2)
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask)
+            regs.append(ceReg.mean()<a id="change"> + </a><a id="change">cePush.mean()</a>)
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies
+        &#47&#47 for code, logit, freq in zip(codes.permute(1, 0, 2, 3), logits, codeFreq):
+        &#47&#47     &#47&#47 perturb code by the most rare codes with 0.1 probability</code></pre><h3>After Change</h3><pre><code class='java'>
+            sample = torch.distributions.Categorical(probs=prob).sample((h, w)).permute(2, 0, 1)
+            logit = logit.permute(0, 3, 1, 2)
+            &#47&#47 [n, 1, 1]
+            weight = freqMap / <a id="change">maxFreq[:, None]</a>
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask * weight
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask) * weight
+            regs.append((ceReg + cePush).mean())
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/49b82a18ca2e79c4b121a944f32f90e85422db22#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2863187</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 49b82a18ca2e79c4b121a944f32f90e85422db22</div><div id='time'> Time: 2021-08-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 71</div><BR>

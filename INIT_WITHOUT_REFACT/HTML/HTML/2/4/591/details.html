@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :591
+</h3><img src='2027236.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        xs, xb = <a id="change">x.chunk(2</a><a id="change">, dim=1)</a>
+        xb = self.blocks(xb)
+        out = self.conv_transition(torch.cat([xs, self.conv_transition_b(xb)], dim=1))
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        split = <a id="change">x.shape[1]</a> // 2
+        xs, xb = x[:, :split], x[:, split:]
+        xb = self.blocks(xb)
+        xb = self.conv_transition_b(xb).contiguous()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/4bc103f504e0d4f36d36c728aedb32966a7806cc#diff-6e9351ae67fc67fd95e4c8786c9d8e2578a7fd62fe212b18e84f1556d1c6a0c3L266' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2027236</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 4bc103f504e0d4f36d36c728aedb32966a7806cc</div><div id='time'> Time: 2021-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/cspnet.py</div><div id='m_class'> M Class Name: CrossStage</div><div id='n_method'> N Class Name: CrossStage</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/cspnet.py</div><div id='n_file'> N File Name: timm/models/cspnet.py</div><div id='m_start'> M Start Line: 266</div><div id='m_end'> M End Line: 269</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 271</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        xs, xb = <a id="change">x.chunk(2</a><a id="change">, dim=1)</a>
+        xb = self.blocks(xb)
+        out = self.conv_transition(torch.cat([xs, self.conv_transition_b(xb)], dim=1))
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.conv_down is not None:
+            x = self.conv_down(x)
+        x = self.conv_exp(x)
+        split = <a id="change">x.shape[1]</a> // 2
+        xs, xb = x[:, :split], x[:, split:]
+        xb = self.blocks(xb)
+        xb = self.conv_transition_b(xb).contiguous()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/7ef7788ee935f3197cc843a972171c168c36b982#diff-6e9351ae67fc67fd95e4c8786c9d8e2578a7fd62fe212b18e84f1556d1c6a0c3L263' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2027237</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 7ef7788ee935f3197cc843a972171c168c36b982</div><div id='time'> Time: 2021-03-06</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/cspnet.py</div><div id='m_class'> M Class Name: CrossStage</div><div id='n_method'> N Class Name: CrossStage</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/cspnet.py</div><div id='n_file'> N File Name: timm/models/cspnet.py</div><div id='m_start'> M Start Line: 266</div><div id='m_end'> M End Line: 269</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 271</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        b, n, d, h = *x.shape, self.heads
+
+        q, k, v = <a id="change">self.QKV(x).chunk(3</a><a id="change">, dim=-1)</a>
+        q, k, v = map(lambda t: rearrange(t, "b n (h d) -&gt; b h n d", h=h), (q, k, v))
+
+        q = q * self.scale
+        similarity = einsum("b h n d, b h m d -&gt; b h n m", q, k)  &#47&#47 m=n</code></pre><h3>After Change</h3><pre><code class='java'>
+            attention_mask (b n m): Use True or 1 to mask out attention weights and False or 0 for opposite.
+        
+        if isinstance(x, tuple):
+            b, n, d, h = *<a id="change">x[0]</a>.shape, self.heads
+            q, k, v = map(lambda proj, token: proj(token), zip((self.Q, self.K, self.V), x))
+        else:
+            b, n, d, h = *x.shape, self.heads</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/blakechi/comvex/commit/4ee659dcabb6b1f1b74163a6cb6542927e2ea5e8#diff-f6fbac4707b7109fa46dd21a91e77b1e139ffeb81544ba99e2271793410aac91L24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2027235</div><div id='project'> Project Name: blakechi/comvex</div><div id='commit'> Commit Name: 4ee659dcabb6b1f1b74163a6cb6542927e2ea5e8</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: pwchi@ucdavis.edu</div><div id='file'> File Name: models/utils/multihead_attention.py</div><div id='m_class'> M Class Name: MultiheadAttention</div><div id='n_method'> N Class Name: MultiheadAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/utils/multihead_attention.py</div><div id='n_file'> N File Name: models/utils/multihead_attention.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 32</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 39</div><BR>

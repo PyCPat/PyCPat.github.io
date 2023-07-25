@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = self.to_qkv(x).view(b, 3 * self.heads, self.dim_head, h * w).chunk(3, dim=1)
+
+        q *= self.scale
+        attn = <a id="change">q.transpose(</a>-2, -1<a id="change">)</a> @ k
+        attn = attn.softmax(dim=-1)
+
+        out<a id="change"> = </a><a id="change">(v @ attn).reshape(</a>b, -1, h, w<a id="change">)</a>
+        return out
+
+
+class PEG(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, c, h, w = x.shape
+        q, k, v = self.to_qkv(x).view(b, 3 * self.heads, self.dim_head, h * w).chunk(3, dim=1)
+
+        attn = <a id="change">q.transpose(</a>-2, -1<a id="change">)</a> @ k * self.scale
+        attn = attn.softmax(dim=-1)
+
+        out = (v @ <a id="change">attn.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>).reshape(b, -1, h, w)
+        return out
+
+</code></pre>

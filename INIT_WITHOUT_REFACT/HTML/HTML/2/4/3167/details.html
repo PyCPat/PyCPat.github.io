@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :3167
+</h3><img src='10213498.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            last_state_list.append([h, c])
+
+        if not self.return_all_layers:
+            layer_output_list = <a id="change">layer_output_list[-1:]</a>
+            last_state_list = last_state_list[-1:]
+
+        return layer_output_list, last_state_list
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if not hidden_state:
+            hidden_state = self.get_init_states(cur_layer_input[0].size(int(not self.batch_first)))
+
+        seq_len = <a id="change">len(</a>cur_layer_input<a id="change">)</a>
+
+        layer_output_list = []
+        last_state_list = []
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/openclimatefix/metnet/commit/12d0ea12a39fb28fca3d382611857f23f060b5b6#diff-cbfcbffe28009711c7c69a5229084d15d10138c11e712855f4120d8a87e7122dL149' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213498</div><div id='project'> Project Name: openclimatefix/metnet</div><div id='commit'> Commit Name: 12d0ea12a39fb28fca3d382611857f23f060b5b6</div><div id='time'> Time: 2022-02-01</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: metnet/layers/ConvLSTM.py</div><div id='m_class'> M Class Name: ConvLSTM</div><div id='n_method'> N Class Name: ConvLSTM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: metnet/layers/ConvLSTM.py</div><div id='n_file'> N File Name: metnet/layers/ConvLSTM.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 182</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+
+    def forward(self, f3, f2, f1):
+        f1 = self.upsample(f1, <a id="change">f3.shape[-2:]</a>)
+        f2 = self.upsample(f2, f3.shape[-2:])
+        f3 = torch.cat([f1, f2, f3], dim=1)
+        f3 = self.conv1(f3)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, fs): &#47&#47f3 f4 f5 -&gt; f3 f2 f1
+        fx = fs[0]
+        for i in range(1, <a id="change">len(</a>fs<a id="change">)</a>):
+            fs[i] = self.upsample(fs[i], fx.shape[-2:])
+        fx = torch.cat(fs[::-1], dim=1)
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/5831b91559b695ff69a4691bd4539a5a1a3c2d5e#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213497</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 5831b91559b695ff69a4691bd4539a5a1a3c2d5e</div><div id='time'> Time: 2022-05-09</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d</div><div id='n_method'> N Class Name: PAA_d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            video = torch.cat([image.unsqueeze(2), video], dim=2)  &#47&#47 1 x 64 x 21 x 16 x 16
+        else:
+            video = image.unsqueeze(2)
+        video = video.view(*<a id="change">video.shape[:3]</a>, -1).permute(0, 2, 3, 1)  &#47&#47 B x T x (H x W) x C -&gt; 1 x 21 x (16*16) x 64
+        video = self.attention(video)  &#47&#47 1 x 21 x 256 x 64
+        return video
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        video = torch.cat([self.learned_frame.unsqueeze(0), image.unsqueeze(2), video], dim=2)
+        video = self.stem(video)
+        s = None
+        if <a id="change">len(</a>self.encoder<a id="change">)</a> &gt; 0:
+            for block, remapper in zip(self.encoder, self.remapper):
+                if block.scaler is not None:
+                    prev_s = nn.functional.interpolate(video, scale_factor=(1, 0.5, 0.5), recompute_scale_factor=False)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/e510eaef70feb098d2c1b5fac8b34291c1955c9e#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10213496</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: e510eaef70feb098d2c1b5fac8b34291c1955c9e</div><div id='time'> Time: 2022-10-17</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 104</div><BR>

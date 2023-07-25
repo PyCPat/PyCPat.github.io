@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            logit = self._select(x)
+
+            logit = logit - logit.mean(1, keepdim=True)
+            logit = logit<a id="change"> / </a>logit.std(1, keepdim=True)
+
+            meanLogit<a id="change"> = </a><a id="change">logit.detach()</a>.mean(1)
+
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [k]
+            bernoulli = Bernoulli(probs=maskProb)
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n<a id="change">, h*w</a>, )).bool()
+
+            maskedLogit = logit.masked_fill(randomFalseMask, -1e9)
+</code></pre>

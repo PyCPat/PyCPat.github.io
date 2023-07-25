@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1164
+</h3><img src='3592178.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        stacked.append(input)
+
+        for idx in range(self.num_blocks):
+            <a id="change">if idx != 0</a><a id="change">:
+                </a>x<a id="change"> = </a><a id="change">torch.cat(</a>stacked<a id="change">, dim=1)</a>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(stacked[1:], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = sum(growth_rate[<a id="change">idx+1:</a>])
+            sections = [in_channels, stacked_channels]
+
+            if idx != num_blocks - 1:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L357' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3592178</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Block</div><div id='n_method'> N Class Name: D3Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 357</div><div id='m_end'> M End Line: 367</div><div id='n_start'> N Start Line: 414</div><div id='n_end'> N End Line: 430</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        stacked.append(input)
+
+        for idx in range(self.depth):
+            <a id="change">if idx != 0</a><a id="change">:
+                </a>x<a id="change"> = </a><a id="change">torch.cat(</a>stacked<a id="change">, dim=1)</a>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(stacked[1:], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = sum(growth_rate[<a id="change">idx+1:</a>])
+            sections = [in_channels, stacked_channels]
+
+            if idx != depth - 1:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3592174</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 67</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, from_up, from_down, mask=None):
+        from_up = self.act(self.norm0(self.up_conv(from_up)))
+        if self.concat:
+            <a id="change">if &quotres&quot in self.mode</a><a id="change">:
+                </a>x1<a id="change"> = </a><a id="change">torch.cat(</a>(from_up, from_down, mask), 1<a id="change">)</a>
+            else:
+                x1 = torch.cat((from_up, from_down), 1)
+        else:
+            if from_down is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 residual structure
+        _,C,H,W = x1.shape
+        for idx, convs in enumerate(zip(self.conv2, self.conv3)):
+            mask = convs[0](torch.cat([x1[:,<a id="change">:</a>C<a id="change">//2</a>], mask], dim=1))
+            x2_actv = x1[:,C//2:] * mask
+            x2 = convs[1](x1[:,C//2:] + x2_actv)
+            x2 = self.bn[idx](x2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-21665f19cd9acd8db0bae320b79f986ec6a79eabb60d74c4c2e813314554df4aL243' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3592175</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/blocks.py</div><div id='m_class'> M Class Name: MBEBlock</div><div id='n_method'> N Class Name: MBEBlock</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/blocks.py</div><div id='n_file'> N File Name: src/networks/blocks.py</div><div id='m_start'> M Start Line: 244</div><div id='m_end'> M End Line: 260</div><div id='n_start'> N Start Line: 254</div><div id='n_end'> N End Line: 267</div><BR>

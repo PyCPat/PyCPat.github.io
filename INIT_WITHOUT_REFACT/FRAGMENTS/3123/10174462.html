@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 compute forward convolutions
+        out = xs[-1]
+
+        lens<a id="change"> = </a>lens_orig
+        for i, <a id="change">l</a> in enumerate(self.mconv):
+            &#47&#47 if we&quotre doing masked convolutions, we need to pass in and
+            &#47&#47 possibly update the sequence lengths
+            &#47&#47 if (i % 4) == 0 and self.conv_mask:
+            <a id="change">if </a><a id="change">isinstance(</a>l, MaskedConv1d<a id="change">):
+                </a>out<a id="change">, lens = </a>l(out, lens)
+            else:
+                out = l(out)
+
+        &#47&#47 compute the residuals
+        if self.res is not None:
+            for i, layer in enumerate(self.res):
+                res_out = xs[i]
+                <a id="change">for </a>j, <a id="change">res_layer</a> in enumerate(layer)<a id="change">:
+                    </a><a id="change">if </a><a id="change">isinstance(</a>res_layer, MaskedConv1d<a id="change">):
+                        </a>res_out, _ = res_layer(res_out, lens_orig)
+                    else:
+                        res_out = res_layer(res_out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 compute the residuals
+        if self.res is not None:
+            for i, layer in enumerate(self.res):
+                res_out = <a id="change">layer(</a>xs[i]<a id="change">)</a>
+                if self.residual_mode == "add" or self.residual_mode == "stride_add":
+                    out = out + res_out
+                else:
+                    out = torch.max(out, res_out)</code></pre>

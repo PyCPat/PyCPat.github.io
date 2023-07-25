@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            W = self.encoder.src_embedding.get_embedding().T
+
+        mask = x.view(-1).eq(self.MASK)
+        enc_output = <a id="change">enc_output.view(-1, self.d_model)[mask]</a>
+        
+        logits = torch.matmul(enc_output, W)
+        
+        outputs = [logits]</code></pre><h3>After Change</h3><pre><code class='java'>
+        enc_output = enc_outputs[0]
+
+        if self.activation == "relu":
+            enc_output = <a id="change">F.relu(</a>enc_output<a id="change">)</a>
+        elif self.activation == "gelu":
+            enc_output = gelu_new(enc_output)
+        enc_output = self.norm(enc_output)
+            
+        if self.share_emb_out_proj == False:
+            W = self.W
+        else:
+            W = self.encoder.src_embedding.get_embedding().T
+        
+        logits = torch.matmul(enc_output, W)
+        
+        outputs = [logits]
+        
+        if return_states == True:
+            outputs = outputs + enc_outputs 
+            
+        if compute_loss == True:
+            loss = self.loss_fn(outputs, targets)
+            outputs<a id="change"> = </a>[loss] + outputs
+            
+        return outputs
+</code></pre>

@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = out.view(batch_size, self.nf0*self.s0*self.s0)
+        out = self.fc(actvn(out))
+
+        index = Variable(torch.LongTensor(range(<a id="change">out.size(</a>0<a id="change">)</a>)))
+        if y.is_cuda:
+            index = index.cuda()
+        out = out[index<a id="change">, y</a>]
+
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = out.view(batch_size, self.nf0*self.s0*self.s0)
+        out = self.fc(actvn(out))
+
+        out<a id="change"> = </a><a id="change">out.squeeze(1</a><a id="change">)</a>
+        out = self.final_sigmoid(out)
+        return out
+
+</code></pre>

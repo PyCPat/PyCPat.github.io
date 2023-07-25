@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+
+        with g.local_scope():
+            h_prime = <a id="change">[]</a>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                             Fn.sum(&quotm&quot, &quotemb&quot))
+                h_prime.append(g.ndata[&quotemb&quot])
+            h_output<a id="change"> = </a><a id="change">torch.cat(</a>h_prime<a id="change">, dim=1)</a>
+
+        g.edata[&quotalpha&quot] = edge_attention
+        if self.residual:
+            res = self.residual(h)</code></pre><h3>After Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+        if self.num_heads == 1:
+            edge_attention = edge_attention[:, 0]
+            edge_attention = <a id="change">edge_attention.unsqueeze(1</a><a id="change">)</a>
+
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()
+            g.edata[&quotalpha&quot] = edge_attention</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        features.append(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = <a id="change">self.maxpool(</a>x<a id="change">)</a>  &#47&#47 56x56 ignore
+
+        x = self.layer1(x)  &#47&#47 56x56
+        features.append(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        features = self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = [a * torch.abs(p[0] - <a id="change">p[1]</a>).mean() for a, p in zip(self.alphas, features)]
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]</code></pre>

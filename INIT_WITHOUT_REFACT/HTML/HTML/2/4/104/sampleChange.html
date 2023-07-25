@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            k1, k2 = key_layer.chunk(2, dim=(key_layer.ndim - 1))
+            q1 = self.relative_positions_encoding(q1)
+            k1 = self.relative_positions_encoding(k1)
+            position_ids<a id="change"> = </a>torch.cat((torch.zeros(q1.shape[2]-1, dtype=torch.long, device=q1.device),
+                                     <a id="change">torch.arange(</a>1<a id="change">, dtype=torch.long, device=q1.device) + </a>1))
+            q2 = self.relative_positions_encoding(q2, position_ids)
+            k2 = self.relative_positions_encoding(k2, position_ids)
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+            k1, k2 = key_layer.chunk(2, dim=(key_layer.ndim - 1))
+            q1 = self.relative_positions_encoding(q1)
+            k1 = self.relative_positions_encoding(k1)
+            q2 = self.relative_positions_encoding(q2, <a id="change">model_kwargs[&quotposition_ids&quot]</a>)
+            k2 = self.relative_positions_encoding(k2, model_kwargs[&quotposition_ids&quot])
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))
+            key_layer = torch.concat([k1, k2], dim=(k1.ndim - 1))</code></pre>

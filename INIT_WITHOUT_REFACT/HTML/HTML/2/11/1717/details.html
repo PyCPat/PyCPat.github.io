@@ -1,0 +1,105 @@
+<html><h3>Pattern ID :1717
+</h3><img src='6781031.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        check_shape(proprio, &quotb d&quot, d = self.proprio_dim)
+        check_shape(extero, &quotb n d&quot, n = self.num_legs, d = self.extero_dim)
+
+        latent_extero<a id="change"> = </a>self.extero_encoder(extero)
+        latent_extero<a id="change"> = </a><a id="change">rearrange(</a>latent_extero, <a id="change">&quotb ... -&gt; b (...)&quot</a><a id="change">)</a>
+
+        &#47&#47 RNN
+
+        if not exists(hiddens):
+            hiddens<a id="change"> = </a>(None,) * len(self.gru_cells)
+
+        gru_input = torch.cat((proprio, latent_extero), dim = -1)
+
+        next_hiddens = []
+        for gru_cell, prev_hidden in zip(self.gru_cells, hiddens):
+            gru_input = gru_cell(gru_input, prev_hidden)
+            next_hiddens.append(gru_input)
+
+        gru_output = gru_input
+
+        &#47&#47 attention gating of exteroception
+
+        attention_gate = self.to_extero_attn_gate(gru_output)
+        gated_extero<a id="change"> = </a>latent_extero<a id="change"> * </a>attention_gate.sigmoid()
+
+        &#47&#47 belief state and add gated exteroception
+
+        belief_state = self.belief_state_encoder(gru_output)
+        belief_state<a id="change"> = </a>sum_with_zeropad(belief_state, gated_extero)
+
+        &#47&#47 to action logits
+
+        action_logits<a id="change"> = </a>self.to_action_logits(belief_state)
+        <a id="change">return </a>action_logits, next_hiddens
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/anymal-belief-state-encoder-decoder-pytorch/commit/31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea#diff-73be6483f8f8caa2ae70e99ad4ab6af1d1c938d94af55a7444fe6a52139b298bL74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6781031</div><div id='project'> Project Name: lucidrains/anymal-belief-state-encoder-decoder-pytorch</div><div id='commit'> Commit Name: 31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_class'> M Class Name: Student</div><div id='n_method'> N Class Name: Student</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='n_file'> N File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None):
+        b, n, device = *x.shape, x.device
+        x<a id="change"> = </a>self.token_emb(x)
+
+        pos_emb<a id="change"> = </a>self.pos_emb(torch.arange(n, device = device))
+        pos_emb<a id="change"> = </a><a id="change">rearrange(</a>pos_emb, <a id="change">&quotn d -&gt; () n d&quot</a><a id="change">)</a>
+
+        x<a id="change"> = </a>x<a id="change"> + </a>pos_emb
+        x<a id="change"> = </a>rearrange(x, &quotb n d -&gt; b d n&quot)
+
+        for attn, ff in self.layers:
+            x<a id="change"> = </a>attn(x) + x
+            x = ff(x) + x
+
+        <a id="change">return </a>self.to_logits(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/multistream-transformers/commit/86dac4546b311f7fe7192762abb8979f45722d53#diff-e81141685efabebecc465bdbe0fb5f026c1b47e7c282daeaaf1d717b13d5d981L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6781158</div><div id='project'> Project Name: lucidrains/multistream-transformers</div><div id='commit'> Commit Name: 86dac4546b311f7fe7192762abb8979f45722d53</div><div id='time'> Time: 2021-07-29</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: multistream_transformers/multistream_transformers.py</div><div id='m_class'> M Class Name: MultistreamTransformer</div><div id='n_method'> N Class Name: MultistreamTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multistream_transformers/multistream_transformers.py</div><div id='n_file'> N File Name: multistream_transformers/multistream_transformers.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 19</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 use 0 as bos
+
+        seq<a id="change"> = </a>F.pad(seq, (1, 0), value = 0)
+
+        &#47&#47 if training, derive labels
+
+        if return_loss:
+            seq, labels = seq[:, :-1], seq[:, 1:]
+
+        &#47&#47 embed both sequence and retrieved chunks
+
+        embed = self.token_emb(seq)
+        retrieved = self.token_emb(retrieved)
+
+        &#47&#47 get positional embedding
+
+        pos_emb<a id="change"> = </a>self.pos_emb(torch.arange(n, device = device))
+        pos_emb<a id="change"> = </a><a id="change">rearrange(</a>pos_emb, <a id="change">&quotn d -&gt; 1 n d&quot</a><a id="change">)</a>
+        embed<a id="change"> = </a>embed<a id="change"> + </a>pos_emb
+
+        logits<a id="change"> = </a>self.to_logits(embed)
+
+        if not return_loss:
+            return logits
+
+        loss<a id="change"> = </a>F.cross_entropy(rearrange(logits, &quotb n c -&gt; b c n&quot), labels)
+        <a id="change">return </a>loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/e737b0c407799969e66abe02d9071e6459c629a0#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6781102</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: e737b0c407799969e66abe02d9071e6459c629a0</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: RETRO</div><div id='n_method'> N Class Name: RETRO</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 15</div><div id='m_end'> M End Line: 16</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 101</div><BR>

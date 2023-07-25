@@ -1,0 +1,87 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.norm_rel_coors:
+            basis = F.normalize(basis, dim = -1, p = 2)
+
+        coors_out<a id="change"> = </a><a id="change">einsum(&quotb h i j, b i j c -&gt; b i c&quot</a>, coor_weights, basis<a id="change">)</a>
+
+        &#47&#47 derive attention
+
+        sim = self.to_attn_mlp(m_ij)</code></pre><h3>After Change</h3><pre><code class='java'>
+        rel_coors = rearrange(coors, &quotb i d -&gt; b i () d&quot) - rearrange(coors, &quotb j d -&gt; b () j d&quot)
+        rel_dist = rel_coors.norm(dim = -1, p = 2)
+
+        nbhd_indices<a id="change"> = </a>None
+        if num_nn &gt; 0:
+            rel_dist = rel_coors.norm(dim = -1, p = 2)
+            nbhd_indices = rel_dist.topk(num_nn, dim = -1, largest = False).indices
+
+        rel_dist<a id="change"> = </a><a id="change">rearrange(</a>rel_dist, <a id="change">&quotb i j -&gt; b i j ()&quot</a><a id="change">)</a>
+
+        if fourier_features &gt; 0:
+            rel_dist = fourier_encode_dist(rel_dist, num_encodings = fourier_features)
+            rel_dist = rearrange(rel_dist, &quotb i j () d -&gt; b i j d&quot)
+
+        rel_dist = repeat(rel_dist, &quotb i j d -&gt; b h i j d&quot, h = h)
+
+        &#47&#47 derive queries keys and values
+
+        q, k, v = self.to_qkv(feats).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        &#47&#47 calculate nearest neighbors
+
+        i = j = n
+
+        if exists(nbhd_indices):
+            i, j = nbhd_indices.shape[-2:]
+            nbhd_indices_with_heads = repeat(nbhd_indices, &quotb n d -&gt; b h n d&quot, h = h)
+            k         = batched_index_select(k, nbhd_indices_with_heads, dim = 2)
+            v         = batched_index_select(v, nbhd_indices_with_heads, dim = 2)
+            rel_dist  = batched_index_select(rel_dist, nbhd_indices_with_heads, dim = 3)
+            rel_coors = batched_index_select(rel_coors, nbhd_indices, dim = 2)
+        else:
+            k = repeat(k, &quotb h j d -&gt; b h n j d&quot, n = n)
+
+        &#47&#47 prepare mask
+
+        if exists(mask):
+            q_mask = rearrange(mask, &quotb i -&gt; b () i ()&quot)
+            k_mask = repeat(mask, &quotb j -&gt; b i j&quot, i = n)
+
+            if exists(nbhd_indices):
+                k_mask = batched_index_select(k_mask, nbhd_indices, dim = 2)
+
+            k_mask = rearrange(k_mask, &quotb i j -&gt; b () i j&quot)
+            mask = q_mask * k_mask
+
+        &#47&#47 expand queries and keys for concatting
+
+        q = repeat(q, &quotb h i d -&gt; b h i n d&quot, n = j)
+
+        edge_input = torch.cat((q, k, rel_dist), dim = -1)
+
+        if exists(edges):
+            if exists(nbhd_indices):
+                edges = batched_index_select(edges, nbhd_indices, dim = 2)
+
+            edges = repeat(edges, &quotb i j d -&gt; b h i j d&quot, h = h)
+            edge_input = torch.cat((edge_input, edges), dim = -1)
+
+        m_ij = self.edge_mlp(edge_input)
+
+        coor_weights = self.coors_mlp(m_ij)
+
+        if exists(mask):
+            coor_weights.masked_fill_(mask, 0.)
+
+        if self.norm_rel_coors:
+            rel_coors = F.normalize(rel_coors, dim = -1, p = 2)
+
+        coors_out<a id="change"> = einsum(&quotb h i j, b i j c -&gt; b i c&quot</a>, coor_weights, rel_coors<a id="change">)</a>
+
+        &#47&#47 derive attention
+
+        sim = self.to_attn_mlp(m_ij)</code></pre>

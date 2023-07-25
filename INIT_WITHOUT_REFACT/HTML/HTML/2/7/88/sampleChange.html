@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        adjweightBase = self.softmax(self.mlp(t_vertex))
+        adjweight = torch.einsum(&quotnb,bkt-&gt;nkt&quot, adjweightBase, self.adjweight)
+        x_neighbors = torch.bmm(x_neighbors.view(num_pts, bsize*feats, num_neighbor), adjweight)
+        x_neighbors = <a id="change">x_neighbors.view(</a>num_pts, bsize, feats, num_neighbor<a id="change">)</a>.permute(1, 0, 3, 2).contiguous()
+        x_neighbors = self.activation(x_neighbors.view(bsize*num_pts, num_neighbor*feats))
+        out_feat = self.activation(self.conv(x_neighbors)).view(bsize,num_pts,self.out_c)
+        out_feat = out_feat * self.zero_padding.to(out_feat.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        batch_index = torch.arange(bsize, device=x.device).view(-1,1).repeat([1,num_pts*num_neighbor]).view(-1).long() 
+        x_neighbors = x[batch_index,neighbor_index,:].view(bsize, num_pts, num_neighbor, feats)
+
+        tmpt = <a id="change">torch.sigmoid(</a>self.tmptmlp(t_vertex)<a id="change">)*</a>(0.1 - <a id="change">1.0</a><a id="change">/</a>self.temp_factor) + 1.0<a id="change">/</a>self.temp_factor 
+        adjweightBase = self.softmax(self.mlp(t_vertex)<a id="change">/</a>tmpt)
+        adjweight = torch.einsum(&quotns,skt-&gt;nkt&quot, adjweightBase, self.adjweight)[None].repeat(bsize, 1, 1, 1)
+        x_neighbors = torch.einsum(&quotbnkf,bnkt-&gt;bnft&quot, x_neighbors, adjweight)
+        x_neighbors = self.activation(x_neighbors.view(bsize*num_pts, num_neighbor*feats))</code></pre>

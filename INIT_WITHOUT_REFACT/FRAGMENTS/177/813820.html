@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            g.apply_edges(fn.copy_src(&quothv&quot, &quothe_src&quot))
+            concat_edge_feats = torch.cat([g.edata[&quothe_src&quot], edge_feats], dim=1)
+            g.edata[&quothe&quot] = self.project_concatenated_messages(concat_edge_feats)
+            <a id="change">g.update_all(</a>fn.copy_edge(&quothe&quot, &quotm&quot), fn.sum(&quotm&quot, &quothv_new&quot)<a id="change">)</a>
+            node_feats = self.get_new_node_feats(
+                torch.cat([node_feats, g.ndata[&quothv_new&quot]], dim=1))
+
+        if not self.set_comparison:</code></pre><h3>After Change</h3><pre><code class='java'>
+            node_feats = self.project_node_in_feats(node_feats)
+        for _ in range(self.n_layers):
+            g = g.local_var()
+            <a id="change">if g.num_edges() &gt; 0</a><a id="change">:
+                &#47&#47 The following lines do not work for a graph without edges.
+                </a>g.ndata[&quothv&quot] = node_feats
+                g.apply_edges(fn.copy_src(&quothv&quot, &quothe_src&quot))
+                concat_edge_feats = torch.cat([g.edata[&quothe_src&quot], edge_feats], dim=1)
+                g.edata[&quothe&quot] = self.project_concatenated_messages(concat_edge_feats)
+                <a id="change">g.update_all(</a>fn.copy_edge(&quothe&quot, &quotm&quot), fn.sum(&quotm&quot, &quothv_new&quot)<a id="change">)</a>
+                node_feats = self.get_new_node_feats(
+                    torch.cat([node_feats, g.ndata[&quothv_new&quot]], dim=1))
+            else:
+                &#47&#47 If we don&quott have edges, above formula becomes very simple.
+                &#47&#47 The sum over the neighbors is zero then.
+                &#47&#47 Refer to equations in section S2.2 of
+                &#47&#47 http://www.rsc.org/suppdata/c8/sc/c8sc04228d/c8sc04228d2.pdf
+                node_feats<a id="change"> = </a>self.get_new_node_feats(
+                    torch.cat([node_feats, node_feats*0], dim=1))
+
+        if not self.set_comparison:</code></pre>

@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47x.size() : torch.Size([batch_size, phoneme_length, self.hidden_channels])
+        x = torch.transpose(x, 1, -1) &#47&#47 [b, h, t]
+        &#47&#47x.size() : torch.Size([batch_size, self.hidden_channels, phoneme_length])
+        x_mask = torch.unsqueeze(sequence_mask(x_lengths, <a id="change">x.size(</a>2<a id="change">)</a>), 1).to(x.dtype)
+        &#47&#47x_mask.size() : torch.Size([batch_size, 1, phoneme_length])
+
+        x = self.encoder(x * x_mask, x_mask)</code></pre><h3>After Change</h3><pre><code class='java'>
+        text_padded_embedded = torch.transpose(text_padded_embedded, 1, -1)
+        &#47&#47text_padded_embedded.size() : torch.Size([batch_size, self.hidden_channels, text_length])
+        &#47&#47マスクの作成
+        max_text_length = <a id="change">text_padded_embedded.size(2</a><a id="change">)</a>
+        progression = <a id="change">torch.arange(</a>max_text_length<a id="change">, dtype=text_lengths.dtype, device=text_lengths.device)</a>
+        text_mask = (progression.unsqueeze(0) &lt; text_lengths.unsqueeze(1))
+        text_mask = torch.unsqueeze(text_mask, 1).to(text_padded_embedded.dtype)
+        &#47&#47text_mask.size() : torch.Size([batch_size, 1, text_length])
+
+        text_encoded = self.encoder(text_padded_embedded * text_mask, text_mask)
+        &#47&#47text_encoded.size() : torch.Size([batch_size, self.hidden_channels, text_length])
+        stats = self.proj(text_encoded) * text_mask
+
+        m, logs = torch.split(stats, self.out_channels, dim=1)
+        return text_encoded<a id="change">, m, logs, text_mask</a>
+</code></pre>

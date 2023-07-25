@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x_std = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+
+        for i in range(x.shape[0]):
+            <a id="change">if x[i, :, :].shape[1] == 1</a><a id="change">:
+                </a>raise ValueError(
+                    "normalize_batch received a tensor of length 1. This will result "
+                    "in torch.std() returning nan"
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True)</a>.detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x<a id="change"> - </a>x_mean)<a id="change"> / </a>x_std
+
+
+class DitherAudio(nn.Module):</code></pre>

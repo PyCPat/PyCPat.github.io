@@ -1,0 +1,125 @@
+<html><h3>Pattern ID :2630
+</h3><img src='8620035.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h = self.relu(self.conv5b(h))
+        h = self.pool5(h)
+
+        h<a id="change"> = </a>h.view(-1, 8192)
+        out = h if feature_layer == 5 else None
+        h = self.relu(self.fc6(h))
+        out = h if feature_layer == 6 and out == None else out
+        h = self.dropout(h)
+        h<a id="change"> = </a>self.relu(self.fc7(h))
+        out = h if feature_layer == 7 and out == None else out
+        h<a id="change"> = </a><a id="change">self.dropout(</a>h<a id="change">)</a>
+        logits<a id="change"> = </a>self.fc8(h)
+        <a id="change">return </a>logits, out
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        h = self.pool5(h)
+        f_list.append(h)
+
+        <a id="change">return </a>f_list
+
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/b7fce2569c27fcdb5a4039c452b821fc908997a0#diff-0cca5210d236c14facdaec2d7a05f46534df86aaeb7a6155f3edd335474b96f8L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8620035</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: b7fce2569c27fcdb5a4039c452b821fc908997a0</div><div id='time'> Time: 2022-11-10</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/thirdparty_lib/C3D_yyuanad/c3d.py</div><div id='m_class'> M Class Name: C3D</div><div id='n_method'> N Class Name: C3D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/thirdparty_lib/C3D_yyuanad/c3d.py</div><div id='n_file'> N File Name: wama_modules/thirdparty_lib/C3D_yyuanad/c3d.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 67</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x = self.conv_1(x)
+        x = self.conv_2(x)
+        x<a id="change"> = </a>self.dropout(x)
+
+        x<a id="change"> = </a>self.conv_3(x)
+        x = self.conv_4(x)
+        x<a id="change"> = </a><a id="change">self.dropout(</a>x<a id="change">)</a>
+
+        x<a id="change"> = </a>self.conv_classifier(x)
+        <a id="change">return </a>x.squeeze()
+
+
+class Conv2dBlockELU(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.base(x)
+        x = torch.flatten(x, start_dim=1)
+        x = self.fc(x)
+        <a id="change">return </a>x
+
+
+def test():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jinglescode/ssvep-multi-task-learning/commit/8142fa572c4f3c12744fbfad45fbb22d3e406f62#diff-d53bb5f3837bd63fbe2081830698b31293f37c3c32cf100db84ca76ca0b5333aL47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8620067</div><div id='project'> Project Name: jinglescode/ssvep-multi-task-learning</div><div id='commit'> Commit Name: 8142fa572c4f3c12744fbfad45fbb22d3e406f62</div><div id='time'> Time: 2022-09-20</div><div id='author'> Author: jinglescode@gmail.com</div><div id='file'> File Name: model_classifier.py</div><div id='m_class'> M Class Name: MultitaskSSVEPClassifier</div><div id='n_method'> N Class Name: MultitaskSSVEPClassifier</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model_classifier.py</div><div id='n_file'> N File Name: model_classifier.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 42</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        question_padding = question.data == self.pad_idx
+
+        context_embedded = self.encoder_embeddings(context, padding=context_padding)
+        question_embedded<a id="change"> = </a>self.encoder_embeddings(question, padding=question_padding)
+
+        &#47&#47 pick the top-most N transformer layers to pass to the decoder for cross-attention
+        &#47&#47 (add 1 to account for the embedding layer - the decoder will drop it later)
+        self_attended_context = context_embedded.all_layers[-(self.args.transformer_layers + 1):]
+        final_context = context_embedded.last_layer
+        final_question<a id="change"> = </a>question_embedded.last_layer
+
+        if self.projection is not None:
+            final_context = self.dropout(final_context)
+            final_context = self.projection(final_context)
+
+            final_question<a id="change"> = </a><a id="change">self.dropout(</a>final_question<a id="change">)</a>
+            final_question<a id="change"> = </a>self.projection(final_question)
+
+        context_rnn_state = None
+        question_rnn_state = None
+        if self.args.rnn_layers &gt; 0:
+            batch_size = context.size(0)
+            if self.args.rnn_zero_state == &quotzero&quot:
+
+                zero = torch.zeros(self.args.rnn_layers, batch_size, self.args.rnn_dimension,
+                                   dtype=torch.float, requires_grad=False, device=context.device)
+                context_rnn_state = (zero, zero)
+                question_rnn_state = (zero, zero)
+            else:
+                if self.args.rnn_zero_state == &quotcls&quot:
+                    packed_rnn_state = self.norm(self.pool(context_embedded.last_layer[:, 0, :]))
+
+                elif self.args.rnn_zero_state == &quotaverage&quot:
+                    masked_final_context = context_embedded.last_layer.masked_fill(context_padding.unsqueeze(2), 0)
+                    summed_context = torch.sum(masked_final_context, dim=1)
+                    average_context = summed_context / context_lengths.unsqueeze(1)
+
+                    packed_rnn_state = self.norm(self.pool(average_context))
+
+                &#47&#47 packed_rnn_state is (batch, 2 * rnn_layers * rnn_dim)
+                packed_rnn_state = packed_rnn_state.reshape(batch_size, 2, self.args.rnn_layers,
+                                                            self.args.rnn_dimension)
+                &#47&#47 transpose to (2, batch, rnn_layers, rnn_dimension)
+                packed_rnn_state = packed_rnn_state.transpose(0, 1)
+                &#47&#47 transpose to (2, rnn_layers, batch, rnn_dimension)
+                packed_rnn_state = packed_rnn_state.transpose(1, 2)
+                &#47&#47 convert to a tuple of two (rnn_layers, batch, rnn_dimension) tensors
+                packed_rnn_state = packed_rnn_state.chunk(2, dim=0)
+                context_rnn_state = (packed_rnn_state[0].squeeze(0), packed_rnn_state[1].squeeze(0))
+
+        <a id="change">return </a>self_attended_context, final_context, context_rnn_state, final_question, question_rnn_state
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                packed_rnn_state = packed_rnn_state.chunk(2, dim=0)
+                context_rnn_state = (packed_rnn_state[0].squeeze(0), packed_rnn_state[1].squeeze(0))
+
+        <a id="change">return </a>self_attended_context, final_context, context_rnn_state
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stanford-oval/genienlp/commit/25cc6202b03c0b3866c249cc83412618eb894797#diff-d64eeb20506890f64fbc35dbbe9eb96bfc16a0c55673ab8dba41f3ed32d89537L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8620160</div><div id='project'> Project Name: stanford-oval/genienlp</div><div id='commit'> Commit Name: 25cc6202b03c0b3866c249cc83412618eb894797</div><div id='time'> Time: 2020-12-05</div><div id='author'> Author: gcampagn@cs.stanford.edu</div><div id='file'> File Name: genienlp/models/identity_encoder.py</div><div id='m_class'> M Class Name: IdentityEncoder</div><div id='n_method'> N Class Name: IdentityEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: genienlp/models/identity_encoder.py</div><div id='n_file'> N File Name: genienlp/models/identity_encoder.py</div><div id='m_start'> M Start Line: 63</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        projected = self.projection(x)
+        x<a id="change"> = </a>self.gelu(projected)
+        x<a id="change"> = </a>self.fc(x)
+        x<a id="change"> = </a><a id="change">self.dropout(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>x + projected
+        x = self.layer_norm(x)
+        <a id="change">return </a>x
+
+
+class CLIPModel(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        projected = self.projection(x)
+        <a id="change">return </a>projected
+
+
+class CLIPModel(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kr-happyface/kodalle/commit/b5e3b335a94fb2a32a1ba9925f29af7aad45aa93#diff-ce6de8a2bc87f5200f1d89a87d19b2823e7575a63d7119104ab57cbe4163b8e4L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8620044</div><div id='project'> Project Name: kr-happyface/kodalle</div><div id='commit'> Commit Name: b5e3b335a94fb2a32a1ba9925f29af7aad45aa93</div><div id='time'> Time: 2021-12-21</div><div id='author'> Author: shawn.khs1208@gmail.com</div><div id='file'> File Name: clipmodel.py</div><div id='m_class'> M Class Name: ProjectionHead</div><div id='n_method'> N Class Name: ProjectionHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: clipmodel.py</div><div id='n_file'> N File Name: clipmodel.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 49</div><BR>

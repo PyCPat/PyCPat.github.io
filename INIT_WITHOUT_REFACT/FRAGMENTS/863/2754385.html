@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47     soft = hard
+
+        &#47&#47 [n, c, h, w], [n, h, w], [n, h, w, k], [n, c, h, w], [k, c]
+        <a id="change">return </a>hard<a id="change">, trueCode, logit</a>
+
+
+class AttentiveQuantizer(nn.Module):
+    def __init__(self, k: int, cin: int, cout: int, dropout: bool = True, deterministic: bool = False, additionWeight: bool = True, ema: float = 0.8):</code></pre><h3>After Change</h3><pre><code class='java'>
+        logit = self.getLogit(q, k)
+        trueCode = logit.argmax(-1)
+        sample = F.gumbel_softmax(logit, temperature, True)
+        code = <a id="change">sample.argmax(-1</a><a id="change">)</a>
+        target = self._codebook
+        hard = sample @ target
+        hard = hard.permute(0, 3, 1, 2)
+</code></pre>

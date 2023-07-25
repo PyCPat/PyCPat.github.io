@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :2802
+</h3><img src='9208540.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 generator loss
+
+        labels<a id="change"> = </a>torch.cat((torch.zeros(batch, device = device), <a id="change">torch.ones(</a>batch<a id="change">, device = device)</a>), dim = 0)
+
+        if return_discr_loss:
+            labels = torch.flip(labels, (0,))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if return_discr_loss:
+            fmap.detach_()
+            fmap_discr_logits<a id="change">, img_discr_logits</a> = map(self.discr, (fmap, img))
+            return self.discr_loss(fmap_discr_logits, img_discr_logits)
+
+        &#47&#47 generator loss</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/6dc8b217f76acb25f8b520e435b7e08a35d884f6#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9208540</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: 6dc8b217f76acb25f8b520e435b7e08a35d884f6</div><div id='time'> Time: 2022-01-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: VQGanVAE</div><div id='n_method'> N Class Name: VQGanVAE</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask_value = max_neg_value(dots_text)
+
+        i, j = dots_text.shape[-2:]
+        mask<a id="change"> = </a><a id="change">torch.ones(</a>i, j<a id="change">, device = device)</a>.triu_(j - i + 1).bool()
+        dots_text.masked_fill(mask, mask_value)
+
+        attn_text = dots_text.softmax(dim = -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+
+        mask = repeat(mask, &quotb j -&gt; (b r) i j&quot, r = (bh // b), i = i)
+        mask = torch.cat((~mask<a id="change">, causal_mask</a>), dim = -1)
+
+        dots_image.masked_fill_(mask, mask_value)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/c27f48c4373942167a0cc2ac2238f67af2479fe3#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9208537</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: c27f48c4373942167a0cc2ac2238f67af2479fe3</div><div id='time'> Time: 2021-02-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 191</div><div id='m_end'> M End Line: 241</div><div id='n_start'> N Start Line: 201</div><div id='n_end'> N End Line: 259</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                batch, permutation_dim, -1
+            )
+            combined_embedding = self.combining_function(trial_embeddings, dim=1)
+            trial_counts<a id="change"> = </a><a id="change">torch.ones(</a>batch, 1<a id="change">, dtype=torch.float32)</a> * permutation_dim
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0]<a id="change">, x.shape[self.aggregation_dim]</a>
+        nan_counts = (
+            torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]  &#47&#47 counts are the same across data dims</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9208534</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>

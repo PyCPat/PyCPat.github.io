@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :1374
+</h3><img src='3970036.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise RuntimeError("Unknown value for attention norm type")
+        context = torch.bmm(alignment.unsqueeze(1), inputs)
+        context = context.squeeze(1)
+        return context<a id="change">, alignment</a>
+
+
+class Postnet(nn.Module):
+    def __init__(self, mel_dim, num_convs=5):</code></pre><h3>After Change</h3><pre><code class='java'>
+                    attention).sum(dim=1).unsqueeze(1)
+        else:
+            raise RuntimeError("Unknown value for attention norm type")
+        <a id="change">if </a><a id="change">self.forward_attn:
+            &#47&#47 forward attention
+            </a>prev_alpha<a id="change"> = </a><a id="change">F.pad(</a>self.alpha[:, :-1].clone(), (1<a id="change">, 0, 0, 0</a>)<a id="change">)</a>.to(inputs.device)
+            self.alpha = (((1-self.u) * self.alpha.clone().to(inputs.device) + self.u * prev_alpha) + 1e-7) * alignment
+            alpha_norm = self.alpha / self.alpha.sum(dim=1).unsqueeze(1)
+            &#47&#47 compute context</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/961af0f5cdefbb5f267671f6847cf05659962d6c#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL173' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3970036</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 961af0f5cdefbb5f267671f6847cf05659962d6c</div><div id='time'> Time: 2019-04-05</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 175</div><div id='n_start'> N Start Line: 193</div><div id='n_end'> N End Line: 208</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(mask[...<a id="change">, None</a>], 0.)
+
+        gate = F.conv1d(gate, weight, bias)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        weight, bias = self.weight, self.bias
+
+        <a id="change">if </a><a id="change">self.use_circulant_matrix:
+            </a>dim_seq = weight.shape[-1]
+            weight<a id="change"> = </a><a id="change">F.pad(</a>weight, (<a id="change">0</a><a id="change">, dim_seq</a>)<a id="change">, value = 0)</a>
+            weight = repeat(weight, &quot... n -&gt; ... (r n)&quot, r = dim_seq)
+            weight = weight[:-dim_seq].reshape(dim_seq, 2 * dim_seq - 1)
+            weight = weight[:, (dim_seq - 1):]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/g-mlp-pytorch/commit/9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f#diff-44034403ad35d2d6dad50e7e4379a1df7da10aa3cd01d85a3d96b8361931c8b1L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3970012</div><div id='project'> Project Name: lucidrains/g-mlp-pytorch</div><div id='commit'> Commit Name: 9b986391ce83028dbf30dcb5f64c8e3cdf5efd6f</div><div id='time'> Time: 2021-08-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_class'> M Class Name: SpatialGatingUnit</div><div id='n_method'> N Class Name: SpatialGatingUnit</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='n_file'> N File Name: g_mlp_pytorch/g_mlp_pytorch.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        x: B, H*W, C
+        
+        H<a id="change">, W</a> = self.input_resolution
+        B, L, C = x.shape
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.view(B, H, W, C)
+
+        &#47&#47 padding
+        <a id="change">pad_input</a> = (H % 2 == 1) or (W % 2 == 1)
+        <a id="change">if </a>pad_input<a id="change">:
+            </a>x<a id="change"> = </a><a id="change">F.pad(</a>x, (0<a id="change">, 0, 0, W % 2, 0, H % 2</a>)<a id="change">)</a>
+
+        x0 = x[:, 0::2, 0::2, :]  &#47&#47 B H/2 W/2 C
+        x1 = x[:, 1::2, 0::2, :]  &#47&#47 B H/2 W/2 C
+        x2 = x[:, 0::2, 1::2, :]  &#47&#47 B H/2 W/2 C</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/12b05eaf235665fc6d1f89a9055b84d7cdfec923#diff-bfa9144b84aa2908523fe6e28d0f355d5701af250801acefca0ffbeed05bc3dfL306' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3970037</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 12b05eaf235665fc6d1f89a9055b84d7cdfec923</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/backbones/SwinTransformer.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/backbones/SwinTransformer.py</div><div id='n_file'> N File Name: lib/backbones/SwinTransformer.py</div><div id='m_start'> M Start Line: 310</div><div id='m_end'> M End Line: 313</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 283</div><BR>

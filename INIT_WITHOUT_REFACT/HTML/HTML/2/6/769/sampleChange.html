@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        if self.use_res_connect:
+            <a id="change">return </a>x + <a id="change">self.conv(</a>x<a id="change">)</a>
+        else:
+            return self.conv(x)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv = nn.Sequential(*layers)
+
+    def forward(self, x):
+        out<a id="change"> = </a><a id="change">self.conv(</a>x<a id="change">)</a>
+        if self.use_res_connect:
+            if self.use_identity:
+                identity_tensor= x[:,:self.identity_tensor_channels,:,:] + out[:,:self.identity_tensor_channels,:,:]
+                out<a id="change"> = </a>torch.cat([identity_tensor, out[:,self.identity_tensor_channels:,:,:]], dim=1)
+                &#47&#47 out[:,:self.identity_tensor_channels,:,:] += x[:,:self.identity_tensor_channels,:,:]
+            else:
+                out = x + out
+            <a id="change">return </a>out
+        else:
+            return out
+</code></pre>

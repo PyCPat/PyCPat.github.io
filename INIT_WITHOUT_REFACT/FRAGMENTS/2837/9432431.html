@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        outputs = self.head_forward(self.backbone(input_image))
+        parsed_results = self.parsing_outputs(outputs)
+
+        <a id="change">return </a>parsed_results
+
+if __name__ == &quot__main__&quot:
+    model = ROMPv1().cuda()</code></pre><h3>After Change</h3><pre><code class='java'>
+    @torch.no_grad()
+    def forward(self, image):
+        x = self.backbone(image)
+        x = torch.cat((x, <a id="change">self.coordmaps.to(</a>x.device<a id="change">)</a>.repeat(x.shape[0],1,1,1)), 1)
+
+        params_maps<a id="change"> = </a>self.final_layers[1](x)
+        center_maps = self.final_layers[2](x)
+        cam_maps<a id="change"> = </a>self.final_layers[3](x)
+        &#47&#47 to make sure that scale is always a positive value
+        cam_maps[:, 0]<a id="change"> = </a>torch.pow(1.1,cam_maps[:, 0])
+        params_maps<a id="change"> = </a>torch.cat([cam_maps, params_maps], 1)
+        <a id="change">return </a>center_maps<a id="change">, params_maps</a> 
+
+
+def export_model_to_onnx_static(model, save_file, bs=1):</code></pre>

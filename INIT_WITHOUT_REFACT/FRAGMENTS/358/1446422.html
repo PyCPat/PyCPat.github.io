@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.row_attn:
+            h_x = rearrange(x, &quotb h w d -&gt; (b h) w d&quot)
+            if <a id="change">exists(</a>attn_bias<a id="change">)</a>:
+                attn_bias = repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = h)
+
+            tie_dim = h if self.global_query_attn else None</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 axial attention
+
+        <a id="change">if </a>self.col_attn<a id="change">:
+            </a>axial_dim<a id="change"> = </a>w
+            mask_fold_axial_eq = &quotb h w -&gt; (b w) h&quot
+            input_fold_eq = &quotb h w d -&gt; (b w) h d&quot
+            output_fold_eq = &quot(b w) h d -&gt; b h w d&quot
+
+        elif self.row_attn:
+            axial_dim = h
+            mask_fold_axial_eq = &quotb h w -&gt; (b h) w&quot
+            input_fold_eq = &quotb h w d -&gt; (b h) w d&quot
+            output_fold_eq<a id="change"> = </a>&quot(b h) w d -&gt; b h w d&quot
+
+        x = rearrange(x, input_fold_eq)
+</code></pre>

@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :436
+</h3><img src='1602441.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.Conv1d(in_channels, out_channels, kernel_size=1, padding=0, bias=True))
+
+    def forward(self, enc_out, enc_out_len) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x<a id="change"> = </a>torch.transpose(enc_out, 1, 2)
+        x<a id="change"> = </a><a id="change">self.layers(</a>x<a id="change">)</a>
+        x = torch.transpose(x, 1, 2)
+        <a id="change">return </a>x, enc_out_len
+
+class AudioToCharCTC(pl.LightningModule):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Conv1d(in_channels, out_channels, kernel_size=1, padding=0, bias=True))
+
+    def forward(self, enc_out) -&gt; torch.Tensor:
+        <a id="change">return </a><a id="change">self.layers(</a>enc_out<a id="change">)</a>
+
+class AudioToCharCTC(pl.LightningModule):
+
+    def __init__(self, audio_size, embed_size, vocab_size, hidden_size, learning_rate):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kaiidams/voice100/commit/666f7e13ac1493414cf4b67e98a58f7752a3c31e#diff-852047560b084462339436968d7a606342c409ce6e0aaa35185bc065a75e7591L124' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1602441</div><div id='project'> Project Name: kaiidams/voice100</div><div id='commit'> Commit Name: 666f7e13ac1493414cf4b67e98a58f7752a3c31e</div><div id='time'> Time: 2021-06-19</div><div id='author'> Author: katsuya.iida@gmail.com</div><div id='file'> File Name: voice100/models.py</div><div id='m_class'> M Class Name: LinearCharDecoder</div><div id='n_method'> N Class Name: LinearCharDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: voice100/models.py</div><div id='n_file'> N File Name: voice100/models.py</div><div id='m_start'> M Start Line: 124</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.layers = ReversibleSequence(layers)
+
+    def forward(self, x, **kwargs):
+        x<a id="change"> = </a>torch.cat([x, x], dim = -1)
+        x<a id="change"> = </a><a id="change">self.layers(</a>x<a id="change">, **kwargs)</a>
+        <a id="change">return </a>torch.stack(x.chunk(2, dim=-1)).mean(dim=0)
+
+class LinearAttentionTransformerLM(nn.Module):
+    def __init__(self, num_tokens, dim, depth, max_seq_len, heads = 8, causal = False, one_kv_head = False, ff_chunks = 1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.layers = execute_type(layers)
+
+    def forward(self, x, **kwargs):
+        <a id="change">return </a><a id="change">self.layers(</a>x<a id="change">, **kwargs)</a>
+
+class LinearAttentionTransformerLM(nn.Module):
+    def __init__(self, num_tokens, dim, depth, max_seq_len, heads = 8, causal = False, one_kv_head = False, reversible = False, ff_chunks = 1):
+        super().__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/linear-attention-transformer/commit/fa23ce09a98a63d26116e3935ad5902cf705255d#diff-eee6cf669463e9683bcf9643c4b19a493056f98ded32854287144d47f02a7032L217' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1602442</div><div id='project'> Project Name: lucidrains/linear-attention-transformer</div><div id='commit'> Commit Name: fa23ce09a98a63d26116e3935ad5902cf705255d</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_class'> M Class Name: LinearAttentionTransformer</div><div id='n_method'> N Class Name: LinearAttentionTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='n_file'> N File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_start'> M Start Line: 218</div><div id='m_end'> M End Line: 220</div><div id='n_start'> N Start Line: 219</div><div id='n_end'> N End Line: 219</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            InvertedResidual(hidden_size, out_channels, kernel_size=99, use_residual=False))
+
+    def forward(self, embed, embed_len) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x<a id="change"> = </a>torch.transpose(embed, 1, 2)
+        x = <a id="change">self.layers(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>torch.transpose(x, 1, 2)
+        <a id="change">return </a>x, torch.div(embed_len + 1, 2, rounding_mode=&quotfloor&quot)
+
+class LinearCharDecoder(nn.Module):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            InvertedResidual(hidden_size, out_channels, kernel_size=99, use_residual=False))
+
+    def forward(self, embed) -&gt; torch.Tensor:
+        <a id="change">return </a><a id="change">self.layers(</a>embed<a id="change">)</a>
+
+    def output_length(self, embed_len) -&gt; torch.Tensor:
+        return torch.div(embed_len + 1, 2, rounding_mode=&quottrunc&quot)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaiidams/voice100/commit/666f7e13ac1493414cf4b67e98a58f7752a3c31e#diff-852047560b084462339436968d7a606342c409ce6e0aaa35185bc065a75e7591L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1602444</div><div id='project'> Project Name: kaiidams/voice100</div><div id='commit'> Commit Name: 666f7e13ac1493414cf4b67e98a58f7752a3c31e</div><div id='time'> Time: 2021-06-19</div><div id='author'> Author: katsuya.iida@gmail.com</div><div id='file'> File Name: voice100/models.py</div><div id='m_class'> M Class Name: ConvVoiceEncoder</div><div id='n_method'> N Class Name: ConvVoiceEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: voice100/models.py</div><div id='n_file'> N File Name: voice100/models.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 111</div><div id='n_end'> N End Line: 111</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            ]))
+        self.layers = ReversibleSequence(layers)
+    def forward(self, x, input_mask = None):
+        x<a id="change"> = </a>torch.cat([x, x], dim = -1)
+        x<a id="change"> = </a><a id="change">self.layers(</a>x<a id="change">)</a>
+        <a id="change">return </a>torch.stack(x.chunk(2, dim=-1)).sum(dim=0)
+
+class SinkhornTransformerLM(nn.Module):
+    def __init__(self, num_tokens, dim, max_seq_len, depth, buckets = 64, heads = 8, causal = False, sinkhorn_iter = 5, n_sortcut = 0, temperature = 0.75, ff_chunks = 1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.layers = execute_type(layers)
+
+    def forward(self, x, input_mask = None):
+        <a id="change">return </a><a id="change">self.layers(</a>x<a id="change">)</a>
+
+class SinkhornTransformerLM(nn.Module):
+    def __init__(self, num_tokens, dim, max_seq_len, depth, buckets = 64, heads = 8, causal = False, sinkhorn_iter = 5, n_sortcut = 0, temperature = 0.75, reversible = False, ff_chunks = 1):
+        super().__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/f24294788dafa05fc2237e1af5e10aa21f7a247b#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL286' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1602437</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: f24294788dafa05fc2237e1af5e10aa21f7a247b</div><div id='time'> Time: 2020-04-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornTransformer</div><div id='n_method'> N Class Name: SinkhornTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 289</div><div id='n_start'> N Start Line: 309</div><div id='n_end'> N End Line: 309</div><BR>

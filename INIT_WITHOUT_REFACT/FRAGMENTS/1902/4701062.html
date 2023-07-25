@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.pyramidal_consistency_loss_fn = nn.L1Loss()
+        
+        self.rgb_encoder = Encoder(in_channels, depth)
+        self.rgb_decoder = <a id="change">Decoder(</a>in_channels, depth, self.loss_fn<a id="change">)</a>
+        
+        self.d_encoder = Encoder(in_channels, depth)
+        self.d_decoder = Decoder(in_channels, depth, self.depth_loss_fn)
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, backbone, in_channels, depth=64):
+        super(InSPyReNetV4, self).__init__()
+        self.backbone = backbone
+        <a id="change">self.in_channels</a> = in_channels
+        self.depth = depth
+        
+        self.reduce = conv(4, 3, 3)
+        
+        self.context1 = PAA_e(self.in_channels[0], self.depth)
+        self.context2 = PAA_e(self.in_channels[1], self.depth)
+        self.context3 = PAA_e(<a id="change">self.in_channels[2]</a>, self.depth)
+        self.context4 = PAA_e(self.in_channels[3], self.depth)
+        self.context5 = PAA_e(<a id="change">self.in_channels[4]</a>, self.depth)
+
+        self.decoder = PAA_d(self.depth)
+</code></pre>

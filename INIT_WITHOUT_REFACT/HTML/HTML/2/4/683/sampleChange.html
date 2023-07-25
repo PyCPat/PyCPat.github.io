@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Self-attention
+        &#47&#47 TODO: 其他模型结构
+        len_range = torch.from_numpy(np.arange(self.max_his)).to(history.device)
+        position = (lengths[:, None] - <a id="change">len_range</a>[None, <a id="change">:</a>seq_len]) * valid_his
+        pos_vectors = self.p_embeddings(position)
+        his_vectors = his_vectors + pos_vectors
+        attn_mask = valid_his.view(batch_size, 1, 1, seq_len)</code></pre><h3>After Change</h3><pre><code class='java'>
+        his_vectors = self.i_embeddings(history)
+        his_vector = self.encoder(his_vectors, lengths, valid_his, t_history, user_min_t)
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>his_vector<a id="change">, intent_pred</a>
+
+
+class GRUEncoder(nn.Module):
+    def __init__(self, emb_size):</code></pre>

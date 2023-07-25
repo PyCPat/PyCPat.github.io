@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask = F.pad(x, (0<a id="change">, padding</a>), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 mask so image has full attention to text, but causal along axis
+
+        bh, i, j = dots_image.shape
+        causal_mask = <a id="change">torch.ones(</a>i, img_size<a id="change">, device = device)</a>.triu_(img_size - i + 1).bool()
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+
+        mask = repeat(mask, &quotb j -&gt; (b r) i j&quot, r = (bh // b), i = i)
+        mask<a id="change"> = torch.cat(</a>(~mask<a id="change">, causal_mask</a>)<a id="change">, dim = -1)</a>
+
+        dots_image.masked_fill_(mask, mask_value)
+
+        &#47&#47 attention.</code></pre>

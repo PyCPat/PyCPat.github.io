@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            p[..., 0:2] = torch.sigmoid(p[..., 0:2]) + self.grid_xy  &#47&#47 xy
+            p[..., 2:4] = torch.exp(p[..., 2:4]) * self.anchor_wh  &#47&#47 wh yolo method
+            &#47&#47 p[..., 2:4] = ((torch.sigmoid(p[..., 2:4]) * 2) ** 2) * self.anchor_wh  &#47&#47 wh power method
+            <a id="change">p[..., 4] = </a>torch.sigmoid(p[..., 4])  &#47&#47 p_conf
+            p[..., 5:] = torch.sigmoid(p[..., 5:])  &#47&#47 p_class
+            &#47&#47 p[..., 5:] = F.softmax(p[..., 5:], dim=4)  &#47&#47 p_class
+            p[..., :4] *= self.stride</code></pre><h3>After Change</h3><pre><code class='java'>
+            return torch.cat((xy / nG, wh, p_conf, p_cls), 2).squeeze().t()
+
+        else:  &#47&#47 inference
+            io<a id="change"> = </a><a id="change">p.clone()</a>  &#47&#47 inference output
+            io[..., 0:2] = torch.sigmoid(io[..., 0:2]) + self.grid_xy  &#47&#47 xy
+            io[..., 2:4] = torch.exp(io[..., 2:4]) * self.anchor_wh  &#47&#47 wh yolo method
+            &#47&#47 io[..., 2:4] = ((torch.sigmoid(io[..., 2:4]) * 2) ** 2) * self.anchor_wh  &#47&#47 wh power method</code></pre>

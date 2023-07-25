@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        self.shape = shape
+    def forward(self, input: torch.Tensor, shape):
+        <a id="change">return </a>torch.reshape(input, self.shape)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input: torch.Tensor, shape=None):
+        shape = shape if shape is not None else self.shape
+        shape = [x if x != 0 else input.size(i) for i, x in enumerate(shape)]
+        inp_shape<a id="change"> = </a><a id="change">torch.tensor(</a>input.shape<a id="change">)</a>
+        if self.initial_input_shape is None:
+            self.initial_input_shape<a id="change"> = </a>inp_shape
+        elif len(shape) == 2 and shape[-1] == -1:
+            pass
+        elif torch.equal(self.initial_input_shape, inp_shape):</code></pre>

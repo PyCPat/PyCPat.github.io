@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        edge_weight = dgl_normalize(graph, self._norm, edge_weight)
+        graph.edata[&quot_edge_weight&quot] = edge_weight
+        
+        graph.ndata[&quoth&quot] = <a id="change">self.linear(</a>feat<a id="change">)</a>
+        graph.update_all(fn.u_mul_e(&quoth&quot, &quot_edge_weight&quot, &quotm&quot),
+                         fn.sum(&quotm&quot, &quoth&quot))
+        feat = graph.ndata.pop(&quoth&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        edge_weight = dgl_normalize(graph, self._norm, edge_weight)
+        graph.edata[&quot_edge_weight&quot] = edge_weight
+        
+        <a id="change">if self.weight is not None</a><a id="change">:
+            </a>feat<a id="change"> = </a>feat<a id="change"> @ </a>self.weight
+        
+        graph.ndata[&quoth&quot] = feat
+        graph.update_all(fn.u_mul_e(&quoth&quot, &quot_edge_weight&quot, &quotm&quot),
+                         fn.sum(&quotm&quot, &quoth&quot))
+        feat = graph.ndata.pop(&quoth&quot)
+
+        <a id="change">if self.bias is not None</a><a id="change">:
+            </a>feat<a id="change"> = </a>feat<a id="change"> + </a>self.bias             
+        
+        if self._activation is not None:
+            feat = self._activation(feat)</code></pre>

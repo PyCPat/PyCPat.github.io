@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x_r = x[:, k:, :] &#47&#47 (B, N-k, C)
+
+            &#47&#47 v1: closing pairs, v2: opening pairs
+            v1<a id="change"> = </a>torch.cat((x_l, x_r), dim=2) &#47&#47 (B, N-k, C*2)
+            v2<a id="change"> = </a>torch.cat((x_r, x_l), dim=2) &#47&#47 (B, N-k, C*2)
+            &#47&#47 concat
+            v = <a id="change">torch.cat(</a>(v1<a id="change">, v2</a>)<a id="change">, dim=0)</a> &#47&#47 (B*2, N-k, C*2)
+            v = torch.reshape(v, (B*2*(N-k), C*2)) &#47&#47 (B*2*(N-k), C*2)
+            for fc in self.fc[:-1]:
+                v = F.relu(fc(v))
+                v = self.dropout(v)
+            v = self.fc[-1](v) &#47&#47 (B*2*(N-k), 1)
+            v<a id="change"> = </a>torch.reshape(v, (B*2, N-k)) &#47&#47 (B*2, N-k)
+            v1<a id="change">, v2 = </a>torch.chunk(v, 2, dim=0) &#47&#47 (B, N-k) * 2
+            y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+            y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)
+        return y</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47     y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)
+
+        x_l = x.view(B, N, 1, C).expand(B, N, N, C)
+        x_r = <a id="change">x.view(</a>B, <a id="change">1</a>, N, C<a id="change">)</a>.expand(B, N, N, C)
+        v<a id="change"> = </a>torch.cat((x_l, x_r), dim=3) &#47&#47 (B, N, N, C*2)
+        v = v.view(B*N*N, C*2)
+        for fc in self.fc[:-1]:
+            v = F.relu(fc(v))
+            v = self.dropout(v)
+        y = self.fc[-1](v) &#47&#47 (B*N*N, 1)
+        y = <a id="change">y.view(</a>B, N, N<a id="change">)</a>
+
+        return y
+
+</code></pre>

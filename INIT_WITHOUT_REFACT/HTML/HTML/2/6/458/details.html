@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :458
+</h3><img src='1628089.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]
+        &#47&#47 output: single frame: [b, c, h, w]
+        <a id="change">raise </a>NotImplementedError
+
+    def pred_n(self, x, pred_length=1, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 output: pred_length (P) frames: [b, P, c, h, w]
+        preds = []
+        loss_dicts = []
+        <a id="change">for i</a> in <a id="change">range(</a>pred_length<a id="change">):
+            </a>pred, loss_dict = self.pred_1(x, **kwargs)
+            pred<a id="change"> = </a>pred.unsqueeze(dim=1)
+            <a id="change">preds.append(</a>pred<a id="change">)</a>
+            loss_dicts.append(loss_dict)
+            x = torch.cat([x[:, 1:], pred], dim=1)
+
+        pred = torch.cat(preds, dim=1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ais-bonn/vp-suite/commit/b1ebac921dc35dcaf5e5c3f9fe803c4c9e2d78f8#diff-5d20954daff7dcc215ae55822581edcf94d33938f852c929207188cdd3385a40L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1628089</div><div id='project'> Project Name: ais-bonn/vp-suite</div><div id='commit'> Commit Name: b1ebac921dc35dcaf5e5c3f9fe803c4c9e2d78f8</div><div id='time'> Time: 2022-01-14</div><div id='author'> Author: boltres@ais.uni-bonn.de</div><div id='file'> File Name: vp_suite/models/_base_model.py</div><div id='m_class'> M Class Name: VideoPredictionModel</div><div id='n_method'> N Class Name: VideoPredictionModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vp_suite/models/_base_model.py</div><div id='n_file'> N File Name: vp_suite/models/_base_model.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        raise NotImplementedError("Implement D3Net")
+    
+    def forward(self, input):
+        <a id="change">raise </a>NotImplementedError("Implement D3Net")
+
+class D3Block(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, num_blocks=3, depth=None, eps=EPS):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        stacked.append(input)
+
+        <a id="change">for idx</a> in <a id="change">range(</a>self.num_d3blocks<a id="change">):
+            </a>if idx != 0:
+                x<a id="change"> = </a>torch.cat(stacked, dim=1)
+            x = self.net[idx](x)
+            <a id="change">stacked.append(</a>x<a id="change">)</a>
+        
+        output = torch.cat(stacked[1:], dim=1)
+
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1628080</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        len is equal to the batch size, the second len is equal to the top_k and the third len is equal to the respective
+        number of classes for the child FC.
+        
+        <a id="change">raise </a>NotImplementedError()
+
+
+class FlowDictDecorator(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        n = len(features)
+        parent_indices = parent_flow_dict.activated.argsort(dim=1)[:, :self.top_k]
+        res = []
+        <a id="change">for i</a> in <a id="change">range(</a>n<a id="change">):
+            </a>res_for_parent<a id="change"> = </a>[]
+            for parent_index in parent_indices[i]:
+                res_for_parent.append(self.fcs[parent_index](features[i:i+1]))
+            <a id="change">res.append(</a>res_for_parent<a id="change">)</a>
+        return res
+
+
+class FlowDictDecorator(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hristo-vrigazov/dnn.cool/commit/3782b44e17cff0a1bc35747df9fe88b4bfac72c3#diff-53cd98664c00edca1974faacafa1f6aafcb5756b740af3a59b935bb20d6a1442L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1628082</div><div id='project'> Project Name: hristo-vrigazov/dnn.cool</div><div id='commit'> Commit Name: 3782b44e17cff0a1bc35747df9fe88b4bfac72c3</div><div id='time'> Time: 2020-06-28</div><div id='author'> Author: hvrigazov@gmail.com</div><div id='file'> File Name: dnn_cool/modules.py</div><div id='m_class'> M Class Name: NestedFC</div><div id='n_method'> N Class Name: NestedFC</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnn_cool/modules.py</div><div id='n_file'> N File Name: dnn_cool/modules.py</div><div id='m_start'> M Start Line: 70</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 79</div><BR>

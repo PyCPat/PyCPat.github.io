@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            coor_mask = rearrange(mask, &quotb () i j -&gt; b i j&quot)
+            coor_weights.masked_fill_(~coor_mask, 0.)
+
+        <a id="change">if </a>self.norm_rel_coors<a id="change">:
+            </a>rel_coors<a id="change"> = </a>F.normalize(rel_coors, dim = -1, p = 2)
+
+        coors_out = einsum(&quotb i j, b i j c -&gt; b i c&quot, coor_weights, rel_coors)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        assert not (only_sparse_neighbors and not exists(adj_mat)), &quotadjacency matrix must be passed in if only_sparse_neighbors is turned on&quot
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>num_nodes<a id="change"> = </a>mask.sum(dim = -1)
+
+        rel_coors = rearrange(coors, &quotb i d -&gt; b i () d&quot) - rearrange(coors, &quotb j d -&gt; b () j d&quot)
+        rel_dist = rel_coors.norm(dim = -1, p = 2)</code></pre>

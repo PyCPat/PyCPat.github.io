@@ -1,0 +1,125 @@
+<html><h3>Pattern ID :1547
+</h3><img src='4436035.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        n, m, h, w, k = sample.shape
+        &#47&#47 [n, m, h, w, k, 1], [m, 1, 1, k, d] -sum-&gt; [n, m, h, w, d] -&gt; [n, m, d, h, w] -&gt; [n, c, h, w]
+        return torch.einsum("nmhwk,mkd-&gt;nmhwd", sample, self._codebook).permute(0, 1, 4, 2, 3).reshape(n, -1, h, w)
+        print(<a id="change">sample[..., None]</a>.shape)
+        print(self._codebook[:, None, None, ...].shape)
+        exit()
+        return (sample[..., None] * self._codebook[:, None, None, ...]).sum(-2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [n, m, h, w, k, 1], [m, 1, 1, k, d] -sum-&gt; [n, m, h, w, d] -&gt; [n, m, d, h, w] -&gt; [n, c, h, w]
+        return torch.einsum("nmhwk,mkd-&gt;nmhwd", sample, self._codebook).permute(0, 1, 4, 2, 3).reshape(n, -1, h, w)
+
+        quantizeds<a id="change"> = </a><a id="change">list()</a>
+        for i in range(len(self._codebook)):
+            &#47&#47 [n, h, w, k]
+            oneHot = sample[:, i]
+            &#47&#47 [n, h, w, k] @ [k, d] -&gt; [n, h, w, d]
+            quantized = oneHot @ self._codebook[i]
+            quantizeds.append(quantized)
+        &#47&#47 m * [n, h, w, d] -&gt; [n, h, w, c] -&gt; [n, c, h, w]
+        <a id="change">return </a>torch.cat(quantizeds, -1).permute(0, 3, 1, 2)
+
+
+class _quantizerEncoder(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/e36abadfbaa15ca5f2208734c7a8c25586153013#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4436035</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: e36abadfbaa15ca5f2208734c7a8c25586153013</div><div id='time'> Time: 2022-01-07</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: _multiCodebookDeQuantization</div><div id='n_method'> N Class Name: _multiCodebookDeQuantization</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 156</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((<a id="change">logit.shape[1]</a>, )).permute(1, 0, 2)
+            randomFalseMask *= -1e9
+            bernoulli = Bernoulli(logits=-meanLogit - 3.0)
+            randomTrueMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        xs<a id="change"> = </a><a id="change">list()</a>
+        for xRaw in latents:
+            n, c, h, w = xRaw.shape
+            &#47&#47 [1, k, c]
+            codebook = getattr(self, "codebook")[None, ...]
+            &#47&#47 [n, c, h, w] -&gt; [n, h, w, c]
+            encoderIn = xRaw.permute(0, 2, 3, 1)
+            &#47&#47 [n, h, w, c] -&gt; [n, h*w, c]
+            encoderIn = self._position(encoderIn).reshape(n, -1, c)
+            &#47&#47 [1, k, c]
+            codebookQ = self._codebookQuery(codebook)
+            &#47&#47 [n, h*w, c]
+            x = self._encoder(encoderIn, codebookQ)
+            xs.append(x)
+            &#47&#47 [n, h*w, k]
+            logit = self._select(x)
+
+            &#47&#47 [k]
+            bernoulli = Bernoulli(probs=maskProb)
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n, h*w, )).bool()
+
+            maskedLogit = logit.masked_fill(randomFalseMask, -1e9)
+
+            &#47&#47 randomFalseMask *= -1e9
+            &#47&#47 maskedLogit = logit + randomFalseMask &#47&#47 + randomTrueMask
+
+            sample = F.gumbel_softmax(maskedLogit, 1.0, True)
+            &#47&#47 [1, k, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [n, h*w, c]
+            quantized = sample @ codewords[0, ...]
+            &#47&#47 [n, h*w, c]
+            posistedQuantized = self._position(quantized.reshape(n, h, w, c)).reshape(n, -1, c)
+            &#47&#47 [1, k, c]
+            decodedCodes = self._codebookDecoder(codebook)
+            &#47&#47 [n, c, h, w]
+            deTransformed = self._decoder(posistedQuantized, decodedCodes).reshape(n, h, w, c).permute(0, 3, 1, 2)
+
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, -1))
+        <a id="change">return </a>quantizeds, codes, logits, xs
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/ff056abb47b531e42496967adda543c562e1cefd#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L504' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4436034</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: ff056abb47b531e42496967adda543c562e1cefd</div><div id='time'> Time: 2021-05-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 505</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 508</div><div id='n_end'> N End Line: 554</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        token_index: LongTensor
+    ) -&gt; Tuple[LongTensor, FloatTensor]:
+        image_count = encoder_state.shape[0] // 2
+        token_index_batched = <a id="change">token_index[[0] * image_count * 2]</a>
+        prev_tokens = prev_tokens[list(range(image_count)) * 2]
+        prev_tokens.clamp_(0, self.image_vocab_count)
+        decoder_state = self.embed_tokens.forward(prev_tokens)
+        decoder_state += self.embed_positions.forward(token_index_batched)</code></pre><h3>After Change</h3><pre><code class='java'>
+        token_index_batched = token_index[None, :][list(range(image_count)) * 2]
+        if prev_tokens.ndim == 1:
+            prev_tokens = prev_tokens.unsqueeze(0)
+        prev_tokens<a id="change"> = </a>prev_tokens.T[<a id="change">list(</a>range(image_count)<a id="change">)</a> * 2]
+        prev_tokens.clamp_(0, self.image_vocab_count)
+        decoder_state = self.embed_tokens.forward(prev_tokens)
+        decoder_state += self.embed_positions.forward(token_index_batched)
+        decoder_state = self.layernorm_embedding.forward(decoder_state)
+        if decoder_state.ndim &lt; 3:
+            decoder_state = decoder_state[:, None]
+        if attention_state is None:
+            attention_state = [None] * self.layer_count
+        for i in range(self.layer_count):
+            decoder_state, attention_state[i] = self.layers[i].forward(
+                decoder_state,
+                encoder_state,
+                attention_state[i],
+                attention_mask,
+                token_index
+            )
+        decoder_state = self.final_ln(decoder_state)
+        logits = self.lm_head(decoder_state)
+        temperature = settings[[0]]
+        top_k = settings[[1]].to(torch.long)
+        supercondition_factor = settings[[2]]
+        logits = logits[:, -1, : 2 ** 14]
+        logits: FloatTensor = (
+            logits[:image_count] * (1 - supercondition_factor) + 
+            logits[image_count:] * supercondition_factor
+        )
+        if return_logits:
+            <a id="change">return </a>logits
+        logits_sorted, _ = logits.sort(descending=True)
+        is_kept = logits &gt;= logits_sorted[:, top_k - 1]
+        logits -= logits_sorted[:, [0]]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/674cd2ef60b250b352d50ecd658e4ce41967dbe8#diff-cdf6c765ac154a08d38442c8f2599da87fe2c451ad8d485b2a3c6fde4f659a81L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4436036</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: 674cd2ef60b250b352d50ecd658e4ce41967dbe8</div><div id='time'> Time: 2022-07-18</div><div id='author'> Author: nev@neverix.io</div><div id='file'> File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='m_class'> M Class Name: DalleBartDecoder</div><div id='n_method'> N Class Name: DalleBartDecoder</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_decoder.py</div><div id='m_start'> M Start Line: 142</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 148</div><div id='n_end'> N End Line: 186</div><BR>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, h, w]
+            &#47&#47 targetWeight = (weight * oneHot).sum(-1)
+            code = torch.randint(logit.shape[-1], [n, h, w], device=device)
+            logit = <a id="change">logit.permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+            mle = F.cross_entropy(logit, code)
+            &#47&#47 regs.append(mle)
+            regs.append(reg + 0.01 * mle)
+        regs = sum(regs) / len(logits)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            &#47&#47 [N, H, W]
+            reg = <a id="change">posterior.entropy().mean()</a>
+            &#47&#47 prior = Categorical(logits=torch.zeros_like(logit))
+            &#47&#47 reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            &#47&#47 &#47&#47 [n, h, w, k]
+            &#47&#47 &#47&#47 weight = (-logit).detach().softmax(-1)</code></pre>

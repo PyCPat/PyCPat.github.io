@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :89
+</h3><img src='360167.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 return cate_pred_list, kernel_pred_list
+        if self.training:
+            <a id="change">pass</a>
+            &#47&#47 return self.forward_train(feats, targets)
+        else:
+            seg_masks, cate_labels, cate_scores, bbox_num = self.forward_eval(cate_pred_list, kernel_pred_list,
+                                                                              seg_pred, im_shape, ori_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            ins_labels = []
+            cate_labels = []
+            grid_order_list = []
+            i<a id="change"> = </a>0
+            for lvl in range(<a id="change">len(</a>self.seg_num_grids<a id="change">)</a>):
+                ins_labels.append(targets[i]); i<a id="change"> += </a>1
+            for lvl in range(len(self.seg_num_grids)):
+                cate_labels.append(targets[i].to(torch.int32)); i += 1
+            for lvl in range(len(self.seg_num_grids)):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/miemie2013/miemiedetection/commit/49afa0099c63a554923f16bc24439bc547d1d52e#diff-98ac090aef281f7c2786c2bcd91e53b06b803895c6162d23b442cdd72a2dde30L330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 360167</div><div id='project'> Project Name: miemie2013/miemiedetection</div><div id='commit'> Commit Name: 49afa0099c63a554923f16bc24439bc547d1d52e</div><div id='time'> Time: 2022-07-15</div><div id='author'> Author: 53960695+miemie2013@users.noreply.github.com</div><div id='file'> File Name: mmdet/models/heads/solov2_head.py</div><div id='m_class'> M Class Name: SOLOv2Head</div><div id='n_method'> N Class Name: SOLOv2Head</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/heads/solov2_head.py</div><div id='n_file'> N File Name: mmdet/models/heads/solov2_head.py</div><div id='m_start'> M Start Line: 351</div><div id='m_end'> M End Line: 351</div><div id='n_start'> N Start Line: 330</div><div id='n_end'> N End Line: 362</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if shared_label is None:
+                shared_label = self.shared(label)
+            else:
+                <a id="change">pass</a>
+            z = torch.cat([shared_label, z], 1)
+
+            act = self.linear0(z)
+            act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)</code></pre><h3>After Change</h3><pre><code class='java'>
+        with torch.cuda.amp.autocast() if self.mixed_precision and not eval else misc.dummy_context_mgr() as mp:
+            if self.MODEL.info_type != "N/A":
+                if self.MODEL.g_info_injection == "concat":
+                    z<a id="change"> = </a>self.info_mix_linear(z)
+                elif self.MODEL.g_info_injection == "cBN":
+                    z, z_info = z[:, :self.z_dim], z[:, self.z_dim:]
+                    affine_list.append(self.info_proj_linear(z_info))
+
+            if self.g_cond_mtd != "W/O":
+                if shared_label is None:
+                    shared_label = self.shared(label)
+                affine_list.append(shared_label)
+            if <a id="change">len(</a>affine_list<a id="change">)</a> == 0:
+                affine<a id="change"> = </a>z
+            else:
+                affine = torch.cat(affine_list + [z], 1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/postech-cvlab/pytorch-studiogan/commit/43b43f14632f9d0b4e18b2d081908bbc7ae2d91d#diff-8e254ee489774778fb1c9ce198410086285820ede9e1a073ff48ad9350a0e011L162' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 360166</div><div id='project'> Project Name: postech-cvlab/pytorch-studiogan</div><div id='commit'> Commit Name: 43b43f14632f9d0b4e18b2d081908bbc7ae2d91d</div><div id='time'> Time: 2022-01-25</div><div id='author'> Author: joonghyuk4727@gmail.com</div><div id='file'> File Name: src/models/deep_big_resnet.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/deep_big_resnet.py</div><div id='n_file'> N File Name: src/models/deep_big_resnet.py</div><div id='m_start'> M Start Line: 164</div><div id='m_end'> M End Line: 177</div><div id='n_start'> N Start Line: 154</div><div id='n_end'> N End Line: 179</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                if shared_label is None:
+                    shared_label = self.shared(label)
+                else:
+                    <a id="change">pass</a>
+                labels = [torch.cat([shared_label, item], 1) for item in zs[1:]]
+            else:
+                labels = [None]*self.chunk_size
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        with torch.cuda.amp.autocast() if self.mixed_precision and not eval else misc.dummy_context_mgr() as mp:
+            if self.MODEL.info_type != "N/A":
+                if self.MODEL.g_info_injection == "concat":
+                    z<a id="change"> = </a>self.info_mix_linear(z)
+                elif self.MODEL.g_info_injection == "cBN":
+                    z, z_info = z[:, :self.z_dim], z[:, self.z_dim:]
+                    affine_list.append(self.info_proj_linear(z_info))
+
+            zs = torch.split(z, self.chunk_size, 1)
+            z = zs[0]
+            if self.g_cond_mtd != "W/O":
+                if shared_label is None:
+                    shared_label = self.shared(label)
+                affine_list.append(shared_label)
+            if <a id="change">len(</a>affine_list<a id="change">)</a> == 0:
+                affines = [item for item in zs[1:]]
+            else:
+                affines<a id="change"> = </a>[torch.cat(affine_list + [item], 1) for item in zs[1:]]
+
+            act = self.linear0(z)
+            act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/postech-cvlab/pytorch-studiogan/commit/43b43f14632f9d0b4e18b2d081908bbc7ae2d91d#diff-57419e1a2c2ed1ee4edbe3661a53420101a7cee3cc6d9bd1c86fa02dbc9a47bbL123' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 360163</div><div id='project'> Project Name: postech-cvlab/pytorch-studiogan</div><div id='commit'> Commit Name: 43b43f14632f9d0b4e18b2d081908bbc7ae2d91d</div><div id='time'> Time: 2022-01-25</div><div id='author'> Author: joonghyuk4727@gmail.com</div><div id='file'> File Name: src/models/big_resnet.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/big_resnet.py</div><div id='n_file'> N File Name: src/models/big_resnet.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 143</div><BR>

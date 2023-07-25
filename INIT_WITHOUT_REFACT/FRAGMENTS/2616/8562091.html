@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, outputs):
+        if self.weight:
+            <a id="change">w</a> = torch.sigmoid(self.w) * (2 / self.n)  &#47&#47 sigmoid weights (0-1)
+            if self.n == 2:
+                return x * <a id="change">w[0]</a> + outputs[self.layers[0]] * w[1]
+            elif self.n == 3:
+                return x * w[0] + outputs[self.layers[0]] * <a id="change">w[1]</a> + outputs[self.layers[1]] * <a id="change">w[2]</a>
+        else:
+            if self.n == 2:
+                return x + outputs[self.layers[0]]
+            elif self.n == 3:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Fusion
+        nc = x.shape[1]  &#47&#47 number of channels
+        <a id="change">for i</a> in range(self.n - 1)<a id="change">:
+            </a>a<a id="change"> = </a>outputs[self.layers[i]]  &#47&#47 feature to add
+            dc<a id="change"> = </a>nc<a id="change"> - </a>a.shape[1]  &#47&#47 delta channels
+
+            &#47&#47 Adjust channels
+            if dc &gt; 0:  &#47&#47 pad</code></pre>

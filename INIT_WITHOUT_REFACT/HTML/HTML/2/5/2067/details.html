@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :2067
+</h3><img src='7509802.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        if self.training:
+            total_blocks = sum([len(sx) for sx in x])
+            mask_size = torch.Size(<a id="change">[</a>total_blocks<a id="change"></a>])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_id = 0</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask_size = torch.Size([X[0].shape[0], sum(blocks_per_mod)])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_shapes = [list(x.shape[:2]) + <a id="change">[</a>1<a id="change"></a>] * (x.dim() - 2) for x in X]
+            grouped_masks = torch.split(mask, blocks_per_mod, dim=1)
+            grouped_masks = <a id="change">[m.reshape(s) for m, s in zip(grouped_masks, mask_shapes)]</a>
+            X = [x * m for x, m in zip(X, grouped_masks)]
+            return X, grouped_masks
+        return X, None
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/a2c91bd6e186680ca2c41bbf22c9b57aff4654d2#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7509802</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: a2c91bd6e186680ca2c41bbf22c9b57aff4654d2</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: BlockDropout</div><div id='n_method'> N Class Name: BlockDropout</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return nn.Sequential(*layers)
+
+    def forward(self, x):  &#47&#47 224x224
+        features = <a id="change">[]</a>
+        x = self.conv1(x)  &#47&#47 112x112
+        features.append(x)
+        x = self.bn1(x)
+        x = self.relu(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        between the different resolutions and scales by alpha_{i}.
+        Normalizing the features and applying spatial resolution was taken from LPIPS and wasn&quott mentioned in the paper.
+        
+        images = torch.concat(<a id="change">[</a>x, x_rec<a id="change"></a>], dim=0)  &#47&#47 batch
+        features = self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = <a id="change">[a * torch.abs(p[0] - p[1]).mean() for a, p in zip(self.alphas, features)]</a>
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/casualganpapers/make-a-scene/commit/89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0#diff-1ccb21e596d4cb9b26cee32d3e64f968bb2dc277d3d4514cc0cfe9ff65e9ef08L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7509800</div><div id='project'> Project Name: casualganpapers/make-a-scene</div><div id='commit'> Commit Name: 89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0</div><div id='time'> Time: 2022-05-26</div><div id='author'> Author: 61938694+dome272@users.noreply.github.com</div><div id='file'> File Name: losses/face_loss.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: losses/face_loss.py</div><div id='n_file'> N File Name: losses/face_loss.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if len(x) &gt; self.split_block:
+                x[-2] = torch.cat(x[-2:], dim=2)
+
+        ret_segments = <a id="change">[]</a>
+        for i in range(self.split_block):
+            ret_segments.append(self.blocks[i]([x[i] for x in segmented_x]))
+
+        ret = [torch.cat([r[m] for r in ret_segments], dim=2) for m in range(self.num_modality)]</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, X):
+        &#47&#47 split into N time segments, assumes in 2nd dim
+        &#47&#47 by default N=1, does not split
+        segment_shapes = [<a id="change">[</a>x.shape[2] // self.split_block<a id="change"></a>] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            seg_shape[-1] += x.shape[2] % self.split_block
+        segmented_x = <a id="change">[torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]</a>
+
+        &#47&#47 apply MSAF
+        ret_segments = [self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7509801</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>

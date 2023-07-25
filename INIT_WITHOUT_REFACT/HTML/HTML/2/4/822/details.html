@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :822
+</h3><img src='2627738.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        <a id="change">self.grl.step()</a>
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        g = F.softmax(g,dim=1).detach()
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label<a id="change"> = </a><a id="change">torch.cat(</a>(
+            torch.ones((g_s.size(0), 1)).to(g_s.device)<a id="change">,
+            torch.zeros((g_t.size(0), 1)).to(g_t.device)</a>,
+        )<a id="change">)</a>
+        weight = 1.0 + torch.exp(-entropy(g))
+        batch_size = f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2627738</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        d_t = self.domain_discriminator(f_t)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+
+        <a id="change">self.grl.step()</a>
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))
+        return 0.5 * (self.bce(d_s, d_label_s) + self.bce(d_t, d_label_t))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.domain_discriminator_accuracy = None
+
+    def forward(self, f_s, f_t):
+        f = self.grl(<a id="change">torch.cat(</a>(f_s<a id="change">, f_t</a>)<a id="change">, dim=0)</a>)
+        d = self.domain_discriminator(f)
+        d_s<a id="change">, d_t = </a>d.chunk(2, dim=0)
+        d_label_s = torch.ones((f_s.size(0), 1)).to(f_s.device)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-5ee1f6b00badfb68689d2023e24e894773603682dd9012554efbc58f238a9789L50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2627741</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/dann.py</div><div id='m_class'> M Class Name: DomainAdversarialLoss</div><div id='n_method'> N Class Name: DomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/dann.py</div><div id='n_file'> N File Name: dalib/adaptation/dann.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        d_t = self.domain_discriminator(f_t)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+
+        <a id="change">self.grl.step()</a>
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))
+        return 0.5 * (self.bce(d_s, d_label_s) + self.bce(d_t, d_label_t))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.domain_discriminator_accuracy = None
+
+    def forward(self, f_s, f_t):
+        f = self.grl(<a id="change">torch.cat(</a>(f_s<a id="change">, f_t</a>)<a id="change">, dim=0)</a>)
+        d = self.domain_discriminator(f)
+        d_s<a id="change">, d_t = </a>d.chunk(2, dim=0)
+        d_label_s = torch.ones((f_s.size(0), 1)).to(f_s.device)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-5ee1f6b00badfb68689d2023e24e894773603682dd9012554efbc58f238a9789L50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2627742</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/dann.py</div><div id='m_class'> M Class Name: DomainAdversarialLoss</div><div id='n_method'> N Class Name: DomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/dann.py</div><div id='n_file'> N File Name: dalib/adaptation/dann.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        <a id="change">self.grl.step()</a>
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        g = F.softmax(g,dim=1).detach()
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label<a id="change"> = </a><a id="change">torch.cat(</a>(
+            torch.ones((g_s.size(0), 1)).to(g_s.device)<a id="change">,
+            torch.zeros((g_t.size(0), 1)).to(g_t.device)</a>,
+        )<a id="change">)</a>
+        weight = 1.0 + torch.exp(-entropy(g))
+        batch_size = f.size(0)
+        weight = weight / torch.sum(weight) * batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2627743</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>

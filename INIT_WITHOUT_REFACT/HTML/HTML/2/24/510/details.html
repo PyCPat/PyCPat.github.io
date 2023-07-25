@@ -1,0 +1,149 @@
+<html><h3>Pattern ID :510
+</h3><img src='1910127.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        print(&quot\n input of first convolution:{}&quot.format(x.size()))
+        out = <a id="change">F.relu(self.bn1(</a><a id="change">self.conv1(</a>x<a id="change">))</a><a id="change">)</a>
+        print(&quot\n output of first convolution:{}&quot.format(out.size()))
+
+        out = <a id="change">self.bn2(self.conv2(</a>out<a id="change">)</a><a id="change">)</a>
+        &#47&#47 print(out.size())
+        out<a id="change"> += </a>self.shortcut(x)
+        out = <a id="change">F.relu(</a>out<a id="change">)</a>
+        return out
+
+
+class Bottleneck(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+
+    def forward(self, x):
+        identity<a id="change"> = x</a>
+
+        out = <a id="change">self.conv1(x</a><a id="change">)</a>
+        out<a id="change"> = </a><a id="change">self.bn1(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>self.relu(out)
+
+        out = <a id="change">self.conv2(</a>out<a id="change">)</a>
+        out = <a id="change">self.bn2(</a>out<a id="change">)</a>
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = self</a><a id="change">.downsample(x</a><a id="change">)</a>
+
+        out<a id="change"> += </a>identity
+        out<a id="change"> = self</a><a id="change">.relu(</a>out<a id="change">)</a>
+
+        return out
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 21</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mdiephuis/simclr/commit/cded7358aca8d4b0d4043c06952a30a0882c05f1#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1910127</div><div id='project'> Project Name: mdiephuis/simclr</div><div id='commit'> Commit Name: cded7358aca8d4b0d4043c06952a30a0882c05f1</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: shideh.rezaeifar@unige.ch</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: BasicBlock</div><div id='n_method'> N Class Name: BasicBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+
+    def forward(self, x):
+        out = <a id="change">F.relu(self.bn1(</a><a id="change">self.conv1(</a>x<a id="change">))</a><a id="change">)</a>
+        out = F.relu(<a id="change">self.bn2(self.conv2(</a>out<a id="change">)</a><a id="change">)</a>)
+        out = self.bn3(self.conv3(out))
+        out<a id="change"> += </a>self.shortcut(x)
+        out = <a id="change">F.relu(</a>out<a id="change">)</a>
+        return out
+
+
+class ResNet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+
+    def forward(self, x: Tensor) -&gt; Tensor:
+        identity<a id="change"> = </a>x
+
+        out = <a id="change">self.conv1(</a>x<a id="change">)</a>
+        out<a id="change"> = </a><a id="change">self.bn1(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>self.relu(out)
+
+        out = <a id="change">self.conv2(</a>out<a id="change">)</a>
+        out = <a id="change">self.bn2(</a>out<a id="change">)</a>
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = </a><a id="change">self.downsample(</a>x<a id="change">)</a>
+
+        out<a id="change"> += </a>identity
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/decile-team/cords/commit/931f2dbbb853ea9beb25e72b69e473c0365e60ca#diff-580e0813097d831f8f05a21aa69ba247d29cf468b66c336c92f2ad30fa9aa7d9L59' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1910136</div><div id='project'> Project Name: decile-team/cords</div><div id='commit'> Commit Name: 931f2dbbb853ea9beb25e72b69e473c0365e60ca</div><div id='time'> Time: 2023-02-04</div><div id='author'> Author: 61333497+krishnatejakk@users.noreply.github.com</div><div id='file'> File Name: cords/utils/models/resnet.py</div><div id='m_class'> M Class Name: Bottleneck</div><div id='n_method'> N Class Name: Bottleneck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cords/utils/models/resnet.py</div><div id='n_file'> N File Name: cords/utils/models/resnet.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 64</div><div id='n_start'> N Start Line: 146</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x):
+        out = <a id="change">F.relu(self.bn1(</a><a id="change">self.conv1(</a>x<a id="change">))</a><a id="change">)</a>
+        out = F.relu(<a id="change">self.bn2(self.conv2(</a>out<a id="change">)</a><a id="change">)</a>)
+        out = self.bn3(self.conv3(out))
+        out<a id="change"> += </a>self.shortcut(x)
+        out = <a id="change">F.relu(</a>out<a id="change">)</a>
+        return out
+
+
+class ResNetC(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+
+    def forward(self, x):
+        identity<a id="change"> = </a>x
+
+        out = <a id="change">self.conv1(</a>x<a id="change">)</a>
+        out<a id="change"> = self.bn1(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>self.relu(out)
+
+        out = <a id="change">self.conv2(</a>out<a id="change">)</a>
+        out = <a id="change">self.bn2(</a>out<a id="change">)</a>
+        out = self.relu(out)
+
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = </a><a id="change">self.downsample(</a>x<a id="change">)</a>
+
+        out<a id="change"> += </a>identity
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mdiephuis/simclr/commit/cded7358aca8d4b0d4043c06952a30a0882c05f1#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1910123</div><div id='project'> Project Name: mdiephuis/simclr</div><div id='commit'> Commit Name: cded7358aca8d4b0d4043c06952a30a0882c05f1</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: shideh.rezaeifar@unige.ch</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: Bottleneck</div><div id='n_method'> N Class Name: Bottleneck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        print(&quot\n input of first convolution:{}&quot.format(x.size()))
+        out = <a id="change">F.relu(self.bn1(</a><a id="change">self.conv1(</a>x<a id="change">))</a><a id="change">)</a>
+        print(&quot\n output of first convolution:{}&quot.format(out.size()))
+
+        out = <a id="change">self.bn2(self.conv2(</a>out<a id="change">)</a><a id="change">)</a>
+        &#47&#47 print(out.size())
+        out<a id="change"> += </a>self.shortcut(x)
+        out = <a id="change">F.relu(</a>out<a id="change">)</a>
+        return out
+
+
+class Bottleneck(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.stride = stride
+
+    def forward(self, x):
+        identity<a id="change"> = </a>x
+
+        out = <a id="change">self.conv1(</a>x<a id="change">)</a>
+        out<a id="change"> = self.bn1(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>self.relu(out)
+
+        out = <a id="change">self.conv2(</a>out<a id="change">)</a>
+        out = <a id="change">self.bn2(</a>out<a id="change">)</a>
+
+        <a id="change">if self.downsample is not None</a><a id="change">:
+            </a>identity<a id="change"> = </a><a id="change">self.downsample(</a>x<a id="change">)</a>
+
+        out<a id="change"> += </a>identity
+        out<a id="change"> = </a><a id="change">self.relu(</a>out<a id="change">)</a>
+
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mdiephuis/simclr/commit/cded7358aca8d4b0d4043c06952a30a0882c05f1#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1910138</div><div id='project'> Project Name: mdiephuis/simclr</div><div id='commit'> Commit Name: cded7358aca8d4b0d4043c06952a30a0882c05f1</div><div id='time'> Time: 2020-03-05</div><div id='author'> Author: shideh.rezaeifar@unige.ch</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: BasicBlock</div><div id='n_method'> N Class Name: BasicBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 62</div><BR>

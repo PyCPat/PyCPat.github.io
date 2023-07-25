@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.act = GELU()
+
+    def forward(self, lmem, smem, hiddens):
+        hiddens, lmem = hiddens.detach(), <a id="change">lmem.detach()</a>
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth
+
+        if lmem.shape[2] == 0:
+            lmem = self.init_lmem.expand(mem_depth, batch, -1, -1).clone()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, lmem, smem, hiddens, detach_lmem = False):
+        hiddens = hiddens.detach()
+        <a id="change">if </a>detach_lmem<a id="change">:
+            </a>lmem<a id="change"> = </a><a id="change">lmem.detach()</a>
+        batch, dim_head, mem_depth = lmem.shape[1], self.dim_head, self.num_memory_depth
+
+        if lmem.shape[2] == 0:
+            lmem = self.init_lmem.expand(mem_depth, batch, -1, -1).clone()</code></pre>

@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :1814
+</h3><img src='7007083.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Student(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        action = dist.sample()
+        action_log_probs<a id="change"> = </a>dist.log_prob(actions)
+
+        entropy<a id="change"> = </a>dist.entropy()
+        ratios = (action_log_probs - old_log_probs).exp()
+        advantages<a id="change"> = </a>normalize(rewards<a id="change"> - </a><a id="change">old_values.detach()</a>)
+        surr1<a id="change"> = </a>ratios<a id="change"> * </a>advantages
+        surr2 = ratios.clamp(<a id="change">1</a><a id="change"> - </a>self.eps_clip, 1 + self.eps_clip) * advantages
+        policy_loss = - torch.min(surr1, surr2) - self.beta_s * entropy
+        <a id="change">return </a>policy_loss
+
+class Student(nn.Module):
+    def __init__(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/anymal-belief-state-encoder-decoder-pytorch/commit/6a860f5856bae89865c3943e580d10de277fb2ef#diff-73be6483f8f8caa2ae70e99ad4ab6af1d1c938d94af55a7444fe6a52139b298bL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7007083</div><div id='project'> Project Name: lucidrains/anymal-belief-state-encoder-decoder-pytorch</div><div id='commit'> Commit Name: 6a860f5856bae89865c3943e580d10de277fb2ef</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_class'> M Class Name: PPO</div><div id='n_method'> N Class Name: PPO</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='n_file'> N File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_start'> M Start Line: 77</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 110</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        <a id="change">return 0.5</a><a id="change"> * </a>(trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):
+        Perform forward on a single domain.</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = <a id="change">F.softmax(g,dim=1).detach()</a>
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label<a id="change"> = </a>torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight<a id="change"> = </a>1.0 + torch.exp(<a id="change">-entropy(g)</a>)
+        batch_size<a id="change"> = </a>f.size(0)
+        weight<a id="change"> = </a>weight<a id="change"> / torch.sum(weight) * </a>batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7007097</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        <a id="change">return 0.5</a><a id="change"> * </a>(trans_loss_s + trans_loss_t)
+
+    def _single_domain_forward(self, logits, features, domain=1):
+        Perform forward on a single domain.</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = <a id="change">F.softmax(g,dim=1).detach()</a>
+        h = self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label<a id="change"> = </a>torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight<a id="change"> = </a>1.0<a id="change"> + </a>torch.exp(-entropy(g))
+        batch_size<a id="change"> = </a>f.size(0)
+        weight<a id="change"> = </a>weight<a id="change"> / torch.sum(weight) * </a>batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        <a id="change">return </a>self.bce(d, d_label, weight.view_as(d))
+
+
+class RandomizedMultiLinearMap(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7007088</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>

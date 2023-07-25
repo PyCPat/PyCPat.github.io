@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            InvertedResidual(hidden_size, out_channels, kernel_size=99, use_residual=False))
+
+    def forward(self, embed, embed_len) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        x<a id="change"> = </a>torch.transpose(embed, 1, 2)
+        x = <a id="change">self.layers(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>torch.transpose(x, 1, 2)
+        <a id="change">return </a>x, torch.div(embed_len + 1, 2, rounding_mode=&quotfloor&quot)
+
+class LinearCharDecoder(nn.Module):
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            InvertedResidual(hidden_size, out_channels, kernel_size=99, use_residual=False))
+
+    def forward(self, embed) -&gt; torch.Tensor:
+        <a id="change">return </a><a id="change">self.layers(</a>embed<a id="change">)</a>
+
+    def output_length(self, embed_len) -&gt; torch.Tensor:
+        return torch.div(embed_len + 1, 2, rounding_mode=&quottrunc&quot)
+</code></pre>

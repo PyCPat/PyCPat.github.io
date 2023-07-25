@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        f3 = self.conv4(f3)
+        out = self.conv5(f3)
+
+        <a id="change">return </a>f3<a id="change">, out</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, f1, f2, f3):
+        f3 = self.upsample(f3, f1.shape[-2:])
+        f2<a id="change"> = </a><a id="change">self.upsample(</a>f2, f1.shape[-2:]<a id="change">)</a>
+        f1 = torch.cat([f1, f2, f3], dim=1)
+        f1 = self.conv1(f1)
+
+        Hf1 = self.Hattn(f1)
+        Wf1 = self.Wattn(f1)
+
+        f1 = self.conv2(Hf1 + Wf1)
+        f1 = self.conv3(f1)
+        f1 = self.conv4(f1)
+        out = self.conv5(f1)
+
+        <a id="change">return </a>f1, out</code></pre>

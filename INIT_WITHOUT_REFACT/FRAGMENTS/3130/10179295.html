@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        q, k, v = (self.to_q(x), self.to_k(x), self.to_v(x))
+
+        b<a id="change">, _, h, w</a> = q.shape
+
+        q = q.reshape(b, self.heads, -1, h * w)
+        k = k.reshape(b, -1, h * w)</code></pre><h3>After Change</h3><pre><code class='java'>
+        v = v.reshape(b, -1, h * w)
+
+        if context is not None:
+            context<a id="change"> = </a>context.reshape(b, c, 1, -1)
+            ck<a id="change"> = </a><a id="change">self.to_k(context).reshape(</a>b, k_dim, <a id="change">-1</a><a id="change">)</a>
+            cv = self.to_v(context).reshape(b, k_dim, -1)
+            k<a id="change"> = </a>torch.cat((k, ck), dim=2)
+            v = torch.cat((v, cv), dim=2)
+
+        k = k.softmax(dim=2)</code></pre>

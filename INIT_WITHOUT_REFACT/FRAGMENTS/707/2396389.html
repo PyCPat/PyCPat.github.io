@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = x if self.expand_ratio == 1 else swish(self.bn1(self.conv1(x)))
+        out = swish(self.bn2(self.conv2(out)))
+        &#47&#47 Squeeze-Excitation
+        w = F.avg_pool2d(out, <a id="change">out.size(</a>2<a id="change">)</a>)
+        w = swish(self.se1(w))
+        w<a id="change"> = </a>self.se2(w).sigmoid()
+        out<a id="change"> = </a>out * w
+        &#47&#47 Output
+        out = self.bn3(self.conv3(out))
+        if self.shortcut:</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.se(out)
+        out = self.bn3(self.conv3(out))
+        if self.has_skip:
+            if <a id="change">self.training and self.drop_rate &gt; 0</a>:
+                out = drop_connect(out, self.drop_rate)
+            out = out + x
+        return out</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            n_tokens, batch_size, n_feats = x.shape
+
+        positions = (torch.full((batch_size, 1), self.pos_scale)
+                     * <a id="change">torch.arange(n_tokens).unsqueeze(0</a><a id="change">)</a>).to(x)
+        positions = self.augment_positions(positions) &#47&#47 B, T
+
+        positions = positions.unsqueeze(-1) &#47&#47 B, T, 1</code></pre><h3>After Change</h3><pre><code class='java'>
+                           &quott -&gt; new_axis t&quot, new_axis=batch_size).to(x)
+        positions = self.augment_positions(positions)
+
+        positions = <a id="change">rearrange(</a>positions, <a id="change">&quotb t -&gt; b t 1&quot</a><a id="change">)</a>
+        product = positions * self.freq
+
+        pos_emb = torch.zeros(batch_size, n_tokens, n_feats, device=x.device)
+        pos_emb[:, :, 0::2] = torch.sin(product)</code></pre>

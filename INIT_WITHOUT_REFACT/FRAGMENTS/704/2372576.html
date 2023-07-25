@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(MDN, self).__init__()
+        self.first_linear = nn.Linear(in_dim, hidden_dim)
+        self.hidden_layers = nn.ModuleList(
+            [nn.Linear(hidden_dim, hidden_dim) for _ in <a id="change">range(</a>num_layers<a id="change">)</a>])
+        self.tanh = nn.Tanh()
+        self.mdn = MDNLayer(hidden_dim, out_dim, num_gaussians=num_gaussians)
+        self.prediction_type="probabilistic"</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(MDN, self).__init__()
+        model = [nn.Linear(in_dim, hidden_dim), nn.ReLU()]
+        if num_layers &gt; 1:
+            for <a id="change">_</a> in range(num_layers - 1):
+                model += <a id="change">[</a>nn.Linear(hidden_dim, hidden_dim), <a id="change">nn.ReLU()</a>]
+        model += [MDNLayer(hidden_dim, out_dim, num_gaussians=num_gaussians)]
+        self.model = nn.Sequential(*model)
+        self.prediction_type="probabilistic"</code></pre>

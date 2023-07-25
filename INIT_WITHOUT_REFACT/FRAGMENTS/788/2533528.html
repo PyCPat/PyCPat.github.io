@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        d_2 = d // 2
+
+        &#47&#47 Create position indexes `[0, 1, ..., seq_len - 1]`
+        seq_idx = <a id="change">torch.arange(</a>seq_len<a id="change">, device=x.device)</a>.type_as(self.theta)
+
+        &#47&#47 Calculate the product of position index and $\theta_i$
+        idx_theta = torch.einsum(&quotn,d-&gt;nd&quot, seq_idx, self.theta)
+
+        &#47&#47 Concatenate so that for row $m$ we have
+        &#47&#47 $[m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}, m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}]$
+        idx_theta2<a id="change"> = </a>torch.cat([idx_theta, idx_theta], dim=1)
+
+        &#47&#47 Calculate $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., -x^{(\frac{d}{2})}]$
+        neg_half_x = torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+
+        &#47&#47 Calculate
+        &#47&#47
+        &#47&#47 \begin{align}
+        &#47&#47 \begin{pmatrix}
+        &#47&#47 x^{(i)}_m \cos m \theta_i - x^{(i + \frac{d}{2})}_m \sin m \theta_i \\
+        &#47&#47 x^{(i + \frac{d}{2})}_m \cos m\theta_i + x^{(i)}_m \sin m \theta_i \\
+        &#47&#47 \end{pmatrix} \\
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        rx<a id="change"> = </a>(x * idx_theta2.cos()[:, None, None, :]) + (neg_half_x * idx_theta2.sin()[:, None, None, :])
+
+        &#47&#47
+        <a id="change">return </a>rx
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_rope = (x_rope * self.cos_cached[:x.shape[0]]) + (neg_half_x * self.sin_cached[:x.shape[0]])
+
+        &#47&#47
+        <a id="change">return </a>torch.cat((x_rope<a id="change">, x_pass</a>), dim=-1)
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre>

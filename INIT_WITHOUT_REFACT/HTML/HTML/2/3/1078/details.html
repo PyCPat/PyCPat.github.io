@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1078
+</h3><img src='3380835.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((logit.shape[1]<a id="change"></a>, )).permute(1, 0, 2)
+            randomFalseMask *= -1e9
+            bernoulli = Bernoulli(logits=-meanLogit - 3.0)
+            randomTrueMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n, h*w, )).bool()
+
+            maskedLogit = <a id="change">logit.masked_fill(</a>randomFalseMask, <a id="change">-1e9</a><a id="change">)</a>
+
+            &#47&#47 randomFalseMask *= -1e9
+            &#47&#47 maskedLogit = logit + randomFalseMask &#47&#47 + randomTrueMask
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/ff056abb47b531e42496967adda543c562e1cefd#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L505' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3380835</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: ff056abb47b531e42496967adda543c562e1cefd</div><div id='time'> Time: 2021-05-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 505</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 508</div><div id='n_end'> N End Line: 554</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+                &#47&#47 visible4lstm: (batch_size * matrix_size, matrix_size, hidden_size)
+                visible4lstm = upper_visible.view(-1, matrix_size, vis_hidden_size)
+                span_pre<a id="change">, _</a> = self.lstm4span(visible4lstm)
+                span_pre = span_pre.view(
+                    batch_size, matrix_size, matrix_size, vis_hidden_size
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask = torch.ones(
+                    matrix_size, matrix_size, device=seq_hiddens.device).tril(-1).bool()[None, :, :, None]
+                &#47&#47 visible4lstm: (batch_size * matrix_size, matrix_size, hidden_size)
+                visible4lstm = <a id="change">visible.masked_fill(</a>mask, <a id="change">0</a><a id="change">)</a>.flatten(0, 1)
+
+                span_pre = self.lstm4span(visible4lstm)[0]
+                span_pre = span_pre.reshape(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/junnyu/gplinker_pytorch/commit/646f478a00ca38cb2975716cba55ca2aee83b980#diff-d2d00112c4cddfc1e5c556f190ad049a3f53e66504f9d610dd4b2f901e465ce4L260' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3380833</div><div id='project'> Project Name: junnyu/gplinker_pytorch</div><div id='commit'> Commit Name: 646f478a00ca38cb2975716cba55ca2aee83b980</div><div id='time'> Time: 2022-02-28</div><div id='author'> Author: 573009727@qq.com</div><div id='file'> File Name: utils/components.py</div><div id='m_class'> M Class Name: HandshakingKernel</div><div id='n_method'> N Class Name: HandshakingKernel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/components.py</div><div id='n_file'> N File Name: utils/components.py</div><div id='m_start'> M Start Line: 272</div><div id='m_end'> M End Line: 293</div><div id='n_start'> N Start Line: 264</div><div id='n_end'> N End Line: 284</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = torch.matmul(w.transpose(1, 2), encoder_outputs)
+
+        return out<a id="change">, w</a>
+
+
+class DurationPredictor(nn.Module):
+     Duration Parameter Predictor </code></pre><h3>After Change</h3><pre><code class='java'>
+        w = self.get_alignment_energies(g, t)  &#47&#47 [B, L, T]
+
+        if mask is not None:
+            w = <a id="change">w.masked_fill(</a>mask.unsqueeze(-1), <a id="change">0.0</a><a id="change">)</a>
+
+        attn = w / (torch.sum(w, dim=1).unsqueeze(1) + 1e-8)  &#47&#47 [B, L, T]
+        out = torch.bmm(attn.transpose(1, 2), encoder_outputs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/wavegrad2/commit/523ec241c64ab635218f32d071fd85fbc469e178#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3380837</div><div id='project'> Project Name: keonlee9420/wavegrad2</div><div id='commit'> Commit Name: 523ec241c64ab635218f32d071fd85fbc469e178</div><div id='time'> Time: 2021-07-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: GaussianUpsampling</div><div id='n_method'> N Class Name: GaussianUpsampling</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 134</div><BR>

@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+
+        if <a id="change">exists(</a>self.rel_pos_length<a id="change">)</a>:
+            row_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_rows)
+            column_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_columns)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        content_out = einsum(&quotnde,ndxy-&gt;nexy&quot, context, content_q)
+
+        <a id="change">if </a><a id="change">exists(</a>self.rel_pos_length<a id="change">):
+            </a>Ix = calc_reindexing_tensor(x, L, device)
+            Px = einsum(&quotxir,rd-&gt;xid&quot, Ix, self.rel_rows)
+            Sx<a id="change"> = </a>einsum(&quotndxy,xid-&gt;nixy&quot, q, Px)
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+</code></pre>

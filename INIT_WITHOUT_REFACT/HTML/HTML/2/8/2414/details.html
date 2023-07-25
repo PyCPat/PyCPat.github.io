@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :2414
+</h3><img src='8109307.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = default(mask, lambda: torch.ones(*x.shape[:2], device = device))
+            context_mask = default(context_mask, mask) if not has_context else default(context_mask, lambda: torch.ones(*context.shape[:2], device = device))
+            mask_value = -torch.finfo(dots.dtype).max
+            mask = <a id="change">mask[:, None, :, None]</a><a id="change"> * </a><a id="change">context_mask[:, None, None, :]</a>
+            dots.masked_fill_(~mask, mask_value)
+
+        attn = dots.softmax(dim = -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 shaw&quots relative positional embedding
+        seq = torch.arange(n, device = device)
+        dist = <a id="change">rearrange(</a>seq, <a id="change">&quoti -&gt; i ()&quot</a><a id="change">)</a> - rearrange(seq, &quotj -&gt; () j&quot)
+        dist = dist.clip(-max_pos_emb, max_pos_emb) + max_pos_emb
+        rel_pos_emb = self.rel_pos_emb(dist).to(q)
+        pos_attn = einsum(&quotb h n d, n r d -&gt; b h n r&quot, q, rel_pos_emb) * self.scale</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/conformer/commit/0f8fbd31dc55d0dd6b6082fa74bad5f7da15fa1e#diff-10353d68441422b150f1ff9647eb5c4a5e0bea5b44830f4cf4ec45d403aee60dL98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8109307</div><div id='project'> Project Name: lucidrains/conformer</div><div id='commit'> Commit Name: 0f8fbd31dc55d0dd6b6082fa74bad5f7da15fa1e</div><div id='time'> Time: 2021-01-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: conformer/conformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: conformer/conformer.py</div><div id='n_file'> N File Name: conformer/conformer.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 109</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot
+            mask = <a id="change">mask[:, None, :] * mask[:, :, None]</a>
+            dots.masked_fill_(~mask, mask_value)
+            del mask
+
+        attn = dots.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot
+            mask = rearrange(mask, &quotb i -&gt; b () i ()&quot) * <a id="change">rearrange(</a>mask, <a id="change">&quotb j -&gt; b () () j&quot</a><a id="change">)</a>
+            dots.masked_fill_(~mask, mask_value)
+            del mask
+
+        attn = dots.softmax(dim=-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/3f2cbc6e23b935224b57915a2b0e1a21eb60c5a6#diff-fce7f92e0b957764a240f657482514430a2fcdd8a0fcfc1d23372f119a92e6ccL49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8109273</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 3f2cbc6e23b935224b57915a2b0e1a21eb60c5a6</div><div id='time'> Time: 2021-02-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/vit_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/vit_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/vit_pytorch.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        j_pos = torch.arange(wsz, device = device)
+        grid = torch.stack(torch.meshgrid(i_pos, j_pos))
+        grid = rearrange(grid, &quotc i j -&gt; (i j) c&quot)
+        rel_ij = <a id="change">grid[:, None] - grid[None, :]</a>
+        rel_pos_bias = self.dpb(rel_ij.float())
+
+        sim = sim + rel_pos_bias
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pos = torch.arange(-wsz, wsz + 1, device = device)
+        rel_pos = torch.stack(torch.meshgrid(pos, pos))
+        rel_pos = <a id="change">rearrange(</a>rel_pos, <a id="change">&quotc i j -&gt; (i j) c&quot</a><a id="change">)</a>
+        biases = self.dpb(rel_pos.float())
+        rel_pos_bias = biases[self.rel_pos_indices]
+
+        sim = sim + rel_pos_bias</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/b69b5af34f7759948425113f6dc3b30dfb91d4d1#diff-65c2de0175e6c0cd43148fc01483ce4dcd04a52ba15130b05fdc9f6521caf494L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8109336</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: b69b5af34f7759948425113f6dc3b30dfb91d4d1</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/crossformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/crossformer.py</div><div id='n_file'> N File Name: vit_pytorch/crossformer.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 152</div><div id='n_end'> N End Line: 156</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 shaw&quots relative positional embedding
+        seq = torch.arange(n, device = device)
+        dist = <a id="change">seq[:, None] - seq[None, :]</a>
+        dist = dist.clip(-max_pos_emb, max_pos_emb) + max_pos_emb
+        rel_pos_emb = self.rel_pos_emb(dist).to(q)
+        pos_attn = einsum(&quotb h n d, n r d -&gt; b h n r&quot, q, rel_pos_emb) * self.scale
+        dots = dots + pos_attn</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 shaw&quots relative positional embedding
+        seq = torch.arange(n, device = device)
+        dist = <a id="change">rearrange(</a>seq, <a id="change">&quoti -&gt; i ()&quot</a><a id="change">)</a> - rearrange(seq, &quotj -&gt; () j&quot)
+        dist = dist.clip(-max_pos_emb, max_pos_emb) + max_pos_emb
+        rel_pos_emb = self.rel_pos_emb(dist).to(q)
+        pos_attn = einsum(&quotb h n d, n r d -&gt; b h n r&quot, q, rel_pos_emb) * self.scale</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/conformer/commit/0f8fbd31dc55d0dd6b6082fa74bad5f7da15fa1e#diff-10353d68441422b150f1ff9647eb5c4a5e0bea5b44830f4cf4ec45d403aee60dL96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8109278</div><div id='project'> Project Name: lucidrains/conformer</div><div id='commit'> Commit Name: 0f8fbd31dc55d0dd6b6082fa74bad5f7da15fa1e</div><div id='time'> Time: 2021-01-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: conformer/conformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: conformer/conformer.py</div><div id='n_file'> N File Name: conformer/conformer.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 109</div><BR>

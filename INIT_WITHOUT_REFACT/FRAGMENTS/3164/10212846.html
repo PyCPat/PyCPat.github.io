@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        <a id="change">for </a>i, att_timesteps in <a id="change">enumerate(</a>count<a id="change">):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            self.c_t[i]</a> = self.attentionStep(first_h_a, first_h_b, att_timesteps)
+
+        if self.drop &lt; 1.0:
+            self.c_t = self.dropout(self.c_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.proj(x)
+        x = self.dropout(x)
+
+        out = torch.zeros((batch_size<a id="change">, time_steps, self.hidden_dim</a>))
+
+        for cur_time in range(time_steps):
+            cur_x = x[:, : cur_time + 1, :]
+            out[:, cur_time, :] = self.retain_encoder(cur_x)
+        <a id="change">return </a>out
+</code></pre>

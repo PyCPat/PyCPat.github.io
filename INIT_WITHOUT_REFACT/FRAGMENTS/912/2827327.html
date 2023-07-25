@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(Bottleneck, self).__init__()
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        <a id="change">width</a> = <a id="change">int(</a>planes * (base_width<a id="change"> / </a>64.)<a id="change">)</a> * groups
+        &#47&#47 Both self.conv2 and self.downsample layers downsample the input when stride != 1
+        self.conv1 = <a id="change">conv1x1(</a>inplanes, width<a id="change">)</a>
+        self.bn1 = <a id="change">norm_layer(</a>width<a id="change">)</a>
+        self.conv2 = <a id="change">conv3x3(</a>width, width, stride, groups, dilation<a id="change">)</a>
+        self.bn2 = norm_layer(width)
+        self.conv3 = conv1x1(width, planes * self.expansion)
+        self.bn3 = norm_layer(planes * self.expansion)
+        self.relu = nn.ReLU(inplace=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+                                   groups=cardinality, bias=False)
+        self.bn = nn.BatchNorm2d(D, momentum=0.001)
+        self.act = mish
+        self.conv_expand = <a id="change">nn.Conv2d(
+            </a>D, out_channels<a id="change">, kernel_size=1, stride=1, padding=0, bias=False)</a>
+        self.bn_expand = nn.BatchNorm2d(out_channels, momentum=0.001)
+
+        self.shortcut = nn.Sequential()
+        if in_channels != out_channels:</code></pre>

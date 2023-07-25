@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :465
+</h3><img src='1633242.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif self._pooling_func_name == &quotmean&quot:
+            out = torch.mean(out, keepdim=True, dim=-1)
+        elif self._pooling_func_name == &quotsum&quot:
+            out<a id="change"> = </a><a id="change">torch.sum(</a>out<a id="change">, keepdim=True, dim=-1)</a>
+        else:
+            raise ValueError(f"Pooling function {self._pooling_func_name} is not yet supported!")
+
+        &#47&#47 out: (BB, embedding_dim, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        masking_input = <a id="change">{</a>&quotin_tensor&quot: out.transpose(2, 1)<a id="change">}</a>
+        if self.use_masking:
+            masking_input[&quotmask_tensor&quot] = masking_tensor
+        out = self.pooling_block(masking_input)[&quotmasking_out&quot]
+        &#47&#47 output_tensor: (BB, embedding_dim)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/enlite-ai/maze/commit/53a9f4e4997b8a5451f14fb57dd6c5cb9becd110#diff-a18d0890711efadf10cc7ee9bb175629d673020f907726acc13ab53e8a7f2617L80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1633242</div><div id='project'> Project Name: enlite-ai/maze</div><div id='commit'> Commit Name: 53a9f4e4997b8a5451f14fb57dd6c5cb9becd110</div><div id='time'> Time: 2021-04-15</div><div id='author'> Author: office@enlite.ai</div><div id='file'> File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_class'> M Class Name: PointNetFeatureTransformNet</div><div id='n_method'> N Class Name: PointNetFeatureTransformNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='n_file'> N File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            (creators_1d, destroyers_1d), 1
+        )
+
+        source_total_persistence = <a id="change">persistence_0d.pow(2).sum()</a> + persistence_1d.pow(2).sum()
+        target_total_persistence = _total_persistence(pd_target[0]) + _total_persistence(pd_target[1])
+
+        loss<a id="change"> = </a>torch.abs(source_total_persistence - target_total_persistence)
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        loss = self.loss(
+            <a id="change">[</a>persistence_diagram_0d, persistence_diagram_1d<a id="change"></a>]
+        )
+
+        return loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aidos-lab/pytorch-topological/commit/d22e852996713c008612ec96df10e82e4ba32186#diff-3ee42b5ac4734955417c9042773daa3ce9df8e8c198d1768384d9a78f21c1f03L64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1633243</div><div id='project'> Project Name: aidos-lab/pytorch-topological</div><div id='commit'> Commit Name: d22e852996713c008612ec96df10e82e4ba32186</div><div id='time'> Time: 2021-12-06</div><div id='author'> Author: bastian@rieck.me</div><div id='file'> File Name: pytorch_topological/nn/vietoris_rips.py</div><div id='m_class'> M Class Name: ModelSpaceLoss</div><div id='n_method'> N Class Name: ModelSpaceLoss</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_topological/nn/vietoris_rips.py</div><div id='n_file'> N File Name: pytorch_topological/nn/vietoris_rips.py</div><div id='m_start'> M Start Line: 76</div><div id='m_end'> M End Line: 122</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        G_cls, G_reg = map(item.get, [&quotproposal_targets_cls&quot, &quotproposal_targets_reg&quot])
+        P_cls, P_reg = map(item.get, [&quotproposal_scores&quot, &quotproposal_boxes&quot])
+        G_cls, mask_cls = G_cls.split([self.cfg.NUM_CLASSES, 1], dim=1)
+        mask_reg<a id="change"> = </a><a id="change">G_cls[:, :-1, ..., None].sum(</a>1<a id="change">, keepdim=True)</a>
+        cls_loss = self.cls_loss(P_cls, G_cls, mask_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, mask_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss
+        losses = dict(cls_loss=cls_loss, reg_loss=reg_loss, loss=loss)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, item):
+        TODO: Decide on cleaner input representation.
+        keys = <a id="change">[</a>&quotG_cls&quot, &quotM_cls&quot, &quotP_cls&quot, &quotG_reg&quot, &quotM_reg&quot, &quotP_reg&quot<a id="change"></a>]
+        G_cls, M_cls, P_cls, G_reg, M_reg, P_reg = map(item.get, keys)
+        cls_loss = self.cls_loss(P_cls, G_cls, M_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, M_reg)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/03a0b92af929371cce91e1666b92f92192e49129#diff-a7f9867bfd9382b3a638afcaf0bf66ead18605d18caa50c991ce865b8b25f1ddL91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1633236</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 03a0b92af929371cce91e1666b92f92192e49129</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/detector/proposal.py</div><div id='m_class'> M Class Name: ProposalLoss</div><div id='n_method'> N Class Name: ProposalLoss</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/detector/proposal.py</div><div id='n_file'> N File Name: pvrcnn/detector/proposal.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 85</div><BR>

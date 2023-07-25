@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0]<a id="change">, qkv[1], qkv[2]</a>
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+
+        qkv = <a id="change">self.qkv(x).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = self.heads), qkv)
+
+        q = q * self.scale
+</code></pre>

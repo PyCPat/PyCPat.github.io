@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :1902
+</h3><img src='7244799.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		adain_params = self.modulation(class_with_style_code)
+		generated_img = self.decoder(regularized_content_code, adain_params)
+
+		<a id="change">return </a>{
+			&quotimg&quot: generated_img,
+			&quotcontent_code&quot: content_code,
+			&quotstyle_code&quot: style_code</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = self.from_rgb(content_img)
+
+		for block in self.encoder:
+			x<a id="change"> = </a>block(x)
+
+		content_code = x
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(x)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			x = x + noise
+
+		if self.training and self.config[&quotstyle_std&quot] != 0:
+			noise = torch.zeros_like(style_code)
+			noise.normal_(mean=0, std=self.config[&quotstyle_std&quot])
+
+			style_code = style_code + noise
+
+		<a id="change">for </a><a id="change">block</a> in self.decoder<a id="change">:
+			</a>x<a id="change"> = </a><a id="change">block(</a>x, style_code<a id="change">)</a>
+
+		return {
+			&quotimg&quot: self.to_rgb(x),
+			&quotcontent_code&quot: content_code.reshape(x.shape[0], -1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/fa020664bf0dcbd11e72953117146be2cdbc3b48#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7244799</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: fa020664bf0dcbd11e72953117146be2cdbc3b48</div><div id='time'> Time: 2020-05-29</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 67</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+		generated_img = self.decoder(regularized_content_code, class_adain_params)
+
+		<a id="change">return </a>{
+			&quotimg&quot: generated_img,
+			&quotcontent_code&quot: content_code
+		}</code></pre><h3>After Change</h3><pre><code class='java'>
+		class_with_style_code = self.class_style_modulation(class_with_style_code)
+
+		x = self.projection(regularized_content_code)
+		x<a id="change"> = </a>x.view((batch_size, 256, 4, 4))
+
+		<a id="change">for </a><a id="change">block</a> in self.decoder<a id="change">:
+			</a>x<a id="change"> = </a><a id="change">block(</a>x, class_with_style_code<a id="change">)</a>
+
+		return {
+			&quotimg&quot: self.to_rgb(x),
+			&quotcontent_code&quot: content_code,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/dffe3cb71a1c6c5500c019edf4a07d4443b84cd8#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7244810</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: dffe3cb71a1c6c5500c019edf4a07d4443b84cd8</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 18</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		for block in self.decoder:
+			x = block(x, style_code)
+
+		<a id="change">return </a>self.to_rgb(x)
+
+
+class ContentEncoder(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+		class_code = self.class_embedding(class_id)
+		class_code_repeated = class_code.view((batch_size, -1, 1, 1)).repeat((1, 1, 16, 16))
+		x<a id="change"> = </a>torch.cat((content_code, class_code_repeated), dim=1)
+
+		<a id="change">for </a><a id="change">block</a> in self.adains<a id="change">:
+			</a>x<a id="change"> = </a><a id="change">block(</a>x, class_code<a id="change">)</a>
+
+		return self.convs(x)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7244804</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: 3ed2f68af62bf260d2133b58ec59b0a19e7dd2c0</div><div id='time'> Time: 2020-07-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 63</div><BR>

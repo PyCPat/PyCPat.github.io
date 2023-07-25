@@ -1,0 +1,46 @@
+<html><h3>Pattern ID :1291
+</h3><img src='3790712.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, logits, samples, soft):
+        if samples is None:
+            <a id="change">return </a>self.gumbel_softmax(logits, self._temperature, self._eps, hard=True)
+        else:
+            return -torch.sum(-samples * F.log_softmax(logits, -1), -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if hard:
+            &#47&#47 Straight through.
+            index<a id="change"> = </a><a id="change">y_soft.max(</a>dim<a id="change">, keepdim=True)</a>[1]
+            y_hard = torch.zeros_like(logits, memory_format=torch.legacy_contiguous_format).scatter_(dim, index, 1.0)
+            ret = y_hard - y_soft.detach() + y_soft
+        else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf#diff-78f56a8e01e054eb5275963e005db8baab5fb8a2f945a6f3947cc3a95166a313L8' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3790712</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf</div><div id='time'> Time: 2021-04-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_class'> M Class Name: GumbelSoftmax</div><div id='n_method'> N Class Name: GumbelSoftmax</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='n_file'> N File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 21</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        loss_conf   = torch.mean(self.BCELoss(conf, tobj))
+
+        loss        += loss_conf * self.balance[l] * self.obj_ratio
+        <a id="change">return </a>loss
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        loss        = loss_loc * self.box_ratio + loss_conf * self.balance[l] * self.obj_ratio + loss_cls * self.cls_ratio
+        num_pos = torch.sum(y_true[..., 4])
+        num_pos<a id="change"> = </a><a id="change">torch.max(</a>num_pos, torch.ones_like(num_pos)<a id="change">)</a>
+        return loss, num_pos
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/yolov5-pytorch/commit/d49e041b6f4ef50c5d94ce88d33d147f3227bc77#diff-25623619f282444dafcdada7a0706865483da83457ebd0cd33af314f6adcfca9L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3790721</div><div id='project'> Project Name: bubbliiiing/yolov5-pytorch</div><div id='commit'> Commit Name: d49e041b6f4ef50c5d94ce88d33d147f3227bc77</div><div id='time'> Time: 2022-01-15</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/yolo_training.py</div><div id='m_class'> M Class Name: YOLOLoss</div><div id='n_method'> N Class Name: YOLOLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/yolo_training.py</div><div id='n_file'> N File Name: nets/yolo_training.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 156</div><div id='n_end'> N End Line: 200</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        activated_t = F.relu(out)
+        linear_out = self.fc2(activated_t)
+
+        <a id="change">return </a>linear_out, hidden
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.fc1(lstm_out)
+        activated_t = F.relu(out)
+        linear_out = self.fc2(activated_t)
+        linear_out<a id="change"> = </a><a id="change">torch.max(</a>linear_out<a id="change">, dim=1)</a>[0]
+
+        return linear_out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hoytta0/knowledgedistillation/commit/d706a04273aacb39d2fc933a09d7d0183582a603#diff-ad072a661775bb50fa45226b7006b2e2286d57e2571f0d207acef5204ca67cf5L22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3790722</div><div id='project'> Project Name: hoytta0/knowledgedistillation</div><div id='commit'> Commit Name: d706a04273aacb39d2fc933a09d7d0183582a603</div><div id='time'> Time: 2021-11-09</div><div id='author'> Author: 893422529@qq.com</div><div id='file'> File Name: models/biLSTM.py</div><div id='m_class'> M Class Name: biLSTM</div><div id='n_method'> N Class Name: biLSTM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/biLSTM.py</div><div id='n_file'> N File Name: models/biLSTM.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 33</div><BR>

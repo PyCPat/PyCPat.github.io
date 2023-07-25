@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :242
+</h3><img src='877169.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 query / key similarities
+
+        dots = <a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q, k<a id="change">)</a> * self.scale
+
+        &#47&#47 add attention bias, if supplied (for pairwise to msa attention communication)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 query / key similarities
+
+        <a id="change">if </a><a id="change">exists(</a>tie_dim<a id="change">):
+            &#47&#47 as in the paper, for the extra MSAs
+            &#47&#47 they average the queries along the rows of the MSAs
+            &#47&#47 they named this particular module MSAColumnGlobalAttention
+
+            </a>q, k = map(lambda t: rearrange(t, &quot(b r) ... -&gt; b r ...&quot, r = tie_dim), (q, k))
+            q = q.mean(dim = 1)
+
+            dots = einsum(&quotb h i d, b r h j d -&gt; b r h i j&quot, q, k)
+            dots<a id="change"> = rearrange(</a>dots, <a id="change">&quotb r ... -&gt; (b r) ...&quot</a><a id="change">)</a>
+        else:
+            dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        &#47&#47 add attention bias, if supplied (for pairwise to msa attention communication)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a4f4732165d4d0579ca060a926bcd30429d86eb1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L103' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 877169</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a4f4732165d4d0579ca060a926bcd30429d86eb1</div><div id='time'> Time: 2021-07-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 103</div><div id='n_end'> N End Line: 135</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        rel_coors = self.rel_coors_norm(rel_coors)
+
+        coors_out = <a id="change">einsum(&quotb h i j, b i j c -&gt; b i c h&quot</a>, coor_weights, rel_coors<a id="change">)</a>
+        coors_out = self.to_coors_out(coors_out)
+
+        &#47&#47 derive attention
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        rel_coors = self.rel_coors_norm(rel_coors)
+        rel_coors = repeat(rel_coors, &quotb i j c -&gt; b i j c h&quot, h = h)
+
+        <a id="change">if </a><a id="change">exists(</a>self.coors_gate<a id="change">):
+            </a>rel_coors_signs = self.coors_gate(coors_gate_input)
+            rel_coors_signs<a id="change"> = rearrange(</a>rel_coors_signs, <a id="change">&quotb i j h -&gt; b i j () h&quot</a><a id="change">)</a>
+            rel_coors = rel_coors * rel_coors_signs
+
+        coors_out = einsum(&quotb h i j, b i j c h -&gt; b i c h&quot, coor_weights, rel_coors)
+        coors_out = self.to_coors_out(coors_out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/5fa899a08f06db745808ae06275da2e2b4ada435#diff-e9ced413215f4c69daca6b09b62593523941c3f008a4967b67f3544a7aea30adL179' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 877168</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 5fa899a08f06db745808ae06275da2e2b4ada435</div><div id='time'> Time: 2021-05-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/old.py</div><div id='m_class'> M Class Name: EquivariantAttention</div><div id='n_method'> N Class Name: EquivariantAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/old.py</div><div id='n_file'> N File Name: en_transformer/old.py</div><div id='m_start'> M Start Line: 298</div><div id='m_end'> M End Line: 309</div><div id='n_start'> N Start Line: 304</div><div id='n_end'> N End Line: 322</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), (q, *kv))
+        dots = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k) * scale
+        attn = dots.softmax(dim = -1)
+        out = <a id="change">einsum(&quotb i j, b j d -&gt; b i d&quot</a>, attn, v<a id="change">)</a>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, *kv))
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * scale
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = rearrange(</a>mask, <a id="change">&quotb n -&gt; b () () n&quot</a><a id="change">)</a>
+            dots.masked_fill_(~mask, float(&quot-inf&quot))
+
+        attn = dots.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/isab-pytorch/commit/552e820ba8c45c4d338bb68771ac53d29433b387#diff-fa18d7551fbcab325857cf2cc8a388445f53ff166e61e932e0e8e9ecdf8bf8efL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 877170</div><div id='project'> Project Name: lucidrains/isab-pytorch</div><div id='commit'> Commit Name: 552e820ba8c45c4d338bb68771ac53d29433b387</div><div id='time'> Time: 2020-10-26</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: isab_pytorch/isab_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: isab_pytorch/isab_pytorch.py</div><div id='n_file'> N File Name: isab_pytorch/isab_pytorch.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 36</div><BR>

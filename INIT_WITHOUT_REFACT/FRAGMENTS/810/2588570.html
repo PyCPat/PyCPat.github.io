@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]
+        &#47&#47 output: single frame: [b, c, h, w]
+        <a id="change">raise </a>NotImplementedError
+
+    def pred_n(self, x, pred_length=1, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss_dicts = []
+        for i in range(pred_length):
+            pred, loss_dict = self.pred_1(x, **kwargs)
+            pred = <a id="change">pred.unsqueeze(dim=1)</a>
+            preds.append(pred)
+            loss_dicts.append(loss_dict)
+            x<a id="change"> = </a>torch.cat([x[:, 1:], pred], dim=1)
+
+        pred = torch.cat(preds, dim=1)
+        if loss_dicts[0] is not None:</code></pre>

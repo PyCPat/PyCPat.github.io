@@ -1,0 +1,74 @@
+<html><h3>Pattern ID :1362
+</h3><img src='3957371.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return softmax
+
+    def forward(self, logits, samples, soft):
+        <a id="change">if samples is None</a><a id="change">:
+            </a>return self.gumbel_softmax(logits, self._temperature, self._eps, hard=True)
+        else:
+            return -torch.sum(-samples * F.log_softmax(logits, -1), -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+class GumbelSoftmax(nn.Module):
+    def forward(self, logits: torch.Tensor, tau: float = 1, hard: bool = False, dim: int = -1):
+        gumbels<a id="change"> = -torch.empty_like(logits, memory_format=torch.legacy_contiguous_format).exponential_().log()</a>  &#47&#47 ~Gumbel(0,1)
+        gumbels = (logits + gumbels) / tau  &#47&#47 ~Gumbel(logits,tau)
+        y_soft = gumbels.softmax(dim)
+
+        if hard:
+            &#47&#47 Straight through.
+            index = y_soft.max(dim, keepdim=True)[1]
+            y_hard<a id="change"> = </a><a id="change">torch.zeros_like(</a>logits<a id="change">, memory_format=torch.legacy_contiguous_format)</a>.scatter_(dim, index, 1.0)
+            ret = y_hard - y_soft.detach() + y_soft
+        else:
+            &#47&#47 Reparametrization trick.</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf#diff-78f56a8e01e054eb5275963e005db8baab5fb8a2f945a6f3947cc3a95166a313L8' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3957371</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf</div><div id='time'> Time: 2021-04-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_class'> M Class Name: GumbelSoftmax</div><div id='n_method'> N Class Name: GumbelSoftmax</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='n_file'> N File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 21</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        <a id="change">if </a>mask is not None and <a id="change">mask.shape[1] == x.shape[1]</a><a id="change">:
+            </a>mask = mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+
+        out = self.net(xi, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.mask_prob &gt; 0.:
+            rand = torch.randn(inp.shape, device = x.device)
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask<a id="change"> = </a>min(int(seq<a id="change"> * </a>self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask<a id="change"> = </a>~<a id="change">torch.zeros_like(</a>inp<a id="change">)</a>.scatter(1, indices, 1.).bool()
+            kwargs.update(context_mask = mask)
+
+        out = self.net(inp, **kwargs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3957404</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        final_target_logit = torch.where(
+            target_logit &gt; self.th, cos_theta_m, target_logit - self.mm
+        )
+        <a id="change">if </a>cfg["USE_AMP"] == True and <a id="change">cfg["OPT_LEVEL"] == "O1"</a><a id="change">:
+            </a>final_target_logit = final_target_logit.half()
+        cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
+        output = cos_theta * self.s
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+        kernel_norm = F.normalize(self.weight, dim=0)
+        cos_theta = torch.mm(embbedings, kernel_norm).clamp(-1, 1)
+        sin_theta = torch.sqrt(1.0 - torch.pow(cos_theta, 2))
+        cos_theta_m = cos_theta<a id="change"> * </a>self.cos_margin - sin_theta * self.sin_margin
+
+        &#47&#47 torch.where doesn&quott support fp16 input
+        is_half = cos_theta.dtype == torch.float16
+
+        cos_theta_m = torch.where(
+            cos_theta &gt; self.min_cos_theta, cos_theta_m, cos_theta.float() - self.m_am,
+        )
+        if is_half:
+            cos_theta_m = cos_theta_m.half()
+        index = <a id="change">torch.zeros_like(</a>cos_theta<a id="change">)</a>
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index = index.byte().bool()
+        output = cos_theta * 1.0
+        output[index]<a id="change"> = </a>cos_theta_m[index]
+        output<a id="change"> *= </a>self.s
+        return output
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cavalleria/cavaface/commit/98a21048f5dce435a6639a288dafc4c6be61be05#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3957408</div><div id='project'> Project Name: cavalleria/cavaface</div><div id='commit'> Commit Name: 98a21048f5dce435a6639a288dafc4c6be61be05</div><div id='time'> Time: 2021-08-25</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>

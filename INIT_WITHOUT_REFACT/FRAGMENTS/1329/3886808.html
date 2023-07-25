@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = self.criterion(preds, labels).view(-1)
+        loss_hard = loss[loss &gt; self.thresh]
+
+        <a id="change">if loss_hard.numel() &lt; n_min</a><a id="change">:
+            </a>loss_hard<a id="change">, _ = </a>loss.topk(n_min)
+
+        return torch.mean(loss_hard)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            return sum(<a id="change">[w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)]</a>)
+        return self._forward(preds, labels)
+
+</code></pre>

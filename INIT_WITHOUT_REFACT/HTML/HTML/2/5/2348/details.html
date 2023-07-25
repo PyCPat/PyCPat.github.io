@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2348
+</h3><img src='8025955.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        position_embeddings = self.pos_emb[:, :t, :]
+        embed = token_embeddings + position_embeddings
+        for enc_layer in self.EncoderLayers:
+            embed<a id="change"> = </a>enc_layer(embed)
+        tkn_prd = self.Token_Prediction(embed)
+        <a id="change">return </a>tkn_prd
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        embed = self.drop(self.ln(token_embeddings + position_embeddings))
+        embed = self.blocks(embed)
+        embed = self.Token_Prediction(embed)
+        logits<a id="change"> = </a><a id="change">torch.matmul(</a>embed, self.tok_emb.weight.T<a id="change">)</a> + self.bias
+
+        <a id="change">return </a>logits
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dome272/maskgit-pytorch/commit/5042389656c05da20be7632a6169a7567a65891a#diff-41c56779d9ab1a289bece438090e25fb814c36631ac5af1aff4ee936c166c37eL88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8025955</div><div id='project'> Project Name: dome272/maskgit-pytorch</div><div id='commit'> Commit Name: 5042389656c05da20be7632a6169a7567a65891a</div><div id='time'> Time: 2022-04-22</div><div id='author'> Author: 61938694+dome272@users.noreply.github.com</div><div id='file'> File Name: bidirectional_transformer.py</div><div id='m_class'> M Class Name: BidirectionalTransformer</div><div id='n_method'> N Class Name: BidirectionalTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bidirectional_transformer.py</div><div id='n_file'> N File Name: bidirectional_transformer.py</div><div id='m_start'> M Start Line: 88</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 126</div><div id='n_end'> N End Line: 135</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Mask heads if we want to
+        if head_mask is not None:
+            attention_weights<a id="change"> = </a>attention_weights * head_mask
+
+        &#47&#47 output = torch.matmul(attention_weights, v)
+        &#47&#47 return output, attention_weights
+        <a id="change">return </a>v, attention_weights
+
+
+class MultiHeadAttention(torch.nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 if head_mask is not None:
+        &#47&#47     attention_weights = attention_weights * head_mask
+
+        output<a id="change"> = </a><a id="change">torch.matmul(</a>attention_weights, v<a id="change">)</a>
+        &#47&#47 return output, attention_weights
+        <a id="change">return </a>output
+
+
+class MultiHeadAttention(torch.nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saareliad/ftpipe/commit/9c6e1c89c840e169f67402839a59e47ae906a3e2#diff-104364ea8995d0c5f407fdc0e00aa585d68d84bc02aeff04e056348c70926906L71' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8025958</div><div id='project'> Project Name: saareliad/ftpipe</div><div id='commit'> Commit Name: 9c6e1c89c840e169f67402839a59e47ae906a3e2</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: alonde-jager@rishon.csf.technion.ac.il</div><div id='file'> File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='m_class'> M Class Name: ScaledDotProductAttention</div><div id='n_method'> N Class Name: ScaledDotProductAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='n_file'> N File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if attention_mask is not None:
+            &#47&#47 Apply the attention mask
+            scaled_attention_logits<a id="change"> = </a>scaled_attention_logits + attention_mask
+
+        attention_weights = torch.softmax(scaled_attention_logits, dim=-1)
+
+        &#47&#47 Mask heads if we want to
+        if head_mask is not None:
+            attention_weights = attention_weights * head_mask
+
+        &#47&#47 output = torch.matmul(attention_weights, v)
+        &#47&#47 return output, attention_weights
+        <a id="change">return </a>v, attention_weights
+
+
+class MultiHeadAttention(torch.nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        scaled_attention_logits += mask[ns - nd: ns, :ns] * -1e4
+
+        attention_weights = torch.softmax(scaled_attention_logits, dim=-1)
+        scaled_attention<a id="change"> = </a><a id="change">torch.matmul(</a>attention_weights, v<a id="change">)</a>
+
+        <a id="change">return </a>scaled_attention
+
+
+class MultiHeadAttention(torch.nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/saareliad/ftpipe/commit/b29b71a9e5b89f728dc936a6c8600a1507ba0bdd#diff-104364ea8995d0c5f407fdc0e00aa585d68d84bc02aeff04e056348c70926906L71' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8025956</div><div id='project'> Project Name: saareliad/ftpipe</div><div id='commit'> Commit Name: b29b71a9e5b89f728dc936a6c8600a1507ba0bdd</div><div id='time'> Time: 2020-04-21</div><div id='author'> Author: alondej@gmail.com</div><div id='file'> File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='m_class'> M Class Name: ScaledDotProductAttention</div><div id='n_method'> N Class Name: ScaledDotProductAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='n_file'> N File Name: models/normal/NLP_models/modeling_ctrl.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 86</div><BR>

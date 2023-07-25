@@ -1,0 +1,73 @@
+<html><h3>Pattern ID :2454
+</h3><img src='8126459.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert c == 3 and v == self.dim_v, &quotcoordinates have wrong dimensions&quot
+        assert n == self.dim_n, &quotscalar features have wrong dimensions&quot
+
+        Vh<a id="change"> = </a>einsum(&quotb v c, v h -&gt; b h c&quot, coors, self.Wh)
+        Vu = einsum(&quotb h c, h u -&gt; b u c&quot, Vh, self.Wu)
+
+        sh<a id="change"> = </a><a id="change">torch.norm(</a>Vh<a id="change">, p = 2, dim = -1)</a>
+        vu = torch.norm(Vu, p = 2, dim = -1, keepdim = True)
+
+        s = torch.cat((feats, sh), dim = 1)
+        sm<a id="change"> = </a>einsum(&quotb h, h m -&gt; b m&quot, s, self.Wm)<a id="change"> + </a>self.Bm
+
+        feats_out = self.σ(sm)
+        coors_out = self.σ_plus(vu) * Vu
+
+        <a id="change">return </a>feats_out, coors_out
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/geometric-vector-perceptron/commit/4fabbd963e60a947d04716b8ffa87ddbf231dc27#diff-ecf51f9806d2fb04a222757632e8e6a901af69e342041ee1198fffaecefcbd0dL11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8126459</div><div id='project'> Project Name: lucidrains/geometric-vector-perceptron</div><div id='commit'> Commit Name: 4fabbd963e60a947d04716b8ffa87ddbf231dc27</div><div id='time'> Time: 2021-01-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: geometric_vector_perceptron/geometric_vector_perceptron.py</div><div id='m_class'> M Class Name: GVP</div><div id='n_method'> N Class Name: GVP</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: geometric_vector_perceptron/geometric_vector_perceptron.py</div><div id='n_file'> N File Name: geometric_vector_perceptron/geometric_vector_perceptron.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 11</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 50</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            row_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_rows)
+            column_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_columns)
+
+        <a id="change">return </a>content_out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Ix = calc_reindexing_tensor(x, L, device)
+            Px = einsum(&quotxir,rd-&gt;xid&quot, Ix, self.rel_rows)
+            Sx = einsum(&quotndxy,xid-&gt;nixy&quot, q, Px)
+            Yh<a id="change"> = </a>einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+
+            Yh = <a id="change">self.norm(</a>Yh<a id="change">)</a>
+
+            Iy = calc_reindexing_tensor(y, L, device)
+            Py = einsum(&quotxir,rd-&gt;xid&quot, Iy, self.rel_columns)
+            Sy = einsum(&quotndxy,xid-&gt;nixy&quot, q, Py)
+            rel_pos_out<a id="change"> = </a>einsum(&quotnixy,neiy-&gt;nexy&quot, Sy, Yh)
+            del Iy
+
+            content_out<a id="change"> = </a>content_out<a id="change"> + </a>rel_pos_out
+
+        content_out = rearrange(content_out, &quot(b h) c x y -&gt; b (h c) x y&quot, b = b, h = h)
+        <a id="change">return </a>self.to_out(content_out)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/global-self-attention-network/commit/6e87bd0b96350f46edc8d4b4ccd582ecc868e22f#diff-af8f87d68d6adf627dabaab6519f02d4b454d6ba08e146c8f5dc18f07e073e31L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8126457</div><div id='project'> Project Name: lucidrains/global-self-attention-network</div><div id='commit'> Commit Name: 6e87bd0b96350f46edc8d4b4ccd582ecc868e22f</div><div id='time'> Time: 2020-10-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_class'> M Class Name: GSA</div><div id='n_method'> N Class Name: GSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gsa_pytorch/gsa_pytorch.py</div><div id='n_file'> N File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 74</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            nn.SiLU()
+        )
+    def forward(self, x):
+        <a id="change">return </a>self.block(x)
+
+class ResnetBlock(nn.Module):
+    def __init__(self, dim, dim_out, *, time_emb_dim = None, groups = 8):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.act = nn.SiLU()
+
+    def forward(self, x, scale_shift = None):
+        x<a id="change"> = </a>self.proj(x)
+        x<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+
+        if exists(scale_shift):
+            scale, shift = scale_shift
+            x = x<a id="change"> * (scale + 1) + </a>shift
+
+        x<a id="change"> = </a>self.act(x)
+        <a id="change">return </a>x
+
+class ResnetBlock(nn.Module):
+    def __init__(self, dim, dim_out, *, time_emb_dim = None, groups = 8):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/e5a18bb25ca73a068647f4652933b07f3ef2ed74#diff-1ef0846017d5c27bd277b66e5afcab8798667afd39675e6f9382fc7e87a1fe28L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8126504</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: e5a18bb25ca73a068647f4652933b07f3ef2ed74</div><div id='time'> Time: 2022-05-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Block</div><div id='n_method'> N Class Name: Block</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 134</div><BR>

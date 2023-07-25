@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        target = torch.bucketize(target, channel_bins, right=True)
+        target = <a id="change">target.float()</a>.mean(dim=3)
+
+        predicted_patches = predicted_patches[mask]
+        target = target[mask]</code></pre><h3>After Change</h3><pre><code class='java'>
+        p = self.patch_size
+        target = rearrange(target, "b c (h p1) (w p2) -&gt; b (h w) c (p1 p2) ", p1 = p, p2 = p)
+
+        avg_target<a id="change"> = </a>target.mean(dim=3)
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        descritized_target = torch.bucketize(avg_target, channel_bins, right=True)
+        descritized_target = F.one_hot(descritized_target, self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits
+        descritized_target<a id="change"> = </a><a id="change">rearrange(</a>descritized_target, <a id="change">"b n c bi -&gt; b n (c bi)"</a><a id="change">, c = c, bi = bi)</a>
+
+        predicted_patches = predicted_patches[mask]
+        descritized_target = descritized_target[mask]
+</code></pre>

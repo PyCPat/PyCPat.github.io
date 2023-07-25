@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :1953
+</h3><img src='7293695.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        contextLoss = F.cross_entropy(predict, c1)
+        &#47&#47 [n, m, h, w, k] -&gt; [n, k, m, h, w]
+        l1, l2 = <a id="change">l1.permute(</a>0, <a id="change">4</a>, <a id="change">1</a>, <a id="change">2</a>, <a id="change">3</a><a id="change">)</a>, l2.permute(0, 4, 1, 2, 3)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        &#47&#47 sum(-logP) / ()
+        bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 sum(-logP) / ()
+        &#47&#47 bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)
+
+        l1 = <a id="change">l1.mean(</a>(2,3)<a id="change">)</a>
+        l2 = l2.mean((2,3))
+
+        posterior1 = torch.distributions.Categorical(logits=l1)
+        posterior2 = torch.distributions.Categorical(logits=l2)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7293695</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3bc9fe6e9c9c8b767c920dcc9da256ef2c9749ef</div><div id='time'> Time: 2021-09-12</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 144</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, h, w]
+            &#47&#47 targetWeight = (weight * oneHot).sum(-1)
+            code = torch.randint(logit.shape[-1], [n, h, w], device=device)
+            logit = <a id="change">logit.permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+            mle = F.cross_entropy(logit, code)
+            &#47&#47 regs.append(mle)
+            regs.append(reg + 0.01 * mle)
+        regs = sum(regs) / len(logits)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            &#47&#47 [N, H, W]
+            reg = <a id="change">posterior.entropy().mean()</a>
+            &#47&#47 prior = Categorical(logits=torch.zeros_like(logit))
+            &#47&#47 reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            &#47&#47 &#47&#47 [n, h, w, k]
+            &#47&#47 &#47&#47 weight = (-logit).detach().softmax(-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/57e88ad60fddbcfe778834fbd8a0ffc816fca34c#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7293823</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 57e88ad60fddbcfe778834fbd8a0ffc816fca34c</div><div id='time'> Time: 2021-09-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x_input):
+        x = x_input[self.from_layer]
+
+        x = <a id="change">self.pool(x).permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>.squeeze()
+        out = self.fc(x)
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x_input):
+        x = x_input[self.from_layer]
+        x = <a id="change">x.mean(</a>2<a id="change">)</a>.permute(0, 2, 1)
+        &#47&#47 x = self.pool(x).permute(0, 3, 1, 2).squeeze(3)
+        out = self.fc(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/media-smart/vedastr/commit/4a5a4b854bb6e13fedd78ef09b30098909bc7c23#diff-03a2fb091e6815ec4501e13d0f7eb73f39d5d54ed52662d351a74ccd40766eb7L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7294334</div><div id='project'> Project Name: media-smart/vedastr</div><div id='commit'> Commit Name: 4a5a4b854bb6e13fedd78ef09b30098909bc7c23</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: jun.sun@media-smart.cn</div><div id='file'> File Name: vedastr/models/heads/ctc_head.py</div><div id='m_class'> M Class Name: CTCHead</div><div id='n_method'> N Class Name: CTCHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vedastr/models/heads/ctc_head.py</div><div id='n_file'> N File Name: vedastr/models/heads/ctc_head.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, latents, codebooks, logits, codes):
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = <a id="change">z.detach().permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>
+            k = l.shape[-1]
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, zq, soft in zip(latents, zqs, softs):
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = <a id="change">F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))</a>
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = F.mse_loss(z, soft.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss += qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7293796</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>

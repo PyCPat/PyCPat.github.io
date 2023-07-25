@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.backbone(x)
+        x = self.neck(x)
+        x = self.detect(x)
+        <a id="change">return </a>x
+
+    def _apply(self, fn):
+        self = super()._apply(fn)</code></pre><h3>After Change</h3><pre><code class='java'>
+        initialize_weights(self)
+
+    def forward(self, x):
+        <a id="change">export_mode</a> = torch.onnx.is_in_onnx_export()
+        x = self.backbone(x)
+        x = self.neck(x)
+        <a id="change">if </a><a id="change">export_mode == False:
+            </a>featmaps<a id="change"> = </a>[]
+            featmaps.extend(x)
+        x = self.detect(x)
+        return x<a id="change"> if export_mode is True</a><a id="change"> else [</a>x, featmaps<a id="change"></a>]
+
+    def _apply(self, fn):
+        self = super()._apply(fn)</code></pre>

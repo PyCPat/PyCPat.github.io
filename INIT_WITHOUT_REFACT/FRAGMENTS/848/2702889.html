@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        S = Func.interpolate(S, scale_factor=1/8)
+        &#47&#47&#47&#47 for reblurring
+        RBF = self.RBF(Filter)
+        <a id="change">RBFs</a> = <a id="change">torch.split(RBF[:, :self.RBF_num * (3 * self.RBFs * 2), :, :]</a>, 3<a id="change"> * self.RBFs * 2</a><a id="change">, dim = 1)</a>
+        <a id="change">RBF_bs = torch</a><a id="change">.split(RBF[:, self.RBF_num * (3 * self.RBFs * 2):, :, :]</a>, 3<a id="change">, dim = 1)</a>
+
+        SB = S
+        <a id="change">for </a><a id="change">i</a> in <a id="change">range(</a>self.RBF_num<a id="change">):
+            </a>RBF1<a id="change">, RBF2 = torch</a><a id="change">.split(RBFs[i]</a>, 3<a id="change"> * </a>self.RBFs<a id="change">, dim = 1)</a>
+            SB<a id="change"> = SAC(feat_in=SB, kernel1=RBF1, kernel2=RBF2, ksize=self.RBFs)</a> &#47&#47&#47&#47 image
+            SB<a id="change"> = </a>SB<a id="change"> + RBF_bs[i]</a>
+            if i &lt; (self.RBF_num - 1):
+                SB<a id="change"> = </a><a id="change">Func.leaky_relu(</a>SB, <a id="change">0.1</a><a id="change">, inplace=True)</a>
+        SB = SB + S
+
+        outs = collections.OrderedDict()</code></pre><h3>After Change</h3><pre><code class='java'>
+        SB = S
+
+        &#47&#47&#47&#47 for reblurring
+        <a id="change">RBF</a> = self.RBF(Filter)
+
+        SB = <a id="change">IAC(</a>SB, <a id="change">RBF</a>, self.RBF_num, 3, self.RBFs<a id="change">, is_act_last = False)</a>
+
+        SB = SB + S
+</code></pre>

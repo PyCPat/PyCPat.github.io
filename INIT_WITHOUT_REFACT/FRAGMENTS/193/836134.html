@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        n_units = self.n_units
+        
+        real, imag = torch.split(input, [n_units // 2, n_units // 2], dim=1)
+        magnitude<a id="change"> = </a>torch.sqrt(real**2 + imag**2)
+        output_magnitude = magnitude + self.bias
+        ratio = output_magnitude / (magnitude + self.eps)
+        ratio<a id="change"> = </a><a id="change">torch.where(output_magnitude &gt;= 0</a>, ratio, torch.zeros_like(magnitude)<a id="change">)</a>
+        real, imag = ratio * real, ratio * imag
+        output = torch.cat([real, imag], dim=1)
+        
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        is_complex = torch.is_complex(input)
+
+        <a id="change">if </a>not is_complex<a id="change">:
+            </a>input<a id="change"> = </a>torch.view_as_complex(input)
+        
+        magnitude<a id="change"> = </a>torch.abs(input)
+        angle = torch.angle(input)
+        magnitude = F.relu(magnitude + self.bias.unsqueeze(dim=-1))
+        output = magnitude * torch.exp(1j * angle)</code></pre>

@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out_2 = self.last(x2)
+        out_2 = out_2 + image
+        <a id="change">return </a><a id="change">[</a>out_1, out_2<a id="change"></a>]
+
+    def get_input_chn(self, in_chn):
+        return in_chn</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        H, W = x.shape[-2:]
+        x<a id="change"> = </a><a id="change">self.check_image_size(</a>x<a id="change">)</a>
+
+        image = x
+        &#47&#47stage 1
+        x1 = self.conv_01(image)
+        encs = []
+        decs = []
+        for i, down in enumerate(self.down_path_1):
+            if (i+1) &lt; self.depth:
+                x1, x1_up = down(x1)
+                encs.append(x1_up)
+            else:
+                x1 = down(x1)
+
+        for i, up in enumerate(self.up_path_1):
+            x1 = up(x1, self.skip_conv_1[i](encs[-i-1]))
+            decs.append(x1)
+
+        sam_feature, out_1 = self.sam12(x1, image)
+        &#47&#47stage 2
+        x2 = self.conv_02(image)
+        x2 = self.cat12(torch.cat([x2, sam_feature], dim=1))
+        blocks = []
+        for i, down in enumerate(self.down_path_2):
+            if (i+1) &lt; self.depth:
+                x2, x2_up = down(x2, encs[i], decs[-i-1])
+                blocks.append(x2_up)
+            else:
+                x2 = down(x2)
+
+        for i, up in enumerate(self.up_path_2):
+            x2 = up(x2, self.skip_conv_2[i](blocks[-i-1]))
+
+        out_2 = self.last(x2)
+        out_2 = out_2 + image
+        <a id="change">return </a><a id="change">[</a>out_1[:,:,:H,:W], out_2[:,:,:H,:W]<a id="change"></a>]
+
+    def get_input_chn(self, in_chn):
+        return in_chn</code></pre>

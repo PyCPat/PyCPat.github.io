@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x)
+        qkv = self.select1(qkv)
+        qkv = qkv.chunk(3, dim = -1)
+        q<a id="change">, k, v</a> = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        k = self.to_k(x)
+        k = self.select1(k)
+        k = rearrange(k, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        v<a id="change"> = </a>self.to_v(x)
+        v<a id="change"> = </a>self.select1(v)
+        v<a id="change"> = </a><a id="change">rearrange(</a>v, <a id="change">&quotb n (h d) -&gt; b h n d&quot</a><a id="change">, h = h)</a>
+
+        &#47&#47 qkv = self.to_qkv(x).chunk(3, dim = -1)
+        &#47&#47 q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+</code></pre>

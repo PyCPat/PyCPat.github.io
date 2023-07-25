@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 regLoss = list()
+        mleLoss = list()
+
+        <a id="change">for </a>logits, codes in zip(allLogits, allTrues)<a id="change">:
+            &#47&#47 rand = torch.randint_like(codes, logits.shape[-1])
+            &#47&#47 regLoss.append(self._auxLoss(logits.permute(0, 4, 1, 2, 3), rand))
+            </a>mleLoss.append(self._auxLoss(logits.permute(0, 4, 1, 2, 3), codes))
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())
+        &#47&#47 pLoss = self._pLoss(image, restored)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 regLoss = list()
+        weakCodebookLoss = list()
+        weakFeatureLoss<a id="change"> = </a>list()
+
+        <a id="change">for </a>features, <a id="change">codebooks</a> in zip(allFeatures, allCodebooks)<a id="change">:
+            </a>for codebook in codebooks:
+                &#47&#47 [k, k] := [k, c] @ [c, k]
+                innerProduct = codebook @ codebook.T
+                &#47&#47 orthogonal regularization
+                weakCodebookLoss.append(self._auxLoss(innerProduct, torch.eye(innerProduct.shape[0], device=innerProduct.device, dtype=innerProduct.dtype)))
+            m = len(features)
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, c, h, w] * [n, c, h, w]).sum(1)
+                    interProduct = (features[i] * features[j]).sum(1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct<a id="change"> = </a>(features[i]<a id="change"> * </a>features[i]).sum(1)
+                <a id="change">weakFeatureLoss.append(</a>self._auxLoss(intraProduct, torch.ones_like(intraProduct))<a id="change">)</a>
+
+        &#47&#47 self._movingMean -= 0.9 * (self._movingMean - ssimLoss.mean())
+        &#47&#47 pLoss = self._pLoss(image, restored)
+        return dLoss, (sum(weakCodebookLoss), sum(weakFeatureLoss)), (restored, allTrues, allLogits)</code></pre>

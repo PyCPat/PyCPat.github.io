@@ -1,0 +1,109 @@
+<html><h3>Pattern ID :1222
+</h3><img src='3669815.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        rel_embedded = self.relation_embeddings(relation_batch).view(-1, 1, self.img_height, self.img_width)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = <a id="change">torch.cat([</a>e1_embedded, rel_embedded<a id="change"></a>], 2<a id="change">)</a>
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        x = torch.mm(x, self.entity_embeddings.weight.transpose(1, 0))
+
+        &#47&#47 TODO: Why this?
+        x<a id="change"> += </a>self.b.expand_as(x)
+        pred = F.sigmoid(x)
+
+        return pred</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, batch, labels):
+        batch_size = batch.shape[0]
+
+        heads = <a id="change">batch</a>[:, 0:1]
+        relations = batch[:, 1:2]
+        tails = <a id="change">batch[:, 2:3]</a>
+
+        &#47&#47 batch_size, num_input_channels, width, height
+        heads_embs = self.entity_embeddings(heads).view(-1, 1, self.img_height, self.img_width)
+        relation_embs = self.relation_embeddings(relations).view(-1, 1, self.img_height, self.img_width)
+        tails_embs = self.entity_embeddings(tails).view(-1, self.embedding_dim)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = torch.cat([heads_embs, relation_embs], 2)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        scores = torch.sum(torch.mm(x, tails_embs.transpose(1, 0)), dim=1)
+
+        predictions = F.sigmoid(scores)
+        loss<a id="change"> = </a>self.compute_loss(predictions, labels)
+
+        return loss
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pykeen/pykeen/commit/e310dc04ccd0763bef25540fb0a19a7423a27a94#diff-ca7a8f13b7b28764529fdd6068fb9b1f73dab80a9636b4e70393393c8141e014L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3669815</div><div id='project'> Project Name: pykeen/pykeen</div><div id='commit'> Commit Name: e310dc04ccd0763bef25540fb0a19a7423a27a94</div><div id='time'> Time: 2018-09-19</div><div id='author'> Author: ali-mehdi@live.de</div><div id='file'> File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_class'> M Class Name: ConvE</div><div id='n_method'> N Class Name: ConvE</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/kg_embeddings_model/conv_e.py</div><div id='n_file'> N File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 153</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = x
+        out2 = fac1 * torch.exp(-1.0 * alpha)
+        for i, layer in enumerate(self.fc_layers):
+            out<a id="change"> = </a>layer(<a id="change">torch.cat([</a>out, out2<a id="change"></a>]<a id="change">, dim=1)</a>)
+        return self.fc_out(torch.cat([out, out2], dim=1))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, alpha, fac1):
+        out = x
+        out2 = <a id="change">torch</a>.exp(-F.interpolate(<a id="change">alpha[:, None]</a>, self.in_feat))[:, 0]
+        out2<a id="change"> = </a>out2 * fac1 + (1 - fac1)
+        return self.fc_out(out * out2)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/d406d3694ab25140dafeb3f2af61335a50011a32#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3669818</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: d406d3694ab25140dafeb3f2af61335a50011a32</div><div id='time'> Time: 2020-09-25</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 35</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out1 = x
+        &#47&#47 out2 = torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]
+        out2 = torch.exp(-alpha) * fac1
+        out<a id="change"> = </a><a id="change">torch.cat([</a>out1, out2<a id="change"></a>]<a id="change">, dim=1)</a>
+        return self.fc_out(out)
+
+
+class GbsConvNet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, alpha, fac1):
+        out1 = x
+        if self.in_feat != self.n_a:
+            out2<a id="change"> = torch</a>.exp(-F.interpolate(<a id="change">alpha[:, None]</a>, self.in_feat))[:, 0] * fac1
+        else:
+            out2 = torch.exp(-alpha) * fac1
+        return self.fc_out(out1 * out2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/e398255427327fff201f2d2e562bf00bec52783f#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3669817</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: e398255427327fff201f2d2e562bf00bec52783f</div><div id='time'> Time: 2020-09-28</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 38</div><BR>

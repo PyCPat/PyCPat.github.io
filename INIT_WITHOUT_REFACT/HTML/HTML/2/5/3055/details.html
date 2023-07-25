@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :3055
+</h3><img src='10080559.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = mask_q[:, None, :, None] &lt; mask_k[:, None, None, :]
+            mask = F.pad(mask, (1, 0), value=True)
+
+            dots.masked_fill_(~mask, -<a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        &#47&#47 attention</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 attention
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * d ** -0.5
+
+        mask_value<a id="change"> = </a><a id="change">-torch.finfo(dots.dtype).max</a>
+
+        &#47&#47 causal masking, if needed
+        if self.causal:
+            mask_q = mask_k = torch.arange(t, device=device)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/memory-compressed-attention/commit/49d2e7497721f4d6353fe59b4dc636260c627b48#diff-adf22066592009555577e53b5051c677e300993c844c330a1ebbc3521434b9b0L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10080559</div><div id='project'> Project Name: lucidrains/memory-compressed-attention</div><div id='commit'> Commit Name: 49d2e7497721f4d6353fe59b4dc636260c627b48</div><div id='time'> Time: 2022-08-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_compressed_attention/memory_compressed_attention.py</div><div id='m_class'> M Class Name: MemoryCompressedAttention</div><div id='n_method'> N Class Name: MemoryCompressedAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_compressed_attention/memory_compressed_attention.py</div><div id='n_file'> N File Name: memory_compressed_attention/memory_compressed_attention.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 65</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () () n&quot)
+            dots.masked_fill_(~mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+
+        attn = dots.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * scale
+
+        if exists(mask):
+            mask_value<a id="change"> = </a><a id="change">-torch.finfo(dots.dtype).max</a>
+            mask = rearrange(mask, &quotb n -&gt; b () () n&quot)
+            dots.masked_fill_(~mask, mask_value)
+
+        attn = dots.softmax(dim = -1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/isab-pytorch/commit/9968cf73e2483cf9326546ba703eaec51e34bdd6#diff-fa18d7551fbcab325857cf2cc8a388445f53ff166e61e932e0e8e9ecdf8bf8efL23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10080561</div><div id='project'> Project Name: lucidrains/isab-pytorch</div><div id='commit'> Commit Name: 9968cf73e2483cf9326546ba703eaec51e34bdd6</div><div id='time'> Time: 2020-12-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: isab_pytorch/isab_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: isab_pytorch/isab_pytorch.py</div><div id='n_file'> N File Name: isab_pytorch/isab_pytorch.py</div><div id='m_start'> M Start Line: 34</div><div id='m_end'> M End Line: 34</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 35</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot
+            mask = mask[:, None, :] * mask[:, :, None]
+            dots.masked_fill_(~mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        attn = dots.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+        mask_value<a id="change"> = </a><a id="change">-torch.finfo(dots.dtype).max</a>
+
+        if mask is not None:
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/6c8dfc185ea41f4d2388e4d33bbb76f900ff8a0a#diff-fce7f92e0b957764a240f657482514430a2fcdd8a0fcfc1d23372f119a92e6ccL48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10080560</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 6c8dfc185ea41f4d2388e4d33bbb76f900ff8a0a</div><div id='time'> Time: 2020-11-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/vit_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/vit_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/vit_pytorch.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 53</div><div id='n_end'> N End Line: 60</div><BR>

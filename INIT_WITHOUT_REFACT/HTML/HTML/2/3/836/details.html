@@ -1,0 +1,75 @@
+<html><h3>Pattern ID :836
+</h3><img src='2639177.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            permute_final_dims(k, (1, 2, 0)),  &#47&#47 [*, H, C_hidden, N_res]
+        )
+        a = a * math.sqrt(1.0 / (3 * self.c_hidden))
+        a = a + (math.sqrt(1.0 / 3) * <a id="change">permute_final_dims(</a>b, (2, 0, 1)<a id="change">)</a>)
+
+        &#47&#47 [*, N_res, N_res, H, P_q, 3]
+        pt_att = q_pts.unsqueeze(-4) - k_pts.unsqueeze(-5)</code></pre><h3>After Change</h3><pre><code class='java'>
+            permute_final_dims(k, (1, 2, 0)),  &#47&#47 [*, H, C_hidden, N_res]
+        )
+        a *= math.sqrt(1.0 / (3 * self.c_hidden))
+        a<a id="change"> += </a>(math.sqrt(1.0 / 3) * <a id="change">permute_final_dims(</a>b, (2, 0, 1)<a id="change">)</a>)
+
+        &#47&#47 [*, N_res, N_res, H, P_q, 3]
+        pt_att = q_pts.unsqueeze(-4) - k_pts.unsqueeze(-5)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/1df4991d63cb3dbc2045c058968c57933e97d248#diff-75fd594fff62b124d6b0b44d0a82c57e5b92ff2df479c5e30031ad46d64ab88cL297' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2639177</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: 1df4991d63cb3dbc2045c058968c57933e97d248</div><div id='time'> Time: 2022-02-03</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/structure_module.py</div><div id='m_class'> M Class Name: InvariantPointAttention</div><div id='n_method'> N Class Name: InvariantPointAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/structure_module.py</div><div id='n_file'> N File Name: openfold/model/structure_module.py</div><div id='m_start'> M Start Line: 297</div><div id='m_end'> M End Line: 372</div><div id='n_start'> N Start Line: 297</div><div id='n_end'> N End Line: 374</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [*, H, Q, K]
+        a = torch.matmul(
+            permute_final_dims(q, (1, 0, 2)),  &#47&#47 [*, H, Q, C_hidden]
+            <a id="change">permute_final_dims(</a>k, (1, 2, 0)<a id="change">)</a>,  &#47&#47 [*, H, C_hidden, K]
+        )
+
+        del q, k</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = permute_final_dims(q, (1, 0, 2))
+
+        &#47&#47 [*, H, C_hidden, K]
+        k<a id="change"> = </a><a id="change">permute_final_dims(</a>k, (1, 2, 0)<a id="change">)</a>
+
+        &#47&#47 [*, H, Q, K]
+        a = torch.matmul(q, k)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/497670998b5fdfd933cbdeb51fbc1673fe036162#diff-82626769d3840a38323ce57203d6c0ef948f806b1e92681e55ea2e4b15ed1078L233' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2639178</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: 497670998b5fdfd933cbdeb51fbc1673fe036162</div><div id='time'> Time: 2021-10-19</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/primitives.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/primitives.py</div><div id='n_file'> N File Name: openfold/model/primitives.py</div><div id='m_start'> M Start Line: 257</div><div id='m_end'> M End Line: 280</div><div id='n_start'> N Start Line: 257</div><div id='n_end'> N End Line: 283</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            permute_final_dims(k, 1, 2, 0), &#47&#47 [*, H, C_hidden, N_res]
+        )
+        a *= math.sqrt(1. / (3 * self.c_hidden))
+        a += math.sqrt(1. / 3) * <a id="change">permute_final_dims(</a>b, 2, 0, 1<a id="change">)</a>
+        
+        &#47&#47 [*, N_res, N_res, H, P_q, 3]
+        pt_att = q_pts.unsqueeze(-4) - k_pts.unsqueeze(-5)
+        pt_att = pt_att ** 2</code></pre><h3>After Change</h3><pre><code class='java'>
+            permute_final_dims(k, 1, 2, 0), &#47&#47 [*, H, C_hidden, N_res]
+        )
+        a = a + math.sqrt(1. / (3 * self.c_hidden))
+        a = a + math.sqrt(1. / 3) * <a id="change">permute_final_dims(</a>b, 2, 0, 1<a id="change">)</a>
+        
+        &#47&#47 [*, N_res, N_res, H, P_q, 3]
+        pt_att = q_pts.unsqueeze(-4) - k_pts.unsqueeze(-5)
+        pt_att = pt_att ** 2
+
+        &#47&#47 [*, N_res, N_res, H, P_q]
+        pt_att = torch.sum(pt_att, dim=-1)
+        head_weights = self.softplus(self.head_weights).view(
+            *((1,) * len(pt_att.shape[:-2]) + (-1, 1))
+        ) 
+        head_weights = (
+            head_weights * math.sqrt(1. / (3 * (self.no_qk_points * 9. / 2)))
+        )
+        pt_att = pt_att * head_weights 
+        
+        &#47&#47 [*, N_res, N_res, H]
+        pt_att = torch.sum(pt_att, dim=-1) * (-0.5)
+
+        &#47&#47 [*, N_res, N_res]
+        square_mask = mask.unsqueeze(-1) * mask.unsqueeze(-2)
+        square_mask = self.inf * (square_mask - 1)
+
+        &#47&#47 [*, H, N_res, N_res]
+        pt_att = permute_final_dims(pt_att, 2, 0, 1)
+        a = a + pt_att
+        a<a id="change"> = </a>a + square_mask.unsqueeze(-3)
+        a = self.softmax(a)
+
+        &#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/ab0c6977435b670213392920dcd0b76f9ca90062#diff-75fd594fff62b124d6b0b44d0a82c57e5b92ff2df479c5e30031ad46d64ab88cL216' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2639185</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: ab0c6977435b670213392920dcd0b76f9ca90062</div><div id='time'> Time: 2021-09-25</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/structure_module.py</div><div id='m_class'> M Class Name: InvariantPointAttention</div><div id='n_method'> N Class Name: InvariantPointAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/structure_module.py</div><div id='n_file'> N File Name: openfold/model/structure_module.py</div><div id='m_start'> M Start Line: 294</div><div id='m_end'> M End Line: 323</div><div id='n_start'> N Start Line: 295</div><div id='n_end'> N End Line: 326</div><BR>

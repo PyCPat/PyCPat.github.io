@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1738
+</h3><img src='6836396.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            out_l = torch.exp(torch.div(out_l, T))
+            &#47&#47 set Z_0 if haven&quott been set yet,
+            &#47&#47 Z_0 is used as a constant approximation of Z, to scale the probs
+            <a id="change">if Z_l &lt; 0</a><a id="change">:
+                </a>self.params[2] = out_l.mean() * outputSize
+                Z_l = self.params[2].clone().detach().item()
+                print("normalization constant Z_l is set to {:.1f}".format(Z_l))
+            if Z_ab &lt; 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+            out_ab = out_ab.contiguous()
+        else:
+            tmp = torch.div(out_l, T) &#47&#47EDIT            
+            out_ab = torch.exp(torch.div(torch.div(out_ab, <a id="change">out_ab.mean()*</a>outputSize), T))
+            out_l = torch.exp(torch.div(torch.div(out_l, out_ab.mean()<a id="change">*</a>outputSize), T))
+            print(&quotdivide T&quot, torch.max(tmp))
+            print(&quotafter&quot, torch.max(out_l))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rvl-lab-utoronto/video_similarity_search/commit/191a3da91996377b7822688589103069f0b69cae#diff-87af94b1c97a76d7491fb10d79ee15146347688ed4bb18961cec85605bb3aceeL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6836396</div><div id='project'> Project Name: rvl-lab-utoronto/video_similarity_search</div><div id='commit'> Commit Name: 191a3da91996377b7822688589103069f0b69cae</div><div id='time'> Time: 2020-10-18</div><div id='author'> Author: sherrychen127@gmail.com</div><div id='file'> File Name: loss/NCE_loss.py</div><div id='m_class'> M Class Name: NCEAverage</div><div id='n_method'> N Class Name: NCEAverage</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/NCE_loss.py</div><div id='n_file'> N File Name: loss/NCE_loss.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 83</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, logitsCondition: torch.Tensor, logitsJoint: torch.Tensor, step: int):
+        dLoss = self._loss(logitsCondition, torch.ones_like(logitsCondition)) + self._loss(logitsJoint, torch.zeros_like(logitsJoint))
+        <a id="change">if step % 2 == 0</a><a id="change">:
+            </a>return dLoss
+        return -dLoss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self._ema -= self._alpha * (self._ema - expMean)
+        loss = EMALoss.apply(logitsJoint, self._ema)
+        &#47&#47 dLoss = self._loss(logitsCondition, torch.ones_like(logitsCondition)) + self._loss(logitsJoint, torch.zeros_like(logitsJoint))
+        return <a id="change">(-logitsCondition.mean())</a><a id="change"> + </a>loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/c82455f8eec854336ea002e002aabad3cfa077f1#diff-f6d149510b121cea99b664a73b3b70efcc15fe8bff03ea07f229ff3d16bee4afL101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6836400</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: c82455f8eec854336ea002e002aabad3cfa077f1</div><div id='time'> Time: 2021-06-15</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/mlm.py</div><div id='m_class'> M Class Name: InfoMaxLoss</div><div id='n_method'> N Class Name: InfoMaxLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/mlm.py</div><div id='n_file'> N File Name: src/mcqc/losses/mlm.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_std = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+
+        for i in range(x.shape[0]):
+            <a id="change">if x[i, :, :].shape[1] == 1</a><a id="change">:
+                </a>raise ValueError(
+                    "normalize_batch received a tensor of length 1. This will result "
+                    "in torch.std() returning nan"
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True)</a>.detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x<a id="change"> - </a>x_mean)<a id="change"> / </a>x_std
+
+
+class DitherAudio(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6836401</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>

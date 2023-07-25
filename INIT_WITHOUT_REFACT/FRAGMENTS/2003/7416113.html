@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
+            random_token_prob &= ~random_no_mask
+            random_indices = torch.nonzero(random_token_prob, as_tuple=True)
+            <a id="change">masked_input[random_indices] = </a>random_tokens[random_indices]
+
+        &#47&#47 [mask] input
+        masked_input = masked_input.masked_fill(mask * replace_prob, self.mask_token_id)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 clone the mask, for potential modification if random tokens are involved
+        &#47&#47 not to be mistakened for the mask above, which is for all tokens, whether not replaced nor replaced with random tokens
+        masking_mask = <a id="change">mask.clone()</a>
+
+        &#47&#47 if random token probability &gt; 0 for mlm
+        if self.random_token_prob &gt; 0:
+            assert self.num_tokens is not None, &quotNumber of tokens (num_tokens) must be passed to Electra for randomizing tokens during masked language modeling&quot
+
+            random_token_prob = prob_mask_like(input, self.random_token_prob)
+            random_tokens = torch.randint(0, self.num_tokens, input.shape, device=input.device)
+            random_no_mask = mask_with_tokens(random_tokens, self.mask_ignore_token_ids)
+            random_token_prob &= ~random_no_mask
+            masked_input = torch.where(random_token_prob, random_tokens, masked_input)
+
+            &#47&#47 remove random token prob mask from masking mask
+            masking_mask<a id="change"> = </a>masking_mask & ~random_token_prob
+
+        &#47&#47 [mask] input
+        masked_input = masked_input.masked_fill(masking_mask * replace_prob, self.mask_token_id)</code></pre>

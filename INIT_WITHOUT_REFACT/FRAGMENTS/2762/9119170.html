@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        logits_mask = logits_mask.unsqueeze(1)
+
+        &#47&#47 Create representations of tokens as heads and dependents.
+        head_arc = self.dropout(<a id="change">self.activation(</a>self.head_arc(x)<a id="change">)</a>)
+        dependent_arc = self.dropout(self.activation(self.dependent_arc(x)))
+        head_label = self.dropout(self.activation(self.head_label(x)))
+        dependent_label = self.dropout(self.activation(self.dependent_label(x)))
+
+        &#47&#47 Compute biaffine attention matrix. This computes from the hidden
+        &#47&#47 representations of the shape [batch_size, seq_len, hidden_width] the
+        &#47&#47 attention matrices [batch_size, seq_len, seq_len, n_O].
+        logits_arc = self.bilinear_arc(head_arc, dependent_arc).squeeze(-1)
+
+        logits_label = self.bilinear_label(head_label, dependent_label)
+
+        &#47&#47 Mask out head candidates that are padding time steps. The logits mask
+        &#47&#47 has shape [batch_size, seq_len], we reshape it to [batch_size, 1,
+        &#47&#47 seq_len] to mask out the head predictions.
+        logits_arc<a id="change"> += </a>logits_mask
+        logits_label += logits_mask.unsqueeze(-1)
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+        logits_mask = logits_mask.unsqueeze(1).unsqueeze(-1)
+
+        &#47&#47 Create representations of tokens as heads and dependents.
+        head = self.dropout(<a id="change">self.activation(</a>self.head(x)<a id="change">)</a>)
+        dependent = self.dropout(self.activation(self.dependent(x)))
+
+        &#47&#47 Compute biaffine attention matrix. This computes from the hidden</code></pre>

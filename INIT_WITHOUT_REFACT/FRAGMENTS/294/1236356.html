@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                box_xy = (y[..., 0:2] * 2.0 - 0.5 + self.grid[i]) * self.stride[i]
+                box_wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 type: ignore
+                box_xyxy = self._xywh2xyxy(box_xy, box_wh).view(batch_size, -1, 4)
+                score = <a id="change">y[..., 4:].float()</a>.view(batch_size, -1, self.n_classes + 1)
+                preds.append(torch.cat([box_xyxy, score], -1))
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+                        -1,
+                    )
+                else:
+                    y<a id="change"> = </a><a id="change">torch.cat((box_xy, box_wh, y[..., 4:]), -1).view(
+                        </a>batch_size, <a id="change">-1</a>, self.n_outputs<a id="change">
+                    )</a>
+
+                preds.append(y)
+
+        if self.training:</code></pre>

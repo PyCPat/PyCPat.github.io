@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, _ = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs<a id="change"> = </a>[spec.squeeze(1).clone() for _ in range(<a id="change">len(</a>self.refinement_stages<a id="change">)</a> + 1)]
+        &#47&#47 re/im into channel axis
+        spec_f = (
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()
+        )  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None
+        for i, (stage, _) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(self.cplx_comp(spec_f), h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :] = spec_f.permute(0, 2, 3, 1)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        return spec<a id="change">, m, lsnr, out_specs</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec<a id="change">, m, lsnr, None</a>
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):
+    assert run_df and train_mask</code></pre>

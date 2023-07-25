@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        W = x.data.size(3)
+        ws = stride
+        hs = stride
+        x = <a id="change">x.view(B, C, H, 1, W, 1).expand(</a>B, C, H, stride, W, stride<a id="change">)</a>.contiguous().view(B, C, H * stride, W * stride)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert (x.data.dim() == 4)
+        
+        x = x.view(x.size(0), x.size(1), x.size(2), 1, x.size(3), 1).\
+            expand(x.size(0), <a id="change">x.size(1</a><a id="change">)</a>, x.size(2), self.stride, x.size(3), self.stride).contiguous().\
+            view(x.size(0), x.size(1), x.size(2) * self.stride, x.size(3) * self.stride)
+
+        return x</code></pre>

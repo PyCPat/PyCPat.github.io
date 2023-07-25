@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :331
+</h3><img src='1334260.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        heatmaps_pred = output.reshape(
+            (batch_size, num_joints, -1)).split(1, 1)
+        heatmaps_gt<a id="change"> = </a><a id="change">target.reshape((batch_size, num_joints, -1)).split(</a>1, 1<a id="change">)</a>
+
+        loss = 0.
+
+        for idx in range(num_joints):</code></pre><h3>After Change</h3><pre><code class='java'>
+            Tensor: The calculated loss.
+        
+        if self.use_target_weight:
+            loss = self.criterion(output * target_weights[...<a id="change">, None, None</a>],
+                                  target * target_weights[..., None, None])
+        else:
+            loss = self.criterion(output, target)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmpose/commit/23954dab675977d9762e61680a0b4a02ee2479f9#diff-6f7db4195f9b076c0397f3e806a1d54846e879457f4c56d5ba72f47b550dfcdfL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1334260</div><div id='project'> Project Name: open-mmlab/mmpose</div><div id='commit'> Commit Name: 23954dab675977d9762e61680a0b4a02ee2479f9</div><div id='time'> Time: 2022-08-02</div><div id='author'> Author: 87690686+liqikai9@users.noreply.github.com</div><div id='file'> File Name: mmpose/models/losses/mse_loss.py</div><div id='m_class'> M Class Name: KeypointMSELoss</div><div id='n_method'> N Class Name: KeypointMSELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmpose/models/losses/mse_loss.py</div><div id='n_file'> N File Name: mmpose/models/losses/mse_loss.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, x_lens, init_state_h_box=None, init_state_c_box=None):
+        if init_state_h_box is not None:
+            if self.use_gru is True:
+                init_state_h_list<a id="change"> = </a><a id="change">torch.split(</a>init_state_h_box, self.num_rnn_layers<a id="change">, dim=0)</a>
+                init_state_list = init_state_h_list
+            else:
+                init_state_h_list = torch.split(init_state_h_box, self.num_rnn_layers, dim=0)
+                init_state_c_list = torch.split(init_state_c_box, self.num_rnn_layers, dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+            final_chunk_state_list.append(final_state)
+
+        if self.use_gru:
+            return x<a id="change">, final_chunk_state_list, init_state_c_box</a>
+        else:
+            final_chunk_state_h_list = [final_chunk_state_list[i][0] for i in range(self.num_rnn_layers)]
+            final_chunk_state_c_list = [final_chunk_state_list[i][1] for i in range(self.num_rnn_layers)]
+            final_chunk_state_h_box = torch.concat(final_chunk_state_h_list, dim=0)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yeyupiaoling/masr/commit/c77fa0a1161da200aaaa5d7bfe696d5333fb9a3f#diff-c4d330638d5d220ca0df32668bc806ac33c238eb36c2ac133a325b7887340810L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1334247</div><div id='project'> Project Name: yeyupiaoling/masr</div><div id='commit'> Commit Name: c77fa0a1161da200aaaa5d7bfe696d5333fb9a3f</div><div id='time'> Time: 2022-07-09</div><div id='author'> Author: 1483586698@qq.com</div><div id='file'> File Name: masr/model_utils/deepspeech2/rnn.py</div><div id='m_class'> M Class Name: RNNStack</div><div id='n_method'> N Class Name: RNNStack</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: masr/model_utils/deepspeech2/rnn.py</div><div id='n_file'> N File Name: masr/model_utils/deepspeech2/rnn.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 74</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, item):
+        G_cls, G_reg = map(item.get, [&quotproposal_targets_cls&quot, &quotproposal_targets_reg&quot])
+        P_cls, P_reg = map(item.get, [&quotproposal_scores&quot, &quotproposal_boxes&quot])
+        G_cls<a id="change">, mask_cls = </a><a id="change">G_cls.split(</a>[self.cfg.NUM_CLASSES, 1]<a id="change">, dim=1)</a>
+        mask_reg = G_cls[:, :-1, ..., None].sum(1, keepdim=True)
+        cls_loss = self.cls_loss(P_cls, G_cls, mask_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, mask_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, item):
+        TODO: Decide on cleaner input representation.
+        keys = [&quotG_cls&quot, &quotM_cls&quot, &quotP_cls&quot, &quotG_reg&quot, &quotM_reg&quot, &quotP_reg&quot]
+        G_cls<a id="change">, M_cls, P_cls, G_reg, M_reg, P_reg</a> = map(item.get, keys)
+        cls_loss = self.cls_loss(P_cls, G_cls, M_cls)
+        reg_loss = self.reg_loss(P_reg, G_reg, M_reg)
+        loss = cls_loss + self.cfg.TRAIN.LAMBDA * reg_loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/03a0b92af929371cce91e1666b92f92192e49129#diff-a7f9867bfd9382b3a638afcaf0bf66ead18605d18caa50c991ce865b8b25f1ddL91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1334248</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 03a0b92af929371cce91e1666b92f92192e49129</div><div id='time'> Time: 2020-02-22</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/detector/proposal.py</div><div id='m_class'> M Class Name: ProposalLoss</div><div id='n_method'> N Class Name: ProposalLoss</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/detector/proposal.py</div><div id='n_file'> N File Name: pvrcnn/detector/proposal.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 85</div><BR>

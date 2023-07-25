@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        policy = Normal(self.actor(state), std)
+    else:
+        policy = Categorical(logits=self.actor(state))
+    <a id="change">return </a>policy
+
+  &#47&#47 Calculates the log probability of an action a with the policy π(·|s) given state s
+  def log_prob(self, state, action):</code></pre><h3>After Change</h3><pre><code class='java'>
+  def forward(self, state):
+    std = torch.exp(self.log_std)
+    mu = self.actor(state)
+    normal<a id="change"> = </a>Independent(<a id="change">Normal(</a>mu, std<a id="change">)</a>, 1)
+    &#47&#47policy = TransformedDistribution(normal, [TanhTransform(), AffineTransform(loc=self.loc, scale=self.scale)])
+    <a id="change">return </a>normal
+    &#47&#47normal.entropy() &#47&#47 Needs double-check with Kai-san can we just take normals entropy term for this?
+
+  &#47&#47 Calculates the log probability of an action a with the policy π(·|s) given state s</code></pre>

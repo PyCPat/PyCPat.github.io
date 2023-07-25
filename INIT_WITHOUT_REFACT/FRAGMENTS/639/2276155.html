@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bx_o = [b[o] for b, o in zip(boxes, bo)]
+        indices = self.matcher(bx_h, bx_o, objects, prior, logits, targets)
+
+        <a id="change">return </a>dict(
+            interaction_loss=self.interaction_loss(bx_h, bx_o, indices, prior, logits, targets)
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        indices = self.matcher(bx_h_post, bx_o_post, objects, prior, logits, targets)
+
+        <a id="change">loss_dict = </a><a id="change">{</a>"focal_loss": self.interaction_loss(n, indices, prior, logits, targets)<a id="change">}</a>
+        <a id="change">loss_dict.update(</a>self.regression_loss(
+            bx_h, bx_o, bx_h_post, bx_o_post, indices, targets, bbox_deltas.split(n)
+        )<a id="change">)</a>
+
+        <a id="change">return </a>loss_dict
+
+def box_cxcywh_to_xyxy(x):
+    x_c, y_c, w, h = x.unbind(-1)</code></pre>

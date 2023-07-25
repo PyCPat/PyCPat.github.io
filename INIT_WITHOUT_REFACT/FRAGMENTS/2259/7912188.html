@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        self.conv1.weight.data = torch.mul(self.conv1.weight,  self.mask1.weight)
+        self.conv2.weight.data<a id="change"> = </a><a id="change">torch.mul(</a>self.conv2.weight,  self.mask2.weight<a id="change">)</a>
+
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += self.shortcut(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        <a id="change">if </a>self.downsample is not None<a id="change">:
+            </a>identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)</code></pre>

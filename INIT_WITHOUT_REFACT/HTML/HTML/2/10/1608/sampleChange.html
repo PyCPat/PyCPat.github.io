@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        qkv = self.qkv(x)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0]<a id="change">, qkv[1], qkv[
+            2]</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><h3>After Change</h3><pre><code class='java'>
+                                          self.rel_pos_w, (H, W), (H, W))
+
+        attn = attn.softmax(dim=-1)
+        x = <a id="change">(attn @ v).view(B, self.num_heads, H, W,
+                            -1).permute(</a>0, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">4</a><a id="change">)</a>.reshape(B, H, W, -1)
+        x = self.proj(x)
+
+        return x</code></pre>

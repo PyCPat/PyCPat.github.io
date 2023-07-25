@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :3051
+</h3><img src='10079065.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self):
+        super().__init__()
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Discriminator(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.out_conv = nn.Conv2d(features[-1], 3, 3, padding = 1)
+
+    def forward(self, x):
+        x<a id="change"> = </a>rearrange(x, &quotb c -&gt; b c () ()&quot)
+        x = self.initial_conv(x)
+
+        residuals<a id="change"> = </a><a id="change">dict()</a>
+
+        for (res, (up, sle)) in zip(self.res_layers, self.layers):
+            x = up(x)
+            if exists(sle):
+                out_res = self.sle_map[res]
+                residual<a id="change"> = </a>sle(x)
+                residuals[out_res] = residual
+
+            if res in residuals:
+                x = x + residuals[res]
+
+        x = self.out_conv(x)
+        <a id="change">return </a>x.tanh()
+
+class Discriminator(nn.Module):
+    def __init__(self):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/lightweight-gan/commit/538ba632552070d68b4f7f322930ebb15ec7c3f5#diff-1fa69ca27a89db17b9469f61058ca7e28d765762bd26522fcee54cf703280b4fL10' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10079065</div><div id='project'> Project Name: lucidrains/lightweight-gan</div><div id='commit'> Commit Name: 538ba632552070d68b4f7f322930ebb15ec7c3f5</div><div id='time'> Time: 2020-11-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: lightweight_gan/lightweight_gan.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lightweight_gan/lightweight_gan.py</div><div id='n_file'> N File Name: lightweight_gan/lightweight_gan.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 10</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, outputs, gt_box, targets, anchors,
+                anchor_masks, mask_anchors, num_classes):
+        <a id="change">return </a>self._get_fine_grained_loss(
+            outputs, targets, gt_box, num_classes,
+            mask_anchors, self._ignore_thresh)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        return loss
+
+    def forward(self, inputs, gt_bbox, gt_targets, anchors):
+        yolo_losses<a id="change"> = </a><a id="change">dict()</a>
+        self.distill_pairs.clear()
+        for x, t, anchor, downsample in zip(inputs, gt_targets, anchors,
+                                            self.downsample):
+            yolo_loss = self.yolov3_loss(x, t, gt_bbox, anchor, downsample,
+                                         self.scale_x_y)
+            for k, v in yolo_loss.items():
+                if k in yolo_losses:
+                    yolo_losses[k] += v
+                else:
+                    yolo_losses[k] = v
+        loss<a id="change"> = </a>0
+        for k, v in yolo_losses.items():
+            loss += v
+
+        yolo_losses[&quottotal_loss&quot]<a id="change"> = </a>loss
+        <a id="change">return </a>yolo_losses
+
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/miemie2013/miemiedetection/commit/5a344f78495e8b6175565d4bfe40df3b543044cf#diff-0d0ce85d86c64700b4a62d7846c42da1f0a295deddda54d29c6a63e753763199L57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10079032</div><div id='project'> Project Name: miemie2013/miemiedetection</div><div id='commit'> Commit Name: 5a344f78495e8b6175565d4bfe40df3b543044cf</div><div id='time'> Time: 2021-12-30</div><div id='author'> Author: 53960695+miemie2013@users.noreply.github.com</div><div id='file'> File Name: mmdet/models/losses/yolov3_loss.py</div><div id='m_class'> M Class Name: YOLOv3Loss</div><div id='n_method'> N Class Name: YOLOv3Loss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/losses/yolov3_loss.py</div><div id='n_file'> N File Name: mmdet/models/losses/yolov3_loss.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 518</div><div id='n_end'> N End Line: 534</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.relu1(self.bn1(self.conv1(x)))
+        x<a id="change"> = </a>self.relu2(self.bn2(self.conv2(x)))
+        x<a id="change"> = </a>self.relu3(self.bn3(self.conv3(x)))
+        x = self.maxpool(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        <a id="change">return </a>x
+
+    def freeze(self):
+        for m in self.modules():</code></pre><h3>After Change</h3><pre><code class='java'>
+        x3 = self.layer2(x2)
+        x4 = self.layer3(x3)
+        x5 = self.layer4(x4)
+        feats<a id="change"> = </a><a id="change">dict(conv_feat=x0, pool_feat=x1, layer1_feat=x2, layer2_feat=x3, layer3_feat=x4, layer4_feat=x5)</a>
+        <a id="change">return </a>feats
+
+    def freeze(self):
+        for m in self.modules():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/669e086a69105b3df68f5116d73c7b33fc14b60f#diff-f5c07133a04720e94c673fb2b90f61b18f2d99ae35660825bc4f0d43c37dc5f2L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10079007</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: 669e086a69105b3df68f5116d73c7b33fc14b60f</div><div id='time'> Time: 2020-05-05</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/backbones/resnet.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/backbones/resnet.py</div><div id='n_file'> N File Name: dp/modules/backbones/resnet.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 115</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 122</div><BR>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, last=False):
+        out = self.conv1(x)
+        out = self.trans1(<a id="change">self.dense1(</a>out<a id="change">)</a>)
+        out = <a id="change">self.trans2(</a><a id="change">self.dense2(</a>out<a id="change">))</a>
+        out = self.trans3(<a id="change">self.dense3(</a>out<a id="change">)</a>)
+        out<a id="change"> = </a><a id="change">self.dense4(</a>out<a id="change">)</a>
+        out = F.avg_pool2d(<a id="change">F.relu(</a><a id="change">self.bn(</a>out<a id="change">))</a>, 4)
+        e<a id="change"> = </a><a id="change">out.view(out.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        out = self.linear(e)
+        if last:
+            return out, e
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, last=False):
+        features = self.features(x)
+        out = F.relu(features, inplace=True)
+        e = <a id="change">F.adaptive_avg_pool2d(out, (1, 1)).view(features.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        out = self.classifier(e)
+        if last:
+          return out, e
+        else:</code></pre>

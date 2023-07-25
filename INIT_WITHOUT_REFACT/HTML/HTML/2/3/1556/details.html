@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :1556
+</h3><img src='4439959.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, state):
+        a = F.relu(self.fc1(state))
+        a = F.relu(<a id="change">self.fc2(</a>a<a id="change">)</a>)
+        mu = self.mu_head(a)
+        mu = torch.clip(mu, MEAN_MIN, MEAN_MAX)
+        log_sigma<a id="change"> = </a>self.sigma_head(a)
+        log_sigma = torch.clip(log_sigma, LOG_STD_MIN, LOG_STD_MAX)
+        sigma = torch.exp(log_sigma)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        a_dist, a_tanh_mode = self._get_outputs(state)
+        action = a_dist.rsample()
+        logp_pi = a_dist.log_prob(action).sum(axis=-1)
+        return action<a id="change">, logp_pi, a_tanh_mode</a>
+
+    def get_log_density(self, state, action):
+        a_dist, _ = self._get_outputs(state)
+        action_clip = torch.clip(action, -1. + EPS, 1. - EPS)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ryanxhr/dwbc/commit/b3791e408af7125fde12cda1cdeaefbaa400aacc#diff-75aa8d0a222c16ec3e4bb78749eef436b3d51c25ea931fe019fed10965e94549L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4439959</div><div id='project'> Project Name: ryanxhr/dwbc</div><div id='commit'> Commit Name: b3791e408af7125fde12cda1cdeaefbaa400aacc</div><div id='time'> Time: 2022-06-30</div><div id='author'> Author: xuhaoran8@jd.com</div><div id='file'> File Name: algos/DWBC.py</div><div id='m_class'> M Class Name: Actor</div><div id='n_method'> N Class Name: Actor</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algos/DWBC.py</div><div id='n_file'> N File Name: algos/DWBC.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 The last hidden state is taken
+        out = torch.relu_(self.fc1(out[:,-1,:]))
+        out = self.dropout(out)
+        out<a id="change"> = </a>torch.sigmoid(<a id="change">self.fc2(</a>out<a id="change">)</a>)
+            
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        packed_output, (hidden, cell) = self.lstm(packed_embedded)
+
+        &#47&#47unpack sequence
+        out<a id="change">, out_lengths</a> = nn.utils.rnn.pad_packed_sequence(packed_output, batch_first=True)
+
+        out = torch.relu_(out[:,-1,:])
+        out = self.dropout(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/c7dff7fb0575840727baa746eb08d9bd4c8ede22#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL434' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4439982</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: c7dff7fb0575840727baa746eb08d9bd4c8ede22</div><div id='time'> Time: 2021-07-05</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: LSTMNetBase</div><div id='n_method'> N Class Name: LSTMNetBase</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 441</div><div id='m_end'> M End Line: 459</div><div id='n_start'> N Start Line: 426</div><div id='n_end'> N End Line: 431</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, frame, target):
+        x = x.view(-1, 28 * 28)
+        x = F.relu(self.fc1(x))
+        x<a id="change"> = </a>F.relu(<a id="change">self.fc2(</a>x<a id="change">)</a>)
+        x = self.fc3(x)
+
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, frame, target):
+        x = self.resnet18(frame)
+
+        output<a id="change">, h_n</a> = self.rnn(x.unsqueeze(1))
+
+        return torch.mean(output, dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/be723666bfcfc6953d1182af0b44f044f6a72cf1#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL14' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4439981</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: be723666bfcfc6953d1182af0b44f044f6a72cf1</div><div id='time'> Time: 2021-01-10</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 15</div><div id='m_end'> M End Line: 20</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 28</div><BR>

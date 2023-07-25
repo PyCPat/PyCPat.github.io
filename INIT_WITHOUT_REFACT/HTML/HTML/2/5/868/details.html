@@ -1,0 +1,105 @@
+<html><h3>Pattern ID :868
+</h3><img src='2755498.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        l_neg = torch.einsum(&quotnc,ck-&gt;nk&quot, [q, self.queue.clone().detach()])
+
+        &#47&#47 logits: Nx(1+K)
+        logits<a id="change"> = </a>torch.cat([l_pos, l_neg], dim=1)
+
+        &#47&#47 apply temperature
+        logits /= self.T
+
+        &#47&#47 labels: positive key indicators
+        labels = torch.zeros(logits.shape[0], dtype=torch.long).cuda()
+
+
+        &#47&#47&#47&#47 densecl logits
+        d_pos = torch.einsum(&quotncm,ncm-&gt;nm&quot, dense_q, dense_k_norm).unsqueeze(1)
+        d_neg = torch.einsum(&quotncm,ck-&gt;nkm&quot, dense_q, self.queue_dense.clone().detach())
+        logits_dense = torch.cat([d_pos, d_neg], dim=1)
+        logits_dense = logits_dense / self.T
+        labels_dense<a id="change"> = </a><a id="change">torch.zeros(</a>(n, h*w)<a id="change">, dtype=torch.long)</a>.cuda()
+
+        &#47&#47 dequeue and enqueue
+        self._dequeue_and_enqueue(k, dense_k)
+
+        return logits<a id="change">, labels, logits_dense, labels_dense</a>
+
+
+&#47&#47 utils
+@torch.no_grad()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 negative logits: NxK
+        l_neg = torch.einsum(&quotnc,ck-&gt;nk&quot, [q, self.queue.clone().detach()])
+
+        l_pos, l_neg = l_pos / self.T<a id="change">, l_neg / self.T</a>
+
+        &#47&#47  &#47&#47 logits: Nx(1+K)
+        &#47&#47  logits = torch.cat([l_pos, l_neg], dim=1)
+        &#47&#47</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coincheung/densecl/commit/a87888620e2cf9dab6bb7adcf31033d78b09ad66#diff-a99caf9fd5fcef62ac531cc8b8467c8a6b83ad2bcdb01732c35368753bdf58faL168' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2755498</div><div id='project'> Project Name: coincheung/densecl</div><div id='commit'> Commit Name: a87888620e2cf9dab6bb7adcf31033d78b09ad66</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: 867153576@qq.com</div><div id='file'> File Name: moco/builder.py</div><div id='m_class'> M Class Name: MoCo</div><div id='n_method'> N Class Name: MoCo</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: moco/builder.py</div><div id='n_file'> N File Name: moco/builder.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 192</div><div id='n_start'> N Start Line: 168</div><div id='n_end'> N End Line: 197</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [conv(x) for conv, x in zip(self.conv_list, v_img_list)]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img<a id="change"> = </a>rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+
+        EV_hat_img = q_img * conv_v_img
+        zero<a id="change"> = </a><a id="change">torch.zeros(</a>(B, h, 1, Ch)<a id="change">, dtype=q.dtype, layout=q.layout, device=q.device)</a>
+        EV_hat = torch.cat((zero<a id="change">, EV_hat_img</a>), dim=2)                                &#47&#47 Shape: [B, h, N, Ch].
+
+        return EV_hat
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+
+        EV_hat = q_img * conv_v_img
+        EV_hat = F.pad(EV_hat, (0<a id="change">, 0, 1, 0, 0, 0</a>))  &#47&#47 [B, h, N, Ch].
+        return EV_hat
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2755491</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input0 = features[2]
+        h0 = torch.zeros(self.num_layers, input0.size(0),
+                         self.hidden_size).to(device)
+        c0<a id="change"> = </a><a id="change">torch.zeros(</a>self.num_layers, input0.size(0),
+                         self.hidden_size<a id="change">)</a>.to(device)
+        out, _ = self.lstm(input0, (h0<a id="change">, c0</a>))
+        out = self.attention_net(out)
+        out = self.fc(out[:, -1, :])
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.sequence_length = inp.size(1)
+        out, _ = self.lstm(inp)
+        out = self.attention_net(out, device)
+        out<a id="change"> = </a>self.fc1(out)
+        out = self.fc2(out)
+        return out<a id="change">, out</a>
+
+
+&#47&#47log key add embedding
+class loganomaly(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/logintelligence/logadempirical/commit/a67d9fc74c175ac3aa700fe533e22a6fe62290ab#diff-806bb9e744e96a11cbd4585413a0bb83f6d2cfa6977027c8a5e60b1ed0d1bb81L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2755473</div><div id='project'> Project Name: logintelligence/logadempirical</div><div id='commit'> Commit Name: a67d9fc74c175ac3aa700fe533e22a6fe62290ab</div><div id='time'> Time: 2021-06-23</div><div id='author'> Author: c3363046@uon.edu.au</div><div id='file'> File Name: logbert/logdeep/models/lstm.py</div><div id='m_class'> M Class Name: robustlog</div><div id='n_method'> N Class Name: robustlog</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: logbert/logdeep/models/lstm.py</div><div id='n_file'> N File Name: logbert/logdeep/models/lstm.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            dec_enc_attns.append(dec_enc_attn)
+        predictions = self.projection(dec_outputs)
+        &#47&#47 TODO: 暂时全部为0, return dec_self_attns, dec_enc_attns
+        alphas<a id="change"> = </a>torch.tensor(<a id="change">np.zeros(</a>(batch_size, 52, 196)<a id="change">)</a>).to(device)
+        return predictions<a id="change">, encoded_captions, decode_lengths, alphas, sort_ind</a>
+
+
+class EncoderLayer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 0 0 0 0 1 2
+        &#47&#47 0 0 0 0 1 1
+        dec_outputs = self.tgt_emb(encoded_captions) + self.pos_emb(torch.LongTensor([list(range(52))]*batch_size).to(device))
+        dec_outputs<a id="change"> = </a>self.dropout(dec_outputs)
+        dec_self_attn_pad_mask = self.get_attn_pad_mask(encoded_captions, encoded_captions)
+        dec_self_attn_subsequent_mask = self.get_attn_subsequent_mask(encoded_captions)
+        dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
+        dec_enc_attn_mask = (torch.tensor(np.zeros((batch_size, 52, 196))).to(device) == torch.tensor(np.ones((batch_size, 52, 196))).to(device))
+
+        dec_self_attns, dec_enc_attns = [], []
+        for layer in self.layers:
+            &#47&#47 attn: [batch_size, n_heads, len_q, len_k]
+            dec_outputs, dec_self_attn, dec_enc_attn = layer(dec_outputs, encoder_out, dec_self_attn_mask, dec_enc_attn_mask)
+            dec_self_attns.append(dec_self_attn)
+            dec_enc_attns.append(dec_enc_attn)
+        predictions = self.projection(dec_outputs)
+        return predictions<a id="change">, encoded_captions, decode_lengths, sort_ind, dec_self_attns, dec_enc_attns</a>
+
+
+class EncoderLayer(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/royalskye/image-caption/commit/569502dd85be28a1e6a10bc8873b7cd0446556b8#diff-7b7030687899150ad5cd420914b35858a8cc34b1d59e5cab0d629393a328448cL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2755478</div><div id='project'> Project Name: royalskye/image-caption</div><div id='commit'> Commit Name: 569502dd85be28a1e6a10bc8873b7cd0446556b8</div><div id='time'> Time: 2020-04-06</div><div id='author'> Author: a19970417b@qq.com</div><div id='file'> File Name: transformer.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer.py</div><div id='n_file'> N File Name: transformer.py</div><div id='m_start'> M Start Line: 150</div><div id='m_end'> M End Line: 189</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 191</div><BR>

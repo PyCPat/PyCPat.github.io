@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x = self.dropout(x)
+        x = <a id="change">x.unsqueeze(0).expand(</a>targets.size(0), -1, -1, -1, -1<a id="change">)</a>
+
+        copies, bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)
+        predictions = x.new(bsz * copies * (tsz - self.offset + 1) * steps - ((steps + 1) * steps // 2) * copies * bsz)</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert end == predictions.numel(), "{} != {}".format(end, predictions.numel())
+
+        if self.infonce:
+            predictions<a id="change"> = </a><a id="change">predictions.view(-1</a>, copies<a id="change">)</a>
+        else:
+            if weights is not None:
+                labels = (labels, weights)
+</code></pre>

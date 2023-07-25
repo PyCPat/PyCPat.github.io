@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+        return quantizeds<a id="change">, codes, logits</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = prob(x, h, w)
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            soft = <a id="change">(logit / temperature).softmax(</a>-1<a id="change">)</a>
+            if hard:
+                hard<a id="change"> = </a>logit.argmax(-1)
+                hard = F.one_hot(hard, k)
+                sample<a id="change"> = </a>(hard<a id="change"> - </a>soft).detach() + soft
+            else:
+                sample<a id="change"> = </a>soft
+            &#47&#47 sample = F.gumbel_softmax(logit, temperature, hard)
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]</code></pre>

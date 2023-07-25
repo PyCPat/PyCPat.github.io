@@ -1,0 +1,56 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if not self.apply_d_sn:
+                h = self.bn1(h)
+            h = self.activation(h)
+            <a id="change">h</a> = torch.sum(h, dim=[2, 3])
+
+            &#47&#47 adversarial training
+            adv_output = torch.squeeze(self.linear1(h))
+
+            &#47&#47 make class labels odd (for fake) or even (for real) for ADC
+            if self.aux_cls_type == "ADC":
+                if adc_fake:
+                    label = label*2 + 1
+                else:
+                    label = label*2
+
+            &#47&#47 forward pass through InfoGAN Q head
+            if self.MODEL.info_num_discrete_c != "N/A":
+                info_discrete_c_logits = self.info_discrete_linear(h)
+            if self.MODEL.info_num_conti_c != "N/A":
+                info_conti_mu = self.info_conti_mu_linear(h)
+                info_conti_var = <a id="change">self.info_conti_var_linear(</a>h<a id="change">)</a>
+
+            &#47&#47 class conditioning
+            if self.d_cond_mtd == "AC":
+                if self.normalize_d_embed:</code></pre><h3>After Change</h3><pre><code class='java'>
+            h = self.conv1(h)
+            if not self.apply_d_sn:
+                h = self.bn1(h)
+            bottom_h<a id="change">, bottom_w</a> = h.shape[2], h.shape[3]
+            h = self.activation(h)
+            <a id="change">h</a> = torch.sum(h, dim=[2, 3])
+
+            &#47&#47 adversarial training
+            adv_output = torch.squeeze(self.linear1(h))
+
+            &#47&#47 make class labels odd (for fake) or even (for real) for ADC
+            if self.aux_cls_type == "ADC":
+                if adc_fake:
+                    label = label*2 + 1
+                else:
+                    label = label*2
+
+            &#47&#47 forward pass through InfoGAN Q head
+            if self.MODEL.info_type in <a id="change">[</a>"discrete", <a id="change">"both"</a>]:
+                info_discrete_c_logits = self.info_discrete_linear(h<a id="change">/</a>(bottom_h<a id="change">*</a>bottom_w))
+            if self.MODEL.info_type in <a id="change">[</a>"continuous", <a id="change">"both"</a>]:
+                info_conti_mu = self.info_conti_mu_linear(h<a id="change">/</a>(bottom_h<a id="change">*</a>bottom_w))
+                info_conti_var = <a id="change">torch.exp(</a><a id="change">self.info_conti_var_linear(</a>h<a id="change">/</a>(bottom_h<a id="change">*</a>bottom_w)<a id="change">))</a>
+
+            &#47&#47 class conditioning
+            if self.d_cond_mtd == "AC":
+                if self.normalize_d_embed:</code></pre>

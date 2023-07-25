@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.Linear(dim * mult, dim)
+        )
+    def forward(self, x, **kwargs):
+        <a id="change">return self.net(</a>x<a id="change">)</a>
+
+&#47&#47 attention.
+
+class SelfAttention(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.w2 = nn.Linear(dim * mult, dim)
+
+    def forward(self, x, **kwargs):
+        <a id="change">if not self.glu</a><a id="change">:
+            </a>x<a id="change"> = self.w1(x</a><a id="change">)</a>
+            x<a id="change"> = self.act(</a>x<a id="change">)</a>
+        else:
+            <a id="change">x</a><a id="change">, v = self.w1(x</a><a id="change">).chunk(2</a><a id="change">, dim=-1)</a>
+            x<a id="change"> = self.act(x</a><a id="change">) * v</a>
+
+        x<a id="change"> = self.dropout(</a>x<a id="change">)</a>
+        x<a id="change"> = self</a><a id="change">.w2(</a>x<a id="change">)</a>
+        <a id="change">return </a>x
+
+&#47&#47 attention.
+</code></pre>

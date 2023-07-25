@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :2259
+</h3><img src='7912188.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        self.conv1.weight.data = torch.mul(self.conv1.weight,  self.mask1.weight)
+        self.conv2.weight.data<a id="change"> = </a><a id="change">torch.mul(</a>self.conv2.weight,  self.mask2.weight<a id="change">)</a>
+
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += self.shortcut(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        <a id="change">if </a>self.downsample is not None<a id="change">:
+            </a>identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/incheon-cho/dynamic_model_pruning_with_feedback/commit/12bd228dc14e0c422c262bcbc1b81cb435e05a4d#diff-da62ce430302dcb6718b9a6a36a17d97e7ef64d1ecba8920e816a058c59c6816L43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7912188</div><div id='project'> Project Name: incheon-cho/dynamic_model_pruning_with_feedback</div><div id='commit'> Commit Name: 12bd228dc14e0c422c262bcbc1b81cb435e05a4d</div><div id='time'> Time: 2020-09-06</div><div id='author'> Author: dlscjs5362@gmail.com</div><div id='file'> File Name: models/resnet.py</div><div id='m_class'> M Class Name: BasicBlock</div><div id='n_method'> N Class Name: BasicBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/resnet.py</div><div id='n_file'> N File Name: models/resnet.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text_latents, image_latents = map(lambda t: F.normalize(t, p = 2, dim = -1), (text_latents, image_latents))
+        labels = torch.arange(input.size(0), device = image_latents.device)
+        sim_i_2_t = torch.matmul(torch.mul(logit_scale, image_latents), torch.t(text_latents))
+        sim_t_2_i<a id="change"> = </a>torch.matmul(<a id="change">torch.mul(</a>logit_scale, text_latents<a id="change">)</a>, torch.t(image_latents))
+        
+        loss_t_2_i = F.cross_entropy(sim_t_2_i, labels)
+        loss_i_2_t = F.cross_entropy(sim_i_2_t, labels)</code></pre><h3>After Change</h3><pre><code class='java'>
+        sim_i_2_t = torch.matmul(torch.mul(logit_scale, image_latents), torch.t(text_latents))
+        sim_t_2_i = sim_i_2_t.t() &#47&#47torch.matmul(torch.mul(logit_scale, text_latents), torch.t(image_latents))
+        
+        <a id="change">if </a>return_loss<a id="change">:
+            </a>assert image.size(0) == input.size(0), "Not Support for unbalanced image-text pair"
+            loss_t_2_i = F.cross_entropy(sim_t_2_i, torch.arange(input.size(0), device = image_latents.device))
+            loss_i_2_t = F.cross_entropy(sim_i_2_t, torch.arange(image.size(0), device = image_latents.device))
+            return sim_i_2_t, sim_t_2_i, loss_i_2_t, loss_t_2_i</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/weiyx16/clip-pytorch/commit/6cd0a84a4b3df54d9b248294556800a0ec49c09d#diff-dabcaa5452d0c0467649383c17e51bc092c7e3e58f73e3d2fe16902ac2e09496L240' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7912190</div><div id='project'> Project Name: weiyx16/clip-pytorch</div><div id='commit'> Commit Name: 6cd0a84a4b3df54d9b248294556800a0ec49c09d</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: weason1998@gmail.com</div><div id='file'> File Name: CLIP.py</div><div id='m_class'> M Class Name: CLIP</div><div id='n_method'> N Class Name: CLIP</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: CLIP.py</div><div id='n_file'> N File Name: CLIP.py</div><div id='m_start'> M Start Line: 241</div><div id='m_end'> M End Line: 254</div><div id='n_start'> N Start Line: 252</div><div id='n_end'> N End Line: 268</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        self.conv1.weight.data = torch.mul(self.conv1.weight,  self.mask1.weight)
+        self.conv2.weight.data<a id="change"> = </a><a id="change">torch.mul(</a>self.conv2.weight,  self.mask2.weight<a id="change">)</a>
+        self.conv3.weight.data = torch.mul(self.conv3.weight,  self.mask3.weight)
+
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = F.relu(self.bn2(self.conv2(out)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.conv3(out)
+        out = self.bn3(out)
+
+        <a id="change">if </a>self.downsample is not None<a id="change">:
+            </a>identity = self.downsample(x)
+
+        out += identity
+        out = self.relu(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/incheon-cho/dynamic_model_pruning_with_feedback/commit/12bd228dc14e0c422c262bcbc1b81cb435e05a4d#diff-da62ce430302dcb6718b9a6a36a17d97e7ef64d1ecba8920e816a058c59c6816L88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7912193</div><div id='project'> Project Name: incheon-cho/dynamic_model_pruning_with_feedback</div><div id='commit'> Commit Name: 12bd228dc14e0c422c262bcbc1b81cb435e05a4d</div><div id='time'> Time: 2020-09-06</div><div id='author'> Author: dlscjs5362@gmail.com</div><div id='file'> File Name: models/resnet.py</div><div id='m_class'> M Class Name: Bottleneck</div><div id='n_method'> N Class Name: Bottleneck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/resnet.py</div><div id='n_file'> N File Name: models/resnet.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 97</div><div id='n_start'> N Start Line: 83</div><div id='n_end'> N End Line: 100</div><BR>

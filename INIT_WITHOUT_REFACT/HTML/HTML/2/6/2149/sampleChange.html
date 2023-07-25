@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.b = nn.Parameter(torch.zeros(1, dim, 1, 1))
+
+    def forward(self, x):
+        std = <a id="change">torch.var(x, dim = 1, unbiased = False, keepdim = True).sqrt()</a>
+        mean = torch.mean(x, dim = 1, keepdim = True)
+        return (x - mean) / (std<a id="change"> + </a>self.eps) * self.g + self.b
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.b = nn.Parameter(torch.zeros(1, dim, 1, 1))
+
+    def forward(self, x):
+        var = <a id="change">torch.var(</a>x<a id="change">, dim = 1, unbiased = False, keepdim = True)</a>
+        mean = torch.mean(x, dim = 1, keepdim = True)
+        return (x - mean) / <a id="change">(var + self.eps).sqrt()</a> * self.g + self.b
+
+class PreNorm(nn.Module):
+    def __init__(self, dim, fn):</code></pre>

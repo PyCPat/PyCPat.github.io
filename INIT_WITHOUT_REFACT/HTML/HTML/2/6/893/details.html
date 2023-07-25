@@ -1,0 +1,73 @@
+<html><h3>Pattern ID :893
+</h3><img src='2781547.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+	def forward(self, src, tgt, T_gt=None, prefix="train"):
+		feat1 = src[..., :3].transpose(1, 2)
+		feat2 = <a id="change">tgt[..., :3].transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+		src = src[..., :3]
+		tgt = tgt[..., :3]
+
+		src_embedding = self.emb_nn(feat1)
+		tgt_embedding = self.emb_nn(feat2)
+		src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores<a id="change"> = </a>torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding) / math.sqrt(self.emb_dims)
+		scores = torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_point = src
+        tgt_point = tgt
+
+        src = <a id="change">src.transpose(1,2).contiguous()</a>
+        tgt = tgt.transpose(1,2).contiguous()
+
+        batch_size<a id="change">, _, _ = </a>src.size()
+
+        src_embedding = self.emb_nn(src)
+        tgt_embedding = self.emb_nn(tgt)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2781547</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_ = <a id="change">torch.transpose(</a>preds, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+			&#47&#47print(preds.size())
+
+			y = y.long()
+			loss<a id="change"> = </a>self.Loss(preds_, torch.squeeze(y))
+			return preds, loss
+		return preds
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		for i,k in enumerate(xs):
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			
+			preds = self.Linear(<a id="change">hs.contiguous()</a>.view(x.size(0), -1))
+			preds_.append(preds)
+			if y is not None:
+				loss<a id="change">+=</a>self.Loss(preds, y[:,i].squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=len(xs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2781563</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        q = q.transpose(0, 1).contiguous()
+        k = k.transpose(0, 1).contiguous()
+        v<a id="change"> = </a><a id="change">v.transpose(0</a>, <a id="change">1</a><a id="change">)</a>.contiguous()
+
+        b = q.size(1) * self._heads
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v = v if torch.is_tensor(v) else k if torch.is_tensor(k) else q
+        k = k if torch.is_tensor(k) else q
+
+        q = <a id="change">self.q(q).transpose(0, 1).contiguous()</a>
+        k = self.k(k).transpose(0, 1).contiguous()
+        v = self.v(v).transpose(0, 1).contiguous()
+
+        b = q.size(1) * self._heads
+
+        q<a id="change"> = </a>q.view(-1, b, self._head_dims).transpose(0, 1)
+        k = k.view(-1, b, self._head_dims).transpose(0, 1)
+        v = v.view(-1, b, self._head_dims).transpose(0, 1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yeliudev/nncore/commit/591ba982d2f81385c91f619f48fc1fa6068f0d9a#diff-b66764790ba7b310b71bcb990fc01ea802675de40cfbd1e8da361bbc4827b8c3L78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2781550</div><div id='project'> Project Name: yeliudev/nncore</div><div id='commit'> Commit Name: 591ba982d2f81385c91f619f48fc1fa6068f0d9a</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: yeliudev@outlook.com</div><div id='file'> File Name: nncore/nn/blocks/transformer.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nncore/nn/blocks/transformer.py</div><div id='n_file'> N File Name: nncore/nn/blocks/transformer.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 106</div><BR>

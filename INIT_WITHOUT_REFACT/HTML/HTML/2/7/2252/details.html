@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :2252
+</h3><img src='7910217.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    device=self.device
+                )
+                for i, idx in enumerate(mask_polyline_indices):
+                    aux_in[i]<a id="change"> = </a><a id="change">global_graph_out[i, idx].squeeze(0</a><a id="change">)</a>
+                    aux_gt[i]<a id="change"> = </a>x[i, idx].squeeze(0)
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.training and self.with_aux:
+            mask_polyline_indices = [random.randint(0, time_step_len - 1) + i * time_step_len for i in
+                                     <a id="change">range(</a>x.size()[0]<a id="change">)</a>]
+            x = x.view(-1, self.subgraph_width)
+            aux_gt = x[mask_polyline_indices]
+            <a id="change">x[mask_polyline_indices]</a> = 0.0
+            x = x.view(-1, time_step_len, self.subgraph_width)
+
+        &#47&#47 TODO: compute the adjacency matrix???</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7910217</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: VectorNet</div><div id='n_method'> N Class Name: VectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 141</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    (global_graph_out.size()[0], self.polyline_vec_shape),
+                    device=self.device
+                )
+                for i, <a id="change">idx</a> in enumerate(mask_polyline_indices):
+                    aux_in[i]<a id="change"> = </a>global_graph_out[i, idx].squeeze(0)
+                    aux_gt[i]<a id="change"> = </a><a id="change">x[i, idx].squeeze(0</a><a id="change">)</a>
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt
+            else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.training and self.with_aux:
+            mask_polyline_indices = [random.randint(0, time_step_len - 1) + i * time_step_len for i in
+                                     <a id="change">range(</a>x.size()[0]<a id="change">)</a>]
+            x = x.view(-1, self.subgraph_width)
+            aux_gt = x[mask_polyline_indices]
+            <a id="change">x[mask_polyline_indices]</a> = 0.0
+            x = x.view(-1, time_step_len, self.subgraph_width)
+
+        &#47&#47 TODO: compute the adjacency matrix???</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7910219</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: VectorNet</div><div id='n_method'> N Class Name: VectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 141</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Need to have so as to reflect a batch_size = 1 // if batched then comment out
+        st_maps = st_maps.unsqueeze(0)
+        for <a id="change">t</a> in range(st_maps.size(1)):
+            &#47&#47 with torch.no_grad():
+            x = self.resnet18(st_maps[:, t, :, :, :])
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            if t == 0:
+                gru_output<a id="change">, h_n = </a>self.rnn(x.unsqueeze(1))
+            else:
+                gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            x<a id="change"> = </a>self.fc_resnet(<a id="change">gru_output.squeeze(1</a><a id="change">)</a>)
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL
+            &#47&#47 x = x*25.0
+            batched_output_per_clip.append(x.squeeze(0))</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        &#47&#47 gru_output = gru_output.squeeze(1)
+        for i in <a id="change">range(</a>gru_output.size(0)<a id="change">)</a>:
+            hr = self.gru_fc_out(<a id="change">gru_output[i, :, :]</a>)
+        &#47&#47     &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr.flatten())
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/0f9fc9b96933c04f723fbfa5b80cdf1a398828c3#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7910214</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: 0f9fc9b96933c04f723fbfa5b80cdf1a398828c3</div><div id='time'> Time: 2021-03-14</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 64</div><BR>

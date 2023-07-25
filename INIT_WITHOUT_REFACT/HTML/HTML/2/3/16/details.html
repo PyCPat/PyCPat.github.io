@@ -1,0 +1,98 @@
+<html><h3>Pattern ID :16
+</h3><img src='34112.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h<a id="change">, process_c = </a>[<a id="change">torch.zeros(</a>(1, batch, embed)<a id="change">, device = device)</a> for _ in range(2)]
+		for i in range(self.n_process):
+			query, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			query = query.squeeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		&#47&#47 ~ query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		query = <a id="change">h[-1]</a>
+		&#47&#47 ~ process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]
+		for i in range(self.n_process):
+			&#47&#47 ~ _, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			&#47&#47 ~ _, (h, c) = self.Decoder(query, (h, c))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/6e79534a9be0ef30e0f97fcccf1addf22312462c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34112</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: 6e79534a9be0ef30e0f97fcccf1addf22312462c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            k1, k2 = key_layer.chunk(2, dim=(key_layer.ndim - 1))
+            q1 = self.relative_positions_encoding(q1)
+            k1 = self.relative_positions_encoding(k1)
+            position_ids<a id="change"> = </a>torch.cat((<a id="change">torch.zeros(</a>q1.shape[2]-1<a id="change">, dtype=torch.long, device=q1.device)</a>,
+                                     torch.arange(1, dtype=torch.long, device=q1.device) + 1))
+            q2 = self.relative_positions_encoding(q2, position_ids)
+            k2 = self.relative_positions_encoding(k2, position_ids)</code></pre><h3>After Change</h3><pre><code class='java'>
+            key_layer = torch.concat([k1, k2], dim=(k1.ndim - 1))
+        elif self.p_bias == &quotrotary&quot and not self.position_encoding_2d:  &#47&#47 原rotary逻辑
+            query_layer = self.relative_positions_encoding(query_layer, model_kwargs[&quotposition_ids&quot])
+            key_layer = self.relative_positions_encoding(key_layer, <a id="change">model_kwargs[&quotposition_ids&quot]</a>)
+
+        if self.is_decoder:
+            past_key_value = (key_layer, value_layer)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tongjilibo/bert4torch/commit/8bfbd96fd50e1f9cd4f1b422c12ff13cd03e1357#diff-423158f6414177c50deaf8ff8d75202474ddccb543fca22c762f1c3c0e973f8eL141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34113</div><div id='project'> Project Name: tongjilibo/bert4torch</div><div id='commit'> Commit Name: 8bfbd96fd50e1f9cd4f1b422c12ff13cd03e1357</div><div id='time'> Time: 2023-04-03</div><div id='author'> Author: tongjilibo@163.com</div><div id='file'> File Name: bert4torch/layers.py</div><div id='m_class'> M Class Name: MultiHeadAttentionLayer</div><div id='n_method'> N Class Name: MultiHeadAttentionLayer</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bert4torch/layers.py</div><div id='n_file'> N File Name: bert4torch/layers.py</div><div id='m_start'> M Start Line: 175</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 183</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        conv_v_img = rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+
+        EV_hat_img = q_img * conv_v_img
+        zero<a id="change"> = </a><a id="change">torch.zeros(</a>(B, h, 1, Ch)<a id="change">, dtype=q.dtype, layout=q.layout, device=q.device)</a>
+        EV_hat = torch.cat((zero, EV_hat_img), dim=2)                                &#47&#47 Shape: [B, h, N, Ch].
+
+        return EV_hat
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = []
+        for i, conv in enumerate(self.conv_list):
+            conv_v_img_list.append(conv(<a id="change">v_img_list[i]</a>))
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34114</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            phi = torch.where(cosine &gt; self.th, phi, cosine - self.mm)
+        &#47&#47 --------------------------- convert label to one-hot ---------------------------
+        &#47&#47 one_hot = torch.zeros(cosine.size(), requires_grad=True, device=&quotcuda&quot)
+        one_hot = <a id="change">torch.zeros(</a>cosine.size()<a id="change">, device = &quotcuda&quot)</a>
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        &#47&#47 -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
+        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)  &#47&#47 you can use torch.where if your torch.__version__ is 0.4
+        output<a id="change"> *= </a>self.s
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        cos_theta = cos_theta.clamp(-1, 1)  &#47&#47 for numerical stability
+        with torch.no_grad():
+            origin_cos = cos_theta.clone()
+        target_logit = <a id="change">cos_theta[torch.arange(0, embbedings.size(0)), label]</a>.view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m &#47&#47cos(target+margin)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cavalleria/cavaface.pytorch/commit/3b84e7dee20887685ce3f9d7a63cb74db35147c3#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L73' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34117</div><div id='project'> Project Name: cavalleria/cavaface.pytorch</div><div id='commit'> Commit Name: 3b84e7dee20887685ce3f9d7a63cb74db35147c3</div><div id='time'> Time: 2020-04-28</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding = []
+            trial_counts<a id="change"> = </a><a id="change">torch.zeros(</a>batch, 1<a id="change">)</a>
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]</a>  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1)  &#47&#47 make it (batch, 1) to match embeddings below
+        )
+        &#47&#47 number of non-nan trials</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34103</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            values, indices = torch.topk(R, self.n_sortcut)
+            values = values.reshape(bh, self.n_sortcut, -1)
+            indices = indices.reshape(bh, self.n_sortcut, -1)
+            R<a id="change"> = </a><a id="change">torch.zeros(</a>bh, self.n_sortcut, buckets<a id="change">, device=device, dtype=dtype)</a>.scatter(2, indices, values)
+
+        return R.softmax(dim=-1) if self.non_permutative else gumbel_sinkhorn(F.relu(R), self.sinkhorn_iter, self.temperature)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        bh, *_, bucket_size, kv_bucket_size, device, dtype, dim = *q.shape, self.bucket_size, self.kv_bucket_size, q.device, q.dtype, self.dim
+        b = bh // self.heads
+
+        buckets = <a id="change">q.shape[1]</a> // bucket_size
+        kv_buckets = k.shape[1] // kv_bucket_size
+
+        b_q = bucket(buckets, q) if self.n_sortcut == 0 else bucket(1, q)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/661c2edf85ed877510c714a024b5332299a4ee00#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL367' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 34120</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 661c2edf85ed877510c714a024b5332299a4ee00</div><div id='time'> Time: 2020-05-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: AttentionSortNet</div><div id='n_method'> N Class Name: AttentionSortNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 370</div><div id='m_end'> M End Line: 386</div><div id='n_start'> N Start Line: 383</div><div id='n_end'> N End Line: 402</div><BR>

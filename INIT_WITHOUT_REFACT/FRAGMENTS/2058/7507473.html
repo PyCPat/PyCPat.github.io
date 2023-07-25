@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47fast_weights = self.net.parameters()
+
+        <a id="change">for i</a> in range(task_num)<a id="change">:
+            </a>&quot&quot&quot
+            &#47&#47 this is the loss and accuracy before first update
+            with torch.no_grad():
+                &#47&#47 [setsz, nway]
+                logits_q, _ = self.net(x_qry[i].to(device), c_qry[i].to(device), graphlets, fast_weights)
+                loss_q = F.cross_entropy(logits_q, y_qry[i].to(device))
+                losses_q[0] += loss_q
+
+                pred_q = F.softmax(logits_q, dim=1).argmax(dim=1)
+                correct = torch.eq(pred_q, y_qry[i].to(device)).sum().item()
+                corrects[0] = corrects[0] + correct
+            &quot&quot&quot
+
+            for k in range(1, self.update_step):
+                logits, _ = self.net(x_spt[i].to(device), c_spt[i].to(device), graphlets)
+                loss = F.cross_entropy(logits, y_spt[i].to(device))
+                self.optim.zero_grad()
+                loss.backward()
+                self.optim.step()
+
+                logits_q<a id="change">, _ = </a>self.net(x_qry[i].to(device), c_qry[i].to(device), graphlets)
+                loss_q = F.cross_entropy(logits_q, y_qry[i].to(device))
+
+                with torch.no_grad():</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47self.meta_optim.step()
+
+        &#47&#47print(querysz *task_num)
+        accs = np.array(corrects) / <a id="change">len(</a>x_spt<a id="change">)</a>
+
+        return accs
+
+</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size = encoder_out.size(0)
+        encoder_dim = encoder_out.size(-1)
+        vocab_size = self.vocab_size
+        num_pixels = <a id="change">encoder_out.size(</a>1<a id="change">)</a>
+
+        &#47&#47 Sort input data by decreasing lengths; why? For each of data in the batch, when len(prediction) = len(caption_lengths), Stop.
+        caption_lengths, sort_ind = caption_lengths.squeeze(1).sort(dim=0, descending=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 0 0 0 0 1 2
+        &#47&#47 0 0 0 0 1 1
+        dec_outputs = self.tgt_emb(encoded_captions) + self.pos_emb(torch.LongTensor([list(range(52))]*batch_size).to(device))
+        dec_outputs<a id="change"> = </a><a id="change">self.dropout(</a>dec_outputs<a id="change">)</a>
+        dec_self_attn_pad_mask = self.get_attn_pad_mask(encoded_captions, encoded_captions)
+        dec_self_attn_subsequent_mask = self.get_attn_subsequent_mask(encoded_captions)
+        dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)</code></pre>

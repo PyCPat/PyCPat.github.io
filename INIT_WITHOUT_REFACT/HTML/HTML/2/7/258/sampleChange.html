@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.norm(x)
+        x = rearrange(x, &quotb n d -&gt; b d n&quot)
+        x = F.pad(x, (2<a id="change">, 0</a>))
+
+        q, k, v = self.to_q(x), self.to_k(x), self.to_v(x)
+        q, k, v = rearrange_many((q, k, v), &quotb (h d) n -&gt; b h n d&quot, h = self.heads)</code></pre><h3>After Change</h3><pre><code class='java'>
+            conv_out = map(lambda t: rearrange(t, &quot(b h) d n -&gt; b h d n&quot, b = batch), conv_out)
+            return torch.cat(tuple(conv_out), dim = 1)
+
+        q<a id="change">, k, v = </a><a id="change">map(</a>apply_causal_ds_conv_to_grouped_heads, zip((q<a id="change">, k, v</a>), self.qkv_ds_convs)<a id="change">)</a>
+
+        &#47&#47 scale and similarity
+
+        q = q * self.scale</code></pre>

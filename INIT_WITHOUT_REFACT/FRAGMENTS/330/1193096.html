@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(CategoricalActorCriticConvNet, self).__init__()
+        self.main = ConvBody(input_channels = input_channels, hidden_size = hidden_size, flatten_size = flatten_size)
+        self.actor = layer_init(nn.Linear(hidden_size, action_dim), gain = 0.01)
+        self.critic = layer_init(<a id="change">nn.Linear(</a>hidden_size, <a id="change">1</a><a id="change">)</a>)
+
+    def forward(self, x, action = None):
+        features = self.main(x/255.0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.actor = make_linear_model(actor_layer_size, output_gain = 0.01)
+        critic_layer_size = [input_dim] + hidden_layer + [1]
+        self.critic = make_linear_model(critic_layer_size)
+        self.actor_params =  list(<a id="change">self.actor.parameters()</a>)
+        self.critic_params =  list(self.critic.parameters())
+
+    def forward(self, x, action=None):</code></pre>

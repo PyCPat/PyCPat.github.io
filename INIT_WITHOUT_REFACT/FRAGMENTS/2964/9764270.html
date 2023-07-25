@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mem = default(mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))
+        lmem = default(lmem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))
+
+        total_len = <a id="change">mem.shape[2]</a> + lmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+
+        next_mem = []</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem = default(mem, init_mem)
+        lmem = default(lmem, init_mem)
+
+        mem_len<a id="change">, lmem_len = </a><a id="change">map(</a>lambda t: t.shape[2], (mem<a id="change">, lmem</a>)<a id="change">)</a>
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))</code></pre>

@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :294
+</h3><img src='1236369.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+    def forward(self, x, rois, roi_indices):
+        roi_indices = torch.Tensor(roi_indices).float()
+        rois = <a id="change">torch.Tensor(rois).float()</a>
+        if x.is_cuda:
+            roi_indices = roi_indices.cuda()
+            rois = rois.cuda()</code></pre><h3>After Change</h3><pre><code class='java'>
+        roi_cls_locs = self.cls_loc(fc7)
+        roi_scores = self.score(fc7)
+
+        roi_cls_locs<a id="change"> = </a><a id="change">roi_cls_locs.view(</a>n, <a id="change">-1</a>, roi_cls_locs.size(1)<a id="change">)</a>
+        roi_scores = roi_scores.view(n, -1, roi_scores.size(1))
+        return roi_cls_locs, roi_scores
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bubbliiiing/faster-rcnn-pytorch/commit/d456f02a402fd8cf8db1d991aa612439b3c0ffb2#diff-e9af117e882e879caed77569c76b6d4c9a00e932a2844fed75b18ec08abfd3fbL31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1236369</div><div id='project'> Project Name: bubbliiiing/faster-rcnn-pytorch</div><div id='commit'> Commit Name: d456f02a402fd8cf8db1d991aa612439b3c0ffb2</div><div id='time'> Time: 2021-01-30</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/classifier.py</div><div id='m_class'> M Class Name: VGG16RoIHead</div><div id='n_method'> N Class Name: VGG16RoIHead</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/classifier.py</div><div id='n_file'> N File Name: nets/classifier.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.roi = RoIPool( (self.roi_size, self.roi_size),self.spatial_scale)
+
+    def forward(self, x, rois, roi_indices):
+        roi_indices = <a id="change">torch.Tensor(roi_indices).float()</a>
+        rois = torch.Tensor(rois).float()
+        if x.is_cuda:
+            roi_indices = roi_indices.cuda()</code></pre><h3>After Change</h3><pre><code class='java'>
+        roi_cls_locs = self.cls_loc(fc7)
+        roi_scores = self.score(fc7)
+        roi_cls_locs = roi_cls_locs.view(n, -1, roi_cls_locs.size(1))
+        roi_scores<a id="change"> = </a><a id="change">roi_scores.view(</a>n, <a id="change">-1</a>, roi_scores.size(1)<a id="change">)</a>
+        return roi_cls_locs, roi_scores
+
+def normal_init(m, mean, stddev, truncated=False):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/faster-rcnn-pytorch/commit/d456f02a402fd8cf8db1d991aa612439b3c0ffb2#diff-e9af117e882e879caed77569c76b6d4c9a00e932a2844fed75b18ec08abfd3fbL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1236374</div><div id='project'> Project Name: bubbliiiing/faster-rcnn-pytorch</div><div id='commit'> Commit Name: d456f02a402fd8cf8db1d991aa612439b3c0ffb2</div><div id='time'> Time: 2021-01-30</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/classifier.py</div><div id='m_class'> M Class Name: Resnet50RoIHead</div><div id='n_method'> N Class Name: Resnet50RoIHead</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/classifier.py</div><div id='n_file'> N File Name: nets/classifier.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                box_xy = (y[..., 0:2] * 2.0 - 0.5 + self.grid[i]) * self.stride[i]
+                box_wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 type: ignore
+                box_xyxy = self._xywh2xyxy(box_xy, box_wh).view(batch_size, -1, 4)
+                score = <a id="change">y[..., 4:].float()</a>.view(batch_size, -1, self.n_classes + 1)
+                preds.append(torch.cat([box_xyxy, score], -1))
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+                        -1,
+                    )
+                else:
+                    y<a id="change"> = </a><a id="change">torch.cat((box_xy, box_wh, y[..., 4:]), -1).view(
+                        </a>batch_size, <a id="change">-1</a>, self.n_outputs<a id="change">
+                    )</a>
+
+                preds.append(y)
+
+        if self.training:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jeikeilim/kindle/commit/2d2ca772f4563ecd77c3cd2ae5f34dfa5886b2f6#diff-9224129af167a7408d2f35c65407e351de521cbbaf7587c5ec5ef82c1972e19bL62' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1236356</div><div id='project'> Project Name: jeikeilim/kindle</div><div id='commit'> Commit Name: 2d2ca772f4563ecd77c3cd2ae5f34dfa5886b2f6</div><div id='time'> Time: 2021-10-09</div><div id='author'> Author: lim.jeikei@gmail.com</div><div id='file'> File Name: kindle/modules/yolo_head.py</div><div id='m_class'> M Class Name: YOLOHead</div><div id='n_method'> N Class Name: YOLOHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kindle/modules/yolo_head.py</div><div id='n_file'> N File Name: kindle/modules/yolo_head.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 107</div><div id='n_end'> N End Line: 122</div><BR>

@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    for encoder in self.encoders:
+      x = encoder(x, input_mask)
+
+    encoder_logit<a id="change"> = </a><a id="change">x.clone()</a>
+
+    for decoder in self.decoders:
+      &#47&#47 target, encoder_output, encoder_mask)
+      target = decoder(target, x, input_mask)
+
+    lm_logits = self.lm_head(x)
+
+    loss = None
+    if labels is not None:
+      &#47&#47 Shift so that tokens &lt; n predict n
+      shift_logits = lm_logits[..., :-1, :].contiguous()
+      shift_labels = labels[..., 1:].contiguous()
+
+      &#47&#47 Flatten the tokens
+      loss_fct = CrossEntropyLoss()
+      loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+    <a id="change">return </a>lm_logits<a id="change">, loss, encoder_logit, x</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+      loss_fct = CrossEntropyLoss()
+      loss = loss_fct(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
+
+    <a id="change">return </a>lm_logits, loss
+</code></pre>

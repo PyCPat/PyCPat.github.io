@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        loss    = 0
+        n       = torch.sum(y_true[..., 4] == 1)
+        <a id="change">if </a>n != 0<a id="change">:
+            &#47&#47---------------------------------------------------------------&#47&#47
+            &#47&#47   计算预测结果和真实结果的giou
+            &#47&#47----------------------------------------------------------------&#47&#47
+            </a>giou<a id="change">        = </a>self.box_giou(pred_boxes, y_true[..., :4])
+            loss_loc    = torch.mean((1 - giou)[y_true[..., 4] == 1])
+            loss_cls    = torch.mean(self.BCELoss(pred_cls[y_true[..., 4] == 1], self.smooth_labels(y_true[..., 5:][y_true[..., 4] == 1], self.label_smoothing, self.num_classes)))
+            loss        += loss_loc * self.box_ratio + loss_cls * self.cls_ratio</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.cuda:
+            y_true          = y_true.cuda()
+            noobj_mask      = noobj_mask.cuda()
+            box_loss_scale<a id="change">  = </a><a id="change">box_loss_scale.cuda()</a>
+        &#47&#47-----------------------------------------------------------&#47&#47
+        &#47&#47   reshape_y_true[...,2:3]和reshape_y_true[...,3:4]
+        &#47&#47   表示真实框的宽高，二者均在0-1之间
+        &#47&#47   真实框越大，比重越小，小框的比重更大。</code></pre>

@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :2319
+</h3><img src='7972699.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        <a id="change">for </a>idx in <a id="change">range(</a>len(srcs)<a id="change">):
+            </a>srcs[idx] = <a id="change">srcs[idx]</a>.flatten(2).transpose(1, 2)
+            pos[idx] = pos[idx].flatten(2).transpose(1, 2)
+            
+        bs, _, c = srcs[0].shape</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        src<a id="change"> = </a><a id="change">src.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+        pos = pos.flatten(2).transpose(1, 2)
+            
+        bs, _, c = src.shape
+        query_embed, tgt = torch.split(query_embed, c, dim=1)       &#47&#47 Tgt in contrast to detr not zeros, but learnable</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/93490790c06b3fe20dfd1eae015b8d79f8fd627a#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7972699</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: 93490790c06b3fe20dfd1eae015b8d79f8fd627a</div><div id='time'> Time: 2022-05-25</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedDecoder</div><div id='n_method'> N Class Name: FocusedDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        device = feats.device
+        V = self.v(feats) &#47&#47 N x V, unsorted
+        Q = self.q(feats).view(feats.shape[0], -1)
+        <a id="change">for </a>i in <a id="change">range(</a>c.shape[1]<a id="change">):
+            </a>_, indices = torch.sort(<a id="change">c[:, i]</a>, 0, True)         
+            feats = torch.index_select(feats, 0, indices) &#47&#47 N x K, sorted
+            q_max = self.q(feats[0].view(1, -1)) &#47&#47 1 x 1 x Q
+            temp = torch.mm(Q, q_max.view(-1, 1)) / torch.sqrt(torch.tensor(Q.shape[1], dtype=torch.float32, device=device))</code></pre><h3>After Change</h3><pre><code class='java'>
+        q_max = self.q(m_feats) &#47&#47 compute queries of critical instances, q_max in shape C x Q
+        A = torch.mm(Q, q_max.transpose(0, 1)) &#47&#47 compute inner product of Q to each entry of q_max, A in shape N x C, each column contains unnormalized attention scores
+        A = F.softmax( A / torch.sqrt(torch.tensor(Q.shape[1], dtype=torch.float32, device=device)), 0) &#47&#47 normalize attention scores, A in shape N x C, 
+        B<a id="change"> = </a>torch.mm(<a id="change">A.transpose(0</a>, <a id="change">1</a><a id="change">)</a>, V) &#47&#47 compute bag representation, B in shape C x V
+        
+        
+&#47&#47         for i in range(c.shape[1]):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/binli123/dsmil-wsi/commit/37d945844a0af37d411b5f1d3fca75a72b4aa979#diff-9e0566f16ab655f2628f501def0fa7733ba800cbec4ac891c3527ff8f63310cbL40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7972701</div><div id='project'> Project Name: binli123/dsmil-wsi</div><div id='commit'> Commit Name: 37d945844a0af37d411b5f1d3fca75a72b4aa979</div><div id='time'> Time: 2021-04-21</div><div id='author'> Author: bli346@wisc.edu</div><div id='file'> File Name: dsmil.py</div><div id='m_class'> M Class Name: BClassifier</div><div id='n_method'> N Class Name: BClassifier</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dsmil.py</div><div id='n_file'> N File Name: dsmil.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        scene_1 = self.convScene_1(scene)
+        scene_2 = self.convScene_2(scene_1)
+
+        <a id="change">for </a>i in <a id="change">range(</a>dim_batch<a id="change">):
+            </a>weight_read[i] = self.similarity(self.memory_past, <a id="change">state_past[:, i]</a>).unsqueeze(0)
+
+        &#47&#47 weight_read[torch.arange(dim_batch)] = self.similarity(self.memory_past, state_past[:,torch.arange(dim_batch)]).unsqueeze(0)
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Cosine similarity
+        past_normalized = F.normalize(self.memory_past, p=2, dim=1)
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        weight_read<a id="change"> = </a><a id="change">torch.matmul(past_normalized, state_normalized.transpose(0,1)).transpose(0</a>,<a id="change">1</a><a id="change">)</a>
+
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()
+
+        for i_track in range(self.num_prediction):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/433bba3b3cf57d5cf7723c46a7fcfd17c1bac858#diff-49be5c461c82a3158fa4c2d730aea004906ad89beca9402cf670d0f93c208dabL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7972702</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 433bba3b3cf57d5cf7723c46a7fcfd17c1bac858</div><div id='time'> Time: 2019-07-28</div><div id='author'> Author: fede.becat@gmail.com</div><div id='file'> File Name: models/model_memory_single.py</div><div id='m_class'> M Class Name: model_memory_single</div><div id='n_method'> N Class Name: model_memory_single</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_memory_single.py</div><div id='n_file'> N File Name: models/model_memory_single.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 134</div><div id='n_end'> N End Line: 136</div><BR>

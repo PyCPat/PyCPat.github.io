@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :590
+</h3><img src='2026814.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+	def forward(self, src, tgt, T_gt=None, prefix="train"):
+		feat1 = src[..., :3].transpose(1, 2)
+		feat2 = tgt[..., :3].transpose(1, 2)
+		src = <a id="change">src[..., :3]</a>
+		tgt = tgt[..., :3]
+
+		src_embedding = self.emb_nn(feat1)
+		tgt_embedding = self.emb_nn(feat2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_point = src
+        tgt_point = tgt
+
+        src = <a id="change">src.transpose(1,2).contiguous()</a>
+        tgt = tgt.transpose(1,2).contiguous()
+
+        batch_size, _, _ = src.size()
+
+        src_embedding = self.emb_nn(src)
+        tgt_embedding = self.emb_nn(tgt)
+
+        src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+
+        src_embedding = src_embedding + src_embedding_p
+        tgt_embedding = tgt_embedding + tgt_embedding_p
+
+        rotation_ab, translation_ab = self.head(src_embedding, tgt_embedding, src, tgt)
+        if self.cycle:
+            rotation_ba<a id="change">, translation_ba = </a>self.head(tgt_embedding, src_embedding, tgt, src)
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2026814</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            h_prime = []
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = <a id="change">edge_attention[:, i]</a>
+                g.srcdata.update({&quotemb&quot: emb[i]})
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                             Fn.sum(&quotm&quot, &quotemb&quot))
+                h_prime.append(g.ndata[&quotemb&quot])</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = <a id="change">emb.permute(0, 2, 1).contiguous()</a>
+            g.edata[&quotalpha&quot] = edge_attention
+            g.srcdata[&quotemb&quot]<a id="change"> = </a>emb
+            g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                         Fn.sum(&quotm&quot, &quotemb&quot))
+            &#47&#47 g.apply_edges(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2026823</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.C_in = C_in
+
+    def forward(self, features, num_voxels, coors=None):
+        points_mean = <a id="change">features[:, :, : self.C_in]</a>.sum(
+            dim=1, keepdim=False
+        ) / num_voxels.type_as(features).view(-1, 1)
+        return points_mean.contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        :return FloatTensor of shape (N, C)
+        
+        denominator = occupancy.type_as(feature).view(-1, 1)
+        feature<a id="change"> = </a><a id="change">(feature.sum(1) / denominator).contiguous()</a>
+        return feature
+
+
+class SparseCNN(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/1736771fde51c478418ee6b5bb8b783fb604b064#diff-678424cc8e3d16b428f9821c522ec01e04fcdd2acd6612c40ca447dc4bb31a56L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2026820</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 1736771fde51c478418ee6b5bb8b783fb604b064</div><div id='time'> Time: 2020-02-09</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/backbone.py</div><div id='m_class'> M Class Name: VoxelFeatureExtractor</div><div id='n_method'> N Class Name: VoxelFeatureExtractor</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/backbone.py</div><div id='n_file'> N File Name: pvrcnn/backbone.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 51</div><BR>

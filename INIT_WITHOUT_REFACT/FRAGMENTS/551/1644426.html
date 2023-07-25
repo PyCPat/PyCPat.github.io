@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.input_projection = nn.Sequential(
+            nn.Linear(encoder_dim, encoder_dim), nn.Dropout(p=dropout)
+        )
+        module_list = <a id="change">[
+            ConformerBlock(
+                encoder_dim=encoder_dim,
+                num_attention_heads=num_heads,
+                feed_forward_expansion_factor=feed_forward_expansion_factor,
+                conv_expansion_factor=conv_expansion_factor,
+                feed_forward_dropout_p=dropout,
+                attention_dropout_p=dropout,
+                conv_dropout_p=dropout,
+                conv_kernel_size=conv_kernel_size,
+                half_step_residual=half_step_residual,
+            )
+            for _ in range(num_layers)
+        ]</a>
+        self.layers = nn.Sequential(*module_list)
+
+    def forward(self, x, lengths):
+        x, lengths = self.conv_subsampling(x, lengths)</code></pre><h3>After Change</h3><pre><code class='java'>
+            input_dim=input_dim, feat_out=encoder_dim, conv_channels=encoder_dim
+        )
+        self.input_dropout = nn.Dropout(p=input_dropout_p)
+        self.layers = <a id="change">nn.ModuleList(
+            </a><a id="change">[
+                ConformerBlock(
+                    encoder_dim=encoder_dim,
+                    num_attention_heads=num_attention_heads,
+                    feed_forward_expansion_factor=feed_forward_expansion_factor,
+                    conv_expansion_factor=conv_expansion_factor,
+                    feed_forward_dropout_p=feed_forward_dropout_p,
+                    attention_dropout_p=attention_dropout_p,
+                    conv_dropout_p=conv_dropout_p,
+                    conv_kernel_size=conv_kernel_size,
+                    half_step_residual=half_step_residual,
+                )
+                for _ in range(num_layers)
+            ]
+        )</a>
+
+    def count_parameters(self) -&gt; int:
+        Count parameters of encoder
+        return sum([p.numel for p in self.parameters()])</code></pre>

@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.mask = Mask(erb_inv_fb, post_filter=p.mask_pf)
+        self.refinement_stages: List[SpectralRefinement]
+        self.refinement_stages = nn.ModuleList(  &#47&#47 type: ignore
+            <a id="change">SpectralRefinement</a>(kernel_size_t=2 if i == 0 else 1, dilation=i + 1)
+            <a id="change">for</a> i in range(self.n_stages)
+        )
+        &#47&#47 SNR offsets on which each refinement layer is activated
+        self.refinement_snr_min = -10</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mask = Mask(erb_inv_fb, post_filter=p.mask_pf)
+        refinement_act = {"tanh": nn.Tanh, "identity": nn.Identity}[p.refinement_act.lower()]
+        self.refinement_stages = nn.ModuleList(
+            <a id="change">[
+                FreqStage(
+                    in_ch=2,
+                    out_ch=2,
+                    out_act=refinement_act,
+                    conv_ch=p.conv_ch,
+                    num_freqs=p.nb_df,
+                    hidden_dim=p.refinement_hidden_dim,
+                    patch_size=2 ** (i + 1),
+                    downsample_hprev=i &gt;= 1,
+                )
+                for i in range(self.n_stages)
+            ]</a>
+        )
+        self.lsnr_net = LSNRNet(p.conv_ch * 2, lsnr_min=p.lsnr_min, lsnr_max=p.lsnr_max)
+        &#47&#47 SNR offsets on which each refinement layer is activated
+        self.refinement_snr_min = -10</code></pre>

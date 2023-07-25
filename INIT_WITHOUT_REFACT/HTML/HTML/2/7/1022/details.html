@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1022
+</h3><img src='3087407.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                h = self.bn(h)
+            return self.dropout(h)
+
+        <a id="change">return </a>{ntype: _apply(ntype, h) for ntype, h in hs.items()}</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, g, h_dict):
+        h_dict = self.conv(g, h_dict)
+        out_put = <a id="change">{}</a>
+        <a id="change">for </a>n_type, h in <a id="change">h_dict.items():
+            out_put[n_type]</a><a id="change"> = </a>h.squeeze()
+        <a id="change">return out_put</a></code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/2b130ff0cd0fbbebda2e07166b048edfc9a63ed2#diff-479e9e5e220b1988d7aba6fec6d6ca5f50a1556fbb4efa423ebf6c1510641a84L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3087407</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 2b130ff0cd0fbbebda2e07166b048edfc9a63ed2</div><div id='time'> Time: 2021-09-11</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/models/RGAT.py</div><div id='m_class'> M Class Name: RGATLayer</div><div id='n_method'> N Class Name: RGATLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/RGAT.py</div><div id='n_file'> N File Name: openhgnn/models/RGAT.py</div><div id='m_start'> M Start Line: 108</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            semantic_embeddings.append(self.mods[i](new_g, h).flatten(1))
+        &#47&#47semantic_embeddings = th.stack(semantic_embeddings, dim=1)  &#47&#47 (N, M, D * K)
+
+        <a id="change">return </a>self.SemanticConv(semantic_embeddings)  &#47&#47 (N, D * K)</code></pre><h3>After Change</h3><pre><code class='java'>
+        h : dict[str: torch.Tensor]
+            The output features dict
+        
+        outputs = {g.dsttypes[0]: [] for s, g in <a id="change">g_list.items()</a>}
+
+        for mp, meta_path in self.meta_paths_dict.items():
+            new_g = g_list[mp]
+            h = h_dict[new_g.srctypes[0]]
+            outputs[new_g.dsttypes[0]].append(self.mods[mp](new_g, h).flatten(1))
+        &#47&#47semantic_embeddings = th.stack(semantic_embeddings, dim=1)  &#47&#47 (N, M, D * K)
+        &#47&#47 Aggregate the results for each destination node type
+        rsts = <a id="change">{}</a>
+        <a id="change">for </a>ntype, ntype_outputs in outputs.items()<a id="change">:
+            </a>if len(ntype_outputs) != 0:
+                <a id="change">rsts[ntype]</a><a id="change"> = </a>self.SemanticConv(ntype_outputs) &#47&#47 (N, D * K)
+        <a id="change">return </a>rsts</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/1e9dfe33ca80be786cfec4f0920de1a4eec839d9#diff-7569eada7c11c13c95d41c83e82703d1c90741100d83dda725c3cc1501b07842L38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3087406</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 1e9dfe33ca80be786cfec4f0920de1a4eec839d9</div><div id='time'> Time: 2022-01-05</div><div id='author'> Author: 34649403+Theheavens@users.noreply.github.com</div><div id='file'> File Name: openhgnn/layers/MetapathConv.py</div><div id='m_class'> M Class Name: MetapathConv</div><div id='n_method'> N Class Name: MetapathConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/layers/MetapathConv.py</div><div id='n_file'> N File Name: openhgnn/layers/MetapathConv.py</div><div id='m_start'> M Start Line: 52</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        DGLHeteroGraph
+            The block graph fed with embeddings.
+        
+        <a id="change">return </a>self.embeds</code></pre><h3>After Change</h3><pre><code class='java'>
+        DGLHeteroGraph
+            The block graph fed with embeddings.
+        
+        out_feature = <a id="change">{}</a>
+        <a id="change">for </a>key, embed in <a id="change">self.embeds.items():
+            out_feature[key]</a><a id="change"> = </a>embed
+        <a id="change">return </a>out_feature
+
+    def forward_nodes(self, nodes_dict):
+        out_feature = {}</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/54b20fdad3370b019171241250a8f84e75b1f427#diff-f91e35b678c366a1567bbaf7c3edaa8165e4ba2cdc0b0dfdfd8042b6b801913eL28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3087405</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: 54b20fdad3370b019171241250a8f84e75b1f427</div><div id='time'> Time: 2021-06-22</div><div id='author'> Author: theheavenszhao@outlook.com</div><div id='file'> File Name: openhgnn/models/EmbedLayer.py</div><div id='m_class'> M Class Name: HeteroEmbedLayer</div><div id='n_method'> N Class Name: HeteroEmbedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/EmbedLayer.py</div><div id='n_file'> N File Name: openhgnn/models/EmbedLayer.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 46</div><BR>

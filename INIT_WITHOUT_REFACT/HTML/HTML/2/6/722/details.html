@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :722
+</h3><img src='2402964.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            lo_cens | hi_cens, ones, sdp - sdm).log()
+        &#47&#47 sdm_term = torch.where(
+        &#47&#47     hi_cens, ones, (q + sdm)).log()
+        sdm_term = torch.where(hi_cens, zeros, x_ + <a id="change">F.softplus(</a>-sd<a id="change">-</a>x_<a id="change">)</a>)
+        &#47&#47 sdp_term = torch.where(
+        &#47&#47     lo_cens, ones, (q + sdp)).log()
+        sdp_term = torch.where(lo_cens, zeros, x_ + F.softplus(sd-x_))</code></pre><h3>After Change</h3><pre><code class='java'>
+        diff_term = torch.where(lo_cens | hi_cens, 
+            ones, sd.exp() - (-sd).exp()
+            ).log()
+        minus_sp_term = torch.where(hi_cens, -sd, <a id="change">F.softplus(</a>-sd<a id="change">-</a>x_<a id="change">)</a>)
+        plus_sp_term = torch.where(lo_cens, zeros, x_ + F.softplus(sd-x_))
+
+        log_delta_cdf<a id="change"> = </a>diff_term<a id="change"> - </a>minus_sp_term - plus_sp_term
+    
+        &#47&#47 log prob
+        r = {</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/intelligent-instruments-lab/iil-python-tools/commit/3cfb0feff3aa13a704a8a16302c1d7bbde37807f#diff-fdebb209d61f0b27525d808f0d35a76b67fc68369026b191e1046c52821c93b6L53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2402964</div><div id='project'> Project Name: intelligent-instruments-lab/iil-python-tools</div><div id='commit'> Commit Name: 3cfb0feff3aa13a704a8a16302c1d7bbde37807f</div><div id='time'> Time: 2022-03-17</div><div id='author'> Author: victor.shepardson@gmail.com</div><div id='file'> File Name: notepredictor/notepredictor/distributions.py</div><div id='m_class'> M Class Name: CensoredMixtureLogistic</div><div id='n_method'> N Class Name: CensoredMixtureLogistic</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: notepredictor/notepredictor/distributions.py</div><div id='n_file'> N File Name: notepredictor/notepredictor/distributions.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        neg_weight = torch.max(torch.zeros_like(neg_weight), neg_weight)
+        lse_negative = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-1)
+
+        loss = <a id="change">F.softplus(</a>lse_positive<a id="change"> + </a>lse_negative<a id="change">)</a> / self.log_scale
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        lse_negative_row = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-1)
+        lse_negative_col = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-2)
+
+        loss_row = <a id="change">F.softplus(</a>lse_positive<a id="change"> + </a>lse_negative_row<a id="change">)</a> / self.log_scale
+        loss_col = F.softplus(lse_positive + lse_negative_col) / self.log_scale
+        loss<a id="change"> = </a>(loss_row<a id="change"> + </a>loss_col) / 2
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/6b04056015be694539faaea65d814b508e6a265b#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL122' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2402960</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: 6b04056015be694539faaea65d814b508e6a265b</div><div id='time'> Time: 2020-07-17</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 144</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 161</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        lse_negative_col = torch.logsumexp(self.log_scale * (self.neg_margin - neg) * neg_weight, dim=-2)
+
+        loss_col = F.softplus(lse_positive + lse_negative_row) / self.log_scale
+        loss_row = <a id="change">F.softplus(</a>lse_positive<a id="change"> + </a>lse_negative_col<a id="change">)</a> / self.log_scale
+        loss = loss_col + loss_row
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists</code></pre><h3>After Change</h3><pre><code class='java'>
+        lse_negative_col = torch.logsumexp(self.log_scale * (self.neg_margin - neg) * neg_weight, dim=-2)
+
+        loss_col = F.softplus(lse_positive_row + lse_negative_row) / self.log_scale
+        loss_row<a id="change"> = </a><a id="change">F.softplus(</a>lse_positive_col<a id="change"> + </a>lse_negative_col<a id="change">) / </a>self.log_scale
+        loss = loss_col + loss_row
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/40203d748b6b5c28edf1c3422c0f2ae1023346b1#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL109' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2402968</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: 40203d748b6b5c28edf1c3422c0f2ae1023346b1</div><div id='time'> Time: 2021-01-07</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 111</div><div id='m_end'> M End Line: 141</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 138</div><BR>

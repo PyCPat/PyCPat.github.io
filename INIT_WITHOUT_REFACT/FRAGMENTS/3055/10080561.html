@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () () n&quot)
+            dots.masked_fill_(~mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+
+        attn = dots.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * scale
+
+        if exists(mask):
+            mask_value<a id="change"> = </a><a id="change">-torch.finfo(dots.dtype).max</a>
+            mask = rearrange(mask, &quotb n -&gt; b () () n&quot)
+            dots.masked_fill_(~mask, mask_value)
+
+        attn = dots.softmax(dim = -1)</code></pre>

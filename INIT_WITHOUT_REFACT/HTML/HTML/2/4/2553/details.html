@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :2553
+</h3><img src='8352030.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.embed_avg.data.mul_(self.decay).add_(new_ema_w, alpha=1 - self.decay)   
+
+            &#47&#47normalize embedding weight EMA and update current embedding weight
+            self.embed.data.copy_(self.embed_avg<a id="change"> / </a><a id="change">self.cluster_size.unsqueeze(1</a><a id="change">)</a>)
+        
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z)</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_normalized = self.embedding.embed_avg / cluster_size.unsqueeze(0)
+            self.embedding.weight.data.copy_(embed_normalized)
+
+        loss = self.beta * <a id="change">(z_q.detach() - z).pow(2).mean()</a>
+        z_q = z + (z_q - z).detach()
+        z_q = z_q.permute(0, 3, 1, 2).contiguous()
+        return z_q, loss, (perplexity, encodings, encoding_indices)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/7a07ecfb269329aa84b6227289bec593ef24bfde#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8352030</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 7a07ecfb269329aa84b6227289bec593ef24bfde</div><div id='time'> Time: 2021-07-28</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                t = F.normalize(t, p=2, dim=2)
+            t = torch.bmm(t, t.transpose(1, 2)).view(-1)
+
+        s = student.unsqueeze(0)<a id="change"> - </a><a id="change">student.unsqueeze(1</a><a id="change">)</a>
+        if normalize:
+            s = F.normalize(s, p=2, dim=2)
+        s = torch.bmm(s, s.transpose(1, 2)).view(-1)
+        return F.smooth_l1_loss(s, t, reduction="mean")</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        with torch.no_grad():
+            t = pairwaise_distance(teacher)
+            t_mean = <a id="change">t[t &gt; 0].mean()</a>
+            t = t / (t_mean + 1e-7)
+
+        s = pairwaise_distance(student)
+        s_mean = s[s &gt; 0].mean()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/28d2e68c71f5d14e9784f85a4f5c6241b858089b#diff-b961522aed8d6a6f3005bd0b5346b3a3a715bb27e672091336acb5e4fd84f798L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8352029</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: 28d2e68c71f5d14e9784f85a4f5c6241b858089b</div><div id='time'> Time: 2020-08-28</div><div id='author'> Author: khizirsiddiqui@gmail.com</div><div id='file'> File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='m_class'> M Class Name: RKDDistanceLoss</div><div id='n_method'> N Class Name: RKDDistanceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='n_file'> N File Name: KD_Lib/KD/vision/RKD/loss_metric.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x = x.mean(-2)<a id="change"> / </a><a id="change">x_len.float().unsqueeze(-1</a><a id="change">)</a>
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.pre_proj(x)
+
+        if x_len is not None:
+            x = [<a id="change">x[b, : x_len[b]].mean(</a>0<a id="change">)</a> for b in range(len(x))]
+            x = torch.stack(x, dim=0)
+        else:
+            x = x.mean(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/atosystem/speechclip/commit/b2d7d1450922b5f68626bcc7751faf4feca14ed5#diff-36cf0d2ba2e002faba923e96cac943aa23122917b021c2258ac13f6f611ab652L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8351995</div><div id='project'> Project Name: atosystem/speechclip</div><div id='commit'> Commit Name: b2d7d1450922b5f68626bcc7751faf4feca14ed5</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: b06901020@ntu.edu.tw</div><div id='file'> File Name: avssl/module/pooling.py</div><div id='m_class'> M Class Name: MeanPoolingLayer</div><div id='n_method'> N Class Name: MeanPoolingLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: avssl/module/pooling.py</div><div id='n_file'> N File Name: avssl/module/pooling.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    &#47&#47 weight (ray_num, point_num)
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        norm_diff = torch.pow((d_norm - p_norm), 2)
+        res = torch.sum(<a id="change">weight.unsqueeze(-1</a><a id="change">)</a> * norm_diff)
+        return res<a id="change"> / </a>weight.numel() if self.size_average == True else res
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        dot_diff = 1. - torch.sum(d_norm * p_norm, dim = -1)
+        &#47&#47 norm_diff = torch.pow((d_norm - p_norm), 2)
+        return <a id="change">torch.mean(</a>weight * dot_diff<a id="change">)</a> if self.size_average == True else torch.sum(weight * dot_diff)
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/enigmatisms/nerf/commit/abd69721dbe663af1bb8a496168c0d5624054ca5#diff-a7de87dc581f771441334c3fe5ec05839927149e6859d6996fd34a247487317cL113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8352056</div><div id='project'> Project Name: enigmatisms/nerf</div><div id='commit'> Commit Name: abd69721dbe663af1bb8a496168c0d5624054ca5</div><div id='time'> Time: 2022-08-16</div><div id='author'> Author: 984041003@qq.com</div><div id='file'> File Name: py/ref_model.py</div><div id='m_class'> M Class Name: WeightedNormalLoss</div><div id='n_method'> N Class Name: WeightedNormalLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: py/ref_model.py</div><div id='n_file'> N File Name: py/ref_model.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 116</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_std[i, :] = x[i, :, :].std(dim=1)
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        return (x - x_mean.unsqueeze(2))<a id="change"> / </a><a id="change">x_std.unsqueeze(2</a><a id="change">)</a>
+
+
+class DitherAudio(nn.Module):
+    def __init__(self, dither=1e-5):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True)</a>.detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8352049</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>

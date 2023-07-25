@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        combined = self.norm_1(combined)
+
+        cls_token, _ = self.attn(combined[:,:1], combined, combined, need_weights=False)
+        cls_token<a id="change"> = </a><a id="change">torch.flatten(</a>cls_token, <a id="change">1</a><a id="change">)</a>                     &#47&#47 (N, 1, C) -&gt; (N, C)
+        cls_token = cls_token + self.drop_path(cls_token * self.layer_scale_1)
+        cls_token = self.norm_2(cls_token)
+
+        cls_token = self.mlp(cls_token)
+        cls_token = cls_token + self.drop_path(cls_token * self.layer_scale_2)
+        cls_token = self.norm_3(cls_token)
+
+        <a id="change">return </a>cls_token
+
+
+class PatchConvNet(BaseBackbone):</code></pre><h3>After Change</h3><pre><code class='java'>
+        cls_token = cls_token + self.drop_path(out * self.layer_scale_2)
+        
+        out = self.norm_3(cls_token).squeeze(1)     &#47&#47 (N, 1, C) -&gt; (N, C)
+        <a id="change">return </a>out
+
+
+class PatchConvNet(BaseBackbone):</code></pre>

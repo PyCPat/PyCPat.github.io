@@ -1,0 +1,44 @@
+<html><h3>Pattern ID :1280
+</h3><img src='3749267.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+            allCodewords.append(<a id="change">codewords.t()</a>)
+        return quantizeds, codes, logits, allCodewords
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits</a>
+
+
+class TransformerQuantizerRein(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/594ba7cd5c9d147e95ba5bd0b842270302dea2a2#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3749267</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 594ba7cd5c9d147e95ba5bd0b842270302dea2a2</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 282</div><div id='m_end'> M End Line: 342</div><div id='n_start'> N Start Line: 295</div><div id='n_end'> N End Line: 320</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            targets.append(xRaw)
+            n, c, h, w = xRaw.shape
+            &#47&#47 [c, k] -&gt; [k, c]
+            codewords = <a id="change">codebook.weight.t()</a>
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            posisted = self._position(encoderIn).reshape(-1, n, c)</code></pre><h3>After Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample)
+            logits.append(logit.reshape(n, h, w, k))
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/88c0e55a6d3e3a8122b70a58818e67d11ba9055b#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L238' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3749269</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 88c0e55a6d3e3a8122b70a58818e67d11ba9055b</div><div id='time'> Time: 2021-01-27</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 239</div><div id='m_end'> M End Line: 274</div><div id='n_start'> N Start Line: 267</div><div id='n_end'> N End Line: 305</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text_latents, image_latents = map(lambda t: F.normalize(t, p = 2, dim = -1), (text_latents, image_latents))
+        labels = torch.arange(input.size(0), device = image_latents.device)
+        sim_i_2_t = torch.matmul(torch.mul(logit_scale, image_latents), torch.t(text_latents))
+        sim_t_2_i = torch.matmul(torch.mul(logit_scale, text_latents), <a id="change">torch.t(</a>image_latents<a id="change">)</a>)
+        
+        loss_t_2_i = F.cross_entropy(sim_t_2_i, labels)
+        loss_i_2_t = F.cross_entropy(sim_i_2_t, labels)</code></pre><h3>After Change</h3><pre><code class='java'>
+            loss_i_2_t = F.cross_entropy(sim_i_2_t, torch.arange(image.size(0), device = image_latents.device))
+            return sim_i_2_t, sim_t_2_i, loss_i_2_t, loss_t_2_i
+        else:
+            <a id="change">return </a>sim_i_2_t<a id="change">, sim_t_2_i</a></code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/weiyx16/clip-pytorch/commit/6cd0a84a4b3df54d9b248294556800a0ec49c09d#diff-dabcaa5452d0c0467649383c17e51bc092c7e3e58f73e3d2fe16902ac2e09496L240' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3749268</div><div id='project'> Project Name: weiyx16/clip-pytorch</div><div id='commit'> Commit Name: 6cd0a84a4b3df54d9b248294556800a0ec49c09d</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: weason1998@gmail.com</div><div id='file'> File Name: CLIP.py</div><div id='m_class'> M Class Name: CLIP</div><div id='n_method'> N Class Name: CLIP</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: CLIP.py</div><div id='n_file'> N File Name: CLIP.py</div><div id='m_start'> M Start Line: 241</div><div id='m_end'> M End Line: 254</div><div id='n_start'> N Start Line: 252</div><div id='n_end'> N End Line: 268</div><BR>

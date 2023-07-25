@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        logit_softmax = F.softmax(logit, dim = 1)
+        diff = -(logit.diag().view(-1, 1).expand_as(logit) - logit)
+        loss = torch.mean(logit_softmax * (torch.sigmoid(diff) + torch.sigmoid(logit ** 2)))
+        <a id="change">return </a>loss
+
+
+class TOP1_max_reg(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            negative_mask: (&#47&#47pos_target, &#47&#47neg_samples) : specify the subset of negative items for each positive target
+        
+        positive_mask = ~negative_mask
+        positives = <a id="change">logits_scores.diag().view(-1, 1).expand_as(</a>logits_scores<a id="change">)</a>
+        diff = positives - logits_scores
+        penalization = torch.sigmoid(logits_scores ** 2)
+        loss = torch.sigmoid(-diff) + penalization
+        logit_softmax = F.softmax(logits_scores, dim = 1)
+        loss<a id="change"> = </a>logit_softmax * loss
+        &#47&#47 set to zeros the difference scores of positive targets of the same session
+        loss = loss.masked_fill(positive_mask, 0)
+        &#47&#47 Average over the nb of negative sample per
+        loss<a id="change"> = </a>loss.sum(1) / negative_mask.sum(1)
+        return torch.mean(loss)
+</code></pre>

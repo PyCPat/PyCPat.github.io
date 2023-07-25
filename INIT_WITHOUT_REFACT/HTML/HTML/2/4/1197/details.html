@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :1197
+</h3><img src='3655047.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        f1 = self.res(f1, (H, W))
+        f1, _ = self.attention0_1(f1, d1.detach()) &#47&#472
+        f1, _ = self.attention0_2(f1, p1.detach()) &#47&#47attention0_2
+        _<a id="change">, p0 = </a>self.attention0_3(f1, <a id="change">p1.detach()</a>) &#47&#472
+        d0 = self.pyr.rec(d1.detach(), p0) &#47&#472
+        
+        if type(sample) == dict and &quotgt&quot in sample.keys() and sample[&quotgt&quot] is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            loss = 0
+
+        <a id="change">if </a>self.resize is True<a id="change">:
+            </a>d0<a id="change"> = </a>self.res(d0, (h, w))
+
+        if type(sample) == dict:
+            return {&quotpred&quot: d0, </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/e2aa235b2cdaa05f89929f528bb85c46a55be0c5#diff-5e1702b98c4b78eb22fc5dbca550cd1eb96e7379388d71db1bd5375c4b2d5edfL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3655047</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: e2aa235b2cdaa05f89929f528bb85c46a55be0c5</div><div id='time'> Time: 2022-01-05</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/InSPyReNetV3.py</div><div id='m_class'> M Class Name: InSPyReNetV3</div><div id='n_method'> N Class Name: InSPyReNetV3</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/InSPyReNetV3.py</div><div id='n_file'> N File Name: lib/InSPyReNetV3.py</div><div id='m_start'> M Start Line: 70</div><div id='m_end'> M End Line: 100</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            Normalized audio tensor with same shape as input
+        
+        mean = audio.mean(1, keepdim=True).detach()
+        std<a id="change"> = </a>(<a id="change">audio.var(1, keepdim=True).detach()</a> + self.div_guard).sqrt()
+        return (audio - mean) / std
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Normalized audio tensor with same shape as input
+        
+        attention_mask: Optional[torch.Tensor] = None
+        <a id="change">if </a>self.mask_input<a id="change">:
+            </a>attention_mask<a id="change"> = </a>lengths_to_mask(
+                audio_lengths, max_len=audio.size(-1)
+            ).int()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/05cbe02b3779b4bafc6dbd1914e490e47893b6da#diff-6f21f8fa5be3ce7b1ffede013b84d050bde988efbbe1747432115d11fc285da4L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3655045</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 05cbe02b3779b4bafc6dbd1914e490e47893b6da</div><div id='time'> Time: 2021-11-30</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/wav2vec/transform.py</div><div id='m_class'> M Class Name: Wav2Vec2Preprocess</div><div id='n_method'> N Class Name: Wav2Vec2Preprocess</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/wav2vec/transform.py</div><div id='n_file'> N File Name: src/thunder/wav2vec/transform.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 49</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            loss = 0
+            &#47&#47 Compute perturbation loss over all states 
+            for j in range(len(states)):
+                loss<a id="change"> += </a>self.loss_fn[j](states_perturbed[j], <a id="change">states[j].detach()</a>)
+            if i == self.num_steps + 1: 
+                return loss 
+            &#47&#47 Compute noise gradient     </code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_perturbed = embed + noise 
+            state_perturbed = self.eval_fn(embed_perturbed)
+            &#47&#47 Return final loss if last step (undetached state)
+            <a id="change">if </a>i == self.num_steps<a id="change">: 
+                </a>return self.loss_last_fn(state_perturbed, state) 
+            &#47&#47 Compute perturbation loss (detached state)
+            loss<a id="change"> = </a>self.loss_fn(state_perturbed, state.detach())
+            &#47&#47 Compute noise gradient ∂loss/∂noise
+            noise_gradient, = torch.autograd.grad(loss, noise)
+            &#47&#47 Move noise towards gradient to change state as much as possible </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/smart-pytorch/commit/a9e3a4332c293ad6c421b81ef10857f32e1818d8#diff-d3a700360d4e95f1072ab84f2988c9a0bd670bfc6c4b1940bba80dca9fb8e674L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3655042</div><div id='project'> Project Name: archinetai/smart-pytorch</div><div id='commit'> Commit Name: a9e3a4332c293ad6c421b81ef10857f32e1818d8</div><div id='time'> Time: 2022-05-25</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: smart_pytorch/smart_pytorch.py</div><div id='m_class'> M Class Name: SMARTLoss</div><div id='n_method'> N Class Name: SMARTLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: smart_pytorch/smart_pytorch.py</div><div id='n_file'> N File Name: smart_pytorch/smart_pytorch.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 58</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            image_tokens += [image_token]
+        
+            if self.is_verbose:
+                token<a id="change"> = </a>int(<a id="change">image_token.detach()</a>.numpy())
+                print("image token {} is {}".format(i, token))
+            
+        return torch.cat(image_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+    ) -&gt; LongTensor:
+        image_tokens: List[LongTensor] = []
+        keys_values_state = torch.zeros(self.keys_values_state_shape)
+        <a id="change">if </a>torch.cuda.is_available()<a id="change">: 
+            </a>keys_values_state<a id="change"> = </a>keys_values_state.cuda()
+        image_token = self.start_token
+
+        for i in range(self.sample_token_count):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/17c96fe110fad3d48ea591dcd46475f521499770#diff-a32b6e5a8d67db649bbd4d0118fdcd645421a8fcca842a8ccaa2bf61e702f403L197' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3655039</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: 17c96fe110fad3d48ea591dcd46475f521499770</div><div id='time'> Time: 2022-06-28</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_class'> M Class Name: DalleBartDecoderTorch</div><div id='n_method'> N Class Name: DalleBartDecoderTorch</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_start'> M Start Line: 205</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 206</div><div id='n_end'> N End Line: 212</div><BR>

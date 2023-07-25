@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :2709
+</h3><img src='9030969.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        memory, encoder_self_attns = self.encoder(inputs, inputs_mask)
+        output, decoder_self_attns, decoder_encoder_attns = self.decoder(targets, memory, targets_mask, memory_mask)
+        output<a id="change"> = </a><a id="change">self.linear(</a>output<a id="change">)</a>
+
+        return output, encoder_self_attns, decoder_self_attns, decoder_encoder_attns
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                targets: Optional[Tensor],
+                return_attns: bool = False) -&gt; Tuple[Tensor, Tensor, Tensor, Tensor]:
+        batch_size = targets.size(0)
+        targets = <a id="change">targets[targets != self.eos_id]</a>.view(batch_size, -1)
+
+        memory, encoder_self_attns = self.encoder(inputs, input_lengths)
+        output, decoder_self_attns, memory_attns = self.decoder(targets, input_lengths, memory)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sooftware/transformer/commit/a0b53d9802b580df564793d1f66e65e286065f00#diff-825f88954874495622d9ca7661409390247cc81d30fc6addd2c4035da5e1e992L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030969</div><div id='project'> Project Name: sooftware/transformer</div><div id='commit'> Commit Name: a0b53d9802b580df564793d1f66e65e286065f00</div><div id='time'> Time: 2020-07-25</div><div id='author'> Author: sh951011@gmail.com</div><div id='file'> File Name: transformer/models/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer/models/transformer.py</div><div id='n_file'> N File Name: transformer/models/transformer.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 84</div><div id='n_start'> N Start Line: 60</div><div id='n_end'> N End Line: 73</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        seq_dim = -3
+        index = torch.tensor([0], device=m.device)
+        s = <a id="change">self.linear(</a>torch.index_select(m, dim=seq_dim, index=index)<a id="change">)</a>
+        s<a id="change"> = </a>s.squeeze(seq_dim)
+
+        return m, z, s
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            blocks_per_ckpt=self.blocks_per_ckpt if self.training else None,
+        )
+
+        s = self.linear(<a id="change">m[..., 0, :, :]</a>)
+        
+        return m, z, s
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aqlaboratory/openfold/commit/a8601529127ff19fc50fee55e8ac810ebe712c82#diff-a5f5325ab6f28a742b6a9f1ad8405351b5be5c306c6aecdb86fd4933d887ae4bL474' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030968</div><div id='project'> Project Name: aqlaboratory/openfold</div><div id='commit'> Commit Name: a8601529127ff19fc50fee55e8ac810ebe712c82</div><div id='time'> Time: 2022-02-03</div><div id='author'> Author: gahdritz@gmail.com</div><div id='file'> File Name: openfold/model/evoformer.py</div><div id='m_class'> M Class Name: EvoformerStack</div><div id='n_method'> N Class Name: EvoformerStack</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openfold/model/evoformer.py</div><div id='n_file'> N File Name: openfold/model/evoformer.py</div><div id='m_start'> M Start Line: 524</div><div id='m_end'> M End Line: 527</div><div id='n_start'> N Start Line: 524</div><div id='n_end'> N End Line: 524</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, label):
+        &#47&#47 --------------------------- cos(theta) & phi(theta) ---------------------------
+        cosine = <a id="change">F.linear(</a>F.normalize(input), F.normalize(self.weight)<a id="change">)</a>
+        sine = torch.sqrt(1.0 - torch.pow(cosine, 2))
+        phi = cosine * self.cos_m - sine * self.sin_m
+        if self.easy_margin:
+            phi = torch.where(cosine &gt; 0, phi, cosine)
+        else:
+            phi = torch.where(cosine &gt; self.th, phi, cosine - self.mm)
+        &#47&#47 --------------------------- convert label to one-hot ---------------------------
+        &#47&#47 one_hot = torch.zeros(cosine.size(), requires_grad=True, device=&quotcuda&quot)
+        one_hot = torch.zeros(cosine.size(), device = &quotcuda&quot)
+        one_hot.scatter_(1, label.view(-1, 1).long(), 1)
+        &#47&#47 -------------torch.where(out_i = {x_i if condition_i else y_i) -------------
+        output = (one_hot * phi) + ((1.0 - one_hot) * cosine)  &#47&#47 you can use torch.where if your torch.__version__ is 0.4
+        output<a id="change"> *= </a>self.s
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        cos_theta = cos_theta.clamp(-1, 1)  &#47&#47 for numerical stability
+        with torch.no_grad():
+            origin_cos = cos_theta.clone()
+        target_logit = <a id="change">cos_theta[torch.arange(0, embbedings.size(0)), label]</a>.view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m &#47&#47cos(target+margin)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cavalleria/cavaface.pytorch/commit/3b84e7dee20887685ce3f9d7a63cb74db35147c3#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L73' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030971</div><div id='project'> Project Name: cavalleria/cavaface.pytorch</div><div id='commit'> Commit Name: 3b84e7dee20887685ce3f9d7a63cb74db35147c3</div><div id='time'> Time: 2020-04-28</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output = torch.cat([output_a, output_b, output_a - output_b], dim=1)
+        logits<a id="change"> = </a><a id="change">self.linear(</a>output<a id="change">)</a>
+        loss = self.loss_fct(logits, labels)
+        return loss, logits
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        embeddings_a = mean_pooling(output_a,  <a id="change">a[&quotattention_mask&quot]</a>)
+        embeddings_b = mean_pooling(output_b, b[&quotattention_mask&quot])
+        output = torch.cat([embeddings_a, embeddings_b, embeddings_a-embeddings_b], dim=1)
+        logits = self.classifier(output)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/prajjwal1/fluence/commit/34419f2135db008008674abe97e4d58df7050376#diff-9b5227bea9875a2faa1f5803fb8bdaa8a1891793820bda7ba792e31c87a9e25fL24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030970</div><div id='project'> Project Name: prajjwal1/fluence</div><div id='commit'> Commit Name: 34419f2135db008008674abe97e4d58df7050376</div><div id='time'> Time: 2020-09-22</div><div id='author'> Author: prajjwalin@protonmail.com</div><div id='file'> File Name: fluence/models/siamese_model.py</div><div id='m_class'> M Class Name: SiameseTransformer</div><div id='n_method'> N Class Name: SiameseTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fluence/models/siamese_model.py</div><div id='n_file'> N File Name: fluence/models/siamese_model.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 32</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 33</div><BR>

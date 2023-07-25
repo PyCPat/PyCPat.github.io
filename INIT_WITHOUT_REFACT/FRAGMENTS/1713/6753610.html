@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x = enc_layer(x)
+            intermediate.append(x)
+        x_rnn, h = self.rnn(x, h)
+        <a id="change">for </a>dec_layer, <a id="change">x_enc</a> in zip(self.dec, reversed(intermediate))<a id="change">:
+            </a>x<a id="change"> = </a>dec_layer(x + x_enc)
+        <a id="change">return </a>x, x_rnn, h
+
+
+class ComplexCompression(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 x_rnn, h = self.rnn(x, h)
+        x_inner, intermediate, h = self.encode(x, h)
+        x = self.decode(x_inner, intermediate)
+        <a id="change">return </a>x<a id="change">, x_inner, h</a>
+
+
+class ComplexCompression(nn.Module):
+    def __init__(self, n_freqs: int, init_value: float = 0.5):</code></pre>

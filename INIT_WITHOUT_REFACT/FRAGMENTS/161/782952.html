@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    outs.append(F.max_pool2d(outs[-1], 1, stride=2))
+            &#47&#47 add conv layers on top of original feature maps (RetinaNet)
+            else:
+                orig<a id="change"> = </a>inputs[self.backbone_end_level - 1]
+                <a id="change">outs.append(</a>self.fpn_convs[used_backbone_levels](orig)<a id="change">)</a>
+                for i in range(used_backbone_levels + 1, self.num_outs):
+                    &#47&#47 BUG: we should add relu before each extra conv
+                    outs.append(self.fpn_convs[i](outs[-1]))
+        return tuple(outs)</code></pre><h3>After Change</h3><pre><code class='java'>
+                    outs.append(F.max_pool2d(outs[-1], 1, stride=2))
+            &#47&#47 add conv layers on top of original feature maps (RetinaNet)
+            else:
+                <a id="change">if self.extra_convs_on_inputs</a><a id="change">:
+                    </a>orig<a id="change"> = </a>inputs[self.backbone_end_level - 1]
+                    <a id="change">outs.append(</a>self.fpn_convs[used_backbone_levels](orig)<a id="change">)</a>
+                else:
+                    <a id="change">outs.append(self.fpn_convs[used_backbone_levels](outs[-1]</a><a id="change">)</a><a id="change">)</a>
+                for i in range(used_backbone_levels + 1, self.num_outs):
+                    &#47&#47 BUG: we should add relu before each extra conv
+                    outs.append(self.fpn_convs[i](outs[-1]))
+        return tuple(outs)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch = range(len(x))  &#47&#47 batch size
+        for i in batch:
+            x[i] = np.array(x[i])  &#47&#47 to numpy
+            <a id="change">x[i]</a> = x[i][:, :, :3] if x[i].ndim == 3 else np.tile(x[i][:, :, None], 3)  &#47&#47 enforce 3ch input
+            s = x[i].shape[:2]  &#47&#47 HWC
+            shape0.append(s)  &#47&#47 image shape
+            g = (size / max(s))  &#47&#47 gain</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  &#47&#47 uint8 to fp16/32
+
+        &#47&#47 Inference
+        <a id="change">with torch</a><a id="change">.no_grad():
+            </a>y = self.model(x, augment, profile)[0]  &#47&#47 forward
+        y = non_max_suppression(y, conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)  &#47&#47 NMS
+
+        &#47&#47 Post-process</code></pre>

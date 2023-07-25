@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        ingate = F.sigmoid(ingate)
+        forgetgate = F.sigmoid(forgetgate)
+        cellgate = F.tanh(cellgate)
+        outgate = <a id="change">F.sigmoid(</a>outgate<a id="change">)</a>
+
+        cy = (forgetgate * cx) + (ingate * cellgate)
+        hy = outgate<a id="change"> * </a>F.tanh(cy)
+
+        return hy, cy
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input, hidden):
+        
+        hx, cx = hidden    
+        gates = <a id="change">self.linear(input).view(-1</a>, self.gate_channels, self.grid_size, self.grid_size, self.grid_size<a id="change">)</a> \
+                + self.conv3d(hx)
+        ingate, forgetgate, cellgate = gates.chunk(3, 1)
+        ingate = F.sigmoid(ingate)</code></pre>

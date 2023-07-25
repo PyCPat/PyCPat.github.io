@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input, incremental_state=None):
+        Input is expected to be of size [bsz x seqlen].
+        &#47&#47 recompute/expand embeddings if needed
+        bsz<a id="change">, seq_len = </a><a id="change">input.size()</a>
+        max_pos = self.padding_idx + 1 + seq_len
+        if self.weights is None or max_pos &gt; self.weights.size(0):
+            self.weights = SinusoidalPositionalEmbedding.get_embedding(
+                max_pos,
+                self.embedding_dim,
+                self.padding_idx,
+            )
+        self.weights = self.weights.type_as(self._float_tensor)
+
+        if incremental_state is not None:
+            &#47&#47 positions is the same for every token when decoding a single step
+            return self.weights[self.padding_idx + seq_len, :].expand(bsz, 1, -1)
+
+        positions = utils.make_positions(input, self.padding_idx, self.left_pad, self.onnx_trace)
+        if self.onnx_trace:
+            bsz<a id="change"> = </a><a id="change">torch.onnx.operators.shape_as_tensor(input)[0]</a>
+            seq_len = torch.onnx.operators.shape_as_tensor(input)[1]
+            flat_embeddings = self.weights.detach().index_select(0, positions.view(-1))
+            embedding_shape = torch.cat((bsz.view(1), seq_len.view(1), torch.LongTensor([-1])))
+            embeddings = torch.onnx.operators.reshape_from_tensor_shape(flat_embeddings, embedding_shape)</code></pre><h3>After Change</h3><pre><code class='java'>
+            pos = (timestep.int() + 1).long() if timestep is not None else seq_len
+            if self.onnx_trace:
+                return self.weights[self.padding_idx + pos, :].unsqueeze(1).repeat(bsz, 1, 1)
+            <a id="change">return self.weights[self.padding_idx + pos, :]</a><a id="change">.expand(</a>bsz, <a id="change">1</a>, <a id="change">-1</a><a id="change">)</a>
+
+        positions = utils.make_positions(input, self.padding_idx, self.left_pad, self.onnx_trace)
+        if self.onnx_trace:
+            flat_embeddings = self.weights.detach().index_select(0, positions.view(-1))</code></pre>

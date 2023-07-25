@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.layers = nn.ModuleList([])
+
+        for level, heads, (dim_in, dim_out), block_repeat in zip(reversed(<a id="change">range(</a>num_heirarchies<a id="change">)</a>), layer_heads, dim_pairs, block_repeats):
+            is_last = level == 0
+            depth = block_repeat
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        blocks = 2 ** (num_heirarchies - 1)
+
+        seq_len = (fmap_size // blocks) ** 2   &#47&#47 sequence length is held constant across heirarchy
+        heirarchies = <a id="change">list(</a>reversed(range(num_heirarchies))<a id="change">)</a>
+        mults<a id="change"> = </a>[2 ** i for i in heirarchies]
+
+        layer_heads = list(map(lambda t: t * heads, mults))
+        layer_dims = list(map(lambda t: t * dim, mults))</code></pre>

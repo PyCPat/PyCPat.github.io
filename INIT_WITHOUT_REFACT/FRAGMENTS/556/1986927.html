@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        feat_new_v = self.pool5_7x7(feat_new).view(feat_new.size(0), -1)
+        feat_space_v = self.pool5_7x7(feat_space).view(feat_space.size(0), -1)
+        feat_channel_v<a id="change"> = self.pool5_7x7(feat_channel).view(</a><a id="change">feat_channel.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+
+        pred_label = self.classifier(feat_new_v)
+        return feat_new_v, feat_space_v, feat_channel_v, feat_new, feat_space, feat_channel, M_space, M_channel, pred_label
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        feat_channel = feat_channel.view(feat_channel.size(0),feat_channel.size(1),self.shape,-1)
+
+        &#47&#47 ----------- Flip -------------
+        feat_channel_flip = torch.flip(feat_channel,<a id="change">[</a>3<a id="change"></a>])
+        feat_channel_cat = torch.cat((feat_channel_flip, feat_channel),1)
+        feat_channel<a id="change"> = </a>self.ChannelFlipMerge(feat_channel_cat)
+
+        feat_cat = torch.cat((feat_space, feat_channel, input),1) &#47&#47 N, 3*C, H, W
+        feat_new = self.Conv4Merge(feat_cat)
+
+        feat_new_v = self.pool5_7x7(feat_new).view(feat_new.size(0), -1)
+        &#47&#47 feat_space_v = self.pool5_7x7(feat_space).view(feat_space.size(0), -1)
+        &#47&#47 feat_channel_v = self.pool5_7x7(feat_channel).view(feat_channel.size(0), -1)
+
+        if label is None:
+            <a id="change">return </a>feat_new_v, feat_new
+        else:
+            pred_loss, pred_label = self.classifier(feat_new_v,label)
+            return feat_new_v, pred_loss, pred_label, M_space, M_channel, feat_space, feat_channel</code></pre>

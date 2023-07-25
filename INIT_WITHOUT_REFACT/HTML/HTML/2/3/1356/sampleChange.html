@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if last:
+          return output, x
+        else:
+          <a id="change">return </a>output
+    def get_embedding_dim(self):
+        return 256
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+
+    def forward(self, x, last=False, freeze=False):
+        <a id="change">if </a>freeze<a id="change">:
+            </a>with torch.no_grad():
+                out = self.pool(F.relu(self.conv1(x)))
+                out = self.pool(F.relu(self.conv2(out)))
+                out = self.pool(F.relu(self.conv3(out)))
+                out = out.view(-1, 64 * 4 * 4)
+                out = F.relu(self.fc1(out))
+                e = F.relu(self.fc2(out))
+        else:
+            out = self.pool(F.relu(self.conv1(x)))
+            out = <a id="change">self.pool(</a>F.relu(self.conv2(out))<a id="change">)</a>
+            out = self.pool(F.relu(self.conv3(out)))
+            out = out.view(-1, 64 * 4 * 4)
+            out = F.relu(self.fc1(out))
+            e = F.relu(self.fc2(out))</code></pre>

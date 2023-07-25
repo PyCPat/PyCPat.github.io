@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        gap = self.global_avg_pool(x)
+        gap_logit = self.global_avg_pool_fc(gap.view(x.size(0), -1))
+        gap_weight = self.global_avg_pool_fc.linear.weight.data.clone()
+        gap = x * <a id="change">gap_weight.unsqueeze(2).unsqueeze(3</a><a id="change">)</a>
+
+        gmp = self.global_max_pool(x)
+        gmp_logit = self.global_max_pool_fc(gmp.view(x.size(0), -1))
+        gmp_weight = self.global_max_pool_fc.linear.weight.data.clone()
+        gmp = x * gmp_weight.unsqueeze(2).unsqueeze(3)
+
+        cam_logit = torch.cat([gap, gmp], dim=1)
+        x = self.conv(cam_logit)
+        return x<a id="change">, cam_logit</a>
+
+class GammaBeta(nn.Module):
+    def __init__(self,
+        channels, resl</code></pre><h3>After Change</h3><pre><code class='java'>
+        gmp = self.maxpool(x)
+        gmp_logit = self.maxpool_fc(gmp.flatten(1))
+        gmp_weight = self.maxpool_fc.weight.detach().clone()
+        gmp = x<a id="change"> * </a>gmp_weight[:, :, None, None]
+
+        cam_logit = torch.cat([gap_logit, gmp_logit], dim=1)
+        x = torch.cat([gap, gmp], dim=1)
+        x = self.conv(x)
+        x = self.act(x)
+
+        heatmap = <a id="change">torch.sum(</a>x<a id="change">, dim=1, keepdim=True)</a>
+
+        <a id="change">return </a>x, cam_logit, heatmap
+
+
+class GammaBeta(nn.Module):</code></pre>

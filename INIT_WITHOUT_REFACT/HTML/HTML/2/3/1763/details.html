@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1763
+</h3><img src='6885033.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        pad_l = pad_t = pad_r = pad_b = 0
+        Ho, Wo = H, W
+        if N &lt;= num_tokens:
+            <a id="change">if </a>self.kernel_size &gt; W<a id="change">:
+                </a>pad_r<a id="change"> = </a>self.kernel_size - W
+            if self.kernel_size &gt; H:
+                pad_b = self.kernel_size - H
+            x = pad(x, (0, 0, pad_l, pad_r, pad_t, pad_b))</code></pre><h3>After Change</h3><pre><code class='java'>
+        B, Hp, Wp, C = x.shape
+        H, W = Hp, Wp
+        pad_l = pad_t = pad_r = pad_b = 0
+        if <a id="change">H &lt; self.kernel_size or W &lt; self.kernel_size</a>:
+            pad_l = pad_t = 0
+            pad_r = max(0, self.window_size - W)
+            pad_b = max(0, self.window_size - H)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/shi-labs/neighborhood-attention-transformer/commit/4252f7b65813e4951d05c9918b11c9efa8e07bb7#diff-2669a8bd202d9502bfcdcdb9ba8c5494eb7b299f7e54f386d5e91ebfcfc7c837L109' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6885033</div><div id='project'> Project Name: shi-labs/neighborhood-attention-transformer</div><div id='commit'> Commit Name: 4252f7b65813e4951d05c9918b11c9efa8e07bb7</div><div id='time'> Time: 2022-07-09</div><div id='author'> Author: alihassanijr1998@gmail.com</div><div id='file'> File Name: natten/nattencuda.py</div><div id='m_class'> M Class Name: NeighborhoodAttention</div><div id='n_method'> N Class Name: NeighborhoodAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: natten/nattencuda.py</div><div id='n_file'> N File Name: natten/nattencuda.py</div><div id='m_start'> M Start Line: 109</div><div id='m_end'> M End Line: 122</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 120</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                x_tc_out = x_glu
+
+            &#47&#47 Temporal Convolution Layer (GTU)
+            elif <a id="change"></a>self.act_func == &quotgtu&quot<a id="change">:
+                &#47&#47 Tanh(x_p + x_in) ⊙ Sigmoid(x_q)
+                </a>x_gtu = torch.mul(self.tanh(x_p + x_in), self.sigmoid(x_q))
+                x_tc_out<a id="change"> = </a>x_gtu
+
+            else:
+                raise ValueError(f&quotERROR: activation function {self.act_func} is not defined.&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_in = self.align(x)[:, :, self.Kt - 1:, :]
+        x_causal_conv = self.causal_conv(x)
+
+        if <a id="change">self.act_func == &quotglu&quot or self.act_func == &quotgtu&quot</a>:
+            x_p = x_causal_conv[:, : self.c_out, :, :]
+            x_q = x_causal_conv[:, -self.c_out:, :, :]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hazdzz/stgcn/commit/de050cc05a36453eafe1bf7bac60401c6561e947#diff-db69bbef9e404fa5af08d5bc209ae131c092e0ce285d496efe5f46170b20add9L92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6885035</div><div id='project'> Project Name: hazdzz/stgcn</div><div id='commit'> Commit Name: de050cc05a36453eafe1bf7bac60401c6561e947</div><div id='time'> Time: 2022-02-07</div><div id='author'> Author: raphaelpeo@gmail.com</div><div id='file'> File Name: model/layers.py</div><div id='m_class'> M Class Name: TemporalConvLayer</div><div id='n_method'> N Class Name: TemporalConvLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/layers.py</div><div id='n_file'> N File Name: model/layers.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, inputs, targets):
+        enc_output, i_mask = None, None
+        <a id="change">if </a>self.has_inputs<a id="change">:
+            </a>i_mask<a id="change"> = </a>utils.create_pad_mask(inputs, self.src_pad_idx)
+            enc_output = self.encode(inputs, i_mask)
+
+        t_mask = utils.create_pad_mask(targets, self.trg_pad_idx)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.initialize()
+
+    def forward(self, padded_input, input_lengths, padded_target):
+        if <a id="change">self.feat_extractor == &quotemb_cnn&quot or self.feat_extractor == &quotvgg_cnn&quot</a>:
+            padded_input = self.conv(padded_input)
+
+        &#47&#47 Reshaping features</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qute012/kosr/commit/b7d24b0d835254fd425224eba3421a3b7224e55f#diff-c6b6e8084627536e70fdb6e8be5c81f8520937c01028e9bb6ea65a82014b023eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6885051</div><div id='project'> Project Name: qute012/kosr</div><div id='commit'> Commit Name: b7d24b0d835254fd425224eba3421a3b7224e55f</div><div id='time'> Time: 2021-01-12</div><div id='author'> Author: ejrwls012@gmail.com</div><div id='file'> File Name: model/transformer/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/transformer/transformer.py</div><div id='n_file'> N File Name: model/transformer/transformer.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 34</div><BR>

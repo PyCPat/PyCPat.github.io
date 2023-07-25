@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+
+    def forward(self, x):
+        <a id="change">print(</a>x.shape<a id="change">)</a>
+        print(x.dtype)
+        embed = self.embedding(x)  &#47&#47 [batch_size, seq_len, embeding]=[64, 32, 64]
+        out, _ = self.lstm(embed)
+        out = torch.cat((embed, out), 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        maxpool_input = fc_output.permute(0, 2, 1)  &#47&#47 [batch_size, hidden_size*2, max_seq_len]
+        maxpool_output = self.maxpool(maxpool_input).squeeze()   &#47&#47 [batch_size, hidden_size*2]
+
+        cls_input = <a id="change">self.dropout(</a>maxpool_output<a id="change">)</a>
+        out<a id="change"> = </a>self.classfier(cls_input)
+
+        return out</code></pre>

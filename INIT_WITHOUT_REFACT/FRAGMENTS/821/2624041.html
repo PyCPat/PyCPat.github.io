@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        inputs = F.softmax(predict, dim=1)       
+        
+        &#47&#47flatten label and prediction tensors
+        inputs = <a id="change">inputs.contiguous().view(-1</a><a id="change">)</a>
+        targets = <a id="change">targets.contiguous()</a>.view(-1)
+        
+        intersection = <a id="change">(inputs * targets).sum()</a>                            
+        dice = (2.<a id="change">*</a>intersection + self.eps)/(inputs.sum() + targets.sum() + self.eps)  
+        
+        loss =  1 - dice
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        labels = batch["targets"].to(device)
+        inputs = F.softmax(predict, dim=1)  
+
+        tp = <a id="change">torch.sum(</a>labels*inputs<a id="change">, dim=(2, 3))</a>
+        fn = torch.sum(labels<a id="change">*</a>(1-inputs), dim=(2, 3))
+        fp = <a id="change">torch.sum(</a>(1-labels)*inputs<a id="change">, dim=(2, 3))</a>
+
+        dice_score = (tp + 1e-6) / (tp<a id="change"> +  fn + </a>fp + 1e-6)
+        dice_score = torch.sum(1 - dice_score, dim=-1)
+
+        loss = dice_score / labels.shape[1]</code></pre>

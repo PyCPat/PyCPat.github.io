@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        else:
+            combined_embedding = []
+            trial_counts = torch.zeros(batch, 1)
+            <a id="change">for </a><a id="change">i</a> in range(batch)<a id="change">:
+                &#47&#47 remove NaNs
+                </a>valid_x<a id="change"> = </a>x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                <a id="change">combined_embedding.append(
+                    </a>self.combining_function(trial_embeddings, dim=0)<a id="change">
+                )</a>
+
+            combined_embedding = torch.stack(combined_embedding, dim=0)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1</a><a id="change">)  &#47&#47 make it (batch, 1) to match embeddings below
+        )</a>
+        &#47&#47 number of non-nan trials
+        trial_counts = max_num_trials - nan_counts
+
+        &#47&#47 get nan entries
+        is_nan = torch.isnan(x)
+        &#47&#47 apply trial net with nan entries replaced with 0
+        masked_x = torch.nan_to_num(x, nan=0.0)
+        trial_embeddings = self.trial_net(masked_x)
+        &#47&#47 replace previous nan entries with zeros
+        trial_embeddings = trial_embeddings * (~is_nan.all(-1, keepdim=True)).float()
+
+        &#47&#47 Take mean over permutation dimension divide by number of trials
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding<a id="change"> = </a>(
+                trial_embeddings.sum(dim=self.aggregation_dim) / trial_counts
+            )
+        else:</code></pre>

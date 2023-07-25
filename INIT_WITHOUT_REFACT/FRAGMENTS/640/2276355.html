@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        first_h_a = self.initHidden_alpha(x.shape[1])
+        first_h_b = self.initHidden_beta(x.shape[1])
+
+        self.emb<a id="change"> = </a><a id="change">self.embedding(</a>x<a id="change">)</a>
+        if self.drop &lt; 1:
+            self.emb = self.dropout(self.emb)
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t<a id="change"> = </a>torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        for i, att_timesteps in enumerate(count):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            self.c_t[i] = self.attentionStep(first_h_a, first_h_b, att_timesteps)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = torch.zeros((batch_size, time_steps, self.hidden_dim))
+
+        for cur_time in range(time_steps):
+            cur_x = <a id="change">x[:, : cur_time + 1, :]</a>
+            out[:, cur_time, :] = self.retain_encoder(cur_x)
+        return out
+</code></pre>

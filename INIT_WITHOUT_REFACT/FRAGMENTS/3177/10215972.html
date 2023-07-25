@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+          
+            &#47&#47max_wi = torch.max(torch.sqrt(torch.sum(wi**2, dim=[1, 2, 3], keepdim=True)), escape_NaN)
+            max_wi = torch.sqrt(torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">) + </a>escape_NaN, dim=[1, 2, 3], keepdim=True))
+
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &quot&quot&quot
+            &#47&#47 conv for compare
+            wi = wi[0]  &#47&#47 [L, C, k, k]   
+            max_wi = torch.sqrt(torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">)</a>, dim=[1, 2, 3], keepdim=True)).clamp_min(1e-4)
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]
+            yi = F.conv2d(xi, wi_normed, stride=1, padding=(self.ksize-1)//2)   &#47&#47 [1, L, H, W]</code></pre>

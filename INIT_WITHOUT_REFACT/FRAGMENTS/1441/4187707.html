@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 adversarial loss for multi-scale discriminators
+
+        for discr, scale in zip(self.discriminators, self.discr_multi_scales):
+            scaled_fake = <a id="change">F.interpolate(</a>recon_x<a id="change">, scale_factor = scale)</a>
+            fake_logits = discr(scaled_fake)
+            one_adversarial_loss = hinge_gen_loss(fake_logits)
+            adversarial_losses.append(one_adversarial_loss)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        feature_losses = []
+
+        <a id="change">for </a>real_intermediates, <a id="change">fake_intermediates</a> in discr_intermediates<a id="change">:
+            </a>losses<a id="change"> = </a>[F.mse_loss(real_intermediate, fake_intermediate) for real_intermediate, fake_intermediate in zip(real_intermediates, fake_intermediates)]
+            feature_losses.extend(losses)
+
+        feature_loss = torch.stack(feature_losses).mean()</code></pre>

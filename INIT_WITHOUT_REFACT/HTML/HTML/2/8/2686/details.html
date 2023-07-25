@@ -1,0 +1,90 @@
+<html><h3>Pattern ID :2686
+</h3><img src='8841350.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for x, net, codebook, k in zip(latents, self._prob, self._codebook, self._k):
+            n, c, h, w = x.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c] -&gt; [h*w, n, c]
+            x = self._encoder(<a id="change">x.permute(2, 3, 0, 1).reshape(</a>-1, n, c<a id="change">)</a>)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k]
+            logit = net(x).permute(1, 0, 2)
+            sample = F.gumbel_softmax(logit * self._d, temperature, hard)</code></pre><h3>After Change</h3><pre><code class='java'>
+            targets.append(xRaw)
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn<a id="change"> = </a><a id="change">xRaw.permute(2</a>, <a id="change">3</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>.reshape(-1, n, c)
+            x = self._encoder(encoderIn)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k]
+            logit = net(x).permute(1, 0, 2)
+            sample = F.gumbel_softmax(logit * self._d, temperature, hard)
+            &#47&#47 [N, h*w, c] &lt;- [N, h*w, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 [n, h*w, c] -&gt; [h*w, n, c]
+            quantized = quantized.permute(1, 0, 2)
+            mixed = temperature * encoderIn / (temperature + 1) + quantized / (temperature + 1)
+            &#47&#47 [h*w, n, c] -&gt; [n, h*w, c] -&gt; [n, h, w, c]
+            deTransformed<a id="change"> = </a>self._decoder(mixed, quantized).permute(1, 0, 2).reshape(n, h, w, c)
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed.permute(0, 3, 1, 2))
+            samples.append(sample)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/1651f1f4f7d28d9afa1ca7abafa2af0d6140309a#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8841350</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 1651f1f4f7d28d9afa1ca7abafa2af0d6140309a</div><div id='time'> Time: 2021-01-14</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 calculate output (width)
+        kernel_w = self.kernels.repeat(c, 1).view(-1, 1, 1, s)
+        output = F.conv2d(output, kernel_w, stride=1, padding=0, groups=c)
+        output = <a id="change">output.reshape(
+            n, c, s, h * s, -1).permute(0, 1, 3, 4, 2).reshape(</a>n, c, h * s, -1<a id="change">)</a>
+
+        return output
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 calculate output (horizontal expansion)
+        kernel_w = self.kernels.view(f, 1, 1, 4)
+        output = F.conv2d(output, kernel_w, stride=1, padding=0)
+        output<a id="change"> = </a><a id="change">output.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>.reshape(n*c, 1, f*h, f*w)
+
+        &#47&#47 split n&c
+        output<a id="change"> = </a>output.view(n, c, f*h, f*w)
+
+        return output
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/skycrapers/tecogan-pytorch/commit/d03cb2d224ef11505f855a0d36fa35a877ef4ec8#diff-94062f270a4e5f954df3662878079a56d38f54b5adce42324a6a8a86eaf86be1L136' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8841396</div><div id='project'> Project Name: skycrapers/tecogan-pytorch</div><div id='commit'> Commit Name: d03cb2d224ef11505f855a0d36fa35a877ef4ec8</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: dengjn@zju.edu.cn</div><div id='file'> File Name: codes/utils/net_utils.py</div><div id='m_class'> M Class Name: BicubicUpsample</div><div id='n_method'> N Class Name: BicubicUpsample</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: codes/utils/net_utils.py</div><div id='n_file'> N File Name: codes/utils/net_utils.py</div><div id='m_start'> M Start Line: 138</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 155</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for i in range(self.Local_B):
+            row_output = self.intra_transformer[i](row_input.permute(1, 0, 2)).permute(1, 0, 2)
+
+        row_output = <a id="change">row_output.reshape(</a>B, P, K, N<a id="change">)</a>.permute(0, 3, 2, 1)
+
+        output = x + row_output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        row_f = row_z3 + row_z
+
+        row_output<a id="change"> = </a><a id="change">row_f.reshape(B, P, K, N).permute(0</a>, <a id="change">3</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>
+
+        &#47&#47 inter DPT
+        col_z = row_output.permute(0, 2, 3, 1).reshape(B*K, P, N)
+        col_z1 = col_z + self.inter_PositionalEncoding(col_z)
+
+        for i in range(self.Local_B):
+            col_z3 = self.inter_transformer[i](col_z1.permute(1, 0, 2)).permute(1, 0, 2)
+
+        col_f = col_z3 + col_z
+        col_output<a id="change"> = </a>col_f.reshape(B, K, P, N).permute(0, 3, 1, 2)
+
+        return col_output
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhongyang-debug/attention-is-all-you-need-in-speech-separation/commit/1496ec5ecbb700c2e354cfa41d21d735e281ff01#diff-7c8acbb8793a584bfe2ae80520bfb2e801e64479bf65e6f723edd575961f9c17L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8840325</div><div id='project'> Project Name: zhongyang-debug/attention-is-all-you-need-in-speech-separation</div><div id='commit'> Commit Name: 1496ec5ecbb700c2e354cfa41d21d735e281ff01</div><div id='time'> Time: 2021-12-23</div><div id='author'> Author: 68770882+Zhongyang-debug@users.noreply.github.com</div><div id='file'> File Name: model/sepformer.py</div><div id='m_class'> M Class Name: DPTBlock</div><div id='n_method'> N Class Name: DPTBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/sepformer.py</div><div id='n_file'> N File Name: model/sepformer.py</div><div id='m_start'> M Start Line: 166</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 TAt
+        temporal_At = self._temporal_attention(x)  &#47&#47 (b, T, T)
+
+        x_TAt = <a id="change">torch.matmul(x.reshape(batch_size, -1, num_of_timesteps), temporal_At).reshape(</a>batch_size, num_of_vertices, num_of_features, num_of_timesteps<a id="change">)</a>
+
+        &#47&#47 SAt
+        spatial_At = self._spatial_attention(x_TAt)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            X_hat = F.relu(torch.cat(X_hat, dim=-1))
+
+        X_hat = self._time_convolution(X_hat.permute(0, 2, 1, 3))
+        X<a id="change"> = </a>self._residual_convolution(<a id="change">X.permute(0</a>, <a id="change">2</a>, <a id="change">1</a>, <a id="change">3</a><a id="change">)</a>)
+        X = self._layer_norm(F.relu(X + X_hat).permute(0, 3, 2, 1))
+        X<a id="change"> = </a>X.permute(0, 2, 3, 1)
+        return X
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/49e8ed9f32590c7ede8d2d4e0a5d68403de19ba0#diff-22584f32d844ec418fe6465eae4a50e8e2e4a6fdedbbb0dd117c022b7bba99d3L292' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8840498</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 49e8ed9f32590c7ede8d2d4e0a5d68403de19ba0</div><div id='time'> Time: 2021-03-23</div><div id='author'> Author: benedek.rozemberczki@gmail.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/astgcn.py</div><div id='m_class'> M Class Name: ASTGCNBlock</div><div id='n_method'> N Class Name: ASTGCNBlock</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/astgcn.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/astgcn.py</div><div id='m_start'> M Start Line: 292</div><div id='m_end'> M End Line: 342</div><div id='n_start'> N Start Line: 292</div><div id='n_end'> N End Line: 332</div><BR>

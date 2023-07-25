@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :2128
+</h3><img src='7582566.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                act_idx1 = self.choose_action(obs_1, 1).long()
+                act_idx2 = self.choose_action(obs_2, 2).long()
+                batch_idx = (
+                    <a id="change">torch.arange(batch_size, dtype=torch.long)
+                    .unsqueeze(-1)
+                    .to(</a>self.device<a id="change">)
+                )</a>
+                action_h1 = observed_h[act_idx1, batch_idx, :].squeeze(1)
+                action_h2 = observed_h[act_idx2, batch_idx, :].squeeze(1)
+                action_h = (action_h1 + action_h2) / 2
+                if self.cell == "lstm":</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        batch_size = labtest.size(0)
+        time_step = labtest.size(1)
+        feature_dim<a id="change"> = </a><a id="change">labtest.size(2</a><a id="change">)</a>
+        assert feature_dim == self.lab_dim
+
+        self.agent1_action = []
+        self.agent1_prob = []</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/41e28f49dd30d760c6c439a5cf41590262c9b76b#diff-5fdd32b806c6289f77045eb16c679e729eabff875bba907ebc44d204c4cc7bbaL117' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7582566</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: 41e28f49dd30d760c6c439a5cf41590262c9b76b</div><div id='time'> Time: 2022-06-24</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/agent.py</div><div id='m_class'> M Class Name: Agent</div><div id='n_method'> N Class Name: Agent</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/agent.py</div><div id='n_file'> N File Name: app/models/backbones/agent.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 204</div><div id='n_start'> N Start Line: 117</div><div id='n_end'> N End Line: 201</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.lin2(x))
+        mean = self.action_range * torch.tanh(self.mean_layer(x))
+        cholesky_vector = F.softplus(self.cholesky_layer(x))
+        cholesky = <a id="change">torch.eye(self.action_shape)[None, ...].repeat(cholesky_vector.size(0), 1, 1).to(</a>device<a id="change">)</a> @ cholesky_vector[..., None]
+        return mean, cholesky
+
+    def action(self, state):</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param states: ([State]) a (batch of) state(s) of the environment
+        :return: ([float])([float]) mean and cholesky factorization chosen by policy at given state
+        
+        B<a id="change"> = </a><a id="change">states.size(0</a><a id="change">)</a>
+
+        device = self.lin1.weight.device
+        if self.action_range.device != device:
+            self.action_range = self.action_range.to(device)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/daisatojp/mpo/commit/5359622c97b4030627d8d9799c44a45cd523977a#diff-4bde858fea9ef97868a34d18c1c80810293da72a8257d1f5d405915c4d6d8928L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7582571</div><div id='project'> Project Name: daisatojp/mpo</div><div id='commit'> Commit Name: 5359622c97b4030627d8d9799c44a45cd523977a</div><div id='time'> Time: 2020-04-03</div><div id='author'> Author: sato-da@sanritz.co.jp</div><div id='file'> File Name: mpo_continuous/actor.py</div><div id='m_class'> M Class Name: Actor</div><div id='n_method'> N Class Name: Actor</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpo_continuous/actor.py</div><div id='n_file'> N File Name: mpo_continuous/actor.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(</a>device<a id="change">)</a>
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h
+			for i in range(self.n_glimpse):</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = x.to(device)
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		embed = <a id="change">embed_enc_inputs.size(2</a><a id="change">)</a>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h<a id="change">, process_c = </a>[torch.zeros((1, batch, embed), device = device) for _ in range(2)]
+		for i in range(self.n_process):
+			query, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			query = query.squeeze(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/ab78416ee96de7b4b780b38a77f4956518afa19c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7582568</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: ab78416ee96de7b4b780b38a77f4956518afa19c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 51</div><BR>

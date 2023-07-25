@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :2731
+</h3><img src='9042575.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, logits, samples, soft):
+        if samples is None:
+            return <a id="change">self.gumbel_softmax(</a>logits, self._temperature, self._eps<a id="change">, hard=True)</a>
+        else:
+            return -torch.sum(-samples * F.log_softmax(logits, -1), -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            &#47&#47 Reparametrization trick.
+            ret = y_soft
+        <a id="change">return </a>ret<a id="change">, y_soft</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf#diff-78f56a8e01e054eb5275963e005db8baab5fb8a2f945a6f3947cc3a95166a313L8' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9042575</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: e12be331e275549e5b8a7ef6a7c8dbf6d4e387bf</div><div id='time'> Time: 2021-04-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_class'> M Class Name: GumbelSoftmax</div><div id='n_method'> N Class Name: GumbelSoftmax</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='n_file'> N File Name: src/mcqc/layers/gumbelSoftmax.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 21</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47     sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47     sample = soft
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temperature, hard<a id="change">)</a>
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+            allCodewords.append(codewords.t())
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits, allCodewords</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/96e69f8763c2cf2c9cf0695159db17ddf4e0c857#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L279' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9042577</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 96e69f8763c2cf2c9cf0695159db17ddf4e0c857</div><div id='time'> Time: 2021-02-15</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 335</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 339</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47       sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47      sample = soft
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temperature, hard<a id="change">)</a>
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 quantized += torch.randn_like(quantized)</code></pre><h3>After Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.permute(1, 0, 2).reshape(n, h, w, k))
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits</a>
+
+
+class TransformerQuantizerRein(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/594ba7cd5c9d147e95ba5bd0b842270302dea2a2#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9042576</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 594ba7cd5c9d147e95ba5bd0b842270302dea2a2</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 282</div><div id='m_end'> M End Line: 342</div><div id='n_start'> N Start Line: 295</div><div id='n_end'> N End Line: 320</div><BR>

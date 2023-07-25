@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        output = self.linear2(output)
+        &#47&#47 [batch * chunk, length // chunk, d_model]
+        output = output.reshape(-1, <a id="change">output.size(1</a><a id="change">)</a> * self.chunk, output.size(2))
+        &#47&#47 [batch, length, d_model]
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [batch, length, d_model]
+        chunks = torch.chunk(input_tensor, chunks=self.chunk, dim=1)
+        &#47&#47 [batch, length // chunk, d_model]
+        output = <a id="change">[F.gelu(self.linear1(chunk)) for chunk in chunks]</a>
+        &#47&#47 [batch, length // chunk, d_ff]
+        if self.training:
+            output = <a id="change">[
+                deterministic_dropout(chunk, seed + i, dropout=self.dropout)\
+                    for chunk, i in zip(output, range(self.chunk))
+            ]</a>
+            &#47&#47 [batch, length // chunk, d_ff]
+
+        output = torch.cat([self.linear2(chunk) for chunk in output], dim=1)</code></pre>

@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :398
+</h3><img src='1570399.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        final_target_logit = torch.where(
+            target_logit &gt; self.th, cos_theta_m, target_logit - self.mm
+        )
+        <a id="change">if cfg["USE_AMP"] == True</a><a id="change"> and cfg["OPT_LEVEL"] == "O1":
+            </a>final_target_logit<a id="change"> = </a>final_target_logit.half()
+        cos_theta.scatter_(1, label.view(-1, 1).long(), final_target_logit)
+        output = cos_theta * self.s
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        if is_half:
+            cos_theta_m = cos_theta_m.half()
+        index<a id="change"> = </a><a id="change">torch.zeros_like(</a>cos_theta<a id="change">)</a>
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index = index.byte().bool()
+        output = cos_theta * 1.0
+        output[index] = cos_theta_m[index]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/cavalleria/cavaface/commit/98a21048f5dce435a6639a288dafc4c6be61be05#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1570399</div><div id='project'> Project Name: cavalleria/cavaface</div><div id='commit'> Commit Name: 98a21048f5dce435a6639a288dafc4c6be61be05</div><div id='time'> Time: 2021-08-25</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        <a id="change">if mask is not None</a><a id="change"> and mask.shape[1] == x.shape[1]:
+            </a>mask<a id="change"> = </a>mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+
+        out = self.net(xi, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask<a id="change"> = </a>~<a id="change">torch.zeros_like(</a>inp<a id="change">)</a>.scatter(1, indices, 1.).bool()
+            kwargs.update(context_mask = mask)
+
+        out = self.net(inp, **kwargs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1570395</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            )
+
+    def forward(self, x, context=None, residual=None):
+        <a id="change">if self.input_size != self.output_size</a><a id="change"> and residual is None:
+            </a>residual<a id="change"> = </a>self.skip_layer(x)
+        if residual is None:
+            residual = x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            residual = x
+
+        if self.input_size == 1 and self.hidden_size == 1:
+            x<a id="change"> = </a><a id="change">torch.zeros_like(</a>residual<a id="change">, device=residual.device)</a>
+            x = self.add_norm(x, residual)
+            return x
+        else:
+            x = self.fc1(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/b86eaa01b49a5108df9780b9dded33086a9dda80#diff-9a8b783572f864adbf7d350ca9150d50513b8e1d871585f96c7310e6336d1c87L138' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1570394</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: b86eaa01b49a5108df9780b9dded33086a9dda80</div><div id='time'> Time: 2020-08-07</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='m_class'> M Class Name: GatedResidualNetwork</div><div id='n_method'> N Class Name: GatedResidualNetwork</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 159</div><div id='n_end'> N End Line: 176</div><BR>

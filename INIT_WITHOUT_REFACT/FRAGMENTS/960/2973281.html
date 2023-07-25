@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        q = q.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        k = k.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        v = <a id="change">v.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.view(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1), F.normalize(k, dim=-1)
+
+        attn = torch.softmax(torch.matmul(q, k.transpose(-2, -1)) * self.temperature, dim=-1)
+        out = self.project_out(<a id="change">torch.matmul(attn, v).view(</a>b, <a id="change">-1</a>, h * w<a id="change">)</a>.view(b, -1, h, w))
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v = v.reshape(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1), F.normalize(k, dim=-1)
+
+        attn = torch.softmax(torch.matmul(q, <a id="change">k.transpose(-2, -1).contiguous()</a>) * self.temperature, dim=-1)
+        out = self.project_out(torch.matmul(attn, v).reshape(b, -1, h, w))
+        return out
+</code></pre>

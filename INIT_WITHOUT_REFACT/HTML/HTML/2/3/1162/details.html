@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1162
+</h3><img src='3591718.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 print("hello0")
+        &#47&#47 下面是使用CFR
+        crf_model = CRF(self.num_token_type, batch_first=True)
+        <a id="change">if </a>USE_CUDA<a id="change">:
+            </a>crf_model = crf_model.cuda()
+        if not is_test:
+            log_likelihood = crf_model(ner_score, data_item[&quottoken_type_list&quot].to(torch.int64),
+                                       mask=data_item[&quotmask_tokens&quot])</code></pre><h3>After Change</h3><pre><code class='java'>
+                                       mask=data_item[&quotmask_tokens&quot])
+            loss_ner = -log_likelihood
+            
+        pred_ner<a id="change"> = </a><a id="change">self.crf_model.decode(</a>ner_score<a id="change">)</a>  &#47&#47 , mask=data_item[&quotmask_tokens&quot]
+        
+        &#47&#47 下面使用的是Softmax
+        &#47&#47 loss_ner = F.softmax(ner_score, data_item[&quotner_type&quot])</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mangonihao/multiheadjointentityrelationextraction_simple/commit/3a8d46652627013ee302506e87489ee75fea8ae9#diff-11eebc726596bfe963ef6f272a32530164721eb5c2c8e1df5102b38a690f4f92L128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3591718</div><div id='project'> Project Name: mangonihao/multiheadjointentityrelationextraction_simple</div><div id='commit'> Commit Name: 3a8d46652627013ee302506e87489ee75fea8ae9</div><div id='time'> Time: 2021-03-08</div><div id='author'> Author: 2075419247@qq.com</div><div id='file'> File Name: modules/joint_model.py</div><div id='m_class'> M Class Name: JointModel</div><div id='n_method'> N Class Name: JointModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: modules/joint_model.py</div><div id='n_file'> N File Name: modules/joint_model.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 165</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 compute loss 
+        mask = labels != 100
+        loss = None 
+        <a id="change">if </a>labels is not None<a id="change">:
+            </a>loss_fn = nn.CrossEntropyLoss()
+            loss = loss_fn(logits.reshape(-1, logits.shape[-1]), labels.reshape(-1))
+            &#47&#47 CRF
+            &#47&#47 loss = -self.crf(emissions=logits, </code></pre><h3>After Change</h3><pre><code class='java'>
+                            mask=mask,
+                            reduction = "token_mean")
+        else:
+            preds<a id="change"> = </a><a id="change">self.crf.decode(emissions=logits, mask=mask)</a>
+            logits = torch.LongTensor(preds)
+            &#47&#47 pass 
+
+        return dict(loss=loss, logits=logits)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thu-keg/omnievent/commit/05fcde9c3b3b7dc6cdb8ad1fd5162263d7f2913d#diff-3f2d93f6f901b9ae25b8805ca3ecd136e06ddaaf2b1b0c0ba64202d69aa2fe54L71' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3591719</div><div id='project'> Project Name: thu-keg/omnievent</div><div id='commit'> Commit Name: 05fcde9c3b3b7dc6cdb8ad1fd5162263d7f2913d</div><div id='time'> Time: 2022-05-17</div><div id='author'> Author: penghao20170136@163.com</div><div id='file'> File Name: src/OpenEE/model/model.py</div><div id='m_class'> M Class Name: ModelForSequenceLabeling</div><div id='n_method'> N Class Name: ModelForSequenceLabeling</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/OpenEE/model/model.py</div><div id='n_file'> N File Name: src/OpenEE/model/model.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 103</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        labels = torch.cat((torch.zeros(batch, device = device), torch.ones(batch, device = device)), dim = 0)
+
+        <a id="change">if </a>return_discr_loss<a id="change">:
+            </a>labels = torch.flip(labels, (0,))
+
+        real_or_fake = self.disc(torch.cat((fmap, img), dim = 0))
+        gan_loss = F.binary_cross_entropy(real_or_fake, labels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        fmap, indices, commit_loss = self.encode(img)
+
+        fmap<a id="change"> = </a><a id="change">self.decode(</a>fmap<a id="change">)</a>
+
+        if not return_loss:
+            return fmap
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/6dc8b217f76acb25f8b520e435b7e08a35d884f6#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3591715</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: 6dc8b217f76acb25f8b520e435b7e08a35d884f6</div><div id='time'> Time: 2022-01-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: VQGanVAE</div><div id='n_method'> N Class Name: VQGanVAE</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 153</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 174</div><BR>

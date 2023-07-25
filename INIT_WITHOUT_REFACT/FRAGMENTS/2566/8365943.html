@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq = torch.stack(batched_output_per_clip, dim=0).transpose_(0, 1)
+        gru_output, h_n = self.rnn(<a id="change">output_seq.unsqueeze(1)[:, :, :config.GRU_TEMPORAL_WINDOW]</a>)
+
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, st_maps, target):
+        batched_output_per_clip = []
+        <a id="change">hr_per_clip</a> = <a id="change">[]</a>
+
+        &#47&#47 Need to have so as to reflect a batch_size = 1 // if batched then comment out
+        st_maps = st_maps.unsqueeze(0)
+        for t in range(st_maps.size(1)):
+            &#47&#47 with torch.no_grad():
+            x = self.resnet18(st_maps[:, t, :, :, :])
+            &#47&#47 collapse dimensions to BSx512 (resnet o/p)
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            &#47&#47 if t == 0:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1))
+            &#47&#47 else:
+            &#47&#47     gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            &#47&#47 x = self.fc_resnet(gru_output.squeeze(1))
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL
+            &#47&#47 x = x*25.0
+            batched_output_per_clip.append(x.squeeze(0))
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        &#47&#47 the features extracted from the backbone CNN are fed to a one-layer GRU structure.
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        for i in range(gru_output.size(0)):
+            hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            <a id="change">hr_per_clip.append(</a>hr<a id="change">)</a>
+
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>hr_per_clip<a id="change">, dim=0)</a>.permute(1,0)
+        &#47&#47 return output_seq, gru_output.squeeze(0), fc_out
+        return output_seq, output_seq.squeeze(0)[:6]
+</code></pre>

@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :3125
+</h3><img src='10175551.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        elif derivative == 2:
+
+            dr = <a id="change">self.extract_tri_up(self.edist(
+                pos, derivative=1)).view(</a>nbatch, <a id="change">3</a>, <a id="change">-1</a><a id="change">)</a>
+            d2r = self.extract_tri_up(self.edist(
+                pos, derivative=2)).view(nbatch, 3, -1)
+
+            return self._jastrow_second_derivative(r, dr, d2r, jast)</code></pre><h3>After Change</h3><pre><code class='java'>
+            dr = self.edist(pos, derivative=1)
+            d2r = self.edist(pos, derivative=2).view(nbatch, 3, -1)
+
+            return(<a id="change">jast.prod(-1).prod(-1).unsqueeze(-1</a><a id="change">)</a>,
+                   self._jastrow_derivative(r, dr, jast, jacobian),
+                   self._jastrow_second_derivative(r, dr, d2r, jast))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/2dd5eec426a6613b9474adfacc7c51f0e461f236#diff-810b707a5e63a08c4e9a7c62d82d46df5168cc336a4b8e826cb5ea1757ee2ac6L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10175551</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: 2dd5eec426a6613b9474adfacc7c51f0e461f236</div><div id='time'> Time: 2021-02-16</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: qmctorch/wavefunction/jastrows/electron_nuclei_jastrow_base.py</div><div id='m_class'> M Class Name: ElectronNucleiJastrowFactorBase</div><div id='n_method'> N Class Name: ElectronNucleiJastrowFactorBase</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: qmctorch/wavefunction/jastrows/electron_nuclei_jastrow_base.py</div><div id='n_file'> N File Name: qmctorch/wavefunction/jastrows/electron_nuclei_jastrow_base.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 71</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input):
+        output = self.preprocess(input)
+        output = <a id="change">output.view(</a>output.shape[0], output.shape[1], <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        output = self.preprocess_1(output)
+        output = output.view(-1, 4 * self.dim, 4, 4)
+        output = self.block1(output)
+        output = self.block2(output)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: torch.Tensor):
+        x = self.preprocess(x)
+        x = <a id="change">x.unsqueeze(-1).unsqueeze(-1</a><a id="change">)</a>
+        x = self.preprocess_1(x)
+        x = x.view(-1, 4 * self.dim, 4, 4)
+        x = self.block1(x)
+        x = self.block2(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ain-soph/trojanzoo/commit/ea3dc7e60e1c454ab193464200273ef48f03888f#diff-2703c81ac301c3f9c4206b9498879a8b38485de4b048123eabf0616dbcf33e70L230' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10175550</div><div id='project'> Project Name: ain-soph/trojanzoo</div><div id='commit'> Commit Name: ea3dc7e60e1c454ab193464200273ef48f03888f</div><div id='time'> Time: 2020-08-04</div><div id='author'> Author: ain-soph@live.com</div><div id='file'> File Name: trojanzoo/attack/backdoor/clean_label.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: trojanzoo/attack/backdoor/clean_label.py</div><div id='n_file'> N File Name: trojanzoo/attack/backdoor/clean_label.py</div><div id='m_start'> M Start Line: 230</div><div id='m_end'> M End Line: 232</div><div id='n_start'> N Start Line: 143</div><div id='n_end'> N End Line: 145</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.out = nn.Linear(self.hidden_size, self.output_size)
+
+    def forward(self, input, hidden, encoder_outputs):
+        embedded = <a id="change">self.embedding(input).view(1</a>, <a id="change">1</a>, -1<a id="change">)</a>
+        embedded = self.dropout(embedded)
+
+        attn_weights = F.softmax(
+            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        embedded = self.dropout(self.embedding(_input).view(1, 1, -1))
+        attn_weights = F.softmax(self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1)
+        attn_applied = torch.bmm(attn_weights.unsqueeze(0), encoder_outputs.unsqueeze(0))
+        output = F.relu(<a id="change">self.attn_combine(torch.cat((embedded[0], attn_applied[0]), 1)).unsqueeze(0</a><a id="change">)</a>)
+        output, hidden = self.gru(output, hidden)
+        output = F.log_softmax(self.out(output[0]), dim=1)
+        return output, hidden, attn_weights</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/asahi417/lm-question-generation/commit/807e2131b9e761d29682f6ddb83c19ca665d4f44#diff-e793d015281df863ed8422944b8e6710874153c91d0860536cbd78aa762e3e53L84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10175569</div><div id='project'> Project Name: asahi417/lm-question-generation</div><div id='commit'> Commit Name: 807e2131b9e761d29682f6ddb83c19ca665d4f44</div><div id='time'> Time: 2022-12-25</div><div id='author'> Author: asahi1992ushio@gmail.com</div><div id='file'> File Name: misc/qag_model/lstm_model/model_training.py</div><div id='m_class'> M Class Name: AttnDecoderRNN</div><div id='n_method'> N Class Name: AttnDecoderRNN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: misc/qag_model/lstm_model/model_training.py</div><div id='n_file'> N File Name: misc/qag_model/lstm_model/model_training.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 72</div><div id='n_end'> N End Line: 75</div><BR>

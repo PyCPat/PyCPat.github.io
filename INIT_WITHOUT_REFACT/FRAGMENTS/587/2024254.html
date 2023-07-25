@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        coords = torch.stack((u_coord, v_coord), dim=1)  &#47&#47 HW x 2
+        tgt_coords_dense = coords.unsqueeze(0).expand(batch_size, height * width, 2) &#47&#47 B x HW x 2
+        if config[&quotgpuid&quot] != &quotcpu&quot:
+            tgt_coords_dense = <a id="change">tgt_coords_dense.cuda()</a>
+
+        pseudo_coords = torch.matmul(tgt_coords_dense.transpose(2, 1).contiguous(),
+            soft_match_vals.transpose(2, 1).contiguous()).transpose(2, 1).contiguous()  &#47&#47 BxNx2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            soft_match_vals.transpose(2, 1).contiguous()).transpose(2, 1).contiguous()  &#47&#47 BxNx2
+
+        &#47&#47 GET SCORES for pseudo point locations
+        pseudo_norm = <a id="change">normalize_coords(pseudo_coords, height, width).unsqueeze(1</a><a id="change">)</a>               &#47&#47 B x 1 x N x 2
+        tgt_scores_dense = scores_dense[1::self.window_size]
+        pseudo_scores = F.grid_sample(tgt_scores_dense, pseudo_norm, mode=&quotbilinear&quot)           &#47&#47 B x 1 x 1 x N
+        pseduo_scores = pseduo_scores.reshape(batch_size, 1, n_points)                          &#47&#47 B x 1 x N</code></pre>

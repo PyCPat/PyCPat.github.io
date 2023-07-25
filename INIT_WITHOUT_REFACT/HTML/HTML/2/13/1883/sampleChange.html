@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        coor_attn = coor_weights.softmax(dim = -2)
+        rel_coors = self.norm_rel_coors(rel_coors)
+        coors_out = <a id="change">einsum(&quotb i j h, b i j c -&gt; b i c h&quot</a>, coor_attn, rel_coors<a id="change">)</a>
+
+        coors_out = self.combine_coors_heads(coors_out)
+
+        &#47&#47 derive attention</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        coor_attn = coor_weights.softmax(dim = -2)
+
+        rel_coors_sign<a id="change"> = </a><a id="change">rearrange(self.coors_gate(</a>coors_mlp_input<a id="change">)</a>, <a id="change">&quotb i j h -&gt; b h i j ()&quot</a><a id="change">)</a>
+
+        rel_coors = self.norm_rel_coors(rel_coors)
+        rel_coors<a id="change"> = </a><a id="change">repeat(</a>rel_coors, <a id="change">&quotb i j c -&gt; b h i j c&quot</a><a id="change">, h = h) * </a>rel_coors_sign
+
+        coors_out<a id="change"> = einsum(&quotb i j h, b h i j c -&gt; b i c h&quot</a>, coor_attn, rel_coors<a id="change">)</a>
+
+        coors_out = self.combine_coors_heads(coors_out)
+
+        &#47&#47 derive attention</code></pre>

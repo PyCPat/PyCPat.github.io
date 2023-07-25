@@ -1,0 +1,44 @@
+<html><h3>Pattern ID :2707
+</h3><img src='9030895.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                i_w += i
+                outputs.append(self._ops[i_w](input_i, w1[i_w], w2[i_w]))
+            inputs.append(sum(consistent_dim(outputs)))
+        return torch.cat(<a id="change">inputs[-self.n_nodes:]</a>, dim=1)
+            
+       </code></pre><h3>After Change</h3><pre><code class='java'>
+                outputs.append(self._ops[i_w](input_i, w1[i_w], w2[i_w]))
+                i_w += 1
+            inputs.append(sum(dim_assert(outputs)))
+        return torch.cat(dim_assert(<a id="change">inputs[-self.n_nodes:]</a>), dim=1)
+            
+       </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/woodywff/nas_3d_unet/commit/232295fabe445c6e66fb1cff24ab27d6dae6feed#diff-485591f5d2aba1e55570896c01c45077c0a6726413ff53f086ff90c6bb47dd38L75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030895</div><div id='project'> Project Name: woodywff/nas_3d_unet</div><div id='commit'> Commit Name: 232295fabe445c6e66fb1cff24ab27d6dae6feed</div><div id='time'> Time: 2020-03-15</div><div id='author'> Author: woodywff@aliyun.com</div><div id='file'> File Name: cell.py</div><div id='m_class'> M Class Name: Cell</div><div id='n_method'> N Class Name: Cell</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cell.py</div><div id='n_file'> N File Name: cell.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 83</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        k = k.transpose(2, 3) &#47&#47 only using transposed k below
+        
+        &#47&#47 relative distance between two tokens is max total_len
+        pos = <a id="change">self.pos[-total_len:]</a>
+        r = self.w_r(pos).view(-1, total_len, embed_dim)
+        
+        &#47&#47 compute relative positional encodings
+        b = q @ r.transpose(1, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 compute projections of input and memory embeddings
+        q = self.w_q(x).view(batch_size, -1, seg_len, embed_dim)
+        kv = self.w_kv(h).view(2*batch_size, -1, total_len, embed_dim)
+        r_emb = self.w_r(<a id="change">self.R[-total_len:]</a>).view(1, -1, total_len, embed_dim)
+        k, v = kv.chunk(2, dim=0)
+        
+        &#47&#47 the "XL specific" way of computing the pre-softmax attention score</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/augustwester/transformer-xl/commit/27dc105ac00db033a4576e0591ab2cc548e62071#diff-eb7ae2070281ad9c6011e2b97c48b86fea6c48408aa6b0e9d20c8c520d3c7cf2L24' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030896</div><div id='project'> Project Name: augustwester/transformer-xl</div><div id='commit'> Commit Name: 27dc105ac00db033a4576e0591ab2cc548e62071</div><div id='time'> Time: 2022-11-27</div><div id='author'> Author: august.wester@gmail.com</div><div id='file'> File Name: attention.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: attention.py</div><div id='n_file'> N File Name: attention.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 42</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                outputs.append(self._ops[i_w](input_i, w1[i_w], w2[i_w]))
+                i_w += 1
+            inputs.append(sum(dim_assert(outputs)))
+        return torch.cat(dim_assert(<a id="change">inputs[-self.n_nodes:]</a>), dim=1)
+            
+       </code></pre><h3>After Change</h3><pre><code class='java'>
+                outputs.append(self._ops[i_w](input_i, w1[i_w], w2[i_w]))
+                i_w += 1
+            inputs.append(sum(outputs)) &#47&#47 debug: dim_assert
+        return torch.cat(<a id="change">inputs[-self.n_nodes:]</a>, dim=1) &#47&#47 debug: dim_assert
+            
+       </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/woodywff/nas_3d_unet/commit/22962faeb7ae96bb60c67372e81eecdc36a22e7a#diff-485591f5d2aba1e55570896c01c45077c0a6726413ff53f086ff90c6bb47dd38L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9030898</div><div id='project'> Project Name: woodywff/nas_3d_unet</div><div id='commit'> Commit Name: 22962faeb7ae96bb60c67372e81eecdc36a22e7a</div><div id='time'> Time: 2020-03-16</div><div id='author'> Author: woodywff@aliyun.com</div><div id='file'> File Name: cell.py</div><div id='m_class'> M Class Name: Cell</div><div id='n_method'> N Class Name: Cell</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cell.py</div><div id='n_file'> N File Name: cell.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 83</div><BR>

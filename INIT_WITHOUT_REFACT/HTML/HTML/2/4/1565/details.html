@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1565
+</h3><img src='4441003.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        output = self.fc3(x)
+        <a id="change">if </a>last<a id="change">:
+          </a>return output, x
+        else:
+          return output
+    def get_embedding_dim(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, last=False, freeze=False):
+        if freeze:
+            <a id="change">with torch.no_grad()</a><a id="change">:
+                </a>out = self.pool(F.relu(self.conv1(x)))
+                out = self.pool(F.relu(self.conv2(out)))
+                out = self.pool(F.relu(self.conv3(out)))
+                out = out.view(-1, 64 * 4 * 4)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/decile-team/distil/commit/4108c7fe8b81f9f198410bb6b2598f6833329a5e#diff-7b330b9ddfa3f7f69b09d1020e1f5880bc0e5266cd5006e041a5fc32abf415dcL17' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4441003</div><div id='project'> Project Name: decile-team/distil</div><div id='commit'> Commit Name: 4108c7fe8b81f9f198410bb6b2598f6833329a5e</div><div id='time'> Time: 2021-04-29</div><div id='author'> Author: you@example.com</div><div id='file'> File Name: distil/utils/models/cifar10net.py</div><div id='m_class'> M Class Name: CifarNet</div><div id='n_method'> N Class Name: CifarNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: distil/utils/models/cifar10net.py</div><div id='n_file'> N File Name: distil/utils/models/cifar10net.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 19</div><div id='n_end'> N End Line: 42</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment
+
+        <a id="change">if </a>self.training<a id="change">:
+            </a>self.new_means = ema(self.new_means, means, 0.5)
+
+        return indices, loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            dists, buckets = dists_and_buckets(x, means)
+
+        if update_means:
+            <a id="change">with torch.no_grad()</a><a id="change">:
+                </a>means = kmeans_iter(x, means, buckets)
+            self.new_means = means
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL394' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4441005</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: Kmeans</div><div id='n_method'> N Class Name: Kmeans</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 396</div><div id='m_end'> M End Line: 410</div><div id='n_start'> N Start Line: 367</div><div id='n_end'> N End Line: 384</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self._parallel_variance(torch.mean(x, dim=0), torch.var(x, dim=0), x.shape[0])
+
+        &#47&#47 scale back the data to the original representation
+        <a id="change">if </a>inverse<a id="change">:
+            </a>return torch.sqrt(self.running_variance.float()) \
+                * torch.clamp(x, min=-self.clip_threshold, max=self.clip_threshold) + self.running_mean.float()
+        &#47&#47 standardization by centering and scaling
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        :type no_grad: bool, optional
+        
+        if no_grad:
+            <a id="change">with torch.no_grad()</a><a id="change">:
+                </a>return self._compute(x, train, inverse)
+        else:
+            return self._compute(x, train, inverse)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/toni-sm/skrl/commit/3ff78a027e492182b7e8d539ce2233a89cdf9bc0#diff-bc43aa4c67bd0eb748dda11701cf63e0d3118648dbc475df748b6b7702960e9eL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4441004</div><div id='project'> Project Name: toni-sm/skrl</div><div id='commit'> Commit Name: 3ff78a027e492182b7e8d539ce2233a89cdf9bc0</div><div id='time'> Time: 2022-07-08</div><div id='author'> Author: toni.semu@gmail.com</div><div id='file'> File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_class'> M Class Name: RunningStandardScaler</div><div id='n_method'> N Class Name: RunningStandardScaler</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='n_file'> N File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 150</div><BR>

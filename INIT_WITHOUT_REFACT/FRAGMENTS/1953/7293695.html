@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        contextLoss = F.cross_entropy(predict, c1)
+        &#47&#47 [n, m, h, w, k] -&gt; [n, k, m, h, w]
+        l1, l2 = <a id="change">l1.permute(</a>0, <a id="change">4</a>, <a id="change">1</a>, <a id="change">2</a>, <a id="change">3</a><a id="change">)</a>, l2.permute(0, 4, 1, 2, 3)
+        &#47&#47 [N, K, M, H, W], [N, M, H, W]
+        &#47&#47 sum(-logP) / ()
+        bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 sum(-logP) / ()
+        &#47&#47 bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)
+
+        l1 = <a id="change">l1.mean(</a>(2,3)<a id="change">)</a>
+        l2 = l2.mean((2,3))
+
+        posterior1 = torch.distributions.Categorical(logits=l1)
+        posterior2 = torch.distributions.Categorical(logits=l2)</code></pre>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = F.pad(mask, (0, self.image_seq_len), value = True)
+
+        out = self.transformer(tokens, mask = mask)
+        <a id="change">return </a><a id="change">self.to_logits(</a>out<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask = F.pad(mask, (0, self.image_seq_len), value = True)
+
+        out = self.transformer(tokens, mask = mask)
+        out<a id="change"> = </a><a id="change">self.to_logits(</a>out<a id="change">)</a>
+
+        <a id="change">if not return_loss</a><a id="change">:
+            return </a>out
+
+        offsetted_image = image + self.num_text_tokens
+        labels = torch.cat((text, offsetted_image), dim = 1)
+        labels = F.pad(labels, (0, 1), value = (self.total_tokens - 1)) &#47&#47 last token predicts EOS
+        loss = F.cross_entropy(out.transpose(1, 2), labels[:, 1:])
+        <a id="change">return </a>loss
+</code></pre>

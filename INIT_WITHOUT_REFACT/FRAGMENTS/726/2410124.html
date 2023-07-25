@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            return ord_prob.view(-1, ord_num, H, W)
+
+        ord_prob = F.softmax(C, dim=1)[:, 1, ::]
+        ord_prob = <a id="change">ord_prob.view(-1</a>, ord_num, H, W<a id="change">)</a>
+        ord_label = <a id="change">torch.sum((ord_prob &gt; 0.5), dim=1).view(-1</a>, 1, H, W<a id="change">)</a>
+        return ord_prob, ord_label
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            return ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = <a id="change">torch.sum((ord_prob &gt; 0.5), dim=1).reshape(</a>(N, 1, H, W)<a id="change">)</a>
+        return ord_prob, ord_label
+
+</code></pre>

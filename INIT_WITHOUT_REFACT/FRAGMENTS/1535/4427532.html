@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            o = norm2(o + ff(o), aug_batch)
+
+        glob = torch.cat([gnn.global_mean_pool(o[:-c.shape[0]], g.batch), o[-c.shape[0]:], c], 1)
+        o_final = torch.cat([o[:-c.shape[0]], <a id="change">c[g.batch]</a>], 1)
+        return o_final, glob
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            agg = gen(o, aug_edge_index, aug_e)
+            l_h = linear(trans(torch.cat([o, agg], 1), aug_edge_index, aug_e))
+            cs = cscale(c[aug_batch])
+            scale, shift = cs[:, <a id="change">:l_h.shape[1]</a>], cs[:, l_h.shape[1]:]
+            o = norm1(o + l_h * scale + shift, aug_batch)
+            o = norm2(o + ff(o), aug_batch)
+</code></pre>

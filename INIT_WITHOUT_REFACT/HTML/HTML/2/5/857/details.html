@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :857
+</h3><img src='2710890.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, data):
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        print(feature_emb.shape)
+
+        attention_out = self.self_attention(feature_emb)
+        attention_out = attention_out.flatten(start_dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        attention_out = attention_out.flatten(start_dim=1)
+        y_pred = self.fc(attention_out)
+        if self.dnn is not None:
+            dense_input<a id="change"> = </a><a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+            emb_flatten = feature_emb.flatten(start_dim=1)
+            y_pred += self.dnn(torch.cat(<a id="change">[</a>emb_flatten, dense_input<a id="change"></a>], dim=1))
+        if self.lr_layer is not None:
+            y_pred += self.lr_layer(data)
+        y_pred = y_pred.sigmoid()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1#diff-c38536361653f289bb7d19b6086e6777c0900c1cb2a83547da1d4c3cecd6798aL47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710890</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/ranking/autoint.py</div><div id='m_class'> M Class Name: AutoInt</div><div id='n_method'> N Class Name: AutoInt</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/ranking/autoint.py</div><div id='n_file'> N File Name: rec_pangu/models/ranking/autoint.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y_pred = self.lr(data)  &#47&#47 Batch,1
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        senet_emb = self.senet_layer(feature_emb)
+        bilinear_p = self.bilinear_interaction(feature_emb)
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)
+
+        dense_input<a id="change"> = </a><a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+        comb_out = torch.cat(<a id="change">[</a>comb_out, dense_input<a id="change"></a>], dim=1)
+        y_pred += self.dnn(comb_out)
+        y_pred = y_pred.sigmoid()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1#diff-bb229915802a071d82e403b304be0859aaf7f48f9f98e21955468aae46aab936L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710883</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/ranking/fibinet.py</div><div id='m_class'> M Class Name: FiBiNet</div><div id='n_method'> N Class Name: FiBiNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/ranking/fibinet.py</div><div id='n_file'> N File Name: rec_pangu/models/ranking/fibinet.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 38</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y_pred = self.lr(data)  &#47&#47 Batch,1
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        senet_emb = self.senet_layer(feature_emb)
+        bilinear_p = self.bilinear_interaction(feature_emb)
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        bilinear_q = self.bilinear_interaction(senet_emb)
+        comb_out = torch.flatten(torch.cat([bilinear_p, bilinear_q], dim=1), start_dim=1)
+
+        dense_input<a id="change"> = </a><a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+        comb_out = torch.cat(<a id="change">[</a>comb_out, dense_input<a id="change"></a>],dim=1)
+        y_pred += self.dnn(comb_out)
+        y_pred = y_pred.sigmoid()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1#diff-5c87e23af6382d7d8f909a324ceea4896dc2cb9ee5f70732e80326a3d939acc7L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710887</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/ranking/afm.py</div><div id='m_class'> M Class Name: AFM</div><div id='n_method'> N Class Name: AFM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/ranking/afm.py</div><div id='n_file'> N File Name: rec_pangu/models/ranking/afm.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 38</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, data):
+
+        sparse_emb_list = self.embedding_layer(data)
+        feature_emb = <a id="change">torch.stack(sparse_emb_list, dim=1).squeeze(2</a><a id="change">)</a>
+        lr_logit = self.lr_layer(data)
+        cin_logit = self.cin(feature_emb)
+        if self.dnn is not None:
+            dnn_logit = self.dnn(feature_emb.flatten(start_dim=1))</code></pre><h3>After Change</h3><pre><code class='java'>
+        lr_logit = self.lr_layer(data)
+        cin_logit = self.cin(feature_emb)
+        if self.dnn is not None:
+            dense_input<a id="change"> = </a><a id="change">get_linear_input(</a>self.enc_dict, data<a id="change">)</a>
+            emb_flatten = feature_emb.flatten(start_dim=1)
+            dnn_logit = self.dnn(torch.cat(<a id="change">[</a>emb_flatten, dense_input<a id="change"></a>], dim=1))
+            y_pred = lr_logit + cin_logit + dnn_logit
+        else:
+            y_pred = lr_logit + cin_logit</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1#diff-a3e0c043ff084420f3994e1b347d27e551a986915c53031b08a565a8106d568aL35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710886</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/ranking/xdeepfm.py</div><div id='m_class'> M Class Name: xDeepFM</div><div id='n_method'> N Class Name: xDeepFM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/ranking/xdeepfm.py</div><div id='n_file'> N File Name: rec_pangu/models/ranking/xdeepfm.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 43</div><BR>

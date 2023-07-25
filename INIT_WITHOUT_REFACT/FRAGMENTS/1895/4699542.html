@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            EqualizedConv2d(
+                in_channels, out_channels, 3, padding=1, bias=False
+            ),
+            <a id="change">FusedLeakyReLU(</a>out_channels<a id="change">)</a>,
+            EqualizedConv2d(
+                out_channels, out_channels, 3, padding=1, bias=False
+            ),</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        layers = [
+            Conv2d(&quotelr&quot, in_channels, out_channels, 3, padding=1),
+            <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>
+        ]
+        for _ in range(num_conv-1):
+            layers.extend([
+                Conv2d(&quotelr&quot, out_channels, out_channels, 3, padding=1),
+                <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>
+            ])
+        self.block = nn.Sequential(*layers)
+        self.down = Downsample2x(down_name)
+        self.skip = Conv2d(&quotelr&quot, in_channels, out_channels, 1)</code></pre>

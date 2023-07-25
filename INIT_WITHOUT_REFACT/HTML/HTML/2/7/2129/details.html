@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :2129
+</h3><img src='7586098.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">return </a>tokens
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, img, iters = None):
+        b, device = img.shape[0], img.device
+        iters = default(iters, self.levels<a id="change"> * </a>2)   &#47&#47 need to have twice the number of levels of iterations in order for information to propagate up and back down. can be overridden
+
+        tokens = self.image_to_tokens(img)
+        n = tokens.shape[1]
+
+        pos_embs = self.pos_emb(torch.arange(n, device = device))
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        bottom_level = rearrange(bottom_level, &quotb n d -&gt; b n () d&quot)
+
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">for _</a> in <a id="change">range(</a>iters<a id="change">):
+            </a>levels = torch.cat((bottom_level, levels), dim = -2)  &#47&#47 each iteration, attach original input (with positional embedding) at the bottom level
+
+            bottom_up_out = self.bottom_up(levels[..., :-1, :])
+            top_down_out<a id="change"> = </a>self.top_down(levels[..., 1:, :])
+
+            bottom_up_out = torch.cat((bottom_level, bottom_up_out), dim = -2)
+            top_down_out = F.pad(top_down_out, (0, 0, 0, 1), value = 0.)
+
+            consensus = self.attention(levels)
+
+            levels<a id="change"> = </a>torch.stack((levels, bottom_up_out, top_down_out, consensus)).mean(dim = 0) &#47&#47 hinton said to use the weighted mean of (1) bottom up (2) top down (3) previous level value {t - 1} (4) consensus value
+            levels = levels[..., 1:, :]  &#47&#47 excise out the bottom level
+
+        return levels</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/glom-pytorch/commit/869b711d49f23be53cc295d583c5ef37f95c96a5#diff-2bce7536af7c0a2fe47054a9c6dd00320e623412cf5c9d7e24a0b0b8c950a574L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7586098</div><div id='project'> Project Name: lucidrains/glom-pytorch</div><div id='commit'> Commit Name: 869b711d49f23be53cc295d583c5ef37f95c96a5</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: glom_pytorch/glom_pytorch.py</div><div id='m_class'> M Class Name: Glom</div><div id='n_method'> N Class Name: Glom</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: glom_pytorch/glom_pytorch.py</div><div id='n_file'> N File Name: glom_pytorch/glom_pytorch.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes_output.device))
+        alpha = torch.sigmoid(self.alpha)
+        embed = (1 - alpha) * items_embedding.clone() + alpha * nodes_output
+        <a id="change">return </a>embed
+
+
+class AggregateTemporalNodeFeatures(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param nodes_output: the output of self-attention model in time dimension, (n_1+n_2+..., F)
+        :return:
+        
+        batch_size = nodes_output.shape[0]<a id="change"> // </a>self.items_total
+        id = 0
+        num_nodes = self.items_total
+        items_embedding = self.item_embedding(torch.tensor([i for i in range(self.items_total)]).to(nodes_output.device))
+        batch_embedding = []
+        <a id="change">for _</a> in <a id="change">range(</a>batch_size<a id="change">):
+            </a>output_node_features<a id="change"> = </a>nodes_output[id:id + num_nodes, :]
+            embed = (1 - self.alpha) * items_embedding
+
+            embed<a id="change"> = </a>embed + self.alpha * output_node_features
+            batch_embedding.append(embed)
+            id += num_nodes
+        batch_embedding = torch.stack(batch_embedding)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/6c36f8a6c545046914ce31c842b9648ac37c8b93#diff-781837fb12ee6ac1f0b89d83a2500544e486bd58832bd4e4a8d1a779b2a0950eL78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7586155</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 6c36f8a6c545046914ce31c842b9648ac37c8b93</div><div id='time'> Time: 2021-07-24</div><div id='author'> Author: benedek.rozemberczki@gmail.com</div><div id='file'> File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_class'> M Class Name: GlobalGatedUpdater</div><div id='n_method'> N Class Name: GlobalGatedUpdater</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 87</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.module_list = nn.Sequential(*self.module_list)
+
+    def forward(self, x):
+        <a id="change">return </a>self.module_list(x)
+
+
+class GraphSageModel(thnn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.lins.append(nn.Linear(hidden_dim, output_dim))
+
+    def forward(self, x):
+        <a id="change">for i</a> in <a id="change">range(</a>self.num_layers<a id="change"> - </a>1<a id="change">):
+            </a>x<a id="change"> = </a>F.relu(self.lins[i](x))
+            x = self.bns[i](x)  &#47&#47 batch norm
+            x<a id="change"> = </a>F.dropout(x, p=0.5, training=self.training)
+        x = self.lins[-1](x)
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ytchx1999/maxp_dgl_graph/commit/f58be51dd0cdd5e93c25fbd239940c88e554bf2e#diff-79e8e0d24a77796bb1fbc9cf4b5504d090f72acbca6cd3dc4db16e6b1b096fa6L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7586111</div><div id='project'> Project Name: ytchx1999/maxp_dgl_graph</div><div id='commit'> Commit Name: f58be51dd0cdd5e93c25fbd239940c88e554bf2e</div><div id='time'> Time: 2021-10-28</div><div id='author'> Author: 54234005+ytchx1999@users.noreply.github.com</div><div id='file'> File Name: gnn/models.py</div><div id='m_class'> M Class Name: MLP</div><div id='n_method'> N Class Name: MLP</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gnn/models.py</div><div id='n_file'> N File Name: gnn/models.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 78</div><BR>

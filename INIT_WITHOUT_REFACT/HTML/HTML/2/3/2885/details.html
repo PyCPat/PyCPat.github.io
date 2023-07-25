@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2885
+</h3><img src='9555725.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            conv_input_mask = rearrange(mask, &quotb n -&gt; b () n&quot)
+            <a id="change">conv_input.masked_fill_(</a>~conv_input_mask, 0.<a id="change">)</a>
+
+        narrow_out = self.narrow_conv(conv_input)
+        narrow_out = rearrange(narrow_out, &quotb d n -&gt; b n d&quot)
+        wide_out = self.wide_conv(conv_input)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            conv_input_mask = rearrange(mask, &quotb n -&gt; b () n&quot)
+            conv_input<a id="change"> = </a><a id="change">conv_input.masked_fill(</a>~conv_input_mask, 0.<a id="change">)</a>
+
+        narrow_out = self.narrow_conv(conv_input)
+        narrow_out = rearrange(narrow_out, &quotb d n -&gt; b n d&quot)
+        wide_out = self.wide_conv(conv_input)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/protein-bert-pytorch/commit/9440e114b898abcfc4bfc28f78465d7fc062ff22#diff-6e35313d9af4f12619a10ddacdffb91019586962c8eddcde1ba5702de45fcc56L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9555725</div><div id='project'> Project Name: lucidrains/protein-bert-pytorch</div><div id='commit'> Commit Name: 9440e114b898abcfc4bfc28f78465d7fc062ff22</div><div id='time'> Time: 2021-06-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_class'> M Class Name: Layer</div><div id='n_method'> N Class Name: Layer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='n_file'> N File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_start'> M Start Line: 215</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 216</div><div id='n_end'> N End Line: 216</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () n ()&quot)
+            <a id="change">k.masked_fill_(</a>~mask, -torch.finfo(k.dtype).max<a id="change">)</a>
+
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () n ()&quot)
+            k<a id="change"> = </a><a id="change">k.masked_fill(</a>~mask, -torch.finfo(k.dtype).max<a id="change">)</a>
+
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/protein-bert-pytorch/commit/9440e114b898abcfc4bfc28f78465d7fc062ff22#diff-6e35313d9af4f12619a10ddacdffb91019586962c8eddcde1ba5702de45fcc56L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9555724</div><div id='project'> Project Name: lucidrains/protein-bert-pytorch</div><div id='commit'> Commit Name: 9440e114b898abcfc4bfc28f78465d7fc062ff22</div><div id='time'> Time: 2021-06-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_class'> M Class Name: GlobalLinearSelfAttention</div><div id='n_method'> N Class Name: GlobalLinearSelfAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='n_file'> N File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 57</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                self_mask = rearrange(torch.eye(n, device = device, dtype = torch.bool), &quoti j -&gt; () i j&quot)
+
+                ranking.masked_fill_(self_mask, -1.)
+                <a id="change">adj_mat.masked_fill_(</a>self_mask, False<a id="change">)</a>
+                ranking.masked_fill_(adj_mat, 0.)
+
+            nbhd_ranking, nbhd_indices = ranking.topk(num_nearest, dim = -1, largest = False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+                self_mask = rearrange(torch.eye(n, device = device, dtype = torch.bool), &quoti j -&gt; () i j&quot)
+
+                adj_mat<a id="change"> = </a><a id="change">adj_mat.masked_fill(</a>self_mask, False<a id="change">)</a>
+                ranking.masked_fill_(self_mask, -1.)
+                ranking.masked_fill_(adj_mat, 0.)
+
+            nbhd_ranking, nbhd_indices = ranking.topk(num_nearest, dim = -1, largest = False)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/egnn-pytorch/commit/e7a8b8c802838179c39e767d39332c06c02207ba#diff-bc5f0b587e39386590599ccefaeb0776a2edb29856099faa2ece667dd370ec4cL155' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9555726</div><div id='project'> Project Name: lucidrains/egnn-pytorch</div><div id='commit'> Commit Name: e7a8b8c802838179c39e767d39332c06c02207ba</div><div id='time'> Time: 2021-03-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_class'> M Class Name: EGNN</div><div id='n_method'> N Class Name: EGNN</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: egnn_pytorch/egnn_pytorch.py</div><div id='n_file'> N File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_start'> M Start Line: 161</div><div id='m_end'> M End Line: 186</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 185</div><BR>

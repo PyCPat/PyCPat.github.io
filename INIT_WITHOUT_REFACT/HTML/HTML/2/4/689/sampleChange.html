@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = mask.unsquuze(1) &#47&#47 [b, 1, l]
+            &#47&#47mask对conv操作没有影响，但是可能对max_pool操作产生影响，在max_pool之前对mask填充-inf
+            conv_res = <a id="change">[x.masked_fill_((1-mask).byte(), float(&quot-inf&quot)) for x in conv_res]</a>
+
+        tmp = [F.max_pool1d(input=x, kernel_size=x.size(2)).squeeze(2) for x in conv_res]
+        return torch.cat(tmp, dim=-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        :params: mask torch.Tensor [batch_size, length]
+        
+        if mask is not None:
+            input = input * <a id="change">mask.unsqueeze(-1</a><a id="change">)</a>.float()
+
+        &#47&#47[b, l, d] -&gt; [b, d, l]
+        input = torch.transpose(input, 1, 2)</code></pre>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 conv features
+        conv = self.cnn(input)
+        b, c, h, w = conv.size()
+        <a id="change">assert </a>h == 1, "the height of conv must be 1"
+        conv = conv.squeeze(2)
+        conv = conv.permute(2, 0, 1)  &#47&#47 [w, b, c]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        conv = self.cnn(input)
+        &#47&#47 rnn features
+        output = self.rnn(conv)
+        cls<a id="change"> = </a>self.classifier(output)
+        &#47&#47 add log_softmax to converge output
+        output = F.log_softmax(cls, dim=2)
+        if self.return_cls:
+            <a id="change">return </a>output<a id="change">, F.softmax(cls, 2)</a>
+
+        return output
+
+</code></pre>

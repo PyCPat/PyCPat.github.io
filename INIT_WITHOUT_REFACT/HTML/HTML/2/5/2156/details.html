@@ -1,0 +1,73 @@
+<html><h3>Pattern ID :2156
+</h3><img src='7633044.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if indivisual_attn:
+            attn = attn.view(n_head, sz_b, len_q, len_k)
+
+        return output<a id="change">, attn</a>
+
+
+class ScaledDotProductAttention(nn.Module):
+    def __init__(self, temperature):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mapping_mask is not None:
+            mapping_mask = mapping_mask.repeat(n_head, 1, 1)  &#47&#47 (n*b) x .. x ..
+        if attn_prior is not None:
+            attn_prior<a id="change"> = </a><a id="change">attn_prior.repeat(</a>n_head, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+        output, attns, attn_logprob = self.attention(
+            q, k, v, key_mask=key_mask, query_mask=query_mask, mapping_mask=mapping_mask, attn_prior=attn_prior)
+
+        output = output.view(n_head, sz_b, len_q, d_v)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keonlee9420/portaspeech/commit/814cdda1ebf7dc626708db2bcf20fdb9207f4345#diff-eed8dda7a8e19d25dc983adc6194cdb57bfef7afee02def70160e6694ca3984aL558' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7633044</div><div id='project'> Project Name: keonlee9420/portaspeech</div><div id='commit'> Commit Name: 814cdda1ebf7dc626708db2bcf20fdb9207f4345</div><div id='time'> Time: 2022-02-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/blocks.py</div><div id='m_class'> M Class Name: WordToPhonemeAttention</div><div id='n_method'> N Class Name: WordToPhonemeAttention</div><div id='m_method'> M Method Name: forward(9)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/blocks.py</div><div id='n_file'> N File Name: model/blocks.py</div><div id='m_start'> M Start Line: 584</div><div id='m_end'> M End Line: 599</div><div id='n_start'> N Start Line: 558</div><div id='n_end'> N End Line: 602</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+	def forward(self, content_code, class_code):
+		batch_size = content_code.shape[0]
+
+		content_code = content_code.view((batch_size<a id="change">, -1, 4, 4</a>))
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])</code></pre><h3>After Change</h3><pre><code class='java'>
+
+	def forward(self, content_codes, class_codes):
+		styles = torch.cat((content_codes, class_codes), dim=1)
+		latent = <a id="change">styles.unsqueeze(dim=1).repeat(1</a>, self.n_latent, <a id="change">1</a><a id="change">)</a>
+		&#47&#47 latent = styles.view((-1, self.n_latent, 512))
+
+		out = self.input(latent)
+		out = self.conv1(out, latent[:, 0])
+
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], self.convs[1::2], self.to_rgbs):
+			out = conv1(out, latent[:, i])
+			out<a id="change"> = </a>conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)
+
+			i += 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7633045</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 TODO: try residual connection
+
+        logits = self.out(torch.cat((text_attn_feature<a id="change">, visual_attn_feature, audio_attn_feature</a>), dim=1))
+        return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            output_text, _ = self.RNNs[0](X_text)
+            output_text = output_text[:, -1, :]
+            text_emo_vecs_origin = self.textEmoEmbs(torch.LongTensor(list(range(self.num_classes))).to(self.device))
+            text_emo_vecs<a id="change"> = </a><a id="change">text_emo_vecs_origin.unsqueeze(0).repeat(</a>batch_size, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>
+            text_attn_weights = self.attention(output_text, text_emo_vecs)
+            logits = text_attn_weights if logits is None else logits + text_attn_weights
+
+        if &quota&quot in self.modalities:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wenliangdai/modality-transferable-mer/commit/b0e565d11d6b3bf9f65fb1dcbdc8c641a2bc8054#diff-9dca09e4df72ee7b751c74b7ea8c66a06c2d78f76fef6a3bdb604dc6680fd2efL51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7633062</div><div id='project'> Project Name: wenliangdai/modality-transferable-mer</div><div id='commit'> Commit Name: b0e565d11d6b3bf9f65fb1dcbdc8c641a2bc8054</div><div id='time'> Time: 2020-06-10</div><div id='author'> Author: wenliang.dai.1995@gmail.com</div><div id='file'> File Name: src/models/temp.py</div><div id='m_class'> M Class Name: EmotionEmbAttnModel</div><div id='n_method'> N Class Name: EmotionEmbAttnModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/temp.py</div><div id='n_file'> N File Name: src/models/temp.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 79</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        block_forecasts = torch.stack(block_forecasts)
+        block_forecasts = block_forecasts.permute(1, 0, 2)
+
+        return forecast<a id="change">, block_forecasts</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 encoder_mask = encoder_mask.flip(dims=(-1,))
+        encoder_mask = encoder_mask.unsqueeze(-1)
+
+        level = <a id="change">encoder_y[:, -1:].repeat(1</a>, decoder_x_t.size(1), <a id="change">1</a><a id="change">)</a>  &#47&#47 Level with Naive1
+        block_forecasts<a id="change"> = </a>[level]
+        block_backcasts = [encoder_y[:, -1:].repeat(1, encoder_y.size(1), 1)]
+
+        forecast = level</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/a60fea51988c95548f47dd9fb76fa57258201160#diff-e15aa407f75975260ffed738d20639620726fe06ff7533b115426860e6eea826L334' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7633052</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: a60fea51988c95548f47dd9fb76fa57258201160</div><div id='time'> Time: 2022-03-20</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_class'> M Class Name: NHiTS</div><div id='n_method'> N Class Name: NHiTS</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/nhits/sub_modules.py</div><div id='m_start'> M Start Line: 343</div><div id='m_end'> M End Line: 363</div><div id='n_start'> N Start Line: 353</div><div id='n_end'> N End Line: 379</div><BR>

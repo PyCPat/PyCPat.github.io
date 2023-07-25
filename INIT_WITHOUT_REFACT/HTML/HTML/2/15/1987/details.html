@@ -1,0 +1,145 @@
+<html><h3>Pattern ID :1987
+</h3><img src='7406913.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">return </a>out<a id="change"> + </a>residual
+
+&#47&#47 Gated Dsconv LM
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        assert x.shape[1] &lt;= self.max_seq_len
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>x<a id="change"> = torch</a><a id="change">.flip(</a>x<a id="change">, dims = (1,))</a>
+
+        residual, x = x.clone(), self.norm(x)
+
+        u = self.to_u(x)
+        v = self.to_v(x)
+
+        v = self.dsconv(v)
+
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">out</a><a id="change"> = </a>out<a id="change"> + </a>residual
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>out<a id="change"> = torch</a><a id="change">.flip(out</a><a id="change">, dims = (1,))</a>
+
+        <a id="change">return out</a>
+
+&#47&#47 Gated Dsconv LM
+
+class GatedDsConvLM(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 11</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/gated-state-spaces-pytorch/commit/558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab#diff-c008c658d78f9c1e86d588f49c9f385cf6b4696ea583837f5d0868952b302241L125' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7406913</div><div id='project'> Project Name: lucidrains/gated-state-spaces-pytorch</div><div id='commit'> Commit Name: 558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab</div><div id='time'> Time: 2022-07-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_class'> M Class Name: GatedDsConv</div><div id='n_method'> N Class Name: GatedDsConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='n_file'> N File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(out, &quot... h d -&gt; ... (h d)&quot)
+
+        <a id="change">return </a>out<a id="change"> + </a>residual
+
+class GatedMHESA(nn.Module):
+     Pseudocode 3.2 </code></pre><h3>After Change</h3><pre><code class='java'>
+        d - dimension
+        
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>x<a id="change"> = </a><a id="change">torch.flip(</a>x<a id="change">, dims = (1,))</a>
+
+        device, seq_len = x.device, x.shape[1]
+        u = self.norm(x)
+
+        &#47&#47 learned weighted residual
+
+        residual = u * self.param_D
+
+        &#47&#47 weights derived from alphas (learned exponential smoothing decay rate)
+
+        alphas = self.alphas.sigmoid()
+        reversed_powers = torch.arange(seq_len - 1, -1, -1, device = device)
+        K = alphas * ((1 - alphas) ** rearrange(reversed_powers, &quot... l -&gt; ... l 1&quot))
+
+        &#47&#47 conv1d fft O(nlog(n))
+
+        u = rearrange(u, &quot... (h d) -&gt; ... h d&quot, h = self.heads)
+
+        out = conv1d_fft(u, K, dim = -3, weight_dim = -2)
+
+        out = rearrange(out, &quot... h d -&gt; ... (h d)&quot)
+
+        <a id="change">out</a><a id="change"> = </a>out<a id="change"> + </a>residual
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>out<a id="change"> = </a><a id="change">torch.flip(</a>out<a id="change">, dims = (1,))</a>
+
+        <a id="change">return </a>out
+
+class GatedMHESA(nn.Module):
+     Pseudocode 3.2 </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/gated-state-spaces-pytorch/commit/558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab#diff-d94ca90bf695e5295a129a5abb2a836cb7101219f0af6f7c0452f91cdabe6419L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7406912</div><div id='project'> Project Name: lucidrains/gated-state-spaces-pytorch</div><div id='commit'> Commit Name: 558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab</div><div id='time'> Time: 2022-07-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gated_state_spaces_pytorch/mhesa.py</div><div id='m_class'> M Class Name: MHESA</div><div id='n_method'> N Class Name: MHESA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gated_state_spaces_pytorch/mhesa.py</div><div id='n_file'> N File Name: gated_state_spaces_pytorch/mhesa.py</div><div id='m_start'> M Start Line: 77</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 74</div><div id='n_end'> N End Line: 103</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">return </a>out<a id="change"> + </a>residual
+
+&#47&#47 Gated State Spaces LM
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.to_out = nn.Linear(dim_hidden, dim)
+
+    def forward(self, x):
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>x<a id="change"> = </a><a id="change">torch.flip(</a>x<a id="change">, dims = (1,))</a>
+
+        residual, x = x.clone(), self.norm(x)
+
+        u = self.to_u(x)
+        v = self.to_v(x)
+
+        v = self.dss(v)
+
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">out</a><a id="change"> = </a>out<a id="change"> + </a>residual
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>out<a id="change"> = </a><a id="change">torch.flip(</a>out<a id="change">, dims = (1,))</a>
+
+        <a id="change">return </a>out
+
+&#47&#47 Gated State Spaces LM
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/gated-state-spaces-pytorch/commit/558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab#diff-d3562359a2a02f32c8f712d60cc4ec8302f49277177dac0845f3018e6648cb3dL98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7406915</div><div id='project'> Project Name: lucidrains/gated-state-spaces-pytorch</div><div id='commit'> Commit Name: 558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab</div><div id='time'> Time: 2022-07-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gated_state_spaces_pytorch/gss.py</div><div id='m_class'> M Class Name: GSS</div><div id='n_method'> N Class Name: GSS</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gated_state_spaces_pytorch/gss.py</div><div id='n_file'> N File Name: gated_state_spaces_pytorch/gss.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 101</div><div id='n_end'> N End Line: 119</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">return </a>out<a id="change"> + </a>residual
+
+&#47&#47 Gated Dsconv LM
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        assert x.shape[1] &lt;= self.max_seq_len
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>x<a id="change"> = </a><a id="change">torch.flip(</a>x<a id="change">, dims = (1,))</a>
+
+        residual, x = x.clone(), self.norm(x)
+
+        u = self.to_u(x)
+        v = self.to_v(x)
+
+        v = self.dsconv(v)
+
+        uc = self.to_gate(v)
+        out = self.to_out(uc * u)
+
+        <a id="change">out</a><a id="change"> = </a>out<a id="change"> + </a>residual
+
+        <a id="change">if self.reverse_seq</a><a id="change">:
+            </a>out<a id="change"> = </a><a id="change">torch.flip(</a>out<a id="change">, dims = (1,))</a>
+
+        <a id="change">return </a>out
+
+&#47&#47 Gated Dsconv LM
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/gated-state-spaces-pytorch/commit/558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab#diff-c008c658d78f9c1e86d588f49c9f385cf6b4696ea583837f5d0868952b302241L120' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7406911</div><div id='project'> Project Name: lucidrains/gated-state-spaces-pytorch</div><div id='commit'> Commit Name: 558c6e44e0b7199a21cfcc74fb7ddf3d1d6947ab</div><div id='time'> Time: 2022-07-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_class'> M Class Name: GatedDsConv</div><div id='n_method'> N Class Name: GatedDsConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='n_file'> N File Name: gated_state_spaces_pytorch/dsconv.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 133</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 143</div><BR>

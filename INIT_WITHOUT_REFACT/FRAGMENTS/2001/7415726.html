@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        with torch.no_grad():
+            means, buckets, dists = kmeans(x, means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+            indices = indices.contiguous().view(*<a id="change">indices.size()[:2]</a>, -1)
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment</code></pre><h3>After Change</h3><pre><code class='java'>
+            dists, buckets = dists_and_buckets(x, means)
+
+        if update_means:
+            <a id="change">with torch</a><a id="change">.no_grad():
+                </a>means = kmeans_iter(x, means, buckets)
+            self.new_means = means
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)</code></pre>

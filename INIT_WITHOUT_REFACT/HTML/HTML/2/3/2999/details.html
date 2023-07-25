@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :2999
+</h3><img src='9925879.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for i, conv in enumerate(self.inter_convs):
+            out = F.interpolate(inters[-1], scale_factor=2., mode="nearest")    &#47&#47 resize(P7td)
+            out = self.fuse([x[-2-i], out])                                     &#47&#47 P6in + resize(P7td)
+            inters.append(<a id="change">conv(</a>out<a id="change">)</a>)                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            
+        &#47&#47 bottom-up
+        inters = inters[::-1]           &#47&#47 feature maps from bottom to top, same order as input x</code></pre><h3>After Change</h3><pre><code class='java'>
+            tds[i] = self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs<a id="change"> = </a><a id="change">[</a>None<a id="change"></a>] * self.num_levels
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9925879</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if &quotres&quot in self.mode:
+            x1 = x1 + from_up
+        for idx, conv in enumerate(self.conv2):
+            x2 = <a id="change">conv(</a>x1<a id="change">)</a>
+            x2 = self.bn[idx](x2)
+
+            if self.residual:
+                x2 = x2 + x1</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 residual structure
+        _,C,H,W = x1.shape
+        for idx, convs in enumerate(zip(self.conv2, self.conv3)):
+            mask = convs[0](torch.cat(<a id="change">[</a>x1[:,:C//2], mask<a id="change"></a>], dim=1))
+            x2_actv = x1[:,C//2:] * mask
+            x2<a id="change"> = </a>convs[1](x1[:,C//2:] + x2_actv)
+            x2 = self.bn[idx](x2)
+            if self.residual:
+                x2 = x2 + x1</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-21665f19cd9acd8db0bae320b79f986ec6a79eabb60d74c4c2e813314554df4aL243' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9925868</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/blocks.py</div><div id='m_class'> M Class Name: MBEBlock</div><div id='n_method'> N Class Name: MBEBlock</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/blocks.py</div><div id='n_file'> N File Name: src/networks/blocks.py</div><div id='m_start'> M Start Line: 244</div><div id='m_end'> M End Line: 260</div><div id='n_start'> N Start Line: 254</div><div id='n_end'> N End Line: 267</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        v_img = rearrange(v_img, &quotB h (H W) Ch -&gt; B (h Ch) H W&quot, H=H, W=W)               &#47&#47 Shape: [B, h, H*W, Ch] -&gt; [B, h*Ch, H, W].
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)                      &#47&#47 Split according to channels.
+        conv_v_img_list = [<a id="change">conv(</a>x<a id="change">)</a> for conv, x in zip(self.conv_list, v_img_list)]
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img = rearrange(conv_v_img, &quotB (h Ch) H W -&gt; B h (H W) Ch&quot, h=h)          &#47&#47 Shape: [B, h*Ch, H, W] -&gt; [B, h, H*W, Ch].
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        v_img = v_img.transpose(-1, -2).reshape(B, h * Ch, H, W)
+        v_img_list = torch.split(v_img, self.channel_splits, dim=1)  &#47&#47 Split according to channels
+        conv_v_img_list = <a id="change">[]</a>
+        for i, conv in enumerate(self.conv_list):
+            conv_v_img_list.append(conv(v_img_list[i]))
+        conv_v_img = torch.cat(conv_v_img_list, dim=1)
+        conv_v_img<a id="change"> = </a>conv_v_img.reshape(B, h, Ch, H * W).transpose(-1, -2)
+
+        EV_hat = q_img * conv_v_img
+        EV_hat = F.pad(EV_hat, (0, 0, 1, 0, 0, 0))  &#47&#47 [B, h, N, Ch].</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/76739a7589ebde1fc6b015e5f9f3e2dc8a73299e#diff-515038d09601bfcc6d6f3a526f98449b70f4b62595ddd47708355d5fa9891311L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9925881</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 76739a7589ebde1fc6b015e5f9f3e2dc8a73299e</div><div id='time'> Time: 2021-04-28</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/coat.py</div><div id='m_class'> M Class Name: ConvRelPosEnc</div><div id='n_method'> N Class Name: ConvRelPosEnc</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/coat.py</div><div id='n_file'> N File Name: timm/models/coat.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 137</div><BR>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            if not self.training:  &#47&#47 inference
+                if self.grid[i].shape[2:4] != x[i].shape[2:4]:
+                    self.grid[i] = <a id="change">self._make_grid(nx, ny).to(</a>x[i].device<a id="change">)</a>
+
+                y = x[i].sigmoid()
+                y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y = x[i].sigmoid()
+                <a id="change">if </a>self.inplace<a id="change">:
+                    </a>y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                else:  &#47&#47 for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
+                    xy = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y<a id="change"> = </a><a id="change">torch.cat(</a>(xy<a id="change">, wh, y[..., 4:]</a>), -1<a id="change">)</a>
+                z.append(y.view(bs, -1, self.no))
+
+        return x if self.training else (torch.cat(z, 1), x)</code></pre>

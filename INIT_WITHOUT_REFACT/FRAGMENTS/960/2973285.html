@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x + self.attn(self.norm1(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        x = x + self.ffn(self.norm2(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x + self.attn(<a id="change">self.norm1(x.reshape(b, c, -1).transpose(-2, -1).contiguous()).transpose(-2, -1)
+                          .contiguous()</a>.reshape(b, c, h, w))
+        x = x + self.ffn(self.norm2(x.reshape(b, c, -1).transpose(-2, -1).contiguous()).transpose(-2, -1)
+                         .contiguous().reshape(b, c, h, w))
+        return x</code></pre>

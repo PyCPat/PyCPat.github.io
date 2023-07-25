@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :1599
+</h3><img src='6501811.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+                    &#47&#47 all random semi hard indices (or hardest easy if not enough semi hard)
+                    neg_list_idx = all_semi_hard(ap_dist, an_dists, self.margin)
+                    num_missing_negatives<a id="change"> = </a>NUM_NEGATIVES<a id="change"> - </a><a id="change">neg_list_idx.shape[0]</a>
+                    if num_missing_negatives &gt; 0:
+                        hardest_easy_neg_idx = torch.topk(an_dists, NUM_NEGATIVES, largest=False)[1]
+                        added_negs = hardest_easy_neg_idx[neg_list_idx.shape[0]:NUM_NEGATIVES]
+                        neg_list_idx = torch.cat((neg_list_idx, added_negs), 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+                        an_sim = torch.exp((1 - an_dists_selected) / temperature)
+                    else:
+                        print(&quotEuclidean dist not supported with infonce loss&quot)
+                        <a id="change">assert</a>(0)
+
+                    loss_info_nce = -torch.log(ap_sim / (torch.sum(an_sim) + ap_sim))
+                    loss += loss_info_nce</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rvl-lab-utoronto/video_similarity_search/commit/c4c07e007bc05f55fa3860fd6215d029d71ff0bb#diff-bc76f2fc546a70b6c9798c5dce931ad46d49b242a0ba19a5ae5ac664a2689fffL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501811</div><div id='project'> Project Name: rvl-lab-utoronto/video_similarity_search</div><div id='commit'> Commit Name: c4c07e007bc05f55fa3860fd6215d029d71ff0bb</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: salar77h@gmail.com</div><div id='file'> File Name: loss/triplet_loss.py</div><div id='m_class'> M Class Name: OnlineTripleLoss</div><div id='n_method'> N Class Name: OnlineTripleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/triplet_loss.py</div><div id='n_file'> N File Name: loss/triplet_loss.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)
+        &#47&#47 Sample from first sigma distribution
+        x<a id="change"> = </a><a id="change">sigmas[0] * </a>x
+        &#47&#47 Compute gammas
+        gammas = torch.where(
+            (sigmas &gt;= self.s_tmin) & (sigmas &lt;= self.s_tmax),</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, noise: Tensor, num_steps: Optional[int] = None) -&gt; Tensor:
+        device = noise.device
+        num_steps = default(num_steps, self.num_steps)  &#47&#47 type: ignore
+        <a id="change">assert </a>exists(num_steps), "Parameter `num_steps` must be provided"
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)
+        &#47&#47 Sample using sampler</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/df197bf615969bc32c1bf9963969c83b24251bcf#diff-2678fbb2636c135caed9b7af07b32741ab81e9722df27eabaabefbc78db80f94L190' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501810</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: df197bf615969bc32c1bf9963969c83b24251bcf</div><div id='time'> Time: 2022-08-10</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_class'> M Class Name: DiffusionSampler</div><div id='n_method'> N Class Name: DiffusionSampler</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 207</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 287</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans<a id="change"> = </a>x.new_ones(x.shape[:-1]+(1,))<a id="change"> / </a><a id="change">x.shape[1]</a>
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47
+        L = u.size(-1)
+        if lengths is not None:
+            <a id="change">assert </a>isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = torch.where(torch.arange(L, device=lengths.device) &lt; lengths[:, None, None], 1., 0.)
+            u = u * mask
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6501808</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>

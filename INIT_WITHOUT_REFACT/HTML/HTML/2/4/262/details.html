@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :262
+</h3><img src='892445.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            embed_sum = flatten.t() @ embed_onehot
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = (embed_sum / <a id="change">bins.unsqueeze(0</a><a id="change">)</a>).t()
+            embed_normalized = l2norm(embed_normalized)
+            embed_normalized = torch.where(zero_mask[..., None], embed,
+                                           embed_normalized)</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_sum = einsum(&quoth n d, h n c -&gt; h c d&quot, flatten, embed_onehot)
+            self.all_reduce_fn(embed_sum)
+
+            embed_normalized = embed_sum / <a id="change">rearrange(</a>bins, <a id="change">&quot... -&gt; ... 1&quot</a><a id="change">)</a>
+            embed_normalized = l2norm(embed_normalized)
+
+            embed_normalized = torch.where(
+                rearrange(zero_mask, &quot... -&gt; ... 1&quot),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL330' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 892445</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: CosineSimCodebook</div><div id='n_method'> N Class Name: CosineSimCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 330</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 397</div><div id='n_end'> N End Line: 448</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Note: this is a bit of a hack but we avoid any resampling issues here if we just try 24kHz throughout
+        &#47&#47 which makes convert_audio a no-op
+        wav = convert_audio(x, x_sampling_rate, self.model.sample_rate, self.model.channels)
+        wav = <a id="change">wav.unsqueeze(0</a><a id="change">)</a>
+        &#47&#47 Extract discrete codes from EnCodec
+        with torch.no_grad():
+            encoded_frames = self.model.encode(wav)
+        codes = torch.cat([encoded[0] for encoded in encoded_frames], dim=-1)  &#47&#47 [batch, num_quantizers, timesteps]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 convert_audio and unsqueeze. The convert_audio function also doesn&quott play nicely with batches.
+
+        &#47&#47 b = batch, t = timesteps, 1 channel for the 24kHz model, 2 channels for the 48kHz model
+        wav = <a id="change">rearrange(</a>x, <a id="change">f&quotb t -&gt; b {self.model.channels} t&quot</a><a id="change">)</a>
+
+        &#47&#47 Extract discrete codes from EnCodec
+        with torch.no_grad():
+            encoded_frames = self.model.encode(wav)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/audiolm-pytorch/commit/5268c04547b7dde2d90d4edb5783f11e3233f4f6#diff-7c9e4997a687959fee85b17a366679f587cf95212be8740742519c8d37b2a511L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 892444</div><div id='project'> Project Name: lucidrains/audiolm-pytorch</div><div id='commit'> Commit Name: 5268c04547b7dde2d90d4edb5783f11e3233f4f6</div><div id='time'> Time: 2023-03-30</div><div id='author'> Author: lwgithub@gmail.com</div><div id='file'> File Name: audiolm_pytorch/encodec.py</div><div id='m_class'> M Class Name: EncodecWrapper</div><div id='n_method'> N Class Name: EncodecWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audiolm_pytorch/encodec.py</div><div id='n_file'> N File Name: audiolm_pytorch/encodec.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            n_tokens, batch_size, n_feats = x.shape
+
+        positions = (torch.full((batch_size, 1), self.pos_scale)
+                     * <a id="change">torch.arange(n_tokens).unsqueeze(0</a><a id="change">)</a>).to(x)
+        positions = self.augment_positions(positions) &#47&#47 B, T
+
+        positions = positions.unsqueeze(-1) &#47&#47 B, T, 1</code></pre><h3>After Change</h3><pre><code class='java'>
+                           &quott -&gt; new_axis t&quot, new_axis=batch_size).to(x)
+        positions = self.augment_positions(positions)
+
+        positions = <a id="change">rearrange(</a>positions, <a id="change">&quotb t -&gt; b t 1&quot</a><a id="change">)</a>
+        product = positions * self.freq
+
+        pos_emb = torch.zeros(batch_size, n_tokens, n_feats, device=x.device)
+        pos_emb[:, :, 0::2] = torch.sin(product)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gcambara/cape/commit/2ad8826eef28ec2c4fbd60965c38f51c51dce6d7#diff-7fa374f1a5ecd784a38f81aa2a23c26df78689c32aa63e9cc88df831e1d6c877L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 892447</div><div id='project'> Project Name: gcambara/cape</div><div id='commit'> Commit Name: 2ad8826eef28ec2c4fbd60965c38f51c51dce6d7</div><div id='time'> Time: 2021-11-23</div><div id='author'> Author: guillermocambara@gmail.com</div><div id='file'> File Name: cape/cape.py</div><div id='m_class'> M Class Name: CAPE1d</div><div id='n_method'> N Class Name: CAPE1d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: cape/cape.py</div><div id='n_file'> N File Name: cape/cape.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 43</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 44</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            ema_inplace(self.embed_avg, embed_sum.t(), self.decay)
+            cluster_size = laplace_smoothing(self.cluster_size, self.codebook_size, self.eps) * self.cluster_size.sum()
+            embed_normalized = self.embed_avg / <a id="change">cluster_size.unsqueeze(1</a><a id="change">)</a>
+            self.embed.data.copy_(embed_normalized)
+            self.expire_codes_(x)
+
+        return quantize, embed_ind</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = rearrange(x, &quot... -&gt; 1 ...&quot)
+
+        shape, dtype = x.shape, x.dtype
+        flatten = <a id="change">rearrange(</a>x, <a id="change">&quoth ... d -&gt; h (...) d&quot</a><a id="change">)</a>
+
+        self.init_embed_(flatten)
+
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/8716f68d5549f5252d81e45651271f466d639356#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL219' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 892452</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: 8716f68d5549f5252d81e45651271f466d639356</div><div id='time'> Time: 2022-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: EuclideanCodebook</div><div id='n_method'> N Class Name: EuclideanCodebook</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 223</div><div id='m_end'> M End Line: 252</div><div id='n_start'> N Start Line: 264</div><div id='n_end'> N End Line: 310</div><BR>

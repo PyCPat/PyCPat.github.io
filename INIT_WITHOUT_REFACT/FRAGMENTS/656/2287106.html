@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            attention_weighted_encoding = gate * attention_weighted_encoding
+            h, c = self.decode_step(
+                torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                (h[:batch_size_t]<a id="change">, c[:batch_size_t]</a>))  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)
+            predictions[:batch_size_t, t, :] = preds
+            alphas[:batch_size_t, t, :] = alpha</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47     torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+            &#47&#47     (h[:batch_size_t], c[:batch_size_t]))  &#47&#47 (batch_size_t, decoder_dim)
+            &#47&#47teahcer forcing
+            <a id="change">if t==1</a><a id="change"> or (np.random.rand() &lt; self.p) :
+                </a>h = self.decode_step(
+                    torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            else:
+                h<a id="change"> = </a>self.decode_step(
+                    torch.cat([self.embedding(torch.argmax(predictions[:batch_size_t, t, :],dim = 1)), attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)</code></pre>

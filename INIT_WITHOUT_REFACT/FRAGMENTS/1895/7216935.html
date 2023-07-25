@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 (N, C, **) -&gt; (N, C, D_j) -&gt; (N, 1, C, D_j)
+        input_x = x.view(N, C, -1).unsqueeze(1)
+        &#47&#47 (N, C, **) -&gt; (N, 1, **) -&gt; (N, 1, D_j) -&gt; (N, 1, D_j, 1)
+        context_mask = <a id="change">self.w_k(x).view(N, 1, -1).unsqueeze(-1</a><a id="change">)</a>
+        context_mask = nn.functional.softmax(context_mask, dim=2)
+        &#47&#47 (N, 1, C, D_j) * (N, 1, D_j, 1) -&gt; (N, 1, C, 1) -&gt; (N, C, 1)
+        context = torch.matmul(input_x, context_mask).reshape(N, C, 1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 (N, 1, D_j) -&gt; (N, 1, D_j, 1)
+        context_mask = nn.functional.softmax(context_mask, dim=2).unsqueeze(-1)
+        &#47&#47 (N, 1, C, D_j) * (N, 1, D_j, 1) -&gt; (N, 1, C, 1) -&gt; (N, C) -&gt; (N, C, **)
+        context = <a id="change">torch.matmul(input_x, context_mask).reshape(N, C).reshape(</a>N, C, *<a id="change">([1] * self.dimension))</a>
+
+        out = self.w_v1(context)
+        out = self.ln(out)
+        out = self.relu(out)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            v = batched_index_select(v, indices, dim = 2)
+            qk_rel = batched_index_select(qk_rel, indices, dim = 2)
+            rel_pos_emb = batched_index_select(rel_pos_emb, indices, dim = 2)
+            mask = batched_index_select(mask, indices, dim = 2)<a id="change"> if </a>exists(mask)<a id="change"> else </a>None
+
+        &#47&#47 add relative positional embeddings to value
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask_value = -max_value(sim)
+            mask<a id="change"> = </a><a id="change">rearrange(</a>mask, &quotb i j -&gt; b 1 i j&quot<a id="change">)</a>
+            sim.masked_fill_(~mask, mask_value)
+
+        &#47&#47 attention
+</code></pre>

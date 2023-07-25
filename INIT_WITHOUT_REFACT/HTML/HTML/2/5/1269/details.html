@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :1269
+</h3><img src='3735384.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.row_attn:
+            h_x = rearrange(x, &quotb h w d -&gt; (b h) w d&quot)
+            <a id="change">if </a>exists(attn_bias)<a id="change">:
+                </a>attn_bias<a id="change"> = </a>repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = h)
+
+            tie_dim = h if self.global_query_attn else None
+            h_out = self.attn(h_x, mask = h_mask, attn_bias = attn_bias, tie_dim = tie_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = rearrange(x, input_fold_eq)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask<a id="change"> = </a>rearrange(mask, mask_fold_axial_eq)
+
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L220' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3735384</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k)
+
+        <a id="change">if </a>self.causal<a id="change">:
+            </a>sim<a id="change"> = </a>sim / rearrange(torch.arange(seq_len, device = device) + 1, &quot... -&gt; ... 1&quot)
+        else:
+            sim = sim / seq_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = F.relu(sim) ** 2
+        attn = self.dropout(attn)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask = rearrange(mask, &quotb j -&gt; b 1 j&quot)
+            attn<a id="change"> = </a>attn.masked_fill(~mask, 0.)
+
+        if self.causal:
+            causal_mask = torch.ones((seq_len, seq_len), dtype = torch.bool, device = device).triu(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/flash-pytorch/commit/6b0cc2e2316bf9c93b8b48916a11f774209d7bf1#diff-6408ce30d3c8730249ca81344fdd04a1dd01ed7b072e84e9d752276e93661682L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3735386</div><div id='project'> Project Name: lucidrains/flash-pytorch</div><div id='commit'> Commit Name: 6b0cc2e2316bf9c93b8b48916a11f774209d7bf1</div><div id='time'> Time: 2022-03-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: flash_pytorch/flash_pytorch.py</div><div id='m_class'> M Class Name: GAU</div><div id='n_method'> N Class Name: GAU</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: flash_pytorch/flash_pytorch.py</div><div id='n_file'> N File Name: flash_pytorch/flash_pytorch.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 178</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 184</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 calculate nearest neighbors
+
+        nbhd_indices = None
+        <a id="change">if </a>num_nn &gt; 0 and num_nn &lt; n<a id="change">:
+            </a>rel_dist = rel_coors.norm(dim = -1, p = 2)
+            nbhd_indices<a id="change"> = </a>rel_dist.topk(num_nn, dim = -1, largest = False).indices
+
+        &#47&#47 main network
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ):
+        n, num_nn = feats.shape[1], self.num_nearest_neighbors
+
+        <a id="change">if </a><a id="change">exists(</a>self.token_emb<a id="change">):
+            </a>feats<a id="change"> = </a>self.token_emb(feats)
+
+        &#47&#47 main network
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/2a279568aee65464c3b29fc032811c0073d069db#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L266' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3735355</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 2a279568aee65464c3b29fc032811c0073d069db</div><div id='time'> Time: 2021-03-19</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EnTransformer</div><div id='n_method'> N Class Name: EnTransformer</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 275</div><div id='m_end'> M End Line: 286</div><div id='n_start'> N Start Line: 285</div><div id='n_end'> N End Line: 290</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            coor_mask = rearrange(mask, &quotb () i j -&gt; b i j&quot)
+            coor_weights.masked_fill_(~coor_mask, 0.)
+
+        <a id="change">if </a>self.norm_rel_coors<a id="change">:
+            </a>rel_coors<a id="change"> = </a>F.normalize(rel_coors, dim = -1, p = 2)
+
+        coors_out = einsum(&quotb i j, b i j c -&gt; b i c&quot, coor_weights, rel_coors)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        assert not (only_sparse_neighbors and not exists(adj_mat)), &quotadjacency matrix must be passed in if only_sparse_neighbors is turned on&quot
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>num_nodes<a id="change"> = </a>mask.sum(dim = -1)
+
+        rel_coors = rearrange(coors, &quotb i d -&gt; b i () d&quot) - rearrange(coors, &quotb j d -&gt; b () j d&quot)
+        rel_dist = rel_coors.norm(dim = -1, p = 2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/27692bb625d5e4916653fc8053d9b76cf0f67fd6#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L148' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3735383</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 27692bb625d5e4916653fc8053d9b76cf0f67fd6</div><div id='time'> Time: 2021-03-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EquivariantAttention</div><div id='n_method'> N Class Name: EquivariantAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 242</div><div id='n_start'> N Start Line: 173</div><div id='n_end'> N End Line: 264</div><BR>

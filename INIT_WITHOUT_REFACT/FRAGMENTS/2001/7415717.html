@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.version == &quotB0&quot:
+            if self.training:
+                var = x.var([0,2,3])
+                self.running_var = (self.momentum * self.running_var) + (1.0-self.momentum) * (<a id="change">x.shape[0]</a>/(x.shape[0]-1)*var)
+            else:
+                var = self.running_var
+            sigma = var.view([1, self.insize, 1, 1]).expand_as(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.training:
+                var = x.var([0, 2, 3], unbiased=False)
+                n = x.numel() / x.size(1)
+                <a id="change">with torch</a><a id="change">.no_grad():
+                    </a>self.running_var = exponential_average_factor * var * n / (n - 1)\
+                        + (1 - exponential_average_factor) * self.running_var
+            else:
+                var = self.running_var</code></pre>

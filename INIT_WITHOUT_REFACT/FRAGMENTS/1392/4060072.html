@@ -1,0 +1,74 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        allCodewords<a id="change"> = </a>list()
+        &#47&#47 probability = mixin / (mixin + 1.0)
+        &#47&#47 rolloutDistribution = Bernoulli(probs=torch.tensor(probability).to(latents[0].device))
+        for xRaw, prob, squeeze, codebook, k in zip(latents, self._prob, self._squeeze, self._codebook, self._k):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [c, k]
+            codewords = codebook.weight
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn = self._position(encoderIn).reshape(-1, n, c)
+            &#47&#47 [h*w, n, c]
+            &#47&#47 x = self._encoder(posisted)
+            x = self._encoder(encoderIn)
+            &#47&#47 x += torch.randn_like(x)
+            &#47&#47 x = self._dePosition(x.reshape(h, w, n, c)).reshape(-1, n, c)
+            &#47&#47 x = encoderIn
+            &#47&#47 [h*w, n, k]
+            &#47&#47 logit = prob(x, h, w)
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            &#47&#47 soft = (logit / temperature).softmax(-1)
+            &#47&#47 if hard:
+            &#47&#47      hard = logit.argmax(-1)
+            &#47&#47       hard = F.one_hot(hard, k)
+            &#47&#47       sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47      sample = soft
+            sample = F.gumbel_softmax(logit, temperature, hard)
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 quantized += torch.randn_like(quantized)
+            &#47&#47 quantized = sample
+
+            &#47&#47 normalize
+            &#47&#47 quantized /= (k - 0.5) / (2 * k - 2)
+            &#47&#47 [h*w, n, c]
+            &#47&#47 quantized -= 0.5 / (k - 1)
+            &#47&#47 quantized = squeeze(sample, h, w)
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+
+            &#47&#47 mixed = (mixin * encoderIn / (mixin + 1)) + (quantized / (mixin + 1))
+
+            &#47&#47 mask = rolloutDistribution.sample((h*w, n, 1)).bool()
+
+            &#47&#47 mixed = mask * encoderIn.detach() + torch.logical_not(mask) * quantized
+            &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+            deTransformed = self._decoder(posistedQuantized, posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            &#47&#47 deTransformed = quantized.permute(1, 2, 0).reshape(n, c, h, w)
+            &#47&#47 deTransformed = self._dePosition(deTransformed.reshape(h, w, n, c)).permute(2, 3, 0, 1)
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+            <a id="change">allCodewords.append(</a>codewords.t()<a id="change">)</a>
+        return quantizeds, codes, logits, allCodewords
+
+
+class TransformerQuantizerRein(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(<a id="change">logit.permute(1</a>, <a id="change">0</a>, <a id="change">2</a><a id="change">)</a>.reshape(n, h, w, k))
+        return quantizeds, codes, logits
+
+</code></pre>

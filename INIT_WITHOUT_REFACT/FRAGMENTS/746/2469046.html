@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        nn.init.normal_(self.linear.weight)
+        self.backbone = [&quotcrossnet&quot, &quotlinear&quot, &quotembedding_layer&quot]
+        self.loss_fn = nn.BCELoss()
+        <a id="change">if </a>torch.cuda.is_available()<a id="change">:
+            </a>self.device = torch.device(&quotcuda&quot)
+        else:
+            self.device = torch.device(&quotcpu&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.feature_num = config["feature_num"]
+        self.in_feature_num = self.feature_num * self.embedding_size
+        self.cross_layer_w = nn.ParameterList(
+            <a id="change">nn.Parameter(</a><a id="change">torch.randn(</a>self.in_feature_num, self.in_feature_num<a id="change">))</a> for _ in range(self.depth)
+        )
+        self.bias = nn.ParameterList(nn.Parameter(torch.zeros(self.in_feature_num, 1)) for _ in range(self.depth))
+        self.linear = nn.Linear(self.in_feature_num, 1)</code></pre>

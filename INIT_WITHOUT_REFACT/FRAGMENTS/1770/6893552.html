@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    affine_list.append(self.info_proj_linear(z_info))
+
+            if self.g_cond_mtd != "W/O":
+                <a id="change">if shared_label is None</a><a id="change">:
+                    </a>shared_label<a id="change"> = </a>self.shared(label)
+                affine_list.append(shared_label)
+            if len(affine_list) &gt; 0:
+                affines = torch.cat(affine_list, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, z, label, shared_label=None, eval=False):
+        affine_list = []
+        if self.g_cond_mtd != "W/O":
+            label<a id="change"> = </a><a id="change">F.one_hot(label, num_classes=self.num_classes).to(</a>torch.float32<a id="change">)</a>
+        with torch.cuda.amp.autocast() if self.mixed_precision and not eval else misc.dummy_context_mgr() as mp:
+            if self.MODEL.info_type != "N/A":
+                if self.g_info_injection == "concat":
+                    z = self.info_mix_linear(z)</code></pre>

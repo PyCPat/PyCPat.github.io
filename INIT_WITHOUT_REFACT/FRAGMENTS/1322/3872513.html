@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        input = torch.clamp(input, -1+eps, 1-eps)
+        theta = torch.arccos(input) &#47&#47 (batch_size, num_classes)
+        theta_modified = theta + margin &#47&#47 (batch_size, num_classes)
+        mesh = <a id="change">torch.arange(</a>0, num_classes<a id="change">)</a>.unsqueeze(dim=0) &#47&#47 (1, num_classes) 
+        mesh_target = target.unsqueeze(dim=1) &#47&#47 (batch_size, 1)
+        condition<a id="change"> = mesh==mesh_target</a> &#47&#47 (batch_size, num_classes)
+        theta_modified = torch.where(condition, theta_modified, theta)
+        cos = scale * torch.cos(theta_modified) &#47&#47 (batch_size, num_classes)
+
+        indices = num_classes * torch.arange(batch_size) + target &#47&#47 (batch_size,)
+        cos_target<a id="change"> = </a>torch.take(cos, indices) &#47&#47 (batch_size,)
+
+        loss<a id="change"> = </a>- cos_target + torch.logsumexp(cos, dim=1)
+
+        if batch_mean:
+            loss = loss.mean(dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        cos_phi = cos_th * cos_m - sin_th * sin_m &#47&#47 (batch_size, num_classes)
+
+        &#47&#47 For target class
+        <a id="change">if </a>self.easy_margin<a id="change">:
+            </a>cos_phi = torch.where(cos_th &lt; 0, cos_th, cos_phi) &#47&#47 (batch_size, num_classes)
+        else:
+            cos_phi = torch.where(cos_th &gt; self.cos_pi_m, cos_th - margin, cos_phi) &#47&#47 (batch_size, num_classes)
+        </code></pre>

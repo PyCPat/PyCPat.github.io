@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            dist_ap.append(dist[i][pos_mask[i]].max().unsqueeze(0))
+            dist_an.append(dist[i][neg_mask[i]].min().unsqueeze(0))
+
+        dist_ap<a id="change"> = </a><a id="change">torch.cat(</a>dist_ap<a id="change">)</a>
+        dist_an = torch.cat(dist_an)
+
+        &#47&#47 Compute ranking hinge loss
+        y = torch.ones_like(dist_an)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dist_mat = pairwise_euclidean_distance(f, xbm_f)
+
+        &#47&#47 hard examples mining
+        n, m = <a id="change">f.size(0</a><a id="change">)</a>, xbm_f.size(0)
+        identity_mat = labels.expand(m, n).t().eq(xbm_labels.expand(n, m)).float()
+        dist_ap, dist_an = hard_examples_mining(dist_mat, identity_mat)
+</code></pre>

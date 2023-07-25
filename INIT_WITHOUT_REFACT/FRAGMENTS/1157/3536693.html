@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.static_weight = torch.cat( (bup,bdown),dim=0)
+
+    def forward(self,input):
+        <a id="change">return </a><a id="change">JastrowFunction.apply(</a>input, self.weight, self.static_weight<a id="change">)</a>
+
+class JastrowFunction(torch.autograd.Function):
+
+    @staticmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+        factors = torch.exp(static_weight * input / (1.0 + weight * input))
+        
+        &#47&#47 electron pairs with different spins
+        factors_updown<a id="change"> = </a>factors[:,:nup,nup:]
+
+        &#47&#47 electron pairs up up
+        factors_upup = factors_[:,:nup,:nup]
+        factors_upup<a id="change"> = </a>factors_upup[:,torch.tril(torch.ones(nup,nup))==0]
+
+        &#47&#47 electron pairs down,down
+        factors_downdown = factors_[:,nup:,nup:]
+        factors_downdown = factors_downdown[:,torch.tril(torch.ones(ndown,ndown))==0]
+
+        <a id="change">return </a>factors_upup.prod(1) * factors_downdown.prod(1) * factors_updown.prod(2).prod(1)
+class JastrowFunction(torch.autograd.Function):
+
+    @staticmethod</code></pre>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    @torch.no_grad()
+    def forward(self, input_image):
+        outputs = self.head_forward(<a id="change">self.backbone(</a>input_image<a id="change">)</a>)
+        parsed_results = self.parsing_outputs(outputs)
+
+        return parsed_results</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    @torch.no_grad()
+    def forward(self, image):
+        x = <a id="change">self.backbone(</a>image<a id="change">)</a>
+        x = torch.cat((x, self.coordmaps.to(x.device).repeat(x.shape[0],1,1,1)), 1)
+
+        params_maps = self.final_layers[1](x)
+        center_maps = self.final_layers[2](x)
+        cam_maps = self.final_layers[3](x)
+        &#47&#47 to make sure that scale is always a positive value
+        cam_maps[:, 0]<a id="change"> = </a>torch.pow(1.1,cam_maps[:, 0])
+        params_maps = torch.cat([cam_maps, params_maps], 1)
+        return center_maps, params_maps 
+</code></pre>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 if no NaNs for padding varying trial lengths we can batch the computation
+        if not torch.isnan(x).any():
+            trial_embeddings = <a id="change">self.trial_net(x.view(batch * permutation_dim, -1)).view(
+                </a>batch, permutation_dim, <a id="change">-1</a><a id="change">
+            )</a>
+            combined_embedding = self.combining_function(trial_embeddings, dim=1)
+            trial_counts = torch.ones(batch, 1, dtype=torch.float32) * permutation_dim
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(</a>-1<a id="change">)</a>[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1)  &#47&#47 make it (batch, 1) to match embeddings below
+        )
+        &#47&#47 number of non-nan trials</code></pre>

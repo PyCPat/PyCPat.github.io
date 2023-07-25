@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Apply feature randomization for each repetition
+        x = self._randomize(x)
+
+        log_p<a id="change"> = </a>self.leaf(x)
+
+        &#47&#47 Forward through all layers, bottom up
+        <a id="change">for layer</a> in self.layers<a id="change">:
+            </a>log_p<a id="change"> = </a>layer(log_p)
+
+        &#47&#47 Root layer merges all scopes that are left
+        log_p = self.prod(log_p)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self._randomize(x)
+
+        &#47&#47 Apply leaf distributions (replace marginalization indicators with 0.0 first)
+        x<a id="change"> = </a>self._leaf(x)
+
+        &#47&#47 Pass through intermediate layers
+        x = self._forward_layers(x)
+
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = <a id="change">x.size()</a>
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        assert channels == 1  &#47&#47 number of channels should be 1 at this point
+        x = x.view(batch_size, 1, repetitions, 1)
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+
+        &#47&#47 Remove repetition dimension
+        x = <a id="change">x.squeeze(3</a><a id="change">)</a>
+
+        &#47&#47 Remove in_features dimension
+        x<a id="change"> = </a>x.squeeze(1)
+
+        return x
+</code></pre>

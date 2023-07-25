@@ -1,0 +1,92 @@
+<html><h3>Pattern ID :804
+</h3><img src='2579493.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 Only pad the lower part of the spectrum.
+                spec_f = self.pad_spec(spec)
+                spec_f = self.df_op(spec_f, df_coefs)
+                <a id="change">spec[..., : self.nb_df, :]</a> = <a id="change">spec_f[..., : self.nb_df, :]</a>
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        return spec, m, lsnr, df_coefs</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        <a id="change">return </a>spec<a id="change">, m, lsnr, df_alpha</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/3e554333e5a3f0802f8df5a00e07de517dfe6561#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL428' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579493</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 3e554333e5a3f0802f8df5a00e07de517dfe6561</div><div id='time'> Time: 2022-10-18</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 428</div><div id='m_end'> M End Line: 455</div><div id='n_start'> N Start Line: 486</div><div id='n_end'> N End Line: 502</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Self-attention
+        &#47&#47 TODO: 其他模型结构
+        len_range = torch.from_numpy(np.arange(self.max_his)).to(history.device)
+        position = (<a id="change">lengths[:, None]</a> - len_range[None, :seq_len]) * valid_his
+        pos_vectors = self.p_embeddings(position)
+        his_vectors = his_vectors + pos_vectors
+        attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        his_vectors = self.transformer(his_vectors, attn_mask)
+        his_vectors = his_vectors * <a id="change">valid_his[:, :, None]</a>.float()
+        his_vector = his_vectors.sum(1) / lengths[:, None].float()
+        &#47&#47 his_vector = his_vectors[torch.arange(batch_size), lengths - 1, :]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        his_vectors = self.i_embeddings(history)
+        his_vector = self.encoder(his_vectors, lengths, valid_his, t_history, user_min_t)
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>his_vector<a id="change">, intent_pred</a>
+
+
+class GRUEncoder(nn.Module):
+    def __init__(self, emb_size):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuwangcy/rechorus/commit/7c6b4cfaf0b7765452a8e750212a05ddf29aaae7#diff-cf7e7f7346927920e4d4df1c41793110b158e04cef7a9a1fb138ee2a0bedbbffL206' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579492</div><div id='project'> Project Name: thuwangcy/rechorus</div><div id='commit'> Commit Name: 7c6b4cfaf0b7765452a8e750212a05ddf29aaae7</div><div id='time'> Time: 2021-08-16</div><div id='author'> Author: THUwangcy@gmail.com</div><div id='file'> File Name: src/models/developing/TiMiRec.py</div><div id='m_class'> M Class Name: IntentPredictor</div><div id='n_method'> N Class Name: IntentPredictor</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/developing/TiMiRec.py</div><div id='n_file'> N File Name: src/models/developing/TiMiRec.py</div><div id='m_start'> M Start Line: 207</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 217</div><div id='n_end'> N End Line: 222</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, points, features):
+        features = features.permute(0, 2, 1)
+        proposals = self.mlp(features)
+        _, indices = torch.topk(<a id="change">proposals[..., -1:]</a>, k=self.cfg.PROPOSAL.TOPK, dim=1)
+        indices = indices.expand(-1, -1, proposals.shape[-1])
+        proposals = proposals.gather(1, indices)
+        return <a id="change">proposals[..., :-1]</a>, proposals[..., -1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        proposals = self.mlp(features)
+        boxes, scores = self.reorganize_proposals(proposals)
+        scores = F.softmax(scores, dim=-1)
+        <a id="change">return </a>boxes<a id="change">, scores</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/425ffd346953ca0d276fcf912c731a0ce0704a3d#diff-a7f9867bfd9382b3a638afcaf0bf66ead18605d18caa50c991ce865b8b25f1ddL41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579474</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 425ffd346953ca0d276fcf912c731a0ce0704a3d</div><div id='time'> Time: 2020-02-15</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/detector/proposal.py</div><div id='m_class'> M Class Name: ProposalLayer</div><div id='n_method'> N Class Name: ProposalLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/detector/proposal.py</div><div id='n_file'> N File Name: pvrcnn/detector/proposal.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 61</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        rx = (x * <a id="change">idx_theta2.cos()[:, None, None, :]</a>) + (neg_half_x * <a id="change">idx_theta2.sin()[:, None, None, :]</a>)
+
+        &#47&#47
+        return rx</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_rope = (x_rope * self.cos_cached[:x.shape[0]]) + (neg_half_x * self.sin_cached[:x.shape[0]])
+
+        &#47&#47
+        <a id="change">return </a>torch.cat((x_rope<a id="change">, x_pass</a>), dim=-1)
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lab-ml/nn/commit/0ce65adf9e602321109528b05cf99fccb16cd2de#diff-637497eb531dcbf4c4fff534c48c9dc4ec23ef7b14699edc95d8b280b04de206L127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579488</div><div id='project'> Project Name: lab-ml/nn</div><div id='commit'> Commit Name: 0ce65adf9e602321109528b05cf99fccb16cd2de</div><div id='time'> Time: 2022-06-03</div><div id='author'> Author: vpjayasiri@gmail.com</div><div id='file'> File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_class'> M Class Name: RotaryPositionalEmbeddings</div><div id='n_method'> N Class Name: RotaryPositionalEmbeddings</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: labml_nn/transformers/rope/__init__.py</div><div id='n_file'> N File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 193</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 Only pad the lower part of the spectrum.
+                spec_f = self.pad_spec(spec)
+                spec_f = self.df_op(spec_f, df_coefs)
+                <a id="change">spec[..., : self.nb_df, :]</a> = <a id="change">spec_f[..., : self.nb_df, :]</a>
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        return spec, m, lsnr, df_coefs</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                spec = self.df_op(spec, df_coefs)
+
+        <a id="change">return </a>spec<a id="change">, m, lsnr, df_alpha</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/3e554333e5a3f0802f8df5a00e07de517dfe6561#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL410' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579487</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 3e554333e5a3f0802f8df5a00e07de517dfe6561</div><div id='time'> Time: 2022-10-18</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 428</div><div id='m_end'> M End Line: 455</div><div id='n_start'> N Start Line: 486</div><div id='n_end'> N End Line: 502</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Dim 1 computations.
+            pers1_reshaped = pers1.permute(1,0,2).reshape(pers1.shape[1],-1)
+            pers1_mask = ~((pers1_reshaped==0).all(-1))
+            <a id="change">nodes_idx_dim1</a> = edge_index[:,pers1_mask]
+            x0_dim1 = torch.cat(
+                [ <a id="change">x[nodes_idx_dim1[0,:],:]</a>, <a id="change">x[nodes_idx_dim1[1,:],:]</a>, pers1_reshaped[pers1_mask]  ], 1)
+            x_dim1 = self.dim1_fn(x0_dim1, edge_slices, mask = pers1_mask)
+        else:
+            x_dim1 = None</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            x0 = self.out(torch.cat([x, x0], dim=-1))
+
+        <a id="change">return </a>x0<a id="change">, x1</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/borgwardtlab/togl/commit/f6de25e187c5a78974edd07cec7fc20c675bbbc6#diff-1bcc83bc8c3847d0b5b3dec6be3a4c891b6976da3e071a7a73d3c3bf28d0141cL220' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2579470</div><div id='project'> Project Name: borgwardtlab/togl</div><div id='commit'> Commit Name: f6de25e187c5a78974edd07cec7fc20c675bbbc6</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: max.horn@bsse.ethz.ch</div><div id='file'> File Name: topognn/layers.py</div><div id='m_class'> M Class Name: SimpleSetTopoLayer</div><div id='n_method'> N Class Name: SimpleSetTopoLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: topognn/layers.py</div><div id='n_file'> N File Name: topognn/layers.py</div><div id='m_start'> M Start Line: 222</div><div id='m_end'> M End Line: 261</div><div id='n_start'> N Start Line: 238</div><div id='n_end'> N End Line: 270</div><BR>

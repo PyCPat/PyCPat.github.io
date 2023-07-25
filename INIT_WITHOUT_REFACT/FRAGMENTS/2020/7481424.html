@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        v = F.relu(self.norm_v1(self.fc_v1(out)))
+        v = self.fc_v2(v)
+
+        <a id="change">return </a>prob<a id="change">, v, h_out</a>
+
+    def make_batch(self, data):
+        &#47&#47 data = [tr1, tr2, ..., tr10] * batch_size
+        s_player_batch, s_ball_batch, s_left_batch, s_left_closest_batch, s_right_batch, s_right_closest_batch=  [], [], [], [], [], []</code></pre><h3>After Change</h3><pre><code class='java'>
+        left_closest_state = state_dict["left_closest"]
+        right_team_state = state_dict["right_team"]  
+        right_closest_state = state_dict["right_closest"]
+        avail<a id="change"> = </a>state_dict["avail"]
+        
+        player_embed = self.norm_player(self.fc_player(player_state))
+        ball_embed = self.norm_ball(self.fc_ball(ball_state))
+        left_team_embed = self.norm_left(self.fc_left(left_team_state))
+        left_closest_embed = self.norm_left_closest(self.fc_left_closest(left_closest_state))
+        right_team_embed = self.norm_right(self.fc_right(right_team_state))
+        right_closest_embed = self.norm_right_closest(self.fc_right_closest(right_closest_state))
+        
+        left_team_embed = self.pool(left_team_embed).squeeze(2)
+        right_team_embed = self.pool(right_team_embed).squeeze(2)
+
+        cat = torch.cat([player_embed, ball_embed, left_team_embed, right_team_embed, left_closest_embed, right_closest_embed], 2)
+        cat = F.relu(self.norm_cat(self.fc_cat(cat)))
+        h_in = state_dict["hidden"]
+        out, h_out = self.lstm(cat, h_in)
+        
+        a_out = F.relu(self.norm_pi_a1(self.fc_pi_a1(out)))
+        a_out<a id="change"> = </a>self.fc_pi_a2(a_out)
+        logit = a_out + (avail-1)*1e8
+        prob = F.softmax(logit, dim=2)
+        
+        prob_m<a id="change"> = </a>F.relu(self.norm_pi_m1(self.fc_pi_m1(out)))
+        prob_m<a id="change"> = </a>self.fc_pi_m2(prob_m)
+        prob_m<a id="change"> = </a>F.softmax(prob_m, dim=2)
+
+        v = F.relu(self.norm_v1(self.fc_v1(out)))
+        v = self.fc_v2(v)
+
+        <a id="change">return </a>prob<a id="change">, prob_m, v, h_out</a>
+
+    def make_batch(self, data):
+        &#47&#47 data = [tr1, tr2, ..., tr10] * batch_size
+        s_player_batch, s_ball_batch, s_left_batch, s_left_closest_batch, s_right_batch, s_right_closest_batch, avail_batch =  [],[],[],[],[],[],[]</code></pre>

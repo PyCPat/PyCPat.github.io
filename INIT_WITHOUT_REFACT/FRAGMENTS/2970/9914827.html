@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        target_size = targets.size()[1]
+        t_self_mask = utils.create_trg_self_mask(target_size,
+                                                 device=targets.device)
+        return <a id="change">self.decode(</a>targets, enc_output, i_mask, t_self_mask, t_mask<a id="change">)</a>
+
+    def initialize(self):
+        &#47&#47 weight init
+        for p in self.parameters():</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Reshaping features
+        sizes = padded_input.size() &#47&#47 B x H_1 (channel?) x H_2 x T
+        padded_input = padded_input.view(<a id="change">sizes[0]</a>, sizes[1] * sizes[2], sizes[3])
+        padded_input = padded_input.transpose(1, 2).contiguous()  &#47&#47 BxTxH
+
+        encoder_padded_outputs, _ = self.encoder(padded_input, input_lengths)</code></pre>

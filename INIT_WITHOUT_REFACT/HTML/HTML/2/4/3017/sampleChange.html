@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        kv_len = t + m + keys.shape[1]
+        use_lsh = not self.use_full_attn or kv_len &lt;= self.full_attn_thres
+        <a id="change">assert </a>not use_lsh or (kv_len % self.bucket_size == 0), f&quotSequence length needs to be divisible by target bucket size - {self.bucket_size}&quot
+
+        x = torch.cat((x, mem, keys), dim=1)
+        qk = self.toqk(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        kv_len = t + m + keys.shape[1]
+        use_full_attn = self.use_full_attn or kv_len &lt;= self.full_attn_thres
+
+        <a id="change">if not use_full_attn</a><a id="change">:
+            </a><a id="change">assert </a>not use_full_attn and (kv_len % self.bucket_size == 0), f&quotSequence length needs to be divisible by target bucket size - {self.bucket_size}&quot
+
+        x = torch.cat((x, mem, keys), dim=1)
+        qk = self.toqk(x)</code></pre>

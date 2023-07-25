@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Step 1: Zero out all modes less than top k
+        out_ft = torch.zeros(batchsize, self.in_channels,
+                             <a id="change">x.size(</a>-1<a id="change">)</a>//2 + 1, 2, device=x.device)
+        &#47&#47 out_ft.shape == x_ft.shape
+
+        &#47&#47 Multiply relevant Fourier modes</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_ft = torch.fft.rfft(x, n=N, dim=-1, norm=&quotortho&quot)
+        &#47&#47 x_ft.shape == [batch_size, in_dim, n_steps // 2 + 1]
+
+        x_ft = <a id="change">torch.stack([</a>x_ft.real, x_ft.imag<a id="change"></a>]<a id="change">, dim=3)</a>
+        &#47&#47 x_ft.shape == [batch_size, in_dim, n_steps // 2 + 1, 2]
+
+        &#47&#47 Step 1: Zero out all modes less than top k
+        out_ft = torch.zeros(B, I, N // 2 + 1, 2, device=x.device)
+        &#47&#47 out_ft.shape == [batch_size, in_dim, n_steps // 2 + 1, 2]
+
+        &#47&#47 Multiply relevant Fourier modes
+        out_ft[:, :, :self.n_modes] = self.complex_matmul_1d(
+            x_ft[:, :, :self.n_modes], self.fourier_weight)
+
+        out_ft<a id="change"> = </a>torch.complex(out_ft[..., 0], out_ft[..., 1])
+
+        x = torch.fft.irfft(out_ft, n=N, dim=-1, norm=&quotortho&quot)
+</code></pre>

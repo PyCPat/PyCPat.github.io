@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :328
+</h3><img src='1333596.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores<a id="change"> = </a>torch.matmul(<a id="change">src_embedding.transpose(2, 1).contiguous()</a>, tgt_embedding) / math.sqrt(self.emb_dims)
+		scores<a id="change"> = </a>torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()
+            translation_ba = -torch.matmul(rotation_ba, <a id="change">translation_ab.unsqueeze(2</a><a id="change">)</a>).squeeze(2)
+        
+        T_12 = rt_to_transformation(rotation_ab, translation_ab.unsqueeze(2))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1333596</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs<a id="change"> = </a><a id="change">torch.stack(mel_outputs).transpose(0, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1333593</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs<a id="change"> = torch.stack(mel_outputs).transpose(0</a><a id="change">, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1333594</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>

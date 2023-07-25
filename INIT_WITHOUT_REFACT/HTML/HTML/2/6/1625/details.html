@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :1625
+</h3><img src='6577636.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k = k if torch.is_tensor(k) else q
+
+        q = self.proj_q(q).view(-1, q.size(1), self._head_dims)
+        k = self.proj_k(k).view(-1, <a id="change">k.size(</a>1<a id="change">)</a>, self._head_dims)
+        v = self.proj_v(v).view(-1, v.size(1), self._head_dims)
+
+        att = torch.bmm(q, k.transpose(1, 2)) / self._h_dims**0.5</code></pre><h3>After Change</h3><pre><code class='java'>
+        k = k.transpose(0, 1).contiguous()
+        v = v.transpose(0, 1).contiguous()
+
+        b = q.size(1)<a id="change"> * </a>self._heads
+
+        q = self.q(q).view(-1, b, self._head_dims).transpose(0, 1)
+        k = self.k(k).view(-1, b, self._head_dims).transpose(0, 1)
+        v = <a id="change">self.v(v).view(-1, b, self._head_dims).transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        att = torch.bmm(q, k.transpose(1, 2)) / self._h_dims**0.5
+
+        if mask is not None:
+            mask = torch.where(mask &gt; 0, .0, float(&quot-inf&quot))
+            mask = mask.repeat_interleave(self._heads, dim=0)
+            att += mask.unsqueeze(1).expand(-1, att.size(1), -1)
+
+        att = att.softmax(-1)
+
+        if self.dropout is not None:
+            att = self.dropout(att)
+
+        m = torch.bmm(att, v).transpose(0, 1).contiguous()
+        m<a id="change"> = </a>self.m(m).view(m.size(0), -1, self._h_dims).transpose(0, 1)
+
+        return m
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yeliudev/nncore/commit/e58a22da4dce9778c38aae284b0c80d84937b04c#diff-b66764790ba7b310b71bcb990fc01ea802675de40cfbd1e8da361bbc4827b8c3L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6577636</div><div id='project'> Project Name: yeliudev/nncore</div><div id='commit'> Commit Name: e58a22da4dce9778c38aae284b0c80d84937b04c</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: yeliudev@outlook.com</div><div id='file'> File Name: nncore/nn/blocks/transformer.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nncore/nn/blocks/transformer.py</div><div id='n_file'> N File Name: nncore/nn/blocks/transformer.py</div><div id='m_start'> M Start Line: 79</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 79</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.temperature = temperature
+
+    def forward(self, g_t: torch.Tensor) -&gt; torch.Tensor:
+        train_bs, class_num = <a id="change">g_t.size(</a>0<a id="change">)</a>, g_t.size(1)
+        g_t_temp = g_t / self.temperature
+        g_t_temp_softmax = nn.Softmax(dim=1)(g_t_temp)
+        target_entropy_weight = entropy(g_t_temp_softmax).detach()</code></pre><h3>After Change</h3><pre><code class='java'>
+        entropy_weight = entropy(predictions).detach()
+        entropy_weight = 1 + torch.exp(-entropy_weight)
+        entropy_weight = (batch_size * entropy_weight / torch.sum(entropy_weight)).unsqueeze(dim=1)  &#47&#47 batch_size x 1
+        class_confusion_matrix<a id="change"> = </a>torch.mm(<a id="change">(predictions * entropy_weight).transpose(1</a>, <a id="change">0</a><a id="change">)</a>, predictions)
+        class_confusion_matrix = class_confusion_matrix / torch.sum(class_confusion_matrix, dim=1)
+        mcc_loss = (torch.sum(class_confusion_matrix) - torch.trace(class_confusion_matrix)) / num_classes
+        return mcc_loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/7f63cd30ea0e7cf8961db90d2af8630e2429b434#diff-970938af033d5bdedb6c8ae49305f52cf895a99e2cc388cc89c2cf008f45f9e9L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6577637</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 7f63cd30ea0e7cf8961db90d2af8630e2429b434</div><div id='time'> Time: 2020-08-28</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/mcc.py</div><div id='m_class'> M Class Name: MinimumClassConfusionLoss</div><div id='n_method'> N Class Name: MinimumClassConfusionLoss</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/mcc.py</div><div id='n_file'> N File Name: dalib/adaptation/mcc.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 23</div><div id='n_start'> N Start Line: 41</div><div id='n_end'> N End Line: 46</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            enc_output = self.encode(inputs, i_mask)
+
+        t_mask = utils.create_pad_mask(targets, self.trg_pad_idx)
+        target_size = <a id="change">targets.size()</a>[1]
+        t_self_mask = utils.create_trg_self_mask(target_size,
+                                                 device=targets.device)
+        return self.decode(targets, enc_output, i_mask, t_self_mask, t_mask)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Reshaping features
+        sizes = padded_input.size() &#47&#47 B x H_1 (channel?) x H_2 x T
+        padded_input = padded_input.view(sizes[0], sizes[1]<a id="change"> * </a>sizes[2], sizes[3])
+        padded_input<a id="change"> = </a><a id="change">padded_input.transpose(1</a>, <a id="change">2</a><a id="change">)</a>.contiguous()  &#47&#47 BxTxH
+
+        encoder_padded_outputs, _ = self.encoder(padded_input, input_lengths)
+        pred, gold, *_ = self.decoder(padded_target, encoder_padded_outputs, input_lengths)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qute012/kosr/commit/b7d24b0d835254fd425224eba3421a3b7224e55f#diff-c6b6e8084627536e70fdb6e8be5c81f8520937c01028e9bb6ea65a82014b023eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6577655</div><div id='project'> Project Name: qute012/kosr</div><div id='commit'> Commit Name: b7d24b0d835254fd425224eba3421a3b7224e55f</div><div id='time'> Time: 2021-01-12</div><div id='author'> Author: ejrwls012@gmail.com</div><div id='file'> File Name: model/transformer/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/transformer/transformer.py</div><div id='n_file'> N File Name: model/transformer/transformer.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 34</div><BR>

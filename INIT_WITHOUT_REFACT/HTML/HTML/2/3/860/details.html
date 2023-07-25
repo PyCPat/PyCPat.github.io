@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :860
+</h3><img src='2753801.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        &#47&#47 TODO: loop if window_size is greater than 2 (for cycle loss)
+        bsz, encoder_dim, n_points = keypoint_desc.size()
+        batch_size<a id="change"> = </a><a id="change">int(</a>bsz / self.window_size<a id="change">)</a>
+        _, _, height, width = desc_dense.size()
+
+        src_desc = keypoint_desc[::self.window_size]  &#47&#47 B x C x N
+        src_desc = F.normalize(src_desc, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_desc = F.normalize(src_desc, dim=1)
+        B = src_desc.size(0)
+
+        tgt_desc_dense = <a id="change">desc_dense[dense_inds]</a>  &#47&#47 B x C x H x W
+        tgt_desc_unrolled = F.normalize(tgt_desc_dense.view(B, encoder_dim, -1), dim=1)  &#47&#47 B x C x HW
+
+        match_vals = torch.matmul(src_desc.transpose(2, 1), tgt_desc_unrolled)  &#47&#47 B x N x HW</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/utiasasrl/hero_radar_odometry/commit/3393ae645f3b4eea057784a2cd3746aefb0c81b1#diff-23e0da2f9fd5de38a06280e99a19331414bae7133b397e03cf546a99b3ddce20L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2753801</div><div id='project'> Project Name: utiasasrl/hero_radar_odometry</div><div id='commit'> Commit Name: 3393ae645f3b4eea057784a2cd3746aefb0c81b1</div><div id='time'> Time: 2021-01-08</div><div id='author'> Author: keenburn2004@gmail.com</div><div id='file'> File Name: networks/softmax_matcher.py</div><div id='m_class'> M Class Name: SoftmaxMatcher</div><div id='n_method'> N Class Name: SoftmaxMatcher</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks/softmax_matcher.py</div><div id='n_file'> N File Name: networks/softmax_matcher.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, C, L = x.shape
+        L1 = int(L / 4)
+        L2 = int(L / 2)
+        L3<a id="change"> = </a><a id="change">int(</a>3 * L / 4<a id="change">)</a>
+        nonlocal_feature = torch.zeros_like(x)
+
+        feat_sub_l1 = x[:, :, :L1]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        nonlocal_feature[:, :, :L1] = nonlocal_l1
+        nonlocal_feature[:, :, L1: L2] = nonlocal_l2
+        <a id="change">nonlocal_feature[:, :, L2: ]</a> = nonlocal_l3
+
+        return nonlocal_feature
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/guanghaoyin/rtcan-1d/commit/c40a8978bd3a75323635f00a3a95ac53d3e2a888#diff-6cfc137d9c6251f4590514f91c4f7839ef3592a2ec9788167c30020e4f932856L284' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2753806</div><div id='project'> Project Name: guanghaoyin/rtcan-1d</div><div id='commit'> Commit Name: c40a8978bd3a75323635f00a3a95ac53d3e2a888</div><div id='time'> Time: 2021-05-27</div><div id='author'> Author: yinguanghao.phd@gmail.com</div><div id='file'> File Name: model/Attention_module.py</div><div id='m_class'> M Class Name: NONLocal1D</div><div id='n_method'> N Class Name: NONLocal1D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/Attention_module.py</div><div id='n_file'> N File Name: model/Attention_module.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 304</div><div id='n_start'> N Start Line: 287</div><div id='n_end'> N End Line: 300</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            image_tokens += [image_token]
+        
+            if self.is_verbose:
+                token<a id="change"> = </a><a id="change">int(</a>image_token.detach().numpy()<a id="change">)</a>
+                print("image token {} is {}".format(i, token))
+            
+        return torch.cat(image_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+        image_token = self.start_token
+
+        for i in range(self.sample_token_count):
+            token_index = <a id="change">self.token_indices[i:i+1]</a>
+            probs, keys_values_state = self.decode_step(
+                text_tokens = text_tokens,
+                encoder_state = encoder_state,
+                keys_values_state = keys_values_state,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kuprel/min-dalle/commit/17c96fe110fad3d48ea591dcd46475f521499770#diff-a32b6e5a8d67db649bbd4d0118fdcd645421a8fcca842a8ccaa2bf61e702f403L197' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2753821</div><div id='project'> Project Name: kuprel/min-dalle</div><div id='commit'> Commit Name: 17c96fe110fad3d48ea591dcd46475f521499770</div><div id='time'> Time: 2022-06-28</div><div id='author'> Author: brkuprel@gmail.com</div><div id='file'> File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_class'> M Class Name: DalleBartDecoderTorch</div><div id='n_method'> N Class Name: DalleBartDecoderTorch</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='n_file'> N File Name: min_dalle/models/dalle_bart_decoder_torch.py</div><div id='m_start'> M Start Line: 205</div><div id='m_end'> M End Line: 222</div><div id='n_start'> N Start Line: 206</div><div id='n_end'> N End Line: 212</div><BR>

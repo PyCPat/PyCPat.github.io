@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, z, label):
+        act = self.linear0(z)
+        act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)
+        <a id="change">for </a>index, blocklist in enumerate(self.blocks)<a id="change">:
+            </a>for block in blocklist:
+                if isinstance(block, ops.SelfAttention):
+                    act = block(act)
+                else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        ops.init_weights(self.modules, g_init)
+
+    def forward(self, z, label, eval=False):
+        <a id="change">with torch.cuda.amp.autocast() if self.mixed_precision and not eval</a><a id="change"> else misc.dummy_context_mgr() as mp:
+            </a>act = self.linear0(z)
+            act = act.view(-1, self.in_dims[0], self.bottom, self.bottom)
+            <a id="change">for </a>index, blocklist in enumerate(self.blocks)<a id="change">:
+                </a>for block in blocklist:
+                    if isinstance(block, ops.SelfAttention):
+                        act = block(act)
+                    else:</code></pre>

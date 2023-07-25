@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 cs = torch.cat(cs, dim=1)
+                &#47&#47 cs = F.one_hot(cs, self.nb_class).view(batch, -1, height, width).type_as(self.bg)
+                &#47&#47 TODO: Move this out into dataloader?
+                cs = <a id="change">[F.one_hot(c, self.nb_class).view(batch, -1, c.shape[1], c.shape[2]).float() for c in cs]</a>
+                cs = [F.interpolate(c, size=(height, width)) for c in cs]
+                cs = torch.cat(cs, dim=1)
+                cs = self.cond_net(cs)
+                cache[&quotcondition&quot] = cs.detach().clone()</code></pre><h3>After Change</h3><pre><code class='java'>
+                cs = cs[:, :, :height, :]
+            else:
+                up_fn = transforms.Resize((height, width), VF.InterpolationMode.NEAREST)
+                cs = [<a id="change">up_fn(c).unsqueeze(1</a><a id="change">)</a> for c in cs]
+                cs = torch.cat(cs, dim=1)
+                cs = F.one_hot(cs, self.nb_class).view(batch, -1, height, width).type_as(self.bg)
+                &#47&#47 cs = [F.one_hot(c, self.nb_class).view(batch, -1, c.shape[1], c.shape[2]).float() for c in cs]</code></pre>

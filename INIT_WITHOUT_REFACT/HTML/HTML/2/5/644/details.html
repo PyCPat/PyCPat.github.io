@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :644
+</h3><img src='2278531.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 y_reg, x_reg, h_reg, w_reg -&gt; x_reg, y_reg, w_reg, h_reg
+        regressions[..., 0::2], regressions[..., 1::2] = regressions[..., 1::2], regressions[..., 0::2].clone()
+        if self.training:
+            <a id="change">assert </a>targets is not None, "targets is None"
+            loss = self.loss_fn(classifications, regressions, anchors, targets)
+            return loss
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 y_reg, x_reg, h_reg, w_reg -&gt; x_reg, y_reg, w_reg, h_reg
+        regressions[..., 0::2], regressions[..., 1::2] = regressions[..., 1::2], regressions[..., 0::2].clone()
+        if targets is not None:
+            <a id="change">if </a><a id="change">score_thresh is not None or nms_thresh is not None:
+                </a>print("Warning: no need to transfer score_thresh or nms_thresh")
+            loss = self.loss_fn(classifications, regressions, anchors, targets)
+            return loss
+        else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jintao-huang/efficientdet_pytorch/commit/e98da68d671231c0437a290a138ea91479d9da39#diff-edecf1046963b370e5bae8f9743f10b874c7c65415ca34b175884d9ad527b1e0L84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2278531</div><div id='project'> Project Name: jintao-huang/efficientdet_pytorch</div><div id='commit'> Commit Name: e98da68d671231c0437a290a138ea91479d9da39</div><div id='time'> Time: 2020-05-22</div><div id='author'> Author: hjt_study@qq.com</div><div id='file'> File Name: models/efficientdet.py</div><div id='m_class'> M Class Name: EfficientDet</div><div id='n_method'> N Class Name: EfficientDet</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/efficientdet.py</div><div id='n_file'> N File Name: models/efficientdet.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        H, W = self.input_resolution
+        B, L, C = x.shape
+        assert L == H * W, "input feature has wrong size"
+        <a id="change">assert </a>H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."
+
+        x = x.view(B, H, W, C)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.view(B, H, W, C)
+
+        &#47&#47 padding
+        pad_input = <a id="change">(H % 2 == 1) or (W % 2 == 1)</a>
+        <a id="change">if </a>pad_input<a id="change">:
+            </a>x = F.pad(x, (0, 0, 0, W % 2, 0, H % 2))
+
+        x0 = x[:, 0::2, 0::2, :]  &#47&#47 B H/2 W/2 C
+        x1 = x[:, 1::2, 0::2, :]  &#47&#47 B H/2 W/2 C</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/12b05eaf235665fc6d1f89a9055b84d7cdfec923#diff-bfa9144b84aa2908523fe6e28d0f355d5701af250801acefca0ffbeed05bc3dfL306' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2278529</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 12b05eaf235665fc6d1f89a9055b84d7cdfec923</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/backbones/SwinTransformer.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/backbones/SwinTransformer.py</div><div id='n_file'> N File Name: lib/backbones/SwinTransformer.py</div><div id='m_start'> M Start Line: 310</div><div id='m_end'> M End Line: 313</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 283</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, C, H, W = x.shape
+        &#47&#47 FIXME look at relaxing size constraints
+        <a id="change">assert </a>H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = self.proj(x).flatten(2).transpose(1, 2)  &#47&#47 B Ph*Pw C
+        if self.norm is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        B, C, H, W = x.shape
+        &#47&#47 FIXME look at relaxing size constraints
+        <a id="change">if </a><a id="change">H != self.img_size[0] or W != self.img_size[1]:
+            </a>raise ValueError(f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]}).")
+        x = self.proj(x).flatten(2).transpose(1, 2)  &#47&#47 B Ph*Pw C
+        if self.norm is not None:
+            x = self.norm(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c#diff-8ea48274a2159a0abc4b0425f2fb246399f29a78d6a46d98cdbda118b48a4195L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2278534</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: 5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: rashit.bayazitov.1995@gmail.co</div><div id='file'> File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/modules/blocks/patch_embedding.py</div><div id='n_file'> N File Name: src/models/modules/blocks/patch_embedding.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        X2 = self.features2(X)
+        
+        N, _, H, W = X1.shape
+        <a id="change">assert </a>X1.shape == X2.shape, &quotFeature shape of two branches should be the same&quot
+
+        X1 = X1.view(N, 512, H*W)
+        X2 = X2.view(N, 128, H*W)  </code></pre><h3>After Change</h3><pre><code class='java'>
+        N, _, H, W = X1.shape
+        N, _, H2, W2 = X2.shape
+
+        <a id="change">if (H != H2)</a><a id="change"> or (W != W2):
+            </a>X2 = F.interpolate(X2, (H, W), mode=&quotbilinear&quot, align_corners=True)
+
+        X1 = X1.view(N, 512, H*W)
+        X2 = X2.view(N, 128, H*W)  </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/chaofengc/iqa-pytorch/commit/ef70142dd8a3db450386039d657152fbb6b102bd#diff-b20113a6f40f3344b978024d062484292303d43148b55f2b469981fcfd7f340bL98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2278532</div><div id='project'> Project Name: chaofengc/iqa-pytorch</div><div id='commit'> Commit Name: ef70142dd8a3db450386039d657152fbb6b102bd</div><div id='time'> Time: 2021-12-30</div><div id='author'> Author: chaofenghust@gmail.com</div><div id='file'> File Name: pyiqa/archs/dbcnn_arch.py</div><div id='m_class'> M Class Name: DBCNN</div><div id='n_method'> N Class Name: DBCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyiqa/archs/dbcnn_arch.py</div><div id='n_file'> N File Name: pyiqa/archs/dbcnn_arch.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 129</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        H, W = self.input_resolution
+        B, L, C = x.shape
+        <a id="change">assert </a>L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."
+
+        x = x.view(B, H, W, C)</code></pre><h3>After Change</h3><pre><code class='java'>
+        B, L, C = x.shape
+        if  L != H * W:
+            raise ValueError(&quotPatchMerging forward method, input feature has wrong size.&quot)
+        <a id="change">if H % 2 != 0</a><a id="change"> or W % 2 != 0:
+            </a>raise ValueError(f"PatchMerging forward method, x size ({H}*{W}) are not even.")
+
+        x = x.view(B, H, W, C)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/eora-ai/torchok/commit/5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c#diff-698ef303146f83333dbef91357773726560288f0e3fb7831ae9727aff9b7965bL33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2278537</div><div id='project'> Project Name: eora-ai/torchok</div><div id='commit'> Commit Name: 5ad3b3a9b4dd3d0f1cf0e645b0679d7aca8ac73c</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: rashit.bayazitov.1995@gmail.co</div><div id='file'> File Name: src/models/modules/blocks/patch_merging.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/modules/blocks/patch_merging.py</div><div id='n_file'> N File Name: src/models/modules/blocks/patch_merging.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 60</div><BR>

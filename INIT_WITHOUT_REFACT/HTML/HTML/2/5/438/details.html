@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :438
+</h3><img src='1608152.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 template pos emb
+
+            assert t.shape[-2:] == x.shape[-2:]
+            x = x<a id="change"> + </a><a id="change">t.mean(dim = 1)</a>
+
+        &#47&#47 embed extra msa, if present
+
+        if exists(extra_msa):</code></pre><h3>After Change</h3><pre><code class='java'>
+            x_point = rearrange(x, &quotb i j d -&gt; (b i j) () d&quot)
+            t_point = rearrange(t, &quotb t i j d -&gt; (b i j) t d&quot)
+            x_mask_point = rearrange(x_mask, &quotb i j -&gt; (b i j) ()&quot)
+            t_mask_point<a id="change"> = </a>rearrange(t_mask_crossed, &quotb t i j -&gt; (b i j) t&quot)
+
+            template_pooled = self.template_pointwise_attn(
+                x_point,
+                context = t_point,
+                mask = x_mask_point,
+                context_mask = t_mask_point
+            )
+
+            template_pooled_mask = rearrange(<a id="change">t_mask_point.sum(dim = -1)</a> &gt; 0, &quotb -&gt; b () ()&quot)
+            template_pooled = template_pooled * template_pooled_mask
+
+            template_pooled = rearrange(template_pooled, &quot(b i j) () d -&gt; b i j d&quot, i = n, j = n)
+            x<a id="change"> = </a>x + template_pooled
+
+        &#47&#47 embed extra msa, if present
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/79d820847ae54855cebe2e5717ca9214564f1ed9#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L607' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1608152</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 79d820847ae54855cebe2e5717ca9214564f1ed9</div><div id='time'> Time: 2021-07-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: Alphafold2</div><div id='n_method'> N Class Name: Alphafold2</div><div id='m_method'> M Method Name: forward(16)</div><div id='n_method'> N Method Name: forward(16)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 607</div><div id='m_end'> M End Line: 652</div><div id='n_start'> N Start Line: 630</div><div id='n_end'> N End Line: 677</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l2QLoss.append(0.01 * F.mse_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+            l1QLoss.append(0.01<a id="change"> * </a><a id="change">F.l1_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3))</a>)
+            &#47&#47 regs.append(-1e-4 * ((latent ** 2).mean((1, 2, 3)) + (q ** 2).mean((1, 2, 3))))
+
+        l1QLoss = sum(l1QLoss)</code></pre><h3>After Change</h3><pre><code class='java'>
+                &#47&#47 N, H, W, K -&gt; N, HW, K
+                batchWiseLogit = logit.reshape(len(logit), -1, logit.shape[-1])
+
+                posterior<a id="change"> = </a>OneHotCategorical(logits=batchWiseLogit)
+                prior = OneHotCategorical(probs=torch.ones_like(batchWiseLogit) / batchWiseLogit.shape[-1])
+                reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).sum(</a>-1<a id="change">)</a> + compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=1.0, allowed_js=4.0, js_coeff=1.0, cv_coeff=1.0, eps=Consts.Eps)
+                regs.append(reg)
+                &#47&#47 reg = reg / diversity
+            regs = sum(regs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/8c71ec66b33adcc34c3c3769caf2b9087dd03ff1#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L125' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1607714</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 8c71ec66b33adcc34c3c3769caf2b9087dd03ff1</div><div id='time'> Time: 2021-03-31</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: CompressionLossTwoStage</div><div id='n_method'> N Class Name: CompressionLossTwoStage</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 146</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            for latent, q in zip(latents, quantizeds):
+                l2QLoss.append(F.mse_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l1QLoss.append(F.l1_loss(latent.detach(), q, reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+                l2QLoss.append(0.00001<a id="change"> * </a><a id="change">F.mse_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3))</a>)
+                l1QLoss.append(0.00001 * F.l1_loss(latent, q.detach(), reduction=&quotnone&quot).mean(axis=(1, 2, 3)))
+
+        l1QLoss = sum(l1QLoss)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+                &#47&#47 summedProb = batchWiseLogit.sum(1)
+                posterior = OneHotCategorical(logits=batchWiseLogit)
+                prior<a id="change"> = </a>OneHotCategorical(probs=torch.ones_like(batchWiseLogit) / batchWiseLogit.shape[-1])
+                reg<a id="change"> = </a><a id="change">torch.distributions.kl_divergence(posterior, prior).sum(</a>-1<a id="change">)</a>
+                reg += compute_penalties(batchWiseLogit, allowed_entropy=0.1, individual_entropy_coeff=cv, allowed_js=4.0, js_coeff=cv, cv_coeff=cv, eps=Consts.Eps)
+                &#47&#47 reg = reg / diversity
+                regs.append(reg)
+            regs = sum(regs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/6a7990547d3b9f68e7377cfc03ef1edd64929802#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1608196</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 6a7990547d3b9f68e7377cfc03ef1edd64929802</div><div id='time'> Time: 2021-03-24</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: CompressionLossTwoStage</div><div id='n_method'> N Class Name: CompressionLossTwoStage</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 90</div><BR>

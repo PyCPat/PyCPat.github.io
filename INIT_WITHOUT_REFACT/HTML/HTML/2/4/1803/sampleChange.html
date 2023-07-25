@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        k[hh_slice] = rotate_left(k[hh_slice], bsz-1, dim=2)
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        q<a id="change"> = </a><a id="change">q.reshape(</a>b * h, t, d_h<a id="change">)</a>
+        k = k.reshape(b * h, t, d_h)
+        v = v.reshape(b * h, t, d_h)
+
+        bucket_fn = partial(bucket, buckets)</code></pre><h3>After Change</h3><pre><code class='java'>
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        merge_batch_head = lambda x: x.reshape(b * h, t, d_h)
+        q, k, v = <a id="change">map(</a>merge_batch_head, (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 bucket qkv
+
+        bucket_fn = partial(bucket, buckets)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.avgpool(x)  &#47&#47 1x1
+        features.append(x)
+
+        x = <a id="change">x.view(</a><a id="change">x.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        x = self.fc(x)
+        return x
+
+    @staticmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+        features = self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = [a * <a id="change">torch.abs(p[0] - p[1]).mean()</a> for a, p in zip(self.alphas, features)]
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]</code></pre>

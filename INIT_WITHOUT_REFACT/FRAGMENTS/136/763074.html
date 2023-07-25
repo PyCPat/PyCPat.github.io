@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+             pad = [1,1,1,1], mode=&quotconstant&quot, value=0.)
+        heatmaps3D = self.reproLayer(heatmaps_padded, center3D,centerHM,
+                    cameraMatrices, intrinsicMatrices, distortionCoefficients)
+        <a id="change">if </a>(self.training)<a id="change">:
+            </a>heatmaps3D = self.drop_joint(heatmaps3D)
+
+        heatmap_final = self.v2vNet((heatmaps3D/255.))
+        heatmap_final = self.softplus(heatmap_final)</code></pre><h3>After Change</h3><pre><code class='java'>
+        z = torch.mul(heatmap_final, self.zz)
+        z = torch.sum(z, dim = [2,3,4])/norm
+        points3D = torch.stack([x,y,z], dim = 2)
+        confidences<a id="change"> = </a>torch.clamp(<a id="change">torch.max(</a>heatmap_final.view(
+                    *heatmap_final.shape[:2], -1)<a id="change">, dim = 2)</a>[0], max = 255.)/255.
+        points3D = (points3D.transpose(0,1)*self.grid_spacing*2 - self.grid_size
+                    / 2. + center3D).transpose(0,1)
+        heatmap_final = self.softplus(heatmap_final)</code></pre>

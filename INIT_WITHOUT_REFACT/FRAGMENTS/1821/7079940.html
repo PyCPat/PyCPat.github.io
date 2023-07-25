@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                innerProduct = codebook @ codebook.T
+                &#47&#47 orthogonal regularization
+                weakCodebookLoss.append(self._auxLoss(innerProduct, torch.eye(innerProduct.shape[0], device=innerProduct.device, dtype=innerProduct.dtype)))
+            m = <a id="change">len(</a>features<a id="change">)</a>
+            for i in range(m):
+                for j in range(i + 1, m):
+                    &#47&#47 [n, h, w] := ([n, h, w, c] * [n, h, w, c]).sum(-1)
+                    interProduct<a id="change"> = </a>(features[i] * features[j]).sum(-1)
+                    &#47&#47 feature from different group should be orthogonal
+                    weakFeatureLoss.append(2 * self._auxLoss(interProduct, torch.zeros_like(interProduct)))
+                intraProduct = (features[i] * features[i]).sum(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        weakCodebookLoss = list()
+
+        for raws, codes, codebooks, k, logits, spread in zip(allFeatures, allCodes, allCodebooks, self._k, allLogits, self._spreadLoss):
+            <a id="change">for </a>raw, code, codebook, logit in zip(raws, codes, codebooks, logits)<a id="change">:
+                &#47&#47 weakFeatureLoss.append(self._alignLoss(raw, F.one_hot(code, k).float(), codebook))
+                </a>weakCodebookLoss.append(spread(codebook))
+                &#47&#47 weakCodebookLoss.append(self._l2Reg(raw, -1))
+
+        return dLoss, (sum(weakCodebookLoss), 0.0, 0.0), (restored, allTrues, allLogits)</code></pre>

@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :960
+</h3><img src='2973288.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            item_eb_hat = torch.sum(self.w[:, :self.seq_len, :, :] * u,
+                                    -1)  &#47&#47 shape=(batch_size, seq_len, hidden_size*interest_num)
+
+        item_eb_hat = <a id="change">item_eb_hat.view(-1</a>, self.seq_len, self.interest_num, self.hidden_size<a id="change">)</a>
+        item_eb_hat = item_eb_hat.permute(0, 2, 1, 3).contiguous()
+        item_eb_hat = <a id="change">item_eb_hat.view(-1</a>, self.interest_num, self.seq_len,
+                                       self.hidden_size<a id="change">)</a>  &#47&#47 [batch_size, num_interest, seq_len, hidden_size]
+
+        &#47&#47 [batch_size, num_interest, seq_len, hidden_size]
+        if self.stop_grad:  &#47&#47 Clip signal for backpropagation, item_emb_hat is not included in gradient calculation</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    dim=3)  &#47&#47 shape=(batch_size, maxlen, hidden_size*interest_num)
+
+        item_eb_hat = torch.reshape(item_eb_hat, (-1, self.seq_len, self.interest_num, self.hidden_size))
+        item_eb_hat = <a id="change">torch.transpose(item_eb_hat, 1, 2).contiguous()</a>
+        item_eb_hat = torch.reshape(item_eb_hat, (-1, self.interest_num, self.seq_len, self.hidden_size))
+
+        &#47&#47 [b, in, s, h]
+        if self.stop_grad:  &#47&#47 截断反向传播，item_emb_hat不计入梯度计算中</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/edb52c9a2e35045250d5fda164df336768f37599#diff-16584232aba0343bfbe840c65428273f6373d78df60d98d31ac5c2a5f4a698dcL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2973288</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: edb52c9a2e35045250d5fda164df336768f37599</div><div id='time'> Time: 2023-03-24</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_class'> M Class Name: CapsuleNetwork</div><div id='n_method'> N Class Name: CapsuleNetwork</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/layers/multi_interest.py</div><div id='n_file'> N File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 154</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x + self.attn(self.norm1(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        x = x + self.ffn(self.norm2(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x + self.attn(<a id="change">self.norm1(x.reshape(b, c, -1).transpose(-2, -1).contiguous()).transpose(-2, -1)
+                          .contiguous()</a>.reshape(b, c, h, w))
+        x = x + self.ffn(self.norm2(x.reshape(b, c, -1).transpose(-2, -1).contiguous()).transpose(-2, -1)
+                         .contiguous().reshape(b, c, h, w))
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/leftthomas/restormer/commit/24dcd377010cc831079023b52a73adcb9ad04e7b#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2973285</div><div id='project'> Project Name: leftthomas/restormer</div><div id='commit'> Commit Name: 24dcd377010cc831079023b52a73adcb9ad04e7b</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: leftthomas@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: TransformerBlock</div><div id='n_method'> N Class Name: TransformerBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 57</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        q = q.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        k = k.view(b, c, -1).view(b, self.num_heads, -1, h * w)
+        v = <a id="change">v.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.view(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1), F.normalize(k, dim=-1)
+
+        attn = torch.softmax(torch.matmul(q, k.transpose(-2, -1)) * self.temperature, dim=-1)
+        out = self.project_out(<a id="change">torch.matmul(attn, v).view(</a>b, <a id="change">-1</a>, h * w<a id="change">)</a>.view(b, -1, h, w))
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        v = v.reshape(b, self.num_heads, -1, h * w)
+        q, k = F.normalize(q, dim=-1), F.normalize(k, dim=-1)
+
+        attn = torch.softmax(torch.matmul(q, <a id="change">k.transpose(-2, -1).contiguous()</a>) * self.temperature, dim=-1)
+        out = self.project_out(torch.matmul(attn, v).reshape(b, -1, h, w))
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/leftthomas/restormer/commit/24dcd377010cc831079023b52a73adcb9ad04e7b#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2973281</div><div id='project'> Project Name: leftthomas/restormer</div><div id='commit'> Commit Name: 24dcd377010cc831079023b52a73adcb9ad04e7b</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: leftthomas@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: MDTA</div><div id='n_method'> N Class Name: MDTA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 26</div><div id='n_start'> N Start Line: 20</div><div id='n_end'> N End Line: 26</div><BR>

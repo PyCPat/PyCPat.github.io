@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            weight, bias = weight[:n, :n], bias[:n]
+            mask = torch.ones(weight.shape[:2], device = device).triu_(1).bool()
+            weight = weight.masked_fill(mask[...<a id="change">, None</a>], 0.)
+
+        gate = F.conv1d(gate, weight, bias)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        weight, bias = self.weight, self.bias
+
+        <a id="change">if </a><a id="change">self.use_circulant_matrix:
+            </a>dim_seq = weight.shape[-1]
+            weight<a id="change"> = </a><a id="change">F.pad(</a>weight, (<a id="change">0</a><a id="change">, dim_seq</a>)<a id="change">, value = 0)</a>
+            weight = repeat(weight, &quot... n -&gt; ... (r n)&quot, r = dim_seq)
+            weight = weight[:-dim_seq].reshape(dim_seq, 2 * dim_seq - 1)
+            weight = weight[:, (dim_seq - 1):]
+</code></pre>

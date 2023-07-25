@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        quantized_input = torch.matmul(encoding_one_hot, self.embedding.weight) &#47&#47 [BHW, D]
+        quantized_input = quantized_input.view(input_shape) &#47&#47 [B x H x W x D]
+
+        return <a id="change">quantized_input.permute(0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a> &#47&#47 [B x D x H x W]
+
+
+class VQVAE(BaseVAE):</code></pre><h3>After Change</h3><pre><code class='java'>
+        quantized_latents = quantized_latents.view(latents_shape)  &#47&#47 [B x H x W x D]
+
+        &#47&#47 Compute the VQ Losses
+        commitment_loss = F.mse_loss(<a id="change">quantized_latents.detach()</a>, latents)
+        embedding_loss = F.mse_loss(quantized_latents, latents.detach())
+
+        vq_loss<a id="change"> = </a>commitment_loss * self.beta + embedding_loss
+
+        &#47&#47 Add the residue back to the latents
+        quantized_latents = latents + (quantized_latents - latents).detach()</code></pre>

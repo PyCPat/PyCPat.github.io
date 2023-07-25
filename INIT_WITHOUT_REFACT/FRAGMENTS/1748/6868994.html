@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x,
+        context = None
+    ):
+        b<a id="change">, c, h, w</a> = x.shape
+        context = default(context, x)
+
+        qkv = (self.to_q(x), *self.to_kv(context).chunk(2, dim = 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out)
+
+class FeedForward(nn.Module):
+    def __init__(self, dim, mult = 4, time_cond_dim = None):</code></pre>

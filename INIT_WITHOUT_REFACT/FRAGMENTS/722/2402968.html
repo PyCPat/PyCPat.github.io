@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        lse_negative_col = torch.logsumexp(self.log_scale * (self.neg_margin - neg) * neg_weight, dim=-2)
+
+        loss_col = F.softplus(lse_positive + lse_negative_row) / self.log_scale
+        loss_row = <a id="change">F.softplus(</a>lse_positive<a id="change"> + </a>lse_negative_col<a id="change">)</a> / self.log_scale
+        loss = loss_col + loss_row
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists</code></pre><h3>After Change</h3><pre><code class='java'>
+        lse_negative_col = torch.logsumexp(self.log_scale * (self.neg_margin - neg) * neg_weight, dim=-2)
+
+        loss_col = F.softplus(lse_positive_row + lse_negative_row) / self.log_scale
+        loss_row<a id="change"> = </a><a id="change">F.softplus(</a>lse_positive_col<a id="change"> + </a>lse_negative_col<a id="change">) / </a>self.log_scale
+        loss = loss_col + loss_row
+
+        return torch.mean(loss), accuracy, furthest_positive.tolist(), average_negative.tolist(), 0, dists</code></pre>

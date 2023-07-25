@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = F.relu(out)
+        out = out.permute(0, 2, 1)
+        out = self.maxpool(out).squeeze()
+        out = <a id="change">self.fc(</a>out<a id="change">)</a>
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print(out.shape)&#47&#47[300,512]
+        out = torch.cat((embed, out), 2)
+        &#47&#47 print(out.shape) &#47&#47 [300,812]
+        fc_output = torch.tanh(<a id="change">self.fc(</a>out<a id="change">)</a>)   &#47&#47 [batch_size, max_seq_len, hidden_size*2]
+
+        maxpool_input<a id="change"> = </a>fc_output.permute(0, 2, 1)  &#47&#47 [batch_size, hidden_size*2, max_seq_len]
+        maxpool_output = self.maxpool(maxpool_input).squeeze()   &#47&#47 [batch_size, hidden_size*2]
+
+        cls_input = self.dropout(maxpool_output)</code></pre>

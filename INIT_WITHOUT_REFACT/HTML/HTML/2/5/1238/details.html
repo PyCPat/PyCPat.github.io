@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :1238
+</h3><img src='3674840.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute scale and shift from time context
+        scale_shift = None
+        if exists(self.to_time_embedding) and exists(t):
+            time_embedding<a id="change"> = </a>self.to_time_embedding(t)
+            time_embedding<a id="change"> = </a><a id="change">rearrange(</a>time_embedding, <a id="change">"b c -&gt; b c 1"</a><a id="change">)</a>
+            scale_shift = time_embedding.chunk(2, dim=1)
+
+        h = self.block2(h, scale_shift=scale_shift)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert_message = "context embedding required if context_embedding_features &gt; 0"
+        assert not (self.use_embedding ^ exists(embedding)), assert_message
+        assert_message = "context mapping required if context_mapping_features &gt; 0"
+        <a id="change">assert </a>not (self.use_mapping ^ exists(mapping)), assert_message
+
+        h = self.block1(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/3c710edf168da06dcc89c23ef12023d0f8b63043#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L194' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3674840</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 3c710edf168da06dcc89c23ef12023d0f8b63043</div><div id='time'> Time: 2022-09-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: ResnetBlock1d</div><div id='n_method'> N Class Name: ResnetBlock1d</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 229</div><div id='n_start'> N Start Line: 194</div><div id='n_end'> N End Line: 206</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sim = einsum(&quotb h d i, b h d j -&gt; b h i j&quot, q, k)
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h (x y) d -&gt; b (h d) x y&quot</a><a id="change">, x = h, y = w)</a>
+        return self.to_out(out)
+
+class FiLM(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.norm(x)
+
+        if exists(self.time_cond):
+            <a id="change">assert </a>exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x = (x * (scale + 1)) + shift
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3674841</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 225</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q = q.softmax(dim = -2)
+        k<a id="change"> = </a>k.softmax(dim = -1)
+
+        q = q * self.scale
+
+        context = torch.einsum(&quotb h d n, b h e n -&gt; b h d e&quot, k, v)
+
+        out = torch.einsum(&quotb h d e, b h d n -&gt; b h e n&quot, context, q)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h c (x y) -&gt; b (h c) x y&quot</a><a id="change">, h = self.heads, x = h, y = w)</a>
+        return self.to_out(out)
+
+class Attention(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.norm(x)
+
+        if exists(self.time_cond):
+            <a id="change">assert </a>exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x = (x * (scale + 1)) + shift
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3674842</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 157</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return_logits: bool = False
+    ) -&gt; Union[Tuple[LongTensor, FloatTensor], FloatTensor]:
+        image_count = encoder_state.shape[0] // 2
+        token_index_batched = <a id="change">token_index[None, :]</a>[list(range(image_count)) * 2]
+        if prev_tokens.ndim == 1:
+            prev_tokens = prev_tokens.unsqueeze(0)
+        prev_tokens = prev_tokens.T[list(range(image_count)) * 2]</code></pre><h3>After Change</h3><pre><code class='java'>
+        return_logits: bool = False
+    ) -&gt; Union[Tuple[LongTensor, FloatTensor], FloatTensor]:
+        image_count = encoder_state.shape[0] // 2
+        <a id="change">if token_index.ndim == 1</a><a id="change">:
+            </a>token_index<a id="change"> = </a><a id="change">token_index.unsqueeze(0</a><a id="change">)</a>.repeat(image_count * 2, 1)
+        token_index_batched = token_index[list(range(image_count)) * 2]
+        if prev_tokens.ndim == 1:
+            prev_tokens = prev_tokens.unsqueeze(0)</code></pre>

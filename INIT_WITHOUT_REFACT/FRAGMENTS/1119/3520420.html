@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads)
+        q = q * self.scale
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)
+        out = self.to_out(out)
+        <a id="change">return </a>rearrange(out, &quot(b f) c h w -&gt; b c f h w&quot, b = b)
+
+&#47&#47 model
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quot... h i j, ... h j d -&gt; ... h i d&quot, attn, v)
+        out<a id="change"> = </a>rearrange(out, &quot... h n d -&gt; ... n (h d)&quot)
+        <a id="change">return </a>self.to_out(out)
+
+&#47&#47 model
+</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                feature_fake = self.max_pooling_1d(feature_fake.unsqueeze(dim=1))
+                mask = self.max_pooling_1d(mask.unsqueeze(dim=1))
+            &#47&#47 Normalize features
+            feature_real = (feature_real - feature_real.mean())<a id="change"> / </a><a id="change">feature_real.std()</a>
+            feature_fake = (feature_fake - feature_fake.mean()) / feature_fake.std()
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))
+        &#47&#47 Average loss with number of features</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Normalize features
+            union = torch.cat((feature_real, feature_fake), dim=0)
+            feature_real = (feature_real - union.mean()) / union.std()
+            feature_fake = (feature_fake - <a id="change">union.mean()</a>)<a id="change"> / </a>union.std()
+            &#47&#47 Calc l1 loss of the real and fake feature conditionalized by the corresponding mask
+            loss = loss + torch.mean(torch.abs((feature_real - feature_fake) * mask))
+        &#47&#47 Average loss with number of features</code></pre>

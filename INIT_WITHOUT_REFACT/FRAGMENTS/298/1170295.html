@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_dim, num_units, init_scale=0.1):
+        super().__init__()
+        self.W = nn.Parameter(default_init(scale=init_scale)(
+            (in_dim<a id="change">, num_units</a>)), requires_grad=True)
+        self.b = nn.Parameter(torch.zeros(num_units), requires_grad=True)
+
+    def forward(self, x):</code></pre><h3>After Change</h3><pre><code class='java'>
+class Block(nn.Module):
+    def __init__(self, dim, dim_out, groups=32, dropout=0):
+        super().__init__()
+        self.block = <a id="change">nn.Sequential(
+            </a>nn.GroupNorm(groups, dim),
+            Swish(),
+            <a id="change">nn.Dropout(</a>dropout<a id="change">)</a> if dropout != 0 else nn.Identity(),
+            nn.Conv2d(dim, dim_out, 3, padding=1)<a id="change">
+        )</a>
+
+    def forward(self, x):
+        return self.block(x)
+</code></pre>

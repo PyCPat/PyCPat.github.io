@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute and apply filter
+        notch_kernel = notch_filter(drop_frequency).to(clean_waveform.device)
+        padding = (len(notch_kernel) // 2<a id="change">, len(notch_kernel) // 2</a>)
+        dropped_waveform = convolve1d(dropped_waveform, notch_kernel, padding)
+
+        &#47&#47 Save the state of the RNG for reproducibility</code></pre><h3>After Change</h3><pre><code class='java'>
+            dropped_waveform = dropped_waveform.unsqueeze(1)
+
+        &#47&#47 Pick number of frequencies to drop
+        drop_count = <a id="change">torch.randint(
+            low=self.drop_count_low,
+            high=self.drop_count_high + 1,
+            size=(1,),
+        )</a>
+
+        &#47&#47 Pick a frequency to drop
+        drop_range = self.drop_freq_high - self.drop_freq_low
+        drop_frequency = torch.rand(drop_count)*drop_range + self.drop_freq_low
+
+        &#47&#47 Filter parameters
+        filter_length = 101
+        pad = filter_length<a id="change"> // </a>2
+
+        &#47&#47 Start with delta function
+        drop_filter<a id="change"> = </a>torch.zeros(1, 1, filter_length)
+        drop_filter[0, 0, pad]<a id="change"> = 1</a>
+
+        &#47&#47 Subtract each frequency
+        for frequency in drop_frequency:
+            notch_kernel = notch_filter(
+                frequency, filter_length, self.drop_width,
+            ).to(clean_waveform.device)
+            drop_filter = convolve1d(drop_filter, notch_kernel, pad)
+
+        &#47&#47 Apply filter
+        dropped_waveform<a id="change"> = </a>convolve1d(dropped_waveform, drop_filter, pad)
+
+        &#47&#47 Save the state of the RNG for reproducibility
+        self.rng_state = torch.random.get_rng_state()</code></pre>

@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :890
+</h3><img src='2777882.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        w = self.width // 2
+        z = []
+        for d in range(-w, w+1):
+            y = torch.diag(<a id="change">torch.ones(</a>N-abs(d)<a id="change">)</a>, diagonal=d) &#47&#47 (N, N)
+            y = y.view(1, N, N).expand(B, N, N) &#47&#47 (B, N, N)
+            y = torch.bmm(y, x) &#47&#47 (B, N, n_hidden)
+            z.append(y)</code></pre><h3>After Change</h3><pre><code class='java'>
+        w = self.context // 2
+        z = []
+        for d in range(-w, w+1):
+            y = <a id="change">torch.diag(torch.ones(N-abs(d)), diagonal=d).to(</a>x.device<a id="change">)</a> &#47&#47 (N, N)
+            y = y.view(1, N, N).expand(B, N, N) &#47&#47 (B, N, N)
+            y = torch.bmm(y, x) &#47&#47 (B, N, n_hidden)
+            z.append(y)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/keio-bioinformatics/mxfold2/commit/c37c09d1ad2940a13dd4c82253c8607c8175115a#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2777882</div><div id='project'> Project Name: keio-bioinformatics/mxfold2</div><div id='commit'> Commit Name: c37c09d1ad2940a13dd4c82253c8607c8175115a</div><div id='time'> Time: 2019-11-06</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: BilinearPairedLayer</div><div id='n_method'> N Class Name: BilinearPairedLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 92</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 94</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    super(_Multiply, self).__init__()
+
+  def forward(self, x):
+    result = <a id="change">torch.ones(</a>x[0].size()<a id="change">)</a>
+    for t in x:
+      result *= t
+    return t
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(_Multiply, self).__init__()
+
+    def forward(self, x):
+        result = <a id="change">torch.ones(x[0].size()).to(</a>self._device<a id="change">)</a>
+
+        for t in x:
+            result *= t
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/datasystemslab/geotorchai/commit/be6f7d91b4abb532b8163f211dcf17b2e238c6b1#diff-1d868ae71db9be10ecbfedc1eb442c0b0c62c9efa6c36ec1bbf6b6f3f141e6ceL55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2777883</div><div id='project'> Project Name: datasystemslab/geotorchai</div><div id='commit'> Commit Name: be6f7d91b4abb532b8163f211dcf17b2e238c6b1</div><div id='time'> Time: 2022-06-04</div><div id='author'> Author: kchowdh1@asu.edu</div><div id='file'> File Name: geotorch/models/deep_stn_net.py</div><div id='m_class'> M Class Name: _Multiply</div><div id='n_method'> N Class Name: _Multiply</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: geotorch/models/deep_stn_net.py</div><div id='n_file'> N File Name: geotorch/models/deep_stn_net.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    device = torch.device(&quotcuda&quot) if torch.cuda.is_available() else torch.device(&quotcpu&quot)
+    batch_size = anchor_output.shape[0]
+    targets_sketch = torch.zeros(batch_size)
+    targets_photos = <a id="change">torch.ones(</a>batch_size<a id="change">)</a>
+
+    if epoch &lt; 5:
+      lmbda = 0
+    elif epoch &lt; 25:</code></pre><h3>After Change</h3><pre><code class='java'>
+    &#47&#47 Create targets for the domain loss(adversarial for the main model - as imposed by the GRL after every output)
+    batch_size = anchor_output.shape[0]
+    targets_sketch = torch.zeros(batch_size).to(self.device)
+    targets_photos = <a id="change">torch.ones(batch_size).to(</a>self.device<a id="change">)</a>
+
+    if epoch &lt; 5:
+      lmbda = 0
+    elif epoch &lt; 25:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ashok-arjun/zero-shot-sketch-based-image-retrieval/commit/928b6709fa51876e05205a350c9507285b8b934c#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2777886</div><div id='project'> Project Name: ashok-arjun/zero-shot-sketch-based-image-retrieval</div><div id='commit'> Commit Name: 928b6709fa51876e05205a350c9507285b8b934c</div><div id='time'> Time: 2020-08-08</div><div id='author'> Author: arjun2000ashok@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: DetangledJointDomainLoss</div><div id='n_method'> N Class Name: DetangledJointDomainLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 107</div><div id='n_end'> N End Line: 116</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            batch_size = X.shape[0]
+            num_step = X.shape[1]
+            num_nodes = X.shape[2]
+            mask = <a id="change">torch.ones(</a>num_step, num_step<a id="change">)</a>
+            mask = torch.tril(mask)
+            mask = torch.unsqueeze(torch.unsqueeze(mask, dim=0), dim=0)
+            mask = mask.repeat(self._K * batch_size, num_nodes, 1, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            batch_size = X.shape[0]
+            num_step = X.shape[1]
+            num_nodes = X.shape[2]
+            mask = <a id="change">torch.ones(num_step, num_step).to(</a>X.device<a id="change">)</a>
+            mask = torch.tril(mask)
+            mask = torch.unsqueeze(torch.unsqueeze(mask, dim=0), dim=0)
+            mask = mask.repeat(self._K * batch_size, num_nodes, 1, 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/a7eebfc2cfea94ab0b852d75e01b02d9102b435f#diff-23bf81031fa8655150b4674c51c7d6eefc8f0ab5b206b922158a4414e899aa8cL229' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2777887</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: a7eebfc2cfea94ab0b852d75e01b02d9102b435f</div><div id='time'> Time: 2021-04-09</div><div id='author'> Author: He_YX@outlook.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_class'> M Class Name: TemporalAttention</div><div id='n_method'> N Class Name: TemporalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/gman.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 241</div><div id='n_end'> N End Line: 262</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.linear = nn.Linear(3, 1)
+
+    def forward(self, input_list: dict[str, torch.Tensor]) -&gt; dict[str, IntWithGetitem]:
+        x = input_list["foo"] if input_list else <a id="change">torch.ones(</a>3<a id="change">)</a>
+        x = self.linear(x)
+        return {"foo": IntWithGetitem(x)}
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, input_list: dict[str, torch.Tensor]) -&gt; dict[str, IntWithGetitem]:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        x = input_list["foo"] if input_list else <a id="change">torch.ones(3).to(</a>device<a id="change">)</a>
+        x = self.linear(x)
+        return {"foo": IntWithGetitem(x)}
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tyleryep/torchinfo/commit/bef1aa93cdf0bd90a5b3c02dbf99163a303aa9b9#diff-98970f0ae80b8fcf3003b25056713bf69212970212177c128459839e9d486524L378' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2777884</div><div id='project'> Project Name: tyleryep/torchinfo</div><div id='commit'> Commit Name: bef1aa93cdf0bd90a5b3c02dbf99163a303aa9b9</div><div id='time'> Time: 2023-02-05</div><div id='author'> Author: tyler.yep@robinhood.com</div><div id='file'> File Name: tests/fixtures/models.py</div><div id='m_class'> M Class Name: EdgecaseInputOutputModel</div><div id='n_method'> N Class Name: EdgecaseInputOutputModel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tests/fixtures/models.py</div><div id='n_file'> N File Name: tests/fixtures/models.py</div><div id='m_start'> M Start Line: 379</div><div id='m_end'> M End Line: 379</div><div id='n_start'> N Start Line: 379</div><div id='n_end'> N End Line: 380</div><BR>

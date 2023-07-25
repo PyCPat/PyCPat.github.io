@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        embeddings = self.embedding(encoded_captions)  &#47&#47 (batch_size, max_caption_length, embed_dim)
+
+        &#47&#47 初始化LSTM状态
+        h<a id="change">, c</a> = self.init_hidden_state(encoder_out)  &#47&#47 (batch_size, decoder_dim)
+
+        &#47&#47 我们一旦生成了&lt;end&gt;就已经完成了解码
+        &#47&#47 因此需要解码的长度实际是 lengths - 1
+        decode_lengths = (caption_lengths - 1).tolist()
+        &#47&#47 新建两个张量用于存放 word predicion scores and alphas
+        global device
+        predictions = torch.zeros(batch_size, max(decode_lengths), vocab_size).to(device)
+        alphas = torch.zeros(batch_size, max(decode_lengths), num_pixels).to(device)
+
+        &#47&#47 在每一个时间步根据解码器的前一个状态以及经过attention加权后的encoder输出进行解码
+        for t in range(max(decode_lengths)):
+            batch_size_t = sum([l &gt; t for l in decode_lengths])
+            attention_weighted_encoding, alpha = self.attention(encoder_out[:batch_size_t],
+                                                                h[:batch_size_t])
+            gate = self.sigmoid(self.f_beta(h[:batch_size_t]))  &#47&#47 gating scalar, (batch_size_t, encoder_dim)
+            attention_weighted_encoding = gate * attention_weighted_encoding
+            h<a id="change">, c</a> = self.decode_step(
+                torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                (h[:batch_size_t], c[:batch_size_t]))  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            else:
+                h = self.decode_step(
+                    torch.cat([<a id="change">self.embedding(</a>torch.argmax(predictions[:batch_size_t, t, :],dim = 1)<a id="change">)</a>, attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)
+            predictions[:batch_size_t, t, :] = preds</code></pre>

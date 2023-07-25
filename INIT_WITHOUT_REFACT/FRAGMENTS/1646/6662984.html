@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for batch_idx in range(batch_size):
+            n_sources = lens_unpacked[batch_idx] &#47&#47 &lt;int&gt;
+            _input, _target = input[batch_idx: batch_idx+1], target[batch_idx: batch_idx+1, : n_sources] &#47&#47 (1, 2, *), (1, n_sources, *)
+            input_one, input_rest = _input[:, 0], <a id="change">_input[:, 1]</a> &#47&#47 (1, *), (1, *)
+
+            possible_loss = None
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        for batch_idx in range(batch_size):
+            n_sources = lens_unpacked[batch_idx] &#47&#47 &lt;int&gt;
+            _input, _target = input[batch_idx: batch_idx + 1], target[batch_idx: batch_idx + 1, : n_sources] &#47&#47 (1, 2, *), (1, n_sources, *)
+            input_one, input_rest = <a id="change">torch.unbind(</a>_input<a id="change">, dim=1)</a> &#47&#47 (1, *), (1, *)
+
+            possible_loss = None
+    </code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        B, T, C = x.size()
+
+        if hasattr(self, &quottime_shift&quot):
+            x = torch.cat([<a id="change">self.time_shift(x)[:, :-1, :C//2]</a>, x[:, :, C//2:]], dim = -1)
+
+        q = self.query(x).view(B, T, self.n_head, self.head_size).transpose(1, 2)       &#47&#47 (B, T, C) -&gt; (B, nh, T, hs)
+        k = self.key(x).view(B, T, self.n_head, self.head_size).transpose(1, 2)         &#47&#47 (B, T, C) -&gt; (B, nh, T, hs)</code></pre><h3>After Change</h3><pre><code class='java'>
+        B, T, C = x.size()
+
+        if hasattr(self, &quottime_shift&quot):
+            x = torch.cat([<a id="change">self.time_shift(x[:, :, :C//2]</a><a id="change">)</a>, x[:, :, C//2:]], dim = -1)
+
+        q = self.query(x).view(B, T, self.n_head, self.head_size).transpose(1, 2)       &#47&#47 (B, T, C) -&gt; (B, nh, T, hs)
+        k = self.key(x).view(B, T, self.n_head, self.head_size).transpose(1, 2)         &#47&#47 (B, T, C) -&gt; (B, nh, T, hs)</code></pre>

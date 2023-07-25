@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+        return quantizeds<a id="change">, codes, logits</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+            soft = (logit / temperature).softmax(-1)
+            if hard:
+                hard = logit.argmax(-1)
+                hard<a id="change"> = </a><a id="change">F.one_hot(</a>hard, k<a id="change">)</a>
+                sample = (hard<a id="change"> - </a>soft).detach()<a id="change"> + </a>soft
+            else:
+                sample = soft
+            &#47&#47 sample = F.gumbel_softmax(logit, temperature, hard)</code></pre>

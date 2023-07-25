@@ -1,0 +1,68 @@
+<html><h3>Pattern ID :2762
+</h3><img src='9119178.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+
+        out = self.conv0(out)
+        out = <a id="change">self.activation(</a>out<a id="change">)</a>
+        out = self.conv1(out)
+        out = self.activation(out)
+        out = self.conv1b(out)
+        out<a id="change"> = </a>self.activation(out)
+        out = self.conv2(out)
+        out = (self.se(out)*2) * out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            shortcut = x
+
+        out = <a id="change">self.activation(</a>self.conv0(out)<a id="change">)</a>
+        out = self.activation(self.conv1(out))
+        out = self.activation(self.conv1b(out))
+        out = self.conv2(out)
+        out = (self.se(out)*2) * out</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/benjs/nfnets_pytorch/commit/45ce9487f5add554dd8912ded03653748d29e1ee#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L165' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9119178</div><div id='project'> Project Name: benjs/nfnets_pytorch</div><div id='commit'> Commit Name: 45ce9487f5add554dd8912ded03653748d29e1ee</div><div id='time'> Time: 2021-02-16</div><div id='author'> Author: benjs@benjs.de</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: NFBlock</div><div id='n_method'> N Class Name: NFBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 165</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x0 = x
+
+        x = <a id="change">self.activation(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>self.conv2d1(x)
+
+        x = self.conv2d2(self.activation(x))
+        x = self.conv2d3(self.activation(x))</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x0 = x
+
+        x = self.conv2d1(<a id="change">self.activation(</a>x<a id="change">)</a>)
+        x = self.conv2d2(self.activation(x))
+        x = self.conv2d3(self.activation(x))
+        x = self.activation(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/postech-cvlab/pytorch-studiogan/commit/3b9c761ba8338911c8ccd369bdee0641589282b7#diff-8e254ee489774778fb1c9ce198410086285820ede9e1a073ff48ad9350a0e011L211' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9119182</div><div id='project'> Project Name: postech-cvlab/pytorch-studiogan</div><div id='commit'> Commit Name: 3b9c761ba8338911c8ccd369bdee0641589282b7</div><div id='time'> Time: 2022-01-26</div><div id='author'> Author: first287@naver.com</div><div id='file'> File Name: src/models/deep_big_resnet.py</div><div id='m_class'> M Class Name: DiscBlock</div><div id='n_method'> N Class Name: DiscBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/deep_big_resnet.py</div><div id='n_file'> N File Name: src/models/deep_big_resnet.py</div><div id='m_start'> M Start Line: 214</div><div id='m_end'> M End Line: 215</div><div id='n_start'> N Start Line: 214</div><div id='n_end'> N End Line: 214</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        logits_mask = logits_mask.unsqueeze(1)
+
+        &#47&#47 Create representations of tokens as heads and dependents.
+        head_arc = self.dropout(<a id="change">self.activation(</a>self.head_arc(x)<a id="change">)</a>)
+        dependent_arc = self.dropout(self.activation(self.dependent_arc(x)))
+        head_label = self.dropout(self.activation(self.head_label(x)))
+        dependent_label = self.dropout(self.activation(self.dependent_label(x)))
+
+        &#47&#47 Compute biaffine attention matrix. This computes from the hidden
+        &#47&#47 representations of the shape [batch_size, seq_len, hidden_width] the
+        &#47&#47 attention matrices [batch_size, seq_len, seq_len, n_O].
+        logits_arc = self.bilinear_arc(head_arc, dependent_arc).squeeze(-1)
+
+        logits_label = self.bilinear_label(head_label, dependent_label)
+
+        &#47&#47 Mask out head candidates that are padding time steps. The logits mask
+        &#47&#47 has shape [batch_size, seq_len], we reshape it to [batch_size, 1,
+        &#47&#47 seq_len] to mask out the head predictions.
+        logits_arc<a id="change"> += </a>logits_mask
+        logits_label += logits_mask.unsqueeze(-1)
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+        logits_mask = logits_mask.unsqueeze(1).unsqueeze(-1)
+
+        &#47&#47 Create representations of tokens as heads and dependents.
+        head = self.dropout(<a id="change">self.activation(</a>self.head(x)<a id="change">)</a>)
+        dependent = self.dropout(self.activation(self.dependent(x)))
+
+        &#47&#47 Compute biaffine attention matrix. This computes from the hidden</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/explosion/spacy-experimental/commit/b11c33d56db81f0be1a4e04fcda0042b9c500f37#diff-510501f7cb2d459202a440b1750a360ccbcdc4c5f42a0298478a064ab610aad0L97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9119170</div><div id='project'> Project Name: explosion/spacy-experimental</div><div id='commit'> Commit Name: b11c33d56db81f0be1a4e04fcda0042b9c500f37</div><div id='time'> Time: 2021-10-29</div><div id='author'> Author: me@danieldk.eu</div><div id='file'> File Name: biaffine_parser/pytorch_biaffine_model.py</div><div id='m_class'> M Class Name: BiaffineModel</div><div id='n_method'> N Class Name: BiaffineModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: biaffine_parser/pytorch_biaffine_model.py</div><div id='n_file'> N File Name: biaffine_parser/pytorch_biaffine_model.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 117</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x = self.dropout(x)
+        x = <a id="change">x.unsqueeze(0</a><a id="change">)</a>.expand(targets.size(0), -1, -1, -1, -1)
+
+        copies, bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)</code></pre><h3>After Change</h3><pre><code class='java'>
+                ).flatten()
+            else:
+                pos_num = (end - start) // copies
+                <a id="change">predictions[start:end]</a> = torch.einsum(
+                    "bct,nbct-&gt;nbt", x[..., :-offset, i], targets[..., offset:]
+                ).flatten()
+                labels[start : start + pos_num] = 1.0</code></pre>

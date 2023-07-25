@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        loss = F.cross_entropy(
+            logits[mask],
+            <a id="change">x[mask]</a>
+        )
+
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            no_replace_prob_mask = get_mask_subset_prob(mask, self.no_replace_prob)
+            replace_mask_id_mask &= ~no_replace_prob_mask
+
+        <a id="change">if self.random_token_prob &gt; 0. and coin_flip()</a><a id="change">:
+            </a>random_token_prob_mask = get_mask_subset_prob(replace_mask_id_mask, self.random_token_prob<a id="change"> * </a>frac_seq_left)
+            random_tokens = <a id="change">torch.randint(0</a>, self.num_tokens, (b, n)<a id="change">, device = device)</a>
+
+            x = torch.where(random_token_prob_mask, random_tokens, x)
+            replace_mask_id_mask &= ~random_token_prob_mask
+</code></pre>

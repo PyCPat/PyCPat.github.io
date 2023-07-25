@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size, c_in, T, n_vertex = x.shape
+
+        x_first_mul = torch.mm(x.reshape(-1, c_in), self.weight.reshape(c_in, -1)).reshape(n_vertex * self.Ks, -1)
+        x_second_mul = <a id="change">torch.mm(self.chebconv_matrix_list, x_first_mul).reshape(</a>-1, self.c_out<a id="change">)</a>
+
+        if self.bias is not None:
+            x_chebconv = x_second_mul + self.bias</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.reshape(n_vertex, -1)
+        x_0 = x
+        x_1 = torch.mm(self.chebconv_matrix, x)
+        <a id="change">if self.Ks - 1 == 0</a><a id="change">:
+            </a>x_list = [x_0]
+        elif self.Ks - 1 == 1:
+            x_list<a id="change"> = </a><a id="change">[</a>x_0<a id="change"></a>]
+            x_list.append(x_1)
+        else:
+            x_list = [x_0, x_1]
+            <a id="change">for k</a> in <a id="change">range(2</a>, self.Ks<a id="change">):
+                </a>x_list.append(torch.mm(2 * self.chebconv_matrix, x_list[<a id="change">k</a><a id="change"> - </a>1]) - x_list[<a id="change">k</a><a id="change"> - </a>2])
+        x_tensor = torch.stack(x_list, dim=0)
+
+        x_mul = torch.mm(x_tensor.reshape(-1, self.Ks * c_in), self.weight.reshape(self.Ks * c_in, -1)).reshape(-1, self.c_out)</code></pre>

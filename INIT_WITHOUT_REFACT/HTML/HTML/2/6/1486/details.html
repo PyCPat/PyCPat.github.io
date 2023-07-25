@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :1486
+</h3><img src='4388674.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return "_decoder", "_quantizer"
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0]<a id="change">, shape[1]</a>
+        return ((self._decoder(self._quantizer(codes)))[..., :h, :w].tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for i</a> in <a id="change">range(</a>self._levels - 1, -1, -1<a id="change">):
+            </a>q = self._scatters[i](self._quantizers[i](<a id="change">codes[i]</a>))
+            smallQ<a id="change"> = </a>self._reverses[i](q + smallQ)
+        return self._decoder(smallQ).tanh()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4388674</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefDecoder</div><div id='n_method'> N Class Name: RefDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 185</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        return "_decoder", "_quantizer"
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0]<a id="change">, shape[1]</a>
+        return ((self._decoder(self._quantizer(codes)))[..., :h, :w].tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for i</a> in <a id="change">range(</a>self._levels - 1, -1, -1<a id="change">):
+            </a>q<a id="change"> = </a>self._scatters[i](self._quantizers[i](<a id="change">codes[i]</a>))
+            smallQ = self._reverses[i](q + smallQ)
+        return self._decoder(smallQ).tanh()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4388675</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefDecoder</div><div id='n_method'> N Class Name: RefDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 185</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 for level in
+
+        cls_loss<a id="change">, box_loss</a> = None, None
+        total_loss = cls_loss + self.box_loss_weight * box_loss
+        return total_loss, cls_loss, box_loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                cls_targets, box_targets, num_positives):
+        cls_losses, box_losses = [], []
+
+        <a id="change">for level</a> in <a id="change">range(</a>self.levels<a id="change">):
+            </a>cls_loss<a id="change"> = </a>self._classification_loss(
+                <a id="change">cls_outputs[level]</a>, cls_targets[level], num_positives)
+            box_loss = self._regression_loss(
+                box_outputs[level], box_targets[level], num_positives)
+            cls_losses.append(cls_loss)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sevakon/efficientdet/commit/bc6fdb9bf709cc82c92ea44a740baf04bd343ed1#diff-217ea1e96fb551669028a03451214681afc74f587f6cf04eff69c306d74bdcb6L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4388672</div><div id='project'> Project Name: sevakon/efficientdet</div><div id='commit'> Commit Name: bc6fdb9bf709cc82c92ea44a740baf04bd343ed1</div><div id='time'> Time: 2020-05-04</div><div id='author'> Author: sevakonyakhin@gmail.com</div><div id='file'> File Name: utils/tools.py</div><div id='m_class'> M Class Name: DetectionLoss</div><div id='n_method'> N Class Name: DetectionLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/tools.py</div><div id='n_file'> N File Name: utils/tools.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 25</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 33</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; Tuple[torch.ByteTensor, torch.IntTensor]:
+        x = (x - 0.5) / 0.5
+        shape = x.shape
+        n<a id="change">, c, h, w</a> = shape
+        if c == 1:
+            x = x.expand(1, 3, 1, 1)
+        hPad = max(0, 32 - h)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for i</a> in <a id="change">range(</a>self._levels<a id="change">):
+            </a>head<a id="change"> = </a>self._heads[i]
+            z = head(latent)
+            if i &lt; self._levels - 1:
+                mapper = <a id="change">self._mappers[i]</a>
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4388679</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefEncoder</div><div id='n_method'> N Class Name: RefEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 106</div><div id='m_end'> M End Line: 114</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        total_loss = global_ball_loss + local_ball_loss + event_loss + seg_loss
+
+        return pred_ball_position_global<a id="change">, pred_ball_position_local, pred_events, pred_seg, total_loss, None</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        target_ball_global = torch.zeros_like(pred_ball_global)
+        target_ball_local = torch.zeros_like(pred_ball_global)
+        target_events = torch.zeros((batch_size, 2), device=self.device)
+        <a id="change">for idx</a> in <a id="change">range(</a>batch_size<a id="change">):
+            </a>target_ball_global[idx] = create_target_ball(global_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h,
+                                                         thresh_mask=0.01, device=self.device)
+            target_ball_local[idx] = create_target_ball(<a id="change">local_ball_pos_xy[idx]</a>, sigma=1., w=self.w, h=self.h,
+                                                        thresh_mask=0.01, device=self.device)
+            target_events[idx]<a id="change"> = </a>create_target_events(event_class[idx], device=self.device)
+
+        global_ball_loss = self.ball_loss_criterion(pred_ball_global, target_ball_global)
+        local_ball_loss = self.ball_loss_criterion(pred_ball_local, target_ball_local)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch/commit/2d3bbff4dfe2976f33c01a4ccc914b01fd71cfe6#diff-8bfc395874ae52350b5003d9d1aef11b6a467641896988628a8077d7a5429bfeL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4388654</div><div id='project'> Project Name: maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch</div><div id='commit'> Commit Name: 2d3bbff4dfe2976f33c01a4ccc914b01fd71cfe6</div><div id='time'> Time: 2020-06-01</div><div id='author'> Author: nguyenmaudung93.kstn@gmail.com</div><div id='file'> File Name: src/models/unbalanced_loss_model.py</div><div id='m_class'> M Class Name: Unbalance_Loss_Model</div><div id='n_method'> N Class Name: Unbalance_Loss_Model</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/unbalanced_loss_model.py</div><div id='n_file'> N File Name: src/models/unbalanced_loss_model.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 23</div><div id='n_end'> N End Line: 46</div><BR>

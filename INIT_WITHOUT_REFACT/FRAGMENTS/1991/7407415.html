@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Squeeze-Excitation
+        w = F.avg_pool2d(out, out.size(2))
+        w = F.relu(self.fc1(w))
+        w = <a id="change">self.fc2(w).sigmoid()</a>
+        out = out * w + shortcut
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = out * w
+        &#47&#47 Output
+        out = self.bn3(self.conv3(out))
+        <a id="change">if </a>self.drop_rate &gt; 0<a id="change">:
+            </a>out<a id="change"> = </a>F.dropout2d(out, self.drop_rate)
+        shortcut = self.shortcut(x) if self.stride == 1 else out
+        out = out + shortcut
+        return out</code></pre>

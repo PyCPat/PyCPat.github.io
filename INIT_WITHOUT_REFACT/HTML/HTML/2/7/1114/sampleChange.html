@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert t &lt;= self.seq_len, f&quotinput contains a sequence length {t} that is greater than the designated maximum sequence length {self.seq_len}&quot
+
+        mem = cmem = None
+        <a id="change">if memories is not None</a><a id="change">:
+            </a>mem, cmem = memories
+
+        num_memory_layers = len(self.memory_layers)
+        mem = default(mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        num_memory_layers = len(self.memory_layers)
+        init_empty_mem = lambda: torch.empty(num_memory_layers, b, 0, d, **to(x))
+        mem<a id="change"> = </a><a id="change">default(</a>mem, <a id="change">init_empty_mem</a><a id="change">)</a>
+        cmem<a id="change"> = </a><a id="change">default(</a>cmem, <a id="change">init_empty_mem</a><a id="change">)</a>
+
+        total_len = mem.shape[2] + cmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+</code></pre>

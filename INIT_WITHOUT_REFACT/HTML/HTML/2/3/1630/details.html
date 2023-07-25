@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1630
+</h3><img src='6639633.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        cond_prob_drop = 0.
+    ):
+        batch_size, device = image_embed.shape[0], image_embed.device
+        t = self.time_mlp(time)<a id="change"> if </a>exists(self.time_mlp)<a id="change"> else </a>None
+
+        cond_prob_mask = prob_mask_like(batch_size, cond_prob_drop, device = device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 mask out image embedding depending on condition dropout
+        &#47&#47 for classifier free guidance
+
+        image_embed<a id="change"> = </a>torch.where(
+            rearrange(cond_prob_mask, &quotb -&gt; b 1&quot),
+            image_embed,
+            <a id="change">rearrange(</a>self.null_image_embed, &quotd -&gt; 1 d&quot<a id="change">)</a>
+        )
+
+        cond = torch.cat((t, image_embed), dim = -1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/25d980ebbf1e22ce8396cdec400e22e83f754176#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL411' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6639633</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 25d980ebbf1e22ce8396cdec400e22e83f754176</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 414</div><div id='n_start'> N Start Line: 412</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if exists(attn_bias):
+                attn_bias = repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = w)
+
+            tie_dim = w<a id="change"> if </a>self.global_query_attn<a id="change"> else </a>None
+            w_out = self.attn(w_x, mask = w_mask, attn_bias = attn_bias, tie_dim = tie_dim)
+            w_out = rearrange(w_out, &quot(b w) h d -&gt; b h w d&quot, h = h, w = w)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = rearrange(x, input_fold_eq)
+
+        if exists(mask):
+            mask<a id="change"> = </a><a id="change">rearrange(</a>mask, mask_fold_axial_eq<a id="change">)</a>
+
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):
+            attn_bias = self.edges_to_attn_bias(edges)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6639635</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            v = batched_index_select(v, indices, dim = 2)
+            qk_rel = batched_index_select(qk_rel, indices, dim = 2)
+            rel_pos_emb = batched_index_select(rel_pos_emb, indices, dim = 2)
+            mask = batched_index_select(mask, indices, dim = 2)<a id="change"> if </a>exists(mask)<a id="change"> else </a>None
+
+        &#47&#47 add relative positional embeddings to value
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            mask_value = -max_value(sim)
+            mask<a id="change"> = </a><a id="change">rearrange(</a>mask, &quotb i j -&gt; b 1 i j&quot<a id="change">)</a>
+            sim.masked_fill_(~mask, mask_value)
+
+        &#47&#47 attention
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/point-transformer-pytorch/commit/99bc3958138d8c9d3b882e4ac50b1a18a86160fe#diff-86745e6c9b49a24c7fba780e904e254c675b41beaecc25803a17adc67f0035e9L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6639629</div><div id='project'> Project Name: lucidrains/point-transformer-pytorch</div><div id='commit'> Commit Name: 99bc3958138d8c9d3b882e4ac50b1a18a86160fe</div><div id='time'> Time: 2022-01-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='m_class'> M Class Name: MultiheadPointTransformerLayer</div><div id='n_method'> N Class Name: MultiheadPointTransformerLayer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='n_file'> N File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 133</div><BR>

@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2481
+</h3><img src='8196493.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, graph):
+        graph.update_all(message_func=self.message_function, reduce_func=fn.sum(msg=&quotm&quot, out=&quotm_sum&quot))
+        <a id="change">graph.apply_nodes(</a>self.update_function<a id="change">)</a>
+
+    def message_function(self, edges):
+        squared_distance = torch.sum((edges.src[&quotx&quot] - edges.dst[&quotx&quot]) ** 2, dim=-1)[:, None]
+        message_input = torch.cat([edges.src[&quotf&quot], edges.dst[&quotf&quot], edges.data[&quotw&quot], squared_distance], dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        graph.update_all(message_func=self.message_function, reduce_func=fn.sum(msg=&quotm&quot, out=&quotm_sum&quot))
+        h = torch.cat([h, graph.ndata[&quotm_sum&quot]], dim=-1)
+        &#47&#47 post-transformation
+        h<a id="change"> = </a>self.posttrans(h)
+        if self.residual:
+            h = h + h_in
+        <a id="change">graph.ndata[&quotf&quot]</a> = h
+
+
+    def message_function(self, edges):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/6656a88c4b662d4ad3e734821d9a6371fe063078#diff-041c01f6b0eab7f70c7e24707b324ef0d939d96e24f965b0f9ec4443fc84a415L59' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8196493</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: 6656a88c4b662d4ad3e734821d9a6371fe063078</div><div id='time'> Time: 2021-05-24</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/mpnn3d.py</div><div id='m_class'> M Class Name: MPLayer</div><div id='n_method'> N Class Name: MPLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mpnn3d.py</div><div id='n_file'> N File Name: models/mpnn3d.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                  )
+
+    def forward(self, graph: dgl.DGLGraph):
+        <a id="change">graph.apply_nodes(</a>self.input_node_func<a id="change">)</a>
+
+        for mp_layer in self.mp_layers:
+            mp_layer(graph)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.bond_encoder = BondEncoder(emb_dim=hidden_dim)
+
+    def forward(self, graph: dgl.DGLGraph):
+        <a id="change">graph.ndata[&quotfeat&quot] = </a>self.atom_encoder(graph.ndata[&quotfeat&quot])
+        graph.edata[&quotfeat&quot] = self.atom_encoder(graph.edata[&quotfeat&quot])
+
+        for mp_layer in self.mp_layers:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/ef046eb10d319acc52bf5a5fc35a0fee79793707#diff-08eb2fc952b80d4ea6202d1ae1ac1dccf8a399c04ec33cff098adbbd526af573L217' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8196494</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: ef046eb10d319acc52bf5a5fc35a0fee79793707</div><div id='time'> Time: 2021-06-20</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/pna.py</div><div id='m_class'> M Class Name: PNAGNN</div><div id='n_method'> N Class Name: PNAGNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/pna.py</div><div id='n_file'> N File Name: models/pna.py</div><div id='m_start'> M Start Line: 218</div><div id='m_end'> M End Line: 218</div><div id='n_start'> N Start Line: 222</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                          layers=readout_layers)
+
+    def forward(self, graph: dgl.DGLGraph):
+        <a id="change">graph.apply_nodes(</a>self.input_node_func<a id="change">)</a>
+
+        for mp_layer in self.mp_layers:
+            mp_layer(graph)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, graph: dgl.DGLGraph):
+        graph.ndata[&quotfeat&quot] = self.atom_encoder(graph.ndata[&quotfeat&quot])
+        <a id="change">graph.edata[&quotfeat&quot] = </a>self.bond_encoder(graph.edata[&quotfeat&quot])
+
+        for mp_layer in self.mp_layers:
+            mp_layer(graph)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/7675d4fa80f1b21cccef5d8716143b57421be85f#diff-5d85186d5ccfeb9d50e98d1d20c404c7fc1f014be3da88b023482a1b79b1bfc4L60' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8196484</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: 7675d4fa80f1b21cccef5d8716143b57421be85f</div><div id='time'> Time: 2021-06-21</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/egnn_e_features.py</div><div id='m_class'> M Class Name: EGNNEdges</div><div id='n_method'> N Class Name: EGNNEdges</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/egnn_e_features.py</div><div id='n_file'> N File Name: models/egnn_e_features.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 61</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 65</div><BR>

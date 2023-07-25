@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.project_out = nn.Parameter(torch.randn(groups, dim * 4, dim))
+
+    def forward(self, levels):
+        x = <a id="change">einsum(&quotb n l d, l d e -&gt; b n l e&quot</a>, levels, self.project_in<a id="change">)</a>
+        x = self.nonlin(x)
+        x = einsum(&quotb n l d, l d e -&gt; b n l e&quot, x, self.project_out)
+        <a id="change">return </a>x
+
+class ConsensusAttention(nn.Module):
+    def __init__(self, attend_self = True, local_consensus_radius = 0):</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, n, l, d = levels.shape
+        levels = rearrange(levels, &quotb n l d -&gt; b (l d) n&quot)
+        out = self.net(levels)
+        out<a id="change"> = </a>rearrange(out, &quotb (l d) n -&gt; b n l d&quot, l = l)
+        <a id="change">return </a>out
+
+class ConsensusAttention(nn.Module):
+    def __init__(self, attend_self = True, local_consensus_radius = 0):</code></pre>

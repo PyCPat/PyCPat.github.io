@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, from_up, from_down, mask=None):
+        from_up = self.act(self.norm0(self.up_conv(from_up)))
+        if self.concat:
+            <a id="change">if &quotres&quot in self.mode</a><a id="change">:
+                </a>x1<a id="change"> = </a><a id="change">torch.cat(</a>(from_up, from_down, mask), 1<a id="change">)</a>
+            else:
+                x1 = torch.cat((from_up, from_down), 1)
+        else:
+            if from_down is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 residual structure
+        _,C,H,W = x1.shape
+        for idx, convs in enumerate(zip(self.conv2, self.conv3)):
+            mask = convs[0](torch.cat([x1[:,<a id="change">:</a>C<a id="change">//2</a>], mask], dim=1))
+            x2_actv = x1[:,C//2:] * mask
+            x2 = convs[1](x1[:,C//2:] + x2_actv)
+            x2 = self.bn[idx](x2)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                ign = ign.unsqueeze(-1).expand_as(batch_label)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                batch_label[ign] *= -1
+                mask = batch_label &gt;= 0
+            loss_c = self.focal_loss(conf_data[mask], <a id="change">batch_label[mask]</a>, reduction=&quotmean&quot)
+
+            return (loss_l, loss_c)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.mutual_guide:
+
+            &#47&#47 match priors (default boxes) and ground truth boxes
+            <a id="change">with torch</a><a id="change">.no_grad():
+                </a>loc_t = torch.zeros(num, num_priors, 4).cuda()
+                conf_t = torch.zeros(num, num_priors).cuda().long()
+                overlap_t = torch.zeros(num, num_priors).cuda()
+                pred_t = torch.zeros(num, num_priors).cuda()</code></pre>

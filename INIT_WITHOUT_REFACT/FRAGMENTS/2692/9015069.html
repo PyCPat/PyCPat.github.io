@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        reconstruction_loss = self.mse(reconstructed_inputs, compressor_inputs)
+        n, _, h, w = compressor_inputs.shape
+        num_pixels = n * h * w
+        bpp = -likelihoods.log2().sum()<a id="change"> if </a>self.reduction == &quotsum&quot<a id="change"> else </a>-likelihoods.log2().sum() / num_pixels
+        return reconstruction_loss + self.beta * bpp
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        num_pixels = n * h * w
+        if self.reduction == &quotsum&quot:
+            bpp = -likelihoods.log2().sum()
+        elif <a id="change">self.reduction == &quotbatchmean&quot</a><a id="change">:
+            </a>bpp<a id="change"> = </a>-<a id="change">likelihoods.log2().sum() / </a>n
+        else:
+            bpp<a id="change"> = </a>-likelihoods.log2().sum() / num_pixels
+        return reconstruction_loss + self.beta * bpp
+
+</code></pre>

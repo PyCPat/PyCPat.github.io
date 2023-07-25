@@ -1,0 +1,73 @@
+<html><h3>Pattern ID :3105
+</h3><img src='10165150.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        _, memory_indices, _ = self.vq(x)
+
+        memories = <a id="change">self.values[memory_indices]</a>
+        return memories
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if memory_indices.ndim == 2:
+            memory_indices = rearrange(memory_indices, &quot... -&gt; ... 1&quot)
+
+        memory_indices<a id="change"> = </a><a id="change">rearrange(</a>memory_indices, <a id="change">&quotb n h -&gt; b h n&quot</a><a id="change">)</a>
+
+        values = repeat(self.values, &quoth n d -&gt; b h n d&quot, b = memory_indices.shape[0])
+        memory_indices<a id="change"> = </a>repeat(memory_indices, &quotb h n -&gt; b h n d&quot, d = values.shape[-1])
+
+        memories<a id="change"> = </a>values.gather(2, memory_indices)
+
+        return <a id="change">rearrange(</a>memories, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/discrete-key-value-bottleneck-pytorch/commit/1c08320164b3db790044a9da02a075e659d1a306#diff-c9aa93d319704ee2b4e3f80ff931aeb3abe77c0197b30202ac8a6654a728bf07L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10165150</div><div id='project'> Project Name: lucidrains/discrete-key-value-bottleneck-pytorch</div><div id='commit'> Commit Name: 1c08320164b3db790044a9da02a075e659d1a306</div><div id='time'> Time: 2022-07-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: discrete_key_value_bottleneck_pytorch/discrete_key_value_bottleneck.py</div><div id='m_class'> M Class Name: DiscreteKeyValueBottleneck</div><div id='n_method'> N Class Name: DiscreteKeyValueBottleneck</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: discrete_key_value_bottleneck_pytorch/discrete_key_value_bottleneck.py</div><div id='n_file'> N File Name: discrete_key_value_bottleneck_pytorch/discrete_key_value_bottleneck.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 62</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        text_mask = None,
+        return_loss = False
+    ):
+        seq_len, device = <a id="change">text.shape[1]</a>, text.device
+        assert seq_len &lt;= self.text_max_seq_len, &quotyour input text has a greater length than what was designated on initialization&quot
+
+        tokens = self.text_embedding(text)</code></pre><h3>After Change</h3><pre><code class='java'>
+        text_embeds = self.text_transformer(tokens, mask = text_mask)
+
+        frame_indices = self.vae.get_video_indices(video)
+        frame_indices = <a id="change">rearrange(</a>frame_indices, <a id="change">&quotb ... -&gt; b (...)&quot</a><a id="change">)</a>
+        frame_indices_input = frame_indices[:, :-1] if return_loss else frame_indices
+
+        frame_embeddings<a id="change"> = </a>self.image_embedding(frame_indices_input)
+        frame_embeddings<a id="change"> = </a>self.video_pos_emb(frame_embeddings) + frame_embeddings
+
+        bos = repeat(self.video_bos, &quotd -&gt; b 1 d&quot, b = batch)
+        frame_embeddings = torch.cat((bos, frame_embeddings), dim = 1)
+        frame_embeddings = self.video_transformer(frame_embeddings)
+
+        logits<a id="change"> = </a>self.to_logits(frame_embeddings)
+
+        if not return_loss:
+            return logits
+
+        loss = F.cross_entropy(<a id="change">rearrange(</a>logits, <a id="change">&quotb n c -&gt; b c n&quot</a><a id="change">)</a>, frame_indices)
+        return loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/daeefa2be5de809f9003a5333dad62183cf819f7#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL210' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10165385</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: daeefa2be5de809f9003a5333dad62183cf819f7</div><div id='time'> Time: 2021-12-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: NUWA</div><div id='n_method'> N Class Name: NUWA</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 227</div><div id='n_start'> N Start Line: 270</div><div id='n_end'> N End Line: 296</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_logits = nn.Linear(latent_dim, num_classes)
+
+    def forward(self, data, mask = None):
+        b = <a id="change">data.shape[0]</a>
+        data = fourier_encode(data, self.num_fourier_features)
+        data = rearrange(data, &quotb n ... -&gt; b n (...)&quot)
+
+        x = self.latents + self.pos_emb</code></pre><h3>After Change</h3><pre><code class='java'>
+        axis_pos = list(map(lambda size: torch.linspace(-1., 1., steps = size, device = device), axis))
+        pos = torch.stack(torch.meshgrid(*axis_pos), dim = -1)
+        enc_pos = fourier_encode(pos, self.num_fourier_features)
+        enc_pos<a id="change"> = </a><a id="change">rearrange(</a>enc_pos, <a id="change">&quot... n d -&gt; ... (n d)&quot</a><a id="change">)</a>
+        enc_pos<a id="change"> = </a>repeat(enc_pos, &quot... -&gt; b ...&quot, b = b)
+
+        &#47&#47 concat to channels of data and flatten axis
+
+        data<a id="change"> = </a>torch.cat((data, enc_pos), dim = -1)
+        data = <a id="change">rearrange(</a>data, <a id="change">&quotb ... d -&gt; b (...) d&quot</a><a id="change">)</a>
+
+        x = self.latents + self.pos_emb
+        x = repeat(x, &quotn d -&gt; b n d&quot, b = b)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/37e2eb6650fb9f609f9aee39df5ed830f5550325#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10165334</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: 37e2eb6650fb9f609f9aee39df5ed830f5550325</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_class'> M Class Name: Perceiver</div><div id='n_method'> N Class Name: Perceiver</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='n_file'> N File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 160</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 174</div><BR>

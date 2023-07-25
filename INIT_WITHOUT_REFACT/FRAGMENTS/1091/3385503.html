@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.level_stack = LevelStack()
+
+    def forward(self, x, *, num_steps_forecast):
+        z = <a id="change">self.embed(</a>x<a id="change">)</a>
+
+        for freq_attn, mhes_attn, attn_post_ln, ff_block, level in self.encoder_layers:
+            latent_seasonal = freq_attn(z)
+            z = z - latent_seasonal
+
+            latent_growth = mhes_attn(z)
+            z = z -latent_growth
+
+            z = attn_post_ln(z)
+
+            if exists(ff_block):
+                z = ff_block(z)
+
+            x<a id="change"> = </a>level(x, latent_seasonal, latent_growth)
+
+        level = self.level_stack(x, num_steps_forecast = num_steps_forecast)
+        <a id="change">return </a>level
+</code></pre>

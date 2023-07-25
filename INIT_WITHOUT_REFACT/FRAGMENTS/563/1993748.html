@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mask_value = max_neg_value(q)
+        mask = torch.zeros((b * h, buckets, buckets), device=device).bool()
+        i, j = torch.triu_indices(buckets, buckets)
+        <a id="change">mask[:, 0, :]</a> = True
+        mask[:, i, j] = True
+        R.masked_fill_(mask, mask_value)
+        R = R.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        null_value_bucket = self.null_value[None, :, None, :, :].expand(b, -1, 1, bsz, -1).reshape(bh, 1, bsz, -1)
+
+        b_k_r = torch.cat((null_key_bucket, b_k), dim=1)
+        b_v_r = <a id="change">torch.cat(</a>(null_value_bucket<a id="change">, b_v</a>)<a id="change">, dim=1)</a>
+
+        &#47&#47 reorder buckets to buckets of the past
+        b_k_r = reorder_buckets(b_k_r, R)
+        b_v_r<a id="change"> = </a>reorder_buckets(b_v_r, R)
+
+        &#47&#47 and concatenate to original buckets themselves for local attention
+        b_k = torch.cat((b_k_r, b_k), dim=2)</code></pre>

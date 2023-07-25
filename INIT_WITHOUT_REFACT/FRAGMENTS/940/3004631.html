@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Batch Normalization
+        self.bn1 = nn.BatchNorm2d(in_channels)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.bn3<a id="change"> = </a><a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">)</a>
+
+        &#47&#47 Initialization
+        &#47&#47 Xavier Initialization
+        nn.init.xavier_uniform(self.conv1.weight.data, 1.0)
+        nn.init.xavier_uniform(self.conv2.weight.data, 1.0)
+
+        self.model_base = nn.Sequential(
+            nn.ReLU(),
+            self.bn1,
+            self.conv1,
+            nn.ReLU(),
+            self.bn2,
+            self.conv2
+        )
+
+        self.bypass = nn.Sequential()
+        if stride == 1:
+            self.model = self.model_base
+        else:
+            self.model = <a id="change">nn.Sequential(
+                </a>self.model_base,
+                nn.AvgPool2d(2, stride=stride, padding=0)<a id="change">
+            )</a>
+            &#47&#47 add Bypass
+            self.bypass_conv<a id="change"> = </a><a id="change">nn.Conv2d(
+                </a>in_channels, out_channels, 1, 1<a id="change">, padding=0)</a>
+            self.bypass = nn.Sequential(
+                self.bn3,
+                self.bypass_conv,
+                nn.AvgPool2d(2, stride=stride, padding=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.model2 = nn.Sequential(
+            self.bn2,
+            nn.ReLU(),
+            <a id="change">nn.Dropout(</a>dropout<a id="change">)</a> if dropout &gt; 0 else <a id="change">nn.Identity()</a>,
+            self.conv2
+        )
+        self.bypass = nn.Sequential()</code></pre>

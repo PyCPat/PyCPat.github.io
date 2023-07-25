@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, a, b):
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        outputs<a id="change"> = </a><a id="change">[]</a>
+        for i in range(len(output_a)):
+            outputs.append(output_a[i] + output_b[i])
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.loss_fct = nn.CrossEntropyLoss()
+
+    def forward(self, a, b):
+        labels<a id="change"> = </a>a[&quotlabels&quot]
+        a.pop(&quotlabels&quot)
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output = <a id="change">torch.cat([</a>output_a, output_b, output_a-output_b<a id="change"></a>]<a id="change">, dim=1)</a>
+        logits = self.linear(output)
+        loss<a id="change"> = </a>self.loss_fct(logits, labels)
+        return loss, logits
+
+</code></pre>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        n_clust = msa.shape[-3]
+        tf_m = (self.linear_tf_m(tf)
+                .unsqueeze(-3)
+                .expand((*(-1,) * len(tf.shape[:-2])<a id="change">, n_clust, -1, -1</a>)))
+        msa_emb = self.linear_msa_m(msa) + tf_m
+
+        return msa_emb, pair_emb</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 [*, N_res, N_res, c_z]
+        pair_emb = tf_emb_i[..., None, :] + tf_emb_j[..., None, :, :]
+        pair_emb<a id="change"> = </a>pair_emb + self.relpos(<a id="change">ri.type(</a>pair_emb.dtype<a id="change">)</a>)
+
+        &#47&#47 [*, N_clust, N_res, c_m]
+        n_clust = msa.shape[-3]</code></pre>

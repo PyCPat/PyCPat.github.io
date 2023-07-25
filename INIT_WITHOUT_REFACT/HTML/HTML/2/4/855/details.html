@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :855
+</h3><img src='2710696.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b = bh // h
+
+        Wsq = expand_dim(self.linear_sort_q, 0, b).reshape(bh, dim, dim_sort)
+        Wsk<a id="change"> = </a><a id="change">expand_dim(</a>self.linear_sort_k, <a id="change">0</a>, b<a id="change">)</a>.reshape(bh, dim, dim_sort)
+        nsk = expand_dim(self.null_sort_k, 0, b).reshape(bh, 1, dim_sort)
+
+        q_r = torch.cat((cumavg(q, dim=1), q), dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        bh, *_, h, buckets, dim, dim_sort = *q.shape, self.heads, self.buckets, self.dim, self.dim_sort
+        b = bh // h
+
+        Wsq<a id="change">, Wsk, pos_q, pos_k</a> = map(partial(expand_batch_and_merge_head, b), (self.linear_sort_q, self.linear_sort_k, self.q_pos_emb, self.k_pos_emb))
+
+        k_r = torch.cat((cumavg(k, dim=1), k), dim=-1)
+        k_r = bucket(buckets, k_r)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/a3d36f7cdf5b9a134787caf42ce18b5b28b0ddc5#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL354' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710696</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: a3d36f7cdf5b9a134787caf42ce18b5b28b0ddc5</div><div id='time'> Time: 2020-04-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: CausalAttentionSortNet</div><div id='n_method'> N Class Name: CausalAttentionSortNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 354</div><div id='m_end'> M End Line: 371</div><div id='n_start'> N Start Line: 365</div><div id='n_end'> N End Line: 380</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b_k = bucket(buckets, k)
+
+        Wsq = expand_dim(self.linear_sort_q, 0, b).reshape(bh, dim, dim_sort)
+        Wsk<a id="change"> = </a><a id="change">expand_dim(</a>self.linear_sort_k, <a id="change">0</a>, b<a id="change">)</a>.reshape(bh, dim, dim_sort)        
+
+        b_qi, b_ki = b_q.mean(dim=2), b_k.mean(dim=2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Wsq, Wsk, pos_q, pos_k = map(partial(expand_batch_and_merge_head, b), (self.linear_sort_q, self.linear_sort_k, self.q_pos_emb, self.k_pos_emb))
+
+        b_qi = torch.cat((b_q.mean(dim=2), pos_q), dim=-1)
+        b_ki = torch.cat((b_k.mean(dim=2)<a id="change">, pos_k</a>), dim=-1)
+
+        sq = b_qi @ Wsq
+        sk = b_ki @ Wsk</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/a3d36f7cdf5b9a134787caf42ce18b5b28b0ddc5#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL201' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710698</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: a3d36f7cdf5b9a134787caf42ce18b5b28b0ddc5</div><div id='time'> Time: 2020-04-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: AttentionSortNet</div><div id='n_method'> N Class Name: AttentionSortNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 203</div><div id='m_end'> M End Line: 211</div><div id='n_start'> N Start Line: 212</div><div id='n_end'> N End Line: 220</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            means, buckets, dists, se = kmeans(k_routing, self.means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+
+        routed_means<a id="change"> = </a>batched_index_select(<a id="change">expand_dim(</a>self.means, <a id="change">0</a>, b<a id="change">)</a>, buckets)
+        commitment_loss = F.mse_loss(k_routing, routed_means) * self.commitment
+
+        if self.training:</code></pre><h3>After Change</h3><pre><code class='java'>
+        k_routing = torch.einsum(&quotbhtd,hdr-&gt;bhtr&quot, qk, self.router) if self.router is not None else qk
+        k_routing = F.normalize(qk, dim=-1)
+
+        indices<a id="change">, commitment_loss</a> = self.kmeans(k_routing, wsz)
+        
+        qk = batched_index_select(qk, indices)
+        v = batched_index_select(v, indices)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/76d902a49ad12e267571f62a45ead8cd22b3bc5c#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL375' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2710709</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 76d902a49ad12e267571f62a45ead8cd22b3bc5c</div><div id='time'> Time: 2020-05-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: KmeansAttention</div><div id='n_method'> N Class Name: KmeansAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 379</div><div id='m_end'> M End Line: 412</div><div id='n_start'> N Start Line: 381</div><div id='n_end'> N End Line: 424</div><BR>

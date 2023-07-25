@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :93
+</h3><img src='396118.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for i in range(used_backbone_levels-1, 0, -1):
+            laterals[i-1] += F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in <a id="change">range(</a>used_backbone_levels-1<a id="change">)</a>]
+        fpn_outs.append(laterals[-1])
+
+        for i in range(used_backbone_levels-1, 0, -1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        for i in reversed(<a id="change">range(</a><a id="change">len(</a>features<a id="change">)</a>-1<a id="change">)</a>):
+            feature = self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 396118</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, input, hidden_state=None):
+        output = []
+        for step in <a id="change">range(</a>input.size(1)<a id="change">)</a>:
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(input[:, step, :, :, :], hidden_state)
+            output.append(hidden_state)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if hidden_state is None:
+            hidden_state = self.get_init_states(cur_layer_input[0])
+
+        seq_len = <a id="change">len(</a>cur_layer_input<a id="change">)</a>
+
+        layer_output_list = []
+        last_state_list = []
+
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            for t in <a id="change">range(</a>seq_len<a id="change">)</a>:
+                h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 396119</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute the action probabilities and the value function estimate
+        &#47&#47 Apply action mask to the logits as well.
+        output_dims = [ph.out_features for ph in self.policy_head]
+        action_masks = [None for _ in <a id="change">range(</a>len(output_dims)<a id="change">)</a>]
+        if self.action_mask is not None:
+            start = 0
+            for idx, dim in enumerate(output_dims):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Compute the action probabilities and the value function estimate
+        &#47&#47 Apply action mask to the logits as well.
+        action_masks = [None for _ in <a id="change">range(</a><a id="change">len(</a>self.output_dims<a id="change">))</a>]
+        if self.action_mask is not None:
+            start = 0
+            for idx, dim in enumerate(self.output_dims):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/salesforce/warp-drive/commit/0433121531b751f4a4d3ebbeed2aa9495d9d4b47#diff-87d36dc5f79d9ccd66e947e7b3a496a4906d722ee676c778c5121b83147c3186L188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 396120</div><div id='project'> Project Name: salesforce/warp-drive</div><div id='commit'> Commit Name: 0433121531b751f4a4d3ebbeed2aa9495d9d4b47</div><div id='time'> Time: 2022-02-07</div><div id='author'> Author: sunil.srinivasa@salesforce.com</div><div id='file'> File Name: warp_drive/training/models/fully_connected.py</div><div id='m_class'> M Class Name: FullyConnected</div><div id='n_method'> N Class Name: FullyConnected</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: warp_drive/training/models/fully_connected.py</div><div id='n_file'> N File Name: warp_drive/training/models/fully_connected.py</div><div id='m_start'> M Start Line: 222</div><div id='m_end'> M End Line: 226</div><div id='n_start'> N Start Line: 227</div><div id='n_end'> N End Line: 230</div><BR>

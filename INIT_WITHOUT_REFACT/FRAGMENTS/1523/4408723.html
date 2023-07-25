@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            grouped_points = torch.cat([grouped_points, grouped_xyz],dim=-1)  &#47&#47 [B, npoint, k, d+3]
+        if self.normalize is not None:
+            if self.normalize =="center":
+                std<a id="change">, mean</a> = torch.std_mean(grouped_points, dim=2, keepdim=True)
+            if self.normalize =="anchor":
+                mean = torch.cat([new_points, new_xyz],dim=-1) if self.use_xyz else new_points
+                mean = mean.unsqueeze(dim=-2)  &#47&#47 [B, npoint, 1, d+3]</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.normalize =="anchor":
+                mean = torch.cat([new_points, new_xyz],dim=-1) if self.use_xyz else new_points
+                mean = mean.unsqueeze(dim=-2)  &#47&#47 [B, npoint, 1, d+3]	
+            std = <a id="change">torch.std((grouped_points-mean).reshape(B,-1),dim=-1,keepdim=True).unsqueeze(dim=-1).unsqueeze(dim=-1)</a>
+            grouped_points = (grouped_points-mean)/(std + 1e-5)
+            grouped_points = self.affine_alpha*grouped_points + self.affine_beta
+
+        new_points = torch.cat([grouped_points, new_points.view(B, S, 1, -1).repeat(1, 1, self.kneighbors, 1)], dim=-1)</code></pre>

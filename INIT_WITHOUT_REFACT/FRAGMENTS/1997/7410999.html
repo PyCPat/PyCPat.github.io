@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                self.running_var = (self.momentum * self.running_var) + (1.0-self.momentum) * (x.shape[0]/(x.shape[0]-1)*var)
+            else:
+                var = self.running_var
+            sigma = var.view(<a id="change">[1</a>, self.insize, <a id="change">1</a>, <a id="change">1</a>]).expand_as(x)
+            if self.non_linear:
+                den = torch.max(sigma, self.v * x + instance_std(x))
+                return x / den * self.gamma + self.beta</code></pre><h3>After Change</h3><pre><code class='java'>
+            exponential_average_factor = self.momentum
+            if self.training:
+                var = x.var([0, 2, 3], unbiased=False)
+                n<a id="change"> = </a>x.numel() / <a id="change">x.size(1</a><a id="change">)</a>
+                with torch.no_grad():
+                    self.running_var = exponential_average_factor * var * n / (n - 1)\
+                        + (1 - exponential_average_factor) * self.running_var</code></pre>

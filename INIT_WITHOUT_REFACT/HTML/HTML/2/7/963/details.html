@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :963
+</h3><img src='2974520.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = torch.cat([x, context], dim=1)
+        x = self.conv_out2(x)
+        x = self.conv_out3(x)
+        out<a id="change"> = </a>self.conv_out4(x)
+
+        <a id="change">return </a>x, out</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, feat_maps, smap, lmap=None, shape=None):
+        assert not xor(self.lmap_in is True, lmap is not None)
+        <a id="change">for </a>i, <a id="change">f</a> in <a id="change">enumerate(</a>feat_maps<a id="change">):
+            </a><a id="change">if f.shape[-2:] != shape</a><a id="change">:
+                </a>feat_maps[i] = self.upsample(f, shape)
+        x = torch.cat(feat_maps, dim=1)
+        b, c, h, w = x.shape
+        </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/722874b88a2465f214eac13d8cda7a9f446e9040#diff-28958d122b29eab3fc1387f31469a5b4e62962cb186585d136905133ef0975afL81' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2974520</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 722874b88a2465f214eac13d8cda7a9f446e9040</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/attention_module.py</div><div id='m_class'> M Class Name: ASCA</div><div id='n_method'> N Class Name: ASCA</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/attention_module.py</div><div id='n_file'> N File Name: lib/modules/attention_module.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 132</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+        
+    def forward(self, f1, f2, f3):
+        f1<a id="change"> = </a>self.upsample(f1, f3.shape[-2:])
+        f2 = self.upsample(f2, f3.shape[-2:])
+        f3 = torch.cat([f1, f2, f3], dim=1)
+        f3 = self.conv1(f3)
+
+        Hf3 = self.Hattn(f3)
+        Wf3 = self.Wattn(f3)
+
+        f3 = self.conv2(Hf3 + Wf3)
+        f3 = self.conv3(f3)
+        f3 = self.conv4(f3)
+        out = self.conv5(f3)
+
+        <a id="change">return </a>f3, out
+
+class PAA_d2(nn.Module):
+    def __init__(self, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+        
+    def forward(self, feat_maps, shape):
+        <a id="change">for </a>i, <a id="change">f</a> in <a id="change">enumerate(</a>feat_maps<a id="change">):
+            </a><a id="change">if f.shape[-2:] != shape</a><a id="change">:
+                </a>feat_maps[i] = self.upsample(f, shape)
+                
+        x = torch.cat(feat_maps, dim=1)
+        x = self.conv1(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/722874b88a2465f214eac13d8cda7a9f446e9040#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2974522</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 722874b88a2465f214eac13d8cda7a9f446e9040</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d</div><div id='n_method'> N Class Name: PAA_d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        f = self.conv1(x)
+        f = self.conv2(f)
+        f<a id="change"> = </a>self.conv3(f)
+        if self.projection is not None:
+            return f+self.projection(x)
+        else:
+            <a id="change">return </a>f+x
+
+class ResStage(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        print(y.shape)
+
+        
+        <a id="change">for </a>conv_index, <a id="change">conv</a> in <a id="change">enumerate(</a>self.conv_list<a id="change">):
+            </a><a id="change">if conv_index == 0</a><a id="change">:
+                </a>f = conv(x)
+            else:
+                f = conv(f)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/b2bf89e72b262002500e8271f984d6f8afac7eb3#diff-fd72c83d7a844cbbdef927405a10ec8803d51b0f46ea91e27f31e7b97e5e3c1cL386' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2974517</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: b2bf89e72b262002500e8271f984d6f8afac7eb3</div><div id='time'> Time: 2022-10-25</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/BaseModule.py</div><div id='m_class'> M Class Name: ResBlock</div><div id='n_method'> N Class Name: ResBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/BaseModule.py</div><div id='n_file'> N File Name: wama_modules/BaseModule.py</div><div id='m_start'> M Start Line: 387</div><div id='m_end'> M End Line: 395</div><div id='n_start'> N Start Line: 425</div><div id='n_end'> N End Line: 431</div><BR>

@@ -1,0 +1,128 @@
+<html><h3>Pattern ID :951
+</h3><img src='2937646.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+			&#47&#47print(preds.size())
+
+			y = y.long()
+			loss<a id="change"> = </a>self.Loss(preds_, torch.squeeze(y))
+			<a id="change">return </a>preds<a id="change">, loss</a>
+		return preds
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		&#47&#47xs = [torch.squeeze(k) for k in xs]
+		preds_ = []
+		loss = 0
+		for i,k in <a id="change">enumerate(</a>xs<a id="change">)</a>:
+			hs, cs = self.rim_model(row_index, ind, k, hs, cs)
+			
+			preds = self.Linear(hs.contiguous().view(x.size(0), -1))
+			preds_.append(preds)
+			if y is not None:
+				loss<a id="change">+=</a>self.Loss(preds, y[:,i].squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=len(xs)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L255' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937646</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        allCodewords<a id="change"> = </a>list()
+        &#47&#47 probability = mixin / (mixin + 1.0)
+        &#47&#47 rolloutDistribution = Bernoulli(probs=torch.tensor(probability).to(latents[0].device))
+        for xRaw, prob, squeeze, codebook, k in zip(latents, self._prob, self._squeeze, self._codebook, self._k):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [c, k]
+            codewords = codebook.weight
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn = self._position(encoderIn).reshape(-1, n, c)
+            &#47&#47 [h*w, n, c]
+            &#47&#47 x = self._encoder(posisted)
+            x = self._encoder(encoderIn)
+            &#47&#47 x += torch.randn_like(x)
+            &#47&#47 x = self._dePosition(x.reshape(h, w, n, c)).reshape(-1, n, c)
+            &#47&#47 x = encoderIn
+            &#47&#47 [h*w, n, k]
+            &#47&#47 logit = prob(x, h, w)
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            &#47&#47 soft = (logit / temperature).softmax(-1)
+            &#47&#47 if hard:
+            &#47&#47      hard = logit.argmax(-1)
+            &#47&#47       hard = F.one_hot(hard, k)
+            &#47&#47       sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47      sample = soft
+            sample = F.gumbel_softmax(logit, temperature, hard)
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 quantized += torch.randn_like(quantized)
+            &#47&#47 quantized = sample
+
+            &#47&#47 normalize
+            &#47&#47 quantized /= (k - 0.5) / (2 * k - 2)
+            &#47&#47 [h*w, n, c]
+            &#47&#47 quantized -= 0.5 / (k - 1)
+            &#47&#47 quantized = squeeze(sample, h, w)
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+
+            &#47&#47 mixed = (mixin * encoderIn / (mixin + 1)) + (quantized / (mixin + 1))
+
+            &#47&#47 mask = rolloutDistribution.sample((h*w, n, 1)).bool()
+
+            &#47&#47 mixed = mask * encoderIn.detach() + torch.logical_not(mask) * quantized
+            &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+            deTransformed = self._decoder(posistedQuantized, posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            &#47&#47 deTransformed = quantized.permute(1, 2, 0).reshape(n, c, h, w)
+            &#47&#47 deTransformed = self._dePosition(deTransformed.reshape(h, w, n, c)).permute(2, 3, 0, 1)
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+            allCodewords.append(codewords.t())
+        <a id="change">return </a>quantizeds<a id="change">, codes, logits, allCodewords</a>
+
+
+class TransformerQuantizerRein(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        for i, (xRaw, k) in <a id="change">enumerate(</a>zip(latents, self._k)<a id="change">)</a>:
+            n, c, h, w = xRaw.shape
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            encoderIn = self._position(encoderIn).reshape(-1, n, c)
+            &#47&#47 [h*w, n, c]
+            &#47&#47 x = encoderIn.reshape(-1, n ,c)
+            x = self._encoder(encoderIn)
+            &#47&#47 similar to scaled dot-product attention
+            &#47&#47 [h*w, N, c]
+            quantized<a id="change">, sample, logit = </a>self._attention(x, i, False)
+            &#47&#47 [h*w, n, c]
+            posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/594ba7cd5c9d147e95ba5bd0b842270302dea2a2#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937640</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 594ba7cd5c9d147e95ba5bd0b842270302dea2a2</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 282</div><div id='m_end'> M End Line: 342</div><div id='n_start'> N Start Line: 295</div><div id='n_end'> N End Line: 320</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 compute refined feature
+        context = torch.bmm(sim, value).permute(0, 2, 1).contiguous().view(b, -1, h, w)
+        context<a id="change"> = </a>self.conv_out1(context)
+        
+        x = torch.cat([x, context], dim=1)
+        x = self.conv_out2(x)
+        x = self.conv_out3(x)
+        out = self.conv_out4(x)
+
+        <a id="change">return </a>x<a id="change">, out</a></code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, feat_maps, smap, lmap=None, shape=None):
+        assert not xor(self.lmap_in is True, lmap is not None)
+        for i, f in <a id="change">enumerate(</a>feat_maps<a id="change">)</a>:
+            if f.shape[-2:] != shape:
+                feat_maps[i]<a id="change"> = </a>self.upsample(f, shape)
+        x = torch.cat(feat_maps, dim=1)
+        b, c, h, w = x.shape
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/722874b88a2465f214eac13d8cda7a9f446e9040#diff-28958d122b29eab3fc1387f31469a5b4e62962cb186585d136905133ef0975afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937636</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 722874b88a2465f214eac13d8cda7a9f446e9040</div><div id='time'> Time: 2021-11-01</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/attention_module.py</div><div id='m_class'> M Class Name: ASCA</div><div id='n_method'> N Class Name: ASCA</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/attention_module.py</div><div id='n_file'> N File Name: lib/modules/attention_module.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 132</div><BR>

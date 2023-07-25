@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :2814
+</h3><img src='9307983.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if x.shape[0] != 3:
+            raise ValueError(f&quotWrong dimensions of inputs, expeted 3 but input {x.shape}.&quot)
+        out_1 = torch.matmul(x, self.V).pow(2).sum(1, keepdim=True) &#47&#47S_1^2
+        out_2 = torch.matmul(<a id="change">x.pow(2</a><a id="change">)</a>, self.V.pow(2)).sum(1, keepdim=True) &#47&#47 S_2
+
+        out_inter<a id="change"> = </a>0.5 *( out_1 - out_2)
+        out_lin = self.lin(x)
+        out = out_inter<a id="change"> + </a>out_lin
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(inputs.shape) != 3:
+            raise ValueError(f&quotWrong dimensions of inputs, expected 3 but input {len(inputs.shape)}.&quot)
+        fm_input = inputs
+        square_of_sum = torch.pow(<a id="change">torch.sum(</a>fm_input<a id="change">, dim=1, keepdim=True)</a>, 2)
+        sum_of_square = torch.sum(fm_input * fm_input, dim=1, keepdim=True)
+        cross_term = square_of_sum - sum_of_square
+        cross_term = 0.5 * torch.sum(cross_term, dim=2, keepdim=False)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/jianzhnie/autotabular/commit/ccbc29cc710d989909e09ae1fc5b67c0098c24aa#diff-e33103d45756b45041e729312950db4f48887a662d323f0c9a55b07dc583c302L13' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9307983</div><div id='project'> Project Name: jianzhnie/autotabular</div><div id='commit'> Commit Name: ccbc29cc710d989909e09ae1fc5b67c0098c24aa</div><div id='time'> Time: 2021-05-13</div><div id='author'> Author: jianzhnie@126.com</div><div id='file'> File Name: autotabular/layers.py</div><div id='m_class'> M Class Name: FM</div><div id='n_method'> N Class Name: FM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: autotabular/layers.py</div><div id='n_file'> N File Name: autotabular/layers.py</div><div id='m_start'> M Start Line: 13</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 40</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        smooth = 1
+
+        &#47&#47 dice系数的定义
+        dice0<a id="change"> = </a>2 * (pred[:,0] * target[:,0]).sum(dim=1).sum(dim=1).sum(dim=1) / (<a id="change">pred[:,0].pow(2</a><a id="change">)</a>.sum(dim=1).sum(dim=1).sum(dim=1) +
+                                            target[:,0].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        dice1 = 2 * (pred[:,1] * target[:,1]).sum(dim=1).sum(dim=1).sum(dim=1) / (pred[:,1].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
+                                            target[:,1].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        dice = (dice1<a id="change">+</a>dice0) / 2.0
+        &#47&#47 返回的是dice距离
+        return torch.clamp((1 - dice).mean(), 0, 1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        smooth = 1
+
+        &#47&#47 dice系数的定义
+        dice = 2 * (pred * target).sum(dim=1).sum(dim=1).sum(dim=1) / (<a id="change">pred.pow(2).sum(dim=1)</a>.sum(dim=1).sum(dim=1) +
+                                            target.pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+
+        &#47&#47 返回的是dice距离</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lee-zq/3dunet-pytorch/commit/5503c174b8875343fe4812ebb0dcbe77346a348a#diff-8a45704eb3dc7993aeb0011c99dee572f7edce10f06785250639c8a95dcc3ee5L15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9307882</div><div id='project'> Project Name: lee-zq/3dunet-pytorch</div><div id='commit'> Commit Name: 5503c174b8875343fe4812ebb0dcbe77346a348a</div><div id='time'> Time: 2021-05-21</div><div id='author'> Author: zq_lee@163.com</div><div id='file'> File Name: loss/Dice.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/Dice.py</div><div id='n_file'> N File Name: loss/Dice.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 26</div><div id='n_start'> N Start Line: 17</div><div id='n_end'> N End Line: 23</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    
+    &#47&#47 weight (ray_num, point_num)
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        norm_diff<a id="change"> = </a><a id="change">torch.pow(</a>(d_norm - p_norm), <a id="change">2</a><a id="change">)</a>
+        res = torch.sum(weight.unsqueeze(-1) * norm_diff)
+        return res<a id="change"> / </a>weight.numel() if self.size_average == True else res
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        dot_diff = 1. - torch.sum(d_norm * p_norm, dim = -1)
+        &#47&#47 norm_diff = torch.pow((d_norm - p_norm), 2)
+        return torch.mean(weight * dot_diff) if self.size_average == True else <a id="change">torch.sum(</a>weight * dot_diff<a id="change">)</a>
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):
+        super().__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/enigmatisms/nerf/commit/abd69721dbe663af1bb8a496168c0d5624054ca5#diff-a7de87dc581f771441334c3fe5ec05839927149e6859d6996fd34a247487317cL113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9307895</div><div id='project'> Project Name: enigmatisms/nerf</div><div id='commit'> Commit Name: abd69721dbe663af1bb8a496168c0d5624054ca5</div><div id='time'> Time: 2022-08-16</div><div id='author'> Author: 984041003@qq.com</div><div id='file'> File Name: py/ref_model.py</div><div id='m_class'> M Class Name: WeightedNormalLoss</div><div id='n_method'> N Class Name: WeightedNormalLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: py/ref_model.py</div><div id='n_file'> N File Name: py/ref_model.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 116</div><BR>

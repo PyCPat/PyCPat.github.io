@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        encoded: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The encoded embedding for each series and time step.
+        
+        <a id="change">pass</a>
+
+
+class TemporalEncoder(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        output: torch.Tensor [batch, series, time steps, output embedding dimension]
+            The transformed embedding for each series and time step.
+        
+        num_batches<a id="change"> = </a>encoded.shape[0]
+        num_series = encoded.shape[1]
+        num_timesteps = encoded.shape[2]
+
+        &#47&#47 Merge the series and time steps, since the PyTorch attention implementation only accept three-dimensional input,
+        &#47&#47 and the attention is applied between all tokens, no matter their series or time step.
+        encoded<a id="change"> = </a>encoded.view(num_batches, num_series * num_timesteps, self.embedding_dim)
+
+        &#47&#47 The PyTorch implementation wants the following order: [tokens, batch, embedding]
+        encoded<a id="change"> = </a>encoded.transpose(0, 1)
+
+        output<a id="change"> = </a>self.transformer_encoder(
+            encoded, mask=torch.zeros(encoded.shape[0], encoded.shape[0], device=encoded.device)
+        )
+
+        &#47&#47 Reset to the original shape
+        output<a id="change"> = </a>output.transpose(0, 1)
+        output<a id="change"> = </a>output.view(num_batches, num_series, num_timesteps, self.embedding_dim)
+
+        <a id="change">return </a>output
+
+
+class TemporalEncoder(nn.Module):</code></pre>

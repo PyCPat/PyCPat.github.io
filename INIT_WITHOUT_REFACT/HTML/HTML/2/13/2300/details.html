@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :2300
+</h3><img src='7957769.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            pred, target = pred[mask], target[mask]
+        pred_sigmoid = pred.sigmoid()
+        target = target.type_as(pred)
+        focal_weight = (<a id="change">target</a><a id="change"> - </a>pred_sigmoid).abs().pow(self.gamma)
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, <a id="change">target</a><a id="change">, reduction=&quotnone&quot) * </a>focal_weight
+        loss = <a id="change">loss.sum()</a><a id="change"> / </a><a id="change">(target&gt;0.0).float().sum()</a>
+        return loss * self.loss_weight
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mask is not None:
+            pred, target = pred[mask], target[mask]
+
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a>
+        
+        pred_prob = torch.sigmoid(pred)  &#47&#47 prob from logits
+        binary_target = (target&gt;0.0).float()
+        alpha_factor = binary_target * self.alpha + (1 - binary_target) * (1 - self.alpha)
+        modulating_factor = <a id="change">torch.abs(</a>target - pred_prob<a id="change">)</a> ** self.gamma
+        loss = loss<a id="change"> * alpha_factor * </a>modulating_factor
+        loss = <a id="change">loss.sum()</a><a id="change"> / binary_target.sum()</a>
+        return loss * self.loss_weight
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 12</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zhanghengdev/mutualguide/commit/4cfe01d8ed981a40106818d60be8c5af05153d87#diff-9d902b6ad822cdc766370d11ca36be89e8768477bf68468ac4a9caa432af3205L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7957769</div><div id='project'> Project Name: zhanghengdev/mutualguide</div><div id='commit'> Commit Name: 4cfe01d8ed981a40106818d60be8c5af05153d87</div><div id='time'> Time: 2021-11-16</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: utils/loss/gfocal_loss.py</div><div id='m_class'> M Class Name: GFocalLoss</div><div id='n_method'> N Class Name: GFocalLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss/gfocal_loss.py</div><div id='n_file'> N File Name: utils/loss/gfocal_loss.py</div><div id='m_start'> M Start Line: 18</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 29</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            pred, target = pred[mask], target[mask]
+
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a>
+        
+        pred_prob = torch.sigmoid(pred)  &#47&#47 prob from logits
+        binary_target = (target&gt;0.0).float()
+        alpha_factor = binary_target * self.alpha + (1 - binary_target) * (1 - self.alpha)
+        modulating_factor = torch.abs(target<a id="change"> - </a>pred_prob) ** self.gamma
+        loss = loss<a id="change"> * alpha_factor * </a>modulating_factor
+        loss = <a id="change">loss.sum()</a><a id="change"> / </a><a id="change">binary_target.sum()</a>
+        return loss * self.loss_weight
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            pred, target = pred[mask], target[mask]
+        pred_sigmoid = pred.sigmoid()
+        target = target.type_as(pred)
+        focal_weight = <a id="change">(target - pred_sigmoid).abs()</a>.pow(self.gamma)
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a><a id="change"> * </a>focal_weight
+        loss = <a id="change">loss.sum()</a><a id="change"> / (target&gt;0.0).float().sum()</a>
+        return loss * self.loss_weight
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/a8fc39b3edd1c6a621bc3fe8f2c15f48115c5bea#diff-9d902b6ad822cdc766370d11ca36be89e8768477bf68468ac4a9caa432af3205L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7957768</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: a8fc39b3edd1c6a621bc3fe8f2c15f48115c5bea</div><div id='time'> Time: 2021-11-25</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: utils/loss/gfocal_loss.py</div><div id='m_class'> M Class Name: GFocalLoss</div><div id='n_method'> N Class Name: GFocalLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss/gfocal_loss.py</div><div id='n_file'> N File Name: utils/loss/gfocal_loss.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 22</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            pred, target = pred[mask], target[mask]
+        pred_sigmoid = pred.sigmoid()
+        <a id="change">target</a> = target.type_as(pred)
+        focal_weight = (target<a id="change"> - </a>pred_sigmoid).abs().pow(self.gamma)
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot) * </a>focal_weight
+        loss = <a id="change">loss.sum()</a><a id="change"> / </a><a id="change">(target&gt;0.0).float().sum()</a>
+        return loss * self.loss_weight
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mask is not None:
+            pred, target = pred[mask], target[mask]
+
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a>
+        
+        pred_prob = torch.sigmoid(pred)  &#47&#47 prob from logits
+        binary_target = (target&gt;0.0).float()
+        alpha_factor = binary_target * self.alpha + (1 - binary_target) * (1 - self.alpha)
+        modulating_factor = <a id="change">torch.abs(</a>target - pred_prob<a id="change">)</a> ** self.gamma
+        loss = loss<a id="change"> * alpha_factor * </a>modulating_factor
+        loss = <a id="change">loss.sum()</a><a id="change"> / binary_target.sum()</a>
+        return loss * self.loss_weight
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/4cfe01d8ed981a40106818d60be8c5af05153d87#diff-9d902b6ad822cdc766370d11ca36be89e8768477bf68468ac4a9caa432af3205L15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7957767</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: 4cfe01d8ed981a40106818d60be8c5af05153d87</div><div id='time'> Time: 2021-11-16</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: utils/loss/gfocal_loss.py</div><div id='m_class'> M Class Name: GFocalLoss</div><div id='n_method'> N Class Name: GFocalLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss/gfocal_loss.py</div><div id='n_file'> N File Name: utils/loss/gfocal_loss.py</div><div id='m_start'> M Start Line: 18</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 29</div><BR>

@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        tokens = torch.cat((text_emb, image_emb), dim = 1)
+
+        if exists(mask):
+            mask = F.pad(mask, (0<a id="change">, self.image_seq_len</a>), value = True)
+
+        out = self.transformer(tokens, mask = mask)
+        out = self.to_logits(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+        tokens = self.text_emb(text)
+        tokens += self.text_pos_emb(torch.arange(text.shape[1], device = device))
+
+        <a id="change">if </a><a id="change">exists(</a>image<a id="change">)</a> and not is_empty(image)<a id="change">:
+            </a>is_raw_image = len(image.shape) == 4
+
+            if is_raw_image:
+                assert exists(self.vae), &quotVAE must be passed into constructor if you are to train directly on raw images&quot
+                image_logits = self.vae(image, return_logits = True)
+                codebook_indices = image_logits.argmax(dim = 1).flatten(1)
+                image = codebook_indices
+
+            image_emb = self.image_emb(image)
+            image_emb += self.image_pos_emb(torch.arange(image.shape[1], device = device))
+
+            tokens = torch.cat((tokens, image_emb), dim = 1)
+
+            if exists(mask):
+                mask = F.pad(mask, (0<a id="change">, image_emb.shape[1]</a>), value = True)
+
+        out = self.transformer(tokens, mask = mask)
+        logits = self.to_logits(out)</code></pre>

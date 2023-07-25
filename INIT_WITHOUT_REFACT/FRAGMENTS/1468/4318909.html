@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            rel_dist = fourier_encode_dist(rel_dist, num_encodings = fourier_features)
+            rel_dist = rearrange(rel_dist, &quotb i j () d -&gt; b i j d&quot)
+
+        feats_i = <a id="change">repeat(</a>feats, <a id="change">&quotb i d -&gt; b i n d&quot</a><a id="change">, n = n)</a>
+        feats_j = repeat(feats, &quotb j d -&gt; b n j d&quot, n = n)
+        edge_input = torch.cat((feats_i, feats_j, rel_dist), dim = -1)
+
+        if exists(edges):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.norm_rel_coors:
+            rel_coors = F.normalize(rel_coors, dim = -1) * self.rel_coors_scale
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>if use_nearest:
+                mask = batched_index_select(mask, nbhd_indices, dim = 1)
+            else:
+                mask<a id="change"> = </a><a id="change">rearrange(</a>mask, &quotb j -&gt; b () j&quot<a id="change">)</a>
+
+            coor_weights.masked_fill_(~mask, 0.)
+
+        coors_out = einsum(&quotb i j, b i j c -&gt; b i c&quot, coor_weights, rel_coors) + coors</code></pre>

@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :1841
+</h3><img src='7167945.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, raw_img, **kwargs):
+        &#47&#47 encoder-decoder part
+        x1, x2, x3, x4 = self.encoder(raw_img)
+        y = normalize_img(<a id="change">self.decoder(</a>raw_img, x1, x2, x3, x4<a id="change">)</a>)
+        
+        return y
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, raw_img, **kwargs):
+        &#47&#47 encoder-decoder part
+        x1, x2, x3, x4 = self.encoder(raw_img)
+        y = <a id="change">self.decoder(</a>raw_img, x1, x2, x3, x4<a id="change">)</a>
+        if self.tail == &quotnorm&quot:
+            y = normalize_img(y)
+        elif self.tail == &quotclip&quot:
+            y = torch.clamp(y, min=0.0, max=1.0)
+        elif self.tail == &quotsigmoid&quot:
+            y<a id="change"> = </a>torch.sigmoid(y)
+        elif self.tail == &quotIN+clip&quot:
+            y = torch.clamp(self.IN(y), min=0.0, max=1.0)
+        elif self.tail == &quotIN+sigmoid&quot:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rq-wu/underwaterranker/commit/70ef5860c9eca7d04b6d3a383818c73101154c0a#diff-e9c1a8c37706f646f9d3e7986efa5f67e44b47df1a5a6fa73ff210eaac55b6e6L116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167945</div><div id='project'> Project Name: rq-wu/underwaterranker</div><div id='commit'> Commit Name: 70ef5860c9eca7d04b6d3a383818c73101154c0a</div><div id='time'> Time: 2022-05-05</div><div id='author'> Author: lhhan@mail.nankai.edu.cn</div><div id='file'> File Name: all_model/SimpleNet/model.py</div><div id='m_class'> M Class Name: SimpleNet</div><div id='n_method'> N Class Name: SimpleNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: all_model/SimpleNet/model.py</div><div id='n_file'> N File Name: all_model/SimpleNet/model.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 137</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        enc_inputs = enc_inputs.view(batch_size, -1, encoder_dim)
+        encoder_out, enc_self_attns = self.encoder(enc_inputs)
+        &#47&#47 encoder_out: [batch_size, 196, 2048]
+        return <a id="change">self.decoder(</a>encoder_out, encoded_captions, caption_lengths<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        enc_inputs = enc_inputs.view(batch_size, -1, encoder_dim)
+        encoder_out, enc_self_attns = self.encoder(enc_inputs)
+        &#47&#47 encoder_out: [batch_size, 196, 2048]
+        predictions<a id="change">, encoded_captions, decode_lengths, sort_ind, dec_self_attns, dec_enc_attns = </a><a id="change">self.decoder(</a>encoder_out, encoded_captions, caption_lengths<a id="change">)</a>
+        alphas = {"enc_self_attns": enc_self_attns, "dec_self_attns": dec_self_attns, "dec_enc_attns": dec_enc_attns}
+        return predictions, encoded_captions, decode_lengths, alphas, sort_ind
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/royalskye/image-caption/commit/569502dd85be28a1e6a10bc8873b7cd0446556b8#diff-7b7030687899150ad5cd420914b35858a8cc34b1d59e5cab0d629393a328448cL263' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167939</div><div id='project'> Project Name: royalskye/image-caption</div><div id='commit'> Commit Name: 569502dd85be28a1e6a10bc8873b7cd0446556b8</div><div id='time'> Time: 2020-04-06</div><div id='author'> Author: a19970417b@qq.com</div><div id='file'> File Name: transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer.py</div><div id='n_file'> N File Name: transformer.py</div><div id='m_start'> M Start Line: 278</div><div id='m_end'> M End Line: 278</div><div id='n_start'> N Start Line: 289</div><div id='n_end'> N End Line: 291</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            ema_unet.update()
+
+    def forward(self, x, *, unet_number, **kwargs):
+        return <a id="change">self.decoder(</a>x<a id="change">, unet_number = unet_number, **kwargs)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, *, unet_number, **kwargs):
+        with autocast(enabled = self.amp):
+            loss<a id="change"> = </a><a id="change">self.decoder(</a>x<a id="change">, unet_number = unet_number, **kwargs)</a>
+        return self.scale(loss, unet_number = unet_number)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/a2ef69af661f4a7a398e3fee1449817b27b5e142#diff-74d733a4be46e85716fcb912aa9b2ab4a882115449b8a2d550dc26f89155c0a9L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167938</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: a2ef69af661f4a7a398e3fee1449817b27b5e142</div><div id='time'> Time: 2022-04-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/train.py</div><div id='m_class'> M Class Name: DecoderTrainer</div><div id='n_method'> N Class Name: DecoderTrainer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/train.py</div><div id='n_file'> N File Name: dalle2_pytorch/train.py</div><div id='m_start'> M Start Line: 157</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 173</div><div id='n_end'> N End Line: 175</div><BR>

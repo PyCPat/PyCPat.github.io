@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        shape0, shape1, files = [], [], []  &#47&#47 image and inference shapes, filenames
+        for i, im in enumerate(imgs):
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = <a id="change">Image.open(</a>requests.get(im, stream=True).raw<a id="change"> if </a>im.startswith(&quothttp&quot)<a id="change"> else </a>im<a id="change">)</a>, im  &#47&#47 open
+                im.filename<a id="change"> = </a>f  &#47&#47 for uri
+            files.append(<a id="change">Path(im.filename).with_suffix(</a>&quot.jpg&quot<a id="change">)</a>.name<a id="change"> if isinstance(im</a>, Image.Image<a id="change">)</a><a id="change"> else </a>f&quotimage{i}.jpg&quot)
+            <a id="change">if </a><a id="change">not isinstance(im, np.ndarray):
+                </a>im = <a id="change">np.asarray(im</a><a id="change">)</a>  &#47&#47 to numpy
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)
+            im = im[:, :, :3] if im.ndim == 3 else np.tile(im[:, :, None], 3)  &#47&#47 enforce 3ch input</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Pre-process
+        n, imgs = (len(imgs), imgs) if isinstance(imgs, list) else (1, [imgs])  &#47&#47 number of images, list of images
+        shape0, shape1, files = [], [], []  &#47&#47 image and inference shapes, filenames
+        for i, <a id="change">im</a> in enumerate(imgs):
+            <a id="change">f = f&quotimage{i}&quot</a>  &#47&#47 filename
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = <a id="change">np.asarray(</a><a id="change">Image.open(</a>requests.get(im, stream=True).raw<a id="change"> if </a>im.startswith(&quothttp&quot)<a id="change"> else </a>im<a id="change">))</a>, im
+            elif <a id="change">isinstance(im</a>, Image.Image<a id="change">)</a><a id="change">:  &#47&#47 PIL Image
+                im</a><a id="change">, f</a> = <a id="change">np.asarray(im</a><a id="change">)</a><a id="change">, getattr(im, &quotfilename&quot, f)</a>
+            files.append(<a id="change">Path(f).with_suffix(</a>&quot.jpg&quot<a id="change">)</a>.name)
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)
+            im = im[:, :, :3] if im.ndim == 3 else np.tile(im[:, :, None], 3)  &#47&#47 enforce 3ch input</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = torch.cat([state, action], 1)
+        for i, layer in enumerate(self.networks):
+            out = layer(out)
+        <a id="change">return </a>state + out
+    
+    def predict(self, state, action):
+        pass</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        mean = out[:, :self.output_dim]
+
+        logvar<a id="change"> = </a>self.max_logvar - F.softplus(self.max_logvar - out[:, self.output_dim:])
+        logvar<a id="change"> = </a>self.min_logvar<a id="change"> + </a><a id="change">F.softplus(</a>logvar<a id="change"> - </a>self.min_logvar<a id="change">)</a>
+        return mean, torch.exp(logvar)
+    
+    def predict(self, state, action):
+        pass</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = len(laterals)
+        <a id="change">for </a>i in range(used_backbone_levels-1, 0, -1)<a id="change">:
+            </a>laterals[i-1]<a id="change"> += </a>F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        for i in reversed(range(<a id="change">len(</a>features<a id="change">)</a>-1)):
+            feature = self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))</code></pre>

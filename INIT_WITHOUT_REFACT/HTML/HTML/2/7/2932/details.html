@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :2932
+</h3><img src='9738437.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        if <a id="change">self._pooling_func_name == &quotmax&quot</a>:
+            out = torch.max(out, -1, keepdim=True)[0]
+        elif self._pooling_func_name == &quotmean&quot:
+            out = torch.mean(out, keepdim=True, dim=-1)
+        elif <a id="change">self._pooling_func_name == &quotsum&quot</a><a id="change">:
+            </a>out = torch.sum(out, keepdim=True, dim=-1)
+        else:
+            <a id="change">raise </a><a id="change">ValueError(f"Pooling function {self._pooling_func_name} is not yet supported!"</a><a id="change">)</a>
+
+        &#47&#47 out: (BB, embedding_dim, 1)
+        out = torch.flatten(out, start_dim=-2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        masking_input = {&quotin_tensor&quot: out.transpose(2, 1)}
+        if self.use_masking:
+            masking_input[&quotmask_tensor&quot] = masking_tensor
+        out = <a id="change">self.pooling_block(masking_input)[&quotmasking_out&quot]</a>
+        &#47&#47 output_tensor: (BB, embedding_dim)
+
+        &#47&#47 out: (BB, embedding_dim)
+        out = self.fc1(out)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/enlite-ai/maze/commit/53a9f4e4997b8a5451f14fb57dd6c5cb9becd110#diff-a18d0890711efadf10cc7ee9bb175629d673020f907726acc13ab53e8a7f2617L80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9738437</div><div id='project'> Project Name: enlite-ai/maze</div><div id='commit'> Commit Name: 53a9f4e4997b8a5451f14fb57dd6c5cb9becd110</div><div id='time'> Time: 2021-04-15</div><div id='author'> Author: office@enlite.ai</div><div id='file'> File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_class'> M Class Name: PointNetFeatureTransformNet</div><div id='n_method'> N Class Name: PointNetFeatureTransformNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='n_file'> N File Name: maze/perception/blocks/feed_forward/point_net.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            batch, permutation_dim, -1
+        )
+
+        if <a id="change">self.combining_operation == "mean"</a>:
+            e = iid_embeddings.mean(dim=1)
+        elif <a id="change">self.combining_operation == "sum"</a><a id="change">:
+            </a>e = iid_embeddings.sum(dim=1)
+        else:
+            <a id="change">raise </a><a id="change">ValueError("combining_operation must be in [&quotsum&quot, &quotmean&quot]."</a><a id="change">)</a>
+
+        embedding = self.fc_subnet(e)
+
+        return embedding</code></pre><h3>After Change</h3><pre><code class='java'>
+            trial_counts = torch.zeros(batch, 1)
+            for i in range(batch):
+                &#47&#47 remove NaNs
+                valid_x = x[i, ~torch.isnan(<a id="change">x[i, :, 0]</a>), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/1352e77bdbc47aa4a4130679903b57672e48218c#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L262' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9738434</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 1352e77bdbc47aa4a4130679903b57672e48218c</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 304</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            pred = self.var_predict_multi * self.var_predict_module(input)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if <a id="change">len(pred.shape) == 1</a>:
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )
+            elif <a id="change">pred.shape[-1] not in (1, self.param_rank)</a><a id="change">:
+                </a><a id="change">raise </a><a id="change">ValueError(
+                    f"{self.id} `predict_variance` module output should have `shape[-1]` of "
+                    f"{self.param_rank}, got {pred.shape[-1]}"</a><a id="change">
+                )</a>
+        if pred is not None:
+            diag_multi = torch.diag_embed(torch.exp(pred))
+            mini_cov = diag_multi @ mini_cov @ diag_multi
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pred = None
+        if self.var_predict_module is not None and not _ignore_input:
+            pred = self.var_predict_module(*[<a id="change">inputs[x]</a> for x in self.expected_kwargs])
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if (pred &lt; 0).any():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/strongio/torchcast/commit/d98b47d1ac38c61653093efd887cc672f228917d#diff-65e118e1565802366914308589e1ad788cb0cd050a59e65d1c18b1195749bf05L244' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9738431</div><div id='project'> Project Name: strongio/torchcast</div><div id='commit'> Commit Name: d98b47d1ac38c61653093efd887cc672f228917d</div><div id='time'> Time: 2021-09-01</div><div id='author'> Author: jacob.dink@strong.io</div><div id='file'> File Name: torchcast/covariance/base.py</div><div id='m_class'> M Class Name: Covariance</div><div id='n_method'> N Class Name: Covariance</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchcast/covariance/base.py</div><div id='n_file'> N File Name: torchcast/covariance/base.py</div><div id='m_start'> M Start Line: 246</div><div id='m_end'> M End Line: 266</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 290</div><BR>

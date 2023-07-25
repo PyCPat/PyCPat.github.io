@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2248
+</h3><img src='7909310.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if exists(mask):
+            w_mask = rearrange(mask, &quotb h w -&gt; (b w) h&quot)
+            h_mask = <a id="change">rearrange(</a>mask, <a id="change">&quotb h w -&gt; (b h) w&quot</a><a id="change">)</a>
+
+        &#47&#47 calculate attention bias
+
+        attn_bias = None</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):
+            attn_bias = self.edges_to_attn_bias(edges)
+            attn_bias = <a id="change">repeat(</a>attn_bias, <a id="change">&quotb h i j -&gt; (b x) h i j&quot</a><a id="change">, x = axial_dim)</a>
+
+        tie_dim = axial_dim if self.global_query_attn else None
+
+        out = self.attn(x, mask = mask, attn_bias = attn_bias, tie_dim = tie_dim)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L220' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7909310</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, data, mask = None):
+        b = data.shape[0]
+        data = fourier_encode(data, self.num_fourier_features)
+        data = <a id="change">rearrange(</a>data, <a id="change">&quotb n ... -&gt; b n (...)&quot</a><a id="change">)</a>
+
+        x = self.latents + self.pos_emb
+        x = repeat(x, &quotn d -&gt; b n d&quot, b = b)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos = torch.stack(torch.meshgrid(*axis_pos), dim = -1)
+        enc_pos = fourier_encode(pos, self.num_fourier_features)
+        enc_pos = rearrange(enc_pos, &quot... n d -&gt; ... (n d)&quot)
+        enc_pos = <a id="change">repeat(</a>enc_pos, <a id="change">&quot... -&gt; b ...&quot</a><a id="change">, b = b)</a>
+
+        &#47&#47 concat to channels of data and flatten axis
+
+        data = torch.cat((data, enc_pos), dim = -1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/37e2eb6650fb9f609f9aee39df5ed830f5550325#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7909311</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: 37e2eb6650fb9f609f9aee39df5ed830f5550325</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_class'> M Class Name: Perceiver</div><div id='n_method'> N Class Name: Perceiver</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='n_file'> N File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 160</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        t = torch.arange(n, device = device).type_as(self.inv_freq)
+        sinusoid_inp = einsum(&quoti , j -&gt; i j&quot, t, self.inv_freq)
+        emb = torch.cat((sinusoid_inp.sin(), sinusoid_inp.cos()), dim=-1)
+        return <a id="change">rearrange(</a>emb, <a id="change">&quoti j -&gt; () i j&quot</a><a id="change">)</a>
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):
+        super().__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, n, device):
+        seq = torch.arange(n, device = device).type_as(self.inv_freq)
+        freqs = einsum(&quoti , j -&gt; i j&quot, seq, self.inv_freq)
+        freqs = <a id="change">repeat(</a>freqs, <a id="change">&quoti j -&gt; () i (j r)&quot</a><a id="change">, r = 2)</a>
+        return [freqs.sin(), freqs.cos()]
+
+class AxialRotaryEmbedding(nn.Module):
+    def __init__(self, dim, max_freq = 10):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/9be6fd958ff5432932845aa3f1f9a23f4b203199#diff-46753fec5461ebc4d150c2c0a150758924540bc61b06a15759dbf2721ce48677L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7909313</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 9be6fd958ff5432932845aa3f1f9a23f4b203199</div><div id='time'> Time: 2021-04-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/rotary.py</div><div id='m_class'> M Class Name: FixedPositionalEmbedding</div><div id='n_method'> N Class Name: FixedPositionalEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/rotary.py</div><div id='n_file'> N File Name: alphafold2_pytorch/rotary.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 45</div><BR>

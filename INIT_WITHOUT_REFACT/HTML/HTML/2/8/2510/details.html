@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2510
+</h3><img src='8244732.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        text_mask = None,
+        return_loss = False
+    ):
+        seq_len, device = <a id="change">text.shape[1]</a>, text.device
+        assert seq_len &lt;= self.text_max_seq_len, &quotyour input text has a greater length than what was designated on initialization&quot
+
+        tokens = self.text_embedding(text)</code></pre><h3>After Change</h3><pre><code class='java'>
+        frame_embeddings = self.image_embedding(frame_indices_input)
+        frame_embeddings = self.video_pos_emb(frame_embeddings) + frame_embeddings
+
+        bos<a id="change"> = </a><a id="change">repeat(</a>self.video_bos, <a id="change">&quotd -&gt; b 1 d&quot</a><a id="change">, b = batch)</a>
+        frame_embeddings<a id="change"> = torch.cat(</a>(bos<a id="change">, frame_embeddings</a>)<a id="change">, dim = 1)</a>
+        frame_embeddings<a id="change"> = </a>self.video_transformer(frame_embeddings)
+
+        logits = self.to_logits(frame_embeddings)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/daeefa2be5de809f9003a5333dad62183cf819f7#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL219' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8244732</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: daeefa2be5de809f9003a5333dad62183cf819f7</div><div id='time'> Time: 2021-12-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: NUWA</div><div id='n_method'> N Class Name: NUWA</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 219</div><div id='m_end'> M End Line: 227</div><div id='n_start'> N Start Line: 270</div><div id='n_end'> N End Line: 296</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 get labels for input patches that were masked
+        bool_mask = mask == True
+        labels = <a id="change">input[bool_mask]</a>
+
+        &#47&#47 get generator output and get mpp loss
+        cls_logits = self.transformer(masked_input, mpp=True, **kwargs)
+        logits = cls_logits[:,1:,:]</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 add cls token to input sequence
+        b, n, _ = masked_input.shape
+        cls_tokens<a id="change"> = </a><a id="change">repeat(</a>self.transformer.cls_token, <a id="change">&quot() n d -&gt; b n d&quot</a><a id="change">, b = b)</a>
+        masked_input = <a id="change">torch.cat(</a>(cls_tokens<a id="change">, masked_input</a>)<a id="change">, dim=1)</a>
+
+        &#47&#47 add positional embeddings to input
+        masked_input += self.transformer.pos_embedding[:, :(n + 1)]
+        masked_input<a id="change"> = </a>self.transformer.dropout(masked_input)
+
+        &#47&#47 get generator output and get mpp loss
+        masked_input = self.transformer.transformer(masked_input, **kwargs)
+        cls_logits<a id="change"> = </a>self.to_bits(masked_input)
+        logits = cls_logits[:,1:,:]
+
+        mpp_loss = self.loss(logits, img, mask)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/be5d560821bb5ae4dff823272118eea4a5dc7d07#diff-1dcf8cf01d06ecd12207392ed2c0b4e7dbccdcba9bced068108922a8ac87a94fL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8244671</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: be5d560821bb5ae4dff823272118eea4a5dc7d07</div><div id='time'> Time: 2021-02-12</div><div id='author'> Author: zackankner@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_class'> M Class Name: MPP</div><div id='n_method'> N Class Name: MPP</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 128</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_logits = nn.Linear(latent_dim, num_classes)
+
+    def forward(self, data, mask = None):
+        b = <a id="change">data.shape[0]</a>
+        data = fourier_encode(data, self.num_fourier_features)
+        data = rearrange(data, &quotb n ... -&gt; b n (...)&quot)
+
+        x = self.latents + self.pos_emb</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos = torch.stack(torch.meshgrid(*axis_pos), dim = -1)
+        enc_pos = fourier_encode(pos, self.num_fourier_features)
+        enc_pos = rearrange(enc_pos, &quot... n d -&gt; ... (n d)&quot)
+        enc_pos<a id="change"> = </a><a id="change">repeat(</a>enc_pos, <a id="change">&quot... -&gt; b ...&quot</a><a id="change">, b = b)</a>
+
+        &#47&#47 concat to channels of data and flatten axis
+
+        data<a id="change"> = </a><a id="change">torch.cat(</a>(data<a id="change">, enc_pos</a>)<a id="change">, dim = -1)</a>
+        data<a id="change"> = </a>rearrange(data, &quotb ... d -&gt; b (...) d&quot)
+
+        x = self.latents + self.pos_emb
+        x = repeat(x, &quotn d -&gt; b n d&quot, b = b)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/37e2eb6650fb9f609f9aee39df5ed830f5550325#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8244728</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: 37e2eb6650fb9f609f9aee39df5ed830f5550325</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_class'> M Class Name: Perceiver</div><div id='n_method'> N Class Name: Perceiver</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='n_file'> N File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 160</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 174</div><BR>

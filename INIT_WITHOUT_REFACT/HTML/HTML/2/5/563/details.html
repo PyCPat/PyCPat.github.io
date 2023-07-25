@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :563
+</h3><img src='1993742.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                y[..., :5 + self.nc].sigmoid_()
+                if self.inplace:
+                    y[..., 0:2] = (y[..., 0:2] * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (<a id="change">y[..., 2:4]</a> * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                else:  &#47&#47 for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
+                    xy, wh, etc = y.split((2, 2, self.no - 4), 4)  &#47&#47 tensor_split((2, 4, 5), 4) if torch 1.8.0
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre><h3>After Change</h3><pre><code class='java'>
+                    xy, wh, conf = x[i].sigmoid().split((2, 2, self.nc + 1), 4)
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (wh * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y<a id="change"> = </a><a id="change">torch.cat(</a>(xy<a id="change">, wh, conf</a>), 4<a id="change">)</a>
+                z.append(y.view(bs, self.na * nx * ny, self.no))
+
+        return x if self.training else (torch.cat(z, 1),) if self.export else (torch.cat(z, 1), x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ultralytics/yolov5/commit/060837406542c5c65301b8fde641f4d92a1f395e#diff-2cd118cbb69c9ca7b5544f4187b11335fc3addbaf2c3c5bb45435cac648c957bL58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1993742</div><div id='project'> Project Name: ultralytics/yolov5</div><div id='commit'> Commit Name: 060837406542c5c65301b8fde641f4d92a1f395e</div><div id='time'> Time: 2022-09-17</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/yolo.py</div><div id='m_class'> M Class Name: Detect</div><div id='n_method'> N Class Name: Detect</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/yolo.py</div><div id='n_file'> N File Name: models/yolo.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 58</div><div id='n_end'> N End Line: 77</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask_value = max_neg_value(q)
+        mask = torch.zeros((b * h, buckets, buckets), device=device).bool()
+        i, j = torch.triu_indices(buckets, buckets)
+        <a id="change">mask[:, 0, :]</a> = True
+        mask[:, i, j] = True
+        R.masked_fill_(mask, mask_value)
+        R = R.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        null_value_bucket = self.null_value[None, :, None, :, :].expand(b, -1, 1, bsz, -1).reshape(bh, 1, bsz, -1)
+
+        b_k_r = torch.cat((null_key_bucket, b_k), dim=1)
+        b_v_r = <a id="change">torch.cat(</a>(null_value_bucket<a id="change">, b_v</a>)<a id="change">, dim=1)</a>
+
+        &#47&#47 reorder buckets to buckets of the past
+        b_k_r = reorder_buckets(b_k_r, R)
+        b_v_r<a id="change"> = </a>reorder_buckets(b_v_r, R)
+
+        &#47&#47 and concatenate to original buckets themselves for local attention
+        b_k = torch.cat((b_k_r, b_k), dim=2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/02446a9900a155b2512af5839f071ea84d292deb#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL286' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1993748</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 02446a9900a155b2512af5839f071ea84d292deb</div><div id='time'> Time: 2020-04-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornCausalAttention</div><div id='n_method'> N Class Name: SinkhornCausalAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 297</div><div id='n_end'> N End Line: 345</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+
+        logits = self.to_logits(transformer_output)
+        return <a id="change">logits[:, -self.image_seq_length:, :]</a>
+
+
+    &#47&#47 def forward(self, text_tokens, seg_tokens, img_tokens):</code></pre><h3>After Change</h3><pre><code class='java'>
+        seq_pos = self.seq_pos_embeddings(torch.arange(seg_tokens.shape[1], device=self.device))
+        seq_embeddings = self.seg_token_embedding(seg_tokens) + text_pos
+
+        embeddings<a id="change"> = </a><a id="change">torch.cat(</a>(text_embeddings<a id="change">, seq_embeddings</a>)<a id="change">, dim=1)</a>
+        if img_tokens is not None:
+            img_pos = self.get_image_pos_embeddings(img_tokens)
+            image_embeddings = self.image_embeddings(img_tokens) + img_pos</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/casualganpapers/make-a-scene/commit/029c4f7e4dc143f105af80e4437c1dd7a09bf91c#diff-e34e919520ffcf961fbcbe6e33d514c3eebea9323c4324e1fecb6c407343d426L308' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1993744</div><div id='project'> Project Name: casualganpapers/make-a-scene</div><div id='commit'> Commit Name: 029c4f7e4dc143f105af80e4437c1dd7a09bf91c</div><div id='time'> Time: 2022-06-16</div><div id='author'> Author: 87744278+thuangb@users.noreply.github.com</div><div id='file'> File Name: models/transformer.py</div><div id='m_class'> M Class Name: MakeAScene</div><div id='n_method'> N Class Name: MakeAScene</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/transformer.py</div><div id='n_file'> N File Name: models/transformer.py</div><div id='m_start'> M Start Line: 314</div><div id='m_end'> M End Line: 334</div><div id='n_start'> N Start Line: 329</div><div id='n_end'> N End Line: 352</div><BR>

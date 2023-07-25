@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = x
+        out2 = fac1 * torch.exp(-1.0 * alpha)
+        for i, layer in enumerate(self.fc_layers):
+            out<a id="change"> = </a>layer(torch.cat(<a id="change">[</a>out, out2<a id="change"></a>], dim=1))
+        return self.fc_out(torch.cat([out, out2], dim=1))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, alpha, fac1):
+        out = x
+        out2 = <a id="change">torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]</a>
+        out2<a id="change"> = </a>out2 * fac1 + (1 - fac1)
+        return self.fc_out(out * out2)
+
+</code></pre>

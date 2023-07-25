@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return "_decoder", "_quantizer"
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0]<a id="change">, shape[1]</a>
+        return ((self._decoder(self._quantizer(codes)))[..., :h, :w].tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for i</a> in <a id="change">range(</a>self._levels - 1, -1, -1<a id="change">):
+            </a>q<a id="change"> = </a>self._scatters[i](self._quantizers[i](<a id="change">codes[i]</a>))
+            smallQ = self._reverses[i](q + smallQ)
+        return self._decoder(smallQ).tanh()
+</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss_hard = loss[loss &gt; self.thresh]
+
+        if loss_hard.numel() &lt; n_min:
+            loss_hard<a id="change">, _</a> = loss.topk(n_min)
+
+        return torch.mean(loss_hard)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            return sum([w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)])
+        <a id="change">return </a><a id="change">self._forward(</a>preds, labels<a id="change">)</a>
+
+
+class Dice(nn.Module):
+    def __init__(self, delta: float = 0.5, aux_weights: list = [1, 0.4]):</code></pre>

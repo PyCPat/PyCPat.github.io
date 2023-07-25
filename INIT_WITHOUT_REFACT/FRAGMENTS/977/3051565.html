@@ -1,0 +1,47 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 encode
+
+        retrieved<a id="change"> = </a><a id="change">rearrange(</a>retrieved, <a id="change">&quotb k n d -&gt; (b k) n d&quot</a><a id="change">)</a>
+        embed_as_context = rearrange(embed, &quotb (k n) d -&gt; (b k) n d&quot, n = chunk_size)
+
+        retrieved = self.encoder(retrieved, context = embed_as_context)
+        retrieved = rearrange(retrieved, &quot(b k) n d -&gt; b k n d&quot, k = n // chunk_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 handle some user inputs
+
+        <a id="change">if </a>retrieved.ndim == 3<a id="change">:
+            </a>retrieved<a id="change"> = rearrange(</a>retrieved, <a id="change">&quotb k n -&gt; b k 1 n&quot</a><a id="change">)</a> &#47&#47 1 neighbor retrieved
+
+        &#47&#47 if training, derive labels
+
+        if return_loss:
+            seq, labels = seq[:, :-1], seq[:, 1:]
+
+        &#47&#47 variables
+
+        n, chunk_size, num_retrieved, device = seq.shape[-1], retrieved.shape[-1], retrieved.shape[-2], seq.device
+
+        assert divisible_by(n, chunk_size), &quotsequence length must be divisible by chunk size&quot
+
+        &#47&#47 embed both sequence and retrieved chunks
+
+        embed = self.token_emb(seq)
+        retrieved = self.token_emb(retrieved)
+
+        &#47&#47 get absolute positional embedding
+
+        pos_emb = self.pos_emb(torch.arange(n, device = device))
+        pos_emb = rearrange(pos_emb, &quotn d -&gt; 1 n d&quot)
+        embed = embed + pos_emb
+
+        &#47&#47 encode
+
+        retrieved<a id="change"> = </a><a id="change">rearrange(</a>retrieved, <a id="change">&quotb k r n d -&gt; (b k r) n d&quot</a><a id="change">, r = num_retrieved)</a>
+        embed_as_context = repeat(embed, &quotb (k n) d -&gt; (b k r) n d&quot, n = chunk_size, r = num_retrieved)
+
+        retrieved = self.encoder(retrieved, context = embed_as_context)
+        retrieved = rearrange(retrieved, &quot(b k r) n d -&gt; b k r n d&quot, k = n // chunk_size, r = num_retrieved)</code></pre>

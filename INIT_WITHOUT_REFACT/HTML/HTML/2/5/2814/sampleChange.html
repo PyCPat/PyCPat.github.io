@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if x.shape[0] != 3:
+            raise ValueError(f&quotWrong dimensions of inputs, expeted 3 but input {x.shape}.&quot)
+        out_1 = torch.matmul(x, self.V).pow(2).sum(1, keepdim=True) &#47&#47S_1^2
+        out_2 = torch.matmul(<a id="change">x.pow(2</a><a id="change">)</a>, self.V.pow(2)).sum(1, keepdim=True) &#47&#47 S_2
+
+        out_inter<a id="change"> = </a>0.5 *( out_1 - out_2)
+        out_lin = self.lin(x)
+        out = out_inter<a id="change"> + </a>out_lin
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(inputs.shape) != 3:
+            raise ValueError(f&quotWrong dimensions of inputs, expected 3 but input {len(inputs.shape)}.&quot)
+        fm_input = inputs
+        square_of_sum = torch.pow(<a id="change">torch.sum(</a>fm_input<a id="change">, dim=1, keepdim=True)</a>, 2)
+        sum_of_square = torch.sum(fm_input * fm_input, dim=1, keepdim=True)
+        cross_term = square_of_sum - sum_of_square
+        cross_term = 0.5 * torch.sum(cross_term, dim=2, keepdim=False)</code></pre>

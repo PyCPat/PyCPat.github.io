@@ -1,0 +1,46 @@
+<html><h3>Pattern ID :299
+</h3><img src='1240858.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        U_t, _, _ = torch.svd(f_t.t())
+        P_s, cosine, P_t = torch.svd(torch.mm(U_s.t(), U_t))
+        sine = torch.sqrt(1 - torch.pow(cosine, 2))
+        <a id="change">return </a>torch.norm(sine, 1) + self.trade_off * <a id="change">torch.norm(</a>torch.abs(P_s) - torch.abs(P_t), 2<a id="change">)</a></code></pre><h3>After Change</h3><pre><code class='java'>
+        P_s, cosine, P_t = torch.svd(torch.mm(U_s.t(), U_t))
+        sine = torch.sqrt(1 - torch.pow(cosine, 2))
+        rsd = torch.norm(sine, 1)  &#47&#47 Representation Subspace Distance
+        bmp<a id="change"> = </a><a id="change">torch.norm(</a>torch.abs(P_s) - torch.abs(P_t), 2<a id="change">)</a>  &#47&#47 Base Mismatch Penalization
+        <a id="change">return </a>rsd + self.trade_off * bmp</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/979fd077896648e2fac862c8a56ae6a03e126392#diff-919454765cf68b0a5cf117b195b5afef3ab3c2714738bcb23a3a709f39baaf9fL14' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1240858</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 979fd077896648e2fac862c8a56ae6a03e126392</div><div id='time'> Time: 2021-08-11</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/rsd.py</div><div id='m_class'> M Class Name: RepresentationSubspaceDistance</div><div id='n_method'> N Class Name: RepresentationSubspaceDistance</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/rsd.py</div><div id='n_file'> N File Name: dalib/adaptation/rsd.py</div><div id='m_start'> M Start Line: 14</div><div id='m_end'> M End Line: 16</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 30</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fn = fn
+
+    def forward(self, x, **kwargs):
+        <a id="change">return </a>self.fn(<a id="change">self.norm(</a>x<a id="change">)</a>, **kwargs)
+
+&#47&#47 feed forward
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fn = fn
+
+    def forward(self, x, **kwargs):
+        x<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+        x = self.fn(x, **kwargs)
+        <a id="change">return </a>self.norm_out(x)
+
+&#47&#47 feed forward
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/e4e101f48badcc219696d1945a5004e060a71d7c#diff-ee397916e2ccc5603bb55b6ea44f20d581aae722f1e26d17108234ff0411b1beL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1240859</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: e4e101f48badcc219696d1945a5004e060a71d7c</div><div id='time'> Time: 2021-10-19</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/transformer.py</div><div id='m_class'> M Class Name: PreNorm</div><div id='n_method'> N Class Name: PreNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/transformer.py</div><div id='n_file'> N File Name: dalle_pytorch/transformer.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 66</div><div id='n_end'> N End Line: 68</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = attn(x, mask = mask, attn_bias = attn_bias) + x
+            x = ff(x) + x
+
+        <a id="change">return </a><a id="change">self.norm(</a>x<a id="change">)</a>
+
+class DiffusionPriorNetwork(nn.Module):
+    def __init__(
+        self,</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = attn(x, mask = mask, attn_bias = attn_bias) + x
+            x = ff(x) + x
+
+        out<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+        <a id="change">return </a>self.project_out(out)
+
+class DiffusionPriorNetwork(nn.Module):
+    def __init__(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/46cef31c86383f2339750883b3be655c56906576#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL367' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1240860</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 46cef31c86383f2339750883b3be655c56906576</div><div id='time'> Time: 2022-04-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: CausalTransformer</div><div id='n_method'> N Class Name: CausalTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 378</div><div id='m_end'> M End Line: 380</div><div id='n_start'> N Start Line: 380</div><div id='n_end'> N End Line: 383</div><BR>

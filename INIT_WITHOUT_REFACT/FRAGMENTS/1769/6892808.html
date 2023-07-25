@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = torch.mm(x, self.entity_embeddings.weight.transpose(1, 0))
+
+        &#47&#47 TODO: Why this?
+        x += <a id="change">self.b.expand_as(</a>x<a id="change">)</a>
+        pred = F.sigmoid(x)
+
+        return pred
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        scores = <a id="change">torch.sum(</a>torch.mm(x, tails_embs.transpose(1, 0))<a id="change">, dim=1)</a>
+
+        predictions = F.sigmoid(scores)
+        loss<a id="change"> = </a>self.compute_loss(predictions, labels)
+
+        <a id="change">return </a>loss
+</code></pre>

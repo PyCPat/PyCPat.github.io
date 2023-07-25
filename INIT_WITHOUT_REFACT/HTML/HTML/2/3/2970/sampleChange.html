@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                            mask=mask,
+                            reduction = "token_mean")
+        else:
+            preds = <a id="change">self.crf.decode(emissions=logits, mask=mask)</a>
+            logits = torch.LongTensor(preds)
+
+        return dict(loss=loss, logits=logits)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = None 
+        if labels is not None:
+            loss_fn = nn.CrossEntropyLoss()
+            loss = loss_fn(logits.reshape(-1, <a id="change">logits.shape[-1]</a>), labels.reshape(-1))
+            &#47&#47 CRF
+            &#47&#47 loss = -self.crf(emissions=logits, 
+            &#47&#47                 tags=labels,</code></pre>

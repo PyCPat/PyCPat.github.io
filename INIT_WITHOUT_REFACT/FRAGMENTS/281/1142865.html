@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, in_channels, encoder_channels, z_dim, c_dim):
+        super(Encoder, self).__init__()
+        self.encoder = nn.Sequential(
+            <a id="change">nn.Conv1d(</a>in_channels, encoder_channels, <a id="change">3</a>, 1, 1<a id="change">)</a>,
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            nn.Conv1d(encoder_channels, encoder_channels, 1),
+            ChannelNorm(encoder_channels),
+            nn.ReLU(True),
+            <a id="change">nn.Conv1d(</a>encoder_channels, z_dim, <a id="change">1</a><a id="change">)</a>,
+        )
+        self.codebook = VQEmbeddingEMA(2, 128, 128)
+        self.rnn = nn.LSTM(z_dim, c_dim, batch_first=True)</code></pre><h3>After Change</h3><pre><code class='java'>
+class Encoder(nn.Module):
+    def __init__(self, in_channels, channels, n_embeddings, z_dim, c_dim):
+        super(Encoder, self).__init__()
+        self.conv = <a id="change">nn.Conv1d(</a>in_channels, channels, 4, 2, <a id="change">1</a><a id="change">, bias=False)</a>
+        self.encoder = nn.Sequential(
+            nn.LayerNorm(channels),
+            nn.ReLU(True),
+            nn.Linear(channels, channels, bias=False),</code></pre>

@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :3269
+</h3><img src='10389564.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            features of the same shape after LN in each instance
+        
+        B<a id="change">, C</a> = x.shape[:2]
+        ori_shape = x.shape
+        x = x.transpose(-1, 1).reshape(B, -1, 3, C)
+        x = self.ln(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returns:
+            features of the same shape after LN in each instance
+        
+        norm = <a id="change">torch.norm(</a>x<a id="change">, dim=2) + </a>EPS  &#47&#47 [B, C, N, ...]
+        norm_ln = self.ln(norm.transpose(1, -1)).transpose(1, -1)
+        norm = norm.unsqueeze(2)
+        norm_ln<a id="change"> = </a>norm_ln.unsqueeze(2)
+        x = x / norm * norm_ln
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wuziyi616/multi_part_assembly/commit/7e1267aa33c2c264299bb4955ef23b3961b17693#diff-a90092c416276a22903e36e71bbaf25f682c8d025f0557e09c165773bb2b43b3L168' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10389564</div><div id='project'> Project Name: wuziyi616/multi_part_assembly</div><div id='commit'> Commit Name: 7e1267aa33c2c264299bb4955ef23b3961b17693</div><div id='time'> Time: 2022-06-29</div><div id='author'> Author: dazitu616@gmail.com</div><div id='file'> File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_class'> M Class Name: VNLayerNorm</div><div id='n_method'> N Class Name: VNLayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='n_file'> N File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 168</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x,
+        context = None
+    ):
+        b<a id="change">, c, h, w</a> = x.shape
+        context = default(context, x)
+
+        qkv = (self.to_q(x), *self.to_kv(context).chunk(2, dim = 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        context = default(context, x)
+
+        x = <a id="change">self.norm(</a>x<a id="change">)</a>
+
+        if exists(self.time_cond):
+            assert exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x<a id="change"> = </a>(x<a id="change"> * </a>(scale + 1)) + shift
+
+        if has_context:
+            context = self.norm_context(context)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10389560</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 225</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+
+    def forward(self, x):
+        b<a id="change">, c, h, w</a> = x.shape
+        qkv = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        time = None
+    ):
+        h = self.heads
+        x = <a id="change">self.norm(</a>x<a id="change">)</a>
+
+        if exists(self.time_cond):
+            assert exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x<a id="change"> = </a>(x * (scale + 1))<a id="change"> + </a>shift
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10389570</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 157</div><BR>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans = x.new_ones(x.shape[:-1]+(1,)) / <a id="change">x.shape[1]</a>
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+        L = u.size(-1)
+        if lengths is not None:
+            assert isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = <a id="change">torch.where(</a>torch.arange(L, device=lengths.device) &lt; lengths[:, None, None], 1., 0.<a id="change">)</a>
+            u<a id="change"> = </a>u * mask
+
+        device = u.device
+        batch_size = u.size(0)</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.norm(x)
+        x = rearrange(x, &quotb n d -&gt; b d n&quot)
+        x = F.pad(x, (2<a id="change">, 0</a>))
+
+        q, k, v = self.to_q(x), self.to_k(x), self.to_v(x)
+        q, k, v = rearrange_many((q, k, v), &quotb (h d) n -&gt; b h n d&quot, h = self.heads)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.norm(x)
+        x = rearrange(x, &quotb n d -&gt; b d n&quot)
+
+        q, k, v = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+
+        q, k, v = rearrange_many((q, k, v), &quotb (h d) n -&gt; b h n d&quot, h = self.heads)
+
+        &#47&#47 apply causal depthwise conv to queries, keys, values (a la Primer) with different kernel sizes across 4 groups of heads</code></pre>

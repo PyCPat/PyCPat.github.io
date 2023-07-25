@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size, max_num_atoms, _ = h.size()
+        h = self.node_gnn(h, pos_enc,mask)
+
+        readout_query = <a id="change">self.readout_query[None, None, :].expand(</a>(batch_size, -1, -1)<a id="change">)</a>
+        &#47&#47 pooled: [batch_size, 1, hidden_dim]
+        pooled, attention_weights = self.readout_attention(readout_query, h, h, key_padding_mask=mask)
+        pooled = pooled.squeeze() &#47&#47 pooled: [batch_size, hidden_dim]
+        return self.output(pooled)</code></pre><h3>After Change</h3><pre><code class='java'>
+        h = self.node_gnn(h, pos_enc, mask) &#47&#47 [batch_size, max_num_atoms + 1, hidden_dim]
+
+        &#47&#47 the first node is the one that was added for readout
+        return self.output(<a id="change">h[:,0,:]</a>)
+
+
+class TransformerGNN(nn.Module):</code></pre>

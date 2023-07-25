@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.temperature = temperature
+
+    def forward(self, g_t: torch.Tensor) -&gt; torch.Tensor:
+        train_bs, class_num = <a id="change">g_t.size(</a>0<a id="change">)</a>, g_t.size(1)
+        g_t_temp = g_t / self.temperature
+        g_t_temp_softmax = nn.Softmax(dim=1)(g_t_temp)
+        target_entropy_weight = entropy(g_t_temp_softmax).detach()</code></pre><h3>After Change</h3><pre><code class='java'>
+        entropy_weight = entropy(predictions).detach()
+        entropy_weight = 1 + torch.exp(-entropy_weight)
+        entropy_weight = (batch_size * entropy_weight / torch.sum(entropy_weight)).unsqueeze(dim=1)  &#47&#47 batch_size x 1
+        class_confusion_matrix<a id="change"> = </a>torch.mm(<a id="change">(predictions * entropy_weight).transpose(1</a>, <a id="change">0</a><a id="change">)</a>, predictions)
+        class_confusion_matrix = class_confusion_matrix / torch.sum(class_confusion_matrix, dim=1)
+        mcc_loss = (torch.sum(class_confusion_matrix) - torch.trace(class_confusion_matrix)) / num_classes
+        return mcc_loss</code></pre>

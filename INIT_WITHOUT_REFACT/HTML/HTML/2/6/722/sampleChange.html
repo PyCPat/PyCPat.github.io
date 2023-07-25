@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            lo_cens | hi_cens, ones, sdp - sdm).log()
+        &#47&#47 sdm_term = torch.where(
+        &#47&#47     hi_cens, ones, (q + sdm)).log()
+        sdm_term = torch.where(hi_cens, zeros, x_ + <a id="change">F.softplus(</a>-sd<a id="change">-</a>x_<a id="change">)</a>)
+        &#47&#47 sdp_term = torch.where(
+        &#47&#47     lo_cens, ones, (q + sdp)).log()
+        sdp_term = torch.where(lo_cens, zeros, x_ + F.softplus(sd-x_))</code></pre><h3>After Change</h3><pre><code class='java'>
+        diff_term = torch.where(lo_cens | hi_cens, 
+            ones, sd.exp() - (-sd).exp()
+            ).log()
+        minus_sp_term = torch.where(hi_cens, -sd, <a id="change">F.softplus(</a>-sd<a id="change">-</a>x_<a id="change">)</a>)
+        plus_sp_term = torch.where(lo_cens, zeros, x_ + F.softplus(sd-x_))
+
+        log_delta_cdf<a id="change"> = </a>diff_term<a id="change"> - </a>minus_sp_term - plus_sp_term
+    
+        &#47&#47 log prob
+        r = {</code></pre>

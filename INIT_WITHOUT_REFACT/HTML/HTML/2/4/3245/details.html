@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :3245
+</h3><img src='10323533.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mq = input_mask[:, :, None]
+            mk = F.pad(input_mask, (0, seq_len - mq.shape[1]), &quotconstant&quot, True)[:, None, :]
+            mask = mq * mk
+            masked_value = <a id="change">-torch.finfo(dot.dtype).max</a>
+            dot.masked_fill_(~mask, masked_value)
+
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 qk attention requires tokens not attend to self
+        i = torch.arange(t)
+        dot[:, i, i] = TOKEN_SELF_ATTN_VALUE
+        masked_value<a id="change"> = </a><a id="change">max_neg_value(</a>dot<a id="change">)</a>
+
+        if input_mask is not None:
+            mask = input_mask[:, :, None] * input_mask[:, None, :]
+            mask = F.pad(mask, (0, seq_len - mask.shape[-1]), &quotconstant&quot, True)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/6bcbb058548ac305ec39557073c4d17bb7d16b28#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL365' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10323533</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 6bcbb058548ac305ec39557073c4d17bb7d16b28</div><div id='time'> Time: 2020-02-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: FullQKAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 365</div><div id='m_end'> M End Line: 376</div><div id='n_start'> N Start Line: 369</div><div id='n_end'> N End Line: 379</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if causal:
+            mask = torch.ones((n, n), device = device).triu(1).bool()
+            mask_value = <a id="change">-torch.finfo(sim.dtype).max</a>
+            sim = sim.masked_fill(mask, mask_value)
+
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb i j, b j d -&gt; b i d&quot, attn, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if causal:
+            causal_mask = torch.ones((n, n), device = device).triu(1).bool()
+            mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>sim<a id="change">)</a>
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb i j, b j d -&gt; b i d&quot, attn, v)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/multistream-transformers/commit/27d4be1d77e48956f00bc70a4d50e6baed388283#diff-e81141685efabebecc465bdbe0fb5f026c1b47e7c282daeaaf1d717b13d5d981L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10323534</div><div id='project'> Project Name: lucidrains/multistream-transformers</div><div id='commit'> Commit Name: 27d4be1d77e48956f00bc70a4d50e6baed388283</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: multistream_transformers/multistream_transformers.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multistream_transformers/multistream_transformers.py</div><div id='n_file'> N File Name: multistream_transformers/multistream_transformers.py</div><div id='m_start'> M Start Line: 99</div><div id='m_end'> M End Line: 104</div><div id='n_start'> N Start Line: 102</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sim = qk.clone()
+
+        if exists(mask):
+            max_neg_value = <a id="change">-torch.finfo(sim.dtype).max</a>
+            sim.masked_fill_(~mask, max_neg_value)
+
+        attn = sim.softmax(dim = -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        coor_weights = self.coors_mlp(coors_mlp_input)
+
+        if exists(mask):
+            mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>coor_weights<a id="change">)</a>
+            coor_mask = repeat(mask, &quotb () i j -&gt; b i j ()&quot)
+            coor_weights.masked_fill_(~coor_mask, mask_value)
+
+        coor_attn = coor_weights.softmax(dim = -2)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/3cf2206856883bba9a13ba4541510b4fe48a6628#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L167' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10323540</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 3cf2206856883bba9a13ba4541510b4fe48a6628</div><div id='time'> Time: 2021-05-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EquivariantAttention</div><div id='n_method'> N Class Name: EquivariantAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 182</div><div id='m_end'> M End Line: 307</div><div id='n_start'> N Start Line: 189</div><div id='n_end'> N End Line: 325</div><BR>

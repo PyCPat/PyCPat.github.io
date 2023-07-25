@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.from_rgb = nn.Sequential(
+            EqualizedConv2d(3, resl2ch[128], 1, bias=False),
+            <a id="change">FusedLeakyReLU(</a>resl2ch[128]<a id="change">)</a>
+        )
+
+        layers = []
+        for resl in list(resl2ch.keys())[::-1]:</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.LeakyReLU(0.2, inplace=True)
+        )
+        resl = image_size
+        blocks = <a id="change">[]</a>
+        while resl &gt; 4:
+            resl = resl // 2
+            channels *= 2
+            ichannels, ochannels = ochannels, check_c(channels)
+            blocks.append(
+                DBlock(ichannels, ochannels, block_num_conv)
+            )
+        blocks.append(MiniBatchStdDev(mbsd_groups))
+        <a id="change">blocks.extend(</a>[
+            Conv2d(&quotelr&quot, ochannels+1, ochannels, 3, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            Flatten(),
+            Linear(&quotelr&quot, ochannels*(resl**2), ochannels),
+            <a id="change">nn.LeakyReLU(0.2</a><a id="change">, inplace=True)</a>,
+            Linear(&quotelr&quot, ochannels, 1)
+        ]<a id="change">)</a>
+        self.blocks = nn.Sequential(*blocks)
+    def forward(self, x):
+        x = self.from_rgb(x)
+        x = self.blocks(x)</code></pre>

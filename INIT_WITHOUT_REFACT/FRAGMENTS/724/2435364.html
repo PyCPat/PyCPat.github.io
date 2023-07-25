@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.Linear(patch_dim, emb_dim),
+        )
+        &#47&#47Embedding
+        self.cls_token<a id="change"> = </a><a id="change">nn.Parameter(</a>torch.randn(1, 1, emb_dim)<a id="change">)</a>
+        self.pos_embedding<a id="change"> = </a><a id="change">nn.Parameter(</a>torch.randn(1, num_patches + 1, emb_dim)<a id="change">)</a>
+
+        &#47&#47Transformer
+        &#47&#47 encoder_layer = nn.TransformerEncoderLayer(d_model=emb_dim, nhead=nhead, dropout=transformer_dropout, dim_feedforward=emb_dim*4)
+        &#47&#47 self.transformer_encoders = nn.TransformerEncoder(encoder_layer, num_layers=num_layers_encoder)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fusions = nn.ModuleList(self.fusions)
+
+        &#47&#47Head
+        <a id="change">if type == "full"</a><a id="change">:
+            </a>self.head_depth = HeadDepth(resample_dim)
+            self.head_segmentation = HeadSeg(resample_dim, nclasses=nclasses)
+        elif type == "depth":
+            self.head_depth<a id="change"> = </a>HeadDepth(resample_dim)
+            self.head_segmentation<a id="change"> = </a>None
+        else:
+            self.head_depth<a id="change"> = </a>None
+            self.head_segmentation<a id="change"> = </a>HeadSeg(resample_dim, nclasses=nclasses)
+
+    def forward(self, img):
+        &#47&#47 x = self.to_patch_embedding(img)</code></pre>

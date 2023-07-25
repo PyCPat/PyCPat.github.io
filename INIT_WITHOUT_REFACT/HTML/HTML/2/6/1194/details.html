@@ -1,0 +1,91 @@
+<html><h3>Pattern ID :1194
+</h3><img src='3654551.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        warnings.warn("We will change the network architecture.", DeprecationWarning)
+    
+    def forward(self, input):
+        stacked = <a id="change">[]</a>
+
+        x = self.band_split(input)
+
+        for idx, key in enumerate(self.bands[:-1]):
+            _x = self.net[key](x[idx])
+            stacked.append(_x)
+        
+        stacked = torch.cat(stacked, dim=2)
+        
+        key = self.bands[-1] &#47&#47 &quotfull&quot
+        x = self.net[key](input)
+        x = torch.cat([stacked, x], dim=1)
+        x = self.d2block(x)
+        
+        output<a id="change"> = </a>self.gated_conv2d(x)
+
+        return output
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+
+        _, _, n_bins, _ = input.size()
+
+        sections<a id="change"> = [</a><a id="change">sum(</a>sections<a id="change">)</a>, n_bins - <a id="change">sum(</a>sections<a id="change">)</a>]
+        x_valid, x_invalid = torch.split(input, sections, dim=2)
+
+        x = self.band_split(x_valid)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654551</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 70</div><div id='m_end'> M End Line: 85</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        if self.training:
+            total_blocks = <a id="change">sum(</a>[len(sx) for sx in x]<a id="change">)</a>
+            mask_size = torch.Size(<a id="change">[</a>total_blocks<a id="change"></a>])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_id = 0
+            for mod in x:
+                for x_mod in mod:
+                    x_mod<a id="change"> *= </a>mask[mask_id]
+                    mask_id += 1
+            return x, mask
+        return x, None</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, X):
+        if self.training:
+            blocks_per_mod = [sx.shape[1] for sx in X]
+            mask_size = torch.Size(<a id="change">[</a>X[0].shape[0], <a id="change">sum(</a>blocks_per_mod<a id="change">)</a>])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_shapes = [list(x.shape[:2]) + [1] * (x.dim() - 2) for x in X]
+            grouped_masks = torch.split(mask, blocks_per_mod, dim=1)
+            grouped_masks = [m.reshape(s) for m, s in zip(grouped_masks, mask_shapes)]
+            X<a id="change"> = </a>[x * m for x, m in zip(X, grouped_masks)]
+            return X, grouped_masks
+        return X, None
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/a2c91bd6e186680ca2c41bbf22c9b57aff4654d2#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654550</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: a2c91bd6e186680ca2c41bbf22c9b57aff4654d2</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: BlockDropout</div><div id='n_method'> N Class Name: BlockDropout</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 40</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections<a id="change"> = </a><a id="change">[</a>in_channels, stacked_channels<a id="change"></a>]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                x = input
+            else:
+                _in_channels = growth_rate[idx - 1]
+                sections<a id="change"> = [</a>_in_channels, <a id="change">sum(</a>growth_rate[idx:]<a id="change">)</a>]
+                x, x_residual = torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/3bac874df403a2b5648fd98049865790c104ed55#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654556</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 3bac874df403a2b5648fd98049865790c104ed55</div><div id='time'> Time: 2021-10-16</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2BlockFixedDilation</div><div id='n_method'> N Class Name: D2BlockFixedDilation</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 89</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x_residual = x_residual + x
+            
+            in_channels = growth_rate[idx]
+            stacked_channels = <a id="change">sum(</a>growth_rate[idx+1:]<a id="change">)</a>
+            sections<a id="change"> = </a><a id="change">[</a>in_channels, stacked_channels<a id="change"></a>]
+
+            if idx != depth - 1:
+                x, x_residual = torch.split(x_residual, sections, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                x = input
+            else:
+                _in_channels = growth_rate[idx - 1]
+                sections<a id="change"> = [</a>_in_channels, <a id="change">sum(</a>growth_rate[idx:]<a id="change">)</a>]
+                x, x_residual = torch.split(x_residual, sections, dim=1)
+            
+            x = self.net[idx](x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/3bac874df403a2b5648fd98049865790c104ed55#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L165' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654552</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 3bac874df403a2b5648fd98049865790c104ed55</div><div id='time'> Time: 2021-10-16</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 174</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 187</div><div id='n_end'> N End Line: 195</div><BR>

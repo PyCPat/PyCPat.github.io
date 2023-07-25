@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        g = self.sigmoid(self.linear_g(z))
+        z = x * g
+
+        <a id="change">return </a>z
+
+
+class TriangleMultiplicationOutgoing(TriangleMultiplicativeUpdate):</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returns:
+            [*, N_res, N_res, C_z] output tensor
+        
+        <a id="change">if(</a>_inplace<a id="change">):
+            </a>x<a id="change"> = </a>self._inference_forward(
+                z, 
+                mask, 
+                inplace_chunk_size=_inplace_chunk_size,
+                with_add=_add_with_inplace,
+            )
+            return x
+
+        if mask is None:
+            mask = z.new_ones(z.shape[:-1])
+
+        mask = mask.unsqueeze(-1)
+        
+        z = self.layer_norm_in(z)
+        a = mask
+        a = a * self.sigmoid(self.linear_a_g(z)) 
+        a = a * self.linear_a_p(z)
+        b = mask
+        b = b * self.sigmoid(self.linear_b_g(z))
+        b = b * self.linear_b_p(z)
+        x = self._combine_projections(a, b)
+        <a id="change">del a, b</a>
+        x = self.layer_norm_out(x)
+        x = self.linear_z(x)
+        g = self.sigmoid(self.linear_g(z))
+        x = x * g</code></pre>

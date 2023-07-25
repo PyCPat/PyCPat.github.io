@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Pooling
+        &#47&#47 out: (BB, embedding_dim, NN)
+        if <a id="change">self._pooling_func_name == &quotmax&quot</a>:
+            out = torch.max(out, -1, keepdim=True)[0]
+        elif self._pooling_func_name == &quotmean&quot:
+            out = torch.mean(out, keepdim=True, dim=-1)
+        elif <a id="change">self._pooling_func_name == &quotsum&quot</a><a id="change">:
+            </a>out = torch.sum(out, keepdim=True, dim=-1)
+        else:
+            <a id="change">raise </a><a id="change">ValueError(f"Pooling function {self._pooling_func_name} is not yet supported!"</a><a id="change">)</a>
+
+        &#47&#47 out: (BB, embedding_dim, 1)
+        out = torch.flatten(out, start_dim=-2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        masking_input = {&quotin_tensor&quot: out.transpose(2, 1)}
+        if self.use_masking:
+            masking_input[&quotmask_tensor&quot] = masking_tensor
+        out = <a id="change">self.pooling_block(masking_input)[&quotmasking_out&quot]</a>
+        &#47&#47 output_tensor: (BB, embedding_dim)
+
+        &#47&#47 out: (BB, embedding_dim)
+        out = self.fc1(out)</code></pre>

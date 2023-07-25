@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 it will be returned early.
+        &#47&#47 Note: during inference batch_size needs to be 1
+        if inference:
+            uncertain_infos<a id="change"> = </a>[]
+            for i, (layer_module, (k, layer_classifier_module)) in enumerate(
+                    zip(self.layer, self.layer_classifiers.items())):
+                hidden_states = layer_module(hidden_states[0], attention_mask)
+                logits = layer_classifier_module(hidden_states[0])
+                prob = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+                uncertain = torch.sum(prob * log_prob, 1) / (-torch.log(self.num_class))
+                uncertain_infos.append([uncertain, prob])
+
+                &#47&#47 return early results
+                if uncertain &lt; inference_speed:
+                    <a id="change">return </a>prob<a id="change">, i, uncertain_infos</a>
+            return prob, i, uncertain_infos
+
+        &#47&#47 Training phase: the first phase corresponds to the backbone training
+        &#47&#47 the second phase to the branches training (actual distillation)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if inference:
+            &#47&#47 positions will keep track of the original position of each element in the
+            &#47&#47 batch when elements will be removed
+            final_probs<a id="change"> = </a>torch.zeros((hidden_states[0].shape[0], 2), device=device)
+            positions<a id="change"> = </a>torch.arange(start=0, end=hidden_states[0].shape[0], device=device).long()
+
+            for i, (layer_module, (k, layer_classifier_module)) in enumerate(
+                    zip(self.layer, self.layer_classifiers.items())):
+
+                hidden_states = layer_module(hidden_states[0], attention_mask)
+                logits = layer_classifier_module(hidden_states[0])
+                prob = F.softmax(logits, dim=-1)
+                log_prob = F.log_softmax(logits, dim=-1)
+                uncertain = torch.sum(prob * log_prob, 1) / (-torch.log(self.num_class))
+
+                &#47&#47 checking if there&quots enough information
+                enough_info = uncertain &lt; inference_speed
+
+                right_pos<a id="change"> = </a>positions[enough_info]
+                final_probs[right_pos]<a id="change"> = prob[enough_info]</a>
+
+                hidden_states = (hidden_states[0][~enough_info],)
+                attention_mask = attention_mask[~enough_info]
+
+                &#47&#47 if we have processed all the samples
+                if hidden_states[0].shape[0] == 0:
+                    <a id="change">return </a>final_probs<a id="change">, i</a>
+
+                positions = positions[~enough_info]  &#47&#47 updating the positions to fit the new batch
+
+            return final_probs, i</code></pre>

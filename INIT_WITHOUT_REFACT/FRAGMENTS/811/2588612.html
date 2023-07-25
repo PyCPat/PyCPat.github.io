@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 add 10 to false negative
+        dist_keypts = np.eye(dist_keypts.shape[0]) * 10 + dist_keypts.detach().cpu().numpy()
+        add_matrix = torch.zeros_like(dists)
+        add_matrix[<a id="change">np.where(</a>dist_keypts &lt; self.safe_radius<a id="change">)</a>] += 10
+        dists = dists + add_matrix
+
+        pos_mask = torch.eq(torch.unsqueeze(pids, dim=1), torch.unsqueeze(pids, dim=0))</code></pre><h3>After Change</h3><pre><code class='java'>
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+
+        neg = dists - 1e5 * <a id="change">(~neg_mask).float()</a>
+        neg_weight<a id="change"> =  </a>(neg - self.neg_optimal).detach()
+        neg_weight = torch.max(torch.zeros_like(neg_weight), neg_weight)
+        lse_negative = torch.logsumexp(self.log_scale * (neg - self.neg_margin) * neg_weight, dim=-1)
+</code></pre>

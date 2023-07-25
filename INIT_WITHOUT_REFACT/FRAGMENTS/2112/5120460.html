@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, num_classes=1000, stripes=[2, 3], num_layers=50):
+        super(MGN, self).__init__()
+        self.stripes = stripes
+        <a id="change">if num_layers == 50</a><a id="change">:
+            </a>resnet<a id="change"> = </a>resnet50(pretrained=True, last_stride=1)
+        elif <a id="change">num_layers == 101</a><a id="change">:
+            </a>resnet<a id="change"> = </a>resnet101(pretrained=True, last_stride=1)
+        elif <a id="change">num_layers == &quot101_32x8d&quot</a><a id="change">:
+            </a>resnet = resnext101_32x8d(pretrained=True, last_stride=1)
+        elif num_layers == &quot50_ibn&quot:
+            resnet<a id="change"> = </a>resnet50_ibn_a(pretrained=True, last_stride=1)
+        elif num_layers == &quot101_ibn&quot:
+            resnet = resnet101_ibn_a(pretrained=True, last_stride=1)
+        self.backone = nn.Sequential(</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(MGN, self).__init__()
+        self.stripes = stripes
+        self.margin = margin
+        <a id="change">self.loss_type</a>= loss_type
+        kwargs = {
+            &quotuse_non_local&quot: use_non_local
+        }
+        resnet = model_zoo[num_layers](
+            pretrained=True, last_stride=last_stride,
+            **kwargs
+        )
+        self.backone = nn.Sequential(
+            resnet.conv1,
+            resnet.bn1,
+            resnet.relu,
+            resnet.maxpool,
+            resnet.layer1,
+            resnet.layer2,
+            resnet.layer3[0],
+        )
+
+        res_conv4 = nn.Sequential(*resnet.layer3[1:])
+        self.gap = nn.AdaptiveAvgPool2d(1)
+
+        reduction = nn.Sequential(nn.Conv2d(2048, 256, 1, bias=False), nn.BatchNorm2d(256))  &#47&#47 , nn.ReLU())
+        self._init_reduction(reduction)
+        fc_layer = nn.Sequential(nn.Dropout(), nn.Linear(256, num_classes))
+        self._init_fc(fc_layer)
+
+        branches = []
+        for stripe_id, stripe in enumerate(stripes):
+            embedding_layers = nn.ModuleList([copy.deepcopy(reduction) for _ in range(stripe+1)])
+            fc_layers = nn.ModuleList([copy.deepcopy(fc_layer) for _ in range(stripe+1)])
+            branches.append(
+                nn.ModuleList([
+                    nn.Sequential(copy.deepcopy(res_conv4), copy.deepcopy(resnet.layer4)),
+                    embedding_layers, fc_layers])
+            )
+        self.branches = nn.ModuleList(branches)
+
+        <a id="change">if &quotsoftmax&quot in self.loss_type</a><a id="change">:
+            if &quotlabelsmooth&quot</a><a id="change"> in self.loss_type:
+                </a>self.ce_loss<a id="change"> = </a><a id="change">CrossEntropyLabelSmooth(</a>num_classes<a id="change">)</a>
+            else:
+                self.ce_loss<a id="change"> = </a><a id="change">nn.CrossEntropyLoss()</a>  &#47&#47 .cuda()
+
+        <a id="change">if &quottriplet&quot</a><a id="change"> in self.loss_type:
+            </a>self.tri_loss<a id="change"> = TripletLoss(</a>margin<a id="change">, normalize_feature=not &quotcircle&quot in self.loss_type)</a> &#47&#47.cuda()
+        <a id="change">if &quotsoft_triplet&quot</a><a id="change"> in self.loss_type:
+            </a>self.tri_loss<a id="change"> = </a>SoftTripletLoss(margin, normalize_feature=not &quotcircle&quot in self.loss_type) &#47&#47.cuda()
+
+    @staticmethod
+    def _init_reduction(reduction):</code></pre>

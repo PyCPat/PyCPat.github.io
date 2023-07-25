@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :867
+</h3><img src='2754762.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            W = self.encoder.src_embedding.get_embedding().T
+
+        mask = x.view(-1).eq(self.MASK)
+        enc_output = <a id="change">enc_output.view(-1, self.d_model)[mask]</a>
+        
+        logits = torch.matmul(enc_output, W)
+        
+        outputs = [logits]</code></pre><h3>After Change</h3><pre><code class='java'>
+        enc_output = enc_outputs[0]
+
+        if self.activation == "relu":
+            enc_output = <a id="change">F.relu(</a>enc_output<a id="change">)</a>
+        elif self.activation == "gelu":
+            enc_output = gelu_new(enc_output)
+        enc_output = self.norm(enc_output)
+            
+        if self.share_emb_out_proj == False:
+            W = self.W
+        else:
+            W = self.encoder.src_embedding.get_embedding().T
+        
+        logits = torch.matmul(enc_output, W)
+        
+        outputs = [logits]
+        
+        if return_states == True:
+            outputs = outputs + enc_outputs 
+            
+        if compute_loss == True:
+            loss = self.loss_fn(outputs, targets)
+            outputs<a id="change"> = </a>[loss] + outputs
+            
+        return outputs
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yaoxiaoyuan/mimix/commit/59b6082bb310a2a17c2ac30225e300124904cc2f#diff-f4ca477841bd3ad5c0b292cbfff7c3ae403a65fb6c97deb15ad996f85dc87bd8L1165' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2754762</div><div id='project'> Project Name: yaoxiaoyuan/mimix</div><div id='commit'> Commit Name: 59b6082bb310a2a17c2ac30225e300124904cc2f</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: sbsbsbsbsb945@gmail.com</div><div id='file'> File Name: src/models.py</div><div id='m_class'> M Class Name: TransformerBiLM</div><div id='n_method'> N Class Name: TransformerBiLM</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models.py</div><div id='n_file'> N File Name: src/models.py</div><div id='m_start'> M Start Line: 1165</div><div id='m_end'> M End Line: 1179</div><div id='n_start'> N Start Line: 1399</div><div id='n_end'> N End Line: 1433</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                ign = ign.unsqueeze(-1).expand_as(batch_label)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                batch_label[ign] *= -1
+                mask = batch_label &gt;= 0
+            loss_c = self.focal_loss(<a id="change">conf_data[mask]</a>, batch_label[mask], reduction=&quotmean&quot)
+
+            return (loss_l, loss_c)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            with torch.no_grad():
+                batch_label = torch.zeros(num * num_priors, num_classes + 1).cuda().scatter_(1, conf_t.view(-1, 1), 1)
+                batch_label = batch_label[:, 1:].view(num, num_priors, num_classes)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                score = <a id="change">(overlap_t-3.0).relu()</a>.unsqueeze(-1).expand_as(batch_label)
+                batch_label<a id="change"> = </a>batch_label * score
+                mask = batch_label &gt;= 0
+            loss_c = self.gfocal_loss(conf_data, batch_label, mask)
+            return (loss_l, loss_c)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/85219f93a8d5b54cb3ed9f06d86bb64d3f6d3552#diff-17e74ddc1f962a57914a4d1ab181d7b62b3d8d17644166846612c43ba5fd6743L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2754761</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: 85219f93a8d5b54cb3ed9f06d86bb64d3f6d3552</div><div id='time'> Time: 2021-10-02</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: utils/loss/multibox_loss.py</div><div id='m_class'> M Class Name: MultiBoxLoss</div><div id='n_method'> N Class Name: MultiBoxLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss/multibox_loss.py</div><div id='n_file'> N File Name: utils/loss/multibox_loss.py</div><div id='m_start'> M Start Line: 27</div><div id='m_end'> M End Line: 102</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 110</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor, label: int):
+        batch_size = x.size(0)
+        y_ = torch.zeros((batch_size, self.num_classes))
+        <a id="change">y_[:, label]</a> = 1.0
+        y_ = self.fc2(y_)
+        y_ = F.relu(y_)
+        x = torch.cat([x, y_], dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, noise: torch.Tensor, poison_label: torch.LongTensor) -&gt; torch.Tensor:
+        _label = onehot_label(poison_label, self.num_classes)
+        y_ = self.fc2(_label)
+        y_ = <a id="change">self.relu(</a>y_<a id="change">)</a>
+        x = torch.cat([x, y_], dim=1)
+        x = self.fc(x)
+        x = x.view(-1, 64, self.data_shape[1], self.data_shape[2])
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.deconv1(x)
+        x = self.bn2(x)
+        x<a id="change"> = </a>self.relu(x)
+        x = self.deconv2(x)
+        x = self.sigmoid(x)
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ain-soph/trojanzoo/commit/e9332c319d243156837f64d6d35b842bdbc5378b#diff-23939a8f4cb89dde9b51a23d437f288d001e40f0c4f0f5ee725b7b0ff85d4f8eL119' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2754766</div><div id='project'> Project Name: ain-soph/trojanzoo</div><div id='commit'> Commit Name: e9332c319d243156837f64d6d35b842bdbc5378b</div><div id='time'> Time: 2020-07-12</div><div id='author'> Author: ain-soph@live.com</div><div id='file'> File Name: trojanzoo/defense/backdoor/deep_inspect.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: trojanzoo/defense/backdoor/deep_inspect.py</div><div id='n_file'> N File Name: trojanzoo/defense/backdoor/deep_inspect.py</div><div id='m_start'> M Start Line: 120</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>

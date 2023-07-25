@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            values, indices = torch.topk(R, self.n_sortcut)
+            values = values.reshape(bh, self.n_sortcut, -1)
+            indices = indices.reshape(bh, self.n_sortcut, -1)
+            R<a id="change"> = </a><a id="change">torch.zeros(</a>bh, self.n_sortcut, buckets<a id="change">, device=device, dtype=dtype)</a>.scatter(2, indices, values)
+
+        return R.softmax(dim=-1) if self.non_permutative else gumbel_sinkhorn(F.relu(R), self.sinkhorn_iter, self.temperature)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        bh, *_, bucket_size, kv_bucket_size, device, dtype, dim = *q.shape, self.bucket_size, self.kv_bucket_size, q.device, q.dtype, self.dim
+        b = bh // self.heads
+
+        buckets = <a id="change">q.shape[1]</a> // bucket_size
+        kv_buckets = k.shape[1] // kv_bucket_size
+
+        b_q = bucket(buckets, q) if self.n_sortcut == 0 else bucket(1, q)</code></pre>

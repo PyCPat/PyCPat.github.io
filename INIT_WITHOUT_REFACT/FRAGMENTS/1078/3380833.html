@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+                &#47&#47 visible4lstm: (batch_size * matrix_size, matrix_size, hidden_size)
+                visible4lstm = upper_visible.view(-1, matrix_size, vis_hidden_size)
+                span_pre<a id="change">, _</a> = self.lstm4span(visible4lstm)
+                span_pre = span_pre.view(
+                    batch_size, matrix_size, matrix_size, vis_hidden_size
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask = torch.ones(
+                    matrix_size, matrix_size, device=seq_hiddens.device).tril(-1).bool()[None, :, :, None]
+                &#47&#47 visible4lstm: (batch_size * matrix_size, matrix_size, hidden_size)
+                visible4lstm = <a id="change">visible.masked_fill(</a>mask, <a id="change">0</a><a id="change">)</a>.flatten(0, 1)
+
+                span_pre = self.lstm4span(visible4lstm)[0]
+                span_pre = span_pre.reshape(</code></pre>

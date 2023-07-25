@@ -1,0 +1,64 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                x = norm(x)
+
+        if return_hiddens:
+            <a id="change">return </a>x<a id="change">, hiddens</a>
+
+        return x
+
+class Encoder(AttentionLayers):</code></pre><h3>After Change</h3><pre><code class='java'>
+        return_hiddens = False
+    ):
+        hiddens = []
+        intermediates<a id="change"> = </a><a id="change">[]</a>
+        prev_attn = None
+        prev_cross_attn = None
+
+        pos_emb = self.pos_emb(x)
+
+        mems = mems.copy() if exists(mems) else ([None] * self.depth)
+
+        for ind, (layer_type, (norm, block)) in enumerate(zip(self.layer_types, self.layers)):
+            is_last = ind == (len(self.layers) - 1)
+
+            if layer_type == &quota&quot:
+                hiddens.append(x)
+                layer_mem = mems.pop(0)
+
+            if self.pre_norm:
+                x = norm(x)
+
+            if layer_type == &quota&quot:
+                out, inter = block(x, mask = mask, pia_emb = pos_emb, rel_pos = self.rel_pos, prev_attn = prev_attn, mem = layer_mem)
+            elif layer_type == &quotc&quot:
+                out, inter = block(x, context = context, mask = mask, context_mask = context_mask, prev_attn = prev_cross_attn)
+            elif layer_type == &quotf&quot:
+                out = block(x)
+
+            x = x + out
+
+            if layer_type in (&quota&quot, &quotc&quot):
+                <a id="change">intermediates.append(</a>inter<a id="change">)</a>
+
+            if layer_type == &quota&quot and self.residual_attn:
+                prev_attn = inter.pre_softmax_attn
+            elif layer_type == &quotc&quot and self.cross_residual_attn:
+                prev_cross_attn = inter.pre_softmax_attn
+
+            if not self.pre_norm and not is_last:
+                x = norm(x)
+
+        if return_hiddens:
+            intermediates<a id="change"> = </a>LayerIntermediates(
+                hiddens = hiddens,
+                attn_intermediates = intermediates
+            )
+
+            <a id="change">return </a>x<a id="change">, intermediates</a>
+
+        return x
+
+class Encoder(AttentionLayers):</code></pre>

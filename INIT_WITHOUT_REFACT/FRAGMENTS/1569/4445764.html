@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    @abstractmethod
+    def forward(self, *inputs: torch.Tensor) -&gt; torch.Tensor:
+        <a id="change">pass</a>
+
+    @abstractmethod
+    def loss_function(self, *inputs: Any, **kwargs) -&gt; torch.Tensor:
+        pass</code></pre><h3>After Change</h3><pre><code class='java'>
+                **kwargs) -&gt; Dict[Union[ChannelEnum, str], torch.Tensor]:
+        input, norm_consts = self.assemble_input(data)
+
+        <a id="change">if self.num_samples &gt; 1</a><a id="change">:
+            </a>samples<a id="change"> = </a>[]
+            for i in range(self.num_samples):
+                samples.append(self.forward_pass(input=input, data=data))
+
+            mean = torch.mean(torch.stack(samples), dim=0)
+            var<a id="change"> = </a>torch.var(torch.stack(samples), dim=0)
+
+            output = {ChannelEnum.RECONSTRUCTED_ELEVATION_MAP: mean,
+                      ChannelEnum.MODEL_UNCERTAINTY_MAP: var}</code></pre>

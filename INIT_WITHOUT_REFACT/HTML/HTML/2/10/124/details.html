@@ -1,0 +1,119 @@
+<html><h3>Pattern ID :124
+</h3><img src='521441.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        y = self.conv2(y)  &#47&#47 n, c, 1, 1, 1
+        y = self.bn2(y)  &#47&#47 n, c, 1, 1, 1
+        y = self.sigmoid(y)  &#47&#47 n, c, 1, 1, 1
+        out = <a id="change">x</a><a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>  &#47&#47 n, c, t, h, w
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.bn2(y)  &#47&#47 n, c, 1, 1, 1
+        y = self.sigmoid(y)  &#47&#47 n, c, 1, 1, 1
+        &#47&#47 out = x * y.expand_as(x)  &#47&#47 n, c, t, h, w
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = <a id="change">x</a><a id="change"> + x</a><a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+
+
+class SELayerMC(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/60a55c3edc7e16d711910277ebe7742419e5db63#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521441</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 60a55c3edc7e16d711910277ebe7742419e5db63</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerCoC</div><div id='n_method'> N Class Name: SELayerCoC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 84</div><div id='n_start'> N Start Line: 83</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y = self.avg_pool(output).view(b, t)
+        y = self.fc(y).view(b, t, 1, 1, 1)
+        y = y.transpose(1, 2).contiguous()
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.fc(y).view(b, t, 1, 1, 1)
+        y = y.transpose(1, 2).contiguous()
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+
+
+class SELayerCoC(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/60a55c3edc7e16d711910277ebe7742419e5db63#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521440</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 60a55c3edc7e16d711910277ebe7742419e5db63</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerT</div><div id='n_method'> N Class Name: SELayerT</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y = torch.cat((y_avg, y_max), dim=2).squeeze().unsqueeze(dim=1)
+        y = self.conv(y).squeeze()
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.conv(y).squeeze()
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/1c4ffe9d1b4a645acf4f37d2dd2ec8df1545f4cd#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L129' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521439</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 1c4ffe9d1b4a645acf4f37d2dd2ec8df1545f4cd</div><div id='time'> Time: 2021-03-05</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerMAC</div><div id='n_method'> N Class Name: SELayerMAC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 136</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, c, _, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+
+
+class SELayerT(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/60a55c3edc7e16d711910277ebe7742419e5db63#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521438</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 60a55c3edc7e16d711910277ebe7742419e5db63</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerC</div><div id='n_method'> N Class Name: SELayerC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, c, _, _, _ = x.size()
+        y = self.max_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.max_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+
+
+class SELayerMAC(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/60a55c3edc7e16d711910277ebe7742419e5db63#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521437</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 60a55c3edc7e16d711910277ebe7742419e5db63</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerMC</div><div id='n_method'> N Class Name: SELayerMC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, c, _, _, _ = x.size()
+        y = self.max_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.max_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+
+
+class SELayerMAC(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/1c4ffe9d1b4a645acf4f37d2dd2ec8df1545f4cd#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521436</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 1c4ffe9d1b4a645acf4f37d2dd2ec8df1545f4cd</div><div id='time'> Time: 2021-03-05</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerMC</div><div id='n_method'> N Class Name: SELayerMC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        y = torch.cat((y_avg, y_max), dim=2).squeeze().unsqueeze(dim=1)
+        y = self.conv(y).squeeze()
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        out = x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        &#47&#47 y = y - 0.5
+        &#47&#47 out = x + x * y.expand_as(x)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        y = self.conv(y).squeeze()
+        y = self.fc(y).view(b, c, 1, 1, 1)
+        &#47&#47 out = x * y.expand_as(x)
+        y<a id="change"> = </a>y<a id="change"> - 0.5</a>
+        out = x<a id="change"> + </a>x<a id="change"> * </a><a id="change">y.expand_as(</a>x<a id="change">)</a>
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pykale/pykale/commit/60a55c3edc7e16d711910277ebe7742419e5db63#diff-61d5f5fb5db1f8372bf440e2d8375a3de583d2de0b02f6c8f313415acee0f345L129' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 521435</div><div id='project'> Project Name: pykale/pykale</div><div id='commit'> Commit Name: 60a55c3edc7e16d711910277ebe7742419e5db63</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: xianyuan.liu@sheffield.ac.uk</div><div id='file'> File Name: kale/embed/video_se_cnn.py</div><div id='m_class'> M Class Name: SELayerMAC</div><div id='n_method'> N Class Name: SELayerMAC</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: kale/embed/video_se_cnn.py</div><div id='n_file'> N File Name: kale/embed/video_se_cnn.py</div><div id='m_start'> M Start Line: 136</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 135</div><div id='n_end'> N End Line: 138</div><BR>

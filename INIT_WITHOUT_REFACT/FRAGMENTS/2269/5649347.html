@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv3 = nn.Conv2d(planes, out_planes, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn3 = nn.BatchNorm2d(out_planes)
+
+        self.shortcut = <a id="change">nn.Sequential()</a>
+        if stride == 1 and in_planes != out_planes:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.BatchNorm2d(out_planes),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        norm_layer = nn.BatchNorm2d
+
+        hidden_dim = int(round(inp<a id="change"> * </a>expand_ratio))
+        self.use_res_connect = self.stride == 1 and inp == oup
+
+        layers: List[nn.Module] = <a id="change">[]</a>
+        if expand_ratio != 1:
+            layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
+        <a id="change">layers.extend(</a>[
+            ConvBNReLU(hidden_dim, hidden_dim,
+                       stride=stride, groups=hidden_dim),
+            nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+            norm_layer(oup),
+        ]<a id="change">)</a>
+        self.conv = nn.Sequential(*layers)
+        self.out_channels = oup
+
+    def forward(self, x: Tensor) -&gt; Tensor:</code></pre>

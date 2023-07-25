@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        o_en, o_en_dp, x_mask, g = self._forward_encoder(x, x_lengths, g)
+        o_dr_log = self.duration_predictor(o_en_dp.detach(), x_mask)
+        o_de, attn = self._forward_decoder(o_en, o_en_dp, dr, x_mask, y_lengths, g=g)
+        <a id="change">return </a>o_de<a id="change">, o_dr_log.squeeze(1), attn</a>
+
+    def inference(self, x, x_lengths, g=None):  &#47&#47 pylint: disable=unused-argument
+        
+        Shapes:</code></pre><h3>After Change</h3><pre><code class='java'>
+                                           g=g)
+        outputs = {
+            &quotmodel_outputs&quot: o_de.transpose(1, 2),
+            &quotdurations_log&quot: <a id="change">o_dr_log.squeeze(1</a><a id="change">)</a>,
+            &quotalignments&quot: attn
+        }
+        return outputs</code></pre>

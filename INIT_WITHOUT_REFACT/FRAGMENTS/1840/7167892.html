@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.register_buffer("ema_weight", self.embedding.clone())
+
+    def forward(self, x):
+        B, C, L = <a id="change">x.size()</a>
+        N, M, D = self.embedding.size()
+        assert C == N * D
+
+        x = x.view(B, N, D, L).permute(1, 0, 3, 2)  &#47&#47 N, B, L, D</code></pre><h3>After Change</h3><pre><code class='java'>
+                                x_flat, self.embedding.t(),
+                                alpha=-2.0, beta=1.0)
+
+        indices = torch.argmin(<a id="change">distances.float()</a>, dim=-1)
+        encodings = F.one_hot(indices, M).float()
+        quantized = F.embedding(indices, self.embedding)
+        quantized = quantized.view_as(x)
+
+        if self.training:
+            self.ema_count = self.decay * self.ema_count + (1 - self.decay) * torch.sum(encodings, dim=0)
+
+            n = torch.sum(self.ema_count)
+            self.ema_count = (self.ema_count + self.epsilon) / (n + M * self.epsilon) * n
+
+            dw = torch.matmul(encodings.t(), x_flat)
+            self.ema_weight = self.decay * self.ema_weight + (1 - self.decay) * dw
+
+            self.embedding = self.ema_weight / self.ema_count.unsqueeze(-1)
+
+        e_latent_loss = F.mse_loss(x, quantized.detach())
+        loss = self.commitment_cost * e_latent_loss
+
+        quantized = x + (quantized - x).detach()
+
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        <a id="change">return </a>quantized<a id="change">, loss, perplexity</a>
+
+
+class CPCLoss(nn.Module):
+    def __init__(self, n_speakers_per_batch, n_utterances_per_speaker, n_prediction_steps, n_negatives, z_dim, c_dim):</code></pre>

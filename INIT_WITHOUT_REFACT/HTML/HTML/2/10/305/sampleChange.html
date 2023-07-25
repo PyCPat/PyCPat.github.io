@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 reshape back to match original input shape
+        &#47&#47z_q, &quotb h w c -&gt; b c h w&quot
+        z_q<a id="change"> = z_q.permute(</a><a id="change">0, 3, 1, 2).contiguous()</a>
+        return z_q, loss, (perplexity, encodings, encoding_indices)
+
+
+class Normed(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = self.beta * F.mse_loss(z_q.detach(), z) + F.mse_loss(z_q, z.detach())
+
+        &#47&#47 contrastive codebook loss
+        <a id="change">if self.contrast</a><a id="change">:
+            </a>target<a id="change"> = </a>torch.arange(0, self.num_tokens, device=self.embedding.weight.device)
+            logits<a id="change"> = </a>torch.einsum(&quotik,jk-&gt;ij&quot, self.embedding.weight, self.embedding.weight)
+            loss = loss + F.cross_entropy(logits, target)
+
+        &#47&#47 preserve gradients</code></pre>

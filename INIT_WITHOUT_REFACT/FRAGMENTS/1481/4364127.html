@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        quantizeds = list()
+        codes = list()
+        logits = list()
+        for i, (xRaw, k) in enumerate(<a id="change">zip(</a>latents, self._k<a id="change">)</a>):
+            n, c, h, w = xRaw.shape
+            &#47&#47 [k, 1, c]
+            codebook = getattr(self, "codebook")[:, None, :]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [1, k, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [n, h*w, c]
+            quantized<a id="change"> = </a>sample<a id="change"> @ </a><a id="change">codewords[0, ...]</a>
+            &#47&#47 [n, h*w, c]
+            posistedQuantized = self._position(quantized.reshape(n, h, w, c)).reshape(n, -1, c)
+            &#47&#47 [1, k, c]
+            decodedCodes = self._codebookDecoder(codebook)</code></pre>

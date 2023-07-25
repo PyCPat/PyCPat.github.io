@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :2195
+</h3><img src='7735748.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        sim = einsum(&quotb h d i, b h d j -&gt; b h i j&quot, q, k)
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h (x y) d -&gt; b (h d) x y&quot</a><a id="change">, x = h, y = w)</a>
+        return self.to_out(out)
+
+class FiLM(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        context = default(context, x)
+
+        x<a id="change"> = </a>self.norm(x)
+
+        <a id="change">if exists(</a>self.time_cond<a id="change">)</a><a id="change">:
+            </a>assert exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x<a id="change"> = </a>(x * (scale + 1)) + shift
+
+        if has_context:
+            context = self.norm_context(context)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL149' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7735748</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 225</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 axial attention
+
+        out<a id="change"> = </a>0
+
+        if self.col_attn:
+            w_x = rearrange(x, &quotb h w d -&gt; (b w) h d&quot)
+            if exists(attn_bias):
+                attn_bias = repeat(attn_bias, &quotb h i j -&gt; (b x) h i j&quot, x = w)
+
+            tie_dim = w if self.global_query_attn else None
+            w_out<a id="change"> = </a>self.attn(w_x, mask = w_mask, attn_bias = attn_bias, tie_dim = tie_dim)
+            w_out = <a id="change">rearrange(</a>w_out, <a id="change">&quot(b w) h d -&gt; b h w d&quot</a><a id="change">, h = h, w = w)</a>
+
+            out<a id="change"> += </a>w_out
+
+        if self.row_attn:
+            h_x = rearrange(x, &quotb h w d -&gt; (b h) w d&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = rearrange(x, input_fold_eq)
+
+        <a id="change">if exists(</a>mask<a id="change">)</a><a id="change">:
+            </a>mask<a id="change"> = </a>rearrange(mask, mask_fold_axial_eq)
+
+        attn_bias = None
+        if exists(self.edges_to_attn_bias) and exists(edges):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/a53a3eb56d47562dfe5d49a28782fa584676f4f1#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L215' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7735746</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: a53a3eb56d47562dfe5d49a28782fa584676f4f1</div><div id='time'> Time: 2021-07-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: AxialAttention</div><div id='n_method'> N Class Name: AxialAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 220</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q = q.softmax(dim = -2)
+        k<a id="change"> = </a>k.softmax(dim = -1)
+
+        q = q * self.scale
+
+        context = torch.einsum(&quotb h d n, b h e n -&gt; b h d e&quot, k, v)
+
+        out = torch.einsum(&quotb h d e, b h d n -&gt; b h e n&quot, context, q)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h c (x y) -&gt; b (h c) x y&quot</a><a id="change">, h = self.heads, x = h, y = w)</a>
+        return self.to_out(out)
+
+class Attention(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        time = None
+    ):
+        h = self.heads
+        x<a id="change"> = </a>self.norm(x)
+
+        <a id="change">if exists(</a>self.time_cond<a id="change">)</a><a id="change">:
+            </a>assert exists(time)
+            scale, shift = self.time_cond(time).chunk(2, dim = -1)
+            x<a id="change"> = </a>(x * (scale + 1)) + shift
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7735739</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 157</div><BR>

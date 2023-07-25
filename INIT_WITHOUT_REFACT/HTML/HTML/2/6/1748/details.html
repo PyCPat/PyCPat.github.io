@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :1748
+</h3><img src='6869002.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x)
+        qkv = self.select1(qkv)
+        qkv = qkv.chunk(3, dim = -1)
+        q<a id="change">, k, v</a> = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        k = self.to_k(x)
+        k = self.select1(k)
+        k = rearrange(k, &quotb n (h d) -&gt; b h n d&quot, h = h)
+        v<a id="change"> = </a>self.to_v(x)
+        v<a id="change"> = </a>self.select1(v)
+        v<a id="change"> = </a><a id="change">rearrange(</a>v, <a id="change">&quotb n (h d) -&gt; b h n d&quot</a><a id="change">, h = h)</a>
+
+        &#47&#47 qkv = self.to_qkv(x).chunk(3, dim = -1)
+        &#47&#47 q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/cydia2018/vit-cifar10-pruning/commit/853f755040dabf84ca08cde164a4d5dafb8f94aa#diff-dfcdfdb3cc72798869ac0cd03f988cc3a003b313176165f458bb2dee8e033743L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6869002</div><div id='project'> Project Name: cydia2018/vit-cifar10-pruning</div><div id='commit'> Commit Name: 853f755040dabf84ca08cde164a4d5dafb8f94aa</div><div id='time'> Time: 2021-04-29</div><div id='author'> Author: 872147876@qq.com</div><div id='file'> File Name: models/vit.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/vit.py</div><div id='n_file'> N File Name: models/vit.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 103</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_out = nn.Conv2d(hidden_dim, dim, 1)
+
+    def forward(self, x):
+        b<a id="change">, c, f, h, w</a> = x.shape
+        x = rearrange(x, &quotb c f h w -&gt; (b f) c h w&quot)
+
+        qkv = self.to_qkv(x).chunk(3, dim = 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = rearrange_many(qkv, &quot... n (h d) -&gt; ... h n d&quot, h = self.heads)
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quot... h i d, ... h j d -&gt; ... h i j&quot, q, k)
+        sim = sim - sim.amax(dim = -1, keepdim = True).detach()
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quot... h i j, ... h j d -&gt; ... h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quot... h n d -&gt; ... n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out)
+
+&#47&#47 model
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/video-diffusion-pytorch/commit/12fac4c86d51e844ecae1514568355d7be6b4833#diff-4ff1a95f5e6b9add82d0e523fd2d858ca38e67b393ea87c2ae88a8b14a0fbb1cL189' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6869004</div><div id='project'> Project Name: lucidrains/video-diffusion-pytorch</div><div id='commit'> Commit Name: 12fac4c86d51e844ecae1514568355d7be6b4833</div><div id='time'> Time: 2022-04-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='n_file'> N File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 204</div><div id='n_start'> N Start Line: 215</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x,
+        context = None
+    ):
+        b<a id="change">, c, h, w</a> = x.shape
+        context = default(context, x)
+
+        qkv = (self.to_q(x), *self.to_kv(context).chunk(2, dim = 1))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a>einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a>einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+        return self.to_out(out)
+
+class FeedForward(nn.Module):
+    def __init__(self, dim, mult = 4, time_cond_dim = None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/5cd08b2823cfe105785a525aea43a7396fea07e9#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6868994</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: 5cd08b2823cfe105785a525aea43a7396fea07e9</div><div id='time'> Time: 2022-12-24</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 161</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 225</div><BR>

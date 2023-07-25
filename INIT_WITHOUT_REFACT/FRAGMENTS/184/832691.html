@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+	def forward(self, content_code, class_code):
+		batch_size = content_code.shape[0]
+
+		content_code<a id="change"> = </a>content_code.view((batch_size, -1, 4, 4))
+		<a id="change">if </a>self.training and <a id="change">self.config[&quotcontent_std&quot] != 0</a><a id="change">:
+			</a>noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			out<a id="change"> = </a>content_code<a id="change"> + </a>noise
+		else:
+			out = content_code
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.n_latent = self.log_size * 2 - 2
+
+	def forward(self, content_codes, class_codes):
+		styles<a id="change"> = </a><a id="change">torch.cat(</a>(content_codes<a id="change">, class_codes</a>)<a id="change">, dim=1)</a>
+		latent<a id="change"> = </a>styles.unsqueeze(dim=1).repeat(1, self.n_latent, 1)
+		&#47&#47 latent = styles.view((-1, self.n_latent, 512))
+
+		out = self.input(latent)</code></pre>

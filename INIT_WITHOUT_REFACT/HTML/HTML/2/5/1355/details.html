@@ -1,0 +1,62 @@
+<html><h3>Pattern ID :1355
+</h3><img src='3950805.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            soft = (logit / temperature).softmax(-1)
+            <a id="change">if hard</a><a id="change">:
+                </a>hard<a id="change"> = </a>logit.argmax(-1)
+                hard = F.one_hot(hard, k)
+                sample = (hard - soft).detach() + soft
+            else:</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47       sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47      sample = soft
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temperature, hard<a id="change">)</a>
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+            &#47&#47 quantized += torch.randn_like(quantized)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L286' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3950805</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 286</div><div id='m_end'> M End Line: 315</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 314</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [h*w, N, Cin],    M * [h*w, n, k]
+            quantized, samples, logits = self._attention(x, temp, True)
+            &#47&#47 quantized = x
+            <a id="change">if False</a><a id="change">:
+                &#47&#47 [h*w, n, c]
+                </a>posistedQuantized = self._position(quantized.reshape(h, w, n, c)).reshape(-1, n, c)
+                deTransformed = self._decoder(posistedQuantized).reshape(h, w, n, c).permute(2, 3, 0, 1)
+            else:
+                &#47&#47 [h*w, n, c] -&gt; [n, c, h*w] -&gt; [n, c, h, w]
+                deTransformed<a id="change"> = </a>quantized.reshape(h, w, n, c).permute(2, 3, 0, 1)
+
+            &#47&#47 mask = torch.rand_like(xRaw) &gt; coeff
+            &#47&#47 mixed = mask * xRaw.detach() + torch.logical_not(mask) * deTransformed</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = self._encoder(codebook, encoderIn)
+            &#47&#47 [h*w, n, k]
+            logit = self._select(x)
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temp, True<a id="change">)</a>
+            &#47&#47 [k, 1, c]
+            codewords = self._codebookEncoder(codebook)
+            &#47&#47 [h*w, n, c]
+            quantized = sample @ codewords[:, 0, ...]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/a4a40624c11a9779699f4a37cccb5b5ed8bc5048#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L263' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3950806</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: a4a40624c11a9779699f4a37cccb5b5ed8bc5048</div><div id='time'> Time: 2021-04-10</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 298</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 534</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 logit = prob(x, h, w)
+            logit = torch.matmul(x, codewords)
+            soft = (logit / temperature).softmax(-1)
+            <a id="change">if hard</a><a id="change">:
+                </a>hard = logit.argmax(-1)
+                hard = F.one_hot(hard, k)
+                sample = (hard - soft).detach() + soft
+            else:
+                sample<a id="change"> = </a>soft
+            &#47&#47 sample = F.gumbel_softmax(logit, temperature, hard)
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47     sample = (hard - soft).detach() + soft
+            &#47&#47 else:
+            &#47&#47     sample = soft
+            sample = <a id="change">F.gumbel_softmax(</a>logit, temperature, hard<a id="change">)</a>
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]
+            quantized = codebook(sample)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/c6d7994765665e47cd39abf93c83c332a5dd8426#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L279' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3950807</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: c6d7994765665e47cd39abf93c83c332a5dd8426</div><div id='time'> Time: 2021-02-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 285</div><div id='m_end'> M End Line: 311</div><div id='n_start'> N Start Line: 300</div><div id='n_end'> N End Line: 308</div><BR>

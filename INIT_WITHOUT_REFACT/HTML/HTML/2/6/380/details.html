@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :380
+</h3><img src='1499446.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, c, l, b in zip(latents, codebooks, logits, codes):
+            z = z.detach().permute(0, 2, 3, 1)
+            k = <a id="change">l.shape[-1]</a>
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = F.one_hot(b, k).float()
+            hard = oneHot @ c</code></pre><h3>After Change</h3><pre><code class='java'>
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = <a id="change">F.mse_loss(z, soft.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))</a>
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss += qe<a id="change"> + 0.01 * commit + </a>0.1 * (softQE + 0.01 * softCommit)
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1499446</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [k, k]
+        intra = codebook @ codebook.T
+
+        distance = 2 * ((inter[:, None] - 2 * intra + inter) / <a id="change">codebook.shape[-1]</a>).triu(1)
+
+        lower = F.relu(self._lower - distance) ** 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [k, k]
+        intra = (codebook @ codebook.T).triu(1)
+
+        loss = ((inter<a id="change"> - 1.0</a>) ** 2).mean()<a id="change"> - </a><a id="change">intra.mean()</a>
+
+        return loss
+
+class L2Regularization(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/bb99df4591b6c532ba2285a5a670f5f070e4e624#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1499438</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: bb99df4591b6c532ba2285a5a670f5f070e4e624</div><div id='time'> Time: 2021-11-29</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CodebookSpreading</div><div id='n_method'> N Class Name: CodebookSpreading</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 153</div><div id='n_end'> N End Line: 159</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        regs = list()
+
+        n, h, w, k = <a id="change">logits[0]</a>.shape
+        &#47&#47 ths = torch.tensor(float(h * w) / k, device=device).clamp(1.0, h * w)
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w]), binCounts: m * list([n, k])</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg = <a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            &#47&#47 [n, h, w, k]
+            &#47&#47 weight = (-logit).detach().softmax(-1)
+            &#47&#47 oneHot = F.one_hot(code, num_classes=logit.shape[-1]).float()
+            &#47&#47 [n, h, w]
+            &#47&#47 targetWeight = (weight * oneHot).sum(-1)
+            code = torch.randint_like(code, logit.shape[-1])
+            logit = logit.permute(0, 3, 1, 2)
+            mle = F.cross_entropy(logit, code)
+            regs.append(reg<a id="change"> + 0.01</a><a id="change"> * </a>mle)
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/1d45f07abde25519c7c2b0dea317da9be2e41aae#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1499437</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 1d45f07abde25519c7c2b0dea317da9be2e41aae</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 125</div><BR>

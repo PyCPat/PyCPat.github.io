@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv3 = nn.Conv2d(int(planes * sketch_rate), self.expansion*planes, kernel_size=1, bias=False)
+        self.bn3 = nn.BatchNorm2d(self.expansion*planes)
+
+        self.downsample<a id="change"> = nn</a><a id="change">.Sequential()</a>
+        <a id="change">if stride != 1</a><a id="change"> or in_planes != self.expansion*planes:
+            </a>self.downsample<a id="change"> = nn</a><a id="change">.Sequential(
+                nn</a><a id="change">.Conv2d(in_planes</a>, self.expansion*planes<a id="change">, kernel_size=1, stride=stride, bias=False)</a>,
+                nn.BatchNorm2d(self.expansion*planes)<a id="change">
+            )</a>
+
+    def forward(self, x):
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = F.relu(self.bn2(self.conv2(out)))</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(Bottleneck, self).__init__()
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        width = <a id="change">int(</a>planes<a id="change"> * </a>(base_width<a id="change"> / 64.</a>)<a id="change">) * </a>groups
+        &#47&#47 Both self.conv2 and self.downsample layers downsample the input when stride != 1
+        if conv1_planes is None:
+            conv1_planes<a id="change"> = </a>width
+        if conv2_planes is None:
+            conv2_planes = width
+        self.conv1 = conv1x1(inplanes, conv1_planes)</code></pre>

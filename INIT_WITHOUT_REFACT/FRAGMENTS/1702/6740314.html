@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if not exists(self.rel_pos) or not self.cache_rel_pos:
+            positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid<a id="change"> = </a>rearrange(grid, &quotc ... -&gt; (...) c&quot)
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            <a id="change">if </a>self.log_dist<a id="change">:
+                </a>rel_pos<a id="change"> = </a>torch.sign(rel_pos) * torch.log(rel_pos.abs() + 1)
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        positions = [torch.arange(d, device = device) for d in dimensions]
+        grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot), dim = -1)
+        grid<a id="change"> = </a>rearrange(grid, &quot... c -&gt; (...) c&quot)
+        rel_dist = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+        &#47&#47 get all relative positions across all dimensions
+
+        rel_positions = [torch.arange(-d + 1, d, device = device) for d in dimensions]
+        rel_pos_grid = torch.stack(torch.meshgrid(*rel_positions, indexing = &quotij&quot), dim = -1)
+        rel_pos_grid = rearrange(rel_pos_grid, &quot... c -&gt; (...) c&quot)
+
+        &#47&#47 mlp input
+
+        bias = rel_pos_grid.float()
+
+        for layer in self.net:
+            bias = layer(bias)
+
+        &#47&#47 convert relative distances to indices of the bias
+
+        rel_dist<a id="change"> += </a>(shape - 1)  &#47&#47 make sure all positive
+        rel_dist *= strides
+        rel_dist_indices<a id="change"> = </a><a id="change">rel_dist.sum(dim = -1)</a>
+
+        &#47&#47 now select the bias for each unique relative position combination
+
+        bias = bias[rel_dist_indices]</code></pre>

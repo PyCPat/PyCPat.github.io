@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    &#47&#47 mask: [bts, seq_len]
+    def forward(self, feats, mask):
+        best_path = self._viterbi_decode(feats, mask)  &#47&#47 [bts, seq_len]
+        <a id="change">return </a>best_path
+    
+    @staticmethod
+    def log_sum_exp(vec, m_size):</code></pre><h3>After Change</h3><pre><code class='java'>
+            mask: [btz, seq_len]
+            tags: [btz, seq_len]
+        
+        <a id="change">if </a>reduction not in (&quotnone&quot, &quotsum&quot, &quotmean&quot, &quottoken_mean&quot)<a id="change">:
+            </a>raise ValueError(f&quotinvalid reduction: {reduction}&quot)
+        if mask.dtype != torch.uint8:
+            mask = mask.byte()
+        self._validate(emissions, tags=tags, mask=mask)
+
+        &#47&#47 shape: (batch_size,)
+        numerator = self._compute_score(emissions, tags, mask)
+        &#47&#47 shape: (batch_size,)
+        denominator = self._compute_normalizer(emissions, mask)
+        &#47&#47 shape: (batch_size,)
+        llh<a id="change"> = </a>denominator<a id="change"> - </a>numerator
+
+        if reduction == &quotnone&quot:
+            return llh
+        if reduction == &quotsum&quot:
+            return llh.sum()
+        if reduction == &quotmean&quot:
+            return llh.mean()
+        <a id="change">return </a>llh.sum()<a id="change"> / mask.float().sum()</a>
+
+    def decode(self, emissions: torch.Tensor, mask: Optional[torch.ByteTensor] = None,
+               nbest: Optional[int] = None, pad_tag: Optional[int] = None) -&gt; List[List[List[int]]]:</code></pre>

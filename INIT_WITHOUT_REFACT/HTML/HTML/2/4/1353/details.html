@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1353
+</h3><img src='3949436.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, height, width, sums, repetitions = x.size()
+        assert width == 1
+        <a id="change">assert </a>height == 1
+        assert sums == self.config.num_classes
+
+        &#47&#47 Apply C sum node outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.root(x)
+
+        &#47&#47 Remove repetition dimension
+        x<a id="change"> = </a><a id="change">x.squeeze(3</a><a id="change">)</a>
+
+        &#47&#47 Remove in_features dimension
+        x = x.squeeze(1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/a4eb63bd492b9a22102ddc82e107efac0bdf04ee#diff-b07179cedca4d239e2586e9cb6fff9e541bc16eec55c28d6d2537cfebff90289L131' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3949436</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: a4eb63bd492b9a22102ddc82e107efac0bdf04ee</div><div id='time'> Time: 2022-01-07</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: simple_einet/einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_einet/einet.py</div><div id='n_file'> N File Name: simple_einet/einet.py</div><div id='m_start'> M Start Line: 145</div><div id='m_end'> M End Line: 157</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 148</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.conv_img = nn.Conv2d(nf, 3, 3, padding=1)
+
+    def forward(self, z, y):
+        <a id="change">assert</a>(z.size(0) == y.size(0))
+        batch_size = z.size(0)
+
+        if y.dtype is torch.int64:</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv_img = nn.Conv2d(nf, 3, 3, padding=1)
+
+    def forward(self, z):
+        z<a id="change"> = </a><a id="change">z.squeeze(-1).squeeze(-1</a><a id="change">)</a>
+        batch_size = z.size(0)
+        out = self.fc(z)
+        out = out.view(batch_size, self.nf0, self.s0, self.s0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/2ccfa8423f413326e7d6083a04ed50782d2d55cf#diff-72d9e55734e448f1f600b13487c83b76fdedd32721da456b5ba3be495d23079fL42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3949434</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: 2ccfa8423f413326e7d6083a04ed50782d2d55cf</div><div id='time'> Time: 2021-01-27</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/submodules/gan_stability/models/resnet.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/submodules/gan_stability/models/resnet.py</div><div id='n_file'> N File Name: core/submodules/gan_stability/models/resnet.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 44</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(self.nf0*s0*s0, nlabels)
+
+    def forward(self, x, y):
+        <a id="change">assert</a>(x.size(0) == y.size(0))
+        batch_size = x.size(0)
+
+        out = self.conv_img(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = out.view(batch_size, self.nf0*self.s0*self.s0)
+        out = self.fc(actvn(out))
+
+        out<a id="change"> = </a><a id="change">out.squeeze(1</a><a id="change">)</a>
+        out = self.final_sigmoid(out)
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/2ccfa8423f413326e7d6083a04ed50782d2d55cf#diff-72d9e55734e448f1f600b13487c83b76fdedd32721da456b5ba3be495d23079fL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3949429</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: 2ccfa8423f413326e7d6083a04ed50782d2d55cf</div><div id='time'> Time: 2021-01-27</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/submodules/gan_stability/models/resnet.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/submodules/gan_stability/models/resnet.py</div><div id='n_file'> N File Name: core/submodules/gan_stability/models/resnet.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 93</div><BR>

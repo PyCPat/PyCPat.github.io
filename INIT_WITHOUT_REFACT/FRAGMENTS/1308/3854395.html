@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if inference:
+            B = x.data.size(0)
+            C = x.data.size(1)
+            H<a id="change"> = </a>x.data.size(2)
+            W = x.data.size(3)
+
+            return <a id="change">x.view(B, C, H, 1, W, 1).expand(B, C, H, tH // H, W, tW // W).contiguous()</a>.view(B, C, tH, tW)
+        else:
+            return F.interpolate(x, size=(tH, tW), mode=&quotnearest&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47H = x.data.size(2)
+            &#47&#47W = x.data.size(3)
+
+            return x.view(x.size(0), x.size(1), <a id="change">x.size(</a>2<a id="change">)</a>, 1, x.size(3), 1).\
+                    expand(<a id="change">x.size(</a>0<a id="change">)</a>, x.size(1), x.size(2), target_size[2] // x.size(2), x.size(3), target_size[3] // x.size(3)).\
+                    contiguous().view(x.size(0), x.size(1), target_size[2], target_size[3])
+        else:
+            return F.interpolate(x, size=(target_size[2], target_size[3]), mode=&quotnearest&quot)</code></pre>

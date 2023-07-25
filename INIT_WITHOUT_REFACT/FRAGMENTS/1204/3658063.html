@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 calculate new memory only if sequence length buffer is full
+        if self.seq_len == t:
+            hidden_states = torch.stack(hidden_states)
+            new_mem<a id="change"> = </a><a id="change">torch.cat(</a>(mem<a id="change">, hidden_states</a>)<a id="change">, dim=2)</a>[:, :, -self.mem_len:, :].detach()
+        else:
+            new_mem = mem
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for attn, ff, m in zip(self.attn_layers, self.ff_layers, mem):
+            x, mem_out = attn(x, mem = m)
+            x, = ff(x)
+            <a id="change">next_mem.append(</a>mem_out<a id="change">)</a>
+
+        out = self.to_logits(x)
+        next_mem = torch.stack(next_mem)
+</code></pre>

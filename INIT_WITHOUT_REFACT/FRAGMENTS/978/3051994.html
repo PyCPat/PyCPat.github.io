@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        neg_scores = self._compute_scores(h_embs=projected_heads_neg, r_embs=neg_rel_embs, t_embs=projected_tails_neg)
+
+        batch_entities = torch.cat([pos_heads.view(-1), pos_tails.view(-1), neg_heads.view(-1), neg_tails.view(-1)])
+        batch_entities = <a id="change">torch.tensor(</a>torch.unique(batch_entities.cpu())<a id="change">, device=self.device)</a>
+        batch_relations = torch.tensor(torch.unique(torch.cat([pos_rels.view(-1), neg_rels.view(-1)]).cpu()),
+                                       device=self.device)
+
+        loss = self.compute_loss(pos_scores=pos_scores, neg_scores=neg_scores, batch_entities=batch_entities,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.use_cuda:
+            batch_entities = torch.unique(batch_entities.cpu()).cuda()
+            batch_relations = torch.unique(torch.cat([pos_rels.view(-1), <a id="change">neg_rels.view(-1</a><a id="change">)</a>]).cpu()).cuda()
+
+
+        loss = self.compute_loss(pos_scores=pos_scores, neg_scores=neg_scores, batch_entities=batch_entities,</code></pre>

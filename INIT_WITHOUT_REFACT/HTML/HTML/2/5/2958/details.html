@@ -1,0 +1,48 @@
+<html><h3>Pattern ID :2958
+</h3><img src='9755076.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        aggregated_features = []
+        for length in lengths:
+            output_node_features = nodes_output[:, :length, :]
+            weights = <a id="change">self.Wq(output_node_features).transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+            aggregated_feature<a id="change"> = </a>weights.matmul(output_node_features).squeeze(dim=1)
+            aggregated_features.append(aggregated_feature)
+        aggregated_features = torch.cat(aggregated_features, dim=0)
+        return aggregated_features</code></pre><h3>After Change</h3><pre><code class='java'>
+        :return:
+        
+        aggregated_features = []
+        for l in <a id="change">range(</a>nodes_output.shape[0]<a id="change">)</a>:
+            output_node_features = nodes_output[l, :, :]
+            weights = self.Wq(output_node_features)
+            aggregated_features.append(weights)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/6c36f8a6c545046914ce31c842b9648ac37c8b93#diff-781837fb12ee6ac1f0b89d83a2500544e486bd58832bd4e4a8d1a779b2a0950eL100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9755076</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 6c36f8a6c545046914ce31c842b9648ac37c8b93</div><div id='time'> Time: 2021-07-24</div><div id='author'> Author: benedek.rozemberczki@gmail.com</div><div id='file'> File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_class'> M Class Name: AggregateTemporalNodeFeatures</div><div id='n_method'> N Class Name: AggregateTemporalNodeFeatures</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/attention/dnntsp.py</div><div id='m_start'> M Start Line: 100</div><div id='m_end'> M End Line: 111</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 prepare input for decoder
+        src_flatten = srcs.flatten(2).transpose(1, 2)                                &#47&#47 [Batch, Patches, HiddenDim] 
+        pos_embed_flatten<a id="change"> = </a><a id="change">pos_embeds.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>                    &#47&#47 [Batch, Patches, HiddenDim] 
+        
+        bs, _, c = src_flatten.shape
+        query_embed, tgt = torch.split(query_embed, c, dim=1)                        &#47&#47 Tgt in contrast to detr not zeros, but learnable</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        for idx in <a id="change">range(</a>len(srcs)<a id="change">)</a>:
+            srcs[idx] = srcs[idx].flatten(2).transpose(1, 2)
+            pos[idx] = pos[idx].flatten(2).transpose(1, 2)
+            </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/b13e8b2db58100e624031db6b1f256e65dd68a87#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9755077</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: b13e8b2db58100e624031db6b1f256e65dd68a87</div><div id='time'> Time: 2022-05-07</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedDecoder</div><div id='n_method'> N Class Name: FocusedDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 109</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        seq_length = seg.size(1)
+        device = seg.device
+        emb<a id="change"> = </a><a id="change">self.pe[: seq_length].transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+
+        return emb.to(device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            no_pad_num = (src != 0).sum(dim=-1)
+        
+        emb =  torch.zeros(batch_size, seq_length, self.emb_size)
+        for i in <a id="change">range(</a>batch_size<a id="change">)</a>:
+            emb[i, :no_pad_num[i], :] = self.emb[2: no_pad_num[i]+2]
+
+        return emb.to(device)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tencent/tencentpretrain/commit/2bc6d47065d7a5e6907d449cf5114248000274fe#diff-41324f66c261d89709c738adf53f3dddb45e587991d1f8c895e23d2dedb742dbL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9755063</div><div id='project'> Project Name: tencent/tencentpretrain</div><div id='commit'> Commit Name: 2bc6d47065d7a5e6907d449cf5114248000274fe</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: 40569026+JINGZIjingzi@users.noreply.github.com</div><div id='file'> File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_class'> M Class Name: SinusoidalposEmbedding</div><div id='n_method'> N Class Name: SinusoidalposEmbedding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='n_file'> N File Name: tencentpretrain/embeddings/sinusoidalpos_embedding.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 68</div><BR>

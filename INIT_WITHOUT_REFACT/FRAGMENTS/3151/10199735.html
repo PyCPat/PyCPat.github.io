@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return x_next
+
+    def forward(self, x: Tensor, num_steps: int = None) -&gt; Tensor:
+        b, device = x.shape[0]<a id="change">, x.device</a>
+        num_steps = default(num_steps, self.num_steps)
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)
+        &#47&#47 Sample from first sigma distribution</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Sample from first sigma distribution
+        x = sigmas[0] * x
+        &#47&#47 Compute gammas
+        gammas<a id="change"> = </a><a id="change">torch.where(
+            </a>(sigmas &gt;= self.s_tmin) & <a id="change">(sigmas &lt;= self.s_tmax)</a>,
+            min(self.s_churn / num_steps, sqrt(2) - 1),
+            0.0<a id="change">,
+        )</a>
+        &#47&#47 Denoise x
+        for i in range(num_steps - 1):
+            x = self.step(x, sigma=sigmas[i], sigma_next=sigmas[i + 1], gamma=gammas[i])
+</code></pre>

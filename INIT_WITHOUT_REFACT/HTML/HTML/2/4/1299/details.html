@@ -1,0 +1,46 @@
+<html><h3>Pattern ID :1299
+</h3><img src='3835518.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            encoder_attns.append(encoder_attn)
+            inputs = output
+
+        <a id="change">return </a>output, self_attns, encoder_attns
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        non_pad_mask = get_pad_mask(targets, pad_id=self.pad_id).eq(False)
+        self_attn_mask = get_attn_pad_mask(targets, self.pad_id) | get_subsequent_mask(targets)
+        memory_mask = <a id="change">get_pad_mask(memory, input_lengths).squeeze(-1).unsqueeze(1).expand(-1</a>, targets.size(1), <a id="change">-1</a><a id="change">)</a>
+
+        output = self.input_dropout(self.embedding(targets) * self.logit_scale + self.pos_encoding(targets.size(1)))
+
+        for layer in self.layers:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sooftware/transformer/commit/a0b53d9802b580df564793d1f66e65e286065f00#diff-825f88954874495622d9ca7661409390247cc81d30fc6addd2c4035da5e1e992L136' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3835518</div><div id='project'> Project Name: sooftware/transformer</div><div id='commit'> Commit Name: a0b53d9802b580df564793d1f66e65e286065f00</div><div id='time'> Time: 2020-07-25</div><div id='author'> Author: sh951011@gmail.com</div><div id='file'> File Name: transformer/models/transformer.py</div><div id='m_class'> M Class Name: TransformerDecoder</div><div id='n_method'> N Class Name: TransformerDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer/models/transformer.py</div><div id='n_file'> N File Name: transformer/models/transformer.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 155</div><div id='n_start'> N Start Line: 136</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = x.reshape(B, inputs.shape[2] // self.patch_size,
+                      inputs.shape[3] // self.patch_size,
+                      C).permute(0, 3, 1, 2)
+        <a id="change">return </a>[x]
+
+    def train(self, mode=True):
+        super(VisionTransformer, self).train(mode)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = self.patch_embed(inputs)
+
+        cls_tokens = <a id="change">self.cls_token.expand(</a>B, <a id="change">-1</a>, <a id="change">-1</a><a id="change">)</a>
+        x = torch.cat((cls_tokens, x), dim=1)
+        x = self._pos_embeding(inputs, x, self.pos_embed)
+
+        if not self.with_cls_token:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmsegmentation/commit/c27ef91942e1cd10328b43c13084ec06d63aefcd#diff-a5f567c7d2777f1bb848840263f081cbec0c7bba0101fb90f67d4b7c887e011dL380' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3835523</div><div id='project'> Project Name: open-mmlab/mmsegmentation</div><div id='commit'> Commit Name: c27ef91942e1cd10328b43c13084ec06d63aefcd</div><div id='time'> Time: 2021-04-30</div><div id='author'> Author: 58427300+sennnnn@users.noreply.github.com</div><div id='file'> File Name: mmseg/models/backbones/vit.py</div><div id='m_class'> M Class Name: VisionTransformer</div><div id='n_method'> N Class Name: VisionTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmseg/models/backbones/vit.py</div><div id='n_file'> N File Name: mmseg/models/backbones/vit.py</div><div id='m_start'> M Start Line: 382</div><div id='m_end'> M End Line: 389</div><div id='n_start'> N Start Line: 422</div><div id='n_end'> N End Line: 452</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x += self.pos_embedding
+        x = self.transformer(x)
+
+        <a id="change">return </a>self.mlp_head(x[:, 0])
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = rearrange(img, &quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1 = p, p2 = p)
+        x = self.patch_to_embedding(x)
+
+        cls_tokens = <a id="change">self.cls_token.expand(</a>img.shape[0], <a id="change">-1</a>, <a id="change">-1</a><a id="change">)</a>
+        x = torch.cat((cls_tokens, x), dim=1)
+        x += self.pos_embedding
+        x = self.transformer(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/8fb261ca66b187958dc59f36d188ea78e59e89b3#diff-fce7f92e0b957764a240f657482514430a2fcdd8a0fcfc1d23372f119a92e6ccL86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3835521</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 8fb261ca66b187958dc59f36d188ea78e59e89b3</div><div id='time'> Time: 2020-10-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/vit_pytorch.py</div><div id='m_class'> M Class Name: ViT</div><div id='n_method'> N Class Name: ViT</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/vit_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/vit_pytorch.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 100</div><BR>

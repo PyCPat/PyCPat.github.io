@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1857
+</h3><img src='7191660.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size, num_of_vertices, in_channels, num_of_timesteps = x.shape
+        data = Data(edge_index=edge_index, edge_attr=None, num_nodes=num_nodes)
+        lambda_max = LaplacianLambdaMax()(data).lambda_max
+        outputs = <a id="change">[]</a>
+        for time_step in range(num_of_timesteps):
+            outputs.append(torch.unsqueeze(self.cheb_conv(x=x[:,:,:,time_step], edge_index=edge_index,
+                batch = batch_size, lambda_max=lambda_max), -1))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        tmp = tmp.permute(2,0,1) &#47&#47 (B*T_in, N_nodes, F_in)
+        output = F.relu(self.cheb_conv(x=tmp, edge_index=edge_index,
+                batch = batch_size*num_of_timesteps, lambda_max=lambda_max))
+        spatial_gcn<a id="change"> = </a><a id="change">output.permute(1</a>,<a id="change">2</a>,<a id="change">0</a><a id="change">)</a>.reshape(num_of_vertices,self.nb_time_filter,batch_size,num_of_timesteps).permute(2,0,1,3) &#47&#47 (B,N_nodes,F_out,T_in)
+
+        &#47&#47 convolution along the time axis
+        time_conv_output = self.time_conv(spatial_gcn.permute(0, 2, 1, 3))  &#47&#47 (b,F,N,T)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/benedekrozemberczki/pytorch_geometric_temporal/commit/509a541a01913f5b45859b801c48b5fd264bd94a#diff-21666376be83b64a4fa768847ddfc3e4e7076772ef843870e346158dd7205045L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7191660</div><div id='project'> Project Name: benedekrozemberczki/pytorch_geometric_temporal</div><div id='commit'> Commit Name: 509a541a01913f5b45859b801c48b5fd264bd94a</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: He_YX@outlook.com</div><div id='file'> File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='m_class'> M Class Name: MSTGCN_block</div><div id='n_method'> N Class Name: MSTGCN_block</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='n_file'> N File Name: torch_geometric_temporal/nn/convolutional/mstgcn.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, h_erb = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs = <a id="change">[</a>spec<a id="change"></a>]
+        &#47&#47 re/im into channel axis
+        spec_f = spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2)  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i, (stage, _lim) in enumerate(zip(self.refinement_stages, self.refinement_snr_max)):
+            refinement, h_conv, _ = stage(spec_f, h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :]<a id="change"> = </a><a id="change">spec_f.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, 1<a id="change">)</a>
+            &#47&#47 if lim &gt;= 100:
+            &#47&#47     spec_f, _ = stage(spec_f)
+            &#47&#47 else:
+            &#47&#47     idcs = torch.logical_and(lsnr &lt; lim, lsnr &gt; self.refinement_snr_min).squeeze(-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/2aacf4d049fc9e7b073c15d705c60f87f3d554f7#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L466' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7191677</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 2aacf4d049fc9e7b073c15d705c60f87f3d554f7</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 471</div><div id='m_end'> M End Line: 477</div><div id='n_start'> N Start Line: 471</div><div id='n_end'> N End Line: 480</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+
+        with g.local_scope():
+            h_prime = <a id="change">[]</a>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = <a id="change">emb.permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>.contiguous()
+            g.edata[&quotalpha&quot] = edge_attention
+            g.srcdata[&quotemb&quot]<a id="change"> = </a>emb
+            g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                         Fn.sum(&quotm&quot, &quotemb&quot))
+            &#47&#47 g.apply_edges(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7191665</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>

@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :2948
+</h3><img src='9751692.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        next_cmem = []
+        aux_loss = torch.zeros(1, requires_grad = True, **to(x))
+
+        for attn, ff, m, c in <a id="change">zip(</a>self.attn_layers, self.ff_layers, mem, cmem<a id="change">)</a>:
+            x, (mem_out, cmem_out), layer_aux_loss = attn(x, memories = (m, c), input_mask = mask, pos_emb = pos_emb)
+            x, = ff(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        next_cmem = []
+        aux_loss = torch.zeros(1, requires_grad = True, **to(x))
+
+        for ind, (attn, ff, m, c) in <a id="change">enumerate(</a><a id="change">zip(</a>self.attn_layers, self.ff_layers, mem, cmem<a id="change">))</a>:
+            layer_num = ind + 1
+            use_memory<a id="change"> = layer_num in self.use_memory_layers</a>
+
+            x, (mem_out, cmem_out), layer_aux_loss = attn(x, memories = (m, c), input_mask = mask, pos_emb = pos_emb)
+            x, = ff(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/2bc4a3213aeccc3b603df09b552feb4beca4ed39#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL265' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9751692</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 2bc4a3213aeccc3b603df09b552feb4beca4ed39</div><div id='time'> Time: 2020-07-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 265</div><div id='m_end'> M End Line: 275</div><div id='n_start'> N Start Line: 269</div><div id='n_end'> N End Line: 281</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        grad_accumulate_every = math.ceil(x.shape[0] / max_batch_size)
+        mems = [None] * grad_accumulate_every
+
+        for xi_seg, xo_seg, mask_seg in <a id="change">zip(</a>xi, xo, mask<a id="change">)</a>:
+            xi_seg, xo_seg = map(split_batch_fn, (xi_seg, xo_seg))
+            mask_seg = split_batch_fn(mask_seg) if mask_seg is not None else ((None,) * grad_accumulate_every)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        grad_accumulate_every = math.ceil(x.shape[0] / max_batch_size)
+        mems = [None] * grad_accumulate_every
+
+        for ind, (xi_seg, xo_seg, mask_seg) in <a id="change">enumerate(</a><a id="change">zip(</a>xi, xo, mask<a id="change">))</a>:
+            xi_seg, xo_seg = map(split_batch_fn, (xi_seg, xo_seg))
+            mask_seg = split_batch_fn(mask_seg) if mask_seg is not None else ((None,) * grad_accumulate_every)
+            truncate<a id="change"> = </a>truncate_every is not None and <a id="change">((ind + 1) % truncate_every) == 0</a>
+
+            new_mems = []
+            for ind, (xi_seg_b, xo_seg_b, mask_seg_b, mem) in enumerate(zip(xi_seg, xo_seg, mask_seg, mems)):
+                is_last = ind == (grad_accumulate_every - 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/d4ae80a8ce18a5ab0d871139f195bb78a7529547#diff-788c4412d48eeb84f7ee848c460b2765526edc2199dac28ebab934d31a465460L108' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9751688</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: d4ae80a8ce18a5ab0d871139f195bb78a7529547</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/autoregressive_wrapper.py</div><div id='n_file'> N File Name: memory_transformer_xl/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 141</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 144</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 spatial tokens is tokens with depth pos reduced along depth dimension + spatial positions        
+
+        for stage_tokens, transformer in <a id="change">zip(</a>tokens_at_stages, self.transformers<a id="change">)</a>:
+            stage_tokens = torch.cat((
+                start_tokens,
+                stage_tokens,</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 spatial tokens is tokens with depth pos reduced along depth dimension + spatial positions        
+
+        for ind, (stage_tokens, transformer) in <a id="change">enumerate(</a><a id="change">zip(</a>tokens_at_stages, self.transformers<a id="change">))</a>:
+            is_last<a id="change"> = ind == (self.stages - 1)</a>
+
+            stage_tokens = torch.cat((
+                start_tokens,
+                stage_tokens,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/rq-transformer/commit/56a8e24814d90cebb03454d9feed0bff4bee69ba#diff-6aad5c31d64c6b7a1a8cd103c9aceb7a4b5bb6c1b41d581e98e22e1a4473b554L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9751690</div><div id='project'> Project Name: lucidrains/rq-transformer</div><div id='commit'> Commit Name: 56a8e24814d90cebb03454d9feed0bff4bee69ba</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_class'> M Class Name: HierarchicalCausalTransformer</div><div id='n_method'> N Class Name: HierarchicalCausalTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='n_file'> N File Name: rq_transformer/hierarchical_causal_transformer.py</div><div id='m_start'> M Start Line: 279</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 293</div><div id='n_end'> N End Line: 344</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, context = None, mask = None, context_mask = None):
+        prev_attn = None
+        for (layer_type, (norm, block)) in <a id="change">zip(</a>self.layer_types, self.layers<a id="change">)</a>:
+            if self.pre_norm:
+                x = norm(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, context = None, mask = None, context_mask = None):
+        prev_attn = None
+        for ind, (layer_type, (norm, block)) in <a id="change">enumerate(</a><a id="change">zip(</a>self.layer_types, self.layers<a id="change">))</a>:
+            is_last<a id="change"> = ind == (len(self.layers) - 1)</a>
+
+            if self.pre_norm:
+                x = norm(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/ee19224d7ddb80e764cd17915652c5b2529604cd#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL349' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9751691</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: ee19224d7ddb80e764cd17915652c5b2529604cd</div><div id='time'> Time: 2020-12-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: AttentionLayers</div><div id='n_method'> N Class Name: AttentionLayers</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 351</div><div id='m_end'> M End Line: 367</div><div id='n_start'> N Start Line: 351</div><div id='n_end'> N End Line: 369</div><BR>

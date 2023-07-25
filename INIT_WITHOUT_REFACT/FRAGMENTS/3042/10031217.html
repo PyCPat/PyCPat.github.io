@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        ]
+        bboxes = torch.cat(
+            [
+                torch.cat([torch.tensor(<a id="change">[</a>idx<a id="change"></a>]), roi_row])
+                for idx, roi in enumerate(bboxes)
+                for roi_row in roi
+            ]</code></pre><h3>After Change</h3><pre><code class='java'>
+            )
+            losses.update(polygonrnn_loss)
+            return losses, acc
+        <a id="change">detections</a> = self.obj_detection_model(x)
+        empty_entries = self._get_empty_entries(detections)
+        if len(empty_entries) == len(detections):
+            for idx, _ in enumerate(detections):
+                <a id="change">detections[idx].update(
+                    </a>{key: [] for key in ["min_row", "min_col", "scale_h", "scale_w"]}<a id="change">
+                )</a>
+            return detections
+        bboxes = [
+            item["boxes"]
+            for idx, item in enumerate(detections)
+            if idx not in empty_entries
+        ]
+        bboxes = torch.cat(
+            [
+                torch.column_stack([idx * torch.ones(bbox.shape[0]), bbox])
+                for idx, bbox in enumerate(bboxes)
+            ]
+        )  &#47&#47 num_rois, 5
+        polygonrnn_output = self.polygonrnn_model.test(
+            x, bboxes, self.val_seq_len
+        )  &#47&#47 type: ignore
+        min_bound = 0
+        for idx, det in enumerate(detections):
+            if idx in empty_entries:
+                <a id="change">detections[idx].update(
+                    </a>{key: [] for key in ["min_row", "min_col", "scale_h", "scale_w"]}<a id="change">
+                )</a>
+                continue
+            n_items = len(det["boxes"])
+            detections[idx].update(
+                {</code></pre>

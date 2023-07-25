@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :1646
+</h3><img src='6662989.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            λp = self.pos_conv(v)
+            Yp = einsum(&quotb h k n, b k v n -&gt; b h v n&quot, q, λp.flatten(3))
+        else:
+            rel_pos_emb = self.rel_pos_emb[self.rel_pos[:, :, 0], <a id="change">self.rel_pos[:, :, 1]</a>]
+            λp = einsum(&quotn m k u, b u v m -&gt; b n k v&quot, rel_pos_emb, v)
+            Yp = einsum(&quotb h k n, b n k v -&gt; b h v n&quot, q, λp)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            λp = self.pos_conv(v)
+            Yp = einsum(&quotb h k n, b k v n -&gt; b h v n&quot, q, λp.flatten(3))
+        else:
+            n, m = <a id="change">self.rel_pos.unbind(dim = -1)</a>
+            rel_pos_emb = self.rel_pos_emb[n, m]
+            λp = einsum(&quotn m k u, b u v m -&gt; b n k v&quot, rel_pos_emb, v)
+            Yp = einsum(&quotb h k n, b n k v -&gt; b h v n&quot, q, λp)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/lambda-networks/commit/52697d897426c53030686af4c40986f21da62363#diff-6d46aff567baa42dfd4c6b8d2f5c956d3ea84b2811ca663ea67159e323344ccbL82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662989</div><div id='project'> Project Name: lucidrains/lambda-networks</div><div id='commit'> Commit Name: 52697d897426c53030686af4c40986f21da62363</div><div id='time'> Time: 2020-11-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: lambda_networks/lambda_networks.py</div><div id='m_class'> M Class Name: LambdaLayer</div><div id='n_method'> N Class Name: LambdaLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lambda_networks/lambda_networks.py</div><div id='n_file'> N File Name: lambda_networks/lambda_networks.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 83</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for batch_idx in range(batch_size):
+            n_sources = lens_unpacked[batch_idx] &#47&#47 &lt;int&gt;
+            _input, _target = input[batch_idx: batch_idx+1], target[batch_idx: batch_idx+1, : n_sources] &#47&#47 (1, 2, *), (1, n_sources, *)
+            input_one, input_rest = _input[:, 0], <a id="change">_input[:, 1]</a> &#47&#47 (1, *), (1, *)
+
+            possible_loss = None
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        for batch_idx in range(batch_size):
+            n_sources = lens_unpacked[batch_idx] &#47&#47 &lt;int&gt;
+            _input, _target = input[batch_idx: batch_idx + 1], target[batch_idx: batch_idx + 1, : n_sources] &#47&#47 (1, 2, *), (1, n_sources, *)
+            input_one, input_rest = <a id="change">torch.unbind(</a>_input<a id="change">, dim=1)</a> &#47&#47 (1, *), (1, *)
+
+            possible_loss = None
+    </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/f567de95d2de6275e9a9ae7e70d9a0d9bde79b90#diff-22aca1dcfba1cb607c12abfa769f86ec60cb0d8e7969b24efc450d5a0ffd0cf5L98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662984</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: f567de95d2de6275e9a9ae7e70d9a0d9bde79b90</div><div id='time'> Time: 2021-11-10</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/pit.py</div><div id='m_class'> M Class Name: ORPIT</div><div id='n_method'> N Class Name: ORPIT</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/pit.py</div><div id='n_file'> N File Name: src/criterion/pit.py</div><div id='m_start'> M Start Line: 126</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 126</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = []
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(<a id="change">input[:, step, :, :, :]</a>, hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        last_state_list, layer_output
+        
+        input = self.input_dp(input)
+        cur_layer_input = <a id="change">torch.unbind(</a>input<a id="change">, dim=int(self.batch_first))</a>
+
+        if hidden_state is None:
+            hidden_state = self.get_init_states(cur_layer_input[0])
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662986</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        print(sample[..., None].shape)
+        print(self._codebook[:, None, None, ...].shape)
+        exit()
+        return <a id="change">(sample[..., None] * self._codebook[:, None, None, ...]).sum(-2</a><a id="change">)</a>
+
+
+class _quantizerEncoder(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        quantizeds = list()
+        for i in range(len(self._codebook)):
+            &#47&#47 [n, h, w, k]
+            oneHot = <a id="change">sample[:, i]</a>
+            &#47&#47 [n, h, w, k] @ [k, d] -&gt; [n, h, w, d]
+            quantized = oneHot @ self._codebook[i]
+            quantizeds.append(quantized)
+        &#47&#47 m * [n, h, w, d] -&gt; [n, h, w, c] -&gt; [n, c, h, w]</code></pre>

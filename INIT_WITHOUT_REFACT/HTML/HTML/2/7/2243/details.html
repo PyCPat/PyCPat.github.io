@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2243
+</h3><img src='7895354.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        is_pad = (x == self.pad_idx).unsqueeze(-2)
+        shifted = torch.zeros(x.size()[:-1] + (1, offset,),
+                              dtype=torch.bool, device=x.device)
+        <a id="change">return </a><a id="change">torch.cat(</a>(shifted<a id="change">, is_pad</a>)<a id="change">, dim=-1)</a>
+
+
+class FutureMasking(nn.Module):
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        is_pad = (x == self.pad_idx).unsqueeze(-2)
+        shifted = torch.zeros(x.size()[:-1] + (1, offset,),
+                              dtype=torch.bool, device=x.device)
+        mask<a id="change"> = </a><a id="change">torch.cat(</a>(shifted<a id="change">, is_pad</a>)<a id="change">, dim=-1)</a>
+
+        &#47&#47 Expand the tensor.
+        <a id="change">return </a>mask.expand(x.shape + mask.shape[-1:])
+
+
+class FutureMasking(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/affjljoo3581/gpt2/commit/2d7f2c40e7cece98300a3766a7ced0ef09b85804#diff-80c6cbb12a2b88e6c08c9f0f3080898678a9efd8a3cdc4683e04a73b246c9355L22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895354</div><div id='project'> Project Name: affjljoo3581/gpt2</div><div id='commit'> Commit Name: 2d7f2c40e7cece98300a3766a7ced0ef09b85804</div><div id='time'> Time: 2020-06-24</div><div id='author'> Author: affjljoo3581@gmail.com</div><div id='file'> File Name: src/gpt2/modeling/masking.py</div><div id='m_class'> M Class Name: PadMasking</div><div id='n_method'> N Class Name: PadMasking</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/gpt2/modeling/masking.py</div><div id='n_file'> N File Name: src/gpt2/modeling/masking.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 25</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        y1 = self.cv3(self.m(self.cv1(x)))
+        y2 = self.cv2(x)
+        <a id="change">return </a>self.cv4(self.act(self.bn(<a id="change">torch.cat(</a>(y1<a id="change">, y2</a>)<a id="change">, dim=1)</a>)))
+
+
+class C3(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        y1 = self.cv3(self.m(self.cv1(x)))
+        y2 = self.cv2(x)
+        y = <a id="change">torch.cat(</a>(y1<a id="change">, y2</a>)<a id="change">, dim=1)</a>
+        y = forward_norm_layer(y, self.bn, self.norm_type)
+        y<a id="change"> = </a>self.act(y)
+        <a id="change">return </a>self.cv4(y)
+
+
+class C3(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liudakai2/unsupdis-pytorch/commit/dff9ffa2c563414ada8234e40e7de2b12f556638#diff-cfb1ff087a99a34369673c9f34bdcd22f2d429ab3599a89f386c5de1fd9a2566L275' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895355</div><div id='project'> Project Name: liudakai2/unsupdis-pytorch</div><div id='commit'> Commit Name: dff9ffa2c563414ada8234e40e7de2b12f556638</div><div id='time'> Time: 2022-07-21</div><div id='author'> Author: 951522847@qq.com</div><div id='file'> File Name: models/common.py</div><div id='m_class'> M Class Name: BottleneckCSP</div><div id='n_method'> N Class Name: BottleneckCSP</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/common.py</div><div id='n_file'> N File Name: models/common.py</div><div id='m_start'> M Start Line: 278</div><div id='m_end'> M End Line: 278</div><div id='n_start'> N Start Line: 287</div><div id='n_end'> N End Line: 290</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        A = A.view(N, 1, ord_num * H * W)
+        B = B.view(N, 1, ord_num * H * W)
+        concat_feats = <a id="change">torch.cat(</a>(A<a id="change">, B</a>)<a id="change">, dim=1)</a>.contiguous()
+
+        if self.training:
+            ord_prob = F.log_softmax(concat_feats, dim=1)
+            <a id="change">return </a>ord_prob.view(-1, ord_num, H, W)
+
+        ord_prob = F.softmax(C, dim=1)[:, 1, ::]
+        ord_prob = ord_prob.view(-1, ord_num, H, W)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 B = B.reshape(N, 1, ord_num * H * W)
+        A = A.unsqueeze(dim=1)
+        B = B.unsqueeze(dim=1)
+        concat_feats = <a id="change">torch.cat(</a>(A<a id="change">, B</a>)<a id="change">, dim=1)</a>
+
+        if self.training:
+            prob = F.log_softmax(concat_feats, dim=1)
+            ord_prob = x.clone()
+            ord_prob[:, 0::2, :, :]<a id="change"> = </a>prob[:, 0, :, :, :]
+            ord_prob[:, 1::2, :, :] = prob[:, 1, :, :, :]
+            <a id="change">return </a>ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1).reshape((N, 1, H, W))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/07fe1714fc568b25bd80debe8dd3ab800ff576a8#diff-4113dbf82d3c85db8d660e5485c3df3048dd9c7cefb1a9060e9e80ba9a7c2cc5L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895356</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: 07fe1714fc568b25bd80debe8dd3ab800ff576a8</div><div id='time'> Time: 2020-05-02</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_class'> M Class Name: OrdinalRegressionLayer</div><div id='n_method'> N Class Name: OrdinalRegressionLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='n_file'> N File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 45</div><BR>

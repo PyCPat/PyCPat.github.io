@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        outputs = []
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        <a id="change">if timespans is None</a><a id="change">:
+            </a>timespans<a id="change"> = </a>x.new_ones(x.shape[:-1]<a id="change">+</a>(1,)) / x.shape[1]
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()
+            hidden_state = self.rnn_cell.forward(inputs, hidden_state, ts)
+            current_output = self.fc(hidden_state[0])
+            outputs.append(current_output)
+            last_output = current_output
+        if self.return_sequences:
+            outputs = torch.stack(outputs, dim=1)  &#47&#47 return entire sequence
+        else:
+            outputs<a id="change"> = </a>last_output  &#47&#47 only last item
+        return outputs, hidden_state</code></pre><h3>After Change</h3><pre><code class='java'>
+        L = u.size(-1)
+        if lengths is not None:
+            assert isinstance(lengths, torch.Tensor) and lengths.ndim == 1 and lengths.size(0) in [1, u.size(0)]
+            mask = torch.where(torch.arange(L, device=lengths.device) &lt; <a id="change">lengths[:, None, None]</a>, 1., 0.)
+            u = u * mask
+
+        device = u.device</code></pre>

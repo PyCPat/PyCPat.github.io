@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :2057
+</h3><img src='7507286.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        B, C = x.shape[:2]
+        ori_shape = x.shape
+        x = <a id="change">x.transpose(-1, 1).reshape(</a>B, <a id="change">-1</a>, 3, C<a id="change">)</a>
+        x = self.ln(x)
+        x = x.transpose(-1, 1).reshape(ori_shape)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returns:
+            features of the same shape after LN in each instance
+        
+        norm = <a id="change">torch.norm(</a>x<a id="change">, dim=2)</a> + EPS  &#47&#47 [B, C, N, ...]
+        norm_ln = self.ln(norm.transpose(1, -1)).transpose(1, -1)
+        norm = norm.unsqueeze(2)
+        norm_ln<a id="change"> = </a>norm_ln.unsqueeze(2)
+        x = x / norm * norm_ln
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wuziyi616/multi_part_assembly/commit/7e1267aa33c2c264299bb4955ef23b3961b17693#diff-a90092c416276a22903e36e71bbaf25f682c8d025f0557e09c165773bb2b43b3L168' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7507286</div><div id='project'> Project Name: wuziyi616/multi_part_assembly</div><div id='commit'> Commit Name: 7e1267aa33c2c264299bb4955ef23b3961b17693</div><div id='time'> Time: 2022-06-29</div><div id='author'> Author: dazitu616@gmail.com</div><div id='file'> File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_class'> M Class Name: VNLayerNorm</div><div id='n_method'> N Class Name: VNLayerNorm</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='n_file'> N File Name: multi_part_assembly/models/modules/vnn/modules.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 168</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        content_q = q if not self.norm_queries else q.softmax(dim=-2)
+
+        content_out = einsum(&quotbhde,bhdn-&gt;bhen&quot, context, content_q)
+        content_out = <a id="change">content_out.reshape(</a>b, <a id="change">-1</a>, x, y<a id="change">)</a>
+        content_out = self.to_out(content_out)
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+
+            Yh = <a id="change">self.norm(</a>Yh<a id="change">)</a>
+
+            Iy = calc_reindexing_tensor(y, L, device)
+            Py = einsum(&quotxir,rd-&gt;xid&quot, Iy, self.rel_columns)
+            Sy = einsum(&quotndxy,xid-&gt;nixy&quot, q, Py)
+            rel_pos_out<a id="change"> = </a>einsum(&quotnixy,neiy-&gt;nexy&quot, Sy, Yh)
+            del Iy
+
+            content_out = content_out + rel_pos_out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/global-self-attention-network/commit/6e87bd0b96350f46edc8d4b4ccd582ecc868e22f#diff-af8f87d68d6adf627dabaab6519f02d4b454d6ba08e146c8f5dc18f07e073e31L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7507284</div><div id='project'> Project Name: lucidrains/global-self-attention-network</div><div id='commit'> Commit Name: 6e87bd0b96350f46edc8d4b4ccd582ecc868e22f</div><div id='time'> Time: 2020-10-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_class'> M Class Name: GSA</div><div id='n_method'> N Class Name: GSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gsa_pytorch/gsa_pytorch.py</div><div id='n_file'> N File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 74</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        input: torch.Tensor = bchw_to_bhwc(input)
+        &#47&#47 Unfold input
+        input: torch.Tensor = input.unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        input: torch.Tensor = <a id="change">input.reshape(</a>batch_size, input.shape[1], input.shape[2], <a id="change">-1</a><a id="change">)</a>
+        &#47&#47 Normalize input
+        input: torch.Tensor = self.normalization(input)
+        &#47&#47 Perform linear mapping
+        output: torch.Tensor = bhwc_to_bchw(self.linear_mapping(input))</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x = bchw_to_bhwc(x).unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        x = x.permute(0, 1, 2, 5, 4, 3).flatten(3)  &#47&#47 permute maintains compat with ch order in official swin impl
+        x<a id="change"> = </a><a id="change">self.norm(</a>x<a id="change">)</a>
+        x = bhwc_to_bchw(self.reduction(x))
+        return x
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3#diff-ed4e73b2f003b1bf594949d63e8066b203ff134a32665c27fe72e45e3a6607afL701' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7507289</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3</div><div id='time'> Time: 2022-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer_v2_cr.py</div><div id='n_file'> N File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 722</div><div id='n_start'> N Start Line: 455</div><div id='n_end'> N End Line: 459</div><BR>

@@ -1,0 +1,45 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+class MaxViT_Block(nn.Module):
+    def __init__(self, stage_dim_in, layer_dim,kernel,dilation,padding, is_first, mbconv_expansion_rate,mbconv_shrinkage_rate,w,dim_head,dropout):
+        super(MaxViT_Block, self).__init__()
+        self.block = <a id="change">nn.Sequential(
+            </a>MBConv(
+                stage_dim_in,
+                layer_dim,
+                kernel,
+                dilation,
+                padding,
+                downsample=is_first,
+                expansion_rate=mbconv_expansion_rate,
+                shrinkage_rate=mbconv_shrinkage_rate
+            ),
+            Rearrange(&quotb d (x w1) (y w2) -&gt; b x y w1 w2 d&quot, w1=w, w2=w),  &#47&#47 block-like attention
+            PreNormResidual(layer_dim, Attention(dim=layer_dim, dim_head=dim_head, dropout=dropout, window_size=w)),
+            PreNormResidual(layer_dim, FeedForward(dim=layer_dim, dropout=dropout)),
+            Rearrange(&quotb x y w1 w2 d -&gt; b d (x w1) (y w2)&quot),
+
+            Rearrange(&quotb d (w1 x) (w2 y) -&gt; b x y w1 w2 d&quot, w1=w, w2=w),  &#47&#47 grid-like attention
+            PreNormResidual(layer_dim, Attention(dim=layer_dim, dim_head=dim_head, dropout=dropout, window_size=w)),
+            PreNormResidual(layer_dim, FeedForward(dim=layer_dim, dropout=dropout)),
+            Rearrange(&quotb x y w1 w2 d -&gt; b d (w1 x) (w2 y)&quot)<a id="change">,
+        )</a>
+    def forward(self,x):
+        return self.block(x)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.SiLU(),
+
+        )
+        self.l1<a id="change"> = </a><a id="change">nn.Sequential(
+            nn.Conv2d(</a>layer_dim, layer_dim<a id="change">, kernel_size=kernel, stride=1, padding=&quotsame&quot, dilation=dilation,groups=layer_dim)</a>,
+            SqueezeExcitation(layer_dim, shrinkage_rate=mbconv_shrinkage_rate),
+            <a id="change">nn.Conv2d(</a>layer_dim, layer_dim, 1<a id="change">)</a>,
+            <a id="change">nn.BatchNorm2d(</a>layer_dim<a id="change">)</a><a id="change">
+        )</a>
+        self.l2 = Rearrange(&quotb d (x w1) (y w2) -&gt; b x y w1 w2 d&quot, w1=w, w2=w)  &#47&#47 block-like attention
+        self.l3 = PreNormResidual(layer_dim, Attention(dim=layer_dim, dim_head=dim_head, dropout=dropout, window_size=w))
+        self.l4 = PreNormResidual(layer_dim, FeedForward(dim=layer_dim, dropout=dropout))
+        self.l5 = Rearrange(&quotb x y w1 w2 d -&gt; b d (x w1) (y w2)&quot)</code></pre>

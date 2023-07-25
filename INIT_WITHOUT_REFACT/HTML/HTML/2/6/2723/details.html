@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :2723
+</h3><img src='9037256.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+        return quantizeds<a id="change">, codes, logits</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = prob(x, h, w)
+            &#47&#47 logit = torch.matmul(x / (x ** 2).sum(-1, keepdim=True), codewords / (codewords ** 2).sum(0, keepdim=True))
+            logit = x @ codewords
+            soft = <a id="change">(logit / temperature).softmax(</a>-1<a id="change">)</a>
+            if hard:
+                hard<a id="change"> = </a>logit.argmax(-1)
+                hard = F.one_hot(hard, k)
+                sample<a id="change"> = </a>(hard<a id="change"> - </a>soft).detach() + soft
+            else:
+                sample<a id="change"> = </a>soft
+            &#47&#47 sample = F.gumbel_softmax(logit, temperature, hard)
+            &#47&#47 sample = logit
+            &#47&#47 [h*w, N, c] &lt;- [h*w, N, k] @ [k, C]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/96e69f8763c2cf2c9cf0695159db17ddf4e0c857#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L280' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037256</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 96e69f8763c2cf2c9cf0695159db17ddf4e0c857</div><div id='time'> Time: 2021-02-15</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 335</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 339</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t<a id="change">, domain_acc_t</a> = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = <a id="change">F.softmax(</a>g<a id="change">,dim=1)</a>.detach()
+        h<a id="change"> = </a>self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label = torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight = 1.0 + torch.exp(-entropy(g))
+        batch_size<a id="change"> = </a>f.size(0)
+        weight<a id="change"> = </a>weight<a id="change"> / torch.sum(weight) * </a>batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        return self.bce(d, d_label, weight.view_as(d))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/8477111b23336e7dd2d349a4b35b969240ff5871#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037259</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 8477111b23336e7dd2d349a4b35b969240ff5871</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.domain_discriminator_accuracy = None
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s<a id="change">, domain_acc_s</a> = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t, domain_acc_t = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, g_s, f_s, g_t, f_t):
+        f = torch.cat((f_s, f_t), dim=0)
+        g = torch.cat((g_s, g_t), dim=0)
+        g = <a id="change">F.softmax(</a>g<a id="change">,dim=1)</a>.detach()
+        h<a id="change"> = </a>self.grl(self.map(f, g))
+        d = self.domain_discriminator(h)
+        d_label = torch.cat((
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight = 1.0 + torch.exp(-entropy(g))
+        batch_size<a id="change"> = </a>f.size(0)
+        weight<a id="change"> = </a>weight<a id="change"> / torch.sum(weight) * </a>batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        return self.bce(d, d_label, weight.view_as(d))
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06#diff-921a2eeb848068663b0c58710b496c58d46246573eaab61f41628954ccf27867L85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037244</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 6dfc8e293ca2cbc4d116dc8ed0a6ef176dff0d06</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: 13126830206@163.com</div><div id='file'> File Name: dalib/adaptation/cdan.py</div><div id='m_class'> M Class Name: ConditionalDomainAdversarialLoss</div><div id='n_method'> N Class Name: ConditionalDomainAdversarialLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/adaptation/cdan.py</div><div id='n_file'> N File Name: dalib/adaptation/cdan.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 100</div><BR>

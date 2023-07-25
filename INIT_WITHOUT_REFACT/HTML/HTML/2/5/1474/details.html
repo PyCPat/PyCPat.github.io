@@ -1,0 +1,91 @@
+<html><h3>Pattern ID :1474
+</h3><img src='4319557.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x):
+        <a id="change">return </a><a id="change">_ReversibleFunction.apply(</a>x, self.blocks<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        blocks = self.blocks
+
+        <a id="change">if self.layer_dropout &gt; 0</a><a id="change">:
+            </a>to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = self.blocks[:1] if len(blocks) == 0 else blocks
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/f989c1483f6f3d108722cfc1070933b6bee9a274#diff-dc60757400f2449a79aac7063816b042a374dc2d771caf95f56cc2d14775084bL118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4319557</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: f989c1483f6f3d108722cfc1070933b6bee9a274</div><div id='time'> Time: 2020-02-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reversible.py</div><div id='n_file'> N File Name: reformer_pytorch/reversible.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                    inference_cuda_module.residual_add_bias_fp32
+
+    def forward(self, input, residual, residual_norm, bias):
+        <a id="change">return </a><a id="change">DeepSpeedMLPFunction.apply(</a>input,
+                                          residual,
+                                          residual_norm,
+                                          bias,
+                                          self.inter_w,
+                                          self.inter_b,
+                                          self.attn_nw,
+                                          self.attn_nb,
+                                          self.config,
+                                          self.mp_group,
+                                          self.output_b,
+                                          self.output_w,
+                                          self.q_scales,
+                                          self.q_groups,
+                                          self.merge_count,
+                                          self.mlp_gemm_func,
+                                          self.fused_gemm_gelu,
+                                          self.vector_matmul_func,
+                                          self.bias_residual_func,
+                                          self.residual_add_func<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            add_bias=bias is not None,
+            residual_add=residual_add)
+
+        <a id="change">if </a>self.mp_group is not None and <a id="change">dist.get_world_size(group=self.mp_group) &gt; 1</a><a id="change">:
+            </a>dist.all_reduce(residual, group=self.mp_group)
+
+        return residual
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/microsoft/deepspeed/commit/c702b64c94243674c3143a4cf29d59777a88307d#diff-9e4ae80750d7192e689307f7e660fd912cebc385a8af9dd8aecb8db714ab98d1L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4319559</div><div id='project'> Project Name: microsoft/deepspeed</div><div id='commit'> Commit Name: c702b64c94243674c3143a4cf29d59777a88307d</div><div id='time'> Time: 2023-01-09</div><div id='author'> Author: jerasley@microsoft.com</div><div id='file'> File Name: deepspeed/ops/transformer/inference/ds_mlp.py</div><div id='m_class'> M Class Name: DeepSpeedMLP</div><div id='n_method'> N Class Name: DeepSpeedMLP</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepspeed/ops/transformer/inference/ds_mlp.py</div><div id='n_file'> N File Name: deepspeed/ops/transformer/inference/ds_mlp.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 178</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 94</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                norm_w=None,
+                norm_b=None,
+                alibi=None):
+        output = <a id="change">DeepSpeedSelfAttentionFunction.apply(
+            </a>input,
+            input_mask,
+            head_mask,
+            layer_past,
+            get_present,
+            encoder_hidden_states,
+            encoder_attention_mask,
+            output_attentions,
+            norm_w,
+            norm_b,
+            self.config,
+            self.attn_qkvw,
+            self.attn_qkvb,
+            self.num_attention_heads_per_partition,
+            self.norm_factor,
+            self.hidden_size_per_partition,
+            self.attn_ow,
+            self.attn_ob,
+            self.mp_group,
+            self.q_scales,
+            self.q_groups,
+            self.merge_count,
+            self.qkv_merging,
+            self.score_context_func,
+            alibi<a id="change">)</a>
+
+        <a id="change">return </a>output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        inp_norm = qkv_out[-1]
+
+        <a id="change">if </a>self.config.mlp_after_attn and self.mp_group is not None and <a id="change">dist.get_world_size(
+                group=self.mp_group) &gt; 1</a><a id="change">:
+            </a>dist.all_reduce(output, group=self.mp_group)
+
+        return (output, key_layer, value_layer, context_layer, inp_norm)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/microsoft/deepspeed/commit/bb68c526ad2c267dfb235db9c0d0fb1413d19a34#diff-88a3148746124b4093264a91ae8cac5be0bb592bfb2868d5df944836e55d93dbL446' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4319558</div><div id='project'> Project Name: microsoft/deepspeed</div><div id='commit'> Commit Name: bb68c526ad2c267dfb235db9c0d0fb1413d19a34</div><div id='time'> Time: 2022-12-22</div><div id='author'> Author: jerasley@microsoft.com</div><div id='file'> File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='m_class'> M Class Name: DeepSpeedSelfAttention</div><div id='n_method'> N Class Name: DeepSpeedSelfAttention</div><div id='m_method'> M Method Name: forward(12)</div><div id='n_method'> N Method Name: forward(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='n_file'> N File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='m_start'> M Start Line: 458</div><div id='m_end'> M End Line: 485</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 151</div><BR>

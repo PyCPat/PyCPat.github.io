@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        voting_map = voting_map.view(batch_size, self.region_num, self.num_classes, width, height)
+        heatmap = torch.zeros((batch_size, self.num_classes, width, height), dtype=torch.float).cuda()
+        for i in range(self.num_classes):
+            <a id="change">heatmap[:, i, :, :]</a> = self.deconv_filters(voting_map[:, :, i, :, :]).squeeze(dim=1)
+
+        return heatmap
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.model_v1:
+            batch_size, channels, width, height = voting_map.shape
+            voting_map = voting_map.view(batch_size, self.region_num, self.num_classes, width, height)
+            voting_map = <a id="change">voting_map.permute(0</a>, <a id="change">2</a>, <a id="change">1</a>, <a id="change">3</a>, <a id="change">4</a><a id="change">)</a>
+            voting_map = voting_map.reshape(batch_size, -1, width, height)
+
+        heatmap = self.deconv_filters(voting_map)
+</code></pre>

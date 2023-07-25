@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    apool = torch.mean(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+    mpool, _ = torch.max(conv_features, dim = 1) &#47&#47 (N, block_num, embed_dim * 0.5)
+
+    imgs_embed<a id="change"> = </a><a id="change">torch.cat(</a>[apool, mpool]<a id="change">, dim = 2)</a> &#47&#47 (N, block_num, embed_dim)
+
+    words_embed = self.__content_embed__(input_ids) &#47&#47 (N, seq_len, embed_dim)
+    indices  = torch.arange(self.seq_len + self.block_num).expand(batch, -1).to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+    &#47&#47batch_texts = self.__clip__.encode_text(text_input)
+
+    &#47&#47tags_embed = self.__text2embed__(self.__clip_drop__(batch_texts.float())).unsqueeze(1)
+    imgs_embed = self.__img2embed__(self.__clip_drop__(<a id="change">batch_features.float()</a>)).unsqueeze(1)
+
+    words_embed = self.__content_embed__(input_ids) 
+    indices  = torch.arange(self.seq_len + self.tags_num + self.block_num).expand(batch, -1).to(device)</code></pre>

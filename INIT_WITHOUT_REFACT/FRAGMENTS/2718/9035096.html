@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 slice causal mask to the appropriate query chunk windows - no padding need to be accounted for
+
+            mask_start_pos = ind * chunk_size
+            mask_end_pos = mask_start_pos + <a id="change">q_chunk.shape[1]</a>
+            mask_range = slice(mask_start_pos, mask_end_pos)
+
+            causal_mask_slice = self.causal_mask[mask_range]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        q_chunks = q.split(chunk_size, dim = 1)
+
+        causal_mask = self.causal_mask[:(n - 1)]
+        causal_mask_chunks<a id="change"> = </a>causal_mask.split(chunk_size, dim = 0)
+
+        for ind, (q_chunk, causal_mask_chunk) in enumerate(<a id="change">zip(</a>q_chunks, causal_mask_chunks<a id="change">)</a>):
+
+            &#47&#47 slice the keys and values to the appropriate frames, accounting for padding along frames dimension
+</code></pre>

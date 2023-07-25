@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                             (1 - self.beta) + res_attn * self.beta
+
+        with g.local_scope():
+            h_prime = <a id="change">[]</a>
+            emb = emb.permute(1, 0, 2).contiguous()
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = <a id="change">emb.permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>.contiguous()
+            g.edata[&quotalpha&quot] = edge_attention
+            g.srcdata[&quotemb&quot]<a id="change"> = </a>emb
+            g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),
+                         Fn.sum(&quotm&quot, &quotemb&quot))
+            &#47&#47 g.apply_edges(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot))</code></pre>

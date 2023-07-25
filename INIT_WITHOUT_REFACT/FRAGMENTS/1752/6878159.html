@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        output_audio, _ = self.RNNs[1](X_audio)
+        output_visual, _ = self.RNNs[2](X_visual)
+
+        batch_size<a id="change"> = </a>output_text.size(0)
+
+        &#47&#47 (batch, num_directions * hidden_size)
+        output_text = output_text[:, -1, :]
+        output_audio = output_audio[:, -1, :]
+        output_visual = output_visual[:, -1, :]
+
+        &#47&#47 (num_classes, 300)
+        text_emo_vecs = self.textEmoEmbs(torch.LongTensor(list(range(self.num_classes))))
+        visual_emo_vecs = self.affineVisual(text_emo_vecs)
+        audio_emo_vecs = self.affineAudio(text_emo_vecs)
+
+        text_emo_vecs = <a id="change">text_emo_vecs.unsqueeze(0).repeat(</a>batch_size, <a id="change">1</a>, 1<a id="change">)</a>
+        visual_emo_vecs = visual_emo_vecs.unsqueeze(0).repeat(batch_size, 1, 1)
+        audio_emo_vecs = audio_emo_vecs.unsqueeze(0).repeat(batch_size, 1, 1)
+
+        text_attn_feature = self.attention(output_text, text_emo_vecs)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        batch_size = X_text.size(0)
+        logits = None
+        <a id="change">if </a>&quott&quot in self.modalities<a id="change">:
+            </a>output_text, _ = self.RNNs[0](X_text)
+            output_text = output_text[:, -1, :]
+            text_emo_vecs_origin = self.textEmoEmbs(torch.LongTensor(list(range(self.num_classes))).to(self.device))
+            text_emo_vecs = text_emo_vecs_origin.unsqueeze(0).repeat(batch_size, 1, 1)</code></pre>

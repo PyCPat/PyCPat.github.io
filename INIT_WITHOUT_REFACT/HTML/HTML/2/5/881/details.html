@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :881
+</h3><img src='2767656.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+class RandomGamma(nn.Module):
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        randomChoice = torch.randint(0, 4, (<a id="change">len(</a>x<a id="change">)</a>, ))
+        x[randomChoice == 0] = srgbToLinear(x[randomChoice == 0])
+        x[randomChoice == 1] = linearToSrgb(x[randomChoice == 1])
+        x[randomChoice == 2]<a id="change"> = </a>randomGamma(x[randomChoice == 2], torch.rand((x[randomChoice == 2].shape[0], ), device=x.device)<a id="change"> * 1.95</a> + 0.05)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    ]
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        choice = random.randint(0, 3)
+        <a id="change">return </a>self._fns[choice](x)
+
+
+class DeTransform(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/4f696ae414617f7730b370b7ed83ffec8b725d83#diff-f2dd150949c9244c3ca9bc6e1756a7e4f3defd500cbcfdf651093080c4513cd5L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2767656</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 4f696ae414617f7730b370b7ed83ffec8b725d83</div><div id='time'> Time: 2022-03-24</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: mcquic/utils/vision.py</div><div id='m_class'> M Class Name: RandomGamma</div><div id='n_method'> N Class Name: RandomGamma</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mcquic/utils/vision.py</div><div id='n_file'> N File Name: mcquic/utils/vision.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 49</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        m, x_rnn, _ = self.erb_stage(feat_erb)
+        spec = self.mask(spec, m, atten_lim)  &#47&#47 [B, 1, T, F, 2]
+        lsnr, _ = self.lsnr_net(x_rnn)
+        out_specs<a id="change"> = </a>[spec.squeeze(1).clone() for _ in range(<a id="change">len(</a>self.refinement_stages<a id="change">) + 1</a>)]
+        &#47&#47 re/im into channel axis
+        spec_f = (
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec, m, lsnr, None
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/946b362aa406f8a1808a252393351d0e7523130a#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L527' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2767657</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 946b362aa406f8a1808a252393351d0e7523130a</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: MSNet</div><div id='n_method'> N Class Name: MSNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 534</div><div id='m_end'> M End Line: 547</div><div id='n_start'> N Start Line: 504</div><div id='n_end'> N End Line: 510</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        
+        &#47&#47 device = output.device
+        batch_size = <a id="change">len(</a>x<a id="change">)</a>
+        batch_size<a id="change"> = </a>batch_size<a id="change"> // 2</a>
+
+        x1, x2 = x[:batch_size], x[batch_size:]
+
+        emb1, emb2 = self.backbone(x1), self.backbone(x2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if return_features:
+            out0, out1 = (out0, f0), (out1, f1)
+
+        <a id="change">return </a>out0, out1
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lightly-ai/lightly/commit/755eb1c6d21615fbf14a2d4292e1e62cc5f56150#diff-679aa0612e0ed3bd2a69f5cc68bd2f81e3d47d808923aa4e65e6f53075a242c3L128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2767655</div><div id='project'> Project Name: lightly-ai/lightly</div><div id='commit'> Commit Name: 755eb1c6d21615fbf14a2d4292e1e62cc5f56150</div><div id='time'> Time: 2020-12-26</div><div id='author'> Author: daviddobre@gmail.com</div><div id='file'> File Name: lightly/models/simsiam.py</div><div id='m_class'> M Class Name: SimSiam</div><div id='n_method'> N Class Name: SimSiam</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lightly/models/simsiam.py</div><div id='n_file'> N File Name: lightly/models/simsiam.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 128</div><div id='n_end'> N End Line: 169</div><BR>

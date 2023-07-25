@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            else:
+                net[key] = D3NetBackbone(in_channels, num_features[key], growth_rate[key], kernel_size[key], scale=scale[key], num_d3blocks=num_d3blocks[key], num_d2blocks=num_d2blocks[key], depth=depth[key], compressed_depth=compressed_depth[key], norm=norm, nonlinear=nonlinear, eps=eps, **kwargs)
+
+        <a id="change">if compressed_depth is None</a> or compressed_depth[key] is None<a id="change">:
+            </a>in_channels_d2block<a id="change"> = </a>2 * num_d2blocks[key][-1] * depth[key][-1] * growth_rate[key][-1]
+        else:
+            in_channels_d2block = 2 * num_d2blocks[key][-1] * compressed_depth[key][-1] * growth_rate[key][-1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                net[key] = D3NetBackbone(in_channels, num_features[key], growth_rate[key], bottleneck_channels, kernel_size[key], scale=scale[key], num_d3blocks=num_d3blocks[key], num_d2blocks=num_d2blocks[key], depth=depth[key], compressed_depth=compressed_depth[key], norm=norm, nonlinear=nonlinear, eps=eps, **kwargs)
+        self.net = nn.ModuleDict(net)
+
+        in_channels_d2block = len(<a id="change">self.bands[:-1]</a>) * bottleneck_channels
+
+        self.d2block = D2Block(in_channels_d2block, growth_rate_d2block, kernel_size_d2block, depth=depth_d2block, norm=norm, nonlinear=nonlinear, eps=eps)
+        self.gated_conv2d = nn.Conv2d(depth_d2block * growth_rate_d2block, in_channels, kernel_size=kernel_size_gated, stride=(1,1), padding=(1,1))</code></pre>

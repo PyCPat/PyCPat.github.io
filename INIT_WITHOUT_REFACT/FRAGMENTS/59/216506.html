@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        after_norm_1 = self.layer_norm1(after_masked_attn + x) &#47&#47 (B, L, d_model) =&gt; (B, L, d_model)
+        after_attn = self.multihead_attention(after_norm_1, encoder_output, encoder_output, mask=attn_mask) &#47&#47 (B, L, d_model) =&gt; (B, L, d_model)
+        after_norm_2 = self.layer_norm2(after_attn + after_norm_1) &#47&#47 (B, L, d_model) =&gt; (B, L, d_model)
+        after_ff = <a id="change">self.feed_forward(</a>after_norm_2<a id="change">)</a> &#47&#47 (B, L, d_model) =&gt; (B, L, d_ff) =&gt; (B, L, d_model)
+        after_norm_3<a id="change"> = </a>self.layer_norm3(after_ff + after_norm_2) &#47&#47 (B, L, d_model) =&gt; (B, L, d_model)
+
+        return after_norm_3
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        after_norm_2 = self.layer_norm_2(x) &#47&#47 (B, L, d_model)
+        x += self.drop_out_2(self.multihead_attention(after_norm_2, encoder_output, encoder_output, mask=encoder_mask)) &#47&#47 (B, L, d_model)
+        after_norm_3 = self.layer_norm_3(x) &#47&#47 (B, L, d_model)
+        x<a id="change"> += </a>self.drop_out_3(<a id="change">self.feed_forward(</a>after_norm_3<a id="change">)</a>) &#47&#47 (B, L, d_model)
+
+        return self.layer_norm_4(x) &#47&#47 (B, L, d_model)
+</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                raise NotImplementedError("Seasonality Mode {} not implemented".format(self.season_mode))
+            self.season_params = nn.ParameterDict({})
+            for name, dim in self.season_dims.items():
+                <a id="change">self.season_params[name]</a> = new_param(dims=[dim])
+            &#47&#47 self.season_params_vec = torch.cat([self.season_params[name] for name in self.season_params.keys()])
+
+        &#47&#47&#47&#47 Autoregression</code></pre><h3>After Change</h3><pre><code class='java'>
+                covar_net = nn.ModuleList()
+                d_inputs = self.n_lags
+                for i in range(self.num_hidden_layers):
+                    covar_net.append(<a id="change">nn.Linear(</a>d_inputs, self.d_hidden<a id="change">, bias=True)</a>)
+                    d_inputs = d_hidden
+                covar_net.append(<a id="change">nn.Linear(</a>d_inputs, self.n_forecasts<a id="change">, bias=False)</a>)
+                for lay in covar_net:
+                    nn.init.kaiming_normal_(lay.weight, mode=&quotfan_in&quot)
+                self.covar_nets[covar] = covar_net</code></pre>

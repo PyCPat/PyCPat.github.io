@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = np.asarray(Image.open(requests.get(im, stream=True).raw if im.startswith(&quothttp&quot) else im)), im
+            elif isinstance(im, Image.Image):  &#47&#47 PIL Image
+                im, f = np.asarray(im), <a id="change">getattr(im</a>, <a id="change">&quotfilename&quot</a>, <a id="change">f</a><a id="change">)</a>
+            files.append(Path(f).with_suffix(&quot.jpg&quot).name)
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)
+            im = im[:, :, :3] if im.ndim == 3 else np.tile(im[:, :, None], 3)  &#47&#47 enforce 3ch input</code></pre><h3>After Change</h3><pre><code class='java'>
+            if isinstance(im, str):  &#47&#47 filename or uri
+                im, f = np.asarray(Image.open(requests.get(im, stream=True).raw if im.startswith(&quothttp&quot) else im)), im
+            elif isinstance(im, Image.Image):  &#47&#47 PIL Image
+                im, f = np.asarray(im), <a id="change">getattr(im, &quotfilename&quot, f) or f</a>
+            files.append(Path(f).with_suffix(&quot.jpg&quot).name)
+            if im.shape[0] &lt; 5:  &#47&#47 image in CHW
+                im = im.transpose((1, 2, 0))  &#47&#47 reverse dataloader .transpose(2, 0, 1)
+            im = im[:, :, :3] if im.ndim == 3 else np.tile(im[:, :, None], 3)  &#47&#47 enforce 3ch input</code></pre>

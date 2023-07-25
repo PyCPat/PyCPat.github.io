@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :2943
+</h3><img src='9744256.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        target_size = targets.size()[1]
+        t_self_mask = utils.create_trg_self_mask(target_size,
+                                                 device=targets.device)
+        <a id="change">return </a><a id="change">self.decode(</a>targets, enc_output, i_mask, t_self_mask, t_mask<a id="change">)</a>
+
+    def initialize(self):
+        &#47&#47 weight init
+        for p in self.parameters():</code></pre><h3>After Change</h3><pre><code class='java'>
+        pred, gold, *_ = self.decoder(padded_target, encoder_padded_outputs, input_lengths)
+        hyp_best_scores, hyp_best_ids = torch.topk(pred, 1, dim=2)
+
+        hyp_seq<a id="change"> = </a>hyp_best_ids.squeeze(2)
+        gold_seq = gold
+
+        <a id="change">return </a>pred<a id="change">, gold, hyp_seq, gold_seq</a>
+
+    def initialize(self):
+        &#47&#47 weight init
+        for p in self.parameters():</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/qute012/kosr/commit/b7d24b0d835254fd425224eba3421a3b7224e55f#diff-c6b6e8084627536e70fdb6e8be5c81f8520937c01028e9bb6ea65a82014b023eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9744256</div><div id='project'> Project Name: qute012/kosr</div><div id='commit'> Commit Name: b7d24b0d835254fd425224eba3421a3b7224e55f</div><div id='time'> Time: 2021-01-12</div><div id='author'> Author: ejrwls012@gmail.com</div><div id='file'> File Name: model/transformer/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/transformer/transformer.py</div><div id='n_file'> N File Name: model/transformer/transformer.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 34</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        mu, logvar = self.encode(x.view(-1, 784))
+        z = self.reparameterize(mu, logvar)
+        <a id="change">return </a><a id="change">self.decode(</a>z<a id="change">)</a>, mu, logvar
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            z = self.reparameterize(mu, logvar)
+        else:
+            z = mu
+        output<a id="change"> = </a>self.output(self.decoder(z))
+        <a id="change">return </a>output<a id="change">, mu, logvar</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/deeperlearner/pytorch-template/commit/576d9f329d45ddf4af2b320655eb909c48d5cb34#diff-21e2f9b1076c045f58e4d63e63a3fbd9155d7b3256dd8398c7e7a33b4dadcda8L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9744257</div><div id='project'> Project Name: deeperlearner/pytorch-template</div><div id='commit'> Commit Name: 576d9f329d45ddf4af2b320655eb909c48d5cb34</div><div id='time'> Time: 2020-11-24</div><div id='author'> Author: b04202035@g.ntu.edu.tw</div><div id='file'> File Name: model/VAE.py</div><div id='m_class'> M Class Name: VAE</div><div id='n_method'> N Class Name: VAE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/VAE.py</div><div id='n_file'> N File Name: model/VAE.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 32</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, codes):
+        &#47&#47 [n, c, h, w]
+        <a id="change">return </a><a id="change">self.decode(</a>codes<a id="change">)</a>
+
+
+class RefEncoder(nn.Module):
+    def __init__(self, m, k, channel, groups, alias):</code></pre><h3>After Change</h3><pre><code class='java'>
+        n, h, w, _ = codes.shape
+        &#47&#47 use codes to index codebook (m, k, d) ==&gt; [n, h, w, m, k] -&gt; [n, c, h, w]
+        &#47&#47 ix = torch.arange(self._m, device=codes.device).expand_as(codes)
+        ix<a id="change"> = </a>self._ix.expand_as(codes)
+        <a id="change">return </a>self._codebook[ix<a id="change">, codes</a>].reshape(n, h, w, -1).permute(0, 3, 1, 2)
+        &#47&#47 return self.decode(codes)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/5eab1f3405e52a0cf81c11777abe1eafeb655b59#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9744252</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 5eab1f3405e52a0cf81c11777abe1eafeb655b59</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: QuantizerDecoder</div><div id='n_method'> N Class Name: QuantizerDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 106</div><div id='n_end'> N End Line: 112</div><BR>

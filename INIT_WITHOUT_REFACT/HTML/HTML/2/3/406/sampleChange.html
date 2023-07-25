@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        attn_val = attn_val.permute(1, 2, 0, 3).contiguous().view(batch_size, query_length, -1)
+
+        combined = torch.cat([attn_val, preserved], dim=2)
+        context = torch.tanh(<a id="change">self.fc(</a>combined.view(-1, 2 * self.in_features)<a id="change">)</a>).view(batch_size, -1, self.in_features)
+
+        return context
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn_val = attn_val.permute(1, 2, 0, 3).contiguous().view(batch_size, -1, self.num_head * self.dim)
+        combined = torch.cat([attn_val, residual], dim=2)
+
+        context = torch.tanh(<a id="change">self.fc(</a>combined.view(-1, self.in_features + self.dim * self.num_head)<a id="change">)</a>)
+        context<a id="change"> = </a>context.view(batch_size, -1, self.in_features)
+
+        return context
+</code></pre>

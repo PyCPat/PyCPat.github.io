@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :556
+</h3><img src='1986927.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        feat_new_v = self.pool5_7x7(feat_new).view(feat_new.size(0), -1)
+        feat_space_v = self.pool5_7x7(feat_space).view(feat_space.size(0), -1)
+        feat_channel_v<a id="change"> = self.pool5_7x7(feat_channel).view(</a><a id="change">feat_channel.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+
+        pred_label = self.classifier(feat_new_v)
+        return feat_new_v, feat_space_v, feat_channel_v, feat_new, feat_space, feat_channel, M_space, M_channel, pred_label
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        feat_channel = feat_channel.view(feat_channel.size(0),feat_channel.size(1),self.shape,-1)
+
+        &#47&#47 ----------- Flip -------------
+        feat_channel_flip = torch.flip(feat_channel,<a id="change">[</a>3<a id="change"></a>])
+        feat_channel_cat = torch.cat((feat_channel_flip, feat_channel),1)
+        feat_channel<a id="change"> = </a>self.ChannelFlipMerge(feat_channel_cat)
+
+        feat_cat = torch.cat((feat_space, feat_channel, input),1) &#47&#47 N, 3*C, H, W
+        feat_new = self.Conv4Merge(feat_cat)
+
+        feat_new_v = self.pool5_7x7(feat_new).view(feat_new.size(0), -1)
+        &#47&#47 feat_space_v = self.pool5_7x7(feat_space).view(feat_space.size(0), -1)
+        &#47&#47 feat_channel_v = self.pool5_7x7(feat_channel).view(feat_channel.size(0), -1)
+
+        if label is None:
+            <a id="change">return </a>feat_new_v, feat_new
+        else:
+            pred_loss, pred_label = self.classifier(feat_new_v,label)
+            return feat_new_v, pred_loss, pred_label, M_space, M_channel, feat_space, feat_channel</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/haoosz/ffr-net/commit/995f07c0c3a3151d73160361b98679b78b1e4ed2#diff-7fdc9cdd613ec93c2879399ebc12d30d272a04ddc61c9ff7553232ce10567486L316' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1986927</div><div id='project'> Project Name: haoosz/ffr-net</div><div id='commit'> Commit Name: 995f07c0c3a3151d73160361b98679b78b1e4ed2</div><div id='time'> Time: 2021-09-14</div><div id='author'> Author: haoshaozhe@outlook.com</div><div id='file'> File Name: models/recnet.py</div><div id='m_class'> M Class Name: RecNet</div><div id='n_method'> N Class Name: RecNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/recnet.py</div><div id='n_file'> N File Name: models/recnet.py</div><div id='m_start'> M Start Line: 316</div><div id='m_end'> M End Line: 334</div><div id='n_start'> N Start Line: 524</div><div id='n_end'> N End Line: 903</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.avgpool(x)  &#47&#47 1x1
+        features.append(x)
+
+        x<a id="change"> = x.view(</a><a id="change">x.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        x = self.fc(x)
+        return x
+
+    @staticmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+        between the different resolutions and scales by alpha_{i}.
+        Normalizing the features and applying spatial resolution was taken from LPIPS and wasn&quott mentioned in the paper.
+        
+        images = torch.concat(<a id="change">[</a>x, x_rec<a id="change"></a>], dim=0)  &#47&#47 batch
+        features<a id="change"> = </a>self._forward(images)
+        features = [f.chunk(2) for f in features]
+        &#47&#47 diffs = [a * torch.abs(p[0] - p[1]).sum() for a, p in zip(self.alphas, features)]
+        diffs = [a * torch.abs(p[0] - p[1]).mean() for a, p in zip(self.alphas, features)]
+        &#47&#47 diffs = [a*torch.abs(self.norm_tensor(tf) - self.norm_tensor(rf)) for a, tf, rf in zip(self.alphas, true_features, rec_features)]
+
+        &#47&#47 diffs = [a * torch.mean(torch.abs(tf - rf)) for a, tf, rf in zip(self.alphas, features)]
+        <a id="change">return </a>sum(diffs)
+        &#47&#47 return sum(diffs) / len(diffs)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/casualganpapers/make-a-scene/commit/89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0#diff-1ccb21e596d4cb9b26cee32d3e64f968bb2dc277d3d4514cc0cfe9ff65e9ef08L126' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1986934</div><div id='project'> Project Name: casualganpapers/make-a-scene</div><div id='commit'> Commit Name: 89ba77e885ac1c12ac2d5df5a6b3da842e30bfe0</div><div id='time'> Time: 2022-05-26</div><div id='author'> Author: 61938694+dome272@users.noreply.github.com</div><div id='file'> File Name: losses/face_loss.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: losses/face_loss.py</div><div id='n_file'> N File Name: losses/face_loss.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 163</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = self.layer4(x)
+
+        x = self.avgpool(x)
+        x<a id="change"> = x.view(</a><a id="change">x.size(0</a><a id="change">)</a>, <a id="change">-1</a><a id="change">)</a>
+        x = self.fc(x)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.relu(x)
+        x = self.maxpool(x)
+        
+        out<a id="change"> = </a><a id="change">[</a>x<a id="change"></a>]
+
+        x = self.layer1(x)
+        out.append(x)
+        x = self.layer2(x)
+        out.append(x)
+        x = self.layer3(x)
+        out.append(x)
+        x = self.layer4(x)
+        out.append(x)
+
+        &#47&#47 x = self.avgpool(x)
+        &#47&#47 x = x.view(x.size(0), -1)
+        &#47&#47 x = self.fc(x)
+
+        <a id="change">return </a>out
+
+
+def res2net50_v1b(pretrained=False, **kwargs):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/12b05eaf235665fc6d1f89a9055b84d7cdfec923#diff-9555f2c4c125473518913cb48e823894a56f136226b2e1ce78b678ad5b9503d4L202' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1986932</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 12b05eaf235665fc6d1f89a9055b84d7cdfec923</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/backbones/Res2Net_v1b.py</div><div id='m_class'> M Class Name: Res2Net</div><div id='n_method'> N Class Name: Res2Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/backbones/Res2Net_v1b.py</div><div id='n_file'> N File Name: lib/backbones/Res2Net_v1b.py</div><div id='m_start'> M Start Line: 211</div><div id='m_end'> M End Line: 217</div><div id='n_start'> N Start Line: 206</div><div id='n_end'> N End Line: 223</div><BR>

@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :1243
+</h3><img src='3680568.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, preds: Tensor, targets: Tensor) -&gt; Tensor:
+        &#47&#47 preds in shape [B, C, H, W] and targets in shape [B, C, H, W]
+        if preds.shape[2:] != targets.shape[2:]:
+            preds<a id="change"> = </a><a id="change">F.interpolate(</a>preds<a id="change">, size=targets.shape[2:], mode=&quotbilinear&quot, align_corners=False)</a>
+
+        tp = torch.sum(targets*preds, dim=(2, 3))
+        fn = torch.sum(targets*(1-preds), dim=(2, 3))
+        fp = torch.sum((1-targets)*preds, dim=(2, 3))
+
+        dice_score = (tp + 1e-6) / (tp + self.delta * fn + (1 - self.delta) * fp + 1e-6)
+        dice_score<a id="change"> = </a>torch.sum(1-dice_score, dim=-1)
+
+        &#47&#47 adjust loss to account for number of classes
+        dice_score = dice_score / targets.shape[1]
+        <a id="change">return </a>dice_score.mean()
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, preds, targets: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            return sum([w * self._forward(pred, targets) for (pred, w) in zip(preds, self.aux_weights)])
+        <a id="change">return </a>self._forward(preds, targets)
+
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3680568</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: Dice</div><div id='n_method'> N Class Name: Dice</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 80</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        h<a id="change"> = </a><a id="change">F.interpolate(</a>x, (H * 2, W * 2)<a id="change">, mode=&quotnearest&quot)</a>
+        if self.with_conv:
+            h<a id="change"> = </a>self.Conv_0(h)
+        <a id="change">return </a>h
+
+
+class Downsample(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv = nn.Conv2d(dim, dim, 3, padding=1)
+
+    def forward(self, x):
+        <a id="change">return </a>self.conv(self.up(x))
+
+
+class Downsample(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janspiry/image-super-resolution-via-iterative-refinement/commit/1a5a8bc409a8b8e072eb2bf25330d4662fd279c4#diff-8f5ccf6b45f0af5991c777ec4c13895ab7943f03df8982ff0e1edd6b462d8d35L146' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3680573</div><div id='project'> Project Name: janspiry/image-super-resolution-via-iterative-refinement</div><div id='commit'> Commit Name: 1a5a8bc409a8b8e072eb2bf25330d4662fd279c4</div><div id='time'> Time: 2021-08-09</div><div id='author'> Author: lw_jiang@foxmail.com</div><div id='file'> File Name: model/ddpm_modules/unet.py</div><div id='m_class'> M Class Name: Upsample</div><div id='n_method'> N Class Name: Upsample</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/ddpm_modules/unet.py</div><div id='n_file'> N File Name: model/ddpm_modules/unet.py</div><div id='m_start'> M Start Line: 147</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 49</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.aux_classifier is not None:
+            x = features["aux"]
+            x = self.aux_classifier(x)
+            x<a id="change"> = </a><a id="change">F.interpolate(</a>x<a id="change">, size=input_shape, mode=&quotbilinear&quot, align_corners=False)</a>
+            result["aux"]<a id="change"> = </a>x
+
+        <a id="change">return </a>result
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        result = OrderedDict()
+        x = features["out"]
+        x = self.classifier(x)
+        <a id="change">return </a>F.interpolate(x, size=input_shape, mode=&quotbilinear&quot, align_corners=False)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dsgoficial/pytorch_segmentation_models_trainer/commit/d6ce8d7c01a19ee9287cf6a73032e35648855a0b#diff-0818d9595ffd727951f5078c126993289e4734ae69181360435e752ec6ea83b6L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3680528</div><div id='project'> Project Name: dsgoficial/pytorch_segmentation_models_trainer</div><div id='commit'> Commit Name: d6ce8d7c01a19ee9287cf6a73032e35648855a0b</div><div id='time'> Time: 2021-06-30</div><div id='author'> Author: philipeborba@gmail.com</div><div id='file'> File Name: pytorch_segmentation_models_trainer/custom_models/utils.py</div><div id='m_class'> M Class Name: _SimpleSegmentationModel</div><div id='n_method'> N Class Name: _SimpleSegmentationModel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_segmentation_models_trainer/custom_models/utils.py</div><div id='n_file'> N File Name: pytorch_segmentation_models_trainer/custom_models/utils.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, preds: Tensor, labels: Tensor) -&gt; Tensor:
+        &#47&#47 preds in shape [B, C, H, W] and labels in shape [B, H, W]
+        if preds.shape[2:] != labels.shape[1:]:
+            preds<a id="change"> = </a><a id="change">F.interpolate(</a>preds<a id="change">, size=labels.shape[1:], mode=&quotbilinear&quot, align_corners=False)</a>
+
+        n_min = labels[labels != self.ignore_label].numel() // 16
+        loss<a id="change"> = </a>self.criterion(preds, labels).view(-1)
+        loss_hard = loss[loss &gt; self.thresh]
+
+        if loss_hard.numel() &lt; n_min:
+            loss_hard, _ = loss.topk(n_min)
+
+        <a id="change">return </a>torch.mean(loss_hard)
+
+
+class Dice(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a>sum([w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)])
+        return self._forward(preds, labels)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3680594</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: OhemCrossEntropy</div><div id='n_method'> N Class Name: OhemCrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 49</div><BR>

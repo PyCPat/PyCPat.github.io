@@ -1,0 +1,106 @@
+<html><h3>Pattern ID :2260
+</h3><img src='7913336.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            inters.append(conv(out))                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            
+        &#47&#47 bottom-up
+        inters = <a id="change">inters[::-1]</a>           &#47&#47 feature maps from bottom to top, same order as input x
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = F.interpolate(outputs[-1], scale_factor=0.5, mode="nearest")  &#47&#47 resize(P3td)</code></pre><h3>After Change</h3><pre><code class='java'>
+        outs[0] = tds[0]
+        for i in range(self.num_levels - 2):
+            outs[i+1] = self.out_fuses[i]([x[i+1], tds[i+1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(<a id="change">tds[-2]</a>)])                &#47&#47 P7in + resize(P6td)
+
+        return outs
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913336</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+
+        i, j = <a id="change">sim.shape[-2:]</a>
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 take care of masking
+
+        i, j = <a id="change">q.shape[-2]</a>, k.shape[-2]
+        mask_value = -torch.finfo(q.dtype).max
+
+        if exists(context_mask):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-ar-pytorch/commit/be3765300f5aae03b779edf0e256b7a74bda5fc8#diff-5ab51011b3cb840590737cf5342761683a8f59ac8817bfe6b989cf9e213218e4L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913322</div><div id='project'> Project Name: lucidrains/perceiver-ar-pytorch</div><div id='commit'> Commit Name: be3765300f5aae03b779edf0e256b7a74bda5fc8</div><div id='time'> Time: 2022-06-21</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_class'> M Class Name: CausalPrefixAttention</div><div id='n_method'> N Class Name: CausalPrefixAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='n_file'> N File Name: perceiver_ar_pytorch/perceiver_ar_pytorch.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 159</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 178</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            last_state_list.append([h, c])
+
+        if not self.return_all_layers:
+            layer_output_list = <a id="change">layer_output_list[-1:]</a>
+            last_state_list = last_state_list[-1:]
+
+        return layer_output_list, last_state_list
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        cur_layer_input = torch.unbind(input, dim=int(self.batch_first))
+
+        if not hidden_state:
+            hidden_state = self.get_init_states(<a id="change">cur_layer_input[0]</a>.size(int(not self.batch_first)))
+
+        seq_len = len(cur_layer_input)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/metnet/commit/12d0ea12a39fb28fca3d382611857f23f060b5b6#diff-cbfcbffe28009711c7c69a5229084d15d10138c11e712855f4120d8a87e7122dL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913339</div><div id='project'> Project Name: openclimatefix/metnet</div><div id='commit'> Commit Name: 12d0ea12a39fb28fca3d382611857f23f060b5b6</div><div id='time'> Time: 2022-02-01</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: metnet/layers/ConvLSTM.py</div><div id='m_class'> M Class Name: ConvLSTM</div><div id='n_method'> N Class Name: ConvLSTM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: metnet/layers/ConvLSTM.py</div><div id='n_file'> N File Name: metnet/layers/ConvLSTM.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 182</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        segmented_x = [list(torch.split(x, x.shape[2] // self.split_block, dim=2)) for x in X]
+        for x in segmented_x:
+            if len(x) &gt; self.split_block:
+                x[-2] = torch.cat(<a id="change">x[-2:]</a>, dim=2)
+
+        ret_segments = []
+        for i in range(self.split_block):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 by default N=1, does not split
+        segment_shapes = [[x.shape[2] // self.split_block] * self.split_block for x in X]
+        for x, seg_shape in zip(X, segment_shapes):
+            <a id="change">seg_shape[-1]</a> += x.shape[2] % self.split_block
+        segmented_x = [torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]
+
+        &#47&#47 apply MSAF</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913326</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output = torch.cat(<a id="change">stacked[1:]</a>, dim=1)
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        stacked = torch.cat(stacked, dim=2)
+        
+        key = <a id="change">self.bands[-1]</a> &#47&#47 &quotfull&quot
+        x = self.net[key](input)
+        x = torch.cat([stacked, x], dim=1)
+        x = self.d2block(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/628cce12054e3d56f6fd72af21cdb87a520f32ae#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913328</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 628cce12054e3d56f6fd72af21cdb87a520f32ae</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 59</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 59</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+
+    def forward(self, f3, f2, f1):
+        f1 = self.upsample(f1, <a id="change">f3.shape[-2:]</a>)
+        f2 = self.upsample(f2, f3.shape[-2:])
+        f3 = torch.cat([f1, f2, f3], dim=1)
+        f3 = self.conv1(f3)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.upsample = lambda img, size: F.interpolate(img, size=size, mode=&quotbilinear&quot, align_corners=True)
+
+    def forward(self, fs): &#47&#47f3 f4 f5 -&gt; f3 f2 f1
+        fx = <a id="change">fs[0]</a>
+        for i in range(1, len(fs)):
+            fs[i] = self.upsample(fs[i], fx.shape[-2:])
+        fx = torch.cat(fs[::-1], dim=1)
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/5831b91559b695ff69a4691bd4539a5a1a3c2d5e#diff-a9e41caf4111f24312f50839834b3d485421b958048f0c6efab85a75a435f31dL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913332</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 5831b91559b695ff69a4691bd4539a5a1a3c2d5e</div><div id='time'> Time: 2022-05-09</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/modules/decoder_module.py</div><div id='m_class'> M Class Name: PAA_d</div><div id='n_method'> N Class Name: PAA_d</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/modules/decoder_module.py</div><div id='n_file'> N File Name: lib/modules/decoder_module.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 96</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor, target: torch.Tensor) -&gt; torch.Tensor:
+        if self.ignore_classes:
+            select = target != self.ignore_classes[0]
+            for c in <a id="change">self.ignore_classes[1:]</a>:
+                select.logical_and_(target != c)
+            x = x[select]
+            target = target[select]</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor, target: torch.Tensor) -&gt; torch.Tensor:
+        if self.ignore_classes:
+            sel = torch.tensor(
+                list(set(range(<a id="change">x.shape[-1]</a>)) - set(self.ignore_classes)),
+                device=x.device,
+            )
+            x = x.index_select(-1, sel)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lukashedegaard/co3d/commit/60c2fd3f9afe20541513643329310c15418e0dc8#diff-97f585c356aab5da92b149097cb7f14797b401b6c487b29b56f02b21833489aaL56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7913335</div><div id='project'> Project Name: lukashedegaard/co3d</div><div id='commit'> Commit Name: 60c2fd3f9afe20541513643329310c15418e0dc8</div><div id='time'> Time: 2022-01-26</div><div id='author'> Author: lh@eng.au.dk</div><div id='file'> File Name: losses/ce.py</div><div id='m_class'> M Class Name: LabelSmoothingCrossEntropy</div><div id='n_method'> N Class Name: LabelSmoothingCrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: losses/ce.py</div><div id='n_file'> N File Name: losses/ce.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 62</div><div id='n_start'> N Start Line: 60</div><div id='n_end'> N End Line: 65</div><BR>

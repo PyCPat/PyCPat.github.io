@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if len(noise_level.shape) &gt; 1:
+            noise_level = noise_level.squeeze(-1)
+        half_dim = self.n_channels // 2
+        exponents = <a id="change">torch.arange(half_dim, dtype=torch.float32).to(
+            </a>noise_level<a id="change">)</a> / float(half_dim)
+        exponents = 1e-4 ** exponents
+        exponents = LINEAR_SCALE * \
+            noise_level.unsqueeze(1) * exponents.unsqueeze(0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        step = torch.arange(count, dtype=noise_level.dtype,
+                            device=noise_level.device) / count
+        encoding = noise_level.unsqueeze(
+            1) * torch.exp(-math.log(1e4) * <a id="change">step.unsqueeze(0</a><a id="change">)</a>)
+        encoding = torch.cat(
+            [torch.sin(encoding), torch.cos(encoding)], dim=-1)
+        return encoding</code></pre>

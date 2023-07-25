@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :1973
+</h3><img src='7332943.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.layer_norm:
+            x = self.layer_norm1(x)
+        x<a id="change"> = self</a><a id="change">.linear1(</a>x<a id="change">)</a>
+        x = self.activation(x)
+        x = F.dropout(x, dropout)
+        if self.layer_norm:
+            x = self.layer_norm2(x)
+        x = <a id="change">self.linear2(</a>x<a id="change">)</a>
+        x<a id="change"> = </a>F.dropout(x, dropout)
+        for i in range(self.k):
+            if self.edge_drop != 0:
+                adj = self.dropout(adj, dropout_prob=self.edge_drop)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if isinstance(layer, nn.LayerNorm):
+                x = layer(x)
+            else:
+                x<a id="change"> = </a><a id="change">layer(</a>x<a id="change">)</a>
+                x = self.activation(x)
+                if self.dropout is not None:
+                    x = self.dropout(x)
+        for i in range(self.k):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thudm/grb/commit/108220c07da3133bdf46f45290f138787f8695c1#diff-b6790a61fe64ac9b0ce46ad8b5eb5581db9b734049aedcfa60cfb8da281be316L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7332943</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: 108220c07da3133bdf46f45290f138787f8695c1</div><div id='time'> Time: 2021-08-13</div><div id='author'> Author: 2363471925@qq.com</div><div id='file'> File Name: grb/model/torch/appnp.py</div><div id='m_class'> M Class Name: APPNP</div><div id='n_method'> N Class Name: APPNP</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/torch/appnp.py</div><div id='n_file'> N File Name: grb/model/torch/appnp.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 106</div><div id='n_end'> N End Line: 117</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            else:
+                x = layer(x, adj)
+
+        x<a id="change"> = </a>F.relu(<a id="change">self.linear1(</a>x<a id="change">)</a>)
+        if self.dropout is not None:
+            x = self.dropout(x)
+        x<a id="change"> = </a><a id="change">self.linear2(</a>x<a id="change">)</a>
+
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                x = layer(x, adj)
+
+        for i, <a id="change">layer</a> in enumerate(self.mlp_layers):
+            x<a id="change"> = </a><a id="change">layer(</a>x<a id="change">)</a>
+            if i != len(self.mlp_layers) - 1:
+                x = self.activation(x)
+                if self.dropout is not None:
+                    x = self.dropout(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thudm/grb/commit/033f2d036673be7a58f544095c76780c09618477#diff-bdd2d692acfa319dae7cba85f1cf79b2b55b310dffca1e4b5c2056b51c6db3e2L97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7332931</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: 033f2d036673be7a58f544095c76780c09618477</div><div id='time'> Time: 2021-08-17</div><div id='author'> Author: 2363471925@qq.com</div><div id='file'> File Name: grb/model/torch/gin.py</div><div id='m_class'> M Class Name: GIN</div><div id='n_method'> N Class Name: GIN</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/torch/gin.py</div><div id='n_file'> N File Name: grb/model/torch/gin.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 132</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, adj, dropout=0):
+        for layer in self.layers:
+            x = layer(x, adj, dropout=dropout)
+        x<a id="change"> = </a>F.relu(<a id="change">self.linear1(</a>x<a id="change">)</a>)
+        x = F.dropout(x, dropout)
+        x<a id="change"> = </a><a id="change">self.linear2(</a>x<a id="change">)</a>
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            layer.reset_parameters()
+
+    def forward(self, x, adj, dropout=0):
+        for <a id="change">layer</a> in self.layers:
+            if isinstance(layer, nn.LayerNorm):
+                x<a id="change"> = </a><a id="change">layer(</a>x<a id="change">)</a>
+            else:
+                x = layer(x, adj, dropout=dropout)
+
+        return x</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thudm/grb/commit/db17c727118b739bab08e20c8a3b338dedc12253#diff-bdd2d692acfa319dae7cba85f1cf79b2b55b310dffca1e4b5c2056b51c6db3e2L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7332928</div><div id='project'> Project Name: thudm/grb</div><div id='commit'> Commit Name: db17c727118b739bab08e20c8a3b338dedc12253</div><div id='time'> Time: 2021-05-30</div><div id='author'> Author: qinkai.zheng1028@gmail.com</div><div id='file'> File Name: grb/model/torch/gin.py</div><div id='m_class'> M Class Name: GIN</div><div id='n_method'> N Class Name: GIN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: grb/model/torch/gin.py</div><div id='n_file'> N File Name: grb/model/torch/gin.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 76</div><BR>

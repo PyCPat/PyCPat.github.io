@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :641
+</h3><img src='2277050.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                        x = torch.cat([layer_outputs[i] for i in layers], 1)
+                    &#47&#47 print(&quot&quot), [print(layer_outputs[i].shape) for i in layers], print(x.shape)
+            elif mtype == &quotshortcut&quot:
+                x = x<a id="change"> + </a><a id="change">layer_outputs[int(mdef[&quotfrom&quot])]</a>
+            elif mtype == &quotyolo&quot:
+                output.append(module(x, img_size))
+            layer_outputs.append(x if i in self.routs else [])
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        layer_outputs = []
+        output = []
+        verbose = False
+        <a id="change">if </a>verbose<a id="change">:
+            </a><a id="change">print(&quot0&quot</a>, x.shape<a id="change">)</a>
+
+        for i, (mdef, module) in enumerate(zip(self.module_defs, self.module_list)):
+            mtype = mdef[&quottype&quot]
+            if mtype in [&quotconvolutional&quot, &quotupsample&quot, &quotmaxpool&quot]:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mikel-brostrom/yolov3_deepsort_pytorch/commit/07c8a03aa076856c6994f971ac9ec975e8b7aa08#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL225' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2277050</div><div id='project'> Project Name: mikel-brostrom/yolov3_deepsort_pytorch</div><div id='commit'> Commit Name: 07c8a03aa076856c6994f971ac9ec975e8b7aa08</div><div id='time'> Time: 2020-01-23</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: Darknet</div><div id='n_method'> N Class Name: Darknet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 225</div><div id='m_end'> M End Line: 244</div><div id='n_start'> N Start Line: 225</div><div id='n_end'> N End Line: 257</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        last_output = torch.zeros((batch_size, self.d_output), device=device)
+
+        if timespans is None:
+            timespans = x.new_ones(x.shape[:-1]+(1,))<a id="change"> / </a><a id="change">x.shape[1]</a>
+
+        for t in range(seq_len):
+            inputs = x[:, t]
+            ts = timespans[:, t].squeeze()</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    &#47&#47 def forward(self, x, state=None,lengths=None,timespans=None):
+    def forward(self, u, state=None, rate=1.0, lengths=None, **kwargs):
+        <a id="change">if </a>state is not None<a id="change">:
+            </a><a id="change">print("state is not None -&gt; breakpoint"</a><a id="change">)</a>
+            breakpoint()
+        &#47&#47 if lengths is not None:
+        &#47&#47     print("lengths is not None -&gt; breakpoint")
+        &#47&#47     breakpoint()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2277048</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+                    &#47&#47 all random semi hard indices (or hardest easy if not enough semi hard)
+                    neg_list_idx = all_semi_hard(ap_dist, an_dists, self.margin)
+                    num_missing_negatives = NUM_NEGATIVES<a id="change"> - </a><a id="change">neg_list_idx.shape[0]</a>
+                    if num_missing_negatives &gt; 0:
+                        hardest_easy_neg_idx = torch.topk(an_dists, NUM_NEGATIVES, largest=False)[1]
+                        added_negs = hardest_easy_neg_idx[neg_list_idx.shape[0]:NUM_NEGATIVES]
+                        neg_list_idx = torch.cat((neg_list_idx, added_negs), 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+                    &#47&#47 Use ap_dist and an_dists_selected to compute info nce loss
+
+                    temperature = 0.5
+                    <a id="change">if </a>self.dist_metric == &quotcosine&quot<a id="change">:
+                        </a>ap_sim = torch.exp((1 - ap_dist) / temperature)
+                        an_sim = torch.exp((1 - an_dists_selected) / temperature)
+                    else:
+                        <a id="change">print(&quotEuclidean dist not supported with infonce loss&quot</a><a id="change">)</a>
+                        assert(0)
+
+                    loss_info_nce = -torch.log(ap_sim / (torch.sum(an_sim) + ap_sim))
+                    loss += loss_info_nce</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rvl-lab-utoronto/video_similarity_search/commit/c4c07e007bc05f55fa3860fd6215d029d71ff0bb#diff-bc76f2fc546a70b6c9798c5dce931ad46d49b242a0ba19a5ae5ac664a2689fffL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2277052</div><div id='project'> Project Name: rvl-lab-utoronto/video_similarity_search</div><div id='commit'> Commit Name: c4c07e007bc05f55fa3860fd6215d029d71ff0bb</div><div id='time'> Time: 2021-02-19</div><div id='author'> Author: salar77h@gmail.com</div><div id='file'> File Name: loss/triplet_loss.py</div><div id='m_class'> M Class Name: OnlineTripleLoss</div><div id='n_method'> N Class Name: OnlineTripleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss/triplet_loss.py</div><div id='n_file'> N File Name: loss/triplet_loss.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 118</div><BR>

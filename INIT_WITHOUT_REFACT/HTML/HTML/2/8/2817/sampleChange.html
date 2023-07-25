@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            return loss, None
+
+        else:
+            <a id="change">return </a>None<a id="change">, self.decode(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                     context_limited, question_limited,
+                                     decoder_vocab, rnn_state=context_rnn_state).data</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre><h3>After Change</h3><pre><code class='java'>
+                loss += self.args.encoder_loss_weight * encoder_loss
+            return loss, None
+        else:
+            <a id="change">if decoder_wrapper is None</a><a id="change">:
+                </a>decoder_wrapper<a id="change"> = </a>self.decoder_wrapper(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                                    context_limited, question_limited, decoder_vocab, rnn_state=context_rnn_state)
+            else:
+                current_token_id = current_token_id.cpu().apply_(self.map_to_full).to(current_token_id.device)
+            &#47&#47 return (next_token_logits, past) where `past` includes all the states needed to continue generation
+            logits<a id="change"> = </a>decoder_wrapper.next_token_probs(current_token_id)
+            &#47&#47 print(&quotlogits&quot, logits.shape)
+            <a id="change">return </a>logits<a id="change">, decoder_wrapper</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, state):
+        a = F.relu(self.l1(state))
+        a = F.relu(self.l2(a))
+        <a id="change">return </a>self.max_action * torch.tanh(self.l3(a))
+
+
+class Critic(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        mu = self.mu_head(a)
+        mu = torch.clip(mu, MEAN_MIN, MEAN_MAX)
+        log_sigma = self.sigma_head(a)
+        log_sigma<a id="change"> = </a>torch.clip(log_sigma, LOG_STD_MIN, LOG_STD_MAX)
+        sigma = torch.exp(log_sigma)
+
+        a_distribution = Normal(mu, sigma)
+        action = a_distribution.rsample()
+
+        logp_pi = a_distribution.log_prob(action).sum(axis=-1)
+        logp_pi<a id="change"> -= </a>(2<a id="change"> * </a>(np.log(2) - action - <a id="change">F.softplus(</a>-2<a id="change"> * </a>action<a id="change">)</a>)).sum(axis=1)
+        logp_pi = torch.unsqueeze(logp_pi, dim=1)
+
+        action = self.max_action * torch.tanh(action)</code></pre>

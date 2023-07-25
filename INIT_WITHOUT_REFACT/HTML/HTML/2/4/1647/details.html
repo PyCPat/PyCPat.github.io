@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :1647
+</h3><img src='6663297.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        visual_emo_vecs = self.affineVisual(text_emo_vecs)
+        audio_emo_vecs = self.affineAudio(text_emo_vecs)
+
+        text_emo_vecs = <a id="change">text_emo_vecs.unsqueeze(0</a><a id="change">)</a>.repeat(batch_size, 1, 1)
+        visual_emo_vecs = visual_emo_vecs.unsqueeze(0).repeat(batch_size, 1, 1)
+        audio_emo_vecs = audio_emo_vecs.unsqueeze(0).repeat(batch_size, 1, 1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, X_text, X_audio, X_visual):
+        &#47&#47 TODO: try residual connection
+
+        batch_size = <a id="change">X_text.size(0</a><a id="change">)</a>
+        logits = None
+        if &quott&quot in self.modalities:
+            output_text, _ = self.RNNs[0](X_text)
+            output_text = output_text[:, -1, :]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wenliangdai/modality-transferable-mer/commit/b0e565d11d6b3bf9f65fb1dcbdc8c641a2bc8054#diff-9dca09e4df72ee7b751c74b7ea8c66a06c2d78f76fef6a3bdb604dc6680fd2efL53' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6663297</div><div id='project'> Project Name: wenliangdai/modality-transferable-mer</div><div id='commit'> Commit Name: b0e565d11d6b3bf9f65fb1dcbdc8c641a2bc8054</div><div id='time'> Time: 2020-06-10</div><div id='author'> Author: wenliang.dai.1995@gmail.com</div><div id='file'> File Name: src/models/temp.py</div><div id='m_class'> M Class Name: EmotionEmbAttnModel</div><div id='n_method'> N Class Name: EmotionEmbAttnModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/temp.py</div><div id='n_file'> N File Name: src/models/temp.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 79</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            outputs = outputs.sum(axis=-1)
+        else:  &#47&#47 for one input, do not perform variable selection but just encoding
+            outputs = self.single_variable_grns[0](embedding)  &#47&#47 fast forward if only one variable
+            sparse_weights = <a id="change">torch.ones_like(outputs).unsqueeze(-1</a><a id="change">)</a>
+        return outputs, sparse_weights
+
+
+class PositionalEncoder(torch.nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+            outputs = outputs.sum(axis=-1)
+        else:  &#47&#47 for one input, do not perform variable selection but just encoding
+            outputs = self.single_variable_grns[0](embedding)  &#47&#47 fast forward if only one variable
+            sparse_weights = torch.ones(outputs.size(0), <a id="change">outputs.size(1</a><a id="change">)</a>, 1, 1, device=outputs.device)
+        return outputs, sparse_weights
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/ea7256c4d7f37c2f41714db7ce9693e365ff93b8#diff-0f736f51235a0612e2fd7b68874c803e7e4fd5a85fb81270d3dd7bfce08d3a77L167' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6663296</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: ea7256c4d7f37c2f41714db7ce9693e365ff93b8</div><div id='time'> Time: 2020-06-29</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: temporal_fusion_transformer_pytorch/model/sub_modules.py</div><div id='m_class'> M Class Name: VariableSelectionNetwork</div><div id='n_method'> N Class Name: VariableSelectionNetwork</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: temporal_fusion_transformer_pytorch/model/sub_modules.py</div><div id='n_file'> N File Name: temporal_fusion_transformer_pytorch/model/sub_modules.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 191</div><div id='n_start'> N Start Line: 190</div><div id='n_end'> N End Line: 191</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		dec_input = <a id="change">self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1</a><a id="change">)</a>.to(device)
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = h.squeeze(0), enc_h</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = x.to(device)
+		batch, city_t, xy = x.size()
+		embed_enc_inputs = self.Embedding(x)
+		embed = <a id="change">embed_enc_inputs.size(2</a><a id="change">)</a>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/ab78416ee96de7b4b780b38a77f4956518afa19c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6663298</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: ab78416ee96de7b4b780b38a77f4956518afa19c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        for i in range(n):
+            dist_ap.append(dist[i][pos_mask[i]].max().unsqueeze(0))
+            dist_an.append(<a id="change">dist[i][neg_mask[i]].min().unsqueeze(0</a><a id="change">)</a>)
+
+        dist_ap = torch.cat(dist_ap)
+        dist_an = torch.cat(dist_an)</code></pre><h3>After Change</h3><pre><code class='java'>
+        dist_mat = pairwise_euclidean_distance(f, xbm_f)
+
+        &#47&#47 hard examples mining
+        n, m = f.size(0), <a id="change">xbm_f.size(0</a><a id="change">)</a>
+        identity_mat = labels.expand(m, n).t().eq(xbm_labels.expand(n, m)).float()
+        dist_ap, dist_an = hard_examples_mining(dist_mat, identity_mat)
+
+        &#47&#47 Compute ranking hinge loss</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/0f8f51c4b2fac78edf87e29764e4da3deec6f65f#diff-3c0e5198c319a0e747e4dc4314623e2dc945e7d839f08f78d25f06f5b7a692a0L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6663292</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 0f8f51c4b2fac78edf87e29764e4da3deec6f65f</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: 57670068+tsingcbx99@users.noreply.github.com</div><div id='file'> File Name: common/vision/models/reid/loss.py</div><div id='m_class'> M Class Name: TripletLossXBM</div><div id='n_method'> N Class Name: TripletLossXBM</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: common/vision/models/reid/loss.py</div><div id='n_file'> N File Name: common/vision/models/reid/loss.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 154</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = x.view(x.size(0), -1)
+            &#47&#47 Unsqueeze for sequence length
+            if t == 0:
+                gru_output, h_n = self.rnn(<a id="change">x.unsqueeze(1</a><a id="change">)</a>)
+            else:
+                gru_output, h_n = self.rnn(x.unsqueeze(1), h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        &#47&#47 gru_output = gru_output.squeeze(1)
+        for i in range(<a id="change">gru_output.size(0</a><a id="change">)</a>):
+            hr = self.gru_fc_out(gru_output[i, :, :])
+        &#47&#47     &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr.flatten())</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/0f9fc9b96933c04f723fbfa5b80cdf1a398828c3#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6663289</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: 0f9fc9b96933c04f723fbfa5b80cdf1a398828c3</div><div id='time'> Time: 2021-03-14</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 64</div><BR>

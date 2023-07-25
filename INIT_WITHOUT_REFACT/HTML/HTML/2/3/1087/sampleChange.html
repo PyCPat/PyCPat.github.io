@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        seq_masks = seq_masks.unsqueeze(-1)                         &#47&#47 [t, N * K] =&gt; [t, N * K, 1]
+
+        mols_per_minibatch = encodings.shape[1] / batch_size
+        <a id="change">assert </a>mols_per_minibatch == self.args.minibatch_size, \
+            f"calculated minibatch size: {mols_per_minibatch}, given in args: {self.args.minibatch_size}"
+
+        encodings = encodings * seq_masks                           &#47&#47 mask out padding</code></pre><h3>After Change</h3><pre><code class='java'>
+                                    -1, &#47&#47 batch_size
+                                    self.args.minibatch_eval,
+                                    self.hidden_size])
+            batch_lens<a id="change"> = </a><a id="change">torch.reshape(</a>batch_lens,                      &#47&#47 [N * K] =&gt; [N, K, 1]
+                                    [-1, &#47&#47batch_size,
+                                    self.args.minibatch_eval, 1]<a id="change">)</a>
+
+        if self.pooling_method == "CLS":                            &#47&#47 [t, N, K, h] =&gt; [N, K, h]
+            pooled_encoding = encodings[0, :, :, :]
+        elif self.pooling_method == "mean":</code></pre>

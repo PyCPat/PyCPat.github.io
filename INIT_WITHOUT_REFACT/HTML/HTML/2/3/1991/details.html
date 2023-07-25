@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1991
+</h3><img src='7407411.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 weights derived from alphas (learned exponential smoothing decay rate)
+
+        alphas = <a id="change">self.alphas.sigmoid()</a>
+        dampen_factors = self.dampen_factors.sigmoid()
+
+        reversed_powers = torch.arange(seq_len - 1, -1, -1, device = device)
+        K = alphas * (((1 - alphas) * dampen_factors) ** rearrange(reversed_powers, &quot... l -&gt; ... l 1&quot))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = apply_learned_ema_with_damping(x, self.alphas, self.dampen_factors)
+
+        <a id="change">if </a>self.bidirectional<a id="change">:
+            </a>x = torch.flip(x, dims = (1,))
+            x<a id="change"> = </a>apply_learned_ema_with_damping(x, self.reverse_alphas, self.reverse_dampen_factors)
+            x = torch.flip(x, dims = (1,))
+
+        &#47&#47 combine heads and out</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/mega-pytorch/commit/a7a4480331079215095effec466086f790323ff7#diff-e0160bc5f71bfa738a21ad7ff9fd9c6ff825b84b3bffaa2ad30d75630ae3316fL207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407411</div><div id='project'> Project Name: lucidrains/mega-pytorch</div><div id='commit'> Commit Name: a7a4480331079215095effec466086f790323ff7</div><div id='time'> Time: 2022-09-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: mega_pytorch/mega_pytorch.py</div><div id='m_class'> M Class Name: MultiHeadedEMA</div><div id='n_method'> N Class Name: MultiHeadedEMA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mega_pytorch/mega_pytorch.py</div><div id='n_file'> N File Name: mega_pytorch/mega_pytorch.py</div><div id='m_start'> M Start Line: 207</div><div id='m_end'> M End Line: 223</div><div id='n_start'> N Start Line: 209</div><div id='n_end'> N End Line: 233</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Squeeze-Excitation
+        w = F.avg_pool2d(out, out.size(2))
+        w = F.relu(self.fc1(w))
+        w = <a id="change">self.fc2(w).sigmoid()</a>
+        out = out * w + shortcut
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = out * w
+        &#47&#47 Output
+        out = self.bn3(self.conv3(out))
+        <a id="change">if </a>self.drop_rate &gt; 0<a id="change">:
+            </a>out<a id="change"> = </a>F.dropout2d(out, self.drop_rate)
+        shortcut = self.shortcut(x) if self.stride == 1 else out
+        out = out + shortcut
+        return out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/johnsk95/pt4al/commit/12420c5f4366b50d9b2fde2f0f68ad886f4bcd09#diff-7932d599d2e356ab9483f330e47e9d237ca3c9aed0f13a3f4642d160ec2e57a3L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407415</div><div id='project'> Project Name: johnsk95/pt4al</div><div id='commit'> Commit Name: 12420c5f4366b50d9b2fde2f0f68ad886f4bcd09</div><div id='time'> Time: 2020-04-01</div><div id='author'> Author: liukuang.lk@alibaba-inc.com</div><div id='file'> File Name: models/efficientnet.py</div><div id='m_class'> M Class Name: Block</div><div id='n_method'> N Class Name: Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/efficientnet.py</div><div id='n_file'> N File Name: models/efficientnet.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        labels = torch.cat((torch.zeros(batch, device = device), torch.ones(batch, device = device)), dim = 0)
+        real_or_fake = self.disc(torch.cat((fmap, img), dim = 0))
+        gen_loss = F.binary_cross_entropy(<a id="change">real_or_fake.sigmoid()</a>, labels)
+
+        &#47&#47 lpips
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        labels = torch.cat((torch.zeros(batch, device = device), torch.ones(batch, device = device)), dim = 0)
+
+        <a id="change">if </a>return_discr_loss<a id="change">:
+            </a>labels<a id="change"> = </a>torch.flip(labels, (0,))
+
+        real_or_fake = self.disc(torch.cat((fmap, img), dim = 0))
+        gan_loss = F.binary_cross_entropy(real_or_fake, labels)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/312454fec6ecc23636bfd39eed5f6ad26f4ff7f2#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407403</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: 312454fec6ecc23636bfd39eed5f6ad26f4ff7f2</div><div id='time'> Time: 2021-12-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: VQGanVAE</div><div id='n_method'> N Class Name: VQGanVAE</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 149</div><BR>

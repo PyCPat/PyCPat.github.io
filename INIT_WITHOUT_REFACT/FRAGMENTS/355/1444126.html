@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 mask image attention
+
+        q_img_indices = <a id="change">rearrange(</a>img_seq, <a id="change">&quoti -&gt; () i ()&quot</a><a id="change">)</a>
+        causal_mask<a id="change"> =  </a>q_img_indices &lt; k_img_indices
+
+        &#47&#47 concat text mask with image causal mask
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (h w) c -&gt; b c h w&quot, h = img_size), (k_img, v_img))
+        k_img, v_img = map(lambda t: F.pad(t, causal_padding), (k_img, v_img))
+        k_img<a id="change">, v_img = map(</a>lambda t: F.unfold(t, kernel_size, dilation = dilation), (k_img<a id="change">, v_img</a>)<a id="change">)</a>
+        k_img, v_img = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 2), (k_img, v_img))
+
+        &#47&#47 let image attend to all of text
+</code></pre>

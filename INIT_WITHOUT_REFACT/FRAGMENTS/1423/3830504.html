@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.activation = activation
+        self.conv1 = nn.Conv1d(in_channels=input_features, out_channels=num_of_filters, kernel_size=kernel_size,
+                               stride=stride, padding=padding)
+        self.batchnorm = <a id="change">nn.BatchNorm1d(</a>num_of_filters<a id="change">, affine=False)</a>
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x = self.conv1(x)
+        x = self.batchnorm(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(conv2d_bn, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv1d(in_channels=in_channel, out_channels=filters, kernel_size=3, padding=padding),
+            <a id="change">nn.BatchNorm1d(num_features=filters)</a>
+        )
+        if activation is None:
+            pass
+        else:
+            self.conv<a id="change"> = </a>nn.Sequential(self.conv, nn.ReLU())
+
+    def forward(self, x):
+        x = self.conv(x)</code></pre>

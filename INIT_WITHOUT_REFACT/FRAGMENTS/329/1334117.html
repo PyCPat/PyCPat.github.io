@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, y_s: torch.Tensor, y_s_adv: torch.Tensor, y_t: torch.Tensor, y_t_adv: torch.Tensor) -&gt; torch.Tensor:
+        _, prediction_s = y_s.max(dim=1)
+        _<a id="change">, prediction_t = </a><a id="change">y_t.max(dim=1)</a>
+        return self.margin * F.cross_entropy(y_s_adv, prediction_s, reduction=self.reduction) \
+               + F.nll_loss(shift_log(1. - F.softmax(y_t_adv, dim=1)), prediction_t, reduction=self.reduction)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, y_s: torch.Tensor, y_s_adv: torch.Tensor, y_t: torch.Tensor, y_t_adv: torch.Tensor) -&gt; torch.Tensor:
+        loss = -self.margin * self.source_disparity(y_s, y_s_adv) + self.target_disparity(y_t, y_t_adv)
+        <a id="change">if </a>self.reduction == &quotmean&quot<a id="change">:
+            </a>loss<a id="change"> = </a>loss.mean()
+        elif self.reduction == &quotsum&quot:
+            loss = loss.sum()
+        return loss</code></pre>

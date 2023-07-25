@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        y = torch.zeros((B, N, N), dtype=torch.float32, device=x.device)
+        for k in range(1, N):
+            x_l = x[:, :-k, :] &#47&#47 (B, N-k, C)
+            x_r = <a id="change">x[:, k:, :]</a> &#47&#47 (B, N-k, C)
+
+            &#47&#47 v1: closing pairs, v2: opening pairs
+            v1 = torch.cat((x_l, x_r), dim=2) &#47&#47 (B, N-k, C*2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47     y += torch.diag_embed(v1, offset=k) &#47&#47 (B, N, N)
+        &#47&#47     y += torch.diag_embed(v2, offset=-k) &#47&#47 (B, N, N)
+
+        x_l = <a id="change">x.view(B, N, 1, C).expand(B</a>, <a id="change">N</a>, <a id="change">N</a>, C<a id="change">)</a>
+        x_r<a id="change"> = </a><a id="change">x.view(B, 1, N, C).expand(B</a>, <a id="change">N</a>, <a id="change">N</a>, C<a id="change">)</a>
+        v = torch.cat((x_l, x_r), dim=3) &#47&#47 (B, N, N, C*2)
+        v = v.view(B*N*N, C*2)
+        for fc in self.fc[:-1]:
+            v = F.relu(fc(v))</code></pre>

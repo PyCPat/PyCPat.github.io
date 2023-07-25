@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :1282
+</h3><img src='3750329.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            x: B x C x T
+            noise_level: B
+        
+        return (x + <a id="change">self.encoding(noise_level)[:, :, None]</a>)
+
+    def encoding(self, noise_level):
+        step = torch.arange(</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, noise_level):
+        if x.shape[2] &gt; self.pe.shape[1]:
+            self.init_pe_matrix(x.shape[1] ,x.shape[2], x)
+        return x + noise_level[..., None, None] + self.pe[:, :<a id="change">x.size(2</a><a id="change">)</a>].repeat(x.shape[0], 1, 1) / self.C
+
+    def init_pe_matrix(self, n_channels, max_len, x):
+        pe = torch.zeros(max_len, n_channels)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/14c2381207c5972359b2af450a233730ff877ee1#diff-af9292879c3a7a8a64c67ffc65c52eb8aa035086869e26cd55f540bab75055a4L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3750329</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 14c2381207c5972359b2af450a233730ff877ee1</div><div id='time'> Time: 2020-10-29</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: TTS/vocoder/layers/wavegrad.py</div><div id='m_class'> M Class Name: PositionalEncoding</div><div id='n_method'> N Class Name: PositionalEncoding</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/vocoder/layers/wavegrad.py</div><div id='n_file'> N File Name: TTS/vocoder/layers/wavegrad.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            timespans = x.new_ones(x.shape[:-1]+(1,)) / x.shape[1]
+
+        for t in range(seq_len):
+            inputs = <a id="change">x[:, t]</a>
+            ts = timespans[:, t].squeeze()
+            hidden_state = self.rnn_cell.forward(inputs, hidden_state, ts)
+            current_output = self.fc(hidden_state[0])
+            outputs.append(current_output)</code></pre><h3>After Change</h3><pre><code class='java'>
+            u = u * mask
+
+        device = u.device
+        batch_size = <a id="change">u.size(0</a><a id="change">)</a>
+        seq_len = u.size(1)
+        hidden_state = [
+            torch.zeros((batch_size, self.d_hidden), device=device),
+            torch.zeros((batch_size, self.d_hidden), device=device),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/raminmh/liquid-s4/commit/52f2ec0442e4b1472915480269dff07788ed7f97#diff-ab2372bdc1906ad2a23c39f4d39f3f048c08b9f7b91891862db640d26d4916afL83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3750331</div><div id='project'> Project Name: raminmh/liquid-s4</div><div id='commit'> Commit Name: 52f2ec0442e4b1472915480269dff07788ed7f97</div><div id='time'> Time: 2022-08-30</div><div id='author'> Author: mlech26l@gmail.com</div><div id='file'> File Name: src/models/sequence/mm.py</div><div id='m_class'> M Class Name: mmRNN</div><div id='n_method'> N Class Name: mmRNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/sequence/mm.py</div><div id='n_file'> N File Name: src/models/sequence/mm.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 89</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq = torch.stack(batched_output_per_clip, dim=0).transpose_(0, 1)
+        gru_output, h_n = self.rnn(<a id="change">output_seq.unsqueeze(1)[:, :, :config.GRU_TEMPORAL_WINDOW]</a>)
+
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        for i in range(<a id="change">gru_output.size(0</a><a id="change">)</a>):
+            hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/deed748087f19356d297fe57e439b967a6a3e617#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3750330</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: deed748087f19356d297fe57e439b967a6a3e617</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    if i == 0:
+                        rec_features.append(rec_feature[:, :inputs[i].size(1)])
+                    else:
+                        rec_features.append(<a id="change">rec_feature[:, \
+                            inputs[i-1].size(1):inputs[i-1].size(1)+inputs[i].size(1)]</a>)
+            &quot&quot&quot
+            if i == 0:
+                rec_features.append(rec_feature[:, :outs[i].size(-1)])</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        fuse = self.fuse(outs, training=training)
+        logit = self.head(fuse, training=training)
+        sizes = [<a id="change">torch.flatten(ii,start_dim=1).size(1</a><a id="change">)</a> for ii in inputs]
+        rec_features = []
+        if training:
+            rec_feature = self.refiner(fuse, training=training)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/pliang279/multibench/commit/72e3344b766884b9160fd383b13945be06819481#diff-d18b23b61842526d6956b06a29d725aed1c3962fa548edca68f628dea2178c2dL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3750333</div><div id='project'> Project Name: pliang279/multibench</div><div id='commit'> Commit Name: 72e3344b766884b9160fd383b13945be06819481</div><div id='time'> Time: 2021-06-05</div><div id='author'> Author: blairc@andrew.cmu.edu</div><div id='file'> File Name: training_structures/Contrastive_Learning.py</div><div id='m_class'> M Class Name: MMDL</div><div id='n_method'> N Class Name: MMDL</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: training_structures/Contrastive_Learning.py</div><div id='n_file'> N File Name: training_structures/Contrastive_Learning.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                         self.hidden_size).to(device)
+        out, _ = self.lstm(input0, (h0, c0))
+        out = self.attention_net(out)
+        out = self.fc(<a id="change">out[:, -1, :]</a>)
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, features, device):
+        inp = features[0]
+        self.sequence_length = <a id="change">inp.size(1</a><a id="change">)</a>
+        out, _ = self.lstm(inp)
+        out = self.attention_net(out, device)
+        out = self.fc1(out)
+        out = self.fc2(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/logintelligence/logadempirical/commit/a67d9fc74c175ac3aa700fe533e22a6fe62290ab#diff-806bb9e744e96a11cbd4585413a0bb83f6d2cfa6977027c8a5e60b1ed0d1bb81L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3750327</div><div id='project'> Project Name: logintelligence/logadempirical</div><div id='commit'> Commit Name: a67d9fc74c175ac3aa700fe533e22a6fe62290ab</div><div id='time'> Time: 2021-06-23</div><div id='author'> Author: c3363046@uon.edu.au</div><div id='file'> File Name: logbert/logdeep/models/lstm.py</div><div id='m_class'> M Class Name: robustlog</div><div id='n_method'> N Class Name: robustlog</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: logbert/logdeep/models/lstm.py</div><div id='n_file'> N File Name: logbert/logdeep/models/lstm.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 73</div><div id='n_end'> N End Line: 79</div><BR>

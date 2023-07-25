@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        hPad = max(0, 32 - h)
+        wPad = max(0, 32 - w)
+        x = F.pad(x, (0, wPad, 0, hPad))
+        return self._quantizer(self._encoder(x)), <a id="change">torch.tensor([</a>h, w<a id="change"></a>]<a id="change">, dtype=torch.int)</a>
+
+
+class RefDecoder(nn.Module):
+    def __init__(self, m, k, channel):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; List[torch.LongTensor]:
+        codes = list()
+        latent = self._encoder(x)
+        <a id="change">for i</a> in <a id="change">range(</a>self._levels<a id="change">)</a><a id="change">:
+            </a>head<a id="change"> = </a>self._heads[i]
+            z = head(latent)
+            if i &lt; self._levels - 1:
+                mapper = <a id="change">self._mappers[i]</a>
+                latent = mapper(latent)
+                code = self._quantizers[i](z)
+                hard = self._deQuantizers[i](code)
+                latent = latent - hard</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        remainder = x.shape[-1] % self.pool_size
+        <a id="change">if </a>remainder &gt; 0<a id="change">:
+            </a>x = F.pad(x, (0, remainder), value = 0)
+
+        attn_logits = einsum(&quotb d n, d e -&gt; b e n&quot, x, self.to_attn_logits)
+        x = self.pool_fn(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if needs_padding:
+            x = F.pad(x, (0, remainder), value = 0)
+            mask = <a id="change">torch.zeros(</a>(b<a id="change">, 1, n</a>)<a id="change">, dtype = torch.bool, device = x.device)</a>
+            mask<a id="change"> = </a>F.pad(mask, (0, remainder), value = True)
+
+        attn_logits = einsum(&quotb d n, d e -&gt; b e n&quot, x, self.to_attn_logits)
+        x = self.pool_fn(x)</code></pre>

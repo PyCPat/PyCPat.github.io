@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        loss = F.mse_loss(input_abs, target_abs) * self.f_m
+        if self.f_under != 1:
+            &#47&#47 Weighting if predicted abs is too low
+            loss = loss * <a id="change">torch.where(</a>input_abs &lt; target_abs, self.f_u, 1.0<a id="change">)</a>
+        if self.f_c &gt; 0:
+            if self.gamma != 1:
+                input = input_abs * torch.exp(1j * angle.apply(input))
+                target = target_abs * torch.exp(1j * angle.apply(target))</code></pre><h3>After Change</h3><pre><code class='java'>
+        tmp = (input_abs - target_abs).pow(2)
+        if self.f_u != 1:
+            &#47&#47 Weighting if predicted abs is too low
+            tmp<a id="change"> *= </a><a id="change">torch.where(</a>input_abs &lt; target_abs, self.f_u, 1.0<a id="change">)</a>
+        loss = torch.mean(tmp) * self.f_m
+        if self.f_c &gt; 0:
+            if self.gamma != 1:
+                input = input_abs * torch.exp(1j * angle.apply(input))</code></pre>

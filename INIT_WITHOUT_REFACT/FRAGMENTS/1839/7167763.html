@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        gru_input = torch.cat((proprio, latent_extero), dim = -1)
+
+        <a id="change">next_hiddens</a><a id="change"> = []</a>
+        <a id="change">for </a>gru_cell, <a id="change">prev_hidden</a> in zip(self.gru_cells, hiddens)<a id="change">:
+            </a>gru_input = gru_cell(gru_input, prev_hidden)
+            <a id="change">next_hiddens.append(</a>gru_input<a id="change">)</a>
+
+        gru_output = gru_input
+
+        &#47&#47 attention gating of exteroception
+
+        attention_gate = self.to_extero_attn_gate(gru_output)
+        gated_extero = latent_extero * attention_gate.sigmoid()
+
+        &#47&#47 belief state and add gated exteroception
+
+        belief_state = self.belief_state_encoder(gru_output)
+        belief_state = sum_with_zeropad(belief_state, gated_extero)
+
+        &#47&#47 to action logits
+
+        action_logits = self.to_action_logits(belief_state)
+        <a id="change">return </a>action_logits<a id="change">, next_hiddens</a>
+
+class Teacher(nn.Module):
+    def __init__(
+        self,</code></pre>

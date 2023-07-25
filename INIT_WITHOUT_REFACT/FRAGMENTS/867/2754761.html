@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                ign = ign.unsqueeze(-1).expand_as(batch_label)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                batch_label[ign] *= -1
+                mask = batch_label &gt;= 0
+            loss_c = self.focal_loss(<a id="change">conf_data[mask]</a>, batch_label[mask], reduction=&quotmean&quot)
+
+            return (loss_l, loss_c)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            with torch.no_grad():
+                batch_label = torch.zeros(num * num_priors, num_classes + 1).cuda().scatter_(1, conf_t.view(-1, 1), 1)
+                batch_label = batch_label[:, 1:].view(num, num_priors, num_classes)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                score = <a id="change">(overlap_t-3.0).relu()</a>.unsqueeze(-1).expand_as(batch_label)
+                batch_label<a id="change"> = </a>batch_label * score
+                mask = batch_label &gt;= 0
+            loss_c = self.gfocal_loss(conf_data, batch_label, mask)
+            return (loss_l, loss_c)</code></pre>

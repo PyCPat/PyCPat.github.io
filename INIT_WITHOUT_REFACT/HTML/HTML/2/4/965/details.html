@@ -1,0 +1,74 @@
+<html><h3>Pattern ID :965
+</h3><img src='2976073.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                expanded_strides.append(
+                    torch.zeros(1, grid.shape[1]).fill_(stride_this_level).type_as(xin[0])
+                )
+                <a id="change">if </a>self.use_l1<a id="change">:
+                    </a>origin_preds.append(reg_output.clone())
+
+            else:
+                output = torch.cat([reg_output, obj_output.sigmoid(), cls_output.sigmoid()], 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+                    batch_size = reg_output.shape[0]
+                    hsize, wsize = reg_output.shape[-2:]
+                    reg_output = reg_output.view(batch_size, self.n_anchors, 4, hsize, wsize)
+                    reg_output<a id="change"> = </a>(
+                        <a id="change">reg_output.permute(0, 1, 3, 4, 2)
+                        .reshape(</a>batch_size, <a id="change">-1</a>, 4<a id="change">)
+                    )</a>
+                    origin_preds.append(reg_output.clone())
+
+            else:
+                output = torch.cat([reg_output, obj_output.sigmoid(), cls_output.sigmoid()], 1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/megvii-basedetection/yolox/commit/2bbb1b195cf2753d41bd5ac49ed0e8f9047db02f#diff-414fcbd94464b999ee634c5916af11328be4e1fef26c9c98b91d4281edba4ac2L157' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2976073</div><div id='project'> Project Name: megvii-basedetection/yolox</div><div id='commit'> Commit Name: 2bbb1b195cf2753d41bd5ac49ed0e8f9047db02f</div><div id='time'> Time: 2021-07-19</div><div id='author'> Author: wangfeng02@megvii.com</div><div id='file'> File Name: yolox/models/yolo_head.py</div><div id='m_class'> M Class Name: YOLOXHead</div><div id='n_method'> N Class Name: YOLOXHead</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: yolox/models/yolo_head.py</div><div id='n_file'> N File Name: yolox/models/yolo_head.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 171</div><div id='n_start'> N Start Line: 157</div><div id='n_end'> N End Line: 178</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		pooled_output	= self.dropout(pooled_output)
+		logits		= self.classifier(pooled_output)
+
+		<a id="change">if </a>labels is None<a id="change">:
+			</a>return logits
+		else:
+			loss = F.binary_cross_entropy_with_logits(logits, labels.float())
+			return loss, logits</code></pre><h3>After Change</h3><pre><code class='java'>
+
+		tok_embed	= outputs[0]
+		bsz, mtok, dim  = tok_embed.shape
+		tok_embed_flat<a id="change">	= </a><a id="change">tok_embed.reshape(-1</a>, dim<a id="change">)</a>
+		men_idx 	= torch.arange(bsz).to(tok_embed.device) * mtok + mention_pos_idx
+		men_embed 	= tok_embed_flat[men_idx]
+
+		pooled_output	= self.dropout(men_embed)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/svjan5/medtype/commit/982c7e977da2c4dea0263c22ce8f8185e016839f#diff-0be3dcb1902aa758d64ed569f40de22e9a9aaf94f79dee28b7e1fd68fff93d9fL15' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2976072</div><div id='project'> Project Name: svjan5/medtype</div><div id='commit'> Commit Name: 982c7e977da2c4dea0263c22ce8f8185e016839f</div><div id='time'> Time: 2021-03-19</div><div id='author'> Author: shikharvashishth@gmail.com</div><div id='file'> File Name: medtype-trainer/models.py</div><div id='m_class'> M Class Name: BertPlain</div><div id='n_method'> N Class Name: BertPlain</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: medtype-trainer/models.py</div><div id='n_file'> N File Name: medtype-trainer/models.py</div><div id='m_start'> M Start Line: 15</div><div id='m_end'> M End Line: 35</div><div id='n_start'> N Start Line: 16</div><div id='n_end'> N End Line: 33</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch, permutation_dim, _ = x.shape
+
+        &#47&#47 if no NaNs for padding varying trial lengths we can batch the computation
+        <a id="change">if </a>not torch.isnan(x).any()<a id="change">:
+            </a>trial_embeddings = self.trial_net(x.view(batch * permutation_dim, -1)).view(
+                batch, permutation_dim, -1
+            )
+            combined_embedding = self.combining_function(trial_embeddings, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1</a><a id="change">)</a>[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1)  &#47&#47 make it (batch, 1) to match embeddings below
+        )
+        &#47&#47 number of non-nan trials
+        trial_counts = max_num_trials - nan_counts
+
+        &#47&#47 get nan entries
+        is_nan = torch.isnan(x)
+        &#47&#47 apply trial net with nan entries replaced with 0
+        masked_x = torch.nan_to_num(x, nan=0.0)
+        trial_embeddings = self.trial_net(masked_x)
+        &#47&#47 replace previous nan entries with zeros
+        trial_embeddings = trial_embeddings * (~is_nan.all(-1, keepdim=True)).float()
+
+        &#47&#47 Take mean over permutation dimension divide by number of trials
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        if self.aggregation_fn == "mean":
+            combined_embedding<a id="change"> = </a>(
+                trial_embeddings.sum(dim=self.aggregation_dim) / trial_counts
+            )
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2976069</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>

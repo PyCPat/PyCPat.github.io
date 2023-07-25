@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.deconv2 = nn.ConvTranspose2d(32, self.data_shape[0], 5, 1, 2)
+
+    def forward(self, x: torch.Tensor, label: int):
+        batch_size<a id="change"> = </a>x.size(0)
+        y_ = torch.zeros((batch_size<a id="change">, self.num_classes</a>))
+        y_[:, label] = 1.0
+        y_ = self.fc2(y_)
+        y_ = F.relu(y_)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, noise: torch.Tensor, poison_label: torch.LongTensor) -&gt; torch.Tensor:
+        _label = onehot_label(poison_label, self.num_classes)
+        y_ = self.fc2(_label)
+        y_ = <a id="change">self.relu(</a>y_<a id="change">)</a>
+        x = torch.cat([x, y_], dim=1)
+        x = self.fc(x)
+        x = x.view(-1, 64, self.data_shape[1], self.data_shape[2])
+        x = self.bn1(x)
+        x<a id="change"> = </a>self.relu(x)
+        x = self.deconv1(x)
+        x = self.bn2(x)
+        x<a id="change"> = </a>self.relu(x)
+        x = self.deconv2(x)
+        x = self.sigmoid(x)
+        return x</code></pre>

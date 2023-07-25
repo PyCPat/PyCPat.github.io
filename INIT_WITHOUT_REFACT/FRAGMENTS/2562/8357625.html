@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        batch_size, C, L = x.shape
+        L1 = int(L / 4)
+        L2 = int(L / 2)
+        L3 = int(<a id="change">3</a><a id="change"> * </a>L / 4)
+        nonlocal_feature = torch.zeros_like(x)
+
+        feat_sub_l1 = x[:, :, :L1]
+        feat_sub_l2 = x[:, :, L1: L2]
+        feat_sub_l3 = <a id="change">x[:, :, L2: L3]</a>
+        feat_sub_l4<a id="change"> = </a>x[:, :, L3:]
+
+        nonlocal_l1 = self.non_local(feat_sub_l1)
+        nonlocal_l2 = self.non_local(feat_sub_l2)
+        nonlocal_l3 = self.non_local(feat_sub_l3)
+        nonlocal_l4<a id="change"> = </a>self.non_local(feat_sub_l4)
+
+        nonlocal_feature[:, :, :L1] = nonlocal_l1
+        nonlocal_feature[:, :, L1: L2] = nonlocal_l2</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        feat_sub_l1 = x[:, :, :L1]
+        feat_sub_l2 = x[:, :, L1: L2]
+        feat_sub_l3 = <a id="change">x[:, :, L2:]</a>
+
+        nonlocal_l1 = self.non_local(feat_sub_l1)
+        nonlocal_l2 = self.non_local(feat_sub_l2)
+        nonlocal_l3 = self.non_local(feat_sub_l3)
+
+        nonlocal_feature[:, :, :L1] = nonlocal_l1
+        nonlocal_feature[:, :, L1: L2] = nonlocal_l2
+        nonlocal_feature[:, :, L2: ]<a id="change"> = </a>nonlocal_l3
+
+        return nonlocal_feature
+</code></pre>

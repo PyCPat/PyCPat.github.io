@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def __init__(self, backbone, num_classes, use_bottleneck=True, bottleneck_dim=1024, head_bottleneck_dim=1024):
+        super(Classifier, self).__init__()
+        self.backbone = backbone
+        <a id="change">if </a>use_bottleneck<a id="change">:
+            </a>self.bottleneck = nn.Sequential(
+                nn.Linear(backbone.out_features, bottleneck_dim),
+                nn.BatchNorm1d(bottleneck_dim),
+                nn.ReLU(),</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        for dep in range(2):
+            self.head[dep * 3].weight.data.normal_(0, 0.01)
+            <a id="change">self.head[dep * 3].bias.data.fill_(0.0</a><a id="change">)</a>
+            self.adv_head[dep * 3].weight.data.normal_(0, 0.01)
+            self.adv_head[dep * 3].bias.data.fill_(0.0)
+
+    def forward(self, inputs, keep_adv_output=False):</code></pre>

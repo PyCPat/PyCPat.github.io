@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = self.tanh(self.conv7(torch.cat((out6, out1), 1)))
+
+        <a id="change">return </a>out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        alpha_stacked = self.tanh(self.conv7(torch.cat((out6, out1), 1)))
+
+        alphas = torch.split(alpha_stacked, 3, 1)
+        <a id="change">results</a><a id="change"> = [</a>x<a id="change"></a>]
+        <a id="change">for i</a> in range(self.n)<a id="change">:
+            &#47&#47 x = x + alphas[i] * (x - x**2)  &#47&#47 as described in the paper
+            &#47&#47 sign doesn&quott really matter becaus of symmetry.
+            </a>x = x + alphas[i] * (torch.pow(x, 2) - x)
+            if i + 1 in self.ret:
+                <a id="change">results.append(</a>x<a id="change">)</a>
+
+        <a id="change">return </a>results<a id="change">, alpha_stacked</a>
+</code></pre>

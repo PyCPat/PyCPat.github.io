@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :1293
+</h3><img src='3791455.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        intermediate = []
+        intermediate_reference_points = []
+        for layer in self.layers:
+            <a id="change">if reference_points.shape[-1] == 3</a><a id="change">:
+                </a>reference_points_input = reference_points[:, :, None] * src_valid_ratios[:, None]   &#47&#47 Only have refererence points in valid areas
+            else:
+                <a id="change">raise </a><a id="change">ValueError("Currently iterative bbox refinement is not implemented."</a><a id="change">)</a>
+
+            output = layer(output, query_pos, reference_points_input, src, src_spatial_shapes, src_level_start_index, src_padding_mask)
+
+            if self.return_intermediate:</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.return_intermediate:
+            return torch.stack(intermediate)
+
+        <a id="change">return </a>output
+
+
+def _get_clones(module, N):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/393e27eea21f0857ee4a388b54e0dd658c958587#diff-8d5b0aebf3dcc112c28e09601b1ccfbd36b9edd6bb4758403feacf2d46c36e32L282' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3791455</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: 393e27eea21f0857ee4a388b54e0dd658c958587</div><div id='time'> Time: 2022-01-27</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/deformable_detr_transformer.py</div><div id='m_class'> M Class Name: DeformableTransformerDecoder</div><div id='n_method'> N Class Name: DeformableTransformerDecoder</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/deformable_detr_transformer.py</div><div id='n_file'> N File Name: transoar/models/necks/deformable_detr_transformer.py</div><div id='m_start'> M Start Line: 282</div><div id='m_end'> M End Line: 303</div><div id='n_start'> N Start Line: 328</div><div id='n_end'> N End Line: 341</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )
+            elif <a id="change">pred.shape[-1] not in (1, self.param_rank)</a><a id="change">:
+                </a><a id="change">raise </a><a id="change">ValueError(
+                    f"{self.id} `predict_variance` module output should have `shape[-1]` of "
+                    f"{self.param_rank}, got {pred.shape[-1]}"</a><a id="change">
+                )</a>
+        if pred is not None:
+            diag_multi = torch.diag_embed(torch.exp(pred))
+            mini_cov = diag_multi @ mini_cov @ diag_multi
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        mask = self.mask.unsqueeze(0).unsqueeze(0)
+
+        <a id="change">return </a>mask @ mini_cov @ mask.tranpose(-1, -2)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/strongio/torchcast/commit/d98b47d1ac38c61653093efd887cc672f228917d#diff-65e118e1565802366914308589e1ad788cb0cd050a59e65d1c18b1195749bf05L244' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3791457</div><div id='project'> Project Name: strongio/torchcast</div><div id='commit'> Commit Name: d98b47d1ac38c61653093efd887cc672f228917d</div><div id='time'> Time: 2021-09-01</div><div id='author'> Author: jacob.dink@strong.io</div><div id='file'> File Name: torchcast/covariance/base.py</div><div id='m_class'> M Class Name: Covariance</div><div id='n_method'> N Class Name: Covariance</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchcast/covariance/base.py</div><div id='n_file'> N File Name: torchcast/covariance/base.py</div><div id='m_start'> M Start Line: 246</div><div id='m_end'> M End Line: 266</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 290</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_std = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+
+        for i in range(x.shape[0]):
+            <a id="change">if x[i, :, :].shape[1] == 1</a><a id="change">:
+                </a><a id="change">raise </a><a id="change">ValueError(
+                    "normalize_batch received a tensor of length 1. This will result "
+                    "in torch.std() returning nan"</a><a id="change">
+                )</a>
+            x_mean[i, :] = x[i, :, :].mean(dim=1)
+            x_std[i, :] = x[i, :, :].std(dim=1)
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard
+        <a id="change">return </a>(x - x_mean) / x_std
+
+
+class DitherAudio(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3791458</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>

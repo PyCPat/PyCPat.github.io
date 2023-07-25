@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2192
+</h3><img src='7729429.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        onehot: whether labels is onehot
+        
+        if self.multiclass:
+            loss1 = F.binary_cross_entropy(torch.sigmoid(logits), <a id="change">labels.float()</a>)
+        else:
+            if onehot:
+                labels = labels.argmax(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.multiclass:
+            &#47&#47 loss1 = F.binary_cross_entropy(torch.sigmoid(logits), labels.float()) &#47&#47 not using, not working
+            log_logits = F.log_softmax(logits, dim=1)
+            labels_scaled = labels / <a id="change">labels.sum(dim=1, keepdim=True)</a>
+            loss1 = <a id="change">- (labels_scaled * log_logits).sum(dim=1)</a>
+            loss1 = loss1.mean()
+        else:
+            if onehot:
+                labels = labels.argmax(1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/cisiplab/cisip-fire/commit/96bcf24c38a9339d15c53d788422df62cf9b5dc5#diff-fbe76e8f7b7c44fe0bbf38cc7045f9776de5a00dbe2ee60f5e94a2de8a3662b0L25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7729429</div><div id='project'> Project Name: cisiplab/cisip-fire</div><div id='commit'> Commit Name: 96bcf24c38a9339d15c53d788422df62cf9b5dc5</div><div id='time'> Time: 2022-01-16</div><div id='author'> Author: jiuntian@gmail.com</div><div id='file'> File Name: functions/loss/greedyhash.py</div><div id='m_class'> M Class Name: GreedyHashLoss</div><div id='n_method'> N Class Name: GreedyHashLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: functions/loss/greedyhash.py</div><div id='n_file'> N File Name: functions/loss/greedyhash.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 25</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 29</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask = sequence_mask(
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2)
+        losses = losses * mask.float()
+        loss = losses.sum() / (<a id="change">length.float()</a>.sum() * float(target.shape[2]))
+        return loss
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = mask.expand_as(input)
+        loss = functional.l1_loss(
+            input * mask, target * mask, reduction="sum")
+        loss = loss<a id="change"> / </a><a id="change">mask.sum()</a>
+        return loss
+
+
+class MSELossMasked(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/a15b3ec9a18377bf67356a9b5c29f4b767001d05#diff-e2062370456db62dc9af5481873d2fcfe1d6e8a959459063dd6233f61d3f66d5L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7729424</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: a15b3ec9a18377bf67356a9b5c29f4b767001d05</div><div id='time'> Time: 2018-08-13</div><div id='author'> Author: erengolge@gmail.com</div><div id='file'> File Name: layers/losses.py</div><div id='m_class'> M Class Name: L1LossMasked</div><div id='n_method'> N Class Name: L1LossMasked</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/losses.py</div><div id='n_file'> N File Name: layers/losses.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 26</div><div id='n_end'> N End Line: 31</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 mask: (batch, max_len, 1)
+        mask = sequence_mask(
+            sequence_length=length, max_len=target.size(1)).unsqueeze(2)
+        losses = losses * <a id="change">mask.float()</a>
+        loss = losses.sum() / (length.float().sum() * float(target.shape[2]))
+        return loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = mask.expand_as(input)
+        loss = functional.mse_loss(
+            input * mask, target * mask, reduction="sum")
+        loss = loss<a id="change"> / </a><a id="change">mask.sum()</a>
+        return loss
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/4326582bb1e68480ef79a02abbf4bfacc3aadede#diff-e2062370456db62dc9af5481873d2fcfe1d6e8a959459063dd6233f61d3f66d5L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7729436</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 4326582bb1e68480ef79a02abbf4bfacc3aadede</div><div id='time'> Time: 2019-03-06</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/losses.py</div><div id='m_class'> M Class Name: MSELossMasked</div><div id='n_method'> N Class Name: MSELossMasked</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/losses.py</div><div id='n_file'> N File Name: layers/losses.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 70</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>

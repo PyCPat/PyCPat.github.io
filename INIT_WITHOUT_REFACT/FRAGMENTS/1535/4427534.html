@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if len(token_index) == 1:
+            self_attn_mask = self.token_indices &lt; token_index + 1
+        else:
+            self_attn_mask = self.token_indices[:len(token_index)][None, :] &lt; <a id="change">(token_index + 1)[:, None]</a>
+        self_attn_mask = self_attn_mask[None][[0] * decoder_state.shape[0]]
+        residual = decoder_state
+        decoder_state = self.pre_self_attn_layer_norm.forward(decoder_state)
+        decoder_state, attention_state = self.self_attn.forward(</code></pre><h3>After Change</h3><pre><code class='java'>
+        if token_index.shape[1] == 1:
+            self_attn_mask = self.token_indices &lt;= token_index
+        else:
+            self_attn_mask = self.token_indices[<a id="change">:token_index.shape[1]</a>][None, None, :] &lt;= token_index[:, :, None]
+        residual = decoder_state
+        decoder_state = self.pre_self_attn_layer_norm.forward(decoder_state)
+        decoder_state, attention_state = self.self_attn.forward(</code></pre>

@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        onehot: whether labels is onehot
+        
+        if self.multiclass:
+            loss1 = F.binary_cross_entropy(torch.sigmoid(logits), <a id="change">labels.float()</a>)
+        else:
+            if onehot:
+                labels = labels.argmax(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.multiclass:
+            &#47&#47 loss1 = F.binary_cross_entropy(torch.sigmoid(logits), labels.float()) &#47&#47 not using, not working
+            log_logits = F.log_softmax(logits, dim=1)
+            labels_scaled = labels / <a id="change">labels.sum(dim=1, keepdim=True)</a>
+            loss1 = <a id="change">- (labels_scaled * log_logits).sum(dim=1)</a>
+            loss1 = loss1.mean()
+        else:
+            if onehot:
+                labels = labels.argmax(1)</code></pre>

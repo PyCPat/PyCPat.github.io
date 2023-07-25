@@ -1,0 +1,97 @@
+<html><h3>Pattern ID :1696
+</h3><img src='6716454.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.causal:
+            i, j = dots.shape[-2:]
+            mask = torch.ones((i, j), device = device).triu_(j - i + 1).bool()
+            dots.masked_fill_(mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        if exists(self.sparse_topk) and self.sparse_topk &lt; dots.shape[-1]:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        dots = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k) * self.scale
+
+        mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if talking_heads:
+            dots = einsum(&quotb h i j, h k -&gt; b k i j&quot, dots, self.pre_softmax_proj).contiguous()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/11d77c7781eba38aa53abbcb5cbb295859954b31#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL233' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716454</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 11d77c7781eba38aa53abbcb5cbb295859954b31</div><div id='time'> Time: 2020-11-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 239</div><div id='m_end'> M End Line: 252</div><div id='n_start'> N Start Line: 233</div><div id='n_end'> N End Line: 257</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if input_mask is not None:
+            mask = input_mask[:, None, :, None] * input_mask[:, None, None, :]
+            mask = F.pad(mask, (mem_len + cmem_len, 0), value = False)
+            dots.masked_fill_(~mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+
+        mask = torch.ones(t, kv_len, **to(x)).triu_(diagonal = 1 + kv_len).bool()
+        dots.masked_fill_(mask[None, None, ...], float(&quot-inf&quot))</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(merge_heads, (q, k, v))
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+        mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if pos_emb is not None:
+            pos_dots = torch.einsum(&quotbhid,hjd-&gt;bhij&quot, q, pos_emb) * self.scale
+            pos_dots = shift(pos_dots)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/95edcd4e60ef2e9c9f46588d0bc7b36ff255565a#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716455</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 95edcd4e60ef2e9c9f46588d0bc7b36ff255565a</div><div id='time'> Time: 2020-07-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 193</div><div id='n_start'> N Start Line: 183</div><div id='n_end'> N End Line: 197</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Causal masking
+        if self.causal:
+            mask = bq_t[:, :, :, None] &lt; bkv_t[:, :, None, :].clamp(max=query_len - 1)
+            dots.masked_fill_(mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        &#47&#47 Mask out attention to self except when no other targets are available.</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Dot-product attention.
+        dots = torch.einsum(&quotbhie,bhje-&gt;bhij&quot, bq, bk) * (dim ** -0.5)
+        masked_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if input_mask is not None:
+            input_mask = F.pad(input_mask, (0, seqlen - input_mask.shape[1]), &quotconstant&quot, True)
+            mq = input_mask.gather(1, st).reshape((batch_size, chunk_size, -1))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/6bcbb058548ac305ec39557073c4d17bb7d16b28#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL191' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716452</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 6bcbb058548ac305ec39557073c4d17bb7d16b28</div><div id='time'> Time: 2020-02-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: LSHAttention</div><div id='n_method'> N Class Name: LSHAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 270</div><div id='n_start'> N Start Line: 249</div><div id='n_end'> N End Line: 274</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.causal:
+            i, j = torch.triu_indices(t, t, 1)
+            dot[:, i, j] = <a id="change">float(&quot-inf&quot</a><a id="change">)</a>
+
+        dot = dot.softmax(dim=-1)
+        out = torch.einsum(&quotbij,bje-&gt;bie&quot, dot, v)
+        return out, dot</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 qk attention requires tokens not attend to self
+        i = torch.arange(t)
+        dot[:, i, i] = TOKEN_SELF_ATTN_VALUE
+        masked_value<a id="change"> = </a><a id="change">max_neg_value(</a>dot<a id="change">)</a>
+
+        if input_mask is not None:
+            mask = input_mask[:, :, None] * input_mask[:, None, :]
+            mask = F.pad(mask, (0, seq_len - mask.shape[-1]), &quotconstant&quot, True)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/6bcbb058548ac305ec39557073c4d17bb7d16b28#diff-7e740488ff2ce47996cfdd5356981ed3e6ac2bb38739a71b400275ac91d1c3bfL353' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716451</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: 6bcbb058548ac305ec39557073c4d17bb7d16b28</div><div id='time'> Time: 2020-02-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_class'> M Class Name: FullQKAttention</div><div id='n_method'> N Class Name: FullQKAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reformer_pytorch.py</div><div id='n_file'> N File Name: reformer_pytorch/reformer_pytorch.py</div><div id='m_start'> M Start Line: 365</div><div id='m_end'> M End Line: 376</div><div id='n_start'> N Start Line: 369</div><div id='n_end'> N End Line: 379</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        bq_k = look_around(b_t, **look_around_kwargs)
+
+        dots = torch.einsum(&quotbhie,bhje-&gt;bhij&quot, bq, bk) * (e ** -0.5)
+        mask_value = <a id="change">float(&quot-inf&quot</a><a id="change">)</a>
+
+        if shared_qk:
+            mask = bq_t[:, :, :, None] == bq_k[:, :, None, :]
+            dots.masked_fill_(mask, TOKEN_SELF_ATTN_VALUE)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        dots = torch.einsum(&quotbhie,bhje-&gt;bhij&quot, bq, bk) * (e ** -0.5)
+
+        mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if shared_qk:
+            mask = bq_t[:, :, :, None] == bq_k[:, :, None, :]
+            dots.masked_fill_(mask, TOKEN_SELF_ATTN_VALUE)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/linear-attention-transformer/commit/bfdf2dc29d4a1f145914ff0cdc4472d80009b596#diff-eee6cf669463e9683bcf9643c4b19a493056f98ded32854287144d47f02a7032L97' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716449</div><div id='project'> Project Name: lucidrains/linear-attention-transformer</div><div id='commit'> Commit Name: bfdf2dc29d4a1f145914ff0cdc4472d80009b596</div><div id='time'> Time: 2020-06-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_class'> M Class Name: LocalAttention</div><div id='n_method'> N Class Name: LocalAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='n_file'> N File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_start'> M Start Line: 120</div><div id='m_end'> M End Line: 150</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 162</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if self.causal:
+            mask = torch.ones(self.window_size, self.window_size, device=device).byte().triu_(1).bool()
+            dots.masked_fill_(mask, <a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        mask = torch.eye(self.window_size, device=dots.device).bool()</code></pre><h3>After Change</h3><pre><code class='java'>
+        dots = torch.einsum(&quotbhnid,bhnjd-&gt;bhnij&quot, q, k) * (d ** -0.5)
+        dots = dots + self.rel_pos(q)
+
+        mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>dots<a id="change">)</a>
+
+        if self.causal:
+            mask = torch.ones(self.window_size, self.window_size, device=device).byte().triu_(1).bool()
+            dots.masked_fill_(mask, mask_value)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/3906e09feb06e14f7220b3afe4e1e8d4b01e895f#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL244' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716456</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 3906e09feb06e14f7220b3afe4e1e8d4b01e895f</div><div id='time'> Time: 2020-05-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: KmeansAttention</div><div id='n_method'> N Class Name: KmeansAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 276</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 272</div><div id='n_end'> N End Line: 281</div><BR>

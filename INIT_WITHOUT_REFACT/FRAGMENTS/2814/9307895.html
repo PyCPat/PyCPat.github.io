@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    
+    &#47&#47 weight (ray_num, point_num)
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        norm_diff<a id="change"> = </a><a id="change">torch.pow(</a>(d_norm - p_norm), <a id="change">2</a><a id="change">)</a>
+        res = torch.sum(weight.unsqueeze(-1) * norm_diff)
+        return res<a id="change"> / </a>weight.numel() if self.size_average == True else res
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, weight:torch.Tensor, d_norm: torch.Tensor, p_norm: torch.Tensor) -&gt; torch.Tensor:
+        dot_diff = 1. - torch.sum(d_norm * p_norm, dim = -1)
+        &#47&#47 norm_diff = torch.pow((d_norm - p_norm), 2)
+        return torch.mean(weight * dot_diff) if self.size_average == True else <a id="change">torch.sum(</a>weight * dot_diff<a id="change">)</a>
+
+class BackFaceLoss(nn.Module):
+    def __init__(self):
+        super().__init__()</code></pre>

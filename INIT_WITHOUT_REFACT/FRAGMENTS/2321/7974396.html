@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            img_size = x.shape[-2:]  &#47&#47 height, width
+            s = [0.83, 0.67]  &#47&#47 scales
+            y = []
+            <a id="change">for </a>i, xi in <a id="change">enumerate(</a>(x,
+                                    torch_utils.scale_img(x.flip(3), s[0]),  &#47&#47 flip-lr and scale
+                                    torch_utils.scale_img(x, s[1]),  &#47&#47 scale
+                                    )<a id="change">):
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % i, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])
+                </a>y.append(self.forward_once(xi)[0])
+
+            y[1][..., :4] /= s[0]  &#47&#47 scale
+            y[1][..., 0] = img_size[1] - y[1][..., 0]  &#47&#47 flip lr</code></pre><h3>After Change</h3><pre><code class='java'>
+            s = [1, 0.83, 0.67]  &#47&#47 scales
+            f = [None, 3, None]  &#47&#47 flips (2-ud, 3-lr)
+            y = []  &#47&#47 outputs
+            <a id="change">for </a>si, <a id="change">fi</a> in zip(s, f)<a id="change">:
+                </a>xi<a id="change"> = </a>torch_utils.scale_img(x.flip(fi) if fi else x, si)
+                yi = self.forward_once(xi)[0]  &#47&#47 forward
+                &#47&#47 cv2.imwrite(&quotimg%g.jpg&quot % s, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])  &#47&#47 save
+                yi[..., :4] /= si  &#47&#47 de-scale
+                if fi is 2:
+                    yi[..., 1]<a id="change"> = </a>img_size[0] - yi[..., 1]  &#47&#47 de-flip ud
+                elif fi is 3:
+                    yi[..., 0] = img_size[1] - yi[..., 0]  &#47&#47 de-flip lr
+                y.append(yi)</code></pre>

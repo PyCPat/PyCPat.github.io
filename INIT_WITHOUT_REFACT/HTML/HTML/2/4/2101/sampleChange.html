@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        x = self.v2p(x)
+        x = <a id="change">x.squeeze()</a>.transpose(1, 2)
+        if self.backend == &quotgru&quot:
+            x = self.gru(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        b = x.size(0)
+        x = x.transpose(1, 2).contiguous()
+        x = x.view(-1, x.size(2), <a id="change">x.size(3</a><a id="change">)</a>, x.size(4))
+        x = self.vgg(x)
+        x<a id="change"> = </a>x.view(b, -1, x.size(1))
+        if self.backend == &quotgru&quot:
+            x = self.gru(x)
+        return x</code></pre>

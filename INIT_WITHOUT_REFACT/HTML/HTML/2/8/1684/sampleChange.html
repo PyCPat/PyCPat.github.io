@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 if no NaNs for padding varying trial lengths we can batch the computation
+        if not torch.isnan(x).any():
+            trial_embeddings = <a id="change">self.trial_net(x.view(batch * permutation_dim, -1)).view(
+                </a>batch, permutation_dim, <a id="change">-1</a><a id="change">
+            )</a>
+            combined_embedding<a id="change"> = </a>self.combining_function(trial_embeddings, dim=1)
+            trial_counts = torch.ones(batch, 1, dtype=torch.float32) * permutation_dim
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Take mean over permutation dimension divide by number of trials
+        &#47&#47 (instead of just taking torch.mean) to account for masking.
+        <a id="change">if self.aggregation_fn == "mean"</a><a id="change">:
+            </a>combined_embedding<a id="change"> = </a>(
+                trial_embeddings.sum(dim=self.aggregation_dim) / trial_counts
+            )
+        else:
+            combined_embedding<a id="change"> = </a>trial_embeddings.sum(dim=self.aggregation_dim)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."
+</code></pre>

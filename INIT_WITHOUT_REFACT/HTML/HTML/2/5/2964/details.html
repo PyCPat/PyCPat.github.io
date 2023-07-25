@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2964
+</h3><img src='9764268.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = []
+
+        if <a id="change">lq.shape[1]</a> &gt; 0:
+            out.append(self.local_attention(lq, lk, lv, input_mask = input_mask))
+
+        if q.shape[1] &gt; 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        split_index_fn = partial(split_at_index, 1, l_h)
+        (lq, q), (lk, k), (lv, v) = map(split_index_fn, (q, k, v))
+        has_local<a id="change">, has_sinkhorn = </a><a id="change">map(</a>lambda x: x.shape[1] &gt; 0, (lq<a id="change">, q</a>)<a id="change">)</a>
+
+        out = []
+
+        if has_local &gt; 0:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/689d5cf565b1671237dfb285d0fd40d5d6a07d95#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL572' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9764268</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 689d5cf565b1671237dfb285d0fd40d5d6a07d95</div><div id='time'> Time: 2020-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornSelfAttention</div><div id='n_method'> N Class Name: SinkhornSelfAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 574</div><div id='m_end'> M End Line: 591</div><div id='n_start'> N Start Line: 572</div><div id='n_end'> N End Line: 590</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                mask = torch.ones(b, q.shape[-2], dtype = torch.bool, device = device)
+
+            if not exists(context_mask):
+                context_mask = torch.ones(b, <a id="change">k.shape[-2]</a>, dtype = torch.bool, device = device)
+
+            mask = rearrange(mask, &quotb i -&gt; b () i ()&quot) * rearrange(context_mask, &quotb j -&gt; b () () j&quot)
+            sim.masked_fill_(~mask, max_neg_value(sim))</code></pre><h3>After Change</h3><pre><code class='java'>
+        k, v = self.to_kv(context).chunk(2, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        null_k<a id="change">, null_v = </a><a id="change">map(</a>lambda t: repeat(t, &quotd -&gt; b h () d&quot, b = b, h = h), (self.null_key<a id="change">, self.null_value</a>)<a id="change">)</a>
+        k = torch.cat((null_k, k), dim = -2)
+        v = torch.cat((null_v, v), dim = -2)
+
+        q, k = map(lambda t: self.qk_activation(t), (q, k))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/protein-bert-pytorch/commit/a38caad27b80726fee00159fd07053468daf725f#diff-6e35313d9af4f12619a10ddacdffb91019586962c8eddcde1ba5702de45fcc56L47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9764269</div><div id='project'> Project Name: lucidrains/protein-bert-pytorch</div><div id='commit'> Commit Name: a38caad27b80726fee00159fd07053468daf725f</div><div id='time'> Time: 2021-05-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='n_file'> N File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 112</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mem = default(mem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))
+        lmem = default(lmem, lambda: torch.empty(num_memory_layers, b, 0, d, **to(x)))
+
+        total_len = <a id="change">mem.shape[2]</a> + lmem.shape[2] + self.seq_len
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+
+        next_mem = []</code></pre><h3>After Change</h3><pre><code class='java'>
+        mem = default(mem, init_mem)
+        lmem = default(lmem, init_mem)
+
+        mem_len<a id="change">, lmem_len = </a><a id="change">map(</a>lambda t: t.shape[2], (mem<a id="change">, lmem</a>)<a id="change">)</a>
+        total_len = mem_len + lmem_len + self.seq_len
+
+        pos_emb = self.pos_emb[:, (self.seq_len - t):total_len]
+        mem_iter, lmem_iter = map(iterate_tensor, (mem, lmem))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memory-transformer-xl/commit/cbabe1ae6fa311092a9d0a88116c079a5ad8d790#diff-a0bf60cdef5ad628f9a83f0454c9c66a535268529835e839bb54088805dba051L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9764270</div><div id='project'> Project Name: lucidrains/memory-transformer-xl</div><div id='commit'> Commit Name: cbabe1ae6fa311092a9d0a88116c079a5ad8d790</div><div id='time'> Time: 2020-07-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_class'> M Class Name: MemoryTransformerXL</div><div id='n_method'> N Class Name: MemoryTransformerXL</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='n_file'> N File Name: memory_transformer_xl/memory_transformer_xl.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 296</div><div id='n_start'> N Start Line: 306</div><div id='n_end'> N End Line: 345</div><BR>

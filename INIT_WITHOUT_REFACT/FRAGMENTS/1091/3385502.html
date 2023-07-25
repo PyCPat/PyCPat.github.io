@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        batch_size = len(sparse_features.lengths()) // len(keys) // self.world_size
+        flattened_sparse_embeddings = self.embed(flattened_sparse_features, batch_offsets)
+        <a id="change">return </a>flattened_sparse_embeddings.view(batch_size, len(keys), -1)
+
+
+class FusedDenseModules(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        batch_size = len(sparse_features.lengths()) // len(keys)
+        feature_size = len(keys)
+        flattened_sparse_embeddings<a id="change"> = </a><a id="change">self.embed(</a>flattened_sparse_features,
+                                                 batch_offsets<a id="change">,
+                                                 send_shape=(batch_size, feature_size, -1))</a>
+        <a id="change">return </a>flattened_sparse_embeddings
+
+
+class FusedDenseModules(nn.Module):</code></pre>

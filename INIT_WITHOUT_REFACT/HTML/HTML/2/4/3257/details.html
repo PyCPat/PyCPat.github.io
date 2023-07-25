@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :3257
+</h3><img src='10379342.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h, x, y = self.heads, *fmap.shape[-2:]
+
+        fmap = self.norm(fmap)
+        q, k, v = <a id="change">self.to_qkv(fmap).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = rearrange_many((q, k, v), &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = h)
+
+        q = q.softmax(dim = -1)
+        k = k.softmax(dim = -2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        h, x, y = self.heads, *fmap.shape[-2:]
+
+        fmap = self.norm(fmap)
+        q, k, v = map(lambda fn: fn(fmap), (self.to_q<a id="change">, self.to_k, self.to_v</a>))
+        q, k, v = rearrange_many((q, k, v), &quotb (h c) x y -&gt; (b h) (x y) c&quot, h = h)
+
+        q = q.softmax(dim = -1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/e72d6d64067422c3d28c7387f17fbf095731bb67#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L712' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10379342</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: e72d6d64067422c3d28c7387f17fbf095731bb67</div><div id='time'> Time: 2022-06-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 713</div><div id='n_start'> N Start Line: 731</div><div id='n_end'> N End Line: 731</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        b, t, d, h = *x.shape, self.heads
+        assert divisible_by(t, self.buckets), f&quotsequence {t} needs to be divisible by bucket size {self.buckets}&quot
+
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim=2)</a>
+
+        merge_heads_fn = partial(merge_heads, h)
+        q, k, v = map(merge_heads_fn, qkv)
+        out = self.sinkhorn_attention(q, k, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q = self.to_q(x)
+        kv = self.to_kv(x).chunk(2, dim=-1) if not self.context_only else (context, context)
+
+        qkv = (q<a id="change">, *kv</a>)
+        merge_heads_fn = partial(merge_heads, h)
+        q, k, v = map(merge_heads_fn, qkv)
+        out = self.sinkhorn_attention(q, k, v)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/3e638458d4bc5c6df8037e1b4f460bfa044288e8#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL355' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10379341</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 3e638458d4bc5c6df8037e1b4f460bfa044288e8</div><div id='time'> Time: 2020-04-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornSelfAttention</div><div id='n_method'> N Class Name: SinkhornSelfAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 359</div><div id='m_end'> M End Line: 359</div><div id='n_start'> N Start Line: 369</div><div id='n_end'> N End Line: 377</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, feats, coors, mask = None):
+        h = self.heads
+        q, k, v = <a id="change">self.to_qkv(feats).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () n ()&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, queries, mask = None):
+        induced = self.attn1(queries, x, mask = mask)
+        out     = self.attn2(x, induced)
+        return out<a id="change">, 0</a>
+
+class EquivariantAttention(nn.Module):
+    def __init__(
+        self,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/6bd1817d780502d24a2515e850c9cd1600f24642#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L131' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10379344</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 6bd1817d780502d24a2515e850c9cd1600f24642</div><div id='time'> Time: 2021-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: GlobalLinearAttention</div><div id='n_method'> N Class Name: GlobalLinearAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 162</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 properly chunk positional embeddings
+
+            q_pos_emb = repeat(q_pos_emb, &quot1 h (k n) d -&gt; (b k) h n d&quot, n = chunk_size, b = b)
+            k_pos_emb<a id="change"> = </a><a id="change">repeat(</a>k_pos_emb, <a id="change">&quot1 h (k n) d -&gt; (b k) h (r n) d&quot</a><a id="change">, n = chunk_size, b = b, r = num_retrieved)</a>
+
+            pos_emb = (q_pos_emb, k_pos_emb)
+
+        &#47&#47 reshape so we have chunk to chunk attention, without breaking causality</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, *, context, pos_emb = None, **kwargs):
+        &#47&#47 derive variables
+
+        b, n, num_chunks, num_retrieved, chunk_size = x.shape[0], x.shape[-2], *context.shape[<a id="change">-4:-1</a>]
+        causal_padding = chunk_size - 1
+
+        &#47&#47 causal padding</code></pre>

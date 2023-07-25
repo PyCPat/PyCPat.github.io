@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 shaw&quots relative positional embedding
+        seq = torch.arange(n, device = device)
+        dist = <a id="change">seq[:, None] - seq[None, :]</a>
+        dist = dist.clip(-max_pos_emb, max_pos_emb) + max_pos_emb
+        rel_pos_emb = self.rel_pos_emb(dist).to(q)
+        pos_attn = einsum(&quotb h n d, n r d -&gt; b h n r&quot, q, rel_pos_emb) * self.scale
+        dots = dots + pos_attn</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 shaw&quots relative positional embedding
+        seq = torch.arange(n, device = device)
+        dist = <a id="change">rearrange(</a>seq, <a id="change">&quoti -&gt; i ()&quot</a><a id="change">)</a> - rearrange(seq, &quotj -&gt; () j&quot)
+        dist = dist.clip(-max_pos_emb, max_pos_emb) + max_pos_emb
+        rel_pos_emb = self.rel_pos_emb(dist).to(q)
+        pos_attn = einsum(&quotb h n d, n r d -&gt; b h n r&quot, q, rel_pos_emb) * self.scale</code></pre>

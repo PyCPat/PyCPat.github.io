@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            k2 = self.relative_positions_encoding(k2, model_kwargs[&quotposition_ids&quot][:, 1, :])
+            query_layer = torch.concat([q1, q2], dim=(q1.ndim - 1))
+            key_layer = torch.concat([k1, k2], dim=(k1.ndim - 1))
+        elif <a id="change">self.p_bias == &quotrotary&quot and not self.position_encoding_2d:  &#47&#47 原rotary逻辑
+            </a>query_layer = self.relative_positions_encoding(query_layer, model_kwargs[&quotposition_ids&quot])
+            key_layer = self.relative_positions_encoding(key_layer, model_kwargs[&quotposition_ids&quot])
+
+        if self.is_decoder:</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:  &#47&#47 原rotary逻辑
+                query_layer = self.relative_positions_encoding(query_layer, model_kwargs[&quotposition_ids&quot])
+                key_layer = self.relative_positions_encoding(key_layer, model_kwargs[&quotposition_ids&quot])
+            <a id="change">if past_key_value is not None</a><a id="change">:  &#47&#47 过了rope再concat
+                </a>key_layer = torch.cat([past_key_value[0], key_layer], dim=2)
+                value_layer<a id="change"> = </a>torch.cat(<a id="change">[</a>past_key_value[1], value_layer<a id="change"></a>], dim=2)
+
+        if self.is_decoder:
+            past_key_value = (key_layer, value_layer)</code></pre>

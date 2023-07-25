@@ -1,0 +1,55 @@
+<html><h3>Pattern ID :1441
+</h3><img src='4187708.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            offsetx = torch.randint(0, width - size, ())
+            offsety = torch.randint(0, width - size, ())
+            apper = out[:, :, offsetx:offsetx + size, offsety:offsety + size]
+            apper = <a id="change">torch.nn.functional.interpolate(</a>apper, (224, 224)<a id="change">, mode = &quotbilinear&quot, align_corners = False)</a>
+            pieces.append(normalize_image(apper))
+
+        image = torch.cat(pieces)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pieces = []
+
+        <a id="change">for </a>(num_images, (lo, hi), downsize) in cutout_specs<a id="change">:
+            </a>for _ in range(num_images):
+                cutout = rand_cutout(out, ratio = (lo, hi))
+                if exists(downsize):
+                    cutout<a id="change"> = </a>interpolate(cutout, downsize)
+                resized_cutout = interpolate(cutout, 224)
+                pieces.append(normalize_image(resized_cutout))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/deep-daze/commit/31c2b6b8607914862120163bc48908ad3e6b5c12#diff-616c9e43a41350a422ceed25123abc6af77b07529631176f76732b6cfab3b710L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4187708</div><div id='project'> Project Name: lucidrains/deep-daze</div><div id='commit'> Commit Name: 31c2b6b8607914862120163bc48908ad3e6b5c12</div><div id='time'> Time: 2021-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: deep_daze/deep_daze.py</div><div id='m_class'> M Class Name: DeepDaze</div><div id='n_method'> N Class Name: DeepDaze</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deep_daze/deep_daze.py</div><div id='n_file'> N File Name: deep_daze/deep_daze.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 113</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 adversarial loss for multi-scale discriminators
+
+        for discr, scale in zip(self.discriminators, self.discr_multi_scales):
+            scaled_fake = <a id="change">F.interpolate(</a>recon_x<a id="change">, scale_factor = scale)</a>
+            fake_logits = discr(scaled_fake)
+            one_adversarial_loss = hinge_gen_loss(fake_logits)
+            adversarial_losses.append(one_adversarial_loss)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        feature_losses = []
+
+        <a id="change">for </a>real_intermediates, <a id="change">fake_intermediates</a> in discr_intermediates<a id="change">:
+            </a>losses<a id="change"> = </a>[F.mse_loss(real_intermediate, fake_intermediate) for real_intermediate, fake_intermediate in zip(real_intermediates, fake_intermediates)]
+            feature_losses.extend(losses)
+
+        feature_loss = torch.stack(feature_losses).mean()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/audiolm-pytorch/commit/d0e1f681048255b2b90790053ad0d3f72066d0e4#diff-96a5ee045c1df07f3125d9b4189130620f229785b36cebb86c95b0646f0d744dL257' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4187707</div><div id='project'> Project Name: lucidrains/audiolm-pytorch</div><div id='commit'> Commit Name: d0e1f681048255b2b90790053ad0d3f72066d0e4</div><div id='time'> Time: 2022-10-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='m_class'> M Class Name: SoundStream</div><div id='n_method'> N Class Name: SoundStream</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='n_file'> N File Name: audiolm_pytorch/audiolm_pytorch.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 325</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 351</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        inters = inters[::-1]           &#47&#47 feature maps from bottom to top, same order as input x
+        outputs = [inters[0]]
+        for i, conv in enumerate(self.output_convs):
+            out = <a id="change">F.interpolate(</a>outputs[-1]<a id="change">, scale_factor=0.5, mode="nearest")</a>  &#47&#47 resize(P3td)
+            if i &lt; len(self.output_convs) - 1:
+                out = self.fuse([x[i+1], inters[i+1], out])                     &#47&#47 P4in + P4td + resize(P3td)
+            else:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 top-down
+        tds = [None] * self.num_levels
+        tds[-1] = x[-1]
+        <a id="change">for i</a> in range(self.num_levels - 2, -1 , -1)<a id="change">:
+            </a>tds[i]<a id="change"> = </a>self.td_fuses[i]([x[i], self.upsample(tds[i+1])])      &#47&#47 P6td = conv(P6in + resize(P7td))
+        
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4187706</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>

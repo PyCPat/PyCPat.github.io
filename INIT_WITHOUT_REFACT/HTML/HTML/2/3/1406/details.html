@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1406
+</h3><img src='4064158.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 latent self attention
+
+            for attn, ff in self.latent_self_attns:
+                latents = <a id="change">attn(</a>latents<a id="change">, time = t)</a> + latents
+                latents = ff(latents, time = t)<a id="change"> + </a>latents
+
+            &#47&#47 additional patches self attention with linear attention
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 the recurrent interface network body
+
+        for block in self.blocks:
+            patches<a id="change">, latents</a> = block(patches, latents, t)
+
+        &#47&#47 to pixels
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/a81dbfaf9e61843bc0da154cf547099de9ffc093#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL372' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4064158</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: a81dbfaf9e61843bc0da154cf547099de9ffc093</div><div id='time'> Time: 2022-12-26</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: RIN</div><div id='n_method'> N Class Name: RIN</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 372</div><div id='m_end'> M End Line: 411</div><div id='n_start'> N Start Line: 403</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47 pairwise attention and transition
+
+            x = <a id="change">attn(</a>x<a id="change">, mask = mask)</a>
+            x = ff(x)<a id="change"> + </a>x
+
+        return x, m
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = None,
+        msa_mask = None
+    ):
+        inp = (x<a id="change">, m, mask, msa_mask</a>)
+        x, m, *_ = checkpoint_sequential(self.layers, 1, inp)
+        return x, m
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/597762beedef6ecbf24f630ad62acbd76050f7d4#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L418' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4064154</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 597762beedef6ecbf24f630ad62acbd76050f7d4</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: Evoformer</div><div id='n_method'> N Class Name: Evoformer</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 425</div><div id='m_end'> M End Line: 436</div><div id='n_start'> N Start Line: 447</div><div id='n_end'> N End Line: 448</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            x = self.neighbor_embedding(z, x, edge_index, edge_weight, edge_attr)
+
+        for attn in self.attention_layers:
+            x = x<a id="change"> + </a><a id="change">attn(</a>x, edge_index, edge_weight, edge_attr<a id="change">)</a>
+        x = self.out_norm(x)
+
+        return x, z, pos, batch
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        vec = torch.zeros(x.size(0), 3, x.size(1), device=x.device)
+
+        for attn in self.attention_layers:
+            dx<a id="change">, dvec</a> = attn(x, vec, edge_index, edge_weight, edge_attr, edge_vec)
+            x = x + dx
+            vec = vec + dvec
+        x = self.out_norm(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/2e48070fab3e2b692e7e9e240654a12d84d84764#diff-41fd77dbca1e928d027707bbb314eea394ba89b00249c2051b698902aeceea50L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4064153</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: 2e48070fab3e2b692e7e9e240654a12d84d84764</div><div id='time'> Time: 2021-07-06</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/torchmd_t.py</div><div id='m_class'> M Class Name: TorchMD_T</div><div id='n_method'> N Class Name: TorchMD_T</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/torchmd_t.py</div><div id='n_file'> N File Name: torchmdnet/models/torchmd_t.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 124</div><BR>

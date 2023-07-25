@@ -1,0 +1,141 @@
+<html><h3>Pattern ID :1605
+</h3><img src='6507507.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        hidden, cell = self.encoder(x_enc)
+        
+        &#47&#47first input to the decoder is the &lt;sos&gt; tokens
+        <a id="change">if </a><a id="change">isinstance(x_dec</a>, <a id="change">list</a><a id="change">):
+            </a>input = <a id="change">[i[:, 0, :].unsqueeze(dim=1) for i in x_dec]</a>
+        else:
+            input = x_dec[:, 0, :].unsqueeze(dim=1)
+        for t in range(1, x_dec_len):
+            
+            &#47&#47insert input token embedding, previous hidden and previous cell states
+            &#47&#47receive output tensor (predictions) and new hidden and cell states
+            output, hidden, cell = self.decoder(input, hidden, cell)
+            
+            &#47&#47place predictions in a tensor holding predictions for each token
+            outputs[:, t-1, :] = output.squeeze(dim=1)
+            
+            &#47&#47decide if we are going to use teacher forcing or not
+            teacher_force = random.random() &lt; teacher_forcing_ratio
+
+            &#47&#47if teacher forcing, use actual next token as next input
+            &#47&#47if not, use predicted token
+            <a id="change">if isinstance(x_dec</a>, <a id="change">list</a><a id="change">)</a><a id="change">:
+                </a>input0 = <a id="change">x_dec[0][:, t, :].unsqueeze(dim=1) if teacher_force</a><a id="change"> else </a>output
+                input = <a id="change">[</a>input0, <a id="change">x_dec[1]</a>[:, t, :].unsqueeze(dim=1)<a id="change"></a>]
+            else:
+                input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+        return outputs[:, :, -self.out_size:]</code></pre><h3>After Change</h3><pre><code class='java'>
+            input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+            input_mark = x_dec_mark[:, t, :].unsqueeze(dim=1)
+
+        return outputs[:, <a id="change">-self.pred_len</a>:, -self.out_size:]
+
+if __name__ == &quot__main__&quot:
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 15</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hyliush/deep-time-series/commit/7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b#diff-af805697d08a3808c558ad8e5080c824317b61e3aac22a68129bee6430c2b332L96' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6507507</div><div id='project'> Project Name: hyliush/deep-time-series</div><div id='commit'> Commit Name: 7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b</div><div id='time'> Time: 2022-03-30</div><div id='author'> Author: 49185490+hyliush@users.noreply.github.com</div><div id='file'> File Name: models/seq2seq/EDLstm.py</div><div id='m_class'> M Class Name: Lstm</div><div id='n_method'> N Class Name: Lstm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/seq2seq/EDLstm.py</div><div id='n_file'> N File Name: models/seq2seq/EDLstm.py</div><div id='m_start'> M Start Line: 113</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 130</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        encoder_outputs, hidden = self.encoder(x_enc)
+        
+        &#47&#47first input to the decoder is the &lt;sos&gt; tokens
+        <a id="change">if </a><a id="change">isinstance(</a>x_dec, list<a id="change">):
+            </a>input = <a id="change">[i[:, 0, :].unsqueeze(dim=1) for i in x_dec]</a>
+        else:
+            input = x_dec[:, 0, :].unsqueeze(dim=1)
+        for <a id="change">t</a> in range(1, x_dec_len):
+            
+            &#47&#47insert input token embedding, previous hidden state and the context state
+            &#47&#47receive output tensor (predictions) and new hidden state
+            output, hidden = self.decoder(input, hidden, encoder_outputs)
+            
+            &#47&#47place predictions in a tensor holding predictions for each token
+            outputs[:, t-1, :] = output.squeeze(dim=1)
+            
+            &#47&#47decide if we are going to use teacher forcing or not
+            <a id="change">teacher_force</a> = random.random() &lt; teacher_forcing_ratio
+            
+            &#47&#47if teacher forcing, use actual next token as next input
+            &#47&#47if not, use predicted token
+            <a id="change">if isinstance(</a>x_dec, list<a id="change">)</a><a id="change">:
+                </a>input0 = <a id="change">x_dec[0][:, t, :].unsqueeze(dim=1) if teacher_force</a><a id="change"> else </a>output
+                input = <a id="change">[</a>input0, <a id="change">x_dec[1]</a>[:, t, :].unsqueeze(dim=1)<a id="change"></a>]
+            else:
+                input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+        return outputs[:, :, -self.out_size:]</code></pre><h3>After Change</h3><pre><code class='java'>
+            input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+            input_mark = x_dec_mark[:, t, :].unsqueeze(dim=1)
+
+        return outputs[:, <a id="change">-self.pred_len</a>:, -self.out_size:]
+       
+if __name__ == &quot__main__&quot:
+    enc_in, dec_in, emb_dim, enc_hid_dim, dec_hid_dim = 45, 45, 512, 512, 512</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hyliush/deep-time-series/commit/7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b#diff-35cbc17b3d598f3be3f2070f99d3489dccccc9245c00650ce2b2d457b8794b5fL142' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6507506</div><div id='project'> Project Name: hyliush/deep-time-series</div><div id='commit'> Commit Name: 7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b</div><div id='time'> Time: 2022-03-30</div><div id='author'> Author: 49185490+hyliush@users.noreply.github.com</div><div id='file'> File Name: models/seq2seq/EDGruAttention.py</div><div id='m_class'> M Class Name: GruAttention</div><div id='n_method'> N Class Name: GruAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/seq2seq/EDGruAttention.py</div><div id='n_file'> N File Name: models/seq2seq/EDGruAttention.py</div><div id='m_start'> M Start Line: 160</div><div id='m_end'> M End Line: 183</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 176</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        hidden = context
+        
+        &#47&#47first input to the decoder is the &lt;sos&gt; tokens
+        <a id="change">if </a><a id="change">isinstance(</a>x_dec, list<a id="change">):
+            </a>input = <a id="change">[i[:, 0, :].unsqueeze(dim=1) for i in x_dec]</a>
+        else:
+            input = x_dec[:, 0, :].unsqueeze(dim=1)
+        for <a id="change">t</a> in range(1, x_dec_len):
+            
+            &#47&#47insert input token embedding, previous hidden state and the context state
+            &#47&#47receive output tensor (predictions) and new hidden state
+            output, hidden = self.decoder(input, hidden, context)
+            
+            &#47&#47place predictions in a tensor holding predictions for each token
+            outputs[:, t-1, :] = output.squeeze(dim=1)
+            
+            &#47&#47decide if we are going to use teacher forcing or not
+            <a id="change">teacher_force</a> = random.random() &lt; teacher_forcing_ratio
+            
+            &#47&#47if teacher forcing, use actual next token as next input
+            &#47&#47if not, use predicted token
+            <a id="change">if isinstance(</a>x_dec, list<a id="change">)</a><a id="change">:
+                </a>input0 = <a id="change">x_dec[0][:, t, :].unsqueeze(dim=1) if teacher_force</a><a id="change"> else </a>output
+                input = <a id="change">[</a>input0, <a id="change">x_dec[1]</a>[:, t, :].unsqueeze(dim=1)<a id="change"></a>]
+            else:
+                input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+        return outputs[:, :, -self.out_size:]</code></pre><h3>After Change</h3><pre><code class='java'>
+            input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+            input_mark = x_dec_mark[:, t, :].unsqueeze(dim=1)
+
+        return outputs[:, <a id="change">-self.pred_len</a>:, -self.out_size:]
+if __name__ == &quot__main__&quot:
+
+    enc_in, dec_in, emb_dim, hid_dim, n_layers = 45, 45, 512, 64, 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hyliush/deep-time-series/commit/85ff6f0c0dae08d16c31136f203da5cce7fb1aff#diff-aa3bf41a5074643d226ac3c1b45d1df6319ba06c4a8e8991bf2302b16261ca57L92' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6507505</div><div id='project'> Project Name: hyliush/deep-time-series</div><div id='commit'> Commit Name: 85ff6f0c0dae08d16c31136f203da5cce7fb1aff</div><div id='time'> Time: 2022-03-27</div><div id='author'> Author: 49185490+hyliush@users.noreply.github.com</div><div id='file'> File Name: models/seq2seq/EDGru.py</div><div id='m_class'> M Class Name: Gru</div><div id='n_method'> N Class Name: Gru</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/seq2seq/EDGru.py</div><div id='n_file'> N File Name: models/seq2seq/EDGru.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 90</div><div id='n_end'> N End Line: 123</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        hidden, cell = self.encoder(x_enc)
+        
+        &#47&#47first input to the decoder is the &lt;sos&gt; tokens
+        <a id="change">if </a><a id="change">isinstance(</a>x_dec, list<a id="change">):
+            </a>input = <a id="change">[i[:, 0, :].unsqueeze(dim=1) for i in x_dec]</a>
+        else:
+            input = x_dec[:, 0, :].unsqueeze(dim=1)
+        for <a id="change">t</a> in range(1, x_dec_len):
+            
+            &#47&#47insert input token embedding, previous hidden and previous cell states
+            &#47&#47receive output tensor (predictions) and new hidden and cell states
+            output, hidden, cell = self.decoder(input, hidden, cell)
+            
+            &#47&#47place predictions in a tensor holding predictions for each token
+            outputs[:, t-1, :] = output.squeeze(dim=1)
+            
+            &#47&#47decide if we are going to use teacher forcing or not
+            <a id="change">teacher_force</a> = random.random() &lt; teacher_forcing_ratio
+
+            &#47&#47if teacher forcing, use actual next token as next input
+            &#47&#47if not, use predicted token
+            <a id="change">if isinstance(</a>x_dec, list<a id="change">)</a><a id="change">:
+                </a>input0 = <a id="change">x_dec[0][:, t, :].unsqueeze(dim=1) if teacher_force</a><a id="change"> else </a>output
+                input = <a id="change">[</a>input0, <a id="change">x_dec[1]</a>[:, t, :].unsqueeze(dim=1)<a id="change"></a>]
+            else:
+                input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+        return outputs[:, :, -self.out_size:]</code></pre><h3>After Change</h3><pre><code class='java'>
+            input = x_dec[:, t, :].unsqueeze(dim=1) if teacher_force else output
+            input_mark = x_dec_mark[:, t, :].unsqueeze(dim=1)
+
+        return outputs[:, <a id="change">-self.pred_len</a>:, -self.out_size:]
+
+if __name__ == &quot__main__&quot:
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hyliush/deep-time-series/commit/7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b#diff-af805697d08a3808c558ad8e5080c824317b61e3aac22a68129bee6430c2b332L95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6507508</div><div id='project'> Project Name: hyliush/deep-time-series</div><div id='commit'> Commit Name: 7d0b55c8adbe672b357b5bd0e1ce882bb0edd63b</div><div id='time'> Time: 2022-03-30</div><div id='author'> Author: 49185490+hyliush@users.noreply.github.com</div><div id='file'> File Name: models/seq2seq/EDLstm.py</div><div id='m_class'> M Class Name: Lstm</div><div id='n_method'> N Class Name: Lstm</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/seq2seq/EDLstm.py</div><div id='n_file'> N File Name: models/seq2seq/EDLstm.py</div><div id='m_start'> M Start Line: 113</div><div id='m_end'> M End Line: 136</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 130</div><BR>

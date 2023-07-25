@@ -1,0 +1,103 @@
+<html><h3>Pattern ID :1172
+</h3><img src='3593150.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    @override(ModelV2)
+    def forward(self, input_dict, state, seq_lens):
+        model_out, _ = self.model(input_dict, state, seq_lens)
+        <a id="change">return </a>model_out<a id="change">, []</a>
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @override(ModelV2)
+    def forward(self, input_dict, state, seq_lens):
+        <a id="change">return </a><a id="change">input_dict["obs_flat"].float(), state</a>
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/d339c3de863e3cae6fbfe67e503ff0953e2cd868#diff-d29da76cddccb7a8cca6338c42a468b0477da49ec76854872d570543571d3895L234' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3593150</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: d339c3de863e3cae6fbfe67e503ff0953e2cd868</div><div id='time'> Time: 2022-03-03</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: MPE/model/torch_maddpg.py</div><div id='m_class'> M Class Name: MADDPGTorchModel</div><div id='n_method'> N Class Name: MADDPGTorchModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module,TorchModelV2</div><div id='n_parent_class'> N Parent Class: nn.Module,TorchModelV2</div><div id='m_file'> M File Name: MPE/model/torch_maddpg.py</div><div id='n_file'> N File Name: MPE/model/torch_maddpg.py</div><div id='m_start'> M Start Line: 237</div><div id='m_end'> M End Line: 238</div><div id='n_start'> N Start Line: 234</div><div id='n_end'> N End Line: 234</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        p = tar_candit_pro * d_x_dist.log_prob(d_x) * d_y_dist.log_prob(d_y)
+        _, indices = p.topk(self.M, dim=1)
+
+        <a id="change">return </a>tar_candit_pro<a id="change">, d_x, d_y, indices</a>
+
+    &#47&#47 todo: offset_gt for every tar_candidate
+    def loss(self,
+             feat_in: torch.Tensor,</code></pre><h3>After Change</h3><pre><code class='java'>
+        _, N, _ = tar_candidate.size()
+
+        &#47&#47 stack the target candidates to the end of input feature
+        feat_in_repeat = torch.cat([feat_in.repeat(1, N, 1), <a id="change">tar_candidate.float()</a>], dim=2)
+        &#47&#47 feat_in_repeat = torch.cat([feat_in.repeat(1, N, 1), tar_candidate.float()], dim=2)
+        &#47&#47 print("feat_in_repeat size: ", feat_in_repeat.size())
+
+        &#47&#47 compute probability for each candidate
+        tar_candit_prob = self.prob_mlp(feat_in_repeat).squeeze(-1)          &#47&#47 [batch_size, self.N_tar, 1]
+        tar_offset_mean = self.mean_mlp(feat_in_repeat)                     &#47&#47 [batch_size, self.N_tar, 2]
+        &#47&#47 print("tar_candit_pro size: ", tar_candit_prob.size())
+        &#47&#47 print("tar_offset_mean size: ", tar_offset_mean.size())
+
+        &#47&#47 compute the prob. of normal distribution
+        d_x_dist = Normal(tar_offset_mean[:, :, 0], torch.tensor([1.0], device=self.device))    &#47&#47 [batch_size, self.N_tar]
+        d_y_dist = Normal(tar_offset_mean[:, :, 1], torch.tensor([1.0], device=self.device))    &#47&#47 [batch_size, self.N_tar]
+
+        d_x = d_x_dist.sample()
+        d_y = d_y_dist.sample()
+
+        &#47&#47 p = tar_candit_pro * d_x_dist.log_prob(d_x) * d_y_dist.log_prob(d_y)
+        _, indices = tar_candit_prob.topk(self.M, dim=1)
+
+        <a id="change">return </a>tar_candit_prob<a id="change">, d_x, d_y, indices</a>
+
+    &#47&#47 todo: offset_gt for every tar_candidate
+    def loss(self,
+             feat_in: torch.Tensor,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/80b9bc9194db403722ff2868d67f8e92c73f17a7#diff-62f1e94c741c7f9de60de56afd69a4d711a920fcbe44cef948ec2491a6158b3eL34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3593151</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: 80b9bc9194db403722ff2868d67f8e92c73f17a7</div><div id='time'> Time: 2021-04-06</div><div id='author'> Author: liu.jb.henry@gmail.com</div><div id='file'> File Name: core/model/layers/target_prediction.py</div><div id='m_class'> M Class Name: TargetPred</div><div id='n_method'> N Class Name: TargetPred</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/layers/target_prediction.py</div><div id='n_file'> N File Name: core/model/layers/target_prediction.py</div><div id='m_start'> M Start Line: 49</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        avg_probs = torch.mean(encodings, dim=1)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10), dim=-1))
+
+        <a id="change">return </a>quantized.permute(1, 0, 3, 2).reshape(B, C, L)<a id="change">, loss, perplexity.sum()</a>
+
+
+class ChannelNorm(nn.Module):
+    def __init__(self,</code></pre><h3>After Change</h3><pre><code class='java'>
+                                x_flat, self.embedding.t(),
+                                alpha=-2.0, beta=1.0)
+
+        indices = torch.argmin(<a id="change">distances.float()</a>, dim=-1)
+        encodings = F.one_hot(indices, M).float()
+        quantized = F.embedding(indices, self.embedding)
+        quantized = quantized.view_as(x)
+
+        if self.training:
+            self.ema_count = self.decay * self.ema_count + (1 - self.decay) * torch.sum(encodings, dim=0)
+
+            n = torch.sum(self.ema_count)
+            self.ema_count = (self.ema_count + self.epsilon) / (n + M * self.epsilon) * n
+
+            dw = torch.matmul(encodings.t(), x_flat)
+            self.ema_weight = self.decay * self.ema_weight + (1 - self.decay) * dw
+
+            self.embedding = self.ema_weight / self.ema_count.unsqueeze(-1)
+
+        e_latent_loss = F.mse_loss(x, quantized.detach())
+        loss = self.commitment_cost * e_latent_loss
+
+        quantized = x + (quantized - x).detach()
+
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))
+
+        <a id="change">return </a>quantized<a id="change">, loss, perplexity</a>
+
+
+class CPCLoss(nn.Module):
+    def __init__(self, n_speakers_per_batch, n_utterances_per_speaker, n_prediction_steps, n_negatives, z_dim, c_dim):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bshall/vectorquantizedcpc/commit/535c95415d62ececde085e376f451b3b76e1b624#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3593149</div><div id='project'> Project Name: bshall/vectorquantizedcpc</div><div id='commit'> Commit Name: 535c95415d62ececde085e376f451b3b76e1b624</div><div id='time'> Time: 2020-05-01</div><div id='author'> Author: benji.l.shall@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: VQEmbeddingEMA</div><div id='n_method'> N Class Name: VQEmbeddingEMA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 54</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 112</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    @override(ModelV2)
+    def forward(self, input_dict, state, seq_lens):
+        model_out, _ = self.model(input_dict, state, seq_lens)
+        <a id="change">return </a>model_out<a id="change">, []</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @override(ModelV2)
+    def forward(self, input_dict, state, seq_lens):
+        <a id="change">return </a><a id="change">input_dict["obs_flat"].float(), state</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/replicable-marl/marllib/commit/d339c3de863e3cae6fbfe67e503ff0953e2cd868#diff-c5bbede1d088c0e168808608495d8ebd7ab0ad9d6309148e2fe33765326f6199L240' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3593147</div><div id='project'> Project Name: replicable-marl/marllib</div><div id='commit'> Commit Name: d339c3de863e3cae6fbfe67e503ff0953e2cd868</div><div id='time'> Time: 2022-03-03</div><div id='author'> Author: hhhusiyi@163.com</div><div id='file'> File Name: MetaDrive/model/torch_maddpg.py</div><div id='m_class'> M Class Name: MADDPGTorchModel</div><div id='n_method'> N Class Name: MADDPGTorchModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module,TorchModelV2</div><div id='n_parent_class'> N Parent Class: nn.Module,TorchModelV2</div><div id='m_file'> M File Name: MetaDrive/model/torch_maddpg.py</div><div id='n_file'> N File Name: MetaDrive/model/torch_maddpg.py</div><div id='m_start'> M Start Line: 241</div><div id='m_end'> M End Line: 242</div><div id='n_start'> N Start Line: 238</div><div id='n_end'> N End Line: 238</div><BR>

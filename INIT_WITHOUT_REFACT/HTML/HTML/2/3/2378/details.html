@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :2378
+</h3><img src='8060555.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.emb = self.embedding(x)
+        if self.drop &lt; 1:
+            self.emb = <a id="change">self.dropout(</a>self.emb<a id="change">)</a>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t<a id="change"> = </a>torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        for i, att_timesteps in enumerate(count):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            self.c_t[i] = self.attentionStep(first_h_a, first_h_b, att_timesteps)</code></pre><h3>After Change</h3><pre><code class='java'>
+        return out
+
+    def forward(self, x):
+        batch_size<a id="change">, time_steps, _</a> = x.size()
+        x = self.proj(x)
+        x = self.dropout(x)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8060555</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        embed_out = self.embedding(x)
+        lstm_out, self.hidden = self.lstm(embed_out, self.hidden)
+        lstm_out = <a id="change">self.dropout(</a>lstm_out<a id="change">)</a>
+        lstm_out<a id="change"> = </a>lstm_out.contiguous().view(-1, self.hidden_dim)
+        fc_out = self.fc(lstm_out)
+
+        return fc_out</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        _, (hidden, cell) = self.lstm(packed_embed_out)
+
+        hidden = self.dropout(torch.cat((hidden[-2, :, :]<a id="change">, hidden[-1, :, :]</a>), dim=1))
+        fc_out = self.fc(hidden)
+
+        return fc_out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8#diff-7dbb295508efd990fc66851d3b00d01a8e3b3d09d0e339f9e740d64e599e9c7dL57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8060552</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 31511755+avishreekh@users.noreply.github.com</div><div id='file'> File Name: KD_Lib/models/lstm.py</div><div id='m_class'> M Class Name: LSTMNet</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/models/lstm.py</div><div id='n_file'> N File Name: KD_Lib/models/lstm.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            final_context = self.dropout(final_context)
+            final_context = self.projection(final_context)
+
+            final_question = <a id="change">self.dropout(</a>final_question<a id="change">)</a>
+            final_question<a id="change"> = </a>self.projection(final_question)
+
+        context_rnn_state = None
+        question_rnn_state = None</code></pre><h3>After Change</h3><pre><code class='java'>
+                packed_rnn_state = packed_rnn_state.chunk(2, dim=0)
+                context_rnn_state = (packed_rnn_state[0].squeeze(0), packed_rnn_state[1].squeeze(0))
+
+        return self_attended_context<a id="change">, final_context, context_rnn_state</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/stanford-oval/genienlp/commit/25cc6202b03c0b3866c249cc83412618eb894797#diff-d64eeb20506890f64fbc35dbbe9eb96bfc16a0c55673ab8dba41f3ed32d89537L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8060562</div><div id='project'> Project Name: stanford-oval/genienlp</div><div id='commit'> Commit Name: 25cc6202b03c0b3866c249cc83412618eb894797</div><div id='time'> Time: 2020-12-05</div><div id='author'> Author: gcampagn@cs.stanford.edu</div><div id='file'> File Name: genienlp/models/identity_encoder.py</div><div id='m_class'> M Class Name: IdentityEncoder</div><div id='n_method'> N Class Name: IdentityEncoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: genienlp/models/identity_encoder.py</div><div id='n_file'> N File Name: genienlp/models/identity_encoder.py</div><div id='m_start'> M Start Line: 63</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 70</div><div id='n_end'> N End Line: 107</div><BR>

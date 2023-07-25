@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 FIXME requires_grad breaks w/ torchscript
+                qkv_bias = torch.cat((self.q_bias, torch.zeros_like(self.v_bias), self.v_bias))
+            else:
+                qkv_bias<a id="change"> = </a><a id="change">torch.cat(</a>(self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias)<a id="change">)</a>
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv.unbind(0)  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, rel_pos_bias: Optional[torch.Tensor] = None):
+        B, N, C = x.shape
+        qkv_bias = torch.cat((self.q_bias, self.k_bias, self.v_bias))<a id="change"> if </a>self.q_bias is not None<a id="change"> else </a>None
+        qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv.unbind(0)  &#47&#47 make torchscript happy (cannot use tensor as tuple)</code></pre>

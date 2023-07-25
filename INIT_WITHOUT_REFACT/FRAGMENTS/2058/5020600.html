@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.ReLU(inplace=True),
+        )
+        self.block = nn.Sequential(
+            <a id="change">nn.Conv2d(</a>in_channels, out_channels, (3, 3)<a id="change">, stride=stride, padding=1, bias=False)</a>,
+            <a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">)</a>,
+            <a id="change">nn.ReLU(inplace=True)</a>,
+            nn.Dropout(dropout, inplace=True),
+            nn.Conv2d(out_channels, out_channels, (3, 3), stride=1, padding=1, bias=False),
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+            ("0_normalization", nn.BatchNorm2d(in_channels)),
+            ("1_activation", nn.ReLU(inplace=True)),
+        ]))
+        self.block = <a id="change">nn.Sequential(</a>OrderedDict([
+            ("0_convolution", <a id="change">nn.Conv2d(</a>in_channels, out_channels, (3, 3)<a id="change">, stride=stride, padding=1, bias=False)</a>),
+            ("1_normalization", <a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">)</a>),
+            ("2_activation", <a id="change">nn.ReLU(inplace=True)</a>),
+            ("3_dropout", nn.Dropout(dropout, inplace=True)),
+            ("4_convolution", nn.Conv2d(out_channels, out_channels, (3, 3), stride=1, padding=1, bias=False)),
+        ])<a id="change">)</a>
+        self.downsample = nn.Conv2d(in_channels, out_channels, (1, 1), stride=stride, padding=0, bias=False)
+
+    def forward(self, x):
+        x = self.norm_act(x)</code></pre>

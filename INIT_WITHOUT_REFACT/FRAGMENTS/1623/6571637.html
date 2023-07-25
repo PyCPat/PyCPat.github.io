@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        token_index: LongTensor
+    ) -&gt; Tuple[LongTensor, FloatTensor]:
+        image_count = encoder_state.shape[0] // 2
+        token_index_batched<a id="change"> = </a>token_index[<a id="change">[0</a>] * image_count * 2]
+        prev_tokens = prev_tokens[list(range(image_count)) * 2]
+        prev_tokens.clamp_(0, self.image_vocab_count)
+        decoder_state = self.embed_tokens.forward(prev_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+        token_index_batched = token_index[None, :][list(range(image_count)) * 2]
+        if prev_tokens.ndim == 1:
+            prev_tokens = prev_tokens.unsqueeze(0)
+        prev_tokens = <a id="change">prev_tokens.T[list(range(image_count)) * 2]</a>
+        prev_tokens.clamp_(0, self.image_vocab_count)
+        decoder_state = self.embed_tokens.forward(prev_tokens)
+        decoder_state += self.embed_positions.forward(token_index_batched)
+        decoder_state = self.layernorm_embedding.forward(decoder_state)
+        if decoder_state.ndim &lt; 3:
+            decoder_state = decoder_state[:, None]
+        if attention_state is None:
+            attention_state = [None] * self.layer_count
+        for i in range(self.layer_count):
+            decoder_state, attention_state[i] = self.layers[i].forward(
+                decoder_state,
+                encoder_state,
+                attention_state[i],
+                attention_mask,
+                token_index
+            )
+        decoder_state = self.final_ln(decoder_state)
+        logits = self.lm_head(decoder_state)
+        temperature = settings[[0]]
+        top_k = settings[[1]].to(torch.long)
+        supercondition_factor = settings[[2]]
+        logits = logits[:, -1, : 2 ** 14]
+        logits: FloatTensor = (
+            logits[:image_count] * (1 - supercondition_factor) + 
+            logits[image_count:] * supercondition_factor
+        )
+        if return_logits:
+            <a id="change">return </a>logits
+        logits_sorted, _ = logits.sort(descending=True)
+        is_kept = logits &gt;= logits_sorted[:, top_k - 1]
+        logits -= logits_sorted[:, [0]]</code></pre>

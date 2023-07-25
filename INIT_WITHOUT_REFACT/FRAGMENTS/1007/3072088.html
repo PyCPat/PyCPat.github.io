@@ -1,0 +1,48 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        &#47&#47a = [batch size, 1, src len]
+        
+        encoder_outputs<a id="change"> = </a>encoder_outputs.permute(1, 0, 2)
+        
+        &#47&#47encoder_outputs = [batch size, src len, enc hid dim * 2]
+        
+        weighted = torch.bmm(a, encoder_outputs)
+        
+        &#47&#47weighted = [batch size, 1, enc hid dim * 2]
+        
+        weighted = weighted.permute(1, 0, 2)
+        
+        &#47&#47weighted = [1, batch size, enc hid dim * 2]
+        
+        rnn_input = torch.cat((embedded, weighted), dim = 2)
+        
+        &#47&#47rnn_input = [1, batch size, (enc hid dim * 2) + emb dim]
+            
+        output, hidden = self.rnn(rnn_input, hidden.unsqueeze(0))
+        
+        &#47&#47output = [seq len, batch size, dec hid dim * n directions]
+        &#47&#47hidden = [n layers * n directions, batch size, dec hid dim]
+        
+        &#47&#47seq len, n layers and n directions will always be 1 in this decoder, therefore:
+        &#47&#47output = [1, batch size, dec hid dim]
+        &#47&#47hidden = [1, batch size, dec hid dim]
+        &#47&#47this also means that output == hidden
+        assert (output == hidden).all()
+        
+        embedded = embedded.squeeze(0)
+        output = output.squeeze(0)
+        weighted<a id="change"> = </a><a id="change">weighted.squeeze(0</a><a id="change">)</a>
+        
+        prediction = self.fc_out(torch.cat((output, weighted, embedded), dim = 1))
+        
+        &#47&#47prediction = [batch size, output dim]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47output = [batch size, 1, dec hid dim]
+        &#47&#47hidden = [1, batch size, dec hid dim]
+        &#47&#47this also means that output == hidden
+        <a id="change">assert </a>(output == hidden.transpose(1, 0)).all()
+        prediction = self.fc_out(torch.cat((output, weighted, embedded), dim = 2))
+        
+        &#47&#47prediction = [batch size, seq_len, output dim]</code></pre>

@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :448
+</h3><img src='1622842.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        out = self.linear_layer(x)
+        out<a id="change"> = </a><a id="change">out.transpose(0, 1).transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+        out = self.bn(out)
+        out<a id="change"> = </a>out.transpose(1, 2).transpose(0, 1)
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(out.shape)==3:
+            out = out.permute(1, 2, 0)
+        out = self.bn(out)
+        <a id="change">if len(out.shape) == 3</a><a id="change">:
+            </a>out<a id="change"> = </a>out.permute(2, 0, 1)
+        return out
+
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/4ffda89c42361af48c15721b2739b36c52f053d6#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1622842</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 4ffda89c42361af48c15721b2739b36c52f053d6</div><div id='time'> Time: 2019-03-11</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: LinearBN</div><div id='n_method'> N Class Name: LinearBN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 46</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_<a id="change"> = </a><a id="change">torch.transpose(</a>preds, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+			&#47&#47print(preds.size())
+
+			y = y.long()
+			loss<a id="change"> = </a>self.Loss(preds_, torch.squeeze(y))
+			return preds, loss
+		return preds
+</code></pre><h3>After Change</h3><pre><code class='java'>
+			if y is not None:
+				loss+=self.Loss(preds, y[:,i].squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		<a id="change">if y is not None</a><a id="change">:
+			</a>loss<a id="change">/=</a>len(xs)
+			return preds_, loss
+		return preds_
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1622811</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q = q * self.scale
+
+        if mask is not None:
+            attn<a id="change"> = </a><a id="change">torch.matmul(q.permute(0, 2, 1, 3), k.permute(0, 2, 3, 1)).transpose(0</a>, <a id="change">1</a><a id="change">)</a>
+            mask[mask &gt; 0] = - torch.inf
+            attn<a id="change"> = </a>(attn + mask).transpose(0, 1)
+        else:
+            attn = torch.matmul(q.permute(0, 2, 1, 3), k.permute(0, 2, 3, 1))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        attn = torch.matmul(q.permute(0, 2, 1, 3), k.permute(0, 2, 3, 1))
+
+        <a id="change">if self.pos_bias is not None</a><a id="change">:
+            </a>attn<a id="change"> += </a>self.pos_bias
+
+        if mask is not None:
+            mask[mask &gt; 0] = - torch.inf</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/888f560e856c81d289a399972af3be840f57d755#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L246' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1622875</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: 888f560e856c81d289a399972af3be840f57d755</div><div id='time'> Time: 2022-05-30</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedAttn</div><div id='n_method'> N Class Name: FocusedAttn</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 251</div><div id='m_end'> M End Line: 263</div><div id='n_start'> N Start Line: 226</div><div id='n_end'> N End Line: 235</div><BR>

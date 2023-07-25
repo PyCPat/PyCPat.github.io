@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :415
+</h3><img src='1579408.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x):
+        <a id="change">return </a>_ReversibleFunction.apply(x, self.blocks)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks<a id="change"> = </a>[block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = self.blocks[:1] if len(blocks) == 0 else blocks
+
+        <a id="change">return </a><a id="change">_ReversibleFunction.apply(</a>x, blocks<a id="change">)</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/reformer-pytorch/commit/f989c1483f6f3d108722cfc1070933b6bee9a274#diff-dc60757400f2449a79aac7063816b042a374dc2d771caf95f56cc2d14775084bL118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1579408</div><div id='project'> Project Name: lucidrains/reformer-pytorch</div><div id='commit'> Commit Name: f989c1483f6f3d108722cfc1070933b6bee9a274</div><div id='time'> Time: 2020-02-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: reformer_pytorch/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: reformer_pytorch/reversible.py</div><div id='n_file'> N File Name: reformer_pytorch/reversible.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, arg_route = (True, True), **kwargs):
+        f_args, g_args = map(lambda route: kwargs if route else {}, arg_route)
+        block_kwargs = {&quotf_args&quot: f_args, &quotg_args&quot: g_args}
+        <a id="change">return </a>_ReversibleFunction.apply(x, self.blocks, block_kwargs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = torch.cat([x, x], dim=-1)
+
+        blocks = self.blocks
+        args<a id="change"> = </a>route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out =  <a id="change">_ReversibleFunction.apply(</a>x, blocks, args<a id="change">)</a>
+        <a id="change">return </a>torch.stack(out.chunk(2, dim=-1)).sum(dim=0)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/linear-attention-transformer/commit/fa23ce09a98a63d26116e3935ad5902cf705255d#diff-29d3c048298bdaa9a9670921a4026430e5b09b55bc1da20d65da18bd5c85f575L118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1579412</div><div id='project'> Project Name: lucidrains/linear-attention-transformer</div><div id='commit'> Commit Name: fa23ce09a98a63d26116e3935ad5902cf705255d</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linear_attention_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linear_attention_transformer/reversible.py</div><div id='n_file'> N File Name: linear_attention_transformer/reversible.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 121</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            torch.Tensor: quantized input tensor.
+        
+        <a id="change">return </a>self.activation(input_tensor)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Returns:
+            torch.Tensor: quantized input tensor.
+        
+        activated_input<a id="change"> = </a>self._activation(input_tensor)
+        if self._gradient_cancellation_threshold:
+            <a id="change">return </a><a id="change">GradientCancellation.apply(</a>activated_input, self._gradient_cancellation_threshold<a id="change">)</a>
+        else:
+            return activated_input
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hpi-xnor/bitorch/commit/36ca7eff5b99dfac51ca950e42e5b73259cdf8c6#diff-c7b766855c9d500f26253f89fb0581a1e2ee0a4f7f04e50c1cc28bdc868054c3L22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1579414</div><div id='project'> Project Name: hpi-xnor/bitorch</div><div id='commit'> Commit Name: 36ca7eff5b99dfac51ca950e42e5b73259cdf8c6</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: overkill98@web.de</div><div id='file'> File Name: bitorch/layers/qactivation.py</div><div id='m_class'> M Class Name: QActivation</div><div id='n_method'> N Class Name: QActivation</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bitorch/layers/qactivation.py</div><div id='n_file'> N File Name: bitorch/layers/qactivation.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 82</div><BR>

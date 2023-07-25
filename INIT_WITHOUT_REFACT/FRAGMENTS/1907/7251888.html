@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.num_iterations = num_iterations
+
+    def forward(self, x):
+        batch_size = <a id="change">x.shape[0]</a>
+        &#47&#47 x: (batch_size, num_route_nodes, in_channels)
+        &#47&#47 route_weights: (num_route_nodes, num_capsules, in_channels, out_channels)
+        &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+        u_hat = torch.einsum(&quotijk, jlkm -&gt; iljm&quot, x, self.route_weights)</code></pre><h3>After Change</h3><pre><code class='java'>
+                              requires_grad=True)
+
+    def forward(self, x):
+        batch_size = <a id="change">x.size(0</a><a id="change">)</a>
+        &#47&#47 (batch_size, in_caps, in_dim) -&gt; (batch_size, 1, in_caps, in_dim, 1)
+        x = x.unsqueeze(1).unsqueeze(4)
+        &#47&#47
+        &#47&#47 W @ x =
+        &#47&#47 (1, num_caps, in_caps, dim_caps, in_dim) @ (batch_size, 1, in_caps, in_dim, 1) =
+        &#47&#47 (batch_size, num_caps, in_caps, dim_caps, 1)
+        u_hat = torch.matmul(self.W, x)
+        &#47&#47 (batch_size, num_caps, in_caps, dim_caps)
+        u_hat = u_hat.squeeze(-1)
+        &#47&#47 detach u_hat during routing iterations to prevent gradients from flowing
+        temp_u_hat = u_hat.detach()
+
+        b = torch.zeros(batch_size, self.num_caps, self.in_caps, 1).to(self.device)
+
+        for route_iter in range(self.num_routing - 1):
+            &#47&#47 (batch_size, num_caps, in_caps, 1) -&gt; Softmax along num_caps
+            c = b.softmax(dim=1)
+
+            &#47&#47 element-wise multiplication
+            &#47&#47 (batch_size, num_caps, in_caps, 1) * (batch_size, in_caps, num_caps, dim_caps) -&gt;
+            &#47&#47 (batch_size, num_caps, in_caps, dim_caps) sum across in_caps -&gt;
+            &#47&#47 (batch_size, num_caps, dim_caps)
+            s = (c * temp_u_hat).sum(dim=2)
+            &#47&#47 apply "squashing" non-linearity along dim_caps
+            v = squash(s)
+            &#47&#47 dot product agreement between the current output vj and the prediction uj|i
+            &#47&#47 (batch_size, num_caps, in_caps, dim_caps) @ (batch_size, num_caps, dim_caps, 1)
+            &#47&#47 -&gt; (batch_size, num_caps, in_caps, 1)
+            uv = torch.matmul(temp_u_hat, v.unsqueeze(-1))
+            b += uv
+
+        &#47&#47 last iteration is done on the original u_hat, without the routing weights update
+        c = b.softmax(dim=1)
+        s<a id="change"> = </a>(c<a id="change"> * </a>u_hat).sum(dim=2)
+        &#47&#47 apply "squashing" non-linearity along dim_caps
+        v = squash(s)
+</code></pre>

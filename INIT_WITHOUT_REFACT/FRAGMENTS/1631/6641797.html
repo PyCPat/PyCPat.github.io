@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+
+        <a id="change">return </a>z_q, loss, (None<a id="change">, None, encoding_indices</a>)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z.dtype)
+        avg_probs<a id="change"> = </a><a id="change">torch.mean(</a>encodings<a id="change">, dim=0)</a>
+        perplexity<a id="change"> = </a>torch.exp(-torch.sum(avg_probs * torch.log(avg_probs<a id="change"> + </a>1e-10)))
+
+        <a id="change">return </a>z_q<a id="change">, loss, (perplexity, encodings, encoding_indices)</a>
+
+</code></pre>

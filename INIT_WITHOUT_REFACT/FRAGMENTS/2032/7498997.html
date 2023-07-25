@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, g_s, f_s, g_t, f_t):
+        trans_loss_s, domain_acc_s = self._single_domain_forward(g_s, f_s, domain=1)
+        trans_loss_t<a id="change">, domain_acc_t</a> = self._single_domain_forward(g_t, f_t, domain=0)
+        self.grl.step()
+        self.domain_discriminator_accuracy = 0.5 * (domain_acc_s + domain_acc_t)
+        return 0.5 * (trans_loss_s + trans_loss_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+            torch.ones((g_s.size(0), 1)).to(g_s.device),
+            torch.zeros((g_t.size(0), 1)).to(g_t.device),
+        ))
+        weight = 1.0 + torch.exp(-<a id="change">entropy(</a>g<a id="change">)</a>)
+        batch_size = f.size(0)
+        weight<a id="change"> = </a>weight<a id="change"> / torch.sum(weight) * </a>batch_size
+        self.domain_discriminator_accuracy = binary_accuracy(d, d_label)
+        return self.bce(d, d_label, weight.view_as(d))
+</code></pre>

@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :715
+</h3><img src='2400020.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = self.blocks[:1]<a id="change"> if </a>len(blocks) == 0<a id="change"> else </a>blocks
+
+        block_args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, block_args))
+        return _ReversibleFunction.apply(x, blocks, block_args)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x, **kwargs):
+        x = <a id="change">torch.cat(</a>[x, x]<a id="change">, dim=-1)</a>
+
+        blocks = self.blocks
+        args = route_args(self.args_route, kwargs, len(blocks))
+        args = list(map(lambda x: {&quotf_args&quot: x[0], &quotg_args&quot: x[1]}, args))
+
+        layers_and_args = list(zip(blocks, args))
+
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out<a id="change"> =  </a>_ReversibleFunction.apply(x, blocks, args)
+        return torch.stack(out.chunk(2, dim=-1)).sum(dim=0)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/d5b9c649e59290b15c15f85d0bb182cb20b699fb#diff-27d52caf7b4f725ff9fe7d9e57172c62a7c8744ebafb23663512e7990a5ed131L133' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2400020</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: d5b9c649e59290b15c15f85d0bb182cb20b699fb</div><div id='time'> Time: 2020-04-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/reversible.py</div><div id='m_class'> M Class Name: ReversibleSequence</div><div id='n_method'> N Class Name: ReversibleSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/reversible.py</div><div id='n_file'> N File Name: sinkhorn_transformer/reversible.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            text_emo_vecs_origin = self.textEmoEmbs(torch.LongTensor(list(range(self.num_classes))).to(self.device))
+            text_emo_vecs = text_emo_vecs_origin.unsqueeze(0).repeat(batch_size, 1, 1)
+            text_attn_weights = self.attention(output_text, text_emo_vecs)
+            logits = text_attn_weights<a id="change"> if </a>logits is None<a id="change"> else </a>logits + text_attn_weights
+
+        if &quota&quot in self.modalities:
+            output_audio, _ = self.RNNs[1](X_audio)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logits = visual_attn_weights if logits is None else logits + visual_attn_weights
+            scores.append(visual_attn_weights.unsqueeze(0))
+
+        scores = <a id="change">torch.cat(</a>tuple(scores)<a id="change">, dim=0)</a>.transpose(0, 2)
+        logits = self.modality_weights(scores)
+        logits<a id="change"> = </a>logits.squeeze().t()
+        &#47&#47 for i in range(len(self.modalities)):
+        &#47&#47     if i == 0:
+        &#47&#47         logits = scores[i] * self.modality_weights[i]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wenliangdai/modality-transferable-mer/commit/eaf8a7cf6ec5b7ed6389b9d73cd6bb31fc1576c2#diff-9dca09e4df72ee7b751c74b7ea8c66a06c2d78f76fef6a3bdb604dc6680fd2efL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2400023</div><div id='project'> Project Name: wenliangdai/modality-transferable-mer</div><div id='commit'> Commit Name: eaf8a7cf6ec5b7ed6389b9d73cd6bb31fc1576c2</div><div id='time'> Time: 2020-06-10</div><div id='author'> Author: wenliang.dai.1995@gmail.com</div><div id='file'> File Name: src/models/temp.py</div><div id='m_class'> M Class Name: EmotionEmbAttnModel</div><div id='n_method'> N Class Name: EmotionEmbAttnModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/temp.py</div><div id='n_file'> N File Name: src/models/temp.py</div><div id='m_start'> M Start Line: 71</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 74</div><div id='n_end'> N End Line: 105</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        cond_prob_drop = 0.
+    ):
+        batch_size, device = image_embed.shape[0], image_embed.device
+        t = self.time_mlp(time)<a id="change"> if </a>exists(self.time_mlp)<a id="change"> else </a>None
+
+        cond_prob_mask = prob_mask_like(batch_size, cond_prob_drop, device = device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            rearrange(self.null_image_embed, &quotd -&gt; 1 d&quot)
+        )
+
+        cond<a id="change"> = </a><a id="change">torch.cat(</a>(t, image_embed)<a id="change">, dim = -1)</a>
+
+        hiddens = []
+
+        for convnext, convnext2, downsample in self.downs:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/25d980ebbf1e22ce8396cdec400e22e83f754176#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL402' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2400015</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 25d980ebbf1e22ce8396cdec400e22e83f754176</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 414</div><div id='n_start'> N Start Line: 412</div><div id='n_end'> N End Line: 425</div><BR>

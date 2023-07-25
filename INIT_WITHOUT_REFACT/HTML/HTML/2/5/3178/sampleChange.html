@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if "conv_layer" in self.custom_config["model_arch_args"]:
+            x = <a id="change">inputs.reshape(-1</a>, self.raw_state_dim[0], self.raw_state_dim[1], self.raw_state_dim[2]<a id="change">)</a>.permute(0, 3, 1,
+                                                                                                                2)
+            x = self.encoder(x)
+            x<a id="change"> = </a>torch.mean(x, (2, 3))
+            x<a id="change"> = </a>x.reshape(inputs.shape[0], -1)
+        else:
+            x = self.encoder(inputs)
+        h_in = hidden_state[0].reshape(-1, self.hidden_state_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input_dict, hidden_state, seq_lens):
+        inputs = input_dict["obs_flat"].float()
+        if len(self.full_obs_space.shape) == 3: &#47&#47 3D
+            inputs = inputs.reshape((-1<a id="change"></a>,) + self.full_obs_space.shape)
+        x = self.encoder(inputs)
+        h_in = hidden_state[0].reshape(-1, self.hidden_state_size)
+        h = self.rnn(x, h_in)</code></pre>

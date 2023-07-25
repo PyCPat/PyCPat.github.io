@@ -1,0 +1,70 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            if flattened_dim:
+                logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+                logits = <a id="change">logits</a>[:, <a id="change">:</a>seq_len]
+
+            return logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 bump space by one to account for a boundary case
+
+        ids = F.pad(ids, (0<a id="change">, 0, 0, 1</a>))
+
+        b, space, depth, device = *ids.shape, ids.device
+        assert space &lt;= (self.max_spatial_seq_len + 1), &quotspatial dimension is greater than the max_spatial_seq_len set&quot
+        assert depth == self.depth_seq_len, &quotdepth dimension must be equal to depth_seq_len&quot
+
+        &#47&#47 get token embeddings
+
+        tokens = self.token_emb(ids)
+
+        spatial_pos = self.spatial_pos_emb(torch.arange(space, device = device))
+        depth_pos = self.depth_pos_emb(torch.arange(depth, device = device))
+
+        tokens_with_depth_pos = tokens + depth_pos
+
+        &#47&#47 spatial tokens is tokens with depth pos reduced along depth dimension + spatial positions
+
+        spatial_tokens = reduce(tokens_with_depth_pos, &quotb s d f -&gt; b s f&quot, &quotsum&quot) + spatial_pos
+
+        spatial_tokens = torch.cat((
+            repeat(self.spatial_start_token, &quotf -&gt; b 1 f&quot, b = b),
+            spatial_tokens
+        ), dim = -2)
+
+        spatial_tokens = spatial_tokens[:, :-1]
+
+        spatial_tokens = self.spatial_transformer(spatial_tokens)
+
+        spatial_tokens = rearrange(spatial_tokens, &quotb s f -&gt; b s 1 f&quot)
+
+        &#47&#47 spatial tokens become the start tokens of the depth dimension
+
+        depth_tokens = torch.cat((spatial_tokens, tokens_with_depth_pos), dim = -2)
+
+        depth_tokens = rearrange(depth_tokens, &quot... n d -&gt; (...) n d&quot)
+
+        depth_tokens = self.depth_transformer(depth_tokens)
+
+        depth_tokens = rearrange(depth_tokens, &quot(b s) d f -&gt; b s d f&quot, b = b)
+
+        logits = self.to_logits(depth_tokens)
+
+        if not return_loss:
+            logits = logits[..., :-1, :]
+
+            logits = rearrange(logits, &quotb ... n -&gt; b (...) n&quot)
+
+            logits = logits[:, 1:(seq_len + 1)] &#47&#47 exclude first start token
+
+            if flattened_dim:
+                return logits
+
+            <a id="change">return </a>rearrange(logits, &quotb (s d) n -&gt; b s d n&quot, d = depth)
+
+        logits = logits[..., :-1, :]
+        preds = rearrange(logits, &quotb ... c -&gt; b c (...)&quot)</code></pre>

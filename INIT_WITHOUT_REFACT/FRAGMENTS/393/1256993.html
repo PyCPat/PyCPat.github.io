@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 setattr(self, f"palette{i}", nn.Parameter(torch.nn.init.kaiming_uniform_(torch.empty(numCodewords, cin))))
+        self._codebookAsKey = nn.ModuleList([nn.Linear(cSplitted, cSplitted) for numCodewords in k])
+        &#47&#47 self._tCodebookAsKey = nn.ModuleList([nn.Linear(cin, cin) for numCodewords in k])
+        self._codebookAsValue<a id="change"> = </a>nn.ModuleList(<a id="change">[nn.Linear(cSplitted, cSplitted) for numCodewords in k]</a>)
+        &#47&#47 self._tCodebookAsValue = nn.ModuleList([nn.Linear(cin, cin) for numCodewords in k])
+        self._xAsQuery = nn.ModuleList([nn.Linear(cSplitted, cSplitted) for numCodewords in k])
+        &#47&#47 self._tXAsQuery = nn.ModuleList([nn.Linear(cin, cin) for numCodewords in k])</code></pre><h3>After Change</h3><pre><code class='java'>
+class TransformerQuantizer(nn.Module):
+    def __init__(self, layers: int, k: List[int], cin: int, rate: float = 0.1):
+        super().__init__()
+        k = <a id="change">k[0]</a>
+        self._position = PositionalEncoding2D(cin, 120, 120)
+        self._encoder = nn.Transformer(cin, 8, layers, layers, dropout=rate, activation="gelu")
+        setattr(self, "codebook", nn.Parameter(torch.nn.init.kaiming_uniform_(torch.empty(k, cin))))
+        self._codebookEncoder = nn.TransformerEncoder(nn.TransformerEncoderLayer(cin, 8, dropout=rate, activation="gelu"), layers)</code></pre>

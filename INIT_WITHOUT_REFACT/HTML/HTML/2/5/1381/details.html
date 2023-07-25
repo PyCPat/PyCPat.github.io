@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :1381
+</h3><img src='3973672.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.smoothing = smoothing
+
+    def forward(self, pred, target):
+        log_prob = <a id="change">F.log_softmax(</a>pred<a id="change">, dim=-1)</a>
+        dist = torch.empty_like(pred).fill_(self.smoothing / (pred.size(-1) - 1))
+        dist.scatter_(dim=-1, index=target[..., None], value=(1 - self.smoothing))
+        loss = F.kl_div(log_prob, dist)
+        <a id="change">return </a>loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        chunked_pred = torch.chunk(pred, chunks=self.chunk, dim=0)
+        chunked_target = torch.chunk(target, chunks=self.chunk, dim=0)
+        chunked_mask = torch.chunk(mask, chunks=self.chunk, dim=0)
+        log_prob = [<a id="change">F.log_softmax(</a>p<a id="change">, dim=-1)</a> for p in chunked_pred]
+        loss = [self.smoothed_loss(p, t, m)[None]\
+            for p, t, m in zip(log_prob, chunked_target, chunked_mask)]
+        loss<a id="change"> = </a>torch.cat(loss, dim=0).sum()
+        <a id="change">return </a>loss / mask.sum()
+
+    def smoothed_loss(self, log_prob: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) -&gt; torch.Tensor:
+        dist = torch.full_like(log_prob, fill_value=self.smoothing / (self.vocab - 2))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rick-mccoy/reformer-pytorch/commit/3411114d22e0bfcae2e106f5c82a3211da83f409#diff-fe652c109b5da8ce3b578ba9b2009d72fccfc98ec85a96850e18c5af2f882069L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3973672</div><div id='project'> Project Name: rick-mccoy/reformer-pytorch</div><div id='commit'> Commit Name: 3411114d22e0bfcae2e106f5c82a3211da83f409</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: rickmccoy3141@gmail.com</div><div id='file'> File Name: model/labelsmoothing.py</div><div id='m_class'> M Class Name: LabelSmoothing</div><div id='n_method'> N Class Name: LabelSmoothing</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/labelsmoothing.py</div><div id='n_file'> N File Name: model/labelsmoothing.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 16</div><div id='n_start'> N Start Line: 13</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        <a id="change">return </a><a id="change">F.log_softmax(</a>x<a id="change">, dim=1)</a></code></pre><h3>After Change</h3><pre><code class='java'>
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x<a id="change"> = </a><a id="change">F.log_softmax(</a>x<a id="change">, dim=1)</a>
+        <a id="change">return </a>x
+
+
+class ResNetClassifier(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/20524d468460f45118d0c169b508fcd440eb79c9#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL193' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3973665</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: 20524d468460f45118d0c169b508fcd440eb79c9</div><div id='time'> Time: 2021-06-01</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: CNNCifar</div><div id='n_method'> N Class Name: CNNCifar</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 199</div><div id='m_end'> M End Line: 201</div><div id='n_start'> N Start Line: 199</div><div id='n_end'> N End Line: 201</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        <a id="change">return </a><a id="change">F.log_softmax(</a>x<a id="change">, dim=1)</a>
+
+
+
+cfg = {</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        x<a id="change"> = </a><a id="change">F.log_softmax(</a>x<a id="change">, dim=1)</a>
+        <a id="change">return </a>x
+
+
+cfg = {</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/20524d468460f45118d0c169b508fcd440eb79c9#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3973666</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: 20524d468460f45118d0c169b508fcd440eb79c9</div><div id='time'> Time: 2021-06-01</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: CifarNet</div><div id='n_method'> N Class Name: CifarNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 87</div><div id='n_start'> N Start Line: 86</div><div id='n_end'> N End Line: 88</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return self.bottleneck(torch.cat(psp_outs, dim=1))
+
+    def forward(self, inputs: Tuple[Tensor, Tensor, Tensor, Tensor]) -&gt; Tensor:
+        laterals = <a id="change">[lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]</a>
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = len(laterals)
+        for i in range(used_backbone_levels-1, 0, -1):</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        for i in reversed(<a id="change">range(len(</a>features<a id="change">)</a>-1<a id="change">)</a>):
+            feature = self.fpn_in[i](features[i])
+            f = feature + F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))</code></pre>

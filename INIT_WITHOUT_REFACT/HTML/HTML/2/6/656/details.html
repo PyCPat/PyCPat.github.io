@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :656
+</h3><img src='2287106.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            attention_weighted_encoding = gate * attention_weighted_encoding
+            h, c = self.decode_step(
+                torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                (h[:batch_size_t]<a id="change">, c[:batch_size_t]</a>))  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)
+            predictions[:batch_size_t, t, :] = preds
+            alphas[:batch_size_t, t, :] = alpha</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47     torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+            &#47&#47     (h[:batch_size_t], c[:batch_size_t]))  &#47&#47 (batch_size_t, decoder_dim)
+            &#47&#47teahcer forcing
+            <a id="change">if t==1</a><a id="change"> or (np.random.rand() &lt; self.p) :
+                </a>h = self.decode_step(
+                    torch.cat([embeddings[:batch_size_t, t, :], attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            else:
+                h<a id="change"> = </a>self.decode_step(
+                    torch.cat([self.embedding(torch.argmax(predictions[:batch_size_t, t, :],dim = 1)), attention_weighted_encoding], dim=1),
+                    h[:batch_size_t])  &#47&#47 (batch_size_t, decoder_dim)
+            preds = self.fc(self.dropout(h))  &#47&#47 (batch_size_t, vocab_size)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/qs956/latex_ocr_pytorch/commit/0455746d6d3141dfc06cd15fb9cd67a0b9defcfc#diff-62e0d959e50d9f4003df8124a1c19d98c77320268642d433b1cc28c58cf73a85L214' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2287106</div><div id='project'> Project Name: qs956/latex_ocr_pytorch</div><div id='commit'> Commit Name: 0455746d6d3141dfc06cd15fb9cd67a0b9defcfc</div><div id='time'> Time: 2020-03-21</div><div id='author'> Author: qs956@163.com</div><div id='file'> File Name: model/model.py</div><div id='m_class'> M Class Name: DecoderWithAttention</div><div id='n_method'> N Class Name: DecoderWithAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/model.py</div><div id='n_file'> N File Name: model/model.py</div><div id='m_start'> M Start Line: 231</div><div id='m_end'> M End Line: 250</div><div id='n_start'> N Start Line: 214</div><div id='n_end'> N End Line: 271</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        x: B, H*W, C
+        
+        H<a id="change">, W</a> = self.input_resolution
+        B, L, C = x.shape
+        assert L == H * W, "input feature has wrong size"
+        assert H % 2 == 0 and W % 2 == 0, f"x size ({H}*{W}) are not even."</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.view(B, H, W, C)
+
+        &#47&#47 padding
+        pad_input = <a id="change">(H % 2 == 1) or (W % 2 == 1)</a>
+        <a id="change">if </a>pad_input<a id="change">:
+            </a>x<a id="change"> = </a>F.pad(x, (0, 0, 0, W % 2, 0, H % 2))
+
+        x0 = x[:, 0::2, 0::2, :]  &#47&#47 B H/2 W/2 C
+        x1 = x[:, 1::2, 0::2, :]  &#47&#47 B H/2 W/2 C</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/12b05eaf235665fc6d1f89a9055b84d7cdfec923#diff-bfa9144b84aa2908523fe6e28d0f355d5701af250801acefca0ffbeed05bc3dfL306' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2287107</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: 12b05eaf235665fc6d1f89a9055b84d7cdfec923</div><div id='time'> Time: 2021-10-14</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/backbones/SwinTransformer.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/backbones/SwinTransformer.py</div><div id='n_file'> N File Name: lib/backbones/SwinTransformer.py</div><div id='m_start'> M Start Line: 310</div><div id='m_end'> M End Line: 313</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 283</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        p_out0 = torch.cat([p_out0, fpn_out0], 1)  &#47&#47 512-&gt;1024/32
+        pan_out0 = self.C3_n4(p_out0)  &#47&#47 1024-&gt;1024/32
+
+        outputs = (pan_out2<a id="change">, pan_out1, pan_out0</a>)
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        pan_out2 = self.C3_p3(f_out1)  &#47&#47 512-&gt;256/8
+        outputs["P3"] = pan_out2
+        
+        <a id="change">if "P4" in self.out_features</a><a id="change"> or "P5" in self.out_features:
+            </a>p_out1 = self.bu_conv2(pan_out2)  &#47&#47 256-&gt;256/16
+            p_out1 = torch.cat([p_out1, fpn_out1], 1)  &#47&#47 256-&gt;512/16
+            pan_out1 = self.C3_n3(p_out1)  &#47&#47 512-&gt;512/16
+            outputs["P4"]<a id="change"> = </a>pan_out1
+        
+        if "P5" in self.out_features:
+            p_out0 = self.bu_conv1(pan_out1)  &#47&#47 512-&gt;512/32</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/developer0hye/yolox-backbone/commit/d1d77b0859f96b37f20fb6831d3c1ce9802c1a30#diff-72150e13c960c5e6e318d3d905b659410c9b98ce6201e701252c2a6bcaa75db9L83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2287104</div><div id='project'> Project Name: developer0hye/yolox-backbone</div><div id='commit'> Commit Name: d1d77b0859f96b37f20fb6831d3c1ce9802c1a30</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: developer.0hye@gmail.com</div><div id='file'> File Name: yolox_backbone/models/yolo_pafpn.py</div><div id='m_class'> M Class Name: YOLOPAFPN</div><div id='n_method'> N Class Name: YOLOPAFPN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: yolox_backbone/models/yolo_pafpn.py</div><div id='n_file'> N File Name: yolox_backbone/models/yolo_pafpn.py</div><div id='m_start'> M Start Line: 104</div><div id='m_end'> M End Line: 116</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.initialize()
+
+    def forward(self, inputs, targets):
+        enc_output, i_mask = None<a id="change">, None</a>
+        if self.has_inputs:
+            i_mask = utils.create_pad_mask(inputs, self.src_pad_idx)
+            enc_output = self.encode(inputs, i_mask)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.initialize()
+
+    def forward(self, padded_input, input_lengths, padded_target):
+        <a id="change">if </a><a id="change">self.feat_extractor == &quotemb_cnn&quot or self.feat_extractor == &quotvgg_cnn&quot:
+            </a>padded_input<a id="change"> = </a>self.conv(padded_input)
+
+        &#47&#47 Reshaping features
+        sizes = padded_input.size() &#47&#47 B x H_1 (channel?) x H_2 x T</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qute012/kosr/commit/b7d24b0d835254fd425224eba3421a3b7224e55f#diff-c6b6e8084627536e70fdb6e8be5c81f8520937c01028e9bb6ea65a82014b023eL18' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2287115</div><div id='project'> Project Name: qute012/kosr</div><div id='commit'> Commit Name: b7d24b0d835254fd425224eba3421a3b7224e55f</div><div id='time'> Time: 2021-01-12</div><div id='author'> Author: ejrwls012@gmail.com</div><div id='file'> File Name: model/transformer/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/transformer/transformer.py</div><div id='n_file'> N File Name: model/transformer/transformer.py</div><div id='m_start'> M Start Line: 19</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 34</div><BR>

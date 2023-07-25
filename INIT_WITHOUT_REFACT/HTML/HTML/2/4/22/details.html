@@ -1,0 +1,93 @@
+<html><h3>Pattern ID :22
+</h3><img src='36080.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor, shape: torch.IntTensor) -&gt; torch.Tensor:
+        h, w = shape[0], shape[1]
+        return (<a id="change">(self._decoder(self._quantizer(codes)))[..., :h, :w]</a>.tanh() + 1) / 2
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, codes: torch.ByteTensor) -&gt; torch.Tensor:
+        smallQ = self._reverses[-1](self._quantizers[-1](codes[-1]))
+        <a id="change">for </a>i in <a id="change">range(</a>self._levels - 1, -1, -1<a id="change">):
+            </a>q = self._scatters[i](self._quantizers[i](codes[i]))
+            smallQ = self._reverses[i](q + smallQ)
+        return self._decoder(smallQ).tanh()
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3ca26f40dc8d00ed5fbebee4a77654f9d1d51939#diff-bd7bac3c224b9a65dc7b95ed138c8c82272e1b2c39df2e3207d43e6411ee6b20L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36080</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3ca26f40dc8d00ed5fbebee4a77654f9d1d51939</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/evaluation/refModel.py</div><div id='m_class'> M Class Name: RefDecoder</div><div id='n_method'> N Class Name: RefDecoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/evaluation/refModel.py</div><div id='n_file'> N File Name: src/mcqc/evaluation/refModel.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 185</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        output = []
+        for step in range(input.size(1)):
+            &#47&#47 Compute current time-step
+            hidden_state = self.rnn_cell(<a id="change">input[:, step, :, :, :]</a>, hidden_state)
+            output.append(hidden_state)
+        &#47&#47 Stack the list of output hidden states into a tensor
+        output = torch.stack(output, 0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for l, (gru_cell, hid_dp) in enumerate(zip(self.cell_list, self.hidden_dps)):
+            h = hidden_state[l]
+            output_inner = []
+            <a id="change">for </a>t in <a id="change">range(</a>seq_len<a id="change">):
+                </a>h = gru_cell(input=cur_layer_input[t], h_prev=h)
+                output_inner.append(h)
+
+            cur_layer_input = torch.stack(output_inner)  &#47&#47 list to array</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/skillful_nowcasting/commit/02c5ceadd01484d6ac8bce848ff76446fe7a6917#diff-cee00a565d888c684ec40bd3eac27669aa3223b223a80ae9f871383a9fb64917L268' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36083</div><div id='project'> Project Name: openclimatefix/skillful_nowcasting</div><div id='commit'> Commit Name: 02c5ceadd01484d6ac8bce848ff76446fe7a6917</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_class'> M Class Name: ConvGRU</div><div id='n_method'> N Class Name: ConvGRU</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='n_file'> N File Name: nowcasting_gan/layers/ConvGRU.py</div><div id='m_start'> M Start Line: 269</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 196</div><div id='n_end'> N End Line: 221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+
+
+        concat_aligned_img_feature = <a id="change">img_feaure[:, None, :]</a>.repeat(1, T_1, 1)
+        concatenated_features = torch.cat((trajectories_past, concat_aligned_img_feature), dim=2) &#47&#47 (N, T_1, 3 + 16)
+        output = self.transformer(src=concatenated_features, tgt=trajectories_future, tgt_mask=tgt_mask) &#47&#47 (N, T_2, 3)
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+            size=(N, T_1, CNN_OUTPUT_FEATURE_SIZE))
+
+        &#47&#47 img (N, T_1, 3, 100, 100) -&gt; CNN -&gt; (N, T_1, 16)
+        <a id="change">for </a>t in <a id="change">range(</a>T_1<a id="change">):
+            </a>concat_aligned_img_feature[:, t, :] = self.cnn(images_past[:, t, :, :, :])
+
+
+        &#47&#47 trajectory_history: (N, 10, 3)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xushenlz/parksim/commit/129fa27deb5d6a07e01c3a149cfb22ffcef91ed2#diff-468657ecf0552a8f76c03e05fc0d3fce06f819adf5e4c827c74e9374101e83bbL127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36075</div><div id='project'> Project Name: xushenlz/parksim</div><div id='commit'> Commit Name: 129fa27deb5d6a07e01c3a149cfb22ffcef91ed2</div><div id='time'> Time: 2022-03-11</div><div id='author'> Author: xushen0118@outlook.com</div><div id='file'> File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='m_class'> M Class Name: TrajectoryPredictTransformerV1</div><div id='n_method'> N Class Name: TrajectoryPredictTransformerV1</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='n_file'> N File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='m_start'> M Start Line: 161</div><div id='m_end'> M End Line: 174</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 177</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        output_seq = torch.stack(batched_output_per_clip, dim=0).transpose_(0, 1)
+        gru_output, h_n = self.rnn(<a id="change">output_seq.unsqueeze(1)[:, :, :config.GRU_TEMPORAL_WINDOW]</a>)
+
+        &#47&#47 fc_out = self.fc(gru_output.flatten())
+        &#47&#47</code></pre><h3>After Change</h3><pre><code class='java'>
+        output_seq = torch.stack(batched_output_per_clip, dim=0)
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        <a id="change">for </a>i in <a id="change">range(</a>gru_output.size(0)<a id="change">):
+            </a>hr = self.fc_resnet(gru_output[i, :])
+            &#47&#47 hr = hr * 25.0
+            hr_per_clip.append(hr)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/deed748087f19356d297fe57e439b967a6a3e617#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36076</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: deed748087f19356d297fe57e439b967a6a3e617</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                &#47&#47 Only pad the lower part of the spectrum.
+                spec_f = self.pad_spec(spec)
+                spec_f = self.df_op(spec_f, df_coefs)
+                <a id="change">spec[..., : self.nb_df, :]</a> = spec_f[..., : self.nb_df, :]
+            else:
+                spec = self.df_op(spec, df_coefs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        spec = self.mask(spec, m)
+        df_coefs, df_alpha = self.df_dec(emb, c0)
+
+        <a id="change">for </a>_ in <a id="change">range(</a>self.df_iter<a id="change">):
+            </a>if self.use_alpha:
+                spec = self.df_op(spec, df_coefs, df_alpha)
+            else:
+                spec = self.df_op(spec, df_coefs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/3e554333e5a3f0802f8df5a00e07de517dfe6561#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL410' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36077</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 3e554333e5a3f0802f8df5a00e07de517dfe6561</div><div id='time'> Time: 2022-10-18</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 428</div><div id='m_end'> M End Line: 455</div><div id='n_start'> N Start Line: 486</div><div id='n_end'> N End Line: 502</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if only_use_last:
+            &#47&#47 we do not need to output a sequence, so only the last element is needed
+            x = t.squeeze(<a id="change">x[:, -1, :]</a>, dim=1)
+
+        return x, rel, raw
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, input: t.Tensor, time_steps=None, additional=None):
+        &#47&#47 input is dim (N, T, in_channels)
+        x = input
+        <a id="change">for </a>i in <a id="change">range(</a>self.tc_num<a id="change">):
+            </a>x = self.layers["tconv_{}".format(i)](x)
+
+        x, rel, raw = self.layers["attention"](x, time_steps)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/iffix/machin/commit/5b8d4a14723b753d9ee9d6dece151e40b3531c98#diff-b99a43ebb8bdea7f7a9ff2be74dc2b460878eec11cb5e5374efa147eedc92cf6L143' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 36079</div><div id='project'> Project Name: iffix/machin</div><div id='commit'> Commit Name: 5b8d4a14723b753d9ee9d6dece151e40b3531c98</div><div id='time'> Time: 2020-04-25</div><div id='author'> Author: hanhanmumuqq@163.com</div><div id='file'> File Name: models/base/tcdnnet.py</div><div id='m_class'> M Class Name: TCDNNet</div><div id='n_method'> N Class Name: TCDNNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base/tcdnnet.py</div><div id='n_file'> N File Name: models/base/tcdnnet.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 181</div><div id='n_start'> N Start Line: 225</div><div id='n_end'> N End Line: 232</div><BR>

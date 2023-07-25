@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 y = convert_labels(y, self.b_int_digits, self.b_dec_digits)
+
+
+        z<a id="change"> = </a><a id="change">torch.cat(</a>(z, y)<a id="change">, dim=1)</a>
+        if z.is_cuda and self.ngpu &gt; 1:
+            output = nn.parallel.data_parallel(self.linear, z, range(self.ngpu))
+            output_img = output.view(-1, 8*self.ngf, 4, 4)
+            output_img = nn.parallel.data_parallel(self.main, output_img, range(self.ngpu))</code></pre><h3>After Change</h3><pre><code class='java'>
+            output_img = output.view(-1, 8*self.ngf, 4, 4)
+            output_img = nn.parallel.data_parallel(self.conv1, output_img, range(self.ngpu))
+            output_img = output_img + y
+            output_img = nn.parallel.data_parallel(self.conv2, output_img, <a id="change">range(</a>self.ngpu<a id="change">)</a>)
+        else:
+            output = self.linear(z)
+            output_img = output.view(-1, 8*self.ngf, 4, 4)</code></pre>

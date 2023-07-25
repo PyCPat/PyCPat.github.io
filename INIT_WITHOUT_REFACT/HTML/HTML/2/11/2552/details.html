@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :2552
+</h3><img src='8351567.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv = ConvBnAct(1, 1, kernel_size, act_layer=None)
+
+    def forward(self, x):
+        x_avg = <a id="change">torch.mean(</a>x<a id="change">, dim=1, keepdim=True)</a>
+        x_max<a id="change"> = </a>torch.max(x, dim=1, keepdim=True)[0]
+        x_attn<a id="change"> = </a>0.5 * x_avg + 0.5 * x_max
+        x_attn = self.conv(x_attn)
+        <a id="change">return </a>x<a id="change"> * x_attn.sigmoid()</a>
+
+
+class CbamModule(nn.Module):
+    def __init__(self, channels, spatial_kernel_size=7):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gate = create_act_layer(gate_layer)
+
+    def forward(self, x):
+        x_attn = 0.5 * <a id="change">x.mean(dim=1, keepdim=True)</a> + 0.5 * x.amax(dim=1, keepdim=True)
+        x_attn = self.conv(x_attn)
+        <a id="change">return x</a><a id="change"> * </a><a id="change">self.gate(</a>x_attn<a id="change">)</a>
+
+
+class CbamModule(nn.Module):
+    def __init__(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 10</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/742c2d524726d426ea2745055a5b217c020ccc72#diff-947302b3eb8be3a379553abac0e9bbf88d5effc352ff2118455cf0ff651dd495L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8351567</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 742c2d524726d426ea2745055a5b217c020ccc72</div><div id='time'> Time: 2021-05-27</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/layers/cbam.py</div><div id='m_class'> M Class Name: LightSpatialAttn</div><div id='n_method'> N Class Name: LightSpatialAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/cbam.py</div><div id='n_file'> N File Name: timm/models/layers/cbam.py</div><div id='m_start'> M Start Line: 70</div><div id='m_end'> M End Line: 74</div><div id='n_start'> N Start Line: 77</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fc2 = nn.Conv2d(channels // reduction, channels, 1, bias=False)
+
+    def forward(self, x):
+        x_avg = <a id="change">x.mean(</a>(2, 3)<a id="change">, keepdim=True)</a>
+        x_max<a id="change"> = </a>F.adaptive_max_pool2d(x, 1)
+        x_avg = self.fc2(self.act(self.fc1(x_avg)))
+        x_max = self.fc2(self.act(self.fc1(x_max)))
+        x_attn<a id="change"> = </a>x_avg + x_max
+        <a id="change">return </a>x<a id="change"> * x_attn.sigmoid()</a>
+
+
+class LightChannelAttn(ChannelAttn):
+    An experimental &quotlightweight&quot that sums avg + max pool first</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gate = create_act_layer(gate_layer)
+
+    def forward(self, x):
+        x_avg = self.fc2(self.act(self.fc1(<a id="change">x.mean(</a>(2, 3)<a id="change">, keepdim=True)</a>)))
+        x_max = self.fc2(self.act(self.fc1(x.amax((2, 3), keepdim=True))))
+        <a id="change">return </a>x<a id="change"> * </a><a id="change">self.gate(</a>x_avg + x_max<a id="change">)</a>
+
+
+class LightChannelAttn(ChannelAttn):
+    An experimental &quotlightweight&quot that sums avg + max pool first</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/742c2d524726d426ea2745055a5b217c020ccc72#diff-947302b3eb8be3a379553abac0e9bbf88d5effc352ff2118455cf0ff651dd495L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8351563</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 742c2d524726d426ea2745055a5b217c020ccc72</div><div id='time'> Time: 2021-05-27</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/layers/cbam.py</div><div id='m_class'> M Class Name: ChannelAttn</div><div id='n_method'> N Class Name: ChannelAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/cbam.py</div><div id='n_file'> N File Name: timm/models/layers/cbam.py</div><div id='m_start'> M Start Line: 27</div><div id='m_end'> M End Line: 32</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.conv = ConvBnAct(2, 1, kernel_size, act_layer=None)
+
+    def forward(self, x):
+        x_avg = <a id="change">torch.mean(</a>x<a id="change">, dim=1, keepdim=True)</a>
+        x_max<a id="change"> = </a>torch.max(x, dim=1, keepdim=True)[0]
+        x_attn<a id="change"> = </a>torch.cat([x_avg, x_max], dim=1)
+        x_attn = self.conv(x_attn)
+        <a id="change">return </a>x<a id="change"> * x_attn.sigmoid()</a>
+
+
+class LightSpatialAttn(nn.Module):
+    An experimental &quotlightweight&quot variant that sums avg_pool and max_pool results.</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gate = create_act_layer(gate_layer)
+
+    def forward(self, x):
+        x_attn = torch.cat([<a id="change">x.mean(dim=1, keepdim=True)</a>, x.amax(dim=1, keepdim=True)], dim=1)
+        x_attn = self.conv(x_attn)
+        <a id="change">return </a>x<a id="change"> * </a><a id="change">self.gate(</a>x_attn<a id="change">)</a>
+
+
+class LightSpatialAttn(nn.Module):
+    An experimental &quotlightweight&quot variant that sums avg_pool and max_pool results.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/742c2d524726d426ea2745055a5b217c020ccc72#diff-947302b3eb8be3a379553abac0e9bbf88d5effc352ff2118455cf0ff651dd495L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8351562</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 742c2d524726d426ea2745055a5b217c020ccc72</div><div id='time'> Time: 2021-05-27</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/layers/cbam.py</div><div id='m_class'> M Class Name: SpatialAttn</div><div id='n_method'> N Class Name: SpatialAttn</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/layers/cbam.py</div><div id='n_file'> N File Name: timm/models/layers/cbam.py</div><div id='m_start'> M Start Line: 55</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 65</div><BR>

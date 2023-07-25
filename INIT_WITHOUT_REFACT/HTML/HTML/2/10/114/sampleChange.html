@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        supports_k, supports_v = self.to_qk(supports_repr), self.to_v(supports_repr)
+        supports_k, supports_v = map(lambda t: rearrange(t, &quot(b n) c h w -&gt; b n c h w&quot, b = b), (supports_k, supports_v))
+
+        sim<a id="change"> = </a>einsum(&quotb c h w, b n c i j -&gt; b h w n i j&quot, query_q, supports_k)
+        sim = rearrange(sim, &quotb h w n i j -&gt; b h w (n i j)&quot)
+
+        attn = sim.softmax(dim = -1)
+        attn = rearrange(attn, &quotb h w (n i j) -&gt; b h w n i j&quot, i = h, j = w)
+
+        out<a id="change"> = </a><a id="change">einsum(&quotb h w n i j, b n c i j -&gt; b c h w&quot</a>, attn, supports_v<a id="change">)</a>
+
+        euclidian_dist = ((query_v - out) ** 2).sum() / (h * w)
+        return euclidian_dist
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        supports_k, supports_v = map(lambda t: rearrange(t, &quot(b k n) c h w -&gt; b k n c h w&quot, b = b, k = k), (supports_k, supports_v))
+
+        sim = einsum(&quotb c h w, b k n c i j -&gt; b k h w n i j&quot, query_q, supports_k)
+        sim<a id="change"> = </a><a id="change">rearrange(</a>sim, <a id="change">&quotb k h w n i j -&gt; b k h w (n i j)&quot</a><a id="change">)</a>
+
+        attn = sim.softmax(dim = -1)
+        attn = rearrange(attn, &quotb k h w (n i j) -&gt; b k h w n i j&quot, i = h, j = w)
+
+        out<a id="change"> = einsum(&quotb k h w n i j, b k n c i j -&gt; b k c h w&quot</a>, attn, supports_v<a id="change">)</a>
+
+        out = rearrange(out, &quotb k c h w -&gt; b k (c h w)&quot)
+        query_v = rearrange(query_v, &quotb c h w -&gt; b () (c h w)&quot)
+</code></pre>

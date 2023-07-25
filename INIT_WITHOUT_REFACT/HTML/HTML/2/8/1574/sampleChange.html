@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    &#47&#47 X: a list of features from different modalities
+    def forward(self, X):
+        <a id="change">if self.split_block == 1</a><a id="change">:
+            </a>ret<a id="change"> = </a>self.blocks[0](X)
+            return ret
+
+        &#47&#47 split into multiple time segments, assumes in 2nd dim
+        segmented_x = [list(torch.split(x, x.shape[2] // self.split_block, dim=2)) for x in X]
+        for x in segmented_x:
+            <a id="change">if len(x) &gt; self.split_block</a><a id="change">:
+                </a>x[-2]<a id="change"> = </a>torch.cat(x[-2:], dim=2)
+
+        ret_segments = []
+        for i in range(self.split_block):</code></pre><h3>After Change</h3><pre><code class='java'>
+        segmented_x = [torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]
+
+        &#47&#47 apply MSAF
+        ret_segments = <a id="change">[self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]</a>
+
+        &#47&#47 put segments back together
+        ret = [torch.cat([r[m] for r in ret_segments], dim=2) for m in range(self.num_modality)]
+</code></pre>

@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :1862
+</h3><img src='7194989.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        out = self.linear_layer(x)
+        out = <a id="change">out.transpose(0</a>, <a id="change">1</a><a id="change">)</a>.transpose(1, 2)
+        out = self.bn(out)
+        out<a id="change"> = </a>out.transpose(1, 2).transpose(0, 1)
+        return out
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if len(out.shape)==3:
+            out = out.permute(1, 2, 0)
+        out = self.bn(out)
+        if <a id="change">len(</a>out.shape<a id="change">)</a> == 3:
+            out = out.permute(2, 0, 1)
+        return out
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/4ffda89c42361af48c15721b2739b36c52f053d6#diff-98fd28c1559c72435d1c59024b2baa25ece39483c2196f2377bfc9ee6c7f183bL46' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7194989</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 4ffda89c42361af48c15721b2739b36c52f053d6</div><div id='time'> Time: 2019-03-11</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron2.py</div><div id='m_class'> M Class Name: LinearBN</div><div id='n_method'> N Class Name: LinearBN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron2.py</div><div id='n_file'> N File Name: layers/tacotron2.py</div><div id='m_start'> M Start Line: 46</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+			preds.append(self.Linear(h))
+		preds = torch.stack(preds, dim = 1)
+		if y is not None:
+			preds_<a id="change"> = </a><a id="change">torch.transpose(</a>preds, <a id="change">1</a>, <a id="change">2</a><a id="change">)</a>
+			&#47&#47print(preds.size())
+
+			y = y.long()
+			loss = self.Loss(preds_, torch.squeeze(y))</code></pre><h3>After Change</h3><pre><code class='java'>
+				loss+=self.Loss(preds, y[:,i].squeeze().long())
+		preds_ = torch.stack(preds_, dim = 1)
+		if y is not None:
+			loss/=<a id="change">len(</a>xs<a id="change">)</a>
+			return preds_, loss
+		return preds_
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dido1998/recurrent-independent-mechanisms/commit/d87a800096eaa36730cbabac535eea24973f3799#diff-e5165d0379320c04b38a0f79666ae179299255ae3019498345e3dd6fc2ef1521L253' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7194985</div><div id='project'> Project Name: dido1998/recurrent-independent-mechanisms</div><div id='commit'> Commit Name: d87a800096eaa36730cbabac535eea24973f3799</div><div id='time'> Time: 2020-02-11</div><div id='author'> Author: adidolkar123@gmail.com</div><div id='file'> File Name: networks.py</div><div id='m_class'> M Class Name: CopyingModel</div><div id='n_method'> N Class Name: CopyingModel</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: networks.py</div><div id='n_file'> N File Name: networks.py</div><div id='m_start'> M Start Line: 255</div><div id='m_end'> M End Line: 276</div><div id='n_start'> N Start Line: 291</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        kl_loss = -0.5 * torch.sum(1 + log_vars - mus.pow(2) - log_vars.exp())
+
+        &#47&#47 Residual Attention Loss
+        attn_loss<a id="change"> = </a>self.guided_loss(<a id="change">attns.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>, src_lens_targets, mel_lens_targets)
+
+        total_loss = (
+            mel_loss + duration_loss + beta * kl_loss + attn_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+            mel_iter_comp = torch.sigmoid(mel_iter)
+            mel_iter_loss += self.sdtw_loss(mel_iter_comp, mel_targets_comp).mean()
+            &#47&#47 mel_iter_loss += self.sdtw_loss(mel_iter, mel_targets).mean()
+        mel_loss = (mel_iter_loss / (<a id="change">len(</a>mel_iters<a id="change">)</a> * mel_lens_targets)).mean()
+
+        &#47&#47 Duration Loss
+        duration_loss = self.lambda_ * (self.mae_loss(durations.sum(-1), mel_lens_targets) / src_lens_targets).mean()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/parallel-tacotron2/commit/2c2f8c0876192de39c8e6d3c4f579dc68a50a678#diff-5ea2db96a36360fc43da9b22eaf6dcb593b698b98e6bf32ebfdef3a7589dd912L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7195000</div><div id='project'> Project Name: keonlee9420/parallel-tacotron2</div><div id='commit'> Commit Name: 2c2f8c0876192de39c8e6d3c4f579dc68a50a678</div><div id='time'> Time: 2021-05-25</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/loss.py</div><div id='m_class'> M Class Name: ParallelTacotron2Loss</div><div id='n_method'> N Class Name: ParallelTacotron2Loss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/loss.py</div><div id='n_file'> N File Name: model/loss.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 91</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 86</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 prepare input for decoder
+        src_flatten = srcs.flatten(2).transpose(1, 2)                                &#47&#47 [Batch, Patches, HiddenDim] 
+        pos_embed_flatten<a id="change"> = </a><a id="change">pos_embeds.flatten(2).transpose(1</a>, <a id="change">2</a><a id="change">)</a>                    &#47&#47 [Batch, Patches, HiddenDim] 
+        
+        bs, _, c = src_flatten.shape
+        query_embed, tgt = torch.split(query_embed, c, dim=1)                        &#47&#47 Tgt in contrast to detr not zeros, but learnable</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert query_embed is not None
+
+        &#47&#47 prepare input for decoder
+        for idx in range(<a id="change">len(</a>srcs<a id="change">)</a>):
+            srcs[idx] = srcs[idx].flatten(2).transpose(1, 2)
+            pos[idx] = pos[idx].flatten(2).transpose(1, 2)
+            </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bwittmann/transoar/commit/b13e8b2db58100e624031db6b1f256e65dd68a87#diff-46296950c0873e06db813f2eb25910c85d79a555ca8fbaddd81bde89454be936L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7194986</div><div id='project'> Project Name: bwittmann/transoar</div><div id='commit'> Commit Name: b13e8b2db58100e624031db6b1f256e65dd68a87</div><div id='time'> Time: 2022-05-07</div><div id='author'> Author: bastian.wittmann@tum.de</div><div id='file'> File Name: transoar/models/necks/focused_decoder.py</div><div id='m_class'> M Class Name: FocusedDecoder</div><div id='n_method'> N Class Name: FocusedDecoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transoar/models/necks/focused_decoder.py</div><div id='n_file'> N File Name: transoar/models/necks/focused_decoder.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 108</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 109</div><BR>

@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :841
+</h3><img src='2643081.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        else:
+            x = embbedings
+            sub_kernels = torch.chunk(self.kernel, len(self.device_id), dim=1)
+            temp_x = x.cuda(<a id="change">self.device_id[0]</a>)
+            kernel_norm = l2_norm(sub_kernels[0], axis=0).cuda(self.device_id[0])
+            cos_theta = torch.mm(temp_x, kernel_norm)
+            for i in range(1, len(self.device_id)):</code></pre><h3>After Change</h3><pre><code class='java'>
+        label = label.view(-1, 1)  &#47&#47 size=(B,1)
+        index = cos_theta.data * 0.0  &#47&#47 size=(B,Classnum)
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index<a id="change"> = </a><a id="change">index.bool()</a>
+        output = cos_theta * 1.0
+        output[index] = phi[index]  &#47&#47 Only change the correct predicted output
+        output *= self.s  &#47&#47 Scale up in order to make softmax work, first introduced in normface
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/opendr-eu/opendr/commit/2140183854961b88a85f55a90b36dc4fb88a7c61#diff-7a976e81c8d759d2fd42cc20aaa095ac8526df3e7bf6b088c72798757ed4aafeL207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643081</div><div id='project'> Project Name: opendr-eu/opendr</div><div id='commit'> Commit Name: 2140183854961b88a85f55a90b36dc4fb88a7c61</div><div id='time'> Time: 2021-05-06</div><div id='author'> Author: ptosidis@gmail.com</div><div id='file'> File Name: src/opendr/perception/face_recognition/algorithm/head/losses.py</div><div id='m_class'> M Class Name: AMSoftmax</div><div id='n_method'> N Class Name: AMSoftmax</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/opendr/perception/face_recognition/algorithm/head/losses.py</div><div id='n_file'> N File Name: src/opendr/perception/face_recognition/algorithm/head/losses.py</div><div id='m_start'> M Start Line: 243</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 207</div><div id='n_end'> N End Line: 214</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.mem_updater = Attention(dim, heads = heads)
+
+    def forward(self, src, tgt, mems = None):
+        b = <a id="change">src.shape[0]</a>
+        mems = default(mems, self.memory_slots)
+
+        if mems.ndim == 2:
+            mems = repeat(mems, &quotn d -&gt; b n d&quot, b = b)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.decoder(tgt, context = enc)
+
+        &#47&#47 update memory with attention
+        mem_mask = <a id="change">torch.eye(num_mem, num_mem, device = device).bool()</a>
+        mem_mask<a id="change"> = </a>F.pad(mem_mask, (0, n), value = True)
+        mems = self.mem_updater(mems, enc, mask = mem_mask, attend_self = True)
+
+        return out, mems</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/e1b7c97459ec7c7f5fe37ff3bfa38bdb448a304c#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L150' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643084</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: e1b7c97459ec7c7f5fe37ff3bfa38bdb448a304c</div><div id='time'> Time: 2020-10-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: Memformer</div><div id='n_method'> N Class Name: Memformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        if mask is not None and <a id="change">mask.shape[1]</a> == x.shape[1]:
+            mask = mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask<a id="change"> = </a>~<a id="change">torch.zeros_like(inp).scatter(1, indices, 1.).bool()</a>
+            kwargs.update(context_mask = mask)
+
+        out = self.net(inp, **kwargs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643085</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>

@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f=f, g=g) for f, g in blocks])
+
+    def forward(self, x):
+        <a id="change">return </a><a id="change">_ReversibleFunction.apply(</a>x, self.blocks<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        blocks = self.blocks
+
+        <a id="change">if self.layer_dropout &gt; 0</a><a id="change">:
+            </a>to_drop = torch.empty(len(self.blocks)).uniform_(0, 1) &lt; self.layer_dropout
+            blocks = [block for block, drop in zip(self.blocks, to_drop) if not drop]
+            blocks = self.blocks[:1] if len(blocks) == 0 else blocks
+</code></pre>

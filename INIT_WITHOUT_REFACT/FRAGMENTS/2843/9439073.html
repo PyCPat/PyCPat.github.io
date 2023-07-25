@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        if self.training:
+            total_blocks = sum([len(sx) for sx in x])
+            mask_size = torch.Size(<a id="change">[</a>total_blocks<a id="change"></a>])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_id = 0
+            for mod in x:
+                for x_mod in mod:
+                    x_mod<a id="change"> *= </a>mask[mask_id]
+                    mask_id += 1
+            return x, mask
+        return x, None</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, X):
+        if self.training:
+            blocks_per_mod<a id="change"> = </a>[sx.shape[1] for sx in X]
+            mask_size = torch.Size([X[0].shape[0], sum(blocks_per_mod)])
+            binomial = torch.distributions.binomial.Binomial(probs=1 - self.p)
+            mask = binomial.sample(mask_size) * (1.0 / (1 - self.p))
+            mask_shapes = [<a id="change">list(</a>x.shape[:2]<a id="change">)</a> + [1] * (x.dim() - 2) for x in X]
+            grouped_masks = torch.split(mask, blocks_per_mod, dim=1)
+            grouped_masks = [m.reshape(s) for m, s in zip(grouped_masks, mask_shapes)]
+            X<a id="change"> = </a>[x * m for x, m in zip(X, grouped_masks)]
+            return X, grouped_masks
+        return X, None
+</code></pre>

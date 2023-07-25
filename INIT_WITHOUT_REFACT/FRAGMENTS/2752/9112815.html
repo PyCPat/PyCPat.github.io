@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                edge_weight: OptTensor = None) -&gt; Tensor:
+        
+
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if <a id="change">is_edge_like</a>:
+            edge_index, edge_weight = gcn_norm(  &#47&#47 yapf: disable
+                edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False, self.add_self_loops,
+                dtype=x.dtype)
+        elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+            </a>edge_index = gcn_norm(  &#47&#47 yapf: disable
+                edge_index, edge_weight, <a id="change">x.size(0</a><a id="change">)</a>, False, self.add_self_loops,
+                dtype=x.dtype)
+        else:
+            &#47&#47 N by N dense adjacency matrix
+            edge_index<a id="change"> = </a><a id="change">dense_gcn_norm(</a>edge_index<a id="change">,
+                                        add_self_loops=self.add_self_loops)</a>
+
+        xs = [x]
+        for _ in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_index, edge_weight = make_self_loops(edge_index, edge_weight,
+                                                      num_nodes=x.size(0))
+
+        if <a id="change">self.normalize</a>:
+            edge_index<a id="change">, edge_weight</a> = <a id="change">make_gcn_norm(</a>edge_index, edge_weight<a id="change">)</a>
+
+        xs = [x]
+        for _ in range(self.K):
+            x = spmm(x, edge_index, edge_weight)</code></pre>

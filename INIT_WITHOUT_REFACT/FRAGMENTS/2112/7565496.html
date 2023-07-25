@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if isinstance(layer, ResnetBlocWithAttn):
+                x = layer(x, t)
+            else:
+                x<a id="change"> = </a>layer(x)
+            feats.append(x)
+
+        <a id="change">for layer</a> in self.mid<a id="change">:
+            </a>if isinstance(layer, ResnetBlocWithAttn):
+                x = layer(x, t)
+            else:
+                x<a id="change"> = </a>layer(x)
+
+        for layer in self.ups:
+            if isinstance(layer, ResnetBlocWithAttn):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, noise_level):
+        noise_embed = self.noise_mlp(noise_level)
+        feats = []
+        x<a id="change"> = </a>self.start_conv(x)
+        for layer in self.downs:
+            x = layer(x, noise_embed)
+            feats.append(x)
+
+        idx = 0
+        for layer in self.ups:
+            info = feats.pop()
+            <a id="change">if idx &gt;= self.skip_start</a><a id="change">:
+                </a>x<a id="change"> = </a>layer(x+info, noise_embed)
+            else:
+                x<a id="change"> = </a>layer(x, noise_embed)
+            idx += 1
+        return self.final_conv(x)
+</code></pre>

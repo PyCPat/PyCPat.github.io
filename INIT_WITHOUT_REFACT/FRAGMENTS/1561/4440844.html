@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, graph: dgl.DGLGraph):
+        graph.apply_nodes(self.input_node_func)
+
+        <a id="change">for </a>mp_layer in self.mp_layers<a id="change">:
+            </a>mp_layer(graph)
+
+    def input_node_func(self, nodes):
+        return {&quotfeat&quot: F.relu(self.node_input_net(nodes.data[&quotfeat&quot]))}</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.edge_feat:
+            e = self.embedding_e(e)
+
+        <a id="change">for </a>i, <a id="change">mp_layer</a> in <a id="change">enumerate(</a>self.layers<a id="change">):
+            </a>h_t = mp_layer(g, h, e, snorm_n)
+            <a id="change">if </a>self.gru_enable and <a id="change">i != len(self.layers) - 1</a><a id="change">:
+                </a>h_t = self.gru(h, h_t)
+            h = h_t
+
+        g.ndata[&quotfeat&quot] = h</code></pre>

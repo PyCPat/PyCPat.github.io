@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :1766
+</h3><img src='6886937.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        h_reshape = h.contiguous().view(batch_size * time_step, self.hidden_dim)
+        if self.dropout &gt; 0.0:
+            h_reshape = self.nn_dropout(h_reshape)
+        output<a id="change"> = </a>self.nn_output(h_reshape)
+        output = self.sigmoid(output)
+        output = <a id="change">output.contiguous().view(</a>batch_size, time_step, self.output_dim<a id="change">)</a>
+        <a id="change">return </a>output, inputse_att
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 output = output.contiguous().view(batch_size, time_step, self.output_dim)
+        &#47&#47 output = h_reshape.contiguous().view(batch_size, time_step, self.hidden_dim)
+        &#47&#47 return output, inputse_att
+        <a id="change">return </a>output
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/ce1f225e785f536b29b088cf35fc7aeae9ec9d0e#diff-6c66b9ba931b91cdf936944f9029d26d64aeade5a9fff9fb2ed483e02ee463f8L184' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6886937</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: ce1f225e785f536b29b088cf35fc7aeae9ec9d0e</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/adacare.py</div><div id='m_class'> M Class Name: AdaCare</div><div id='n_method'> N Class Name: AdaCare</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/adacare.py</div><div id='n_file'> N File Name: app/models/backbones/adacare.py</div><div id='m_start'> M Start Line: 184</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 185</div><div id='n_end'> N End Line: 223</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            B = x.data.size(0)
+            C = x.data.size(1)
+            H = x.data.size(2)
+            W<a id="change"> = </a>x.data.size(3)
+
+            <a id="change">return x.view(B, C, H, 1, W, 1).expand(B, C, H, tH // H, W, tW // W).contiguous().view(</a>B, C, tH, tW<a id="change">)</a>
+        else:
+            return F.interpolate(x, size=(tH, tW), mode=&quotnearest&quot)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47H = x.data.size(2)
+            &#47&#47W = x.data.size(3)
+
+            <a id="change">return </a>x.view(x.size(0), x.size(1), x.size(2), 1, x.size(3), 1).\
+                    expand(x.size(0), x.size(1), x.size(2), target_size[2] // x.size(2), x.size(3), target_size[3] // x.size(3)).\
+                    contiguous().view(x.size(0), x.size(1), target_size[2], target_size[3])
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tianxiaomo/pytorch-yolov4/commit/1ff5a1085ce0c1b35c2ea45b707166ac404e0b66#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6886923</div><div id='project'> Project Name: tianxiaomo/pytorch-yolov4</div><div id='commit'> Commit Name: 1ff5a1085ce0c1b35c2ea45b707166ac404e0b66</div><div id='time'> Time: 2020-08-11</div><div id='author'> Author: ersheng@nvidia.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: Upsample</div><div id='n_method'> N Class Name: Upsample</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 25</div><div id='n_end'> N End Line: 39</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        A = x[:, ::2, :, :]
+        B = x[:, 1::2, :, :]
+
+        A<a id="change"> = </a>A.view(N, 1, ord_num * H * W)
+        B = B.view(N, 1, ord_num * H * W)
+        concat_feats = <a id="change">torch.cat((A, B), dim=1).contiguous()</a>
+
+        if self.training:
+            ord_prob = F.log_softmax(concat_feats, dim=1)
+            <a id="change">return ord_prob.view(</a>-1, ord_num, H, W<a id="change">)</a>
+
+        ord_prob = F.softmax(C, dim=1)[:, 1, ::]
+        ord_prob = ord_prob.view(-1, ord_num, H, W)
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1).view(-1, 1, H, W)</code></pre><h3>After Change</h3><pre><code class='java'>
+            ord_prob = x.clone()
+            ord_prob[:, 0::2, :, :] = prob[:, 0, :, :, :]
+            ord_prob[:, 1::2, :, :] = prob[:, 1, :, :, :]
+            <a id="change">return </a>ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = torch.sum((ord_prob &gt; 0.5), dim=1).reshape((N, 1, H, W))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/07fe1714fc568b25bd80debe8dd3ab800ff576a8#diff-4113dbf82d3c85db8d660e5485c3df3048dd9c7cefb1a9060e9e80ba9a7c2cc5L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6886939</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: 07fe1714fc568b25bd80debe8dd3ab800ff576a8</div><div id='time'> Time: 2020-05-02</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_class'> M Class Name: OrdinalRegressionLayer</div><div id='n_method'> N Class Name: OrdinalRegressionLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='n_file'> N File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        rnn_outputs = rnn_outputs.contiguous().view(-1, rnn_outputs.size(-1))
+        if self.dropout &gt; 0.0:
+            rnn_outputs = self.nn_dropout(rnn_outputs)
+        output<a id="change"> = </a>self.nn_output(rnn_outputs)
+        output = <a id="change">output.contiguous().view(</a>batch_size, time_step, self.output_dim<a id="change">)</a>
+        output = torch.sigmoid(output)
+
+        &#47&#47 return output, torch.stack(distance)
+        <a id="change">return </a>output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 output = torch.sigmoid(output)
+
+        &#47&#47 return output, torch.stack(distance)
+        <a id="change">return </a>rnn_outputs
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/a9c2f882fd593647881eea41e246b60003a1bae9#diff-52f9e873d3cecf1138414706006c4f31e609a4be10bbab3db83aab318221e98fL104' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6886942</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: a9c2f882fd593647881eea41e246b60003a1bae9</div><div id='time'> Time: 2022-06-24</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/stagenet.py</div><div id='m_class'> M Class Name: StageNet</div><div id='n_method'> N Class Name: StageNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/stagenet.py</div><div id='n_file'> N File Name: app/models/backbones/stagenet.py</div><div id='m_start'> M Start Line: 154</div><div id='m_end'> M End Line: 162</div><div id='n_start'> N Start Line: 154</div><div id='n_end'> N End Line: 163</div><BR>

@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :2727
+</h3><img src='9039561.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        tokens = self.to_tokens(video)
+
+        for dpe, ff, conv in self.stages:
+            tokens<a id="change"> = </a>dpe(tokens)<a id="change"> + </a>tokens
+            tokens<a id="change"> = </a>ff(tokens) + tokens
+
+            <a id="change">if </a><a id="change">exists(</a>conv<a id="change">):
+                </a>tokens<a id="change"> = </a>conv(tokens)
+
+        return self.to_logits(tokens)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/uniformer-pytorch/commit/5330624e7b20753dd8f595fd8a29b63dba3ff657#diff-ca942e1233c24d0a3ecbd27ee9c3a6b339282037af82aa448ed1b5e791db26f3L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9039561</div><div id='project'> Project Name: lucidrains/uniformer-pytorch</div><div id='commit'> Commit Name: 5330624e7b20753dd8f595fd8a29b63dba3ff657</div><div id='time'> Time: 2021-11-15</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: uniformer_pytorch/uniformer_pytorch.py</div><div id='m_class'> M Class Name: Uniformer</div><div id='n_method'> N Class Name: Uniformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: uniformer_pytorch/uniformer_pytorch.py</div><div id='n_file'> N File Name: uniformer_pytorch/uniformer_pytorch.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 11</div><div id='n_start'> N Start Line: 76</div><div id='n_end'> N End Line: 85</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for freq_attn, mhes_attn, attn_post_ln, ff_block, level in self.encoder_layers:
+            latent_seasonal = freq_attn(z)
+            z<a id="change"> = </a>z<a id="change"> - </a>latent_seasonal
+
+            latent_growth = mhes_attn(z)
+            z = z -latent_growth
+
+            z<a id="change"> = </a>attn_post_ln(z)
+
+            <a id="change">if </a><a id="change">exists(</a>ff_block<a id="change">):
+                </a>z<a id="change"> = </a>ff_block(z)
+
+            x = level(x, latent_seasonal, latent_growth)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/etsformer-pytorch/commit/45c37c88fd1418716daf54cd865109160492e830#diff-b4b8264f25f5dfdaf86bc5e5eff19dd88e54974eb3ebdbb09741da0265b56130L190' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9039593</div><div id='project'> Project Name: lucidrains/etsformer-pytorch</div><div id='commit'> Commit Name: 45c37c88fd1418716daf54cd865109160492e830</div><div id='time'> Time: 2022-03-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_class'> M Class Name: ETSFormer</div><div id='n_method'> N Class Name: ETSFormer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='n_file'> N File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_start'> M Start Line: 191</div><div id='m_end'> M End Line: 191</div><div id='n_start'> N Start Line: 267</div><div id='n_end'> N End Line: 284</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        out =  self.to_out(out)
+        <a id="change">return </a>out
+
+&#47&#47 microsoft sparse attention CUDA kernel
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, n, _, h, img_size, axis, seq_len, device = *x.shape, self.heads, self.image_size, self.axis, self.seq_len, x.device
+
+        if n &lt; seq_len:
+            padding<a id="change"> = </a>seq_len<a id="change"> - </a>n
+            x<a id="change"> = </a>F.pad(x, (0, 0, 0, padding), value = 0)
+
+            <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+                </a>mask<a id="change"> = </a>F.pad(x, (0, padding), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL185' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9039545</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 192</div><div id='m_end'> M End Line: 248</div><div id='n_start'> N Start Line: 195</div><div id='n_end'> N End Line: 266</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        out =  self.to_out(out)
+        <a id="change">return </a>out
+
+&#47&#47 sparse axial causal attention
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, n, _, h, img_size, kernel_size, dilation, seq_len, device = *x.shape, self.heads, self.image_size, self.kernel_size, self.dilation, self.seq_len, x.device
+
+        if n &lt; seq_len:
+            padding<a id="change"> = </a>seq_len<a id="change"> - </a>n
+            x<a id="change"> = </a>F.pad(x, (0, 0, 0, padding), value = 0)
+            <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+                </a>mask<a id="change"> = </a>F.pad(x, (0, padding), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9039543</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 171</div><BR>

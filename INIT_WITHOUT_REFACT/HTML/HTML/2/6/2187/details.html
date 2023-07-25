@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :2187
+</h3><img src='7695973.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x<a id="change"> = </a><a id="change">x.reshape(</a>batch_size, <a id="change">1</a>, channels<a id="change"> * </a>repetitions, 1<a id="change">)</a>
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+
+        &#47&#47 Remove repetition dimension
+        x<a id="change"> = </a>x.squeeze(3)
+
+        &#47&#47 Remove in_features dimension
+        x = x.squeeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = x.squeeze(1).squeeze(1)
+
+        &#47&#47 Final shape check
+        <a id="change">assert </a>x.shape == (batch_size, self.config.num_classes)
+
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/6c0a0ca7de9dfbed9f4b0eebd0e015cf76002c2b#diff-b07179cedca4d239e2586e9cb6fff9e541bc16eec55c28d6d2537cfebff90289L131' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7695973</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: 6c0a0ca7de9dfbed9f4b0eebd0e015cf76002c2b</div><div id='time'> Time: 2022-01-05</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: simple_einet/einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_einet/einet.py</div><div id='n_file'> N File Name: simple_einet/einet.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 148</div><div id='n_start'> N Start Line: 145</div><div id='n_end'> N End Line: 157</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert channels == self.config.C
+
+        &#47&#47 Treat repetitions as additional channels at this point
+        x<a id="change"> = </a><a id="change">x.reshape(</a>batch_size, <a id="change">1</a>, channels<a id="change"> * </a>repetitions, 1<a id="change">)</a>
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)
+
+        &#47&#47 Remove repetition dimension
+        x<a id="change"> = </a>x.squeeze(3)
+
+        &#47&#47 Remove in_features dimension
+        x = x.squeeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        assert features == 1  &#47&#47 number of features should be 1 at this point
+        <a id="change">assert </a>channels == self.config.num_classes
+
+        &#47&#47 Apply C sum node outputs
+        x = self.root(x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/e657fc668bd0f87f5e622a8b2549cd9e8ade437a#diff-b07179cedca4d239e2586e9cb6fff9e541bc16eec55c28d6d2537cfebff90289L115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7695975</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: e657fc668bd0f87f5e622a8b2549cd9e8ade437a</div><div id='time'> Time: 2022-01-11</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: simple_einet/einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: simple_einet/einet.py</div><div id='n_file'> N File Name: simple_einet/einet.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 123</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs<a id="change"> = </a><a id="change">inputs.reshape(</a>B, inputs.size(1)<a id="change"> // </a>self.r, <a id="change">-1</a><a id="change">)</a>
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check
+        <a id="change">assert </a>greedy or mel_outputs.size(1) == T_decoder
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7695974</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs<a id="change"> = </a><a id="change">inputs.reshape(</a>B, inputs.size(1)<a id="change"> // </a>self.r, <a id="change">-1</a><a id="change">)</a>
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check
+        <a id="change">assert </a>greedy or mel_outputs.size(1) == T_decoder
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7695982</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

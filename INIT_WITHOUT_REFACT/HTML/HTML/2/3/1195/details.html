@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1195
+</h3><img src='3654717.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            rel_dist = fourier_encode_dist(rel_dist, num_encodings = fourier_features)
+            rel_dist = rearrange(rel_dist, &quotb i j () d -&gt; b i j d&quot)
+
+        feats_i = <a id="change">repeat(</a>feats, <a id="change">&quotb i d -&gt; b i n d&quot</a><a id="change">, n = n)</a>
+        feats_j = repeat(feats, &quotb j d -&gt; b n j d&quot, n = n)
+        edge_input = torch.cat((feats_i, feats_j, rel_dist), dim = -1)
+
+        if exists(edges):</code></pre><h3>After Change</h3><pre><code class='java'>
+        i = j = n
+
+        if use_nearest:
+            nbhd_indices = <a id="change">rel_dist[..., 0]</a>.topk(num_nearest, dim = -1, largest = False).indices
+            rel_coors = batched_index_select(rel_coors, nbhd_indices, dim = 2)
+            rel_dist = batched_index_select(rel_dist, nbhd_indices, dim = 2)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/egnn-pytorch/commit/f9dd0bb101e885b6a912e8a400b9cc8a95c57495#diff-bc5f0b587e39386590599ccefaeb0776a2edb29856099faa2ece667dd370ec4cL87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654717</div><div id='project'> Project Name: lucidrains/egnn-pytorch</div><div id='commit'> Commit Name: f9dd0bb101e885b6a912e8a400b9cc8a95c57495</div><div id='time'> Time: 2021-03-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_class'> M Class Name: EGNN</div><div id='n_method'> N Class Name: EGNN</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: egnn_pytorch/egnn_pytorch.py</div><div id='n_file'> N File Name: egnn_pytorch/egnn_pytorch.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 146</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        seq = seq * scales * pi
+
+        x_sinu = repeat(seq, &quoti d -&gt; i j d&quot, j = n)
+        y_sinu = <a id="change">repeat(</a>seq, <a id="change">&quotj d -&gt; i j d&quot</a><a id="change">, i = n)</a>
+
+        sin = torch.cat((x_sinu.sin(), y_sinu.sin()), dim = -1)
+        cos = torch.cat((x_sinu.cos(), y_sinu.cos()), dim = -1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        scales = self.scales[(*((None,) * (len(seq_x.shape) - 1)), Ellipsis)]
+        scales = scales.to(x)
+
+        scales = <a id="change">self.scales[(*((None,) * (len(seq_y.shape) - 1)), Ellipsis)]</a>
+        scales = scales.to(x)
+
+        seq_x = seq_x * scales * pi
+        seq_y = seq_y * scales * pi</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/uformer-pytorch/commit/a51da45df6271fc5fbb1dda68ae5605be25a8f70#diff-efdca9d0ec49f156ba27cc7f0a99637e60a1c05ecbf8b014d10510f5e6c511d8L44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654716</div><div id='project'> Project Name: lucidrains/uformer-pytorch</div><div id='commit'> Commit Name: a51da45df6271fc5fbb1dda68ae5605be25a8f70</div><div id='time'> Time: 2021-06-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: uformer_pytorch/uformer_pytorch.py</div><div id='m_class'> M Class Name: AxialRotaryEmbedding</div><div id='n_method'> N Class Name: AxialRotaryEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: uformer_pytorch/uformer_pytorch.py</div><div id='n_file'> N File Name: uformer_pytorch/uformer_pytorch.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 66</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = x + pos_emb
+
+        if self.num_streams &gt; 1:
+            x = <a id="change">repeat(</a>x, <a id="change">&quotb n d -&gt; b n (s d)&quot</a><a id="change">, s = self.num_streams)</a>
+
+        x = rearrange(x, &quotb n d -&gt; b d n&quot)
+
+        for attn, ff in self.layers:</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        b, n, device = *x.shape, x.device
+        x = self.token_emb(x)
+        dim = <a id="change">x.shape[-1]</a>
+
+        pos_emb = self.pos_emb(torch.arange(n, device = device))
+        pos_emb = rearrange(pos_emb, &quotn d -&gt; () n d&quot)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/multistream-transformers/commit/90cb1c52cfa96cfa3a2de0e94cd9f5c346a8e144#diff-e81141685efabebecc465bdbe0fb5f026c1b47e7c282daeaaf1d717b13d5d981L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3654715</div><div id='project'> Project Name: lucidrains/multistream-transformers</div><div id='commit'> Commit Name: 90cb1c52cfa96cfa3a2de0e94cd9f5c346a8e144</div><div id='time'> Time: 2021-07-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: multistream_transformers/multistream_transformers.py</div><div id='m_class'> M Class Name: MultistreamTransformer</div><div id='n_method'> N Class Name: MultistreamTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multistream_transformers/multistream_transformers.py</div><div id='n_file'> N File Name: multistream_transformers/multistream_transformers.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 177</div><div id='n_start'> N Start Line: 176</div><div id='n_end'> N End Line: 209</div><BR>

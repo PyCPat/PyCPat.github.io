@@ -1,0 +1,73 @@
+<html><h3>Pattern ID :764
+</h3><img src='2490724.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        <a id="change">q</a><a id="change">, k = </a><a id="change">map(</a>l2norm, (<a id="change">q</a><a id="change">, k</a>)<a id="change">)</a>
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, <a id="change">q</a>, <a id="change">k</a><a id="change">)</a> * self.scale
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a><a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/23fd887a5fcd48468bb79c744acb1e8bb8b0dc3b#diff-1ef0846017d5c27bd277b66e5afcab8798667afd39675e6f9382fc7e87a1fe28L251' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2490724</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 23fd887a5fcd48468bb79c744acb1e8bb8b0dc3b</div><div id='time'> Time: 2022-10-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 255</div><div id='n_start'> N Start Line: 251</div><div id='n_end'> N End Line: 253</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        q, k, v = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) ... -&gt; b h (...) c&quot, h = self.heads), (q, k, v))
+
+        q<a id="change">, k = </a><a id="change">map(</a>l2norm, (q<a id="change">, k</a>)<a id="change">)</a>
+
+        sim = <a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q, k<a id="change">)</a> * self.scale
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) ... -&gt; b h (...) c&quot, h = self.heads), (q, k, v))
+
+        q = q * self.scale
+        sim<a id="change"> = </a><a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-unet/commit/78afee2a64d15ee9e818793c32f54d3d59a40c88#diff-6e9e7a6d8d7a8c116b8bdae64f3e845f516adfec59d0379fc01849d294784966L200' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2490722</div><div id='project'> Project Name: lucidrains/x-unet</div><div id='commit'> Commit Name: 78afee2a64d15ee9e818793c32f54d3d59a40c88</div><div id='time'> Time: 2022-10-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_unet/x_unet.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_unet/x_unet.py</div><div id='n_file'> N File Name: x_unet/x_unet.py</div><div id='m_start'> M Start Line: 210</div><div id='m_end'> M End Line: 212</div><div id='n_start'> N Start Line: 206</div><div id='n_end'> N End Line: 207</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q<a id="change">, k = </a><a id="change">map(</a>l2norm, (q<a id="change">, k</a>)<a id="change">)</a>
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a> * self.scale
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a><a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)
+        return self.to_out(out)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/bit-diffusion/commit/f431bddab71a2c35a7aedf7073904d051aefc9f2#diff-fa1704ed33520f9e00eadcb67b10c809ebe7cdd9d08435ae908b1c8126a28435L207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2490720</div><div id='project'> Project Name: lucidrains/bit-diffusion</div><div id='commit'> Commit Name: f431bddab71a2c35a7aedf7073904d051aefc9f2</div><div id='time'> Time: 2022-10-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: bit_diffusion/bit_diffusion.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: bit_diffusion/bit_diffusion.py</div><div id='n_file'> N File Name: bit_diffusion/bit_diffusion.py</div><div id='m_start'> M Start Line: 212</div><div id='m_end'> M End Line: 214</div><div id='n_start'> N Start Line: 209</div><div id='n_end'> N End Line: 211</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.to_qkv(x).chunk(3, dim = 1)
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+
+        q<a id="change">, k = </a><a id="change">map(</a>l2norm, (q<a id="change">, k</a>)<a id="change">)</a>
+
+        sim = <a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a> * self.scale
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        q = q * self.scale
+
+        sim<a id="change"> = </a><a id="change">einsum(&quotb h d i, b h d j -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+
+        out = rearrange(out, &quotb h (x y) d -&gt; b (h d) x y&quot, x = h, y = w)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/23fd887a5fcd48468bb79c744acb1e8bb8b0dc3b#diff-1ef0846017d5c27bd277b66e5afcab8798667afd39675e6f9382fc7e87a1fe28L248' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2490719</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 23fd887a5fcd48468bb79c744acb1e8bb8b0dc3b</div><div id='time'> Time: 2022-10-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 255</div><div id='n_start'> N Start Line: 251</div><div id='n_end'> N End Line: 253</div><BR>

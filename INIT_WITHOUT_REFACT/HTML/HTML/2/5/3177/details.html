@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :3177
+</h3><img src='10215966.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            escape_NaN = escape_NaN.to(device)
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+            max_wi = torch.sqrt(
+                torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">) + </a>escape_NaN, dim=[1, 2, 3], keepdim=True))
+
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &quot&quot&quot
+            &#47&#47 conv for compare
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+            max_wi = torch.sqrt(torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">)</a>, dim=[1, 2, 3], keepdim=True)).clamp_min(1e-4)
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]
+            xi = same_padding(xi, [self.ksize, self.ksize], [1, 1], [1, 1])  &#47&#47 xi: 1*c*H*W</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/nipponjo/deepfillv2-pytorch/commit/b56ad8569aeea17343cedc9c7331223e134c228f#diff-e9366d4b0e74c6f58afc0e8ec64f4603739e8d75e0c63da5e728893a16a8c92dL309' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215966</div><div id='project'> Project Name: nipponjo/deepfillv2-pytorch</div><div id='commit'> Commit Name: b56ad8569aeea17343cedc9c7331223e134c228f</div><div id='time'> Time: 2021-12-02</div><div id='author'> Author: 28433296+nipponjo@users.noreply.github.com</div><div id='file'> File Name: model/networks_tf.py</div><div id='m_class'> M Class Name: ContextualAttention</div><div id='n_method'> N Class Name: ContextualAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/networks_tf.py</div><div id='n_file'> N File Name: model/networks_tf.py</div><div id='m_start'> M Start Line: 309</div><div id='m_end'> M End Line: 467</div><div id='n_start'> N Start Line: 338</div><div id='n_end'> N End Line: 464</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+
+        d = torch<a id="change">.sum(z_flattened.pow(2), dim=1, keepdim=True) + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - </a>2 * \
+            torch.einsum(&quotbd,dn-&gt;bn&quot, z_flattened, self.embedding.weight.permute(1,0)) &#47&#47 &quotn d -&gt; d n&quot
+
+        encoding_indices = torch.argmin(d, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        z = rearrange(z, &quotb c h w -&gt; b h w c&quot).contiguous()
+        z_flattened = z.reshape(-1, self.codebook_dim)
+        d = (
+            <a id="change">z_flattened.pow(2</a><a id="change">)</a>.sum(1, keepdim=True)
+            - 2 * z_flattened @ self.embedding.weight
+            + self.embedding.weight.pow(2).sum(0, keepdim=True)
+        )</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/e387b61c8c640b56c7cbd241d8ec60ab1f022611#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215971</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: e387b61c8c640b56c7cbd241d8ec60ab1f022611</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 184</div><div id='n_end'> N End Line: 215</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        z = z.permute(0, 2, 3, 1).contiguous()
+        z_flattened = z.reshape(-1, self.codebook_dim)
+        d = (
+            <a id="change">z_flattened.pow(2</a><a id="change">)</a>.sum(1, keepdim=True)
+            - 2 * z_flattened @ self.embedding.weight
+            + self.embedding.weight.pow(2).sum(0, keepdim=True)
+        )
+        _, encoding_indices = <a id="change">(-d)</a>.max(1)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z_flattened.dtype)
+        encoding_indices = encoding_indices.view(*z.shape[:-1])
+        z_q = self.embedding(encoding_indices)</code></pre><h3>After Change</h3><pre><code class='java'>
+        z_flattened = z.view(-1, self.codebook_dim)
+        &#47&#47 distances from z to embeddings e_j (z - e)^2 = z^2 + e^2 - 2 e * z
+
+        d = torch.sum(<a id="change">z_flattened.pow(2</a><a id="change">)</a>, dim=1, keepdim=True) + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - 2 * \
+            torch.einsum(&quotbd,dn-&gt;bn&quot, z_flattened, self.embedding.weight.permute(1,0)) &#47&#47 &quotn d -&gt; d n&quot
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215975</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            wi = wi[0]  &#47&#47 [L, C, k, k]
+          
+            &#47&#47max_wi = torch.max(torch.sqrt(torch.sum(wi**2, dim=[1, 2, 3], keepdim=True)), escape_NaN)
+            max_wi = torch.sqrt(torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">) + </a>escape_NaN, dim=[1, 2, 3], keepdim=True))
+
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]</code></pre><h3>After Change</h3><pre><code class='java'>
+            &quot&quot&quot
+            &#47&#47 conv for compare
+            wi = wi[0]  &#47&#47 [L, C, k, k]   
+            max_wi = torch.sqrt(torch.sum(<a id="change">torch.pow(</a>wi, <a id="change">2</a><a id="change">)</a>, dim=[1, 2, 3], keepdim=True)).clamp_min(1e-4)
+            wi_normed = wi / max_wi
+            &#47&#47 xi shape: [1, C, H, W], yi shape: [1, L, H, W]
+            yi = F.conv2d(xi, wi_normed, stride=1, padding=(self.ksize-1)//2)   &#47&#47 [1, L, H, W]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nipponjo/deepfillv2-pytorch/commit/b56ad8569aeea17343cedc9c7331223e134c228f#diff-3eaaced9361a826c2aad9331cd5df2488e9a4b15f6c936aa46574b67f6649874L326' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215972</div><div id='project'> Project Name: nipponjo/deepfillv2-pytorch</div><div id='commit'> Commit Name: b56ad8569aeea17343cedc9c7331223e134c228f</div><div id='time'> Time: 2021-12-02</div><div id='author'> Author: 28433296+nipponjo@users.noreply.github.com</div><div id='file'> File Name: model/networks.py</div><div id='m_class'> M Class Name: ContextualAttention</div><div id='n_method'> N Class Name: ContextualAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/networks.py</div><div id='n_file'> N File Name: model/networks.py</div><div id='m_start'> M Start Line: 333</div><div id='m_end'> M End Line: 482</div><div id='n_start'> N Start Line: 352</div><div id='n_end'> N End Line: 474</div><BR>

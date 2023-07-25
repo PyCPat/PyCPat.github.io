@@ -1,0 +1,17 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, points, features):
+        features = features.permute(0, 2, 1)
+        proposals = self.mlp(features)
+        _, indices = torch.topk(<a id="change">proposals[..., -1:]</a>, k=self.cfg.PROPOSAL.TOPK, dim=1)
+        indices = indices.expand(-1, -1, proposals.shape[-1])
+        proposals = proposals.gather(1, indices)
+        return <a id="change">proposals[..., :-1]</a>, proposals[..., -1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        proposals = self.mlp(features)
+        boxes, scores = self.reorganize_proposals(proposals)
+        scores = F.softmax(scores, dim=-1)
+        <a id="change">return </a>boxes<a id="change">, scores</a>
+</code></pre>

@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :2083
+</h3><img src='7517955.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            p.requires_grad = False
+
+    def forward(self, x):
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>return self.sobel(x)
+
+
+class Laplacian(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.sobel(x)
+        if self.use_threshold:
+            x_thr<a id="change"> = </a>torch.quantile(
+                x.view(x.size(0), 1, -1), 0.80, dim=2).view(x.size(0), 1, 1, 1)
+            <a id="change">x[x &lt; x_thr] = </a>0.
+        
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/westlake-ai/openmixup/commit/1969d56d997a214a2d5f909c64998f458d2009b1#diff-df527fce09d813b854a4316fe5eebb772b7fef28524ff69868b8bbbc9fb3110aL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7517955</div><div id='project'> Project Name: westlake-ai/openmixup</div><div id='commit'> Commit Name: 1969d56d997a214a2d5f909c64998f458d2009b1</div><div id='time'> Time: 2022-04-25</div><div id='author'> Author: 1070535169@qq.com</div><div id='file'> File Name: openmixup/models/utils/sobel.py</div><div id='m_class'> M Class Name: Sobel</div><div id='n_method'> N Class Name: Sobel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openmixup/models/utils/sobel.py</div><div id='n_file'> N File Name: openmixup/models/utils/sobel.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            p.requires_grad = False
+
+    def forward(self, x):
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>return self.laplacian(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @torch.no_grad()
+    def forward(self, x):
+        <a id="change">x</a> = self.laplacian(x)
+        if self.use_threshold:
+            x_thr<a id="change"> = </a>torch.quantile(
+                x.view(x.size(0), 1, -1), 0.80, dim=2).view(x.size(0), 1, 1, 1)
+            <a id="change">x[x &lt; x_thr] = </a>0.
+        
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/westlake-ai/openmixup/commit/1969d56d997a214a2d5f909c64998f458d2009b1#diff-df527fce09d813b854a4316fe5eebb772b7fef28524ff69868b8bbbc9fb3110aL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7517957</div><div id='project'> Project Name: westlake-ai/openmixup</div><div id='commit'> Commit Name: 1969d56d997a214a2d5f909c64998f458d2009b1</div><div id='time'> Time: 2022-04-25</div><div id='author'> Author: 1070535169@qq.com</div><div id='file'> File Name: openmixup/models/utils/sobel.py</div><div id='m_class'> M Class Name: Laplacian</div><div id='n_method'> N Class Name: Laplacian</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openmixup/models/utils/sobel.py</div><div id='n_file'> N File Name: openmixup/models/utils/sobel.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        cos_theta = torch.mm(embbedings, kernel_norm).clamp(
+            -1, 1
+        )  &#47&#47 for numerical stability
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>origin_cos = cos_theta.clone()
+        target_logit = cos_theta[torch.arange(0, embbedings.size(0)), label].view(-1, 1)
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        if is_half:
+            cos_theta_m = cos_theta_m.half()
+        index<a id="change"> = </a>torch.zeros_like(cos_theta)
+        index.scatter_(1, label.data.view(-1, 1), 1)
+        index = index.byte().bool()
+        <a id="change">output</a> = cos_theta * 1.0
+        <a id="change">output[index] = </a>cos_theta_m[index]
+        output *= self.s
+        return output
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/cavalleria/cavaface/commit/98a21048f5dce435a6639a288dafc4c6be61be05#diff-e54d97a982dbe26c94a83bf3dd7e2d279a6049044331caf1140127bc9afbb225L80' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7517960</div><div id='project'> Project Name: cavalleria/cavaface</div><div id='commit'> Commit Name: 98a21048f5dce435a6639a288dafc4c6be61be05</div><div id='time'> Time: 2021-08-25</div><div id='author'> Author: 605370459@qq.com</div><div id='file'> File Name: head/metrics.py</div><div id='m_class'> M Class Name: ArcFace</div><div id='n_method'> N Class Name: ArcFace</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: head/metrics.py</div><div id='n_file'> N File Name: head/metrics.py</div><div id='m_start'> M Start Line: 81</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>

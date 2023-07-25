@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :2286
+</h3><img src='7947257.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            quantizeds.append(deTransformed)
+            codes.append(sample.argmax(-1).permute(1, 0).reshape(n, h, w))
+            logits.append(logit.reshape(n, h, w, k))
+        return quantizeds<a id="change">, codes, logits</a>
+
+
+class VQuantizer(nn.Module):
+    def __init__(self, k: List[int], cin: int, rate: float = 0.1):</code></pre><h3>After Change</h3><pre><code class='java'>
+            soft = (logit / temperature).softmax(-1)
+            if hard:
+                hard = logit.argmax(-1)
+                hard<a id="change"> = </a><a id="change">F.one_hot(</a>hard, k<a id="change">)</a>
+                sample = (hard<a id="change"> - </a>soft).detach()<a id="change"> + </a>soft
+            else:
+                sample = soft
+            &#47&#47 sample = F.gumbel_softmax(logit, temperature, hard)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/96e69f8763c2cf2c9cf0695159db17ddf4e0c857#diff-6b290d83a36e7951ea6e9dbd33da6b8e0b6f40c45926540ce74b74ea4ab48a24L280' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7947257</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 96e69f8763c2cf2c9cf0695159db17ddf4e0c857</div><div id='time'> Time: 2021-02-15</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/models/quantizer.py</div><div id='m_class'> M Class Name: TransformerQuantizer</div><div id='n_method'> N Class Name: TransformerQuantizer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/models/quantizer.py</div><div id='n_file'> N File Name: src/mcqc/models/quantizer.py</div><div id='m_start'> M Start Line: 280</div><div id='m_end'> M End Line: 335</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 339</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+
+        return z_q, loss, (None<a id="change">, None, encoding_indices</a>)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = self.kl_weight * torch.sum(qy * torch.log(qy * self.num_tokens + 1e-10), dim=1).mean()
+
+        encoding_indices = soft_one_hot.argmax(dim=1)
+        encodings = <a id="change">F.one_hot(</a>encoding_indices, self.num_tokens<a id="change">)</a>.type(z.dtype)
+        avg_probs<a id="change"> = </a>torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs<a id="change"> * </a>torch.log(avg_probs<a id="change"> + </a>1e-10)))
+
+        return z_q, loss, (perplexity, encodings, encoding_indices)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/39e8b24fa405a4320d7c683e7054ae18ef4563f4#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7947259</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 39e8b24fa405a4320d7c683e7054ae18ef4563f4</div><div id='time'> Time: 2021-07-28</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: GumbelQuantizer</div><div id='n_method'> N Class Name: GumbelQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            output &lt;torch.Tensor&gt;: (batch_size,) or ()
+        
+        batch_size<a id="change">, num_classes</a> = input.size()
+        scale, margin = self.scale, self.margin
+        eps = self.eps
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            cos_phi = torch.where(cos_th &gt; self.cos_pi_m, cos_th - margin, cos_phi) &#47&#47 (batch_size, num_classes)
+        
+        &#47&#47 For non-target class
+        mask<a id="change"> = </a><a id="change">F.one_hot(</a>target<a id="change">, num_classes=num_classes)</a> &#47&#47 (batch_size, num_classes)
+        input = scale * (mask * cos_phi + (1.0<a id="change"> - </a>mask)<a id="change"> * </a>cos_th)
+        loss = F.cross_entropy(input, target, reduction="none")
+
+        if batch_mean:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/a4bde6a5794ce4ec526ff846e07a4de4de24ab04#diff-3b1267acc6972219643a5bd026f7337eba5af922eb9445f208d8fc8b1a87fa1bL160' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7947248</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: a4bde6a5794ce4ec526ff846e07a4de4de24ab04</div><div id='time'> Time: 2022-02-10</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/criterion/metric_learn.py</div><div id='m_class'> M Class Name: AdditiveAngularMarginLoss</div><div id='n_method'> N Class Name: AdditiveAngularMarginLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/criterion/metric_learn.py</div><div id='n_file'> N File Name: src/criterion/metric_learn.py</div><div id='m_start'> M Start Line: 168</div><div id='m_end'> M End Line: 184</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 199</div><BR>

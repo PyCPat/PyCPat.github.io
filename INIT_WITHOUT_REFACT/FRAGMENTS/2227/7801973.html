@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.attention = TemporalSpatialAttention(hidden_channels, size, compressed_frames, num_layers=num_layers, num_heads=num_heads)
+
+    def forward(self, x):
+        x = <a id="change">x.permute(0</a>, <a id="change">2</a>, <a id="change">1</a>, 3, <a id="change">4</a><a id="change">)</a> &#47&#47 B x T x C x H x W -&gt; B x C x T x H x W
+        x = self.patch_emb(x)
+        x = x.view(*x.shape[:3], -1).permute(0, 2, 3, 1) &#47&#47 -&gt; B x T x (H x W) x C [I&quotll use this as a reference shape, so every function returns this shape]
+        x = self.attention(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        image, video = x[:, 0], x[:, 1:]
+        video = video.permute(0, 2, 1, 3, 4)  &#47&#47 B x T x C x H x W -&gt; B x C x T x H x W
+        image<a id="change"> = </a>self.image_patch_emb(image)
+        video = self.video_patch_emb(video)
+        video = <a id="change">torch.cat(</a><a id="change">[</a>image.unsqueeze(2), video<a id="change"></a>]<a id="change">, dim=2)</a>
+        video = video.view(*video.shape[:3], -1).permute(0, 2, 3, 1)  &#47&#47 -&gt; B x T x (H x W) x C [I&quotll use this as a reference shape, so every function returns this shape]
+        video = self.attention(video)
+        return video</code></pre>

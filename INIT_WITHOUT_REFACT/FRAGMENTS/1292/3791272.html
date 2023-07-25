@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            q = apply_rotary_pos_emb(rotary_pos_emb, q)
+            k = apply_rotary_pos_emb(rotary_pos_emb, k)
+
+        sim = <a id="change">einsum(&quotb h i d, b h j d -&gt; b h i j&quot</a>, q, k<a id="change">)</a>
+
+        i, j = sim.shape[-2:]
+
+        mask_value = -torch.finfo(sim.dtype).max
+
+        if exists(context_mask):
+            mask_len = context_mask.shape[-1]
+            context_mask = F.pad(context_mask, (0, max(j - mask_len, 0)), value = True)
+            context_mask = rearrange(context_mask, &quotb j -&gt; b 1 1 j&quot)
+            sim = sim.masked_fill(~context_mask, mask_value)
+
+        causal_mask = torch.ones((i, j), device = x.device, dtype = torch.bool).triu(j - i + 1)
+        sim = sim.masked_fill(causal_mask, mask_value)
+
+        attn = sim.softmax(dim = -1)
+        attn = self.dropout(attn)
+
+        out<a id="change"> = einsum(&quotb h i j, b h j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+
+        return self.to_out(out)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 take care of masking
+
+        i, j = q.shape[-2]<a id="change">, k.shape[-2]</a>
+        mask_value = -torch.finfo(q.dtype).max
+
+        if exists(context_mask):
+            mask_len = context_mask.shape[-1]</code></pre>

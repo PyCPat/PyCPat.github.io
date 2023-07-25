@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if memory is not None:
+            memory = memory.transpose(0, 1)
+        outputs = []
+        alignments = <a id="change">[]</a>
+        stop_tokens = []
+        t = 0
+        memory_input = initial_memory
+        while True:
+            if t &gt; 0:
+                if greedy:
+                    memory_input = outputs[-1]
+                else:
+                    memory_input = memory[t-1]
+            &#47&#47 Prenet
+            processed_memory = self.prenet(memory_input)
+            &#47&#47 Attention RNN
+            attention_rnn_hidden, current_context_vec, alignment = self.attention_rnn(
+                processed_memory, current_context_vec, attention_rnn_hidden, inputs)
+            &#47&#47 Concat RNN output and attention context vector
+            decoder_input = self.project_to_decoder_in(
+                torch.cat((attention_rnn_hidden, current_context_vec), -1))
+            &#47&#47 Pass through the decoder RNNs
+            for idx in range(len(self.decoder_rnns)):
+                decoder_rnn_hiddens[idx] = self.decoder_rnns[idx](
+                    decoder_input, decoder_rnn_hiddens[idx])
+                &#47&#47 Residual connectinon
+                decoder_input = decoder_rnn_hiddens[idx] + decoder_input
+            decoder_output = decoder_input
+            &#47&#47 predict mel vectors from decoder vectors
+            output = self.proj_to_mel(decoder_output)
+            stop_input = output
+            &#47&#47 predict stop token
+            stop_token, stopnet_rnn_hidden = self.stopnet(stop_input, stopnet_rnn_hidden)
+            outputs += [output]
+            alignments<a id="change"> += </a>[alignment]
+            stop_tokens += [stop_token]
+            t += 1
+            if (not greedy and self.training) or (greedy and memory is not None):</code></pre><h3>After Change</h3><pre><code class='java'>
+            for _ in range(len(self.decoder_rnns))]
+        current_context_vec = inputs.data.new(B, 256).zero_()
+        stopnet_rnn_hidden = inputs.data.new(B, self.r * self.memory_dim).zero_()
+        attention_vec<a id="change"> = </a>memory.data.new(B, T).zero_()
+        attention_vec_cum = memory.data.new(B, T).zero_()
+        &#47&#47 Time first (T_decoder, B, memory_dim)
+        if memory is not None:
+            memory = memory.transpose(0, 1)
+        outputs = []
+        attentions = []
+        stop_tokens = []
+        t = 0
+        memory_input = initial_memory
+        while True:
+            if t &gt; 0:
+                if greedy:
+                    memory_input = outputs[-1]
+                else:
+                    memory_input = memory[t-1]
+            &#47&#47 Prenet
+            processed_memory = self.prenet(memory_input)
+            &#47&#47 Attention RNN
+            attention_vec_cat<a id="change"> = </a>torch.cat((<a id="change">attention_vec.unsqueeze(1</a><a id="change">)</a>,
+                                               attention_vec_cum.unsqueeze(1)),
+                                           dim=1)
+            attention_rnn_hidden, current_context_vec, attention = self.attention_rnn(</code></pre>

@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :1642
+</h3><img src='6662832.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        action_type_logits = action_type_logits / self.temperature
+        print(&quotaction_type_logits after temperature:&quot, action_type_logits) if debug else None
+
+        if <a id="change">self.is_rl_training and random.random() &lt; 0.5</a>:
+            action_type_logits[:] = 0.
+
+        action_type_probs = self.softmax(action_type_logits)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.is_rl_training:
+            if random.random() &lt; 0.8:
+                if random.random() &lt; 0.8:
+                    <a id="change">action_type_logits[:, 0]</a> = 1e5
+                else:
+                    action_type_logits[:] = 0.
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruoze/mini-alphastar/commit/d2a79c6bfd6c81abbc17aeb76aee2b49398a5826#diff-f88def29134d6e8b4ee46cc35091bb18caa8810dcb4b3943016ee326121c093aL118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662832</div><div id='project'> Project Name: liuruoze/mini-alphastar</div><div id='commit'> Commit Name: d2a79c6bfd6c81abbc17aeb76aee2b49398a5826</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: liuruoze@163.com</div><div id='file'> File Name: alphastarmini/core/arch/action_type_head.py</div><div id='m_class'> M Class Name: ActionTypeHead</div><div id='n_method'> N Class Name: ActionTypeHead</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphastarmini/core/arch/action_type_head.py</div><div id='n_file'> N File Name: alphastarmini/core/arch/action_type_head.py</div><div id='m_start'> M Start Line: 121</div><div id='m_end'> M End Line: 124</div><div id='n_start'> N Start Line: 118</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        if <a id="change">mask is not None and mask.shape[1] == x.shape[1]</a>:
+            mask = mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.mask_prob &gt; 0.:
+            rand = torch.randn(inp.shape, device = x.device)
+            <a id="change">rand[:, 0]</a> = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask = ~torch.zeros_like(inp).scatter(1, indices, 1.).bool()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/595a4745d532c20b8ebd310256c342e946a4cef7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662831</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 595a4745d532c20b8ebd310256c342e946a4cef7</div><div id='time'> Time: 2022-11-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 107</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		batch_size = content_code.shape[0]
+
+		content_code = content_code.view((batch_size, -1, 4, 4))
+		if <a id="change">self.training and self.config[&quotcontent_std&quot] != 0</a>:
+			noise = torch.zeros_like(content_code)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		out = self.input(latent)
+		out = self.conv1(out, latent[:, 0])
+
+		skip = self.to_rgb1(out, <a id="change">latent[:, 1]</a>)
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], self.convs[1::2], self.to_rgbs):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/b0f943171d9586ee561baa9a794cfcd4fe07b753#diff-010afa63dbb1d2b023c3379ba1d1e40740dcca6b33d23a3ccf900dbc0b1d8053L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6662830</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: b0f943171d9586ee561baa9a794cfcd4fe07b753</div><div id='time'> Time: 2020-08-17</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/modules.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/modules.py</div><div id='n_file'> N File Name: network/modules.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 85</div><BR>

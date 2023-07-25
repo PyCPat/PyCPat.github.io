@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :1703
+</h3><img src='6743600.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (dec_h0, dec_c0) = self.Encoder(embed_enc_inputs, None)
+		hidden = enc_h.size(2)
+		dec_state = (dec_h0, dec_c0)
+		dec_i1 = <a id="change">torch.rand(</a>batch, 1, hidden<a id="change">)</a>.to(device)&#47&#47hidden not embed
+		for i in range(city_t):
+			dec_h, dec_state = self.LSTMprocess_block(dec_i1, dec_state)
+			dec_i1 = self.attending_mechanism(enc_h, dec_h)</code></pre><h3>After Change</h3><pre><code class='java'>
+		dec_input = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		for i in range(city_t):
+			_, (h, c) = self.Decoder(dec_input, (h, c))
+			query, ref = <a id="change">h.squeeze(0</a><a id="change">)</a>, enc_h
+			for i in range(self.n_glimpse):
+				query = self.glimpse(query, ref)
+		&quot&quot&quot	</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/baba7bab0eb239771948cc519681967a5498129b#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6743600</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: baba7bab0eb239771948cc519681967a5498129b</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 50</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		enc_h, (dec_h0, dec_c0) = self.Encoder(embed_enc_inputs, None)
+		dec_state = (dec_h0, dec_c0)
+		pred_tour_list, neg_log = [], 0
+		dec_i1 = <a id="change">torch.rand(</a>batch, 1, embed<a id="change">)</a>.to(device)
+		for i in range(city_t):
+			dec_h, dec_state = self.Decoder(dec_i1, dec_state)
+			logits, probs, dec_i1 = self.pointing_mechanism(</code></pre><h3>After Change</h3><pre><code class='java'>
+			logits, dec_input = self.pointer(query, ref, mask)	
+			log_p = torch.log_softmax(logits, dim = -1)
+			&#47&#47 next_node = torch.argmax(log_p, dim = 1).type(torch.long)
+			next_node = <a id="change">torch.multinomial(log_p.exp(), 1).type(torch.long).squeeze(1</a><a id="change">)</a>
+			
+			pi_list.append(next_node)
+			log_ps.append(log_p)
+			mask += torch.zeros(batch,city_t).to(device).scatter_(dim = 1, index = next_node.unsqueeze(1), value = 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/baba7bab0eb239771948cc519681967a5498129b#diff-5f6860d4cc739005e631b0261793559010f77d769cb44e39c012dc614036d9f6L27' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6743598</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: baba7bab0eb239771948cc519681967a5498129b</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: actor.py</div><div id='m_class'> M Class Name: PtrNet1</div><div id='n_method'> N Class Name: PtrNet1</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: actor.py</div><div id='n_file'> N File Name: actor.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 59</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 65</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.cfg = cfg
+
+    def forward(self, points, features):
+        proposals = Boxes3D(20 * <a id="change">torch.rand(</a>(25, 7)<a id="change">)</a>.cuda())
+        return proposals
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        features = features.permute(0, 2, 1)
+        proposals = Boxes3D(self.mlp(features))
+        _, indices = torch.topk(proposals.score, k=self.cfg.PROPOSAL.TOPK, dim=1)
+        indices = <a id="change">indices.squeeze(0).squeeze(-1</a><a id="change">)</a>
+        proposals = Boxes3D(proposals.tensor[:, indices])
+        return proposals
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jhultman/vision3d/commit/8439cb424b206f497ff582b81f58bd2cdd45dd0d#diff-8d1e6526befe69c3197c50ea2b7de32e379e056d6f746156b529edaa39ca0e74L16' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6743594</div><div id='project'> Project Name: jhultman/vision3d</div><div id='commit'> Commit Name: 8439cb424b206f497ff582b81f58bd2cdd45dd0d</div><div id='time'> Time: 2020-02-10</div><div id='author'> Author: 27909223+jhultman@users.noreply.github.com</div><div id='file'> File Name: pvrcnn/proposal.py</div><div id='m_class'> M Class Name: ProposalLayer</div><div id='n_method'> N Class Name: ProposalLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pvrcnn/proposal.py</div><div id='n_file'> N File Name: pvrcnn/proposal.py</div><div id='m_start'> M Start Line: 17</div><div id='m_end'> M End Line: 17</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 32</div><BR>

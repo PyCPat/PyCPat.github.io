@@ -1,0 +1,47 @@
+<html><h3>Pattern ID :1155
+</h3><img src='3535764.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, pred, target):
+        log_prob = F.log_softmax(pred, dim=-1)
+        dist = torch.empty_like(pred).fill_(self.smoothing / (<a id="change">pred.size(-1</a><a id="change">) - </a>1))
+        dist.scatter_(dim=-1, index=target[..., None], value=(1 - self.smoothing))
+        loss = F.kl_div(log_prob, dist)
+        return loss</code></pre><h3>After Change</h3><pre><code class='java'>
+        log_prob = [F.log_softmax(p, dim=-1) for p in chunked_pred]
+        loss = [self.smoothed_loss(p, t, m)[None]\
+            for p, t, m in zip(log_prob, chunked_target, chunked_mask)]
+        loss<a id="change"> = </a><a id="change">torch.cat(</a>loss<a id="change">, dim=0)</a>.sum()
+        return loss / mask.sum()
+
+    def smoothed_loss(self, log_prob: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) -&gt; torch.Tensor:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rick-mccoy/reformer-pytorch/commit/3411114d22e0bfcae2e106f5c82a3211da83f409#diff-fe652c109b5da8ce3b578ba9b2009d72fccfc98ec85a96850e18c5af2f882069L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3535764</div><div id='project'> Project Name: rick-mccoy/reformer-pytorch</div><div id='commit'> Commit Name: 3411114d22e0bfcae2e106f5c82a3211da83f409</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: rickmccoy3141@gmail.com</div><div id='file'> File Name: model/labelsmoothing.py</div><div id='m_class'> M Class Name: LabelSmoothing</div><div id='n_method'> N Class Name: LabelSmoothing</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/labelsmoothing.py</div><div id='n_file'> N File Name: model/labelsmoothing.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 16</div><div id='n_start'> N Start Line: 13</div><div id='n_end'> N End Line: 24</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs = inputs.reshape(B, <a id="change">inputs.size(1</a><a id="change">) // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder = inputs.size(1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                    break
+
+        &#47&#47 To tensor
+        mel_outputs<a id="change"> = </a><a id="change">torch.cat(</a>mel_outputs<a id="change">, dim=1)</a> &#47&#47 (B, T_decoder, mel_dim)
+        attn_scores = torch.cat(attn_scores, dim=1) &#47&#47 (B, T_decoder/r, T_encoder)
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3535762</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs = inputs.reshape(B, <a id="change">inputs.size(1</a><a id="change">) // </a>self.r, -1)
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder = inputs.size(1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 To tensor
+        mel_outputs = torch.cat(mel_outputs, dim=1) &#47&#47 (B, T_decoder, mel_dim)
+        attn_scores<a id="change"> = </a><a id="change">torch.cat(</a>attn_scores<a id="change">, dim=1)</a> &#47&#47 (B, T_decoder/r, T_encoder)
+        stop_tokens = torch.cat(stop_tokens, dim=1) &#47&#47 (B, T_decoder)
+
+        &#47&#47 Validation check</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3535772</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>

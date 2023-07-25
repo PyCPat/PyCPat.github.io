@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 if mask is needed, uncomment this
+        self.maxlen = 2048 &#47&#47 beyond this scale 
+        self.mask = Variable(torch.tril(torch.ones(self.maxlen, self.maxlen)).view(1, 1, self.maxlen, self.maxlen), requires_grad=False)
+        <a id="change">if </a>use_cuda<a id="change">:
+            </a>self.mask.cuda()
+        self.n_head = n_head
+        self.c_proj = Conv1D(n_state, nx)
+        self.attn_dropout = nn.Dropout(attn_pdrop)</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert n_state % n_head == 0
+        &#47&#47 if mask is needed, uncomment this
+        self.maxlen = 2048 &#47&#47 beyond this scale 
+        self.mask = Variable(torch.tril(torch.ones(self.maxlen, self.maxlen)).view(1, 1, self.maxlen, self.maxlen), requires_grad=False).cuda() if use_cuda else Variable(<a id="change">torch.tril(torch.ones(self.maxlen, self.maxlen)).view(1</a>, <a id="change">1</a>, self.maxlen, self.maxlen<a id="change">)</a>, requires_grad=False)
+        self.n_head = n_head
+        self.c_proj = Conv1D(n_state, nx)
+        self.attn_dropout = nn.Dropout(attn_pdrop)</code></pre>

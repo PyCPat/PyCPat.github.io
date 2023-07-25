@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.resnet_block(x)
+        x_short, x_long = self.quantization_block(x)
+        x_short = <a id="change">self.short_attention_block(x_short).mean(-1</a><a id="change">)</a>
+        x_long = self.long_attention_block(x_long).mean(-1)
+        x = torch.cat([x_short, x_long], dim=-1)
+        x = self.classifier(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.resnet_block(x)
+        x_short, x_long = self.quantization_block(x)
+        <a id="change">if self.att_type in [&quotspatialsa&quot, &quottemporalsa&quot, &quotspatiotemporal&quot]</a><a id="change">:
+            </a>x_short1 = self.short_attention_block(x_short)
+            x_long1 = self.long_attention_block(x_long)
+            x_short2<a id="change"> = </a>self.short_attention_block2(x_short)
+            x_long2<a id="change"> = </a>self.long_attention_block2(x_long)
+            x_short3<a id="change"> = </a>self.short_attention_block3(x_short)
+            x_long3 = self.long_attention_block3(x_long)
+            x_short<a id="change"> = torch.cat(</a><a id="change">[</a>x_short1, x_short2, x_short3<a id="change"></a>]<a id="change">, axis=1)</a>
+            x_long = torch.cat([x_long1, x_long2, x_long3], axis=1)
+        else:
+            x_short = self.short_attention_block(x_short)
+            x_long = self.long_attention_block(x_long)</code></pre>

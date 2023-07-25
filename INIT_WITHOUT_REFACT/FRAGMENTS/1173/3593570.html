@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        attn = sim.softmax(dim = -1)
+
+        out = einsum(&quotb h i j, b h d j -&gt; b h i d&quot, attn, v)
+        out<a id="change"> = </a><a id="change">rearrange(</a>out, <a id="change">&quotb h (x y) d -&gt; b (h d) x y&quot</a><a id="change">, x = h, y = w)</a>
+        return self.to_out(out)
+
+class FiLM(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+        sim = einsum(&quotb h i d, b h j d -&gt; b h i j&quot, q, k)
+        attn = sim.softmax(dim = -1)
+
+        out<a id="change"> = </a><a id="change">einsum(&quotb h i j, b h j d -&gt; b h i d&quot</a>, attn, v<a id="change">)</a>
+        out = rearrange(out, &quotb h n d -&gt; b n (h d)&quot)
+        return self.to_out(out)
+
+class FeedForward(nn.Module):</code></pre>

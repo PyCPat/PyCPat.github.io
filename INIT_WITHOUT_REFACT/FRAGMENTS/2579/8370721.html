@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            padding = seq_len - n
+            mask = default(mask, lambda: torch.ones(b, n, device = device).bool())
+            x = F.pad(x, (0, 0, 0, padding), value = 0)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>x, (0, padding)<a id="change">, value = False)</a>
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        mask = default(mask, lambda: torch.ones(b, text_len, device = device).bool())
+
+        x = F.pad(x, (0, 0, 0, padding), value = 0)
+        mask = <a id="change">mask[:, :text_len]</a>
+
+        &#47&#47 derive queries / keys / values
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)</code></pre>

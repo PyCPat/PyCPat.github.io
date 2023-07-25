@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 flatten patches with channels last like the paper (likely using TF)
+            x = x.unfold(2, Ph, Ph).unfold(3, Pw, Pw).permute(0, 2, 3, 4, 5, 1).reshape(B, -1, Ph * Pw * C)
+        else:
+            x<a id="change"> = </a><a id="change">x.permute(0, 2, 3, 1).unfold(1, Ph, Ph).unfold(2, Pw, Pw).reshape(</a>B, -1, C * Ph * Pw<a id="change">)</a>
+        x = self.proj(x)
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 FIXME look at relaxing size constraints
+        assert H == self.img_size[0] and W == self.img_size[1], \
+            f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = <a id="change">self.proj(x).flatten(2</a><a id="change">)</a>.transpose(1, 2)
+        return x
+
+</code></pre>

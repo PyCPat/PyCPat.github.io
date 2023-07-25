@@ -1,0 +1,63 @@
+<html><h3>Pattern ID :223
+</h3><img src='864013.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        f1 = self.mlp1(input)
+        f2 = self.mlp2(f1)
+        context_vector = self.maxpool(f2)
+        Gf1 = torch.cat((<a id="change">context_vector.repeat(1</a>, <a id="change">1</a>, self.input_cloud_size<a id="change">)</a>, f1), 1)
+        scores = self.mlp3(Gf1)
+        logits = self.softmax(scores)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        f1 = self.mlp1(input)
+        f2 = self.mlp2(f1)
+        context_vector = torch.max(f2, 1)[0]
+        input_size = <a id="change">f1.shape[1]</a>
+        expanded_context_vector = torch.unsqueeze(context_vector, 1).expand(-1, input_size, -1)
+        Gf1 = torch.cat((expanded_context_vector, f1), 2)
+        scores = self.mlp3(Gf1)
+        logits = self.softmax(scores)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 5</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ignf/lidar-deep-segmentation/commit/d06a0f0b88ee66f879e3d148f4c4b63f49ab16c1#diff-dcf4f6d558fc7dca6c5df6fbfd384b24543e287459a2269bfb9a39c01a9c7e33L43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 864013</div><div id='project'> Project Name: ignf/lidar-deep-segmentation</div><div id='commit'> Commit Name: d06a0f0b88ee66f879e3d148f4c4b63f49ab16c1</div><div id='time'> Time: 2021-09-22</div><div id='author'> Author: charles.gaydon@gmail.com</div><div id='file'> File Name: semantic_val/models/modules/point_net.py</div><div id='m_class'> M Class Name: PointNet</div><div id='n_method'> N Class Name: PointNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: semantic_val/models/modules/point_net.py</div><div id='n_file'> N File Name: semantic_val/models/modules/point_net.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        if self.has_mean:
+            batch_size = x.data.size(0)
+            x = x - torch.autograd.Variable(<a id="change">self.mean_img.repeat(</a>batch_size, <a id="change">1</a>, 1, <a id="change">1</a><a id="change">)</a>)
+
+        ind = -2
+        self.loss = None</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.loss = self.loss + self.models[ind](x)
+                else:
+                    self.loss = self.models[ind](x)
+                <a id="change">outputs[ind]</a> = None
+            elif block[&quottype&quot] == &quotyolo&quot:
+                if self.training:
+                    pass</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tianxiaomo/pytorch-yolov4/commit/cf696adb6de3e2a8f68498ff9f2586f2ef62df3a#diff-979f6319c5a776a402674142f7f50a37662aa40399498541a9248a78a7a1ee51L100' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 864025</div><div id='project'> Project Name: tianxiaomo/pytorch-yolov4</div><div id='commit'> Commit Name: cf696adb6de3e2a8f68498ff9f2586f2ef62df3a</div><div id='time'> Time: 2020-04-25</div><div id='author'> Author: 1025568329@qq.com</div><div id='file'> File Name: tool/darknet2pytorch.py</div><div id='m_class'> M Class Name: Darknet</div><div id='n_method'> N Class Name: Darknet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tool/darknet2pytorch.py</div><div id='n_file'> N File Name: tool/darknet2pytorch.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 149</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                            for i in source_ids]
+        source_alphas = F.softmax(source_alphas)
+
+        output_moe = sum([ <a id="change">alpha.unsqueeze(1).repeat(1</a>, <a id="change">1</a><a id="change">)</a> *
+                                F.softmax(classifier_outputs[id], dim=1)
+                        for alpha, id in zip(source_alphas, source_ids)])
+        return output_moe</code></pre><h3>After Change</h3><pre><code class='java'>
+                            for i in source_ids]
+        source_alphas = F.softmax(torch.cat(source_alphas, dim=0), dim=0) &#47&#47 n_source x bs
+        output_moe = sum([ source_alphas[j].unsqueeze(1).repeat(1, 1) *
+                            <a id="change">classifier_outputs[j]</a> for j in source_ids])
+        return output_moe
+    
+    def compute_domain_encs(self, all_train_smiles):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/cf8ea2e781c32716964835d39a9cc4562c75b677#diff-eee12f70990be22455041e206b0ab84ff5903fea7888f4b78e4089cf96e59988L113' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 864007</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: cf8ea2e781c32716964835d39a9cc4562c75b677</div><div id='time'> Time: 2018-10-28</div><div id='author'> Author: yangk@mit.edu</div><div id='file'> File Name: moe.py</div><div id='m_class'> M Class Name: MOE</div><div id='n_method'> N Class Name: MOE</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: moe.py</div><div id='n_file'> N File Name: moe.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+
+
+        concat_aligned_img_feature = <a id="change">img_feaure[:, None, :].repeat(1</a>, T_1, <a id="change">1</a><a id="change">)</a>
+        concatenated_features = torch.cat((trajectories_past, concat_aligned_img_feature), dim=2) &#47&#47 (N, T_1, 3 + 16)
+        output = self.transformer(src=concatenated_features, tgt=trajectories_future, tgt_mask=tgt_mask) &#47&#47 (N, T_2, 3)
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 img (N, T_1, 3, 100, 100) -&gt; CNN -&gt; (N, T_1, 16)
+        for t in range(T_1):
+            concat_aligned_img_feature[:, t, :] = self.cnn(<a id="change">images_past[:, t, :, :, :]</a>)
+
+
+        &#47&#47 trajectory_history: (N, 10, 3)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xushenlz/parksim/commit/129fa27deb5d6a07e01c3a149cfb22ffcef91ed2#diff-468657ecf0552a8f76c03e05fc0d3fce06f819adf5e4c827c74e9374101e83bbL127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 864001</div><div id='project'> Project Name: xushenlz/parksim</div><div id='commit'> Commit Name: 129fa27deb5d6a07e01c3a149cfb22ffcef91ed2</div><div id='time'> Time: 2022-03-11</div><div id='author'> Author: xushen0118@outlook.com</div><div id='file'> File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='m_class'> M Class Name: TrajectoryPredictTransformerV1</div><div id='n_method'> N Class Name: TrajectoryPredictTransformerV1</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='n_file'> N File Name: python/parksim/trajectory_predict/vanilla_transformer/network.py</div><div id='m_start'> M Start Line: 161</div><div id='m_end'> M End Line: 174</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 177</div><BR>

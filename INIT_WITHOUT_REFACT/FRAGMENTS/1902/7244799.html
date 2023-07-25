@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		adain_params = self.modulation(class_with_style_code)
+		generated_img = self.decoder(regularized_content_code, adain_params)
+
+		<a id="change">return </a>{
+			&quotimg&quot: generated_img,
+			&quotcontent_code&quot: content_code,
+			&quotstyle_code&quot: style_code</code></pre><h3>After Change</h3><pre><code class='java'>
+		x = self.from_rgb(content_img)
+
+		for block in self.encoder:
+			x<a id="change"> = </a>block(x)
+
+		content_code = x
+		if self.training and self.config[&quotcontent_std&quot] != 0:
+			noise = torch.zeros_like(x)
+			noise.normal_(mean=0, std=self.config[&quotcontent_std&quot])
+
+			x = x + noise
+
+		if self.training and self.config[&quotstyle_std&quot] != 0:
+			noise = torch.zeros_like(style_code)
+			noise.normal_(mean=0, std=self.config[&quotstyle_std&quot])
+
+			style_code = style_code + noise
+
+		<a id="change">for </a><a id="change">block</a> in self.decoder<a id="change">:
+			</a>x<a id="change"> = </a><a id="change">block(</a>x, style_code<a id="change">)</a>
+
+		return {
+			&quotimg&quot: self.to_rgb(x),
+			&quotcontent_code&quot: content_code.reshape(x.shape[0], -1)</code></pre>

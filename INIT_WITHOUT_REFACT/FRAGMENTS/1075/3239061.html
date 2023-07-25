@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.to_q = nn.Linear(dim, dim, bias = False)
+
+        kv_dim = self.dim_head<a id="change"> if </a>one_kv_head<a id="change"> else </a>dim
+        self.to_k = nn.Linear(dim, kv_dim, bias = False)
+        self.proj_k = nn.Parameter(init_(torch.zeros(seq_len, k)))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.heads = heads
+
+        dim_head = <a id="change">default(</a>dim_head, dim // heads<a id="change">)</a>
+        self.dim_head = dim_head
+
+        self.to_q = nn.Linear(dim, dim_head * heads, bias = False)
+
+        kv_dim = dim_head if one_kv_head else (dim_head * heads)
+        self.to_k = nn.Linear(dim, kv_dim, bias = False)
+        self.proj_k = nn.Parameter(init_(torch.zeros(seq_len, k)))
+
+        self.share_kv = share_kv
+        if not share_kv:
+            self.to_v = nn.Linear(dim, kv_dim, bias = False)
+            self.proj_v = nn.Parameter(init_(torch.zeros(seq_len, k)))
+
+        self.dropout = nn.Dropout(dropout)
+        self.to_out<a id="change"> = </a>nn.Linear(dim_head * heads, dim)
+
+    def forward(self, x, context = None, **kwargs):
+        b, n, d, d_h, h, k = *x.shape, self.dim_head, self.heads, self.k</code></pre>

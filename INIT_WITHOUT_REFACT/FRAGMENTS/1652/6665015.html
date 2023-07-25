@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        position_logits = self.to_position_logits(embed)
+        value_logits = self.to_value_logits(embed)
+
+        <a id="change">return </a>channel_logits
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        embed = torch.cat((start_token, embed), dim = 1)
+
+        if return_loss:
+            embed<a id="change"> = </a>embed[:, :-1]
+
+        embed = self.postemb_norm(embed)
+
+        &#47&#47 layers of attention + cross attention
+
+        for attn, cross_attn, ff in self.layers:
+            embed = attn(embed) + embed
+            embed = cross_attn(embed, encoded) + embed
+            embed = ff(embed) + embed
+
+        &#47&#47 to logits
+
+        embed = self.final_norm(embed)
+
+        channel_logits = self.to_channel_logits(embed)
+        position_logits = self.to_position_logits(embed)
+        value_logits = self.to_value_logits(embed)
+
+        if not return_loss:
+            return channel_logits, position_logits, value_logits
+
+        channel_logits<a id="change">, position_logits, value_logits = </a><a id="change">map(</a>lambda t: rearrange(t, &quotb n c -&gt; b c n&quot), (channel_logits<a id="change">, position_logits, value_logits</a>)<a id="change">)</a>
+
+        channel_loss = F.cross_entropy(channel_logits, channels)
+        position_loss = F.cross_entropy(channel_logits, channels)
+        value_loss = F.cross_entropy(channel_logits, channels)</code></pre>

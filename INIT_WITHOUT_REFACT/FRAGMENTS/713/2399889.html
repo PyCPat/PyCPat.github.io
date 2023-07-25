@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        omega, time_seq = self.omega, self.time_seq
+        window = self.window
+
+        basis_real, basis_imag = torch.cos(- omega.unsqueeze(dim=1) * time_seq.unsqueeze(dim=0)), <a id="change">torch.sin(</a>-<a id="change"> omega.unsqueeze(dim=1) * </a>time_seq.unsqueeze(dim=0)<a id="change">)</a>
+        basis_real, basis_imag = basis_real.unsqueeze(dim=1), basis_imag.unsqueeze(dim=1)
+        if not self.onesided:
+            _, basis_real_conj, _ = torch.split(basis_real, [1, n_basis // 2 - 1, 1], dim=0)
+            _, basis_imag_conj, _ = torch.split(basis_imag, [1, n_basis // 2 - 1, 1], dim=0)</code></pre><h3>After Change</h3><pre><code class='java'>
+        omega, n = self.frequency, self.time_seq
+        window = self.window
+
+        omega_n = omega.unsqueeze(dim=1)<a id="change"> * </a>n.unsqueeze(dim=0)
+        if self.trainable_phase:
+            phi = self.phase
+            basis_real, basis_imag = torch.cos(-(omega_n + phi.unsqueeze(dim=1))), <a id="change">torch.sin(</a>-(omega_n + phi.unsqueeze(dim=1))<a id="change">)</a>
+        else:
+            basis_real, basis_imag = torch.cos(-omega_n), torch.sin(-omega_n)
+        basis_real, basis_imag = basis_real.unsqueeze(dim=1), basis_imag.unsqueeze(dim=1)
+</code></pre>

@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :2267
+</h3><img src='7923338.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size,
+                                       self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        x = self.unpatch_emb(x)
+        x<a id="change"> = </a><a id="change">x.permute(0</a>, <a id="change">2</a>, <a id="change">1</a>, 3, 4<a id="change">)</a>  &#47&#47 B x C x T x H x W -&gt; B x T x C x H x W
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 example x: 1 x 21 x 256 x 64
+        x = self.attention(x)  &#47&#47 1 x 21 x 256 x 64
+        x = x.permute(0, 3, 1, 2).view(x.size(0), x.size(3), x.size(1), self.size, self.size)  &#47&#47 B x T x (H x W) x C -&gt; B x C x T x H x W
+        if <a id="change">x.shape[2]</a> &gt; 1:  &#47&#47 not only image training
+            image, video = x[:, :, 0], x[:, :, 1:]
+            video = self.video_unpatch_emb(video)
+            image = self.image_unpatch_emb(image)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/laion-ai/phenaki/commit/04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2#diff-d2675e29d21c30767dbf4b16980547aac6cc99b46ce44781ec89d09ee7193467L83' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923338</div><div id='project'> Project Name: laion-ai/phenaki</div><div id='commit'> Commit Name: 04c8fd7948c8e3b4ef008be5b788d4f067d5d9c2</div><div id='time'> Time: 2022-10-12</div><div id='author'> Author: d6582533@gmail.com</div><div id='file'> File Name: vivq.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vivq.py</div><div id='n_file'> N File Name: vivq.py</div><div id='m_start'> M Start Line: 83</div><div id='m_end'> M End Line: 86</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 97</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        if not self.batch_first:
+            &#47&#47 (t, b, c, h, w) -&gt; (b, t, c, h, w)
+            input_tensor = <a id="change">input_tensor.permute(</a>1, <a id="change">0</a>, <a id="change">2</a>, 3, <a id="change">4</a><a id="change">)</a>
+
+        b<a id="change">, _, _, h, w = </a>input_tensor.size()
+
+        &#47&#47 Implement stateful ConvLSTM
+        if hidden_state is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        cur_layer_input = torch.unbind(input, dim=int(self.batch_first))
+
+        if not hidden_state:
+            hidden_state = self.get_init_states(<a id="change">cur_layer_input[0]</a>.size(int(not self.batch_first)))
+
+        seq_len = len(cur_layer_input)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/openclimatefix/metnet/commit/12d0ea12a39fb28fca3d382611857f23f060b5b6#diff-cbfcbffe28009711c7c69a5229084d15d10138c11e712855f4120d8a87e7122dL135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923323</div><div id='project'> Project Name: openclimatefix/metnet</div><div id='commit'> Commit Name: 12d0ea12a39fb28fca3d382611857f23f060b5b6</div><div id='time'> Time: 2022-02-01</div><div id='author'> Author: jacob@bieker.tech</div><div id='file'> File Name: metnet/layers/ConvLSTM.py</div><div id='m_class'> M Class Name: ConvLSTM</div><div id='n_method'> N Class Name: ConvLSTM</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: metnet/layers/ConvLSTM.py</div><div id='n_file'> N File Name: metnet/layers/ConvLSTM.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 188</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 182</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 p_cls = F.softmax(p_cls, 2) * p_conf  &#47&#47 SSD-like conf
+            p_cls = torch.exp(p_cls).permute((2, 1, 0))
+            p_cls = p_cls / p_cls.sum(0).unsqueeze(0) * p_conf.permute((2, 1, 0))  &#47&#47 F.softmax() equivalent
+            p_cls<a id="change"> = </a><a id="change">p_cls.permute(2</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>
+            return torch.cat((xy / ngu, wh, p_conf, p_cls), 2).squeeze().t()
+
+        else:  &#47&#47 inference
+            &#47&#47 s = 1.5  &#47&#47 scale_xy  (pxy = pxy * s - (s - 1) / 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+            anchor_wh = self.anchor_wh.repeat((1, 1, self.nx, self.ny, 1)).view((1, -1, 2)) / ngu
+
+            p = p.view(-1, 5 + self.nc)
+            xy = torch.sigmoid(p[..., 0:2]) + <a id="change">grid_xy[0]</a>  &#47&#47 x, y
+            wh = torch.exp(p[..., 2:4]) * anchor_wh[0]  &#47&#47 width, height
+            p_conf = torch.sigmoid(p[:, 4:5])  &#47&#47 Conf
+            p_cls = F.softmax(p[:, 5:85], 1) * p_conf  &#47&#47 SSD-like conf</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mikel-brostrom/yolov3_deepsort_pytorch/commit/636c1cff7a91c0b54c996ef48b36274b08e4a8b8#diff-dcfeaa5ac3dffd54264034760914588d92fc7395c81eaa9274715840dc28100bL110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923328</div><div id='project'> Project Name: mikel-brostrom/yolov3_deepsort_pytorch</div><div id='commit'> Commit Name: 636c1cff7a91c0b54c996ef48b36274b08e4a8b8</div><div id='time'> Time: 2019-08-11</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models.py</div><div id='m_class'> M Class Name: YOLOLayer</div><div id='n_method'> N Class Name: YOLOLayer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models.py</div><div id='n_file'> N File Name: models.py</div><div id='m_start'> M Start Line: 126</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 126</div><div id='n_end'> N End Line: 135</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		embed = embed_enc_inputs.size(2)
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		query = <a id="change">h.permute(1</a>,<a id="change">0</a>,<a id="change">2</a><a id="change">)</a>.to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]
+		for i in range(self.n_process):
+			query, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			query<a id="change"> = </a>query.squeeze(1)
+			for i in range(self.n_glimpse):
+				query = self.glimpse(query, ref)
+				query = query.unsqueeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		enc_h, (h, c) = self.Encoder(embed_enc_inputs, None)
+		ref = enc_h
+		&#47&#47 ~ query = h.permute(1,0,2).to(device)&#47&#47 query = self.dec_input.unsqueeze(0).repeat(batch,1).unsqueeze(1).to(device)
+		query = <a id="change">h[-1]</a>
+		&#47&#47 ~ process_h, process_c = [torch.zeros((1, batch, embed), device = device) for _ in range(2)]
+		for i in range(self.n_process):
+			&#47&#47 ~ _, (process_h, process_c) = self.Decoder(query, (process_h, process_c))
+			&#47&#47 ~ _, (h, c) = self.Decoder(query, (h, c))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rintarooo/tsp_drl_ptrnet/commit/6e79534a9be0ef30e0f97fcccf1addf22312462c#diff-42f1c9ad6725f8454caf39ebef9a07a72dcf8d767824b8be45fac7e3f4672940L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923332</div><div id='project'> Project Name: rintarooo/tsp_drl_ptrnet</div><div id='commit'> Commit Name: 6e79534a9be0ef30e0f97fcccf1addf22312462c</div><div id='time'> Time: 2020-11-12</div><div id='author'> Author: 310rnomeado@gmail.com</div><div id='file'> File Name: critic.py</div><div id='m_class'> M Class Name: PtrNet2</div><div id='n_method'> N Class Name: PtrNet2</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: critic.py</div><div id='n_file'> N File Name: critic.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        patches = self.proj(x)  &#47&#47 BCHW
+
+        B, C, H, W = patches.size()
+        patches<a id="change"> = </a><a id="change">patches.view(B, C, -1).permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>  &#47&#47 (batch_size, num_patches, d_model)
+        cls_tokens = self.cls_token.expand(B, -1, -1)  &#47&#47 (batch_size, 1, d_model)
+        &#47&#47 concate cls_tokens to patches
+        embeddings = torch.cat([cls_tokens, patches], dim=1)  &#47&#47 (batch_size, num_patches + 1, d_model)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 NOTE: patchify with Conv2d works only with padding="valid" correctly on smaller images
+        &#47&#47 and has currently no ONNX support so we use this workaround
+        x = x.reshape(
+            B, C, (H // self.patch_size[0]), <a id="change">self.patch_size[0]</a>, (W // self.patch_size[1]), self.patch_size[1]
+        )
+        &#47&#47 (B, H&quot, W&quot, C, ph, pw) -&gt; (B, H&quot*W&quot, C*ph*pw)
+        patches = x.permute(0, 2, 4, 1, 3, 5).flatten(1, 2).flatten(2, 4)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mindee/doctr/commit/a95baaa8c71b859eae1c3292b3bd4225aa410ee5#diff-04ca7e6665eabb9cbda92aaf29511903a29d37ba7549ec61189157307f2fca1aL37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923335</div><div id='project'> Project Name: mindee/doctr</div><div id='commit'> Commit Name: a95baaa8c71b859eae1c3292b3bd4225aa410ee5</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: felixdittrich92@gmail.com</div><div id='file'> File Name: doctr/models/modules/vision_transformer/pytorch.py</div><div id='m_class'> M Class Name: PatchEmbedding</div><div id='n_method'> N Class Name: PatchEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: doctr/models/modules/vision_transformer/pytorch.py</div><div id='n_file'> N File Name: doctr/models/modules/vision_transformer/pytorch.py</div><div id='m_start'> M Start Line: 42</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 50</div><BR>

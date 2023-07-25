@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &quot&quot&quotCompute the output of the RBF layer&quot&quot&quot
+
+        if self.sigma.requires_grad:
+            self.invCov<a id="change"> = </a>self.invCovMat(self.sigma)
+            self.detS = self.denom(self.sigma,self.input_features)
+
+        &#47&#47 get the distancese of each point to each RBF center
+        &#47&#47 (Nbatch,Nrbf,Ndim)
+        delta<a id="change"> =  </a>(input[:,None,:] - self.centers[None,...])
+
+        &#47&#47 Compute (INPUT-MU).T x Sigma^-1 * (INPUT-MU)-&gt; (Nbatch,Nrbf)
+        X<a id="change"> = </a>( torch.matmul(delta.unsqueeze(2),self.invCov).squeeze(2) * delta ).sum(2)
+
+        &#47&#47 slater kernel
+        if self.kernel == &quotslater&quot:
+            X<a id="change"> = </a>torch.sqrt(X)
+            self.detS[:,:] = 1.
+
+        &#47&#47 divide by the determinant of the cov mat
+        X<a id="change"> = </a>(torch.exp(-0.5*X).unsqueeze(2) / self.detS).squeeze()
+
+        <a id="change">return </a>X</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif self.kernel == &quotslater&quot:
+            return self._slater_kernel(input)
+        else:
+            <a id="change">raise </a>ValueError(&quotKernel not recognized&quot)
+
+    def _gaussian_kernel(self,input):
+</code></pre>

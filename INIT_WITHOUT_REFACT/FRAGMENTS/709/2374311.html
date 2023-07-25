@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.cuda_ray = cuda_ray
+        if cuda_ray:
+            &#47&#47 density grid
+            density_grid = torch.zeros([self.cascade] + <a id="change">[</a>128<a id="change"></a>] * 3) &#47&#47 [CAS, H, H, H]
+            self.register_buffer(&quotdensity_grid&quot, density_grid)
+            self.mean_density = 0
+            self.iter_density = 0</code></pre><h3>After Change</h3><pre><code class='java'>
+        if cuda_ray:
+            &#47&#47 density grid
+            density_grid = torch.zeros([self.cascade] + [self.grid_size] * 3) &#47&#47 [CAS, H, H, H]
+            density_bitfield = torch.zeros(self.cascade * self.grid_size<a id="change"> ** </a>3 // 8, dtype=torch.uint8) &#47&#47 [CAS * H * H * H // 8]
+            self.register_buffer(&quotdensity_grid&quot, density_grid)
+            <a id="change">self.register_buffer(&quotdensity_bitfield&quot</a>, density_bitfield<a id="change">)</a>
+            self.mean_density = 0
+            self.iter_density = 0
+            &#47&#47 step counter
+            step_counter = torch.zeros(16, 2, dtype=torch.int32) &#47&#47 16 is hardcoded for averaging...</code></pre>

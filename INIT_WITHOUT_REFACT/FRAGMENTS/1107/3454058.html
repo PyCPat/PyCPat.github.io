@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.layer_id = layer_id
+
+	def forward(self, x):
+		features = <a id="change">self.vgg_features(x, [self.layer_id])[0]</a>
+
+		means = torch.mean(features, dim=[2, 3])
+		stds = torch.std(features, dim=[2, 3])
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		features = self.vgg_features(x, self.layer_ids)
+
+		means = []
+		stds<a id="change"> = </a><a id="change">[]</a>
+		<a id="change">for i</a> in <a id="change">range(</a>len(self.layer_ids)<a id="change">)</a><a id="change">:
+			</a>means_i = torch.mean(features[i], dim=[2, 3])
+			stds_i = torch.std(features[i], dim=[2, 3])
+
+			means.append(means_i)
+			<a id="change">stds.append(</a>stds_i<a id="change">)</a>
+
+		return torch.cat(means + stds, dim=1)
+</code></pre>

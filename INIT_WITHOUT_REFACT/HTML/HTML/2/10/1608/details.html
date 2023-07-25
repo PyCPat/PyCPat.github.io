@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :1608
+</h3><img src='6522627.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        qkv = self.qkv(x)
+        qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0]<a id="change">, qkv[1], qkv[
+            2]</a>  &#47&#47 make torchscript happy (cannot use tensor as tuple)
+
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))</code></pre><h3>After Change</h3><pre><code class='java'>
+                                          self.rel_pos_w, (H, W), (H, W))
+
+        attn = attn.softmax(dim=-1)
+        x = <a id="change">(attn @ v).view(B, self.num_heads, H, W,
+                            -1).permute(</a>0, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">4</a><a id="change">)</a>.reshape(B, H, W, -1)
+        x = self.proj(x)
+
+        return x</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/9f01a37ad4df57b30430c41df08459025174e8fd#diff-78f05b57f42dcd5f7f060081ceac6dd4b971872c6edf8842805ae881484d5589L206' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6522627</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: 9f01a37ad4df57b30430c41df08459025174e8fd</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: 38110862+tuofeilunhifi@users.noreply.github.com</div><div id='file'> File Name: easycv/models/backbones/vitdet.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/backbones/vitdet.py</div><div id='n_file'> N File Name: easycv/models/backbones/vitdet.py</div><div id='m_start'> M Start Line: 206</div><div id='m_end'> M End Line: 238</div><div id='n_start'> N Start Line: 236</div><div id='n_end'> N End Line: 252</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 layer7 = layer6.permute(0,2,3,1)
+        layer7 = torch.reshape(layer6,(-1,layer6.shape[2],layer6.shape[3],512))
+        layer7 = add_timing_signal_nd(layer7)
+        layer7 = torch.reshape(layer7,(-1<a id="change">,512,layer7.shape[1],layer7.shape[2]</a>))
+        &#47&#47 layer7 = layer7.permute(0,3,1,2)
+
+        &#47&#47 layer7 = layer7.contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+        layer6 = F.relu(layer6)
+
+        &#47&#47位置嵌入
+        layer7 = <a id="change">layer6.permute(0</a>,<a id="change">2</a>,<a id="change">3</a>,<a id="change">1</a><a id="change">)</a>
+        layer7 = self.add_timing_signal_nd(layer7)
+        layer7 = layer7.permute(0,3,1,2)
+
+        &#47&#47 layer7 = layer7.contiguous()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/qs956/latex_ocr_pytorch/commit/b2b0c78a756e7f5937e0b92e6901f04cc28073dd#diff-62e0d959e50d9f4003df8124a1c19d98c77320268642d433b1cc28c58cf73a85L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6522611</div><div id='project'> Project Name: qs956/latex_ocr_pytorch</div><div id='commit'> Commit Name: b2b0c78a756e7f5937e0b92e6901f04cc28073dd</div><div id='time'> Time: 2020-02-28</div><div id='author'> Author: qs956@163.com</div><div id='file'> File Name: model/model.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/model.py</div><div id='n_file'> N File Name: model/model.py</div><div id='m_start'> M Start Line: 108</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 48</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 assert H == self.img_size[0] and W == self.img_size[1], \
+        &#47&#47     f"Input image size ({H}*{W}) doesn&quott match model ({self.img_size[0]}*{self.img_size[1]})."
+        x = self.proj(x)
+        Hp, Wp = <a id="change">x.shape[2], x.shape[3]</a>
+
+        x = x.flatten(2).transpose(1, 2)
+        return x, (Hp, Wp)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.proj(x)
+        &#47&#47 B C H W -&gt; B H W C
+        x = <a id="change">x.permute(0</a>, <a id="change">2</a>, <a id="change">3</a>, <a id="change">1</a><a id="change">)</a>
+        return x
+
+
+class Attention(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/9f01a37ad4df57b30430c41df08459025174e8fd#diff-78f05b57f42dcd5f7f060081ceac6dd4b971872c6edf8842805ae881484d5589L529' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6522616</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: 9f01a37ad4df57b30430c41df08459025174e8fd</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: 38110862+tuofeilunhifi@users.noreply.github.com</div><div id='file'> File Name: easycv/models/backbones/vitdet.py</div><div id='m_class'> M Class Name: PatchEmbed</div><div id='n_method'> N Class Name: PatchEmbed</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/backbones/vitdet.py</div><div id='n_file'> N File Name: easycv/models/backbones/vitdet.py</div><div id='m_start'> M Start Line: 530</div><div id='m_end'> M End Line: 538</div><div id='n_start'> N Start Line: 188</div><div id='n_end'> N End Line: 191</div><BR>

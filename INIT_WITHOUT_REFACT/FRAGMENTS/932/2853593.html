@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 TODO: implement state passing for lstms
+        d = self.layers(x)
+        if self.use_lstm_with_projection:
+            d = <a id="change">torch.nn.functional.normalize(</a>d[:, -1]<a id="change">, p=2, dim=1)</a>
+        else:
+            d = torch.nn.functional.normalize(d, p=2, dim=1)
+        return d
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        Shapes:
+            - x: :math:`(N, 1, T_{in})` or :math:`(N, D_{spec}, T_{in})`
+        
+        <a id="change">with torch.no_grad()</a><a id="change">:
+            </a>with torch.cuda.amp.autocast(enabled=False):
+                if self.use_torch_spec:
+                    x.squeeze_(1)
+                    x<a id="change"> = </a>self.torch_spec(x)
+                x = self.instancenorm(x).transpose(1, 2)
+        d = self.layers(x)
+        if self.use_lstm_with_projection:</code></pre>

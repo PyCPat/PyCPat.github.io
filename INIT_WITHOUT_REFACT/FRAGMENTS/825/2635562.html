@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                y = x[i].clone()
+                y[..., :5 + self.nc].sigmoid_()
+                if self.inplace:
+                    y[..., 0:2] = (<a id="change">y[..., 0:2]</a> * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    <a id="change">y[..., 2:4]</a> = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                else:  &#47&#47 for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
+                    xy, wh, etc = y.split((2, 2, self.no - 4), 4)  &#47&#47 tensor_split((2, 4, 5), 4) if torch 1.8.0
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre><h3>After Change</h3><pre><code class='java'>
+                    wh = (wh.sigmoid() * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf.sigmoid(), mask), 4)
+                else:  &#47&#47 Detect (boxes only)
+                    xy, wh, conf = <a id="change">x[i].sigmoid().split(</a>(2, 2, self.nc + 1), 4<a id="change">)</a>
+                    xy = (xy * 2 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (wh * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y = torch.cat((xy, wh, conf), 4)
+                z.append(y.view(bs, self.na * nx * ny, self.no))</code></pre>

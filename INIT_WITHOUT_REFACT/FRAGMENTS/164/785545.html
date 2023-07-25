@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.final_conv(self.blocks(x))
+        x = self.final_linear(x.view(x.shape[0], -1))
+             
+        return <a id="change">x.squeeze()</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.blocks(x)
+        batch, channel, height, width = out.shape
+
+        group<a id="change"> = </a>min(batch, self.stddev_group)
+        stddev = out.view(
+            group, -1, self.stddev_feat, channel // self.stddev_feat, height, width
+        )
+        stddev = torch.sqrt(stddev.var(0, unbiased=False) + 1e-8)
+        stddev = <a id="change">stddev.mean(</a>[2, 3, 4]<a id="change">, keepdims=True)</a>.squeeze(2)
+        stddev = stddev.repeat(group, 1, height, width)
+        out = torch.cat([out, stddev], 1)
+        
+        out = self.final_conv(out)
+        out = out.view(out.shape[0], -1)
+        out<a id="change"> = </a>self.final_linear(out)
+             
+        return out.squeeze()
+</code></pre>

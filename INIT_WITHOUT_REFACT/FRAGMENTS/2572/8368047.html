@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 masked value
+            x, edge_index, _, subset, _ = self.get_subgraph(node_idx, x, edge_index)
+            new_node_idx = torch.where(subset == node_idx)[0]
+            _, edge_mask = self.explain(x, edge_index, <a id="change">embed[node_idx]</a>, tmp=1.0, training=False)
+            data = Data(x=x, edge_index=edge_index)
+            selected_nodes = calculate_selected_nodes(data, edge_mask, top_k)
+            masked_nodes_list = [node for node in range(data.x.shape[0]) if node not in selected_nodes]</code></pre><h3>After Change</h3><pre><code class='java'>
+        top_k = kwargs.get(&quottop_k&quot) if kwargs.get(&quottop_k&quot) is not None else 10
+        y = kwargs.get(&quoty&quot)
+        x = x.to(self.device)
+        edge_index<a id="change"> = </a><a id="change">edge_index.to(</a>self.device<a id="change">)</a>
+        y = y.to(self.device)
+
+        self.__clear_masks__()
+        logits<a id="change"> = </a>self.model(x, edge_index)
+        probs<a id="change"> = </a>F.softmax(logits, dim=-1)
+        embed = self.model.get_emb(x, edge_index)
+
+        if self.explain_graph:</code></pre>

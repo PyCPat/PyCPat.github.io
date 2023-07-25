@@ -1,0 +1,101 @@
+<html><h3>Pattern ID :788
+</h3><img src='2533542.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Self-attention
+        &#47&#47 TODO: 其他模型结构
+        len_range = torch.from_numpy(<a id="change">np.arange(</a>self.max_his<a id="change">)</a>).to(history.device)
+        position<a id="change"> = </a>(lengths[:, None] - len_range[None, :seq_len]) * valid_his
+        pos_vectors<a id="change"> = </a>self.p_embeddings(position)
+        his_vectors = his_vectors + pos_vectors
+        attn_mask = valid_his.view(batch_size, 1, 1, seq_len)
+        his_vectors = self.transformer(his_vectors, attn_mask)
+        his_vectors = his_vectors * valid_his[:, :, None].float()
+        his_vector = his_vectors.sum(1) / lengths[:, None].float()
+        &#47&#47 his_vector = his_vectors[torch.arange(batch_size), lengths - 1, :]
+
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>intent_pred
+
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        his_vectors = self.i_embeddings(history)
+        his_vector = self.encoder(his_vectors, lengths, valid_his, t_history, user_min_t)
+        intent_pred = self.proj(his_vector)  &#47&#47 bsz, K
+        <a id="change">return </a>his_vector<a id="change">, intent_pred</a>
+
+
+class GRUEncoder(nn.Module):
+    def __init__(self, emb_size):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuwangcy/rechorus/commit/7c6b4cfaf0b7765452a8e750212a05ddf29aaae7#diff-cf7e7f7346927920e4d4df1c41793110b158e04cef7a9a1fb138ee2a0bedbbffL207' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2533542</div><div id='project'> Project Name: thuwangcy/rechorus</div><div id='commit'> Commit Name: 7c6b4cfaf0b7765452a8e750212a05ddf29aaae7</div><div id='time'> Time: 2021-08-16</div><div id='author'> Author: THUwangcy@gmail.com</div><div id='file'> File Name: src/models/developing/TiMiRec.py</div><div id='m_class'> M Class Name: IntentPredictor</div><div id='n_method'> N Class Name: IntentPredictor</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/developing/TiMiRec.py</div><div id='n_file'> N File Name: src/models/developing/TiMiRec.py</div><div id='m_start'> M Start Line: 207</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 217</div><div id='n_end'> N End Line: 222</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.use_mask:
+            lens = lens.to(dtype=torch.long)
+            max_len = x.size(2)
+            mask<a id="change"> = </a><a id="change">torch.arange(</a>max_len<a id="change">)</a>.to(lens.device).expand(
+                len(lens), max_len
+            ) &gt;= lens.unsqueeze(1)
+            x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
+            &#47&#47 del mask
+            lens = self.get_seq_len(lens)
+
+        sh = x.shape
+        if self.heads != -1:
+            x = x.view(-1, self.heads, sh[-1])
+
+        out = self.conv(x)
+
+        if self.heads != -1:
+            out<a id="change"> = </a>out.view(sh[0], self.real_out_channels, -1)
+
+        <a id="change">return </a>out, lens
+
+
+class GroupShuffle(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out = self.conv(x)
+        <a id="change">return </a>out<a id="change">, self.get_seq_len(lens)</a>
+
+
+def GroupShuffle(groups: int, channels: int) -&gt; nn.Module:
+    Group shuffle operator from shufflenet.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/1eb7dfb6a8a7b1e3d30aaebb26a0f0ca0390e542#diff-466f09dc94a8d0261c5affeb35283ea929f8f99c0560176aff78070c963baf18L165' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2533550</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 1eb7dfb6a8a7b1e3d30aaebb26a0f0ca0390e542</div><div id='time'> Time: 2021-01-30</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/jasper/blocks.py</div><div id='m_class'> M Class Name: MaskedConv1d</div><div id='n_method'> N Class Name: MaskedConv1d</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/jasper/blocks.py</div><div id='n_file'> N File Name: src/thunder/jasper/blocks.py</div><div id='m_start'> M Start Line: 165</div><div id='m_end'> M End Line: 185</div><div id='n_start'> N Start Line: 225</div><div id='n_end'> N End Line: 239</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        d_2 = d // 2
+
+        &#47&#47 Create position indexes `[0, 1, ..., seq_len - 1]`
+        seq_idx = <a id="change">torch.arange(</a>seq_len<a id="change">, device=x.device)</a>.type_as(self.theta)
+
+        &#47&#47 Calculate the product of position index and $\theta_i$
+        idx_theta = torch.einsum(&quotn,d-&gt;nd&quot, seq_idx, self.theta)
+
+        &#47&#47 Concatenate so that for row $m$ we have
+        &#47&#47 $[m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}, m \theta_0, m \theta_1, ..., m \theta_{\frac{d}{2}}]$
+        idx_theta2<a id="change"> = </a>torch.cat([idx_theta, idx_theta], dim=1)
+
+        &#47&#47 Calculate $[-x^{(\frac{d}{2} + 1)}, -x^{(\frac{d}{2} + 2)}, ..., -x^{(d)}, x^{(1)}, x^{(2)}, ..., -x^{(\frac{d}{2})}]$
+        neg_half_x = torch.cat([-x[:, :, :, d_2:], x[:, :, :, :d_2]], dim=-1)
+
+        &#47&#47 Calculate
+        &#47&#47
+        &#47&#47 \begin{align}
+        &#47&#47 \begin{pmatrix}
+        &#47&#47 x^{(i)}_m \cos m \theta_i - x^{(i + \frac{d}{2})}_m \sin m \theta_i \\
+        &#47&#47 x^{(i + \frac{d}{2})}_m \cos m\theta_i + x^{(i)}_m \sin m \theta_i \\
+        &#47&#47 \end{pmatrix} \\
+        &#47&#47 \end{align}
+        &#47&#47
+        &#47&#47 for $i \in {1, 2, ..., \frac{d}{2}}$
+        rx<a id="change"> = </a>(x * idx_theta2.cos()[:, None, None, :]) + (neg_half_x * idx_theta2.sin()[:, None, None, :])
+
+        &#47&#47
+        <a id="change">return </a>rx
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x_rope = (x_rope * self.cos_cached[:x.shape[0]]) + (neg_half_x * self.sin_cached[:x.shape[0]])
+
+        &#47&#47
+        <a id="change">return </a>torch.cat((x_rope<a id="change">, x_pass</a>), dim=-1)
+
+
+class RotaryPEMultiHeadAttention(MultiHeadAttention):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lab-ml/nn/commit/0ce65adf9e602321109528b05cf99fccb16cd2de#diff-637497eb531dcbf4c4fff534c48c9dc4ec23ef7b14699edc95d8b280b04de206L127' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2533528</div><div id='project'> Project Name: lab-ml/nn</div><div id='commit'> Commit Name: 0ce65adf9e602321109528b05cf99fccb16cd2de</div><div id='time'> Time: 2022-06-03</div><div id='author'> Author: vpjayasiri@gmail.com</div><div id='file'> File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_class'> M Class Name: RotaryPositionalEmbeddings</div><div id='n_method'> N Class Name: RotaryPositionalEmbeddings</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: labml_nn/transformers/rope/__init__.py</div><div id='n_file'> N File Name: labml_nn/transformers/rope/__init__.py</div><div id='m_start'> M Start Line: 132</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 171</div><div id='n_end'> N End Line: 193</div><BR>

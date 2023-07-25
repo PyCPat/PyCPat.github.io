@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :915
+</h3><img src='2829289.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Create target for events spotting and ball position (local and global)
+        batch_size = pred_ball_global.size(0)
+        target_ball_global = torch.zeros_like(pred_ball_global)
+        target_ball_local<a id="change"> = </a><a id="change">torch.zeros_like(</a>pred_ball_global<a id="change">)</a>
+        target_events = torch.zeros((batch_size, 2), device=self.device)
+        for idx in range(batch_size):
+            target_ball_global[idx] = create_target_ball(global_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            target_ball_local[idx] = create_target_ball(local_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+            log_vars_idx += 1
+            target_events = torch.zeros((batch_size, 2), device=self.device)
+            for sample_idx in range(batch_size):
+                target_events[sample_idx] = create_target_events(<a id="change">event_class[sample_idx]</a>, device=self.device)
+            event_loss = self.event_loss_criterion(pred_events, target_events)
+            total_loss += event_loss / (torch.exp(self.log_vars[log_vars_idx])) + self.log_vars[log_vars_idx]
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch/commit/4e2a9eb758dbd4cdd39420a237e25ba581182193#diff-1894af787af773f0900f2d4288fad393d1be5feb407cc292b0bfc65198036c33L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2829289</div><div id='project'> Project Name: maudzung/ttnet-real-time-analysis-system-for-table-tennis-pytorch</div><div id='commit'> Commit Name: 4e2a9eb758dbd4cdd39420a237e25ba581182193</div><div id='time'> Time: 2020-06-01</div><div id='author'> Author: nguyenmaudung93.kstn@gmail.com</div><div id='file'> File Name: src/models/multi_task_learning_model.py</div><div id='m_class'> M Class Name: Multi_Task_Learning_Model</div><div id='n_method'> N Class Name: Multi_Task_Learning_Model</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/multi_task_learning_model.py</div><div id='n_file'> N File Name: src/models/multi_task_learning_model.py</div><div id='m_start'> M Start Line: 38</div><div id='m_end'> M End Line: 53</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.emb = self.dropout(self.emb)
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t<a id="change"> = </a><a id="change">torch.zeros_like(</a>self.emb<a id="change">)</a>  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        for i, att_timesteps in enumerate(count):
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            self.c_t[i] = self.attentionStep(first_h_a, first_h_b, att_timesteps)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for cur_time in range(time_steps):
+            cur_x = x[:, : cur_time + 1, :]
+            <a id="change">out[:, cur_time, :]</a> = self.retain_encoder(cur_x)
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2829288</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        dists = cdist(anchor, positive, metric=self.metric)
+        &#47&#47 add 10 to false negative
+        dist_keypts = np.eye(dist_keypts.shape[0]) * 10 + dist_keypts.detach().cpu().numpy()
+        add_matrix<a id="change"> = </a><a id="change">torch.zeros_like(</a>dists<a id="change">)</a>
+        add_matrix[np.where(dist_keypts &lt; self.safe_radius)] += 10
+        dists = dists + add_matrix
+
+        pos_mask = torch.eq(torch.unsqueeze(pids, dim=1), torch.unsqueeze(pids, dim=0))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+
+        &#47&#47 pos = dists + 1e5 * (~pos_mask).float()
+        pos = <a id="change">furthest_positive[:, None]</a>
+        pos_weight = (self.pos_optimal - pos).detach()
+        pos_weight = torch.max(torch.zeros_like(pos_weight), pos_weight)
+        lse_positive = torch.logsumexp(-self.log_scale * (pos - self.pos_margin) * pos_weight, dim=-1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/xuyangbai/d3feat.pytorch/commit/f19b93196387b22f1cb416f9a0214b2cffaf8e5e#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2829299</div><div id='project'> Project Name: xuyangbai/d3feat.pytorch</div><div id='commit'> Commit Name: f19b93196387b22f1cb416f9a0214b2cffaf8e5e</div><div id='time'> Time: 2020-07-16</div><div id='author'> Author: 653823597@qq.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: CircleLoss</div><div id='n_method'> N Class Name: CircleLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 125</div><div id='n_end'> N End Line: 157</div><BR>

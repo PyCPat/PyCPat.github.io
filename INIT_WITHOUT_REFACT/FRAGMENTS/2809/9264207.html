@@ -1,0 +1,36 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		else:
+			out = content_code
+
+		<a id="change">for </a>layer in self.layers<a id="change">:
+			</a>out<a id="change"> = </a>layer(out, class_code, None)
+
+		out = self.to_rgb(out)
+		return out</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.n_latent = self.log_size * 2 - 2
+
+	def forward(self, content_codes, class_codes):
+		styles<a id="change"> = </a>torch.cat((content_codes, class_codes), dim=1)
+		latent = <a id="change">styles.unsqueeze(dim=1).repeat(</a>1, self.n_latent, 1<a id="change">)</a>
+		&#47&#47 latent = styles.view((-1, self.n_latent, 512))
+
+		out = self.input(latent)
+		out = self.conv1(out, latent[:, 0])
+
+		skip = self.to_rgb1(out, latent[:, 1])
+
+		i = 1
+		for conv1, conv2, to_rgb in zip(self.convs[::2], self.convs[1::2], self.to_rgbs):
+			out<a id="change"> = </a>conv1(out, latent[:, i])
+			out<a id="change"> = </a>conv2(out, latent[:, i + 1])
+			skip = to_rgb(out, latent[:, i + 2], skip)
+
+			i += 2
+
+		image<a id="change"> = </a>skip
+		return image
+
+</code></pre>

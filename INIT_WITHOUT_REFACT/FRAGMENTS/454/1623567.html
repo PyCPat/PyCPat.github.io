@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x = self.net(x)  &#47&#47 batch, 512, 1, 1
+        &#47&#47 Add fc layer for final prediction
+        x = <a id="change">torch.flatten(</a>x<a id="change">, start_dim=1)</a>  &#47&#47 batch, 512
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 256
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_l = self.net(x[:, :3, :, :]).squeeze()
+        x_r = self.net(x[:, 3:, :, :]).squeeze()
+        x<a id="change"> = torch.cat(</a>(x_l<a id="change">, x_r</a>)<a id="change">, dim=-1)</a>
+        &#47&#47 Add fc layer for final prediction
+        output = F.relu(self.fc1(x))  &#47&#47 batch, 512
+        output = self.fc2(output)  &#47&#47 batch, 64
+        return output</code></pre>

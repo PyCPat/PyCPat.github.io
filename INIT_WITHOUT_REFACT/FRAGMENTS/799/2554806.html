@@ -1,0 +1,95 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        maxlen, batch_size = src.shape[0], src.shape[1]  &#47&#47 src.shape = [215, 128, 72]
+
+        Question: why 72 features (36 feature + 36 mask)?
+        src = <a id="change">self.encoder(</a>src<a id="change">)</a> * math.sqrt(self.d_model)  &#47&#47 linear layer: 72 --&gt; 32
+
+        pe = self.pos_encoder(times)  &#47&#47 times.shape = [215, 128], the values are hours.
+        &#47&#47 pe.shape = [215, 128, 32]
+
+        Here are two options: plus or concat
+        &#47&#47         src = src + pe
+        src = torch.cat([pe, src], axis=2)  &#47&#47 shape: [215, 128, 64]
+
+
+        src = self.dropout(src)
+
+        emb = self.emb(static)  &#47&#47 emb.shape = [128, 64]. Linear layer: 9--&gt; 64
+
+        &#47&#47 append context on front
+        &#47&#47 215-D for time series and 1-D for static info
+        x = src
+
+        mask out the all-zero rows. 
+        &#47&#47 mask = torch.arange(maxlen + 1)[None, :] &gt;= (lengths.cpu()[:, None] + 1)
+        mask = torch.arange(maxlen)[None, :] &gt;= (lengths.cpu()[:, None])
+        mask = mask.squeeze(1).cuda()  &#47&#47 shape: [128, 216]
+
+        output = self.transformer_encoder(x, src_key_padding_mask=mask) &#47&#47 output.shape: [216, 128, 64]
+
+        &#47&#47 masked aggregation
+        mask2 = mask.permute(1, 0).unsqueeze(2).long()  &#47&#47 [216, 128, 1]
+        if self.aggreg == &quotmean&quot:
+            lengths2 = lengths.unsqueeze(1)
+            output = torch.sum(output * (1 - mask2), dim=0) / (lengths2 + 1)
+        elif self.aggreg == &quotmax&quot:
+            output, _ = torch.max(output * ((mask2 == 0) * 1.0 + (mask2 == 1) * -10.0), dim=0)
+
+        &#47&#47 feed through MLP
+        output = torch.cat([emb, output], dim=1)  &#47&#47 x.shape: [216, 128, 64]
+        output = self.mlp(output)  &#47&#47 two linears: 64--&gt;64--&gt;2
+        <a id="change">return </a>output
+
+&#47&#47 class HGT_latconcat(nn.Module):
+&#47&#47     ""</code></pre><h3>After Change</h3><pre><code class='java'>
+        src = src[:, :, :int(src.shape[2]/2)] &#47&#47 remove the mask info
+
+        Question: why 72 features (36 feature + 36 mask)?
+        src = <a id="change">self.encoder(</a>src<a id="change">)</a> &#47&#47* math.sqrt(self.d_model)  &#47&#47 linear layer: 72 --&gt; 32
+        pe = self.pos_encoder(times)  &#47&#47 times.shape = [215, 128], the values are hours.
+        &#47&#47 pe.shape = [215, 128, 32]
+
+        Here are two options: plus or concat
+        &#47&#47         src = src + pe
+        src = torch.cat([pe, src], axis=2)  &#47&#47 shape: [215, 128, 64]
+
+
+        src = self.dropout(src)
+
+        emb = self.emb(static)  &#47&#47 emb.shape = [128, 64]. Linear layer: 9--&gt; 64
+
+        &#47&#47 append context on front
+        &#47&#47 215-D for time series and 1-D for static info
+        x = src
+
+        mask out the all-zero rows. 
+        &#47&#47 mask = torch.arange(maxlen + 1)[None, :] &gt;= (lengths.cpu()[:, None] + 1)
+        mask = torch.arange(maxlen)[None, :] &gt;= (lengths.cpu()[:, None])
+        mask = mask.squeeze(1).cuda()  &#47&#47 shape: [128, 216]
+
+        output = self.transformer_encoder(x, src_key_padding_mask=mask) &#47&#47 output.shape: [216, 128, 64]
+
+        What if no transformer? just MLP, the performance is still good!!!
+        &#47&#47 output = x
+
+        &#47&#47 masked aggregation: this really matters.
+        mask2 = mask.permute(1, 0).unsqueeze(2).long()  &#47&#47 [216, 128, 1]
+        if self.aggreg == &quotmean&quot:
+            lengths2 = lengths.unsqueeze(1)
+            output = torch.sum(output * (1 - mask2), dim=0) / (lengths2 + 1)
+        elif self.aggreg == &quotmax&quot:
+            output, _ = torch.max(output * ((mask2 == 0) * 1.0 + (mask2 == 1) * -10.0), dim=0)
+
+        &#47&#47 output = torch.sum(output , dim=0) / (lengths.unsqueeze(1) + 1)
+
+        &#47&#47 feed through MLP
+        output = torch.cat([output, emb], dim=1)  &#47&#47 x.shape: [216, 128, 64]
+        output = self.mlp(output)  &#47&#47 two linears: 64--&gt;64--&gt;2
+        <a id="change">return </a>output<a id="change">, 0, 0</a>
+
+&#47&#47 class HGT_latconcat(nn.Module):
+&#47&#47     ""
+&#47&#47     Implement the raindrop stratey one by one.</code></pre>

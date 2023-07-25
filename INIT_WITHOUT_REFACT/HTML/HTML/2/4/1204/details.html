@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :1204
+</h3><img src='3658068.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        o_x = self.mt_x.forward(o)
+        o_y = self.mt_y.forward(o)
+        o_z = self.mt_z.forward(o)
+        o_not_bg = <a id="change">torch.cat(</a>(o_p<a id="change">, o_phot, o_x, o_y, o_z</a>), 1<a id="change">)</a>
+
+        if self.ch_out == 5:
+            o<a id="change"> = </a>o_not_bg
+
+        elif self.ch_out == 6:
+            o_bg = self.mt_bg.forward(o)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        o_head = []
+        for i in range(self.ch_out):
+            <a id="change">o_head.append(</a>self.mt_heads[i].forward(o)<a id="change">)</a>
+        o = torch.cat(o_head, 1)
+
+        Apply the final non-linearities
+        if self._use_last_nl:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/turagalab/decode/commit/9c0e6c95a59bb121b9749cd281e4390a185ca1d9#diff-3826c201579fe6551dcca937dabb31125d6cac046ee35486b117d154d78def59L336' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658068</div><div id='project'> Project Name: turagalab/decode</div><div id='commit'> Commit Name: 9c0e6c95a59bb121b9749cd281e4390a185ca1d9</div><div id='time'> Time: 2019-11-30</div><div id='author'> Author: gitdev@LRM.PHOTO</div><div id='file'> File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='m_class'> M Class Name: DoubleMUnet</div><div id='n_method'> N Class Name: DoubleMUnet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='n_file'> N File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='m_start'> M Start Line: 336</div><div id='m_end'> M End Line: 357</div><div id='n_start'> N Start Line: 340</div><div id='n_end'> N End Line: 347</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if i == 0:
+                input4 = x.unsqueeze(1)
+            else:
+                input4<a id="change"> = </a><a id="change">torch.cat(</a>(input4<a id="change">, x.unsqueeze(1)</a>)<a id="change">, dim=1)</a>
+
+        comm = torch.mean(input4, axis=1)
+        for i in range(self.agents):
+            x = input4[:, i]</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(self.agents):
+            x = input4[:, i]
+            x = self.fc3[i](torch.cat((x, comm), axis=-1))
+            <a id="change">output.append(</a>x<a id="change">)</a>
+        output = torch.stack(output, dim=1)
+
+        return output.cpu()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gml16/rl-medical/commit/a7aa4702050819ab83f9ad27fcfad2cfada3f306#diff-600a3995b91d3fac712ba595c951e8d897dde1cf5afa1225cbb8977770d3245dL248' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658081</div><div id='project'> Project Name: gml16/rl-medical</div><div id='commit'> Commit Name: a7aa4702050819ab83f9ad27fcfad2cfada3f306</div><div id='time'> Time: 2020-05-15</div><div id='author'> Author: g.m.leroy@outlook.com</div><div id='file'> File Name: examples/LandmarkDetection/DQN/DQNModel.py</div><div id='m_class'> M Class Name: CommNet</div><div id='n_method'> N Class Name: CommNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: examples/LandmarkDetection/DQN/DQNModel.py</div><div id='n_file'> N File Name: examples/LandmarkDetection/DQN/DQNModel.py</div><div id='m_start'> M Start Line: 256</div><div id='m_end'> M End Line: 308</div><div id='n_start'> N Start Line: 255</div><div id='n_end'> N End Line: 298</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 calculate new memory only if sequence length buffer is full
+        if self.seq_len == t:
+            hidden_states = torch.stack(hidden_states)
+            new_mem<a id="change"> = </a><a id="change">torch.cat(</a>(mem<a id="change">, hidden_states</a>)<a id="change">, dim=2)</a>[:, :, -self.mem_len:, :].detach()
+        else:
+            new_mem = mem
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for attn, ff, m in zip(self.attn_layers, self.ff_layers, mem):
+            x, mem_out = attn(x, mem = m)
+            x, = ff(x)
+            <a id="change">next_mem.append(</a>mem_out<a id="change">)</a>
+
+        out = self.to_logits(x)
+        next_mem = torch.stack(next_mem)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/b5257bf3b0c5f8aed8ccce17883bfe9409c33909#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL124' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3658063</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: b5257bf3b0c5f8aed8ccce17883bfe9409c33909</div><div id='time'> Time: 2020-07-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 145</div><div id='n_end'> N End Line: 159</div><BR>

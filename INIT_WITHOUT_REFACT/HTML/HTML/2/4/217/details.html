@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :217
+</h3><img src='848861.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 ssimLoss = -F.binary_cross_entropy(ssimLoss, torch.ones_like(ssimLoss))
+        regs = list()
+
+        <a id="change">for logit</a> in logits<a id="change">:
+            &#47&#47 [N, H, W, K] -&gt; [N, K]
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            </a>posterior<a id="change"> = </a>Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            regs.append(reg)</code></pre><h3>After Change</h3><pre><code class='java'>
+            logit = logit.permute(0, 3, 1, 2)
+            ceReg = F.cross_entropy(logit, sample, reduction="none") * needRegMask
+            cePush = F.cross_entropy(logit, code, reduction="none") * (1 - needRegMask)
+            regs.append(ceReg.mean() + <a id="change">cePush.mean()</a>)
+        &#47&#47 &#47&#47 [m, n, h, w] and m * list(n, h, w, k) logits and [n, k] frequencies
+        &#47&#47 for code, logit, freq in zip(codes.permute(1, 0, 2, 3), logits, codeFreq):
+        &#47&#47     &#47&#47 perturb code by the most rare codes with 0.1 probability</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/3b419aa2f7b4286b6ae991022fe7469650db4bbd#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 848861</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 3b419aa2f7b4286b6ae991022fe7469650db4bbd</div><div id='time'> Time: 2021-08-01</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLoss</div><div id='n_method'> N Class Name: CompressionLoss</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.ff_layers = nn.ModuleList([PreNorm(dim, FeedForward(dim)) for _ in range(depth)])
+
+    def forward(self, x, **kwargs):
+        <a id="change">for </a>attn, <a id="change">ff</a> in zip(self.attn_layers, self.ff_layers)<a id="change">:
+            </a>x = attn(x, **kwargs) + x
+            x<a id="change"> = </a>ff(x) + x
+        return x
+
+class LinearAttentionTransformerLM(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, **kwargs):
+        x = torch.cat([x, x], dim = -1)
+        x = self.layers(x, **kwargs)
+        return <a id="change">torch.stack(x.chunk(2, dim=-1)).mean(dim=0)</a>
+
+class LinearAttentionTransformerLM(nn.Module):
+    def __init__(self, num_tokens, dim, depth, max_seq_len, heads = 8, causal = False, one_kv_head = False):
+        super().__init__()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/linear-attention-transformer/commit/a0a35e7e9727b6428c7527ec34f5192529ab5e82#diff-eee6cf669463e9683bcf9643c4b19a493056f98ded32854287144d47f02a7032L194' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 848862</div><div id='project'> Project Name: lucidrains/linear-attention-transformer</div><div id='commit'> Commit Name: a0a35e7e9727b6428c7527ec34f5192529ab5e82</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_class'> M Class Name: LinearAttentionTransformer</div><div id='n_method'> N Class Name: LinearAttentionTransformer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='n_file'> N File Name: linear_attention_transformer/linear_attention_transformer.py</div><div id='m_start'> M Start Line: 195</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 207</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x_mean = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+        x_std = torch.zeros((x.shape[0], x.shape[1]), dtype=x.dtype, device=x.device)
+
+        <a id="change">for i</a> in range(x.shape[0])<a id="change">:
+            </a>if x[i, :, :].shape[1] == 1:
+                raise ValueError(
+                    "normalize_batch received a tensor of length 1. This will result "
+                    "in torch.std() returning nan"
+                )
+            x_mean[i, :]<a id="change"> = </a>x[i, :, :].mean(dim=1)
+            x_std[i, :] = x[i, :, :].std(dim=1)
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.div_guard = 1e-5
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        x_mean = <a id="change">x.mean(dim=2, keepdim=True)</a>.detach()
+        x_std = x.std(dim=2, keepdim=True).detach()
+        &#47&#47 make sure x_std is not zero
+        x_std += self.div_guard</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/868b3d50886a7e0d85f988328f18e7c60aa81bab#diff-4b3574d95a510a60cbf5df92f8b0ec72607d39a5bc1a3039972fab82dd7c8510L54' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 848863</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 868b3d50886a7e0d85f988328f18e7c60aa81bab</div><div id='time'> Time: 2021-02-24</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/quartznet/preprocess.py</div><div id='m_class'> M Class Name: FeatureBatchNormalizer</div><div id='n_method'> N Class Name: FeatureBatchNormalizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/quartznet/preprocess.py</div><div id='n_file'> N File Name: src/thunder/quartznet/preprocess.py</div><div id='m_start'> M Start Line: 54</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 59</div><BR>

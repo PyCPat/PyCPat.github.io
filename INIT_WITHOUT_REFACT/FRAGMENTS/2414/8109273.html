@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot
+            mask = <a id="change">mask[:, None, :] * mask[:, :, None]</a>
+            dots.masked_fill_(~mask, mask_value)
+            del mask
+
+        attn = dots.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mask is not None:
+            mask = F.pad(mask.flatten(1), (1, 0), value = True)
+            assert mask.shape[-1] == dots.shape[-1], &quotmask has incorrect dimensions&quot
+            mask = rearrange(mask, &quotb i -&gt; b () i ()&quot) * <a id="change">rearrange(</a>mask, <a id="change">&quotb j -&gt; b () () j&quot</a><a id="change">)</a>
+            dots.masked_fill_(~mask, mask_value)
+            del mask
+
+        attn = dots.softmax(dim=-1)</code></pre>

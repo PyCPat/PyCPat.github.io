@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                for block in blocklist:
+                    h = block(h)
+            h = self.activation(h)
+            <a id="change">h</a> = torch.sum(h, dim=[2,3])
+
+            if self.conditional_strategy == &quotno&quot:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                <a id="change">return </a>authen_output
+
+            elif self.conditional_strategy in <a id="change">[&quotContraGAN&quot</a>, &quotProxy_NCA_GAN&quot, <a id="change">&quotNT_Xent_GAN&quot</a>]:
+                authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                cls_proxy = self.embedding(label)
+                <a id="change">cls_embed</a> = self.linear2(h)
+                <a id="change">if self.nonlinear_embed</a><a id="change">:
+                    </a>cls_embed<a id="change"> = </a><a id="change">self.linear3(self.activation(</a>cls_embed<a id="change">)</a><a id="change">)</a>
+                if self.normalize_embed:
+                    cls_proxy = F.normalize(cls_proxy, dim=1)
+                    cls_embed = F.normalize(cls_embed, dim=1)
+                <a id="change">return </a>cls_proxy<a id="change">, cls_embed, authen_output</a>
+
+            elif <a id="change"></a>self.conditional_strategy == &quotProjGAN&quot<a id="change">:
+                </a>authen_output = torch.squeeze(<a id="change">self.linear1(</a>h<a id="change">)</a>)
+                proj = <a id="change">torch.sum(</a><a id="change">torch.mul(</a>self.embedding(label), h<a id="change">)</a>, <a id="change">1</a><a id="change">)</a>
+                <a id="change">return </a>proj<a id="change"> + </a>authen_output
+
+            elif self.conditional_strategy == &quotACGAN&quot:
+                authen_output<a id="change"> = </a>torch.squeeze(self.linear1(h))
+                cls_output<a id="change"> = </a><a id="change">self.linear4(</a>h<a id="change">)</a>
+                <a id="change">return </a>cls_output<a id="change">, authen_output</a>
+
+            else:
+                raise NotImplementedError
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                for block in blocklist:
+                    h = block(h)
+            h = self.activation(h)
+            <a id="change">h</a> = torch.sum(h, dim=[2,3])
+
+            adv_output<a id="change"> = </a>torch.squeeze(self.linear1(h))
+            <a id="change">if </a>self.d_cond_mtd == "2C"<a id="change">:
+                </a>embed = self.linear2(h)
+                proxy = self.embedding(label)
+                if self.MODEL.normalize_d_embed:
+                    embed = F.normalize(embed, dim=1)
+                    proxy = F.normalize(proxy, dim=1)
+            elif self.d_cond_mtd == "PD":
+                adv_output = adv_output<a id="change"> + </a><a id="change">torch.sum(</a><a id="change">torch.mul(</a>self.embedding(label), h<a id="change">)</a>, <a id="change">1</a><a id="change">)</a>
+            elif self.d_cond_mtd == "AC":
+                cls_output = self.linear2(h)
+            else:
+                raise NotImplementedError</code></pre>

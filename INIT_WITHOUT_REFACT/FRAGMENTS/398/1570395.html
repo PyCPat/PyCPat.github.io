@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 help auto-solve a frequent area of confusion around input masks in auto-regressive
+        &#47&#47 if user supplies a mask that is only off by one from the source sequence, resolve it for them
+        mask = kwargs.get(&quotmask&quot, None)
+        <a id="change">if mask is not None</a><a id="change"> and mask.shape[1] == x.shape[1]:
+            </a>mask<a id="change"> = </a>mask[:, :-1]
+            kwargs[&quotmask&quot] = mask
+
+        out = self.net(xi, **kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+            rand[:, 0] = -torch.finfo(rand.dtype).max &#47&#47 first token should not be masked out
+            num_mask = min(int(seq * self.mask_prob), seq - 1)
+            indices = rand.topk(num_mask, dim = -1).indices
+            mask<a id="change"> = </a>~<a id="change">torch.zeros_like(</a>inp<a id="change">)</a>.scatter(1, indices, 1.).bool()
+            kwargs.update(context_mask = mask)
+
+        out = self.net(inp, **kwargs)</code></pre>

@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = self.embedding(x)
+        x = x.unsqueeze(dim=1)
+
+        out_tensors<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for </a>conv, <a id="change">pool</a> in zip(self.convs, self.pools)<a id="change">:
+            </a>activation<a id="change"> = </a>pool(F.relu(conv(x)))
+            <a id="change">out_tensors.append(</a>activation<a id="change">)</a>
+
+        x = torch.cat(out_tensors, dim=1)
+
+        batch_size = x.size(0)
+        x = x.view(batch_size, -1)
+        x = self.dropout(x)
+
+        <a id="change">return </a>self.fc(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        x : torch.LongTensor or torch.cuda.LongTensor
+            input tensor (batch_size, max_sequence_length) with padded sequences of word ids
+        
+        x<a id="change"> = </a>self._forward_pooled(x)
+        <a id="change">return </a>self._dropout_and_fc(x)
+
+    def _forward_pooled(self, x):
+        assert x.size(1) == self.max_seq_length</code></pre>

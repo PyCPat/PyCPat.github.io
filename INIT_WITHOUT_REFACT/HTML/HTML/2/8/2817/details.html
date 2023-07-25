@@ -1,0 +1,99 @@
+<html><h3>Pattern ID :2817
+</h3><img src='9331887.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            return loss, None
+
+        else:
+            <a id="change">return </a>None<a id="change">, self.decode(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                     context_limited, question_limited,
+                                     decoder_vocab, rnn_state=context_rnn_state).data</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre><h3>After Change</h3><pre><code class='java'>
+                loss += self.args.encoder_loss_weight * encoder_loss
+            return loss, None
+        else:
+            <a id="change">if decoder_wrapper is None</a><a id="change">:
+                </a>decoder_wrapper<a id="change"> = </a>self.decoder_wrapper(self_attended_context, final_context, context_padding, final_question, question_padding,
+                                                    context_limited, question_limited, decoder_vocab, rnn_state=context_rnn_state)
+            else:
+                current_token_id = current_token_id.cpu().apply_(self.map_to_full).to(current_token_id.device)
+            &#47&#47 return (next_token_logits, past) where `past` includes all the states needed to continue generation
+            logits<a id="change"> = </a>decoder_wrapper.next_token_probs(current_token_id)
+            &#47&#47 print(&quotlogits&quot, logits.shape)
+            <a id="change">return </a>logits<a id="change">, decoder_wrapper</a>
+
+    def probs(self, outputs, vocab_pointer_switches, context_question_switches,
+              context_attention, question_attention,
+              context_indices, question_indices,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/stanford-oval/genienlp/commit/8750a12fd1be465524e5aa235e507dd421607034#diff-006b4d33956687d03abcca19226871777a55013fbed4a456e2f142a52d52d4fcL82' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9331887</div><div id='project'> Project Name: stanford-oval/genienlp</div><div id='commit'> Commit Name: 8750a12fd1be465524e5aa235e507dd421607034</div><div id='time'> Time: 2020-07-24</div><div id='author'> Author: s.j.semnani@gmail.com</div><div id='file'> File Name: genienlp/models/mqan_decoder.py</div><div id='m_class'> M Class Name: MQANDecoder</div><div id='n_method'> N Class Name: MQANDecoder</div><div id='m_method'> M Method Name: forward(10)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: genienlp/models/mqan_decoder.py</div><div id='n_file'> N File Name: genienlp/models/mqan_decoder.py</div><div id='m_start'> M Start Line: 86</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 82</div><div id='n_end'> N End Line: 149</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if need_transpose:
+            quantize = rearrange(quantize, &quotb d n -&gt; b n d&quot)
+
+        <a id="change">return </a>quantize<a id="change">, embed_ind, commit_loss</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = torch.tensor([0.], device = device)
+
+        if self.training:
+            <a id="change">if self.commitment &gt; 0</a><a id="change">:
+                </a>commit_loss = F.mse_loss(quantize.detach(), x)
+                loss<a id="change"> = </a>loss + commit_loss * self.commitment
+
+            if self.orthogonal_reg_weight &gt; 0:
+                orthogonal_reg_loss = orthgonal_loss_fn(self.codebook)
+                loss<a id="change"> = </a>loss + orthogonal_reg_loss * self.orthogonal_reg_weight
+
+        quantize = self.project_out(quantize)
+
+        if need_transpose:
+            quantize = rearrange(quantize, &quotb d n -&gt; b n d&quot)
+
+        <a id="change">return </a>quantize<a id="change">, embed_ind, loss</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vector-quantize-pytorch/commit/be2e021bf30d70ec8d709c1ea3ce5ef796a00058#diff-8bcd9c958b614ce130dc4091c094d4cfcc2023716823c181e3a9edaddbcd433dL287' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9331898</div><div id='project'> Project Name: lucidrains/vector-quantize-pytorch</div><div id='commit'> Commit Name: be2e021bf30d70ec8d709c1ea3ce5ef796a00058</div><div id='time'> Time: 2021-12-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_class'> M Class Name: VectorQuantize</div><div id='n_method'> N Class Name: VectorQuantize</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='n_file'> N File Name: vector_quantize_pytorch/vector_quantize_pytorch.py</div><div id='m_start'> M Start Line: 293</div><div id='m_end'> M End Line: 308</div><div id='n_start'> N Start Line: 300</div><div id='n_end'> N End Line: 330</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            attn = attn * mapping_mask
+        output = torch.bmm(attn, v)
+
+        <a id="change">return </a>output<a id="change">, attn</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if key_mask is not None:
+            attn = attn.masked_fill(key_mask == 0., -np.inf)
+        <a id="change">if attn_prior is not None</a><a id="change">:
+            </a>attn<a id="change"> = </a>self.log_softmax(attn) + torch.log(attn_prior.transpose(1, 2) + 1e-8)
+        attn_logprob = attn.unsqueeze(1).clone()
+
+        attn = self.softmax(attn)
+
+        if query_mask is not None:
+            attn = attn * query_mask
+        attn_raw<a id="change"> = </a>attn.clone()
+        if mapping_mask is not None:
+            attn = attn * mapping_mask
+        output = torch.bmm(attn, v)
+
+        <a id="change">return </a>output<a id="change">, (attn, attn_raw), attn_logprob</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/portaspeech/commit/814cdda1ebf7dc626708db2bcf20fdb9207f4345#diff-eed8dda7a8e19d25dc983adc6194cdb57bfef7afee02def70160e6694ca3984aL608' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9331908</div><div id='project'> Project Name: keonlee9420/portaspeech</div><div id='commit'> Commit Name: 814cdda1ebf7dc626708db2bcf20fdb9207f4345</div><div id='time'> Time: 2022-02-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/blocks.py</div><div id='m_class'> M Class Name: ScaledDotProductAttention</div><div id='n_method'> N Class Name: ScaledDotProductAttention</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/blocks.py</div><div id='n_file'> N File Name: model/blocks.py</div><div id='m_start'> M Start Line: 615</div><div id='m_end'> M End Line: 623</div><div id='n_start'> N Start Line: 612</div><div id='n_end'> N End Line: 632</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = torch.matmul(w.transpose(1, 2), encoder_outputs)
+
+        <a id="change">return </a>out<a id="change">, w</a>
+
+
+class DurationPredictor(nn.Module):
+     Duration Parameter Predictor </code></pre><h3>After Change</h3><pre><code class='java'>
+
+        w = self.get_alignment_energies(g, t)  &#47&#47 [B, L, T]
+
+        <a id="change">if mask is not None</a><a id="change">:
+            </a>w<a id="change"> = </a>w.masked_fill(mask.unsqueeze(-1), 0.0)
+
+        attn = w / (torch.sum(w, dim=1).unsqueeze(1) + 1e-8)  &#47&#47 [B, L, T]
+        out<a id="change"> = </a>torch.bmm(attn.transpose(1, 2), encoder_outputs)
+
+        <a id="change">return </a>out<a id="change">, attn</a>
+
+
+class DurationPredictor(nn.Module):
+     Duration Parameter Predictor </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/keonlee9420/wavegrad2/commit/523ec241c64ab635218f32d071fd85fbc469e178#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9331874</div><div id='project'> Project Name: keonlee9420/wavegrad2</div><div id='commit'> Commit Name: 523ec241c64ab635218f32d071fd85fbc469e178</div><div id='time'> Time: 2021-07-13</div><div id='author'> Author: keonlee9420@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: GaussianUpsampling</div><div id='n_method'> N Class Name: GaussianUpsampling</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 135</div><div id='n_start'> N Start Line: 120</div><div id='n_end'> N End Line: 134</div><BR>

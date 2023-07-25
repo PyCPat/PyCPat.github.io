@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, mask = None):
+        n, device, h, g, causal = x.shape[2], x.device, self.heads, self.groups, self.causal
+
+        q, k, v = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = rearrange_all((q, k, v), &quotb (g h d) n -&gt; (b g h) n d&quot, g = g, h = h)
+
+        q = q * self.scale
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None, context = None):
+        n, device, h, g, causal = x.shape[2], x.device, self.heads, self.groups, self.causal
+        context<a id="change"> = default(</a>context, <a id="change">x</a><a id="change">)</a>
+
+        q, k, v = (<a id="change">self.to_q(x</a><a id="change">), *self.to_kv(context).chunk(2, dim = 1)</a>)
+        q, k, v = rearrange_all((q, k, v), &quotb (g h d) n -&gt; (b g h) n d&quot, g = g, h = h)
+
+        q = q * self.scale</code></pre>

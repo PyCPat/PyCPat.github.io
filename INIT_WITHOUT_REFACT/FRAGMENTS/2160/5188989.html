@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv1d_projections = nn.ModuleList(
+            [BatchNormConv1d(in_size, out_size, kernel_size=3, stride=1,
+                             padding=1, activation=ac)
+             for (in_size, out_size, ac) in <a id="change">zip(
+                 </a>in_sizes, projections, activations<a id="change">)</a>])
+
+        self.pre_highway = nn.Linear(projections[-1], in_dim, bias=False)
+        self.highways = nn.ModuleList(</code></pre><h3>After Change</h3><pre><code class='java'>
+        activations += [None]
+
+        &#47&#47 setup conv1d projection layers
+        layer_set<a id="change"> = </a><a id="change">[]</a>
+        for (in_size, out_size, ac) in zip(out_features, projections, activations):
+            layer = BatchNormConv1d(in_size, out_size, kernel_size=3, stride=1,
+                                    padding=1, activation=ac)
+            layer_set.append(layer)
+        self.conv1d_projections<a id="change"> = </a>nn.ModuleList(layer_set)
+
+        &#47&#47 setup Highway layers
+        self.pre_highway = nn.Linear(projections[-1], in_features, bias=False)</code></pre>

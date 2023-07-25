@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self_cond = None
+        if random() &lt; 0.5:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                </a>self_cond = self.model(noised_img, noise_level).detach_()
+
+        &#47&#47 predict and take gradient step
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self_cond = self_latents = None
+
+        if random() &lt; self.train_prob_self_cond:
+            <a id="change">with </a><a id="change">torch.no_grad():
+                </a>self_cond, self_latents = self.model(noised_img, noise_level, return_latents = True)
+                self_cond<a id="change"> = </a>self_cond.detach()
+                self_latents = self_latents.detach()
+
+        &#47&#47 predict and take gradient step</code></pre>

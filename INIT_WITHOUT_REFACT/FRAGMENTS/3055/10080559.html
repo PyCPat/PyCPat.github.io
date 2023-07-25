@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mask = mask_q[:, None, :, None] &lt; mask_k[:, None, None, :]
+            mask = F.pad(mask, (1, 0), value=True)
+
+            dots.masked_fill_(~mask, -<a id="change">float(&quot-inf&quot</a><a id="change">)</a>)
+            del mask
+
+        &#47&#47 attention</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 attention
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * d ** -0.5
+
+        mask_value<a id="change"> = </a><a id="change">-torch.finfo(dots.dtype).max</a>
+
+        &#47&#47 causal masking, if needed
+        if self.causal:
+            mask_q = mask_k = torch.arange(t, device=device)</code></pre>

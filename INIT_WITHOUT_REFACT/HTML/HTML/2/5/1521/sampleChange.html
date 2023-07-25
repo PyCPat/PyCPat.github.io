@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        quantize, embed_ind = self._codebook(x)
+
+        if self.training:
+            commit_loss = F.mse_loss(<a id="change">quantize.detach()</a>, x) * self.commitment
+            quantize = x + (quantize - x).detach()
+        else:
+            commit_loss = torch.tensor([0.], device = x.device)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        loss = torch.tensor([0.], device = device)
+
+        <a id="change">if </a><a id="change">self.training:
+            </a>if self.commitment &gt; 0:
+                commit_loss = F.mse_loss(<a id="change">quantize.detach()</a>, x)
+                loss<a id="change"> = </a>loss + commit_loss * self.commitment
+
+            if self.orthogonal_reg_weight &gt; 0:
+                orthogonal_reg_loss = orthgonal_loss_fn(self.codebook)</code></pre>

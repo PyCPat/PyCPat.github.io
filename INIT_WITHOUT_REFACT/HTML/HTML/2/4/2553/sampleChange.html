@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.embed_avg.data.mul_(self.decay).add_(new_ema_w, alpha=1 - self.decay)   
+
+            &#47&#47normalize embedding weight EMA and update current embedding weight
+            self.embed.data.copy_(self.embed_avg<a id="change"> / </a><a id="change">self.cluster_size.unsqueeze(1</a><a id="change">)</a>)
+        
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z)</code></pre><h3>After Change</h3><pre><code class='java'>
+            embed_normalized = self.embedding.embed_avg / cluster_size.unsqueeze(0)
+            self.embedding.weight.data.copy_(embed_normalized)
+
+        loss = self.beta * <a id="change">(z_q.detach() - z).pow(2).mean()</a>
+        z_q = z + (z_q - z).detach()
+        z_q = z_q.permute(0, 3, 1, 2).contiguous()
+        return z_q, loss, (perplexity, encodings, encoding_indices)
+</code></pre>

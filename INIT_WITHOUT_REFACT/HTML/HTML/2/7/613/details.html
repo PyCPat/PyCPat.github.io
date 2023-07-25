@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :613
+</h3><img src='2195115.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.head = SVDHead(args=args)
+
+	def forward(self, src, tgt, T_gt=None, prefix="train"):
+		feat1 = <a id="change">src[..., :3]</a>.transpose(1, 2)
+		feat2 = tgt[..., :3].transpose(1, 2)
+		src = src[..., :3]
+		tgt = tgt[..., :3]
+
+		src_embedding = self.emb_nn(feat1)
+		tgt_embedding = self.emb_nn(feat2)
+		src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+		src_embedding = src_embedding + src_embedding_p
+		tgt_embedding = tgt_embedding + tgt_embedding_p
+
+		scores = torch.matmul(src_embedding.transpose(2, 1).contiguous(), tgt_embedding) / math.sqrt(self.emb_dims)
+		scores<a id="change"> = </a>torch.softmax(scores, dim=2)
+		&#47&#47 b x points x points
+		feat1_corr = torch.matmul(feat2, scores.transpose(2, 1).contiguous())
+		rotation_ab, translation_ab = self.head(feat1, feat1_corr)</code></pre><h3>After Change</h3><pre><code class='java'>
+        tgt_point = tgt
+
+        src = src.transpose(1,2).contiguous()
+        tgt = <a id="change">tgt.transpose(1</a>,<a id="change">2</a><a id="change">)</a>.contiguous()
+
+        batch_size, _, _ = src.size()
+
+        src_embedding = self.emb_nn(src)
+        tgt_embedding = self.emb_nn(tgt)
+
+        src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+
+        src_embedding = src_embedding + src_embedding_p
+        tgt_embedding = tgt_embedding + tgt_embedding_p
+
+        rotation_ab, translation_ab = self.head(src_embedding, tgt_embedding, src, tgt)
+        if self.cycle:
+            rotation_ba<a id="change">, translation_ba = </a>self.head(tgt_embedding, src_embedding, tgt, src)
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/paul007pl/mvp_benchmark/commit/cb5622fec6ad947b57a83033563a402533978c61#diff-b0b2731ff940d2b158077f966e3841337bc29d9303d97f5bbc31253fe6eaf136L270' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2195115</div><div id='project'> Project Name: paul007pl/mvp_benchmark</div><div id='commit'> Commit Name: cb5622fec6ad947b57a83033563a402533978c61</div><div id='time'> Time: 2021-07-12</div><div id='author'> Author: panliang_de2007@qq.com</div><div id='file'> File Name: registration/models/dcp.py</div><div id='m_class'> M Class Name: Model</div><div id='n_method'> N Class Name: Model</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: registration/models/dcp.py</div><div id='n_file'> N File Name: registration/models/dcp.py</div><div id='m_start'> M Start Line: 270</div><div id='m_end'> M End Line: 294</div><div id='n_start'> N Start Line: 394</div><div id='n_end'> N End Line: 425</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = <a id="change">values[None, :, None, :, :]</a>.expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+
+        out = (attn.unsqueeze(-1) * selected_values).sum(dim=-2)
+        out<a id="change"> = </a>out.transpose(1, 2).reshape(b, t, -1)
+        return self.to_out(out)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        b, t, e, h = *x.shape, self.heads
+        queries = self.to_queries(x)
+        queries<a id="change"> = </a>self.batch_norm(<a id="change">queries.transpose(1</a>, <a id="change">2</a><a id="change">)</a>).transpose(1, 2)
+        queries = queries.chunk(2, dim=-1)
+        queries = torch.stack(queries).reshape(2, b, t, h, -1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/product-key-memory/commit/915dd922ef8e168f7970d5336d0ba79b4f57fe47#diff-53ae44ef28554a4a669d1c87edbe44e54bf426a6c124261ea02da7a46a53f1d9L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2195123</div><div id='project'> Project Name: lucidrains/product-key-memory</div><div id='commit'> Commit Name: 915dd922ef8e168f7970d5336d0ba79b4f57fe47</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: product_key_memory/product_key_memory.py</div><div id='m_class'> M Class Name: PKM</div><div id='n_method'> N Class Name: PKM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: product_key_memory/product_key_memory.py</div><div id='n_file'> N File Name: product_key_memory/product_key_memory.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 71</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        scene_2 = self.convScene_2(scene_1)
+
+        for i in range(dim_batch):
+            weight_read[i]<a id="change"> = </a>self.similarity(self.memory_past, <a id="change">state_past[:, i]</a>).unsqueeze(0)
+
+        &#47&#47 weight_read[torch.arange(dim_batch)] = self.similarity(self.memory_past, state_past[:,torch.arange(dim_batch)]).unsqueeze(0)
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Cosine similarity
+        past_normalized = F.normalize(self.memory_past, p=2, dim=1)
+        state_normalized = F.normalize(state_past.squeeze(), p=2, dim=1)
+        weight_read<a id="change"> = </a><a id="change">torch.matmul(past_normalized, state_normalized.transpose(0,1)).transpose(0</a>,<a id="change">1</a><a id="change">)</a>
+
+        index_max = torch.sort(weight_read, descending=True)[1].cpu()
+
+        for i_track in range(self.num_prediction):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/marchetz/mantra-cvpr20/commit/433bba3b3cf57d5cf7723c46a7fcfd17c1bac858#diff-49be5c461c82a3158fa4c2d730aea004906ad89beca9402cf670d0f93c208dabL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2195143</div><div id='project'> Project Name: marchetz/mantra-cvpr20</div><div id='commit'> Commit Name: 433bba3b3cf57d5cf7723c46a7fcfd17c1bac858</div><div id='time'> Time: 2019-07-28</div><div id='author'> Author: fede.becat@gmail.com</div><div id='file'> File Name: models/model_memory_single.py</div><div id='m_class'> M Class Name: model_memory_single</div><div id='n_method'> N Class Name: model_memory_single</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/model_memory_single.py</div><div id='n_file'> N File Name: models/model_memory_single.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 134</div><div id='n_end'> N End Line: 136</div><BR>

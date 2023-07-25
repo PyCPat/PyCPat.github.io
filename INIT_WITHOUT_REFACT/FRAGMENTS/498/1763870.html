@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        b, n, d, h = *x.shape, self.heads
+
+        q, k, v = <a id="change">self.QKV(x).chunk(3</a><a id="change">, dim=-1)</a>
+        q, k, v = map(lambda t: rearrange(t, "b n (h d) -&gt; b h n d", h=h), (q, k, v))
+
+        q = q * self.scale
+        similarity = einsum("b h n d, b h m d -&gt; b h n m", q, k)  &#47&#47 m=n</code></pre><h3>After Change</h3><pre><code class='java'>
+            x (b, n, d) or ((b, n, d), (b, n, d), (b, n, d)): input tensors, if its a list, the order represents (q, k, v)
+            attention_mask (b n m): Use True or 1 to mask out attention weights and False or 0 for opposite.
+        
+        <a id="change">if </a>isinstance(x, tuple)<a id="change">:
+            </a>b, n, d, h = *x[0].shape, self.heads
+            q, k, v = map(lambda proj, token: proj(token), zip((self.Q, self.K, self.V), x))
+        else:
+            b, n, d, h = *x.shape, self.heads
+            q, k, v = map(lambda proj: proj(x), (self.Q<a id="change">, self.K, self.V</a>))
+
+        q, k, v = map(lambda t: rearrange(t, "b n (h d) -&gt; b h n d", h=h), (q, k, v))
+</code></pre>

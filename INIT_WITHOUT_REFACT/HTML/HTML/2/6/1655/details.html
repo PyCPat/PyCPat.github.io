@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :1655
+</h3><img src='6665749.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        Returns:
+            output (batch_size, 1, T)
+        
+        <a id="change">raise </a><a id="change">NotImplementedError("Implement forward."</a><a id="change">)</a>
+    
+    @property
+    def num_parameters(self):
+        _num_parameters = 0</code></pre><h3>After Change</h3><pre><code class='java'>
+            estimated_sources: (batch_size, num_blocks * num_layers, 1, T) if stack_dim=1.
+            sorted_speaker_vector: (batch_size, n_sources, latent_dim, T)
+        
+        <a id="change">if sorted_idx is None</a><a id="change">:    
+            </a>sorted_idx = self.solve_permutation(mixture, spk_idx=spk_idx)
+
+            return sorted_idx &#47&#47 (batch_size, T, n_sources)
+        
+        estimated_sources<a id="change">, sorted_spk_vector = </a>self.extract_latent(mixture, sorted_idx, return_all_layers=return_all_layers, stack_dim=stack_dim)
+
+        if return_spk_vector:
+            return estimated_sources, sorted_spk_vector</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/bceeacb692d2f21773f3f8ad7921d5ff890a1403#diff-28649dc6ec1ef23f8ecb9167c7d59372d842872ac5c5379763c2fd9abbadab43L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6665749</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: bceeacb692d2f21773f3f8ad7921d5ff890a1403</div><div id='time'> Time: 2021-11-05</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/models/wavesplit.py</div><div id='m_class'> M Class Name: WaveSplitBase</div><div id='n_method'> N Class Name: WaveSplitBase</div><div id='m_method'> M Method Name: forward(7)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/wavesplit.py</div><div id='n_file'> N File Name: src/models/wavesplit.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            and F the number of output channels (= `num_output_channels`)
+        
+        if attn_mask is not None:
+            <a id="change">raise </a><a id="change">NotImplementedError("attention masks not supported yet"</a><a id="change">)</a>
+
+        q = self.q_proj(x_q)
+        k = self.k_proj(x_kv)
+        v = self.v_proj(x_kv)</code></pre><h3>After Change</h3><pre><code class='java'>
+        q, k, v = (rearrange(x, "b n (h c) -&gt; b h n c", h=self.num_heads) for x in [q, k, v])
+        q = q * self.dp_scale
+
+        <a id="change">if rot_pos_emb_q is not None</a><a id="change">:
+            </a>q<a id="change"> = </a>rot_pos_emb_q.rotate(q)
+
+        if rot_pos_emb_k is not None:
+            k = rot_pos_emb_k.rotate(k)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/krasserm/perceiver-io/commit/c2b9af32775fd28f693dd1b572142935efd31b99#diff-866d7079788f8c2d5430c75794ec5cca33c737ad6524b8b4f98feb4650471239L64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6665745</div><div id='project'> Project Name: krasserm/perceiver-io</div><div id='commit'> Commit Name: c2b9af32775fd28f693dd1b572142935efd31b99</div><div id='time'> Time: 2022-09-25</div><div id='author'> Author: krasserm@googlemail.com</div><div id='file'> File Name: perceiver/model/core/modules.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(6)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver/model/core/modules.py</div><div id='n_file'> N File Name: perceiver/model/core/modules.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 120</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        raise NotImplementedError("Implement D3Net")
+    
+    def forward(self, input):
+        <a id="change">raise </a><a id="change">NotImplementedError("Implement D3Net"</a><a id="change">)</a>
+
+class D3Block(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, num_blocks=3, depth=None, eps=EPS):
+        super().__init__()</code></pre><h3>After Change</h3><pre><code class='java'>
+        stacked.append(input)
+
+        for idx in range(self.num_d3blocks):
+            <a id="change">if idx != 0</a><a id="change">:
+                </a>x<a id="change"> = </a>torch.cat(stacked, dim=1)
+            x = self.net[idx](x)
+            stacked.append(x)
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L23' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6665746</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Net</div><div id='n_method'> N Class Name: D3Net</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 72</div><BR>

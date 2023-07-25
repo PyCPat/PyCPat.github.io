@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            p.requires_grad = False
+
+    def forward(self, x):
+        <a id="change">with torch</a><a id="change">.no_grad():
+            return </a>self.sobel(x)
+
+
+class Laplacian(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    @torch.no_grad()
+    def forward(self, x):
+        x = self.sobel(x)
+        <a id="change">if </a><a id="change">self.use_threshold:
+            </a>x_thr<a id="change"> = </a>torch.quantile(
+                x.view(x.size(0), 1, -1), 0.80, dim=2).view(<a id="change">x.size(</a>0<a id="change">)</a>, 1, 1, 1)
+            x[x &lt; x_thr]<a id="change"> = </a>0.
+        
+        return x
+</code></pre>

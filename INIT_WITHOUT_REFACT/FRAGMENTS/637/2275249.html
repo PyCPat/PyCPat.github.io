@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        avg_target = target.mean(dim=3)
+
+        bin_size<a id="change"> = </a>self.max_pixel_val / self.output_channel_bits
+        channel_bins = torch.arange(bin_size, self.max_pixel_val, bin_size).to(avg_target.device)
+        discretized_target = torch.bucketize(avg_target, channel_bins)
+        discretized_target = F.one_hot(discretized_target,
+                                       self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits
+        discretized_target = rearrange(discretized_target,
+                                       "b n c bi -&gt; b n (c bi)",
+                                       c=c,
+                                       bi=bi)
+
+        bin_mask = 2**torch.arange(c * bi - 1, -1,
+                                   -1).to(discretized_target.device,
+                                          discretized_target.dtype)
+        target_label = torch.sum(bin_mask * discretized_target, -1)
+        predicted_patches = predicted_patches[mask]
+        target_label = target_label[mask]
+        loss = <a id="change">F.cross_entropy(</a>predicted_patches, target_label<a id="change">)</a>
+        return loss
+
+
+&#47&#47 main class</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        target_label = torch.sum(bin_mask * discretized_target, dim = -1)
+
+        loss = <a id="change">F.cross_entropy(</a>predicted_patches[mask], target_label[mask]<a id="change">)</a>
+        return loss
+
+
+&#47&#47 main class</code></pre>

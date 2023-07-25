@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is not None:
+            pred, target = pred[mask], target[mask]
+
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a>
+        
+        pred_prob = torch.sigmoid(pred)  &#47&#47 prob from logits
+        binary_target = (target&gt;0.0).float()
+        alpha_factor = binary_target * self.alpha + (1 - binary_target) * (1 - self.alpha)
+        modulating_factor = torch.abs(target<a id="change"> - </a>pred_prob) ** self.gamma
+        loss = loss<a id="change"> * alpha_factor * </a>modulating_factor
+        loss = <a id="change">loss.sum()</a><a id="change"> / </a><a id="change">binary_target.sum()</a>
+        return loss * self.loss_weight
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            pred, target = pred[mask], target[mask]
+        pred_sigmoid = pred.sigmoid()
+        target = target.type_as(pred)
+        focal_weight = <a id="change">(target - pred_sigmoid).abs()</a>.pow(self.gamma)
+        loss = <a id="change">F.binary_cross_entropy_with_logits(</a>pred, target<a id="change">, reduction=&quotnone&quot)</a><a id="change"> * </a>focal_weight
+        loss = <a id="change">loss.sum()</a><a id="change"> / (target&gt;0.0).float().sum()</a>
+        return loss * self.loss_weight
+</code></pre>

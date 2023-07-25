@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mask
+    ):
+        b, n, d, h = *x.shape, self.heads
+        flat_indices<a id="change"> = </a><a id="change">rearrange(</a>adj_kv_indices, <a id="change">&quotb n a -&gt; b (n a)&quot</a><a id="change">)</a>
+
+        &#47&#47 select the neighbors for every individual token. "a" dimension stands for &quotadjacent neighbor&quot
+        kv_x = batched_index_select(x, flat_indices)
+        kv_x = rearrange(kv_x, &quotb (n a) d -&gt; b n a d&quot, n = n)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 derive query, key, value
+        q, k, v = self.to_qkv(x).chunk(3, dim = -1)
+        q<a id="change">, k, v</a> = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        &#47&#47 gather keys and values according to adjacency matrix
+        k<a id="change">, v = map(</a>lambda t: rearrange(t, &quotb h n d -&gt; (b h) n d&quot), (<a id="change">k</a><a id="change">, v</a>)<a id="change">)</a>
+        k = batched_index_select(k, flat_indices)
+        v = batched_index_select(v, flat_indices)
+        k, v = map(lambda t: rearrange(t, &quot(b h) (n a) d -&gt; b h n a d&quot, h = h, n = n), (k, v))
+</code></pre>

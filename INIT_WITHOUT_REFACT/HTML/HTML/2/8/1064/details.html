@@ -1,0 +1,93 @@
+<html><h3>Pattern ID :1064
+</h3><img src='3143343.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            p.requires_grad = False
+
+    def forward(self, x):
+        <a id="change">with torch</a><a id="change">.no_grad():
+            return </a>self.laplacian(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    @torch.no_grad()
+    def forward(self, x):
+        x = self.laplacian(x)
+        <a id="change">if </a><a id="change">self.use_threshold:
+            </a>x_thr<a id="change"> = </a>torch.quantile(
+                x.view(x.size(0), 1, -1), 0.80, dim=2).view(<a id="change">x.size(</a>0<a id="change">)</a>, 1, 1, 1)
+            x[x &lt; x_thr]<a id="change"> = </a>0.
+        
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/westlake-ai/openmixup/commit/1969d56d997a214a2d5f909c64998f458d2009b1#diff-df527fce09d813b854a4316fe5eebb772b7fef28524ff69868b8bbbc9fb3110aL65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3143343</div><div id='project'> Project Name: westlake-ai/openmixup</div><div id='commit'> Commit Name: 1969d56d997a214a2d5f909c64998f458d2009b1</div><div id='time'> Time: 2022-04-25</div><div id='author'> Author: 1070535169@qq.com</div><div id='file'> File Name: openmixup/models/utils/sobel.py</div><div id='m_class'> M Class Name: Laplacian</div><div id='n_method'> N Class Name: Laplacian</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openmixup/models/utils/sobel.py</div><div id='n_file'> N File Name: openmixup/models/utils/sobel.py</div><div id='m_start'> M Start Line: 65</div><div id='m_end'> M End Line: 66</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 100</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        If ``cache`` is set to True, ``feat`` and ``graph`` should not change during
+        training, or you will get wrong results.
+        
+        <a id="change">with graph</a><a id="change">.local_scope():
+
+            </a>if self._cached and self._cached_h is not None:
+                feat = self._cached_h
+            else:
+                &#47&#47 compute normalization
+                degs = graph.in_degrees().float().clamp(min=1)
+                norm = th.pow(degs, -0.5).to(feat.device).unsqueeze(1)
+
+                &#47&#47 compute (D^-0.5 * A * D^-0.5)^k X
+                for _ in range(self._k):
+                    feat = feat * norm
+                    graph.ndata[&quoth&quot] = feat
+                    graph.update_all(fn.copy_src(&quoth&quot, &quotm&quot),
+                                     fn.sum(&quotm&quot, &quoth&quot))
+                    feat = graph.ndata.pop(&quoth&quot)
+                    feat = feat * norm
+
+                &#47&#47 cache feature
+                if self._cached:
+                    self._cached_h = feat
+
+            if weight is not None:
+                if self.weight is not None:
+                    raise DGLError(&quotExternal weight is provided while at the same time the&quot
+                                   &quot module has defined its own weight parameter. Please&quot
+                                   &quot create the module with flag weight=False.&quot)
+            else:
+                weight = self.weight
+
+            if weight is not None:
+                feat = th.matmul(feat, weight)
+
+            if self.bias is not None:
+                feat = feat + self.bias
+            <a id="change">return </a>feat
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            assert edge_weight is None or edge_weight.size(0) == graph.num_edges()
+
+            <a id="change">if </a><a id="change">self._add_self_loop:
+                </a>graph = graph.add_self_loop()
+                if edge_weight is not None:
+                    size<a id="change"> = </a>(graph.num_nodes(),) + <a id="change">edge_weight.size()</a>[1:]
+                    self_loop = edge_weight.new_ones(size)
+                    edge_weight = torch.cat([edge_weight, self_loop])
+            else:
+                graph<a id="change"> = </a>graph.local_var()
+
+            edge_weight = dgl_normalize(graph, self._norm, edge_weight)
+            graph.edata[&quot_edge_weight&quot] = edge_weight</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/greatx/commit/c43665fd30401c63acbd50175da1880509a52d21#diff-4e82f29fd5c78eabd4fe1d5867020e786dc0deb6b867e435c11f46885eaadad4L107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3143340</div><div id='project'> Project Name: edisonleeeee/greatx</div><div id='commit'> Commit Name: c43665fd30401c63acbd50175da1880509a52d21</div><div id='time'> Time: 2021-12-06</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: graphwar/nn/sgconv.py</div><div id='m_class'> M Class Name: SGConv</div><div id='n_method'> N Class Name: SGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: graphwar/nn/sgconv.py</div><div id='n_file'> N File Name: graphwar/nn/sgconv.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 171</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            p.requires_grad = False
+
+    def forward(self, x):
+        <a id="change">with torch</a><a id="change">.no_grad():
+            return </a>self.sobel(x)
+
+
+class Laplacian(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    @torch.no_grad()
+    def forward(self, x):
+        x = self.sobel(x)
+        <a id="change">if </a><a id="change">self.use_threshold:
+            </a>x_thr<a id="change"> = </a>torch.quantile(
+                x.view(x.size(0), 1, -1), 0.80, dim=2).view(<a id="change">x.size(</a>0<a id="change">)</a>, 1, 1, 1)
+            x[x &lt; x_thr]<a id="change"> = </a>0.
+        
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/westlake-ai/openmixup/commit/1969d56d997a214a2d5f909c64998f458d2009b1#diff-df527fce09d813b854a4316fe5eebb772b7fef28524ff69868b8bbbc9fb3110aL31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3143337</div><div id='project'> Project Name: westlake-ai/openmixup</div><div id='commit'> Commit Name: 1969d56d997a214a2d5f909c64998f458d2009b1</div><div id='time'> Time: 2022-04-25</div><div id='author'> Author: 1070535169@qq.com</div><div id='file'> File Name: openmixup/models/utils/sobel.py</div><div id='m_class'> M Class Name: Sobel</div><div id='n_method'> N Class Name: Sobel</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openmixup/models/utils/sobel.py</div><div id='n_file'> N File Name: openmixup/models/utils/sobel.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 36</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 51</div><BR>

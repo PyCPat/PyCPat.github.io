@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :2245
+</h3><img src='7895484.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None):
+        b, n, _, h = *x.shape, self.heads
+        qkv = <a id="change">self.to_qkv(</a>x<a id="change">)</a>
+        q, k, v = <a id="change">rearrange(</a>qkv, <a id="change">&quotb n (qkv h d) -&gt; qkv b h n d&quot</a><a id="change">, qkv = 3, h = h)</a>
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+
+        if mask is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, mask = None):
+        b, n, _, h = *x.shape, self.heads
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), qkv)
+
+        dots = torch.einsum(&quotbhid,bhjd-&gt;bhij&quot, q, k) * self.scale
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/6d1df1a9701dcef683b19abd09136ba23a01a770#diff-fce7f92e0b957764a240f657482514430a2fcdd8a0fcfc1d23372f119a92e6ccL50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895484</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: 6d1df1a9701dcef683b19abd09136ba23a01a770</div><div id='time'> Time: 2020-10-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/vit_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/vit_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/vit_pytorch.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 51</div><div id='n_start'> N Start Line: 50</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        qkv = <a id="change">self.to_qkv(</a>x<a id="change">)</a>
+        q, k, v = <a id="change">rearrange(</a>qkv, <a id="change">&quotb (qkv heads c) h w -&gt; qkv b heads c (h w)&quot</a><a id="change">, heads = self.heads, qkv=3)</a>
+        k = k.softmax(dim=-1)
+        context = torch.einsum(&quotbhdn,bhen-&gt;bhde&quot, k, v)
+        out = torch.einsum(&quotbhde,bhdn-&gt;bhen&quot, context, q)
+        out = rearrange(out, &quotb heads c (h w) -&gt; b (heads c) h w&quot, heads=self.heads, h=h, w=w)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb (h c) x y -&gt; b h c (x y)&quot, h = self.heads), qkv)
+        q = q * self.scale
+
+        k = k.softmax(dim = -1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/denoising-diffusion-pytorch/commit/91cff459394b784f870f3998023439796c95b7ca#diff-1ef0846017d5c27bd277b66e5afcab8798667afd39675e6f9382fc7e87a1fe28L178' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895485</div><div id='project'> Project Name: lucidrains/denoising-diffusion-pytorch</div><div id='commit'> Commit Name: 91cff459394b784f870f3998023439796c95b7ca</div><div id='time'> Time: 2022-01-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='n_file'> N File Name: denoising_diffusion_pytorch/denoising_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 180</div><div id='m_end'> M End Line: 181</div><div id='n_start'> N Start Line: 168</div><div id='n_end'> N End Line: 170</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        qkv = <a id="change">self.to_qkv(</a>x<a id="change">)</a>
+        q, k, v = <a id="change">rearrange(</a>qkv, <a id="change">&quotb (qkv heads c) h w -&gt; qkv b heads c (h w)&quot</a><a id="change">, heads = self.heads, qkv=3)</a>
+        k = k.softmax(dim=-1)
+        context = torch.einsum(&quotbhdn,bhen-&gt;bhde&quot, k, v)
+        out = torch.einsum(&quotbhde,bhdn-&gt;bhen&quot, context, q)
+        out = rearrange(out, &quotb heads c (h w) -&gt; b (heads c) h w&quot, heads=self.heads, h=h, w=w)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = self.norm(x)
+        qkv = <a id="change">self.to_qkv(x).chunk(3</a><a id="change">, dim = 1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb (heads c) h w -&gt; b heads c (h w)&quot, heads = self.heads), (q, k, v))
+        q = q * self.scale
+
+        k = k.softmax(dim=-1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/ddpm-proteins/commit/7348a21bc4ed9be6ea1aa6bccef3647294573726#diff-294329f92d6e12167448a958b6c56a6b392e72c976b33cd74a3d590b6c8f64cfL171' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7895486</div><div id='project'> Project Name: lucidrains/ddpm-proteins</div><div id='commit'> Commit Name: 7348a21bc4ed9be6ea1aa6bccef3647294573726</div><div id='time'> Time: 2021-06-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: ddpm_proteins/ddpm_proteins.py</div><div id='m_class'> M Class Name: LinearAttention</div><div id='n_method'> N Class Name: LinearAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ddpm_proteins/ddpm_proteins.py</div><div id='n_file'> N File Name: ddpm_proteins/ddpm_proteins.py</div><div id='m_start'> M Start Line: 173</div><div id='m_end'> M End Line: 174</div><div id='n_start'> N Start Line: 166</div><div id='n_end'> N End Line: 169</div><BR>

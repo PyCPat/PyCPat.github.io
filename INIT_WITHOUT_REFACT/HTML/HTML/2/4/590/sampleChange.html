@@ -1,0 +1,34 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+	def forward(self, src, tgt, T_gt=None, prefix="train"):
+		feat1 = src[..., :3].transpose(1, 2)
+		feat2 = tgt[..., :3].transpose(1, 2)
+		src = <a id="change">src[..., :3]</a>
+		tgt = tgt[..., :3]
+
+		src_embedding = self.emb_nn(feat1)
+		tgt_embedding = self.emb_nn(feat2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        src_point = src
+        tgt_point = tgt
+
+        src = <a id="change">src.transpose(1,2).contiguous()</a>
+        tgt = tgt.transpose(1,2).contiguous()
+
+        batch_size, _, _ = src.size()
+
+        src_embedding = self.emb_nn(src)
+        tgt_embedding = self.emb_nn(tgt)
+
+        src_embedding_p, tgt_embedding_p = self.pointer(src_embedding, tgt_embedding)
+
+        src_embedding = src_embedding + src_embedding_p
+        tgt_embedding = tgt_embedding + tgt_embedding_p
+
+        rotation_ab, translation_ab = self.head(src_embedding, tgt_embedding, src, tgt)
+        if self.cycle:
+            rotation_ba<a id="change">, translation_ba = </a>self.head(tgt_embedding, src_embedding, tgt, src)
+
+        else:
+            rotation_ba = rotation_ab.transpose(2, 1).contiguous()</code></pre>

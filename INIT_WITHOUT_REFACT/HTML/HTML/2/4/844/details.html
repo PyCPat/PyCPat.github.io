@@ -1,0 +1,62 @@
+<html><h3>Pattern ID :844
+</h3><img src='2643793.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, z, pos, batch=None):
+        assert z.dim() == 1 and z.dtype == torch.long
+        batch = <a id="change">torch.zeros_like(</a>z<a id="change">)</a> if <a id="change">batch is None</a> else batch
+
+        if self.derivative:
+            pos.requires_grad_(True)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = x + attn(x, edge_index, edge_weight, edge_attr)
+        x = self.out_norm(x)
+        
+        <a id="change">return </a>x<a id="change">, z, pos, batch</a>
+
+    def __repr__(self):
+        return (f&quot{self.__class__.__name__}(&quot
+                f&quothidden_channels={self.hidden_channels}, &quot</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/664a5d31ef39ac64ba4939188322a979eaa9c4f2#diff-41fd77dbca1e928d027707bbb314eea394ba89b00249c2051b698902aeceea50L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643793</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: 664a5d31ef39ac64ba4939188322a979eaa9c4f2</div><div id='time'> Time: 2021-05-13</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/torchmd_t.py</div><div id='m_class'> M Class Name: TorchMD_T</div><div id='n_method'> N Class Name: TorchMD_T</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/torchmd_t.py</div><div id='n_file'> N File Name: torchmdnet/models/torchmd_t.py</div><div id='m_start'> M Start Line: 125</div><div id='m_end'> M End Line: 146</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 107</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, z, pos, batch=None):
+        assert z.dim() == 1 and z.dtype == torch.long
+        batch = <a id="change">torch.zeros_like(</a>z<a id="change">)</a> if <a id="change">batch is None</a> else batch
+
+        if self.derivative:
+            pos.requires_grad_(True)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for interaction in self.interactions:
+            x = x + interaction(x, edge_index, edge_weight, edge_attr)
+        
+        <a id="change">return </a>x<a id="change">, z, pos, batch</a>
+
+    def __repr__(self):
+        return (f&quot{self.__class__.__name__}(&quot
+                f&quothidden_channels={self.hidden_channels}, &quot</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/torchmd/torchmd-net/commit/664a5d31ef39ac64ba4939188322a979eaa9c4f2#diff-ec27ffac25aff25f5f73a0c55e7f1aae7f0f69fb31bd0b07ffca625968703986L122' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643794</div><div id='project'> Project Name: torchmd/torchmd-net</div><div id='commit'> Commit Name: 664a5d31ef39ac64ba4939188322a979eaa9c4f2</div><div id='time'> Time: 2021-05-13</div><div id='author'> Author: p.thoelke@gmx.de</div><div id='file'> File Name: torchmdnet/models/torchmd_gn.py</div><div id='m_class'> M Class Name: TorchMD_GN</div><div id='n_method'> N Class Name: TorchMD_GN</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchmdnet/models/torchmd_gn.py</div><div id='n_file'> N File Name: torchmdnet/models/torchmd_gn.py</div><div id='m_start'> M Start Line: 123</div><div id='m_end'> M End Line: 142</div><div id='n_start'> N Start Line: 102</div><div id='n_end'> N End Line: 104</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        loss    = 0
+        n       = torch.sum(y_true[..., 4] == 1)
+        if <a id="change">n != 0</a>:
+            &#47&#47---------------------------------------------------------------&#47&#47
+            &#47&#47   计算预测结果和真实结果的giou
+            &#47&#47----------------------------------------------------------------&#47&#47
+            giou        = self.box_giou(pred_boxes, y_true[..., :4])
+            loss_loc    = torch.mean((1 - giou)[y_true[..., 4] == 1])
+            loss_cls    = torch.mean(self.BCELoss(pred_cls[y_true[..., 4] == 1], self.smooth_labels(y_true[..., 5:][y_true[..., 4] == 1], self.label_smoothing, self.num_classes)))
+            loss        += loss_loc * self.box_ratio + loss_cls * self.cls_ratio
+            &#47&#47-----------------------------------------------------------&#47&#47
+            &#47&#47   计算置信度的loss
+            &#47&#47-----------------------------------------------------------&#47&#47
+            tobj        = torch.where(y_true[..., 4] == 1, giou.detach().clamp(0), <a id="change">torch.zeros_like(</a>y_true[..., 4]<a id="change">)</a>)
+        else:
+            tobj        = torch.zeros_like(y_true[..., 4])
+        loss_conf   = torch.mean(self.BCELoss(conf, tobj))</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss_cls    = torch.sum(self.BCELoss(pred_cls[y_true[..., 4] == 1], self.smooth_labels(y_true[..., 5:][y_true[..., 4] == 1], self.label_smoothing, self.num_classes)))
+
+        loss        = loss_loc * self.box_ratio + loss_conf * self.balance[l] * self.obj_ratio + loss_cls * self.cls_ratio
+        num_pos = torch.sum(y_true[...<a id="change">, 4</a>])
+        num_pos = torch.max(num_pos, torch.ones_like(num_pos))
+        <a id="change">return </a>loss, num_pos
+    
+    def get_near_points(self, x, y, i, j):
+        sub_x = x - i</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bubbliiiing/yolov5-pytorch/commit/d49e041b6f4ef50c5d94ce88d33d147f3227bc77#diff-25623619f282444dafcdada7a0706865483da83457ebd0cd33af314f6adcfca9L106' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2643795</div><div id='project'> Project Name: bubbliiiing/yolov5-pytorch</div><div id='commit'> Commit Name: d49e041b6f4ef50c5d94ce88d33d147f3227bc77</div><div id='time'> Time: 2022-01-15</div><div id='author'> Author: 47347516+bubbliiiing@users.noreply.github.com</div><div id='file'> File Name: nets/yolo_training.py</div><div id='m_class'> M Class Name: YOLOLoss</div><div id='n_method'> N Class Name: YOLOLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nets/yolo_training.py</div><div id='n_file'> N File Name: nets/yolo_training.py</div><div id='m_start'> M Start Line: 158</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 156</div><div id='n_end'> N End Line: 200</div><BR>

@@ -1,0 +1,74 @@
+<html><h3>Pattern ID :2933
+</h3><img src='9739060.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            if not self.training:  &#47&#47 inference
+                if self.grid[i].shape[2:4] != x[i].shape[2:4]:
+                    self.grid[i] = <a id="change">self._make_grid(nx, ny).to(</a>x[i].device<a id="change">)</a>
+
+                y = x[i].sigmoid()
+                y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y = x[i].sigmoid()
+                <a id="change">if </a>self.inplace<a id="change">:
+                    </a>y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                else:  &#47&#47 for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
+                    xy = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y<a id="change"> = </a><a id="change">torch.cat(</a>(xy<a id="change">, wh, y[..., 4:]</a>), -1<a id="change">)</a>
+                z.append(y.view(bs, -1, self.no))
+
+        return x if self.training else (torch.cat(z, 1), x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pooya-mohammadi/deep_utils/commit/7d442fe6eef7ccd63661e0463e87358ff795d709#diff-49eab6b0c60ac05fb492f015910f89eb7e7700e4f19ef20b92bf2a7483df7ec3L43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9739060</div><div id='project'> Project Name: pooya-mohammadi/deep_utils</div><div id='commit'> Commit Name: 7d442fe6eef7ccd63661e0463e87358ff795d709</div><div id='time'> Time: 2021-11-26</div><div id='author'> Author: practical.ai.programming@gmail.com</div><div id='file'> File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='m_class'> M Class Name: Detect</div><div id='n_method'> N Class Name: Detect</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='n_file'> N File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 71</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            else:
+                &#47&#47 compute normalization
+                degs = graph.in_degrees().float().clamp(min=1)
+                norm = <a id="change">th.pow(degs, -0.5).to(</a>feat.device<a id="change">)</a>.unsqueeze(1)
+
+                &#47&#47 compute (D^-0.5 * A * D^-0.5)^k X
+                for _ in range(self._k):</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            assert edge_weight is None or edge_weight.size(0) == graph.num_edges()
+
+            if <a id="change">self._add_self_loop</a>:
+                graph = graph.add_self_loop()
+                <a id="change">if </a>edge_weight is not None<a id="change">:
+                    </a>size = (graph.num_nodes()<a id="change"></a>,) + edge_weight.size()[1:]
+                    self_loop = edge_weight.new_ones(size)
+                    edge_weight<a id="change"> = </a><a id="change">torch.cat(</a>[edge_weight, self_loop]<a id="change">)</a>
+            else:
+                graph = graph.local_var()
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/edisonleeeee/graphwar/commit/c43665fd30401c63acbd50175da1880509a52d21#diff-4e82f29fd5c78eabd4fe1d5867020e786dc0deb6b867e435c11f46885eaadad4L107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9739054</div><div id='project'> Project Name: edisonleeeee/graphwar</div><div id='commit'> Commit Name: c43665fd30401c63acbd50175da1880509a52d21</div><div id='time'> Time: 2021-12-06</div><div id='author'> Author: cnljt@outlook.com</div><div id='file'> File Name: graphwar/nn/sgconv.py</div><div id='m_class'> M Class Name: SGConv</div><div id='n_method'> N Class Name: SGConv</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: graphwar/nn/sgconv.py</div><div id='n_file'> N File Name: graphwar/nn/sgconv.py</div><div id='m_start'> M Start Line: 141</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 144</div><div id='n_end'> N End Line: 171</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            if not self.training:  &#47&#47 inference
+                if self.grid[i].shape[2:4] != x[i].shape[2:4]:
+                    self.grid[i] = <a id="change">self._make_grid(nx, ny).to(</a>x[i].device<a id="change">)</a>
+
+                y = x[i].sigmoid()
+                y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        z = []  &#47&#47 inference output
+        for <a id="change">i</a> in range(self.nl):
+            x[i] = self.m[i](x[i])  &#47&#47 conv
+            bs, _, ny, nx = x[i].shape  &#47&#47 x(bs,255,20,20) to x(bs,3,20,20,85)
+            x[i] = x[i].view(bs, self.na, self.no, ny, nx).permute(0, 1, 3, 4, 2).contiguous()
+
+            if not self.training:  &#47&#47 inference
+                if self.grid[i].shape[2:4] != x[i].shape[2:4] or self.onnx_dynamic:
+                    self.grid[i], self.anchor_grid[i] = self._make_grid(nx, ny, i)
+
+                y = x[i].sigmoid()
+                <a id="change">if </a>self.inplace<a id="change">:
+                    </a>y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                else:  &#47&#47 for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
+                    xy = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  &#47&#47 xy
+                    wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  &#47&#47 wh
+                    y<a id="change"> = </a><a id="change">torch.cat(</a>(xy<a id="change">, wh, y[..., 4:]</a>), -1<a id="change">)</a>
+                z.append(y.view(bs, -1, self.no))
+
+        return x if self.training else (torch.cat(z, 1), x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/practical-ai/deep_utils/commit/7d442fe6eef7ccd63661e0463e87358ff795d709#diff-49eab6b0c60ac05fb492f015910f89eb7e7700e4f19ef20b92bf2a7483df7ec3L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9739050</div><div id='project'> Project Name: practical-ai/deep_utils</div><div id='commit'> Commit Name: 7d442fe6eef7ccd63661e0463e87358ff795d709</div><div id='time'> Time: 2021-11-26</div><div id='author'> Author: practical.ai.programming@gmail.com</div><div id='file'> File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='m_class'> M Class Name: Detect</div><div id='n_method'> N Class Name: Detect</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='n_file'> N File Name: deep_utils/vision/object_detection/yolo/v5/torch/models/yolo.py</div><div id='m_start'> M Start Line: 43</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 71</div><BR>

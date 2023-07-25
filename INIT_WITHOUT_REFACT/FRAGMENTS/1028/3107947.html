@@ -1,0 +1,57 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if self.use_hinge_gan_loss and not scores_fake is not None:
+            hinge_fake_loss = 0
+            <a id="change">if </a><a id="change">isinstance(</a>scores_fake, list<a id="change">):
+                </a>for score_fake in scores_fake:
+                    fake_loss = self.hinge_loss(score_fake)
+                    hinge_fake_loss += fake_loss
+            else:
+                fake_loss<a id="change"> = </a>self.hinge_loss(scores_fake)
+                hinge_fake_loss = fake_loss
+            return_dict[&quotG_hinge_fake_loss&quot] = hinge_fake_loss
+            loss += self.hinge_gan_loss_weight * hinge_fake_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, y_hat=None, y=None, scores_fake=None, feats_fake=None, feats_real=None, y_hat_sub=None, y_sub=None):
+        gen_loss = 0
+        adv_loss<a id="change"> = </a>0
+        return_dict = {}
+
+        &#47&#47 STFT Loss
+        if self.use_stft_loss:
+            stft_loss_mg, stft_loss_sc = self.stft_loss(y_hat.squeeze(1), y.squeeze(1))
+            return_dict[&quotG_stft_loss_mg&quot] = stft_loss_mg
+            return_dict[&quotG_stft_loss_sc&quot] = stft_loss_sc
+            gen_loss += self.stft_loss_weight * (stft_loss_mg + stft_loss_sc)
+
+        &#47&#47 subband STFT Loss
+        if self.use_subband_stft_loss:
+            subband_stft_loss_mg, subband_stft_loss_sc = self.subband_stft_loss(y_hat_sub, y_sub)
+            return_dict[&quotG_subband_stft_loss_mg&quot] = subband_stft_loss_mg
+            return_dict[&quotG_subband_stft_loss_sc&quot] = subband_stft_loss_sc
+            gen_loss += self.subband_stft_loss_weight * (subband_stft_loss_mg + subband_stft_loss_sc)
+
+        &#47&#47 multiscale MSE adversarial loss
+        if self.use_mse_gan_loss and scores_fake is not None:
+            mse_fake_loss = _apply_G_adv_loss(scores_fake, self.mse_loss)
+            return_dict[&quotG_mse_fake_loss&quot] = mse_fake_loss
+            adv_loss += self.mse_gan_loss_weight * mse_fake_loss
+
+        &#47&#47 multiscale Hinge adversarial loss
+        if self.use_hinge_gan_loss and not scores_fake is not None:
+            hinge_fake_loss = _apply_G_adv_loss(scores_fake, self.hinge_loss)
+            return_dict[&quotG_hinge_fake_loss&quot] = hinge_fake_loss
+            adv_loss += self.hinge_gan_loss_weight * hinge_fake_loss
+
+        &#47&#47 Feature Matching Loss
+        if self.use_feat_match_loss and not feats_fake:
+            feat_match_loss = self.feat_match_loss(feats_fake, feats_real)
+            return_dict[&quotG_feat_match_loss&quot] = feat_match_loss
+            adv_loss += self.feat_match_loss_weight * feat_match_loss
+        <a id="change">return_dict[&quotG_loss&quot]</a> = gen_loss + adv_loss
+        return_dict[&quotG_gen_loss&quot] = gen_loss
+        return_dict[&quotG_adv_loss&quot] = adv_loss
+        return return_dict</code></pre>

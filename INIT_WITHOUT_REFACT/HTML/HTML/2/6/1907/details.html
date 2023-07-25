@@ -1,0 +1,83 @@
+<html><h3>Pattern ID :1907
+</h3><img src='7251886.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if self.version == &quotB0&quot:
+            if self.training:
+                var = x.var([0,2,3])
+                self.running_var = (self.momentum * self.running_var) + (1.0-self.momentum) * (x.shape[0]/(<a id="change">x.shape[0]</a>-1)*var)
+            else:
+                var = self.running_var
+            sigma = var.view([1, self.insize, 1, 1]).expand_as(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            exponential_average_factor = self.momentum
+            if self.training:
+                var = x.var([0, 2, 3], unbiased=False)
+                n<a id="change"> = </a>x.numel()<a id="change"> / </a><a id="change">x.size(1</a><a id="change">)</a>
+                with torch.no_grad():
+                    self.running_var = exponential_average_factor * var * n / (n - 1)\
+                        + (1 - exponential_average_factor) * self.running_var</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/digantamisra98/evonorm/commit/e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef#diff-3e603d8ee6e954d92d8ca2340dc887ad739428240f8c52b56be403bbc30e64e6L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7251886</div><div id='project'> Project Name: digantamisra98/evonorm</div><div id='commit'> Commit Name: e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef</div><div id='time'> Time: 2020-04-08</div><div id='author'> Author: mishradiganta91@gmail.com</div><div id='file'> File Name: evonorm2d.py</div><div id='m_class'> M Class Name: EvoNorm2D</div><div id='n_method'> N Class Name: EvoNorm2D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: evonorm2d.py</div><div id='n_file'> N File Name: evonorm2d.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        total_loss = 0
+        &#47&#47 predict = F.softmax(predict, dim=1)
+
+        for i in range(<a id="change">target.shape[1]</a>):
+            if i != self.ignore_index:
+                dice_loss = dice(predict[:, i], target[:, i])
+                if self.weight is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+            dice += 2 * (pred[:,i] * target[:,i]).sum(dim=1).sum(dim=1).sum(dim=1) / (pred[:,i].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) +
+                                                target[:,i].pow(2).sum(dim=1).sum(dim=1).sum(dim=1) + smooth)
+        &#47&#47 返回的是dice距离
+        dice<a id="change"> = </a>dice<a id="change"> / </a><a id="change">pred.size(1</a><a id="change">)</a>
+        return torch.clamp((1 - dice).mean(), 0, 1)
+
+class ELDiceLoss(nn.Module):
+    def __init__(self):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lee-zq/3dunet-pytorch/commit/070a8816879b33e97a9541e35cc5b2bfaf1bcd76#diff-afc9c0f856a1fa54a2d35dfcd375a176b7b736953195238a3a51870eef4314bbL77' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7251883</div><div id='project'> Project Name: lee-zq/3dunet-pytorch</div><div id='commit'> Commit Name: 070a8816879b33e97a9541e35cc5b2bfaf1bcd76</div><div id='time'> Time: 2021-05-22</div><div id='author'> Author: zq_lee@163.com</div><div id='file'> File Name: utils/loss.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss.py</div><div id='n_file'> N File Name: utils/loss.py</div><div id='m_start'> M Start Line: 78</div><div id='m_end'> M End Line: 93</div><div id='n_start'> N Start Line: 18</div><div id='n_end'> N End Line: 27</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.num_iterations = num_iterations
+
+    def forward(self, x):
+        batch_size = <a id="change">x.shape[0]</a>
+        &#47&#47 x: (batch_size, num_route_nodes, in_channels)
+        &#47&#47 route_weights: (num_route_nodes, num_capsules, in_channels, out_channels)
+        &#47&#47 u_hat: (batch_size, num_capsules, num_route_nodes, out_channels)
+        u_hat = torch.einsum(&quotijk, jlkm -&gt; iljm&quot, x, self.route_weights)</code></pre><h3>After Change</h3><pre><code class='java'>
+                              requires_grad=True)
+
+    def forward(self, x):
+        batch_size = <a id="change">x.size(0</a><a id="change">)</a>
+        &#47&#47 (batch_size, in_caps, in_dim) -&gt; (batch_size, 1, in_caps, in_dim, 1)
+        x = x.unsqueeze(1).unsqueeze(4)
+        &#47&#47
+        &#47&#47 W @ x =
+        &#47&#47 (1, num_caps, in_caps, dim_caps, in_dim) @ (batch_size, 1, in_caps, in_dim, 1) =
+        &#47&#47 (batch_size, num_caps, in_caps, dim_caps, 1)
+        u_hat = torch.matmul(self.W, x)
+        &#47&#47 (batch_size, num_caps, in_caps, dim_caps)
+        u_hat = u_hat.squeeze(-1)
+        &#47&#47 detach u_hat during routing iterations to prevent gradients from flowing
+        temp_u_hat = u_hat.detach()
+
+        b = torch.zeros(batch_size, self.num_caps, self.in_caps, 1).to(self.device)
+
+        for route_iter in range(self.num_routing - 1):
+            &#47&#47 (batch_size, num_caps, in_caps, 1) -&gt; Softmax along num_caps
+            c = b.softmax(dim=1)
+
+            &#47&#47 element-wise multiplication
+            &#47&#47 (batch_size, num_caps, in_caps, 1) * (batch_size, in_caps, num_caps, dim_caps) -&gt;
+            &#47&#47 (batch_size, num_caps, in_caps, dim_caps) sum across in_caps -&gt;
+            &#47&#47 (batch_size, num_caps, dim_caps)
+            s = (c * temp_u_hat).sum(dim=2)
+            &#47&#47 apply "squashing" non-linearity along dim_caps
+            v = squash(s)
+            &#47&#47 dot product agreement between the current output vj and the prediction uj|i
+            &#47&#47 (batch_size, num_caps, in_caps, dim_caps) @ (batch_size, num_caps, dim_caps, 1)
+            &#47&#47 -&gt; (batch_size, num_caps, in_caps, 1)
+            uv = torch.matmul(temp_u_hat, v.unsqueeze(-1))
+            b += uv
+
+        &#47&#47 last iteration is done on the original u_hat, without the routing weights update
+        c = b.softmax(dim=1)
+        s<a id="change"> = </a>(c<a id="change"> * </a>u_hat).sum(dim=2)
+        &#47&#47 apply "squashing" non-linearity along dim_caps
+        v = squash(s)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/riroaki/capsnet/commit/e62f83faad1731befd8a1e434aaf902e2140aecb#diff-903964c7bdce50a4b995b4520374f243c677f45b2f8c7ed7b15abeeb6f26af12L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7251888</div><div id='project'> Project Name: riroaki/capsnet</div><div id='commit'> Commit Name: e62f83faad1731befd8a1e434aaf902e2140aecb</div><div id='time'> Time: 2020-03-08</div><div id='author'> Author: aki@akideMacBook-Pro.local</div><div id='file'> File Name: capsnet.py</div><div id='m_class'> M Class Name: DigitCaps</div><div id='n_method'> N Class Name: DigitCaps</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: capsnet.py</div><div id='n_file'> N File Name: capsnet.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 79</div><div id='n_start'> N Start Line: 59</div><div id='n_end'> N End Line: 93</div><BR>

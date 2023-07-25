@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :2725
+</h3><img src='9037629.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        spec = self.mask(spec, m)
+        df_coefs, df_alpha = self.df_dec(emb, c0)
+
+        <a id="change">for </a>_ in range(self.df_iter)<a id="change">:
+            </a>if self.use_alpha:
+                spec = self.df_op(spec, df_coefs, df_alpha)
+            else:
+                spec = self.df_op(spec, df_coefs)</code></pre><h3>After Change</h3><pre><code class='java'>
+                spec = self.pad_spec(spec)
+                spec = self.df_op(spec, df_coefs)
+        else:
+            df_alpha<a id="change"> = </a><a id="change">torch.zeros(</a>()<a id="change">)</a>
+
+        return spec, m, lsnr, df_alpha
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/a02877c94eb3c65d15ea256da7fb5a5193f6596a#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL431' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037629</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: a02877c94eb3c65d15ea256da7fb5a5193f6596a</div><div id='time'> Time: 2022-05-11</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 488</div><div id='m_end'> M End Line: 504</div><div id='n_start'> N Start Line: 431</div><div id='n_end'> N End Line: 456</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+
+        <a id="change">for </a>(f, g), (f_args, g_args) in layers_and_args<a id="change">:
+            </a>x = x + f(x, **f_args)
+            x = x + g(x, **g_args)
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.training and self.layer_dropout &gt; 0:
+            layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+
+        aux_loss = <a id="change">torch.zeros(</a>1<a id="change">, device=x.device, dtype=x.dtype)</a>
+
+        for (f, g), (f_args, g_args) in layers_and_args:
+            res, loss = cast_return(f(x, **f_args))
+            aux_loss += loss
+            x = x + res
+
+            res, loss = cast_return(g(x, **g_args))
+            aux_loss<a id="change"> += </a>loss
+            x = x + res
+        return x, aux_loss
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/7066f4fb2505744791a8113dde847e2ff6a3f18a#diff-ecc3da95b25235ff56146920727a0b55b5c678f7b11825e930dbbc96e875a3cdL141' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037633</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 7066f4fb2505744791a8113dde847e2ff6a3f18a</div><div id='time'> Time: 2020-05-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/reversible.py</div><div id='m_class'> M Class Name: SequentialSequence</div><div id='n_method'> N Class Name: SequentialSequence</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/reversible.py</div><div id='n_file'> N File Name: routing_transformer/reversible.py</div><div id='m_start'> M Start Line: 143</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 159</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        <a id="change">for </a>i, att_timesteps in enumerate(count)<a id="change">:
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            </a>self.c_t[i] = self.attentionStep(first_h_a, first_h_b, att_timesteps)
+
+        if self.drop &lt; 1.0:
+            self.c_t = self.dropout(self.c_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.proj(x)
+        x = self.dropout(x)
+
+        out<a id="change"> = </a><a id="change">torch.zeros(</a>(batch_size, time_steps, self.hidden_dim)<a id="change">)</a>
+
+        for cur_time in range(time_steps):
+            cur_x = x[:, : cur_time + 1, :]
+            out[:, cur_time, :] = self.retain_encoder(cur_x)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 9037632</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>

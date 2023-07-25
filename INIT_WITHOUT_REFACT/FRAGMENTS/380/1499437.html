@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        regs = list()
+
+        n, h, w, k = <a id="change">logits[0]</a>.shape
+        &#47&#47 ths = torch.tensor(float(h * w) / k, device=device).clamp(1.0, h * w)
+
+        &#47&#47 codes: [m, n, h, w]; logits: m * list(n, h, w, k); codeFreqMap: m * list([n, h, w]), binCounts: m * list([n, k])</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 logit = logit.mean(dim=(1, 2))
+            posterior = Categorical(logits=logit)
+            prior = Categorical(logits=torch.zeros_like(logit))
+            reg = <a id="change">torch.distributions.kl_divergence(posterior, prior).mean()</a>
+            &#47&#47 [n, h, w, k]
+            &#47&#47 weight = (-logit).detach().softmax(-1)
+            &#47&#47 oneHot = F.one_hot(code, num_classes=logit.shape[-1]).float()
+            &#47&#47 [n, h, w]
+            &#47&#47 targetWeight = (weight * oneHot).sum(-1)
+            code = torch.randint_like(code, logit.shape[-1])
+            logit = logit.permute(0, 3, 1, 2)
+            mle = F.cross_entropy(logit, code)
+            regs.append(reg<a id="change"> + 0.01</a><a id="change"> * </a>mle)
+        regs = sum(regs) / len(logits)
+        &#47&#47 regs = 0.0
+        return ssimLoss, l1Loss + l2Loss, regs</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, c, h, w] -&gt; [h, w, n, c]
+            encoderIn = xRaw.permute(2, 3, 0, 1)
+            &#47&#47 [h, w, n, c] -&gt; [h*w, n, c]
+            posisted = <a id="change">self._position(encoderIn).reshape(</a>-1, n, c<a id="change">)</a>
+            encoderIn = encoderIn.reshape(-1, n, c)
+            &#47&#47 [h*w, n, c]
+            x = self._encoder(posisted)
+            &#47&#47 x = self._encoder(posisted, codewords[:, None, ...].expand(k, n, c))</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 deTransformed = self._dePosition(deTransformed).permute(2, 3, 0, 1)
+            &#47&#47 [n, c, h, w]
+            quantizeds.append(deTransformed)
+            codes.append(<a id="change">sample.argmax(-1).permute(1, 0).reshape(</a>n, h, w<a id="change">)</a>)
+            logits.append(logit.reshape(n, h, w, k))
+        return quantizeds, codes, logits
+</code></pre>

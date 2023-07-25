@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :2268
+</h3><img src='7923404.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            )
+            &#47&#47normalize embedding average with smoothed cluster size
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            <a id="change">self.embedding.weight.data.copy_(</a>embed_normalized.data<a id="change">)</a>
+
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z) 
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47normalize embedding average with smoothed cluster size
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            &#47&#47self.embedding.weight.data.copy_(embed_normalized.data)
+            self.embedding.weight<a id="change"> = </a><a id="change">nn.Parameter(</a>embed_normalized<a id="change">)</a>
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z) 
+
+        &#47&#47 preserve gradients</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/53ad4644321d444a9d45772e012788e82c320582#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923404</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 53ad4644321d444a9d45772e012788e82c320582</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 91</div><div id='m_end'> M End Line: 92</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 93</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                (self.embedding.cluster_size + self.eps) / (n + self.num_tokens * self.eps) * n
+            )
+            embed_normalized = self.embedding.embed_avg / cluster_size.unsqueeze(0)
+            <a id="change">self.embedding.weight.data.copy_(</a>embed_normalized<a id="change">)</a>
+
+        loss = self.beta * (z_q.detach() - z).pow(2).mean()
+        z_q = z + (z_q - z).detach()
+        z_q = z_q.permute(0, 3, 1, 2).contiguous()</code></pre><h3>After Change</h3><pre><code class='java'>
+                (self.embedding.cluster_size + self.eps) / (n + self.num_tokens * self.eps) * n
+            )
+            embed_normalized = self.embedding.embed_avg / cluster_size.unsqueeze(0)
+            self.embedding.weight<a id="change"> = </a><a id="change">nn.Parameter(</a>embed_normalized.permute(1,0)<a id="change">)</a>
+
+        loss = self.beta * (z_q.detach() - z).pow(2).mean()
+        z_q = z + (z_q - z).detach()
+        z_q = z_q.permute(0, 3, 1, 2).contiguous()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/e623652c50338bdda64dd7f23e2ca110422dba05#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923405</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: e623652c50338bdda64dd7f23e2ca110422dba05</div><div id='time'> Time: 2021-07-29</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 73</div><div id='m_end'> M End Line: 95</div><div id='n_start'> N Start Line: 76</div><div id='n_end'> N End Line: 98</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            )
+            &#47&#47normalize embedding average with smoothed cluster size
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            <a id="change">self.embedding.weight.data.copy_(</a>embed_normalized.data<a id="change">)</a>
+            &#47&#47self.embedding.weight = nn.Parameter(embed_normalized)
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z) 
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47normalize embedding average with smoothed cluster size
+            embed_normalized = self.embed_avg / cluster_size.unsqueeze(1)
+            &#47&#47self.embedding.weight.data.copy_(embed_normalized.data)
+            self.embedding.weight<a id="change"> = </a><a id="change">nn.Parameter(</a>embed_normalized<a id="change">)</a>
+        &#47&#47 compute loss for embedding
+        loss = self.beta * F.mse_loss(z_q.detach(), z) 
+
+        &#47&#47 preserve gradients</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/55ef757f8b8dc2620de6b789edc6f6cfcf54e55d#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L79' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7923406</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: 55ef757f8b8dc2620de6b789edc6f6cfcf54e55d</div><div id='time'> Time: 2021-08-12</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 111</div><div id='m_end'> M End Line: 112</div><div id='n_start'> N Start Line: 111</div><div id='n_end'> N End Line: 113</div><BR>

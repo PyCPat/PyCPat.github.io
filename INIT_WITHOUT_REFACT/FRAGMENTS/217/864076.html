@@ -1,0 +1,52 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        res_cum_delay = 0
+        &#47&#47 SEQUENTIAL RESIDUALS
+        <a id="change">for </a><a id="change">i</a> in <a id="change">range(</a>3<a id="change">):
+            &#47&#47 RESIDUAL BLOCK
+            </a><a id="change">seq</a> = [nn.LeakyReLU(.2)]
+            <a id="change">seq.append(
+                </a>wn(
+                    cc.Conv1d(
+                        dim,
+                        dim,
+                        kernel_size,
+                        padding=cc.get_padding(
+                            kernel_size,
+                            dilation=3**i,
+                            mode=padding_mode,
+                        ),
+                        dilation=3**i,
+                        bias=bias,
+                    ))<a id="change">)</a>
+
+            <a id="change">seq.append(</a>nn.LeakyReLU(.2)<a id="change">)</a>
+            seq.append(
+                wn(
+                    cc.Conv1d(
+                        dim,
+                        dim,
+                        kernel_size,
+                        padding=cc.get_padding(kernel_size, mode=padding_mode),
+                        bias=bias,
+                        cumulative_delay=seq[-2].cumulative_delay,
+                    )))
+
+            res_net = cc.CachedSequential(*seq)
+
+            <a id="change">net.append(</a>Residual(res_net, cumulative_delay=res_cum_delay)<a id="change">)</a>
+            res_cum_delay = net[-1].cumulative_delay
+
+        self.net = cc.CachedSequential(*net)
+        self.cumulative_delay = self.net.cumulative_delay + cumulative_delay</code></pre><h3>After Change</h3><pre><code class='java'>
+    ) -&gt; None:
+        super().__init__()
+        blocks = []
+        <a id="change">for </a>k in kernel_sizes<a id="change">:
+            </a>blocks.append(
+                ResidualBlock(
+                    dim,
+                    k,</code></pre>

@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :133
+</h3><img src='762795.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = torch.stack(mel_outputs).transpose(0, 1).contiguous()
+        stop_tokens<a id="change"> = </a><a id="change">torch.stack(</a>stop_tokens<a id="change">)</a>.transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs = mel_outputs.reshape(B, -1, self.mel_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 762795</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 input should be (seq_len, batch, input_size)
+
+        &#47&#47 the features extracted from the backbone CNN are fed to a one-layer GRU structure.
+        output_seq<a id="change"> = </a><a id="change">torch.stack(</a>batched_output_per_clip<a id="change">, dim=0)</a>
+        gru_output, h_n = self.rnn(output_seq.unsqueeze(1))
+        gru_output = gru_output.squeeze(1)
+        for i in range(gru_output.size(0)):
+            hr = self.fc_resnet(gru_output[i, :])</code></pre><h3>After Change</h3><pre><code class='java'>
+            if t == 0:
+                gru_output, h_n = self.rnn(x.unsqueeze(1))
+            else:
+                gru_output, h_n = self.rnn(<a id="change">x.unsqueeze(1</a><a id="change">)</a>, h_n)
+            &#47&#47 output dim: BSx1 and Squeeze sequence length after completing GRU step
+            x = self.fc_resnet(gru_output.squeeze(1))
+            &#47&#47 normalize by frame-rate: 25.0 for VIPL</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anweshcr7/rhythmnet/commit/adec4d39977a38f9886da164d98a68aac1fcc004#diff-3fc5bf831ef8bd1cc5d50189ec691215fb3d3ae0cbb974e736200edc7f8c65cdL32' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 762793</div><div id='project'> Project Name: anweshcr7/rhythmnet</div><div id='commit'> Commit Name: adec4d39977a38f9886da164d98a68aac1fcc004</div><div id='time'> Time: 2021-03-13</div><div id='author'> Author: anwesh.marwade@beyondsports.nl</div><div id='file'> File Name: src/models/rhythmNet.py</div><div id='m_class'> M Class Name: RhythmNet</div><div id='n_method'> N Class Name: RhythmNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/rhythmNet.py</div><div id='n_file'> N File Name: src/models/rhythmNet.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 64</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 56</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                    self.combining_function(trial_embeddings, dim=0)
+                )
+
+            combined_embedding<a id="change"> = </a><a id="change">torch.stack(</a>combined_embedding<a id="change">, dim=0)</a>
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."
+
+        &#47&#47 add number of trials as additional input</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(-1)[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1</a><a id="change">)  &#47&#47 make it (batch, 1) to match embeddings below
+        )</a>
+        &#47&#47 number of non-nan trials
+        trial_counts = max_num_trials - nan_counts
+
+        &#47&#47 get nan entries</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L267' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 762797</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = <a id="change">torch.stack(</a>mel_outputs<a id="change">)</a>.transpose(0, 1).contiguous()
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 Store predictions
+            mel_outputs.append(output)
+            attn_scores.append(<a id="change">attention_score.unsqueeze(1</a><a id="change">)</a>)
+            stop_tokens.extend([stop] * self.r)
+
+            if greedy:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 762803</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

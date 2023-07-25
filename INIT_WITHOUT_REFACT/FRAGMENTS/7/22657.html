@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.num_features = 512 * block.expansion
+        self.fc = nn.Linear(self.num_features, num_classes)
+
+        for <a id="change">m</a> in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n<a id="change"> = </a><a id="change">m.kernel_size[0]</a><a id="change"> * m.kernel_size[1] * </a>m.out_channels
+                <a id="change">m.weight.data.normal_(0</a>, <a id="change">math.sqrt(2.</a><a id="change"> / </a>n<a id="change">)</a><a id="change">)</a>
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                <a id="change">m.bias.data.zero_()</a>
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        reshape = stride != 1 or self.inplanes != planes * block.expansion</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.num_features = 512 * block.expansion
+        self.fc = nn.Linear(self.num_features, num_classes)
+
+        for <a id="change">m</a> in self.modules():
+            if isinstance(m, nn.Conv2d):
+                <a id="change">nn.init.kaiming_normal_(</a>m.weight<a id="change">, mode=&quotfan_out&quot, nonlinearity=&quotrelu&quot)</a>
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1.)
+                <a id="change">nn.init.constant_(</a>m.bias, <a id="change">0.</a><a id="change">)</a>
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        reshape = stride != 1 or self.inplanes != planes * block.expansion</code></pre>

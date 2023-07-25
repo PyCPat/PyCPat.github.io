@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        seq_len = history.size()[1]
+        state_len = out_state.size()[1]
+        batch_size = history.size()[0]
+        <a id="change">attn_energies = </a><a id="change">torch.zeros(
+            </a>batch_size, state_len, seq_len<a id="change">)</a>.to(self.device)
+        for i in range(state_len):
+            <a id="change">for </a>j in range(seq_len)<a id="change">:
+                </a>for k in range(batch_size):
+                    <a id="change">attn_energies[k, i, j] = </a>self.score(
+                        out_state[k][i], history[k][j])
+        return F.softmax(attn_energies, dim=2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.method == &quotdot&quot:
+            history = history.permute(0, 2, 1)  &#47&#47 batch_size * hidden_size * history_len
+            attn_energies = torch.bmm(out_state, history)
+        elif <a id="change"></a>self.method == &quotgeneral&quot<a id="change">:
+            </a>history = self.attn(history)
+            history<a id="change"> = </a><a id="change">history.permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>
+            attn_energies<a id="change"> = </a>torch.bmm(out_state, history)
+        return F.softmax(attn_energies, dim=2)
+
+</code></pre>

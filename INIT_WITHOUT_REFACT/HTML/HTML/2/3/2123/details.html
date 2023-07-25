@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :2123
+</h3><img src='7574403.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, _data):
+        if self.gate_type == &quotfeatures&quot:
+            bsz, length, dim = <a id="change">_data[self.input_name]</a>.shape
+            self.scale = self.scale.repeat(bsz, length, 1)
+        elif self.gate_type == &quotheads&quot:
+            bsz, heads, length, head_dim = _data[self.input_name].shape</code></pre><h3>After Change</h3><pre><code class='java'>
+                                  }
+
+    def forward(self, _data):
+        _data[self.output_name] = <a id="change">torch.einsum(f&quot{self.einsum_in_1},{self.einsum_in_2}-&gt;{self.einsum_in_1}&quot</a>, _data[self.input_name], self.scale<a id="change">)</a>
+        return _data</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/antofuller/configaformers/commit/587753fa0f50da143bb3a3ad4da1d65e3ee72c60#diff-6104623d9ae05ae1c0cef36e79e444ecc0b3952216b46ead35c829eae2cb8557L128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574403</div><div id='project'> Project Name: antofuller/configaformers</div><div id='commit'> Commit Name: 587753fa0f50da143bb3a3ad4da1d65e3ee72c60</div><div id='time'> Time: 2021-11-11</div><div id='author'> Author: afuller187187@gmail.com</div><div id='file'> File Name: norm_module.py</div><div id='m_class'> M Class Name: Gate</div><div id='n_method'> N Class Name: Gate</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: norm_module.py</div><div id='n_file'> N File Name: norm_module.py</div><div id='m_start'> M Start Line: 128</div><div id='m_end'> M End Line: 137</div><div id='n_start'> N Start Line: 134</div><div id='n_end'> N End Line: 134</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = <a id="change">values[None, :, None, :, :]</a>.expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        queries = queries.chunk(2, dim=-1)
+        queries = torch.stack(queries).reshape(2, b, t, h, -1)
+
+        dots = <a id="change">torch.einsum(&quotpbthd,hnpd-&gt;bthpn&quot</a>, queries, self.keys<a id="change">)</a>
+        scores, indices = dots.topk(k=self.topk, dim=-1)
+        scores, indices = map(lambda x: x.chunk(2, dim=2), (scores, indices))
+
+        all_topk = self.topk ** 2</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/product-key-memory/commit/915dd922ef8e168f7970d5336d0ba79b4f57fe47#diff-53ae44ef28554a4a669d1c87edbe44e54bf426a6c124261ea02da7a46a53f1d9L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574402</div><div id='project'> Project Name: lucidrains/product-key-memory</div><div id='commit'> Commit Name: 915dd922ef8e168f7970d5336d0ba79b4f57fe47</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: product_key_memory/product_key_memory.py</div><div id='m_class'> M Class Name: PKM</div><div id='n_method'> N Class Name: PKM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: product_key_memory/product_key_memory.py</div><div id='n_file'> N File Name: product_key_memory/product_key_memory.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 71</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        )
+        _, encoding_indices = (-d).max(1)
+        encodings = F.one_hot(encoding_indices, self.num_tokens).type(z_flattened.dtype)
+        encoding_indices = encoding_indices.view(*<a id="change">z.shape[:-1]</a>)
+        z_q = self.embedding(encoding_indices)
+        avg_probs = torch.mean(encodings, dim=0)
+        perplexity = torch.exp(-torch.sum(avg_probs * torch.log(avg_probs + 1e-10)))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        d = torch.sum(z_flattened.pow(2), dim=1, keepdim=True) + \
+            torch.sum(self.embedding.weight.pow(2), dim=1) - 2 * \
+            <a id="change">torch.einsum(&quotbd,dn-&gt;bn&quot</a>, z_flattened, self.embedding.weight.permute(1,0)<a id="change">)</a> &#47&#47 &quotn d -&gt; d n&quot
+
+        encoding_indices = torch.argmin(d, dim=1)
+        z_q = self.embedding(encoding_indices).view(z.shape)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tgisaturday/dalle-lightning/commit/f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7#diff-5cc0cb1395e7634e216d321d933d7868cc1ee34fa25763750d65126b9ad1ea15L67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574406</div><div id='project'> Project Name: tgisaturday/dalle-lightning</div><div id='commit'> Commit Name: f5fd383f3ac54b79f33c1ab36ae01f46ea06c6c7</div><div id='time'> Time: 2021-08-04</div><div id='author'> Author: jamesk1228@gmail.com</div><div id='file'> File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_class'> M Class Name: EMAVectorQuantizer</div><div id='n_method'> N Class Name: EMAVectorQuantizer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='n_file'> N File Name: pl_dalle/modules/vqvae/quantize.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 131</div><div id='n_end'> N End Line: 164</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        u_hat = torch.einsum(&quotijk, jkl -&gt; ijl&quot, x, self.route_weights)
+
+        &#47&#47 Dynamic route
+        b = torch.zeros(<a id="change">x.shape[1]</a>, self.num_capsules, requires_grad=True)
+        for it in range(self.num_iterations):
+            c = b.softmax(dim=-1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Last iteration with original u_hat to pass gradient
+        c = b.softmax(dim=1)
+        s = <a id="change">torch.einsum(&quotijk, ijkl -&gt; ijl&quot</a>, c, u_hat_temp<a id="change">)</a>
+        v = squash(s)
+
+        return v
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/riroaki/capsnet/commit/408b1e77f4e40589def9c313c0b11beaa88f2108#diff-903964c7bdce50a4b995b4520374f243c677f45b2f8c7ed7b15abeeb6f26af12L45' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574404</div><div id='project'> Project Name: riroaki/capsnet</div><div id='commit'> Commit Name: 408b1e77f4e40589def9c313c0b11beaa88f2108</div><div id='time'> Time: 2020-03-08</div><div id='author'> Author: aki@akideMacBook-Pro.local</div><div id='file'> File Name: capsnet.py</div><div id='m_class'> M Class Name: DigitCaps</div><div id='n_method'> N Class Name: DigitCaps</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: capsnet.py</div><div id='n_file'> N File Name: capsnet.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 52</div><div id='n_end'> N End Line: 84</div><BR>

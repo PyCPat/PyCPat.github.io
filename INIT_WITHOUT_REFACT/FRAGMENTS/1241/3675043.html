@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [BS, K, H]
+        intra_rnn, _ = self.intra_rnn(intra_rnn)
+        &#47&#47 [BS, K, N]
+        intra_rnn = <a id="change">self.intra_linear(</a>intra_rnn<a id="change">)</a>
+        &#47&#47 [BS, N, K]
+        intra_rnn = <a id="change">intra_rnn.permute(0, 2, 1).contiguous()</a>
+        intra_rnn = self.intra_norm(intra_rnn)
+        &#47&#47 [B, S, N, K]
+        intra_rnn = intra_rnn.view(B, S, N, K)
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous()
+        intra_rnn = intra_rnn + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B*K, S, N)
+        &#47&#47 [BK, S, H]
+        inter_rnn, _ = self.inter_rnn(inter_rnn)
+        &#47&#47 [BK, S, N]
+        inter_rnn = <a id="change">self.inter_linear(</a>inter_rnn<a id="change">)</a>
+        &#47&#47 [BK, N, S]
+        inter_rnn = inter_rnn.permute(0, 2, 1).contiguous()
+        inter_rnn = self.inter_norm(inter_rnn)
+        &#47&#47 [B, K, N, S]</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 [BS, K, H]
+        intra_rnn, _ = self.intra_rnn(intra_rnn)
+        &#47&#47 [BS, K, N]
+        intra_rnn = <a id="change">self.intra_linear(</a>intra_rnn.contiguous().view(B*S*K, -1)<a id="change">)</a>.view(B*S, K, -1)
+        &#47&#47 [B, S, K, N]
+        intra_rnn = intra_rnn.view(B, S, K, N)
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn.permute(0, 3, 2, 1).contiguous()
+        intra_rnn = self.intra_norm(intra_rnn)
+        
+        &#47&#47 [B, N, K, S]
+        intra_rnn = intra_rnn + x
+
+        &#47&#47 inter RNN
+        &#47&#47 [BK, S, N]
+        inter_rnn = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B*K, S, N)
+        &#47&#47 [BK, S, H]
+        inter_rnn, _ = self.inter_rnn(inter_rnn)
+        &#47&#47 [BK, S, N]
+        inter_rnn = <a id="change">self.inter_linear(</a>inter_rnn.contiguous().view(B*S*K, -1)<a id="change">)</a>.view(B*K, S, -1)
+        &#47&#47 [B, K, S, N]
+        inter_rnn = inter_rnn.view(B, K, S, N)
+        &#47&#47 [B, N, K, S]</code></pre>

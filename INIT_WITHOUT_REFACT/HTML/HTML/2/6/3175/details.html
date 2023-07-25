@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :3175
+</h3><img src='10215483.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                mask = torch.ones(b, q.shape[-2], dtype = torch.bool, device = device)
+
+            if not exists(context_mask):
+                context_mask = torch.ones(b, <a id="change">k.shape[-2]</a>, dtype = torch.bool, device = device)
+
+            mask = rearrange(mask, &quotb i -&gt; b () i ()&quot) * rearrange(context_mask, &quotb j -&gt; b () () j&quot)
+            sim.masked_fill_(~mask, max_neg_value(sim))</code></pre><h3>After Change</h3><pre><code class='java'>
+                mask = torch.ones(b, i, dtype = torch.bool, device = device)
+
+            if exists(context_mask):
+                context_mask<a id="change"> = </a><a id="change">F.pad(</a>context_mask, (1<a id="change">, 0</a>)<a id="change">, value = True)</a>
+            else:
+                context_mask = torch.ones(b, j, dtype = torch.bool, device = device)
+
+            mask = rearrange(mask, &quotb i -&gt; b () i ()&quot) * rearrange(context_mask, &quotb j -&gt; b () () j&quot)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/protein-bert-pytorch/commit/a38caad27b80726fee00159fd07053468daf725f#diff-6e35313d9af4f12619a10ddacdffb91019586962c8eddcde1ba5702de45fcc56L50' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215483</div><div id='project'> Project Name: lucidrains/protein-bert-pytorch</div><div id='commit'> Commit Name: a38caad27b80726fee00159fd07053468daf725f</div><div id='time'> Time: 2021-05-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='n_file'> N File Name: protein_bert_pytorch/protein_bert_pytorch.py</div><div id='m_start'> M Start Line: 50</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 95</div><div id='n_end'> N End Line: 112</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.mem_updater = Attention(dim, heads = heads)
+
+    def forward(self, src, tgt, mems = None):
+        b = <a id="change">src.shape[0]</a>
+        mems = default(mems, self.memory_slots)
+
+        if mems.ndim == 2:
+            mems = repeat(mems, &quotn d -&gt; b n d&quot, b = b)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 update memory with attention
+        mem_mask = torch.eye(num_mem, num_mem, device = device).bool()
+        mem_mask<a id="change"> = </a><a id="change">F.pad(</a>mem_mask, (<a id="change">0</a><a id="change">, n</a>)<a id="change">, value = True)</a>
+        mems = self.mem_updater(mems, enc, mask = mem_mask, attend_self = True)
+
+        return out, mems
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/memformer/commit/e1b7c97459ec7c7f5fe37ff3bfa38bdb448a304c#diff-3739fa9ed5b04cd8606fb4ef1d563baf1344fd72b2610c00224ab2f0b223cd86L150' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215481</div><div id='project'> Project Name: lucidrains/memformer</div><div id='commit'> Commit Name: e1b7c97459ec7c7f5fe37ff3bfa38bdb448a304c</div><div id='time'> Time: 2020-10-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: memformer/memformer.py</div><div id='m_class'> M Class Name: Memformer</div><div id='n_method'> N Class Name: Memformer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: memformer/memformer.py</div><div id='n_file'> N File Name: memformer/memformer.py</div><div id='m_start'> M Start Line: 151</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 161</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_attn_logits = nn.Parameter(torch.eye(dim))
+
+    def forward(self, x):
+        remainder = <a id="change">x.shape[-1]</a> % self.pool_size
+        if remainder &gt; 0:
+            x = F.pad(x, (0, remainder), value = 0)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if needs_padding:
+            x = F.pad(x, (0, remainder), value = 0)
+            mask = torch.zeros((b, 1, n), dtype = torch.bool, device = x.device)
+            mask<a id="change"> = </a><a id="change">F.pad(</a>mask, (<a id="change">0</a><a id="change">, remainder</a>)<a id="change">, value = True)</a>
+
+        attn_logits = einsum(&quotb d n, d e -&gt; b e n&quot, x, self.to_attn_logits)
+        x = self.pool_fn(x)
+        logits = self.pool_fn(attn_logits)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/enformer-pytorch/commit/d6c7c92831f85618e38d208d15a411e1259fa4b3#diff-d41824114176cf139e53af298fee855401c92b5fbb8c782f4eb1dd3fbf56fe10L121' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10215480</div><div id='project'> Project Name: lucidrains/enformer-pytorch</div><div id='commit'> Commit Name: d6c7c92831f85618e38d208d15a411e1259fa4b3</div><div id='time'> Time: 2021-10-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_class'> M Class Name: AttentionPool</div><div id='n_method'> N Class Name: AttentionPool</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: enformer_pytorch/enformer_pytorch.py</div><div id='n_file'> N File Name: enformer_pytorch/enformer_pytorch.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 139</div><BR>

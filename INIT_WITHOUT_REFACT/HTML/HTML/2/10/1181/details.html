@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :1181
+</h3><img src='3597922.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        o_z = self.mt_z.forward(o)
+        o_not_bg = torch.cat((o_p, o_phot, o_x, o_y, o_z), 1)
+
+        <a id="change">if self.ch_out == 5</a><a id="change">:
+            </a>o<a id="change"> = </a>o_not_bg
+
+        elif <a id="change">self.ch_out == 6</a><a id="change">:
+            </a>o_bg = self.mt_bg.forward(o)
+            o = torch.cat((o_not_bg, o_bg), 1)
+
+        Apply the final non-linearities</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        o = self.unet_union.forward(o)
+
+        o_head<a id="change"> = []</a>
+        <a id="change">for </a>i in range(self.ch_out)<a id="change">:
+            </a><a id="change">o_head.append(</a>self.mt_heads[i].forward(o)<a id="change">)</a>
+        o = torch.cat(o_head, 1)
+
+        Apply the final non-linearities
+        if self._use_last_nl:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/turagalab/decode/commit/9c0e6c95a59bb121b9749cd281e4390a185ca1d9#diff-3826c201579fe6551dcca937dabb31125d6cac046ee35486b117d154d78def59L336' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3597922</div><div id='project'> Project Name: turagalab/decode</div><div id='commit'> Commit Name: 9c0e6c95a59bb121b9749cd281e4390a185ca1d9</div><div id='time'> Time: 2019-11-30</div><div id='author'> Author: gitdev@LRM.PHOTO</div><div id='file'> File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='m_class'> M Class Name: DoubleMUnet</div><div id='n_method'> N Class Name: DoubleMUnet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='n_file'> N File Name: deepsmlm/neuralfitter/models/unet_param.py</div><div id='m_start'> M Start Line: 336</div><div id='m_end'> M End Line: 357</div><div id='n_start'> N Start Line: 340</div><div id='n_end'> N End Line: 347</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            batch, permutation_dim, -1
+        )
+
+        <a id="change">if self.combining_operation == "mean"</a><a id="change">:
+            </a>e<a id="change"> = </a>iid_embeddings.mean(dim=1)
+        elif <a id="change">self.combining_operation == "sum"</a><a id="change">:
+            </a>e = iid_embeddings.sum(dim=1)
+        else:
+            raise ValueError("combining_operation must be in [&quotsum&quot, &quotmean&quot].")
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths
+        else:
+            combined_embedding<a id="change"> = []</a>
+            trial_counts = torch.zeros(batch, 1)
+            <a id="change">for i</a> in range(batch)<a id="change">:
+                &#47&#47 remove NaNs
+                </a>valid_x = x[i, ~torch.isnan(x[i, :, 0]), :]
+                trial_counts[i] = valid_x.shape[0]
+                trial_embeddings = self.trial_net(valid_x)
+                &#47&#47 apply combining operation over permutation dimension
+                <a id="change">combined_embedding.append(
+                    </a>self.combining_function(trial_embeddings, dim=0)<a id="change">
+                )</a>
+
+            combined_embedding = torch.stack(combined_embedding, dim=0)
+
+        assert not torch.isnan(combined_embedding).any(), "NaNs in embedding."</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/1352e77bdbc47aa4a4130679903b57672e48218c#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L262' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3597920</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 1352e77bdbc47aa4a4130679903b57672e48218c</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 271</div><div id='m_end'> M End Line: 284</div><div id='n_start'> N Start Line: 277</div><div id='n_end'> N End Line: 304</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        predict = F.softmax(predict, dim=1)
+
+        for i in range(target.shape[1]):
+            <a id="change">if i != self.ignore_index</a><a id="change">:
+                </a>dice_loss = dice(predict[:, i], target[:, i])
+                <a id="change">if self.weight is not None</a><a id="change">:
+                    </a>assert self.weight.shape[0] == target.shape[1], \
+                        &quotExpect weight shape [{}], get[{}]&quot.format(target.shape[1], self.weight.shape[0])
+                    dice_loss *= self.weights[i]
+                total_loss<a id="change"> += </a>dice_loss
+
+        return total_loss/target.shape[1]</code></pre><h3>After Change</h3><pre><code class='java'>
+        if weight is None:
+            weight = [1] * self.n_classes
+        assert inputs.size() == target.size(), &quotpredict & target shape do not match&quot
+        class_wise_dice<a id="change"> = []</a>
+        loss = 0.0
+        <a id="change">for i</a> in range(0, self.n_classes)<a id="change">:
+            </a>dice = self._dice_loss(inputs[:, i], target[:, i])
+            <a id="change">class_wise_dice.append(</a>1.0 - dice.item()<a id="change">)</a>
+            loss += dice * weight[i]
+        return loss / self.n_classes</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/montaellis/pytorch-medical-segmentation/commit/b8a38cb1bdf6cd7c93a5c1945ab23f7a54c87406#diff-0419e9aa72248110d12ce030e3c15e94f00f1f38cbd819d7e6f0d269eee1b832L118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3597921</div><div id='project'> Project Name: montaellis/pytorch-medical-segmentation</div><div id='commit'> Commit Name: b8a38cb1bdf6cd7c93a5c1945ab23f7a54c87406</div><div id='time'> Time: 2022-06-09</div><div id='author'> Author: elliszkn@163.com</div><div id='file'> File Name: loss_function.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss_function.py</div><div id='n_file'> N File Name: loss_function.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 138</div><BR>

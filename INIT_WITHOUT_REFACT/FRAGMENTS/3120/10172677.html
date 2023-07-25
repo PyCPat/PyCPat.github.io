@@ -1,0 +1,16 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.blocks = nn.ModuleList([ReversibleBlock(f, g) for (f, g) in blocks])
+
+    def forward(self, x, arg_route = (True, True), **kwargs):
+        f_args<a id="change">, g_args</a> = map(lambda route: kwargs if route else {}, arg_route)
+        block_kwargs = {&quotf_args&quot: f_args, &quotg_args&quot: g_args}
+        return _ReversibleFunction.apply(x, self.blocks, block_kwargs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            blocks, args = map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out =  _ReversibleFunction.apply(x, blocks, args)
+        return torch.stack(<a id="change">out.chunk(2</a><a id="change">, dim=-1)</a>).sum(dim=0)
+</code></pre>

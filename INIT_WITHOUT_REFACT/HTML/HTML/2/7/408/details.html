@@ -1,0 +1,76 @@
+<html><h3>Pattern ID :408
+</h3><img src='1575832.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        conv6_BN        = self.conv6_BN(conv6_activation)
+        conv6_maxpool, conv6_maxpool_idx = F.max_pool2d(conv6_BN, kernel_size=(2, 1), stride=(2, 1), padding=0, ceil_mode=False, return_indices=True)
+        conv6_dropout   = F.dropout(input = conv6_maxpool, p = 0.25, training = self.training, inplace = True)
+        flatten         = <a id="change">conv6_dropout.reshape(-1</a>, 256<a id="change">)</a>
+        classifier      = self.classifier(flatten)
+        classifier_activation<a id="change"> = </a>F.sigmoid(classifier)
+        <a id="change">return </a>classifier_activation
+
+
+    @staticmethod</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = self.layer(x, self.conv6, self.conv6_BN)
+        
+        &#47&#47 Compute logits
+        <a id="change">return </a>self.classifier(<a id="change">x.reshape(-1</a>, 256<a id="change">)</a>)
+
+    &#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47&#47
+    &#47&#47 Forward pass utilities</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/maxrmorrison/torchcrepe/commit/417aab7a92fdcc710e847c5012e352bea9d5989b#diff-0229c1e4c0f66ad3745f2550393391163e61f9d59dcb10314ab80d8e939ed1b8L68' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1575832</div><div id='project'> Project Name: maxrmorrison/torchcrepe</div><div id='commit'> Commit Name: 417aab7a92fdcc710e847c5012e352bea9d5989b</div><div id='time'> Time: 2020-06-04</div><div id='author'> Author: maxrmorrison@gmail.com</div><div id='file'> File Name: torchcrepe/model.py</div><div id='m_class'> M Class Name: Crepe</div><div id='n_method'> N Class Name: Crepe</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchcrepe/model.py</div><div id='n_file'> N File Name: torchcrepe/model.py</div><div id='m_start'> M Start Line: 76</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 80</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        
+        b, n, h, w = x2.data.size()
+        b_n = b * n // 2
+        y = <a id="change">x2.reshape(</a>b_n, <a id="change">2</a>, h * w<a id="change">)</a>
+        y = y.permute(1, 0, 2)
+        y<a id="change"> = </a>y.reshape(2, -1, n // 2, h, w)
+
+        <a id="change">return </a>torch.cat((y[0], y[1]), 1)
+ 
+
+class GSConvns(GSConv):</code></pre><h3>After Change</h3><pre><code class='java'>
+        x1 = self.cv1(x)
+        x2 = torch.cat((x1, self.cv2(x1)), 1)
+        &#47&#47 shuffle
+        y = <a id="change">x2.reshape(</a>x2.shape[0], <a id="change">2</a>, x2.shape[1] // 2, x2.shape[2], x2.shape[3]<a id="change">)</a>
+        y = y.permute(0, 2, 1, 3, 4)
+        <a id="change">return </a>y.reshape(y.shape[0], -1, y.shape[3], y.shape[4])
+
+
+class GSConvns(GSConv):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alanli1997/slim-neck-by-gsconv/commit/d777012fa58bb0945c52782dda58f48a4fc53521#diff-c161808a450534b9ea65dd801519e14586a8d54540517ff28e0ea7193e82e2eaL43' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1575819</div><div id='project'> Project Name: alanli1997/slim-neck-by-gsconv</div><div id='commit'> Commit Name: d777012fa58bb0945c52782dda58f48a4fc53521</div><div id='time'> Time: 2023-02-05</div><div id='author'> Author: Yanzailee@163.com</div><div id='file'> File Name: models_inPaper.py</div><div id='m_class'> M Class Name: GSConv</div><div id='n_method'> N Class Name: GSConv</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_inPaper.py</div><div id='n_file'> N File Name: models_inPaper.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 72</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        att = torch.softmax(att, dim=-1)
+        
+        out = self.layer_norm(self.mlp(att @ v))
+        <a id="change">return </a>self.pos_ff(out)
+          
+    def get_sinusoid_pos_encoding(self, mem_len, embed_dim):
+        pos = torch.arange(mem_len).unsqueeze(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        total_len = h.shape[1]
+        
+        &#47&#47 compute projections of output from previous layer and the memory
+        q = <a id="change">self.w_q(x).reshape(</a>batch_size, <a id="change">-1</a>, seg_len, embed_dim<a id="change">)</a>
+        k = <a id="change">self.w_ke(h).reshape(</a>batch_size, <a id="change">-1</a>, total_len, embed_dim<a id="change">)</a>
+        v = self.w_v(h).reshape(batch_size, -1, total_len, embed_dim)
+        r = self.w_kr(self.pos).reshape(-1, total_len, embed_dim)
+        
+        &#47&#47 compute relative positional encodings
+        b = q @ r.transpose(1, 2)
+        b = self.circulant_shift(b, -seg_len+1)
+        
+        &#47&#47 this is the XL specific way of computing the attention score
+        k<a id="change"> = </a>k.transpose(2, 3)
+        att = q @ k + b + self.u @ k + self.v @ r.transpose(1, 2)
+        att = att.tril(mem_len) / embed_dim**0.5
+        att = torch.softmax(att, dim=-1)
+        
+        &#47&#47 compute the output of the layer and save to memory
+        out = self.layer_norm(self.mlp(att @ v) + x)
+        out = self.pos_ff(out)
+        self.save_to_memory(out)
+        
+        <a id="change">return </a>out
+          
+    def get_sinusoid_pos_encoding(self, mem_len, embed_dim):
+        pos = torch.arange(mem_len).unsqueeze(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/augustwester/transformer-xl/commit/6cce5d3da48879cdef126940aa5529afcff03c9a#diff-eb7ae2070281ad9c6011e2b97c48b86fea6c48408aa6b0e9d20c8c520d3c7cf2L29' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1575836</div><div id='project'> Project Name: augustwester/transformer-xl</div><div id='commit'> Commit Name: 6cce5d3da48879cdef126940aa5529afcff03c9a</div><div id='time'> Time: 2022-11-21</div><div id='author'> Author: august.wester@gmail.com</div><div id='file'> File Name: attention.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: attention.py</div><div id='n_file'> N File Name: attention.py</div><div id='m_start'> M Start Line: 30</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 61</div><BR>

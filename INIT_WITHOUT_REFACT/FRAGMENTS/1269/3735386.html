@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k)
+
+        <a id="change">if </a>self.causal<a id="change">:
+            </a>sim<a id="change"> = </a>sim / rearrange(torch.arange(seq_len, device = device) + 1, &quot... -&gt; ... 1&quot)
+        else:
+            sim = sim / seq_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = F.relu(sim) ** 2
+        attn = self.dropout(attn)
+
+        <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+            </a>mask = rearrange(mask, &quotb j -&gt; b 1 j&quot)
+            attn<a id="change"> = </a>attn.masked_fill(~mask, 0.)
+
+        if self.causal:
+            causal_mask = torch.ones((seq_len, seq_len), dtype = torch.bool, device = device).triu(1)</code></pre>

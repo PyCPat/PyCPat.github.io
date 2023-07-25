@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :2121
+</h3><img src='7574347.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                cmem_k, cmem_v = map(merge_heads, (cmem_k, cmem_v))
+
+                old_mem_range = slice(- min(mem_len, self.mem_len) - self.seq_len, -self.seq_len)
+                old_mem_k, old_mem_v = <a id="change">k[:, :, old_mem_range]</a>.clone(), v[:, :, old_mem_range].clone()
+
+                q, old_mem_k, old_mem_v, cmem_k, cmem_v = map(lambda x: x.detach(), (q, old_mem_k, old_mem_v, cmem_k, cmem_v))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                cmem_k, cmem_v = map(merge_heads, (cmem_k, cmem_v))
+
+                old_mem_range = slice(- min(mem_len, self.mem_len) - self.seq_len, -self.seq_len)
+                old_mem_k, old_mem_v = <a id="change">map(</a>lambda x: x[:, :, old_mem_range].clone(), (k<a id="change">, v</a>)<a id="change">)</a>
+
+                q, old_mem_k, old_mem_v, cmem_k, cmem_v = map(lambda x: x.detach(), (q, old_mem_k, old_mem_v, cmem_k, cmem_v))
+
+                aux_loss = F.mse_loss(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/725bf4f5f63cfe64082e3b7b34685f259410d0f1#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL200' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574347</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 725bf4f5f63cfe64082e3b7b34685f259410d0f1</div><div id='time'> Time: 2020-07-01</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 200</div><div id='m_end'> M End Line: 201</div><div id='n_start'> N Start Line: 201</div><div id='n_end'> N End Line: 201</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        mask_value = max_neg_value(q)
+        mask = torch.zeros((b * h, buckets, buckets), device=device).bool()
+        i, j = torch.triu_indices(buckets, buckets)
+        <a id="change">mask[:, 0, :]</a> = True
+        mask[:, i, j] = True
+        R.masked_fill_(mask, mask_value)
+        R = R.softmax(dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        v[hh_slice] = rotate_left(v[hh_slice], bsz-1, dim=2)
+
+        merge_batch_head = lambda x: x.reshape(b * h, t, d_h)
+        q, k, v = <a id="change">map(</a>merge_batch_head, (q<a id="change">, k, v</a>)<a id="change">)</a>
+
+        &#47&#47 bucket qkv
+
+        bucket_fn = partial(bucket, buckets)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/02446a9900a155b2512af5839f071ea84d292deb#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL286' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574346</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: 02446a9900a155b2512af5839f071ea84d292deb</div><div id='time'> Time: 2020-04-09</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornCausalAttention</div><div id='n_method'> N Class Name: SinkhornCausalAttention</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 287</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 297</div><div id='n_end'> N End Line: 345</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 merge heads
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        return self.to_out(<a id="change">out[:, :n]</a>)
+
+&#47&#47 transformer
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        k, v = map(lambda t: rearrange(t, &quotb (f h w) d -&gt; b d f h w&quot, f  = num_frames, h = fmap_size), (k, v))
+        k, v = map(lambda t: unfoldNd(t, kernel_size = kernel_size, padding = kernel_size // 2), (k, v))
+        k, v = map(lambda t: rearrange(t, &quotb (d j) i -&gt; b i j d&quot, j = kernel_size ** 3), (k, v))
+        k, v = <a id="change">map(</a>lambda t: t[:, :(n - 1)], (k<a id="change">, v</a>)<a id="change">)</a>
+
+        &#47&#47 append bos keys and values
+
+        k_bos, v_bos = map(lambda t: repeat(t, &quotb 1 d -&gt; b n 1 d&quot, n = k.shape[1]), (k_bos, v_bos))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/nuwa-pytorch/commit/7d904d1fdd0776ffb9e0a20d0857d47c7988f90a#diff-47b637f0a46bb7e4f245f382a9b47f0351b6a5fda8ab6476a0476b4677441eddL412' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574345</div><div id='project'> Project Name: lucidrains/nuwa-pytorch</div><div id='commit'> Commit Name: 7d904d1fdd0776ffb9e0a20d0857d47c7988f90a</div><div id='time'> Time: 2022-01-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_class'> M Class Name: Sparse3DNA</div><div id='n_method'> N Class Name: Sparse3DNA</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='n_file'> N File Name: nuwa_pytorch/nuwa_pytorch.py</div><div id='m_start'> M Start Line: 423</div><div id='m_end'> M End Line: 494</div><div id='n_start'> N Start Line: 423</div><div id='n_end'> N End Line: 494</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        expanded_values = <a id="change">values[None, :, None, :, :]</a>.expand(b, -1, t, -1, -1)
+        expanded_indices = expand_dim(value_indices, dim=4, k=d_head, unsqueeze=True)
+        selected_values = expanded_values.gather(-2, expanded_indices)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        attn = final_topk.softmax(dim=-1)
+
+        value_indices, attn = <a id="change">map(</a>lambda x: x.reshape(-1, self.topk * h), (value_indices<a id="change">, attn</a>)<a id="change">)</a>
+        out = self.values(value_indices, per_sample_weights=attn)
+        return out.reshape(b, t, e)
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/product-key-memory/commit/915dd922ef8e168f7970d5336d0ba79b4f57fe47#diff-53ae44ef28554a4a669d1c87edbe44e54bf426a6c124261ea02da7a46a53f1d9L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7574348</div><div id='project'> Project Name: lucidrains/product-key-memory</div><div id='commit'> Commit Name: 915dd922ef8e168f7970d5336d0ba79b4f57fe47</div><div id='time'> Time: 2020-06-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: product_key_memory/product_key_memory.py</div><div id='m_class'> M Class Name: PKM</div><div id='n_method'> N Class Name: PKM</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: product_key_memory/product_key_memory.py</div><div id='n_file'> N File Name: product_key_memory/product_key_memory.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 71</div><div id='n_start'> N Start Line: 35</div><div id='n_end'> N End Line: 64</div><BR>

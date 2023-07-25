@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :2637
+</h3><img src='8624609.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, *dimensions):
+        device = self.device
+
+        if not <a id="change">exists(</a>self.rel_pos<a id="change">)</a> or not self.cache_rel_pos:
+            positions = [torch.arange(d, device = device) for d in dimensions]
+            grid = torch.stack(torch.meshgrid(*positions, indexing = &quotij&quot))
+            grid = rearrange(grid, &quotc ... -&gt; (...) c&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        rel_positions = [torch.arange(-d + 1, d, device = device) for d in dimensions]
+        rel_pos_grid = torch.stack(torch.meshgrid(*rel_positions, indexing = &quotij&quot), dim = -1)
+        rel_pos_grid<a id="change"> = </a><a id="change">rearrange(</a>rel_pos_grid, <a id="change">&quot... c -&gt; (...) c&quot</a><a id="change">)</a>
+
+        &#47&#47 mlp input
+
+        bias<a id="change"> = </a>rel_pos_grid.float()
+
+        for layer in self.net:
+            bias = layer(bias)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8624609</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        x = F.pad(x, (0, 0, -causal_padding, causal_padding), value = 0.)
+
+        if <a id="change">exists(</a>pos_emb<a id="change">)</a>:
+            q_pos_emb, k_pos_emb = cast_tuple(pos_emb, num = 2)
+
+            &#47&#47 make sure queries positions are properly shifted</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 reshape so we have chunk to chunk attention, without breaking causality
+
+        x<a id="change"> = </a><a id="change">rearrange(</a>x, <a id="change">&quotb (k n) d -&gt; (b k) n d&quot</a><a id="change">, k = num_chunks)</a>
+        context = rearrange(context, &quotb k r n d -&gt; (b k) (r n) d&quot)
+
+        &#47&#47 cross attention
+
+        out = self.cross_attn(x, context = context, pos_emb = pos_emb, **kwargs)
+
+        &#47&#47 reshape back to original sequence
+
+        out<a id="change"> = </a>rearrange(out, &quot(b k) n d -&gt; b (k n) d&quot, k = num_chunks)
+
+        &#47&#47 pad back to original, with 0s at the beginning (which will be added to the residual and be fine)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/retro-pytorch/commit/1ff2901fb9c7dd2ad49abd9dc643cb9fd7edac5e#diff-fedd9cc24fef747e4ffbe9ce88b42fa6cdd64bd399aeb8589d4b304931bfcc64L164' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8624597</div><div id='project'> Project Name: lucidrains/retro-pytorch</div><div id='commit'> Commit Name: 1ff2901fb9c7dd2ad49abd9dc643cb9fd7edac5e</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: retro_pytorch/retro_pytorch.py</div><div id='m_class'> M Class Name: ChunkedCrossAttention</div><div id='n_method'> N Class Name: ChunkedCrossAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: retro_pytorch/retro_pytorch.py</div><div id='n_file'> N File Name: retro_pytorch/retro_pytorch.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 198</div><div id='n_start'> N Start Line: 167</div><div id='n_end'> N End Line: 192</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        cond_prob_drop = 0.
+    ):
+        batch_size, device = image_embed.shape[0], image_embed.device
+        t = self.time_mlp(time) if <a id="change">exists(</a>self.time_mlp<a id="change">)</a> else None
+
+        cond_prob_mask = prob_mask_like(batch_size, cond_prob_drop, device = device)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 mask out image embedding depending on condition dropout
+        &#47&#47 for classifier free guidance
+
+        image_embed<a id="change"> = </a>torch.where(
+            rearrange(cond_prob_mask, &quotb -&gt; b 1&quot),
+            image_embed,
+            <a id="change">rearrange(</a>self.null_image_embed, <a id="change">&quotd -&gt; 1 d&quot</a><a id="change">)</a>
+        )
+
+        cond<a id="change"> = </a>torch.cat((t, image_embed), dim = -1)
+
+        hiddens = []
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/25d980ebbf1e22ce8396cdec400e22e83f754176#diff-038ecede954c29266888cb88e37cc06f61ba2433f8b5142c7b2b2cefde5ed0edL402' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8624585</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: 25d980ebbf1e22ce8396cdec400e22e83f754176</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='n_file'> N File Name: dalle2_pytorch/dalle2_pytorch.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 414</div><div id='n_start'> N Start Line: 412</div><div id='n_end'> N End Line: 425</div><BR>

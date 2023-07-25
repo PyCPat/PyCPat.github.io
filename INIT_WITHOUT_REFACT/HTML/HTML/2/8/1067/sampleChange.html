@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ) &gt;= lens.unsqueeze(1)
+            x = x.masked_fill(mask.unsqueeze(1).to(device=x.device), 0)
+            &#47&#47 del mask
+            lens<a id="change"> = </a>self.get_seq_len(lens)
+
+        sh = x.shape
+        if self.heads != -1:
+            x = <a id="change">x.view(-1</a>, self.heads, sh[-1]<a id="change">)</a>
+
+        out = self.conv(x)
+
+        if self.heads != -1:
+            out<a id="change"> = </a>out.view(sh[0], self.real_out_channels, -1)
+
+        <a id="change">return </a>out<a id="change">, lens</a>
+
+
+class GroupShuffle(nn.Module):
+    def __init__(self, groups: int, channels: int):</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.use_mask:
+            x = self.mask_fill(x, lens)
+        out = self.conv(x)
+        <a id="change">return </a>out<a id="change">, self.get_seq_len(lens)</a>
+
+
+def GroupShuffle(groups: int, channels: int) -&gt; nn.Module:
+    Group shuffle operator from shufflenet.</code></pre>

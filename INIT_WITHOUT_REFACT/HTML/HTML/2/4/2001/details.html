@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :2001
+</h3><img src='7415715.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                ign = ign.unsqueeze(-1).expand_as(batch_label)  &#47&#47 shape: (batch_size, num_priors, num_classes)
+                batch_label[ign] *= -1
+                mask = batch_label &gt;= 0
+            loss_c = self.focal_loss(conf_data[mask], <a id="change">batch_label[mask]</a>, reduction=&quotmean&quot)
+
+            return (loss_l, loss_c)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.mutual_guide:
+
+            &#47&#47 match priors (default boxes) and ground truth boxes
+            <a id="change">with torch</a><a id="change">.no_grad():
+                </a>loc_t = torch.zeros(num, num_priors, 4).cuda()
+                conf_t = torch.zeros(num, num_priors).cuda().long()
+                overlap_t = torch.zeros(num, num_priors).cuda()
+                pred_t = torch.zeros(num, num_priors).cuda()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 7</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/85219f93a8d5b54cb3ed9f06d86bb64d3f6d3552#diff-17e74ddc1f962a57914a4d1ab181d7b62b3d8d17644166846612c43ba5fd6743L27' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415715</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: 85219f93a8d5b54cb3ed9f06d86bb64d3f6d3552</div><div id='time'> Time: 2021-10-02</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: utils/loss/multibox_loss.py</div><div id='m_class'> M Class Name: MultiBoxLoss</div><div id='n_method'> N Class Name: MultiBoxLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/loss/multibox_loss.py</div><div id='n_file'> N File Name: utils/loss/multibox_loss.py</div><div id='m_start'> M Start Line: 27</div><div id='m_end'> M End Line: 102</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 110</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.version == &quotB0&quot:
+            if self.training:
+                var = x.var([0,2,3])
+                self.running_var = (self.momentum * self.running_var) + (1.0-self.momentum) * (<a id="change">x.shape[0]</a>/(x.shape[0]-1)*var)
+            else:
+                var = self.running_var
+            sigma = var.view([1, self.insize, 1, 1]).expand_as(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.training:
+                var = x.var([0, 2, 3], unbiased=False)
+                n = x.numel() / x.size(1)
+                <a id="change">with torch</a><a id="change">.no_grad():
+                    </a>self.running_var = exponential_average_factor * var * n / (n - 1)\
+                        + (1 - exponential_average_factor) * self.running_var
+            else:
+                var = self.running_var</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/digantamisra98/evonorm/commit/e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef#diff-3e603d8ee6e954d92d8ca2340dc887ad739428240f8c52b56be403bbc30e64e6L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415717</div><div id='project'> Project Name: digantamisra98/evonorm</div><div id='commit'> Commit Name: e64df8c7cc70ac2bb49fc1ec7d479cd1a07ebbef</div><div id='time'> Time: 2020-04-08</div><div id='author'> Author: mishradiganta91@gmail.com</div><div id='file'> File Name: evonorm2d.py</div><div id='m_class'> M Class Name: EvoNorm2D</div><div id='n_method'> N Class Name: EvoNorm2D</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: evonorm2d.py</div><div id='n_file'> N File Name: evonorm2d.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+			factor_code = (
+				self.factor_embeddings[f](factors[:, f]) * label_masks[:, [f]]
+				+ torch.matmul(assignment.probs, <a id="change">self.factor_embeddings[f]</a>.weight) * (~label_masks[:, [f]])
+			)
+
+			assignments.append(assignment)</code></pre><h3>After Change</h3><pre><code class='java'>
+		for f in range(self.config[&quotn_factors&quot]):
+			assignment = Categorical(logits=self.img_factor_embeddings[f](img_id))
+
+			<a id="change">with torch</a><a id="change">.no_grad():
+				</a>factor_values = torch.arange(self.config[&quotfactor_sizes&quot][f], dtype=torch.int64).to(img_id.device)
+				factor_embeddings = self.factor_embeddings[f](factor_values)
+
+			factor_code = (</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/zerodim/commit/6f99249458de35cd5046b90d4e9044ab9cdf8cb4#diff-984b110b5715695ee962627a74d3943954cc60be2f36b8986a8e46d712745d31L51' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415716</div><div id='project'> Project Name: avivga/zerodim</div><div id='commit'> Commit Name: 6f99249458de35cd5046b90d4e9044ab9cdf8cb4</div><div id='time'> Time: 2021-05-01</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: network/training.py</div><div id='m_class'> M Class Name: FactorModel</div><div id='n_method'> N Class Name: FactorModel</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: network/training.py</div><div id='n_file'> N File Name: network/training.py</div><div id='m_start'> M Start Line: 56</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 55</div><div id='n_end'> N End Line: 64</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        :type inverse: bool, optional
+        
+        if train:
+            self._parallel_variance(torch.mean(x, dim=0), torch.var(x, dim=0), <a id="change">x.shape[0]</a>)
+
+        &#47&#47 scale back the data to the original representation
+        if inverse:</code></pre><h3>After Change</h3><pre><code class='java'>
+        :type no_grad: bool, optional
+        
+        if no_grad:
+            <a id="change">with torch</a><a id="change">.no_grad():
+                </a>return self._compute(x, train, inverse)
+        else:
+            return self._compute(x, train, inverse)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/toni-sm/skrl/commit/3ff78a027e492182b7e8d539ce2233a89cdf9bc0#diff-bc43aa4c67bd0eb748dda11701cf63e0d3118648dbc475df748b6b7702960e9eL93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415719</div><div id='project'> Project Name: toni-sm/skrl</div><div id='commit'> Commit Name: 3ff78a027e492182b7e8d539ce2233a89cdf9bc0</div><div id='time'> Time: 2022-07-08</div><div id='author'> Author: toni.semu@gmail.com</div><div id='file'> File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_class'> M Class Name: RunningStandardScaler</div><div id='n_method'> N Class Name: RunningStandardScaler</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='n_file'> N File Name: skrl/resources/preprocessors/torch/running_standard_scaler.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 115</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch = range(len(x))  &#47&#47 batch size
+        for i in batch:
+            x[i] = np.array(x[i])  &#47&#47 to numpy
+            <a id="change">x[i]</a> = x[i][:, :, :3] if x[i].ndim == 3 else np.tile(x[i][:, :, None], 3)  &#47&#47 enforce 3ch input
+            s = x[i].shape[:2]  &#47&#47 HWC
+            shape0.append(s)  &#47&#47 image shape
+            g = (size / max(s))  &#47&#47 gain</code></pre><h3>After Change</h3><pre><code class='java'>
+        x = torch.from_numpy(x).to(p.device).type_as(p) / 255.  &#47&#47 uint8 to fp16/32
+
+        &#47&#47 Inference
+        <a id="change">with torch</a><a id="change">.no_grad():
+            </a>y = self.model(x, augment, profile)[0]  &#47&#47 forward
+        y = non_max_suppression(y, conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)  &#47&#47 NMS
+
+        &#47&#47 Post-process</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/positive666/yolov5_research/commit/f5429260ca4fbc208fc9ba80804e7215fefc8f72#diff-cfb1ff087a99a34369673c9f34bdcd22f2d429ab3599a89f386c5de1fd9a2566L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415718</div><div id='project'> Project Name: positive666/yolov5_research</div><div id='commit'> Commit Name: f5429260ca4fbc208fc9ba80804e7215fefc8f72</div><div id='time'> Time: 2020-11-16</div><div id='author'> Author: glenn.jocher@ultralytics.com</div><div id='file'> File Name: models/common.py</div><div id='m_class'> M Class Name: autoShape</div><div id='n_method'> N Class Name: autoShape</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/common.py</div><div id='n_file'> N File Name: models/common.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 168</div><div id='n_start'> N Start Line: 141</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        with torch.no_grad():
+            means, buckets, dists = kmeans(x, means, training=self.training, init=not self.initted)
+            indices = distribution(dists, window_size)
+            indices = indices.contiguous().view(*<a id="change">indices.size()[:2]</a>, -1)
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)
+        loss = F.mse_loss(x, routed_means) * self.commitment</code></pre><h3>After Change</h3><pre><code class='java'>
+            dists, buckets = dists_and_buckets(x, means)
+
+        if update_means:
+            <a id="change">with torch</a><a id="change">.no_grad():
+                </a>means = kmeans_iter(x, means, buckets)
+            self.new_means = means
+
+        routed_means = batched_index_select(expand_dim(means, 0, b), buckets)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/2042adb06111339b86814500f0c389759b8f6cdf#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL394' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7415726</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 2042adb06111339b86814500f0c389759b8f6cdf</div><div id='time'> Time: 2020-05-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: Kmeans</div><div id='n_method'> N Class Name: Kmeans</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 396</div><div id='m_end'> M End Line: 410</div><div id='n_start'> N Start Line: 367</div><div id='n_end'> N End Line: 384</div><BR>

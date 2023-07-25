@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        var = torch.var(x, dim = -1, unbiased = False, keepdim = True)
+        mean = torch.mean(x, dim = -1, keepdim = True)
+        <a id="change">return </a>(x<a id="change"> - </a>mean) / (var + self.eps).sqrt() * self.g
+
+&#47&#47 parallel with residual
+&#47&#47 discovered by Wang et al + EleutherAI from GPT-J fame</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register_buffer(&quotbeta&quot, torch.zeros(dim))
+
+    def forward(self, x):
+        <a id="change">return </a><a id="change">F.layer_norm(</a>x, x.shape[-1:], self.gamma, self.beta<a id="change">)</a>
+
+&#47&#47 parallel with residual
+&#47&#47 discovered by Wang et al + EleutherAI from GPT-J fame
+</code></pre>

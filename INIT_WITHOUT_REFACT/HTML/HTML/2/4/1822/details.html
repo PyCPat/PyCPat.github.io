@@ -1,0 +1,49 @@
+<html><h3>Pattern ID :1822
+</h3><img src='7080796.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        device = x.get_device()
+        dic_z = self.dic.to(device)
+        prior = self.prior.to(device)
+        if <a id="change">len(proposals) == 2</a>:
+            proposals1 = proposals[0].bbox.size(0)
+            proposals2 = proposals[1].bbox.size(0)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        dic_z = self.dic.to(device)
+        prior = self.prior.to(device)
+
+        box_size_list = <a id="change">[proposal.bbox.size(0) for proposal in proposals]</a>
+        feature_split = x.split(box_size_list)
+        xzs = [self.z_dic(feature_pre_obj, dic_z, prior) for feature_pre_obj in feature_split]
+
+        causal_logits_list = [self.causal_score(xz) for xz in xzs]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wangt-cn/vc-r-cnn/commit/51a882a36e8777715669773236cd8285b0d38986#diff-be62d5533104d4c97b3017be21afc11ab8aaaf90848ecea92447a04acbbb4e06L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7080796</div><div id='project'> Project Name: wangt-cn/vc-r-cnn</div><div id='commit'> Commit Name: 51a882a36e8777715669773236cd8285b0d38986</div><div id='time'> Time: 2020-02-21</div><div id='author'> Author: wangt97@hotmail.com</div><div id='file'> File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='m_class'> M Class Name: CausalPredictor</div><div id='n_method'> N Class Name: CausalPredictor</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='n_file'> N File Name: vc_rcnn/vc_rcnn/modeling/roi_heads/box_head/roi_box_predictors.py</div><div id='m_start'> M Start Line: 96</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 101</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 split into multiple time segments, assumes in 2nd dim
+        segmented_x = [list(torch.split(x, x.shape[2] // self.split_block, dim=2)) for x in X]
+        for x in segmented_x:
+            if <a id="change">len(x) &gt; self.split_block</a>:
+                x[-2] = torch.cat(x[-2:], dim=2)
+
+        ret_segments = []</code></pre><h3>After Change</h3><pre><code class='java'>
+        segmented_x = [torch.split(x, seg_shape, dim=2) for x, seg_shape in zip(X, segment_shapes)]
+
+        &#47&#47 apply MSAF
+        ret_segments = <a id="change">[self.blocks[i]([x[i] for x in segmented_x]) for i in range(self.split_block)]</a>
+
+        &#47&#47 put segments back together
+        ret = [torch.cat([r[m] for r in ret_segments], dim=2) for m in range(self.num_modality)]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/anita-hu/msaf/commit/c784fa99febfbf86ef8aa8f6fa708227a7251ab1#diff-d68e3105d0084e846106ad79a39721b487918159e4343a84f4ae68b3d6eadc0cL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7080799</div><div id='project'> Project Name: anita-hu/msaf</div><div id='commit'> Commit Name: c784fa99febfbf86ef8aa8f6fa708227a7251ab1</div><div id='time'> Time: 2020-12-30</div><div id='author'> Author: anitahu113@gmail.com</div><div id='file'> File Name: MSAF.py</div><div id='m_class'> M Class Name: MSAF</div><div id='n_method'> N Class Name: MSAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: MSAF.py</div><div id='n_file'> N File Name: MSAF.py</div><div id='m_start'> M Start Line: 131</div><div id='m_end'> M End Line: 145</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 139</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            pred = self.var_predict_multi * self.var_predict_module(input)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if <a id="change">len(pred.shape) == 1</a>:
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pred = None
+        if self.var_predict_module is not None and not _ignore_input:
+            pred = self.var_predict_module(*<a id="change">[inputs[x] for x in self.expected_kwargs]</a>)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if (pred &lt; 0).any():</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/strongio/torchcast/commit/d98b47d1ac38c61653093efd887cc672f228917d#diff-65e118e1565802366914308589e1ad788cb0cd050a59e65d1c18b1195749bf05L244' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7080801</div><div id='project'> Project Name: strongio/torchcast</div><div id='commit'> Commit Name: d98b47d1ac38c61653093efd887cc672f228917d</div><div id='time'> Time: 2021-09-01</div><div id='author'> Author: jacob.dink@strong.io</div><div id='file'> File Name: torchcast/covariance/base.py</div><div id='m_class'> M Class Name: Covariance</div><div id='n_method'> N Class Name: Covariance</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchcast/covariance/base.py</div><div id='n_file'> N File Name: torchcast/covariance/base.py</div><div id='m_start'> M Start Line: 246</div><div id='m_end'> M End Line: 266</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 290</div><BR>

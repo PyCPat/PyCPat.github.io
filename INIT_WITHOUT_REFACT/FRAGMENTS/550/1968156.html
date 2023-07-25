@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, attn_mask=None):
+        B, N, C = x.shape
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads)
+        q, k, v = <a id="change">qkv[:, :, 0]</a>.transpose(1, 2), qkv[:, :, 1].transpose(1, 2), qkv[:, :, 2].transpose(1, 2)
+
+        &#47&#47 TODO benchmark vs above
+        &#47&#47qkv = qkv.reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        B, N, C = x.shape
+        q, k, v = <a id="change">self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2</a>, <a id="change">0</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">4</a><a id="change">)</a>
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)</code></pre>

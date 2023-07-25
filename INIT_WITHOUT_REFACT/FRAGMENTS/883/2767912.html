@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        spatial_cls_tokens = repeat(self.spatial_cls_token, &quot1 1 d -&gt; b f 1 d&quot, b = b, f = f)
+        x = torch.cat((spatial_cls_tokens, x), dim = 2)
+        x += <a id="change">self.pos_embedding[:, :(n + 1)]</a>
+        x = self.dropout(x)
+
+        x = rearrange(x, &quotb f n d -&gt; (b f) n d&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        x = x + self.pos_embedding
+
+        <a id="change">if </a><a id="change">exists(</a>self.spatial_cls_token<a id="change">):
+            </a>spatial_cls_tokens = repeat(self.spatial_cls_token, &quot1 1 d -&gt; b f 1 d&quot, b = b, f = f)
+            x = torch.cat((spatial_cls_tokens, x), dim = 2)
+
+        x = self.dropout(x)</code></pre>

@@ -1,0 +1,94 @@
+<html><h3>Pattern ID :484
+</h3><img src='1735310.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Sample amount of noise to add for each batch element
+        sigmas = self.sigma_distribution(num_samples=batch, device=device)
+        sigmas_padded<a id="change"> = </a>rearrange(sigmas, "b -&gt; b 1 1")
+
+        &#47&#47 Add noise to input
+        noise<a id="change"> = </a>default(noise, lambda: torch.randn_like(x))
+        x_noisy = x + sigmas_padded * noise
+
+        &#47&#47 Compute denoised values
+        x_denoised = self.denoise_fn(x_noisy, sigmas=sigmas, **kwargs)
+
+        &#47&#47 Compute weighted loss
+        losses<a id="change"> = </a>F.mse_loss(x_denoised, x, reduction="none")
+        losses = reduce(losses, "b ... -&gt; b", "mean")
+        losses<a id="change"> = </a>losses * self.loss_weight(sigmas)
+        loss<a id="change"> = </a>losses.mean()
+
+        <a id="change">return </a>loss
+
+
+class DiffusionSampler(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        raise NotImplementedError("Diffusion class missing denoise_fn")
+
+    def forward(self, x: Tensor, noise: Tensor = None, **kwargs) -&gt; Tensor:
+        <a id="change">raise </a>NotImplementedError("Diffusion class missing forward function")
+
+
+class VDiffusion(Diffusion):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/68da808cd7e5acb5c571cf14ccefecb3ddceec5b#diff-2678fbb2636c135caed9b7af07b32741ab81e9722df27eabaabefbc78db80f94L109' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1735310</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 68da808cd7e5acb5c571cf14ccefecb3ddceec5b</div><div id='time'> Time: 2022-10-08</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_class'> M Class Name: Diffusion</div><div id='n_method'> N Class Name: Diffusion</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_start'> M Start Line: 310</div><div id='m_end'> M End Line: 329</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 109</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        -----
+        The pose score is the log softmax of the output of the last linear layer.
+        
+        x<a id="change"> = </a>self.features(x)
+
+        &#47&#47 Reshape based on number of channels
+        &#47&#47 Global max pooling reduced spatial dimensions to single value
+        x<a id="change"> = </a>x.view(-1, self.features_out_size)
+
+        pose_raw<a id="change"> = </a>self.pose(x)
+
+        pose_raw<a id="change"> = </a>self.pose(x)
+        pose_log<a id="change"> = </a>F.log_softmax(pose_raw, dim=1)
+
+        if self.predict_affinity:
+            affinity = self.affinity(x)
+            &#47&#47 Squeeze last (dummy) dimension of affinity prediction
+            &#47&#47 This allows to match the shape (batch_size,) of the target tensor
+            return pose_log, affinity.squeeze(-1)
+        else:
+            <a id="change">return </a>pose_log
+
+
+models_dict = {</code></pre><h3>After Change</h3><pre><code class='java'>
+        x: torch.Tensor
+            Input tensor
+        
+        <a id="change">raise </a>NotImplementedError
+
+
+class DensePose(Dense):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rmeli/gnina-torch/commit/4593d453ca56656187db30333f85286e3ab260a2#diff-5ab34236f2ede2f92bf7a22d8178708b84218a88a112b5e7e46c9f9d4243283dL544' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1735327</div><div id='project'> Project Name: rmeli/gnina-torch</div><div id='commit'> Commit Name: 4593d453ca56656187db30333f85286e3ab260a2</div><div id='time'> Time: 2021-11-17</div><div id='author'> Author: rocco.meli@biodtp.ox.ac.uk</div><div id='file'> File Name: gnina/models.py</div><div id='m_class'> M Class Name: Dense</div><div id='n_method'> N Class Name: Dense</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gnina/models.py</div><div id='n_file'> N File Name: gnina/models.py</div><div id='m_start'> M Start Line: 555</div><div id='m_end'> M End Line: 575</div><div id='n_start'> N Start Line: 672</div><div id='n_end'> N End Line: 672</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &quot&quot&quotCompute the output of the RBF layer&quot&quot&quot
+
+        if self.sigma.requires_grad:
+            self.invCov<a id="change"> = </a>self.invCovMat(self.sigma)
+            self.detS = self.denom(self.sigma,self.input_features)
+
+        &#47&#47 get the distancese of each point to each RBF center
+        &#47&#47 (Nbatch,Nrbf,Ndim)
+        delta<a id="change"> =  </a>(input[:,None,:] - self.centers[None,...])
+
+        &#47&#47 Compute (INPUT-MU).T x Sigma^-1 * (INPUT-MU)-&gt; (Nbatch,Nrbf)
+        X<a id="change"> = </a>( torch.matmul(delta.unsqueeze(2),self.invCov).squeeze(2) * delta ).sum(2)
+
+        &#47&#47 slater kernel
+        if self.kernel == &quotslater&quot:
+            X<a id="change"> = </a>torch.sqrt(X)
+            self.detS[:,:] = 1.
+
+        &#47&#47 divide by the determinant of the cov mat
+        X<a id="change"> = </a>(torch.exp(-0.5*X).unsqueeze(2) / self.detS).squeeze()
+
+        <a id="change">return </a>X</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif self.kernel == &quotslater&quot:
+            return self._slater_kernel(input)
+        else:
+            <a id="change">raise </a>ValueError(&quotKernel not recognized&quot)
+
+    def _gaussian_kernel(self,input):
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/nlesc-jcer/qmctorch/commit/d200b089e3f6aad463577f9769a09314efb48805#diff-0f891af57afb115ffddc9a1a93baac483839a2011946a7dd032026efd55d150fL147' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1735325</div><div id='project'> Project Name: nlesc-jcer/qmctorch</div><div id='commit'> Commit Name: d200b089e3f6aad463577f9769a09314efb48805</div><div id='time'> Time: 2019-06-19</div><div id='author'> Author: nicolas.gm.renaud@gmail.com</div><div id='file'> File Name: pyCHAMP/wavefunction/rbf.py</div><div id='m_class'> M Class Name: RBF</div><div id='n_method'> N Class Name: RBF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyCHAMP/wavefunction/rbf.py</div><div id='n_file'> N File Name: pyCHAMP/wavefunction/rbf.py</div><div id='m_start'> M Start Line: 150</div><div id='m_end'> M End Line: 170</div><div id='n_start'> N Start Line: 151</div><div id='n_end'> N End Line: 156</div><BR>

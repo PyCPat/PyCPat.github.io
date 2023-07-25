@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            mean = mean + self.bias_mean
+            var = var + self.bias_var
+
+        <a id="change">mean</a> = F.relu(mean)
+        var = F.relu(var)
+
+        <a id="change">is_edge_like = </a><a id="change">is_edge_index(</a>edge_index<a id="change">)</a>
+
+        if <a id="change">is_edge_like</a>:
+            edge_index, edge_weight = gcn_norm(
+                edge_index, edge_weight, <a id="change">mean.size(0</a><a id="change">)</a>, improved=False,
+                add_self_loops=self.add_self_loops, dtype=mean.dtype)
+        elif <a id="change">isinstance(</a>edge_index, SparseTensor<a id="change">)</a><a id="change">:
+            </a>adj = gcn_norm(edge_index, <a id="change">mean.size(0</a><a id="change">)</a>, improved=False,
+                           add_self_loops=self.add_self_loops,
+                           dtype=mean.dtype)
+
+        else:
+            &#47&#47 N by N dense adjacency matrix
+            adj<a id="change"> = </a><a id="change">dense_gcn_norm(</a>edge_index<a id="change">, improved=False,
+                                 add_self_loops=self.add_self_loops)</a>
+
+        attention = torch.exp(-self.gamma * var)
+        mean = mean * attention
+        var = var * attention * attention</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_index, edge_weight = make_self_loops(edge_index, edge_weight,
+                                                      num_nodes=x.size(0))
+
+        if <a id="change">self.normalize</a>:
+            edge_index<a id="change">, edge_weight</a> = <a id="change">make_gcn_norm(</a>edge_index, edge_weight<a id="change">)</a>
+
+        attention = torch.exp(-self.gamma * var)
+        mean = mean * attention
+        var = var * attention * attention</code></pre>

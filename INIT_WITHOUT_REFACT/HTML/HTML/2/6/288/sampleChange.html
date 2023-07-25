@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.stride = stride
+
+    def forward(self, x):
+        stride<a id="change"> = </a>self.stride
+        assert (x.data.dim() == 4)
+        B = x.data.size(0)
+        C = x.data.size(1)
+        H = x.data.size(2)
+        W = x.data.size(3)
+        ws = stride
+        hs<a id="change"> = </a>stride
+        x<a id="change"> = </a><a id="change">x.view(B, C, H, 1, W, 1).expand(B, C, H, stride, W, stride).contiguous()</a>.view(B, C, H * stride, W * stride)
+        <a id="change">return </a>x
+
+
+class Conv_Bn_Activation(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x, target_size):
+        assert (x.data.dim() == 4)
+        _<a id="change">, _, H, W</a> = target_size
+        return F.interpolate(x, size=(H, W), mode=&quotnearest&quot)
+
+</code></pre>

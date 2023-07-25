@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if mask is None:
+            mask = torch.ones_like(gt).bool()
+        assert mask.size() == gt.size()
+        <a id="change">if </a>not isinstance(mask, torch.BoolTensor)<a id="change">:
+            </a><a id="change">assert </a>torch.all(torch.logical_or(mask == 0, mask == 1))
+            mask = mask.bool()
+        return self.smooth_l1_loss(pred[mask], gt[mask])
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if mask is None:
+            mask = torch.ones_like(gt).bool()
+        assert mask.size() == gt.size()
+        loss = self.smooth_l1_loss(pred * mask, gt<a id="change"> * </a>mask)
+        return <a id="change">loss.sum()</a><a id="change"> / </a>(<a id="change">mask.sum() + </a>self.eps)
+</code></pre>

@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        else:
+            prev_features = inputs
+
+        <a id="change">if </a><a id="change">self.memory_efficient and self.any_requires_grad(prev_features):
+            </a>if torch.jit.is_scripting():
+                raise Exception("memory efficient not supported in JIT")
+
+            bottleneck_output<a id="change"> = </a>self.call_checkpoint_bottleneck(prev_features)
+        else:
+            bottleneck_output<a id="change"> = </a>self.bn_function(prev_features)
+
+        new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        if self.drop_rate &gt; 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+ 
+
+    def forward(self, inputs: Tensor):
+        concat_features<a id="change"> = </a><a id="change">torch.cat(</a>inputs, 1<a id="change">)</a>
+        bottleneck_output<a id="change"> = self.conv1(</a>self.relu1(self.norm1(concat_features))<a id="change">)</a>
+        new_features = self.conv2(self.relu2(self.norm2(bottleneck_output)))
+        
+        if self.drop_rate &gt; 0:
+            new_features = F.dropout(new_features,  p=self.drop_rate, training=self.training)</code></pre>

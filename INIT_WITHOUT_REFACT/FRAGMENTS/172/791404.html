@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                logits, decision = self.Policy_net(p_in.detach(), temp)
+
+                decision = decision.unsqueeze(1)                   
+                pose, hc = self.Pose_net(fv[:, i, :].unsqueeze(1), <a id="change">fv_alter[:, i, :].unsqueeze(1</a><a id="change">)</a>, fi[:, i, :].unsqueeze(1), decision, hc)
+                decision_list.append(decision) 
+                logit_list.append(logits) 
+            </code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(seq_len):
+            if i == 0 and is_first:
+                &#47&#47 The first relative pose is estimated by both images and imu by default
+                pose, hc = self.Pose_net(<a id="change">fv[:, i:i+1, :]</a>, None, fi[:, i:i+1, :], None, hc)
+            else:
+                &#47&#47 Otherwise, sample the decision from the policy network
+                p_in = torch.cat((fi[:, i, :], hidden), -1)</code></pre>

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2).clone()
+        )  &#47&#47 [B, 2, T, F_df]
+        h_conv: Optional[Tensor] = None
+        <a id="change">for i</a>, (stage, _) in enumerate(<a id="change">zip(</a>self.refinement_stages, self.refinement_snr_max<a id="change">)</a>)<a id="change">:
+            </a>refinement, h_conv, _ = stage(self.cplx_comp(spec_f), h_conv)
+            spec_f = spec_f + refinement
+            out_specs[i + 1][..., : self.df_bins, :]<a id="change"> = </a>spec_f.permute(0, 2, 3, 1)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec, m, lsnr, out_specs
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):</code></pre><h3>After Change</h3><pre><code class='java'>
+        r, _, _ = self.refinement_stage(self.cplx_comp(spec_f))
+        spec_f = self.refinement_op(spec_f, r)
+        spec[..., : self.df_bins, :] = spec_f.unsqueeze(-1).transpose(1, -1)
+        <a id="change">return </a>spec, m, lsnr, None
+
+
+def init_model(df_state: Optional[DF] = None, run_df: bool = True, train_mask: bool = True):</code></pre>

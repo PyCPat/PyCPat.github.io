@@ -1,0 +1,90 @@
+<html><h3>Pattern ID :406
+</h3><img src='1573768.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        attn_val = attn_val.permute(1, 2, 0, 3).contiguous().view(batch_size, query_length, -1)
+
+        combined = torch.cat([attn_val, preserved], dim=2)
+        context = torch.tanh(<a id="change">self.fc(</a>combined.view(-1, 2 * self.in_features)<a id="change">)</a>).view(batch_size, -1, self.in_features)
+
+        return context
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn_val = attn_val.permute(1, 2, 0, 3).contiguous().view(batch_size, -1, self.num_head * self.dim)
+        combined = torch.cat([attn_val, residual], dim=2)
+
+        context = torch.tanh(<a id="change">self.fc(</a>combined.view(-1, self.in_features + self.dim * self.num_head)<a id="change">)</a>)
+        context<a id="change"> = </a>context.view(batch_size, -1, self.in_features)
+
+        return context
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 6</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sooftware/attentions/commit/4660cfe60771e0198b434c5c91706d91aa7299ce#diff-eb7ae2070281ad9c6011e2b97c48b86fea6c48408aa6b0e9d20c8c520d3c7cf2L28' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573768</div><div id='project'> Project Name: sooftware/attentions</div><div id='commit'> Commit Name: 4660cfe60771e0198b434c5c91706d91aa7299ce</div><div id='time'> Time: 2020-05-01</div><div id='author'> Author: sh951011@gmail.com</div><div id='file'> File Name: attention.py</div><div id='m_class'> M Class Name: MultiHeadAttention</div><div id='n_method'> N Class Name: MultiHeadAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: attention.py</div><div id='n_file'> N File Name: attention.py</div><div id='m_start'> M Start Line: 28</div><div id='m_end'> M End Line: 47</div><div id='n_start'> N Start Line: 30</div><div id='n_end'> N End Line: 47</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = F.relu(out)
+        out = out.permute(0, 2, 1)
+        out = self.maxpool(out).squeeze()
+        out = <a id="change">self.fc(</a>out<a id="change">)</a>
+
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 print(out.shape)&#47&#47[300,512]
+        out = torch.cat((embed, out), 2)
+        &#47&#47 print(out.shape) &#47&#47 [300,812]
+        fc_output = torch.tanh(<a id="change">self.fc(</a>out<a id="change">)</a>)   &#47&#47 [batch_size, max_seq_len, hidden_size*2]
+
+        maxpool_input<a id="change"> = </a>fc_output.permute(0, 2, 1)  &#47&#47 [batch_size, hidden_size*2, max_seq_len]
+        maxpool_output = self.maxpool(maxpool_input).squeeze()   &#47&#47 [batch_size, hidden_size*2]
+
+        cls_input = self.dropout(maxpool_output)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ygzwqzd/lamda-ssl/commit/2bff86050026e23fa26339d45b62e1077805a3d6#diff-de03df31d28d6abdaa082f260491d6ad2bcdc691bec9d0d3bb28769b6780da1bL22' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573773</div><div id='project'> Project Name: ygzwqzd/lamda-ssl</div><div id='commit'> Commit Name: 2bff86050026e23fa26339d45b62e1077805a3d6</div><div id='time'> Time: 2022-02-19</div><div id='author'> Author: 1129198222@qq.com</div><div id='file'> File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='m_class'> M Class Name: TextRCNN</div><div id='n_method'> N Class Name: TextRCNN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='n_file'> N File Name: Semi_sklearn/Network/TextRCNN.py</div><div id='m_start'> M Start Line: 23</div><div id='m_end'> M End Line: 31</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 39</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        x = input.mean(dim=self.avg_dim)  &#47&#47 [B, C, T]
+        x = x.transpose(1, 2)  &#47&#47 [B, T, C]
+        x, h = self.gru(x, h)
+        x = <a id="change">self.fc(</a>x<a id="change">)</a>.transpose(1, 2).unsqueeze(-1)
+        if self.skip is not None:
+            x = self.skip(input) + x  &#47&#47 a regular skip connection
+        elif self.scale is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        else:
+            x = input.mean(dim=self.avg_dim).transpose(1, 2)  &#47&#47 [B, T, C]
+        x, h = self.gru(x, h)
+        x = <a id="change">self.fc(</a>x<a id="change">)</a>
+        if self.avg_dim == 1:
+            x<a id="change"> = </a>x.unsqueeze(1)
+        else:
+            x = x.transpose(1, 2).unsqueeze(-1)
+        if self.skip is not None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/b3201ebf31a3af185550aeb2d23876b72cdd439f#diff-5334ed6884f81bc804d2bd390857a20259928c0ff4353d022d636e6017920ce9L175' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573776</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: b3201ebf31a3af185550aeb2d23876b72cdd439f</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_class'> M Class Name: GruSE</div><div id='n_method'> N Class Name: GruSE</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/multistagenet.py</div><div id='n_file'> N File Name: DeepFilterNet/df/multistagenet.py</div><div id='m_start'> M Start Line: 177</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 184</div><div id='n_end'> N End Line: 194</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.layer_norm:
+            h = self.ln0(h)  &#47&#47 (B, N, d)
+
+        h += F.relu(<a id="change">self.fc(</a>h<a id="change">)</a>)  &#47&#47 (B, N, d)
+        if self.layer_norm:
+            h = self.ln1(h)  &#47&#47 (B, N, d)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.layer_norm:
+            h = self.ln0(h)  &#47&#47 (B, N, d)
+
+        h<a id="change"> = </a>h + F.relu(<a id="change">self.fc(</a>h<a id="change">)</a>)  &#47&#47 (B, N, d)
+        if self.layer_norm:
+            h = self.ln1(h)  &#47&#47 (B, N, d)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bdsaglam/torch-scae/commit/08b5657768fd4fde0632cd1d88d439b8afcc9e8b#diff-279e3f60fb90a15cce8aad99c56549c814d3389376407c42447db94ffb3f8320L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573779</div><div id='project'> Project Name: bdsaglam/torch-scae</div><div id='commit'> Commit Name: 08b5657768fd4fde0632cd1d88d439b8afcc9e8b</div><div id='time'> Time: 2020-05-20</div><div id='author'> Author: bdsaglam@gmail.com</div><div id='file'> File Name: torch_scae/set_transformer.py</div><div id='m_class'> M Class Name: MAB</div><div id='n_method'> N Class Name: MAB</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_scae/set_transformer.py</div><div id='n_file'> N File Name: torch_scae/set_transformer.py</div><div id='m_start'> M Start Line: 113</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 113</div><div id='n_end'> N End Line: 118</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = torch.relu_(out[:,-1,:])
+        out = self.dropout(out)
+        out = torch.sigmoid(<a id="change">self.fc(</a>out<a id="change">)</a>)
+            
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        out = torch.relu_(out[:,-1,:])
+        out = self.dropout(out)
+        out = <a id="change">self.fc(</a>out<a id="change">)</a>
+        out<a id="change"> = </a>F.log_softmax(out, dim=1)
+            
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tsingz0/pfl-non-iid/commit/9f3dd6c4ac5b7e8a15d07ef015eb8fd4f90beab3#diff-61d670ad373ce6e8d36a6062412e1738e23f7fda4d45275da1d472b8449af62eL387' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573780</div><div id='project'> Project Name: tsingz0/pfl-non-iid</div><div id='commit'> Commit Name: 9f3dd6c4ac5b7e8a15d07ef015eb8fd4f90beab3</div><div id='time'> Time: 2021-08-29</div><div id='author'> Author: 2719584131@qq.com</div><div id='file'> File Name: system/flcore/trainmodel/models.py</div><div id='m_class'> M Class Name: LSTMNet</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: system/flcore/trainmodel/models.py</div><div id='n_file'> N File Name: system/flcore/trainmodel/models.py</div><div id='m_start'> M Start Line: 400</div><div id='m_end'> M End Line: 401</div><div id='n_start'> N Start Line: 244</div><div id='n_end'> N End Line: 246</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        out = self.relu(self.bn1(out))
+        out = F.adaptive_avg_pool2d(out, 1)
+        out = out.view(-1, self.channels)
+        return <a id="change">self.fc(</a>out<a id="change">)</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.relu(self.bn1(out))
+        out = F.adaptive_avg_pool2d(out, 1)
+        out = out.view(-1, self.channels)
+        output<a id="change"> = </a><a id="change">self.fc(</a>out<a id="change">)</a>
+        return output</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ygzwqzd/lamda-ssl/commit/360768e49da2ff10157493a976817acc85f1ccd5#diff-c12f6dc3cd748b44ef5b7327e975a2667f80a6b4c6fd7e62186d1b5019d46445L105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1573764</div><div id='project'> Project Name: ygzwqzd/lamda-ssl</div><div id='commit'> Commit Name: 360768e49da2ff10157493a976817acc85f1ccd5</div><div id='time'> Time: 2022-01-17</div><div id='author'> Author: 1129198222@qq.com</div><div id='file'> File Name: Semi_sklearn/Network/WideResNet.py</div><div id='m_class'> M Class Name: WideResNet</div><div id='n_method'> N Class Name: WideResNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: Semi_sklearn/Network/WideResNet.py</div><div id='n_file'> N File Name: Semi_sklearn/Network/WideResNet.py</div><div id='m_start'> M Start Line: 112</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 112</div><div id='n_end'> N End Line: 115</div><BR>

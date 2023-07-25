@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, graph):
+        graph.update_all(message_func=self.message_function, reduce_func=fn.sum(msg=&quotm&quot, out=&quotm_sum&quot))
+        <a id="change">graph.apply_nodes(</a>self.update_function<a id="change">)</a>
+
+    def message_function(self, edges):
+        squared_distance = torch.sum((edges.src[&quotx&quot] - edges.dst[&quotx&quot]) ** 2, dim=-1)[:, None]
+        message_input = torch.cat([edges.src[&quotf&quot], edges.dst[&quotf&quot], edges.data[&quotw&quot], squared_distance], dim=-1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        graph.update_all(message_func=self.message_function, reduce_func=fn.sum(msg=&quotm&quot, out=&quotm_sum&quot))
+        h = torch.cat([h, graph.ndata[&quotm_sum&quot]], dim=-1)
+        &#47&#47 post-transformation
+        h<a id="change"> = </a>self.posttrans(h)
+        if self.residual:
+            h = h + h_in
+        <a id="change">graph.ndata[&quotf&quot]</a> = h
+
+
+    def message_function(self, edges):</code></pre>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">cut_point</a> = self.forecast_basis.shape[0]
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, cut_point:]</a>, self.backcast_basis)
+        forecast = torch.einsum(&quotbp,pt-&gt;bt&quot, <a id="change">theta[:, :cut_point]</a>, self.forecast_basis)
+        return backcast, forecast
+
+&#47&#47 %% ../../nbs/models.nbeatsx.ipynb 9</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.forecast_basis = nn.Parameter(forecast_template, requires_grad=False)
+
+    def forward(self, theta: torch.Tensor) -&gt; Tuple[torch.Tensor, torch.Tensor]:
+        <a id="change">harmonic_size</a> = self.forecast_basis.shape[0] &#47&#47 [harmonic_size, L+H]
+        backcast_theta<a id="change"> = </a><a id="change">theta[:, :harmonic_size]</a>
+        <a id="change">forecast_theta = </a><a id="change">theta[:, harmonic_size:]</a>
+        forecast_theta<a id="change"> = </a><a id="change">forecast_theta.reshape(len(</a>forecast_theta<a id="change">)</a>,harmonic_size,<a id="change">-1</a><a id="change">)</a>
+        backcast = torch.einsum(&quotbp,pt-&gt;bt&quot, backcast_theta, self.backcast_basis)
+        forecast = torch.einsum(&quotbpq,pt-&gt;btq&quot, forecast_theta, self.forecast_basis)
+        return backcast, forecast
+</code></pre>

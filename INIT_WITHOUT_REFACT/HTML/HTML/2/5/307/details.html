@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :307
+</h3><img src='1293328.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        embed_out = self.embedding(x)
+        lstm_out, self.hidden = self.lstm(embed_out, self.hidden)
+        lstm_out = self.dropout(lstm_out)
+        lstm_out<a id="change"> = </a><a id="change">lstm_out.contiguous()</a>.view(-1, self.hidden_dim)
+        fc_out = self.fc(lstm_out)
+
+        return fc_out</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+        _, (hidden, cell) = self.lstm(packed_embed_out)
+
+        hidden = self.dropout(torch.cat((<a id="change">hidden[-2, :, :]</a>, hidden[-1, :, :]), dim=1))
+        fc_out = self.fc(hidden)
+
+        return fc_out</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sforaidl/kd_lib/commit/d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8#diff-7dbb295508efd990fc66851d3b00d01a8e3b3d09d0e339f9e740d64e599e9c7dL47' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1293328</div><div id='project'> Project Name: sforaidl/kd_lib</div><div id='commit'> Commit Name: d00c232de5a16bcd2a81b896a35ec3f20c2f9fa8</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: 31511755+avishreekh@users.noreply.github.com</div><div id='file'> File Name: KD_Lib/models/lstm.py</div><div id='m_class'> M Class Name: LSTMNet</div><div id='n_method'> N Class Name: LSTMNet</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: KD_Lib/models/lstm.py</div><div id='n_file'> N File Name: KD_Lib/models/lstm.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 47</div><div id='n_end'> N End Line: 55</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = <a id="change">torch.stack(mel_outputs).transpose(0, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1293323</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Back to batch first
+        attn_scores = torch.stack(attn_scores).transpose(0, 1)
+        mel_outputs = <a id="change">torch.stack(mel_outputs).transpose(0, 1).contiguous()</a>
+        stop_tokens = torch.stack(stop_tokens).transpose(0, 1).squeeze(2)
+
+        &#47&#47 (B, T&quot, mel_dim*r) -&gt; (B, T, mel_dim)
+        mel_outputs<a id="change"> = </a>mel_outputs.reshape(B, -1, self.mel_dim)
+
+        return mel_outputs, stop_tokens, attn_scores
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1293326</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        with g.local_scope():
+            h_prime = []
+            emb<a id="change"> = </a><a id="change">emb.permute(1, 0, 2).contiguous()</a>
+            for i in range(self.num_heads):
+                g.edata[&quotalpha&quot] = edge_attention[:, i]
+                g.srcdata.update({&quotemb&quot: emb[i]})
+                g.update_all(Fn.u_mul_e(&quotemb&quot, &quotalpha&quot, &quotm&quot),</code></pre><h3>After Change</h3><pre><code class='java'>
+            edge_attention = edge_attention * \
+                             (1 - self.beta) + res_attn * self.beta
+        if self.num_heads == 1:
+            edge_attention = <a id="change">edge_attention[:, 0]</a>
+            edge_attention = edge_attention.unsqueeze(1)
+
+        with g.local_scope():
+            emb = emb.permute(0, 2, 1).contiguous()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bupt-gamma/openhgnn/commit/c2a6b5ad048e2d937b6642b0106dad5faa75a335#diff-59f1f6852baf41601055fbdbc029a635a162bb43b4244576cc8c6184f15c96d5L156' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1293324</div><div id='project'> Project Name: bupt-gamma/openhgnn</div><div id='commit'> Commit Name: c2a6b5ad048e2d937b6642b0106dad5faa75a335</div><div id='time'> Time: 2022-02-25</div><div id='author'> Author: 996179900@qq.com</div><div id='file'> File Name: openhgnn/models/SimpleHGN.py</div><div id='m_class'> M Class Name: SimpleHGNConv</div><div id='n_method'> N Class Name: SimpleHGNConv</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: openhgnn/models/SimpleHGN.py</div><div id='n_file'> N File Name: openhgnn/models/SimpleHGN.py</div><div id='m_start'> M Start Line: 159</div><div id='m_end'> M End Line: 190</div><div id='n_start'> N Start Line: 158</div><div id='n_end'> N End Line: 190</div><BR>

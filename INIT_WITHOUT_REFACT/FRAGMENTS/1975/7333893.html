@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.other = nn.Parameter(torch.FloatTensor(self.hidden_size))
+
+    def forward(self, out_state, history):
+        seq_len = <a id="change">history.size()</a>[1]
+        state_len = out_state.size()[1]
+        batch_size = history.size()[0]
+        attn_energies = torch.zeros(</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        if self.method == &quotdot&quot:
+            history = history.permute(0, 2, 1)  &#47&#47 batch_size * hidden_size * history_len
+            attn_energies = <a id="change">torch.bmm(</a>out_state, history<a id="change">)</a>
+        elif self.method == &quotgeneral&quot:
+            history = self.attn(history)
+            history = history.permute(0, 2, 1)
+            attn_energies = <a id="change">torch.bmm(</a>out_state, history<a id="change">)</a>
+        return F.softmax(attn_energies, dim=2)
+
+
+class DeepMove(AbstractModel):</code></pre>

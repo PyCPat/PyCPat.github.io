@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        question_padding = question.data == self.pad_idx
+
+        context_embedded = self.encoder_embeddings(context, padding=context_padding)
+        question_embedded<a id="change"> = </a>self.encoder_embeddings(question, padding=question_padding)
+
+        &#47&#47 pick the top-most N transformer layers to pass to the decoder for cross-attention
+        &#47&#47 (add 1 to account for the embedding layer - the decoder will drop it later)
+        self_attended_context = context_embedded.all_layers[-(self.args.transformer_layers + 1):]
+        final_context = context_embedded.last_layer
+        final_question<a id="change"> = </a>question_embedded.last_layer
+
+        if self.projection is not None:
+            final_context = self.dropout(final_context)
+            final_context = self.projection(final_context)
+
+            final_question<a id="change"> = </a><a id="change">self.dropout(</a>final_question<a id="change">)</a>
+            final_question<a id="change"> = </a>self.projection(final_question)
+
+        context_rnn_state = None
+        question_rnn_state = None
+        if self.args.rnn_layers &gt; 0:
+            batch_size = context.size(0)
+            if self.args.rnn_zero_state == &quotzero&quot:
+
+                zero = torch.zeros(self.args.rnn_layers, batch_size, self.args.rnn_dimension,
+                                   dtype=torch.float, requires_grad=False, device=context.device)
+                context_rnn_state = (zero, zero)
+                question_rnn_state = (zero, zero)
+            else:
+                if self.args.rnn_zero_state == &quotcls&quot:
+                    packed_rnn_state = self.norm(self.pool(context_embedded.last_layer[:, 0, :]))
+
+                elif self.args.rnn_zero_state == &quotaverage&quot:
+                    masked_final_context = context_embedded.last_layer.masked_fill(context_padding.unsqueeze(2), 0)
+                    summed_context = torch.sum(masked_final_context, dim=1)
+                    average_context = summed_context / context_lengths.unsqueeze(1)
+
+                    packed_rnn_state = self.norm(self.pool(average_context))
+
+                &#47&#47 packed_rnn_state is (batch, 2 * rnn_layers * rnn_dim)
+                packed_rnn_state = packed_rnn_state.reshape(batch_size, 2, self.args.rnn_layers,
+                                                            self.args.rnn_dimension)
+                &#47&#47 transpose to (2, batch, rnn_layers, rnn_dimension)
+                packed_rnn_state = packed_rnn_state.transpose(0, 1)
+                &#47&#47 transpose to (2, rnn_layers, batch, rnn_dimension)
+                packed_rnn_state = packed_rnn_state.transpose(1, 2)
+                &#47&#47 convert to a tuple of two (rnn_layers, batch, rnn_dimension) tensors
+                packed_rnn_state = packed_rnn_state.chunk(2, dim=0)
+                context_rnn_state = (packed_rnn_state[0].squeeze(0), packed_rnn_state[1].squeeze(0))
+
+        <a id="change">return </a>self_attended_context, final_context, context_rnn_state, final_question, question_rnn_state
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                packed_rnn_state = packed_rnn_state.chunk(2, dim=0)
+                context_rnn_state = (packed_rnn_state[0].squeeze(0), packed_rnn_state[1].squeeze(0))
+
+        <a id="change">return </a>self_attended_context, final_context, context_rnn_state
+</code></pre>

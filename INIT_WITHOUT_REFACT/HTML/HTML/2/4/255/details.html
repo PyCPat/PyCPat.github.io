@@ -1,0 +1,63 @@
+<html><h3>Pattern ID :255
+</h3><img src='890317.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            k = l.shape[-1]
+            soft = l @ c
+            softQE = F.mse_loss(soft, z)
+            oneHot = <a id="change">F.one_hot(b, k).float()</a>
+            hard = oneHot @ c
+            hardQE = F.mse_loss(hard, z)
+            loss<a id="change"> += </a>(softQE + hardQE + 0.1 * F.mse_loss(hard, soft)).mean()
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss = 0.0
+        for z, zq, soft in zip(latents, zqs, softs):
+            qe = F.mse_loss(z.detach(), zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            commit = <a id="change">F.mse_loss(z, zq.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))</a>
+            softQE = F.mse_loss(z.detach(), soft, reduction=&quotnone&quot).mean(axis=(0, 2))
+            softCommit = F.mse_loss(z, soft.detach(), reduction=&quotnone&quot).mean(axis=(0, 2))
+            &#47&#47 joint = F.mse_loss(soft, zq, reduction=&quotnone&quot).mean(axis=(0, 2))
+            loss<a id="change"> += </a>qe + 0.01 * commit + 0.1 * (softQE + 0.01 * softCommit)
+        return loss
+
+class CompressionLoss(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/163d9bc5bb4d433d52358cf5c7abc5955136f574#diff-93a462c5d42bc45838b4e4215cbb88d97c7a71ce0ceb9af896a4f1b48e34e718L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 890317</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 163d9bc5bb4d433d52358cf5c7abc5955136f574</div><div id='time'> Time: 2021-02-25</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/structural.py</div><div id='m_class'> M Class Name: QError</div><div id='n_method'> N Class Name: QError</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/structural.py</div><div id='n_file'> N File Name: src/mcqc/losses/structural.py</div><div id='m_start'> M Start Line: 11</div><div id='m_end'> M End Line: 21</div><div id='n_start'> N Start Line: 12</div><div id='n_end'> N End Line: 19</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        target = torch.bucketize(target, channel_bins, right=True)
+        target<a id="change"> = </a><a id="change">target.float()</a>.mean(dim=3)
+
+        predicted_patches = predicted_patches[mask]
+        target = target[mask]</code></pre><h3>After Change</h3><pre><code class='java'>
+        p = self.patch_size
+        target = rearrange(target, "b c (h p1) (w p2) -&gt; b (h w) c (p1 p2) ", p1 = p, p2 = p)
+
+        avg_target = <a id="change">target.mean(dim=3)</a>
+
+        channel_bins = torch.tensor([0.333, 0.666, 1.0])
+        descritized_target = torch.bucketize(avg_target, channel_bins, right=True)
+        descritized_target = F.one_hot(descritized_target, self.output_channel_bits)
+        c, bi = self.channels, self.output_channel_bits
+        descritized_target<a id="change"> = </a>rearrange(descritized_target, "b n c bi -&gt; b n (c bi)", c = c, bi = bi)
+
+        predicted_patches = predicted_patches[mask]
+        descritized_target = descritized_target[mask]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/be5d560821bb5ae4dff823272118eea4a5dc7d07#diff-1dcf8cf01d06ecd12207392ed2c0b4e7dbccdcba9bced068108922a8ac87a94fL34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 890318</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: be5d560821bb5ae4dff823272118eea4a5dc7d07</div><div id='time'> Time: 2021-02-12</div><div id='author'> Author: zackankner@gmail.com</div><div id='file'> File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_class'> M Class Name: MPPLoss</div><div id='n_method'> N Class Name: MPPLoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/mpp_pytorch.py</div><div id='n_file'> N File Name: vit_pytorch/mpp_pytorch.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 52</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if self.proj is not None and self.pre_proj:
+            x = self.proj(x)
+
+        x<a id="change"> = </a>x.mean(-2) / <a id="change">x_len.float()</a>.unsqueeze(-1)
+
+        if self.proj is not None and not self.pre_proj:
+            x = self.proj(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x = [x[b, : x_len[b]].mean(0) for b in range(len(x))]
+            x = torch.stack(x, dim=0)
+        else:
+            x = <a id="change">x.mean(</a>1<a id="change">)</a>
+
+        if self.post_proj is not None:
+            x<a id="change"> = </a>self.post_proj(x)
+
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/atosystem/speechclip/commit/b2d7d1450922b5f68626bcc7751faf4feca14ed5#diff-36cf0d2ba2e002faba923e96cac943aa23122917b021c2258ac13f6f611ab652L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 890341</div><div id='project'> Project Name: atosystem/speechclip</div><div id='commit'> Commit Name: b2d7d1450922b5f68626bcc7751faf4feca14ed5</div><div id='time'> Time: 2022-03-19</div><div id='author'> Author: b06901020@ntu.edu.tw</div><div id='file'> File Name: avssl/module/pooling.py</div><div id='m_class'> M Class Name: MeanPoolingLayer</div><div id='n_method'> N Class Name: MeanPoolingLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: avssl/module/pooling.py</div><div id='n_file'> N File Name: avssl/module/pooling.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 58</div><BR>

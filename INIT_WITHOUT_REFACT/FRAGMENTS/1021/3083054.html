@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        B, N, C = x.shape
+
+        <a id="change">if </a><a id="change">self.context &gt; 1:
+            </a>z<a id="change"> = </a>[x]
+            for d in range(1, self.context // 2 + 1):
+                z_u = torch.zeros_like(x)
+                z_u[:, d:, :]<a id="change"> = </a>x[:, :-d, :] &#47&#47 i-d
+                z.append(z_u)
+                z_d = <a id="change">torch.zeros_like(</a>x<a id="change">)</a>
+                z_d[:, :-d, :] = x[:, d:, :] &#47&#47 i+d
+                z.append(z_d)
+            x = torch.cat(z, dim=2) &#47&#47 (B, N, C*width)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, x_base=None):
+        B, N, C = x.shape
+
+        x<a id="change"> = </a>self.contextize(x, self.context) &#47&#47 (B, N, C*context)
+        if self.mix_base &gt; 0 and x_base is not None:
+            x_base<a id="change"> = </a>self.contextize(x_base, self.mix_base) &#47&#47 (B, N, 4*mix_base)
+            x = torch.cat((x_base<a id="change">, x</a>), dim=2)
+
+        x = x.view(B*N, -1) &#47&#47 (B*N, C*width)
+        for fc in self.fc[:-1]:</code></pre>

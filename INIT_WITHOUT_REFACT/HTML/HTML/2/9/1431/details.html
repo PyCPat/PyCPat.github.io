@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :1431
+</h3><img src='4152127.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">return </a>tokens
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            bottom_up_out = self.bottom_up(levels[..., :-1, :])
+            top_down_out = self.top_down(levels[..., 1:, :])
+
+            bottom_up_out = torch.cat((bottom_level<a id="change">, bottom_up_out</a>), dim = -2)
+            top_down_out<a id="change"> = </a><a id="change">F.pad(</a>top_down_out, (<a id="change">0</a><a id="change">, 0, 0, 1</a>)<a id="change">, value = 0.)</a>
+
+            consensus = self.attention(levels)
+
+            levels = torch.stack((levels, bottom_up_out, top_down_out, consensus)).mean(dim = 0) &#47&#47 hinton said to use the weighted mean of (1) bottom up (2) top down (3) previous level value {t - 1} (4) consensus value
+            levels<a id="change"> = </a>levels[..., 1:, :]  &#47&#47 excise out the bottom level
+
+        return levels
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/glom-pytorch/commit/869b711d49f23be53cc295d583c5ef37f95c96a5#diff-2bce7536af7c0a2fe47054a9c6dd00320e623412cf5c9d7e24a0b0b8c950a574L39' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4152127</div><div id='project'> Project Name: lucidrains/glom-pytorch</div><div id='commit'> Commit Name: 869b711d49f23be53cc295d583c5ef37f95c96a5</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: glom_pytorch/glom_pytorch.py</div><div id='m_class'> M Class Name: Glom</div><div id='n_method'> N Class Name: Glom</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: glom_pytorch/glom_pytorch.py</div><div id='n_file'> N File Name: glom_pytorch/glom_pytorch.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 46</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        out =  self.to_out(out)
+        <a id="change">return </a>out
+
+&#47&#47 microsoft sparse attention CUDA kernel
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if n &lt; seq_len:
+            padding = seq_len - n
+            x<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, 0, 0, padding</a>)<a id="change">, value = 0)</a>
+
+            if exists(mask):
+                mask<a id="change"> = </a>F.pad(x, (0<a id="change">, padding</a>), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL185' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4151791</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseAxialCausalAttention</div><div id='n_method'> N Class Name: SparseAxialCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 192</div><div id='m_end'> M End Line: 248</div><div id='n_start'> N Start Line: 195</div><div id='n_end'> N End Line: 266</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = rearrange(out, &quot(b h) n d -&gt; b n (h d)&quot, h = h)
+        out =  self.to_out(out)
+        <a id="change">return </a>out
+
+&#47&#47 sparse axial causal attention
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if n &lt; seq_len:
+            padding = seq_len - n
+            x<a id="change"> = </a><a id="change">F.pad(</a>x, (<a id="change">0</a><a id="change">, 0, 0, padding</a>)<a id="change">, value = 0)</a>
+            if exists(mask):
+                mask<a id="change"> = </a>F.pad(x, (0<a id="change">, padding</a>), value = False)
+
+        qkv = self.to_qkv(x).chunk(3, dim = -1)
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; (b h) n d&quot, h = h), qkv)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-58807b9968341c05944b3adf3de1bfcd9d33660121a78f3ef013fd0e9bf16fdfL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4151228</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/attention.py</div><div id='m_class'> M Class Name: SparseConvCausalAttention</div><div id='n_method'> N Class Name: SparseConvCausalAttention</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/attention.py</div><div id='n_file'> N File Name: dalle_pytorch/attention.py</div><div id='m_start'> M Start Line: 101</div><div id='m_end'> M End Line: 163</div><div id='n_start'> N Start Line: 96</div><div id='n_end'> N End Line: 171</div><BR>

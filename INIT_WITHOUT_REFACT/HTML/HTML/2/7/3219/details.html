@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :3219
+</h3><img src='10259823.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        return self.bottleneck(torch.cat(psp_outs, dim=1))
+
+    def forward(self, inputs: Tuple[Tensor, Tensor, Tensor, Tensor]) -&gt; Tensor:
+        laterals = [lateral_conv(inputs[i]) for i, lateral_conv in <a id="change">enumerate(</a>self.lateral_convs<a id="change">)</a>]
+        laterals.append(self.psp_forward(inputs))
+
+        used_backbone_levels = len(laterals)
+        <a id="change">for i</a> in range(used_backbone_levels-1, 0, -1)<a id="change">:
+            </a>laterals[i-1]<a id="change"> += </a>F.interpolate(laterals[i], size=laterals[i-1].shape[2:], mode=&quotbilinear&quot, align_corners=False)
+        
+        fpn_outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels-1)]
+        fpn_outs.append(laterals[-1])</code></pre><h3>After Change</h3><pre><code class='java'>
+        f = self.ppm(features[-1])
+        fpn_features = [f]
+
+        <a id="change">for </a>i in reversed(<a id="change">range(</a>len(features)-1<a id="change">)</a>)<a id="change">:
+            </a>feature = self.fpn_in[i](features[i])
+            f = feature<a id="change"> + </a>F.interpolate(f, size=feature.shape[-2:], mode=&quotbilinear&quot, align_corners=False)
+            fpn_features.append(self.fpn_out[i](f))
+
+        fpn_features.reverse()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d#diff-34cecd933382e1fd69f8eb47990fab2dfbe929c210f74c82718154d4c5a5428cL44' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10259823</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: af9bcfd5c4642c42b0fa9e1b2af46eb45ec9063d</div><div id='time'> Time: 2021-08-27</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: models/heads/upernet.py</div><div id='m_class'> M Class Name: UPerHead</div><div id='n_method'> N Class Name: UPerHead</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/heads/upernet.py</div><div id='n_file'> N File Name: models/heads/upernet.py</div><div id='m_start'> M Start Line: 53</div><div id='m_end'> M End Line: 63</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x: List[torch.Tensor]) -&gt; List[torch.Tensor]:
+        &#47&#47 top-down
+        inters = [x[-1]]                                                        &#47&#47 P7in
+        <a id="change">for </a>i, <a id="change">conv</a> in <a id="change">enumerate(</a>self.inter_convs<a id="change">)</a><a id="change">:
+            </a>out = F.interpolate(inters[-1], scale_factor=2., mode="nearest")    &#47&#47 resize(P7td)
+            out<a id="change"> = </a>self.fuse([x[-2-i], out])                                     &#47&#47 P6in + resize(P7td)
+            inters.append(conv(out))                                            &#47&#47 P6td = conv(P6in + resize(P7td))
+            
+        &#47&#47 bottom-up</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 bottom-up
+        outs = [None] * self.num_levels
+        outs[0] = tds[0]
+        <a id="change">for </a>i in <a id="change">range(</a>self.num_levels - 2<a id="change">):
+            </a>outs[i+1] = self.out_fuses[i]([x[i+1], tds[i<a id="change">+</a>1], self.downsample(tds[i])])  &#47&#47 P4in + P4td + resize(P3td)
+        outs[-1] = self.out_fuses[-1]([x[-1], self.downsample(tds[-2])])                &#47&#47 P7in + resize(P6td)
+
+        return outs</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/0844b6bcb142e63b09cf6ae44e5087c20d52c380#diff-885dedfcd4036693f75ac69100e9ef7734b059807b782809a75be8b18762d0bdL161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10259816</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 0844b6bcb142e63b09cf6ae44e5087c20d52c380</div><div id='time'> Time: 2022-04-10</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/necks.py</div><div id='m_class'> M Class Name: BiFPNLayer</div><div id='n_method'> N Class Name: BiFPNLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/necks.py</div><div id='n_file'> N File Name: vision_toolbox/necks.py</div><div id='m_start'> M Start Line: 163</div><div id='m_end'> M End Line: 180</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        count = np.arange(x.shape[0]) + 1
+        self.c_t = torch.zeros_like(self.emb)  &#47&#47 shape=(seq_len, batch_size, day_dim)
+        <a id="change">for </a>i, <a id="change">att_timesteps</a> in <a id="change">enumerate(</a>count<a id="change">)</a><a id="change">:
+            &#47&#47 按时间步迭代，计算每个时间步的经attention的gru输出
+            </a>self.c_t[i]<a id="change"> = </a>self.attentionStep(first_h_a, first_h_b, att_timesteps)
+
+        if self.drop &lt; 1.0:
+            self.c_t = self.dropout(self.c_t)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        out = torch.zeros((batch_size, time_steps, self.hidden_dim))
+
+        <a id="change">for </a>cur_time in <a id="change">range(</a>time_steps<a id="change">):
+            </a>cur_x = x[:, : cur_time<a id="change"> + </a>1, :]
+            out[:, cur_time, :] = self.retain_encoder(cur_x)
+        return out
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yhzhu99/covid-ehr-benchmarks/commit/b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa#diff-77d2a7ae5e3183c97c4a93ec2d675da0a9f18941a477d8d2a5d9e1d496f4b387L63' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10259827</div><div id='project'> Project Name: yhzhu99/covid-ehr-benchmarks</div><div id='commit'> Commit Name: b3d4ba85ad8e8cfeb3e45e07e5fadfa3fd4a25fa</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: yhzhu99@gmail.com</div><div id='file'> File Name: app/models/backbones/retain.py</div><div id='m_class'> M Class Name: RETAIN</div><div id='n_method'> N Class Name: RETAIN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: app/models/backbones/retain.py</div><div id='n_file'> N File Name: app/models/backbones/retain.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 53</div><BR>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 prepare text key / values for the image tokens to attend to
+
+        k_text, v_text = <a id="change">map(</a>lambda t: repeat(t, &quotb n d -&gt; (b ax) n d&quot, ax = img_size), (k_text<a id="change">, v_text</a>)<a id="change">)</a>
+        k_img = torch.cat((k_text, k_img), dim = 1)
+        v_img = torch.cat((v_text, v_img), dim = 1)
+
+        &#47&#47 similarity</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 aggregate
+
+        attn_image_to_text, attn_image_to_image = <a id="change">attn[..., :text_len]</a>, attn[..., text_len:]
+
+        out_image_to_image = einsum(&quotb x i j, b x j d -&gt; b x i d&quot, attn_image_to_image, v_img)
+        out_image_to_text = einsum(&quotb x i j, b j d -&gt; b x i d&quot, attn_image_to_text, v_text)</code></pre>

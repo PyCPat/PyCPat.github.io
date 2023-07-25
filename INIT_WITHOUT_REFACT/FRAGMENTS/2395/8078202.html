@@ -1,0 +1,53 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x += self.b.expand_as(x)
+        pred = F.sigmoid(x)
+
+        <a id="change">return </a>pred
+
+if __name__ == &quot__main__&quot:
+    config = dict()</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, batch, labels):
+        batch_size = batch.shape[0]
+
+        heads<a id="change"> = </a>batch[:, 0:1]
+        relations = <a id="change">batch[:, 1:2]</a>
+        tails = batch[:, 2:3]
+
+        &#47&#47 batch_size, num_input_channels, width, height
+        heads_embs = self.entity_embeddings(heads).view(-1, 1, self.img_height, self.img_width)
+        relation_embs = self.relation_embeddings(relations).view(-1, 1, self.img_height, self.img_width)
+        tails_embs<a id="change"> = </a>self.entity_embeddings(tails).view(-1, self.embedding_dim)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = torch.cat([heads_embs, relation_embs], 2)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        scores = torch.sum(torch.mm(x, tails_embs.transpose(1, 0)), dim=1)
+
+        predictions = F.sigmoid(scores)
+        loss = self.compute_loss(predictions, labels)
+
+        <a id="change">return </a>loss
+</code></pre>

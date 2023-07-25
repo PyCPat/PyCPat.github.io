@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :2512
+</h3><img src='8245725.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 add relative positional embedding
+
+        seq_index = default(seq_index, <a id="change">torch.arange(</a>n<a id="change">, device = device)</a>)
+        seq_rel_dist = rearrange(seq_index, &quoti -&gt; () i ()&quot) - rearrange(seq_index, &quotj -&gt; () () j&quot)
+        seq_rel_dist = seq_rel_dist.clamp(-self.max_rel_dist, self.max_rel_dist) + self.max_rel_dist
+        rel_pos_emb = self.pos_emb(seq_rel_dist)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            &#47&#47 template pos emb
+
+            x_point = <a id="change">rearrange(</a>x, <a id="change">&quotb i j d -&gt; (b i j) () d&quot</a><a id="change">)</a>
+            t_point = rearrange(t, &quotb t i j d -&gt; (b i j) t d&quot)
+            x_mask_point = rearrange(x_mask, &quotb i j -&gt; (b i j) ()&quot)
+            t_mask_point = rearrange(t_mask_crossed, &quotb t i j -&gt; (b i j) t&quot)
+
+            template_pooled = self.template_pointwise_attn(
+                x_point,
+                context = t_point,
+                mask = x_mask_point,
+                context_mask = t_mask_point
+            )
+
+            template_pooled_mask = rearrange(t_mask_point.sum(dim = -1) &gt; 0, &quotb -&gt; b () ()&quot)
+            template_pooled = template_pooled * template_pooled_mask
+
+            template_pooled = rearrange(template_pooled, &quot(b i j) () d -&gt; b i j d&quot, i = n, j = n)
+            x<a id="change"> = </a>x + template_pooled
+
+        &#47&#47 embed extra msa, if present
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/alphafold2/commit/79d820847ae54855cebe2e5717ca9214564f1ed9#diff-ec920ef561468dc34d1b12371582e439c6a12a81ed9904c9608bb9935e895824L607' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8245725</div><div id='project'> Project Name: lucidrains/alphafold2</div><div id='commit'> Commit Name: 79d820847ae54855cebe2e5717ca9214564f1ed9</div><div id='time'> Time: 2021-07-20</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_class'> M Class Name: Alphafold2</div><div id='n_method'> N Class Name: Alphafold2</div><div id='m_method'> M Method Name: forward(16)</div><div id='n_method'> N Method Name: forward(16)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: alphafold2_pytorch/alphafold2.py</div><div id='n_file'> N File Name: alphafold2_pytorch/alphafold2.py</div><div id='m_start'> M Start Line: 607</div><div id='m_end'> M End Line: 652</div><div id='n_start'> N Start Line: 630</div><div id='n_end'> N End Line: 677</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        sim = einsum(&quotb i d, b j d -&gt; b i j&quot, q, k)
+
+        if self.causal:
+            sim = sim / rearrange(<a id="change">torch.arange(</a>seq_len<a id="change">, device = device)</a> + 1, &quot... -&gt; ... 1&quot)
+        else:
+            sim = sim / seq_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = self.dropout(attn)
+
+        if exists(mask):
+            mask<a id="change"> = </a><a id="change">rearrange(</a>mask, <a id="change">&quotb j -&gt; b 1 j&quot</a><a id="change">)</a>
+            attn = attn.masked_fill(~mask, 0.)
+
+        if self.causal:
+            causal_mask = torch.ones((seq_len, seq_len), dtype = torch.bool, device = device).triu(1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/flash-pytorch/commit/6b0cc2e2316bf9c93b8b48916a11f774209d7bf1#diff-6408ce30d3c8730249ca81344fdd04a1dd01ed7b072e84e9d752276e93661682L158' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8245724</div><div id='project'> Project Name: lucidrains/flash-pytorch</div><div id='commit'> Commit Name: 6b0cc2e2316bf9c93b8b48916a11f774209d7bf1</div><div id='time'> Time: 2022-03-28</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: flash_pytorch/flash_pytorch.py</div><div id='m_class'> M Class Name: GAU</div><div id='n_method'> N Class Name: GAU</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: flash_pytorch/flash_pytorch.py</div><div id='n_file'> N File Name: flash_pytorch/flash_pytorch.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 178</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 184</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 add dynamic positional bias
+
+        i_pos = torch.arange(wsz, device = device)
+        j_pos = <a id="change">torch.arange(</a>wsz<a id="change">, device = device)</a>
+        grid = torch.stack(torch.meshgrid(i_pos, j_pos))
+        grid = rearrange(grid, &quotc i j -&gt; (i j) c&quot)
+        rel_ij = grid[:, None] - grid[None, :]
+        rel_pos_bias = self.dpb(rel_ij.float())</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pos = torch.arange(-wsz, wsz + 1, device = device)
+        rel_pos = torch.stack(torch.meshgrid(pos, pos))
+        rel_pos<a id="change"> = </a><a id="change">rearrange(</a>rel_pos, <a id="change">&quotc i j -&gt; (i j) c&quot</a><a id="change">)</a>
+        biases = self.dpb(rel_pos.float())
+        rel_pos_bias = biases[self.rel_pos_indices]
+
+        sim = sim + rel_pos_bias</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/b69b5af34f7759948425113f6dc3b30dfb91d4d1#diff-65c2de0175e6c0cd43148fc01483ce4dcd04a52ba15130b05fdc9f6521caf494L112' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8245715</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: b69b5af34f7759948425113f6dc3b30dfb91d4d1</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/crossformer.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/crossformer.py</div><div id='n_file'> N File Name: vit_pytorch/crossformer.py</div><div id='m_start'> M Start Line: 139</div><div id='m_end'> M End Line: 144</div><div id='n_start'> N Start Line: 152</div><div id='n_end'> N End Line: 156</div><BR>

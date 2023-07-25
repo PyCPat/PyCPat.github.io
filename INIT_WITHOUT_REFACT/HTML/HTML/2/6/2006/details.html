@@ -1,0 +1,155 @@
+<html><h3>Pattern ID :2006
+</h3><img src='7418080.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        rel_embedded = self.relation_embeddings(relation_batch).view(-1, 1, self.img_height, self.img_width)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = torch.cat(<a id="change">[</a>e1_embedded, rel_embedded<a id="change"></a>], 2)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        x = torch.mm(x, self.entity_embeddings.weight.transpose(1, 0))
+
+        &#47&#47 TODO: Why this?
+        x<a id="change"> += </a>self.b.expand_as(x)
+        pred = F.sigmoid(x)
+
+        return pred</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 batch_size, num_input_channels, width, height
+        heads_embs = self.entity_embeddings(heads).view(-1, 1, self.img_height, self.img_width)
+        relation_embs = self.relation_embeddings(relations).view(-1, 1, self.img_height, self.img_width)
+        tails_embs<a id="change"> = </a>self.entity_embeddings(tails).view(-1, self.embedding_dim)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = <a id="change">torch.cat([</a>heads_embs, relation_embs<a id="change"></a>], 2<a id="change">)</a>
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        stacked_inputs = self.bn0(stacked_inputs)
+
+        &#47&#47 batch_size, num_input_channels, 2*height, width
+        x = self.inp_drop(stacked_inputs)
+        &#47&#47 (N,C_out,H_out,W_out)
+        x = self.conv1(x)
+
+        x = self.bn1(x)
+        x = F.relu(x)
+        x = self.feature_map_drop(x)
+        &#47&#47 batch_size, num_output_channels * (2 * height - kernel_height + 1) * (width - kernel_width + 1)
+        x = x.view(batch_size, -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+
+        if batch_size &gt; 1:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        scores = torch.sum(torch.mm(x, tails_embs.transpose(1, 0)), dim=1)
+
+        predictions = F.sigmoid(scores)
+        loss<a id="change"> = </a>self.compute_loss(predictions, labels)
+
+        return loss
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/pykeen/pykeen/commit/e310dc04ccd0763bef25540fb0a19a7423a27a94#diff-ca7a8f13b7b28764529fdd6068fb9b1f73dab80a9636b4e70393393c8141e014L114' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7418080</div><div id='project'> Project Name: pykeen/pykeen</div><div id='commit'> Commit Name: e310dc04ccd0763bef25540fb0a19a7423a27a94</div><div id='time'> Time: 2018-09-19</div><div id='author'> Author: ali-mehdi@live.de</div><div id='file'> File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_class'> M Class Name: ConvE</div><div id='n_method'> N Class Name: ConvE</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/kg_embeddings_model/conv_e.py</div><div id='n_file'> N File Name: src/kg_embeddings_model/conv_e.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 153</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        for idx in range(self.num_blocks):
+            if stacked is None:
+                stacked<a id="change"> = </a>x
+            else:
+                stacked = torch.cat(<a id="change">[</a>stacked, x<a id="change"></a>], dim=1)
+            x = self.net[idx](stacked)
+            
+        output<a id="change"> = </a>x
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            output (batch_size, out_channels, n_bins, n_frames)
+        
+        x = input
+        stacked = <a id="change">[]</a>
+
+        stacked.append(input)
+
+        for idx in range(self.num_blocks):
+            if idx != 0:
+                x = torch.cat(stacked, dim=1)
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output<a id="change"> = </a><a id="change">torch.cat(</a>stacked[1:]<a id="change">, dim=1)</a>
+
+        return output
+
+class D2Block(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7418099</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D3Block</div><div id='n_method'> N Class Name: D3Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 72</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 125</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, a, b):
+        output_a = self.model_a(**a)
+        output_b = self.model_b(**b)
+        outputs<a id="change"> = </a><a id="change">[]</a>
+        for i in range(len(output_a)):
+            outputs.append(output_a[i] + output_b[i])
+
+        return outputs</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.loss_fct = nn.CrossEntropyLoss()
+
+    def forward(self, a, b):
+        labels<a id="change"> = </a>a[&quotlabels&quot]
+        a.pop(&quotlabels&quot)
+        b.pop(&quotlabels&quot)
+        output_a = self.model_a(**a)[1]  &#47&#47 [bs, seq_len, 768]
+        output_b = self.model_b(**b)[1]
+        output = <a id="change">torch.cat([</a>output_a, output_b, output_a-output_b<a id="change"></a>]<a id="change">, dim=1)</a>
+        logits = self.linear(output)
+        loss<a id="change"> = </a>self.loss_fct(logits, labels)
+        return loss, logits
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/prajjwal1/fluence/commit/384e5722f994d3a39d54cf057a0a48a996206bbf#diff-9b5227bea9875a2faa1f5803fb8bdaa8a1891793820bda7ba792e31c87a9e25fL21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7418071</div><div id='project'> Project Name: prajjwal1/fluence</div><div id='commit'> Commit Name: 384e5722f994d3a39d54cf057a0a48a996206bbf</div><div id='time'> Time: 2020-08-03</div><div id='author'> Author: prajjwalin@protonmail.com</div><div id='file'> File Name: fluence/models/siamese_model.py</div><div id='m_class'> M Class Name: SiameseTransformer</div><div id='n_method'> N Class Name: SiameseTransformer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fluence/models/siamese_model.py</div><div id='n_file'> N File Name: fluence/models/siamese_model.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 24</div><div id='n_end'> N End Line: 32</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        for idx in range(self.depth):
+            if stacked is None:
+                stacked<a id="change"> = </a>x
+            else:
+                stacked = torch.cat(<a id="change">[</a>stacked, x<a id="change"></a>], dim=1)
+            x = self.net[idx](stacked)
+        
+        output<a id="change"> = </a>x
+
+        return output
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            output (batch_size, out_channels, n_bins, n_frames)
+        
+        x = input
+        stacked = <a id="change">[]</a>
+        output = []
+
+        stacked.append(input)
+
+        for idx in range(self.depth):
+            if idx != 0:
+                x = torch.cat(stacked, dim=1)
+            x = self.net[idx](x)
+            stacked.append(x)
+        
+        output<a id="change"> = </a><a id="change">torch.cat(</a>stacked[1:]<a id="change">, dim=1)</a>
+
+        return output
+
+class MultiDilatedConvBlock(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L104' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7418091</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 08ed4eac522e740d5bb22e99fb4f60bd3f8aadf1</div><div id='time'> Time: 2021-03-12</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 165</div><div id='n_end'> N End Line: 177</div><BR>

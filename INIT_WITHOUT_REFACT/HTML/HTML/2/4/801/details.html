@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :801
+</h3><img src='2555127.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for block_size in self.block_sizes:
+            blocks = rearrange(x, &quotb (n m) d -&gt; b n m d&quot, m = block_size)
+
+            if <a id="change">exists(</a>mask<a id="change">)</a>:
+                mask_blocks = rearrange(mask, &quotb (n m) -&gt; b n m&quot, m = block_size)
+                block_repr = masked_mean(blocks, mask_blocks, dim = -2)
+            else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            block_x = x.clone()
+
+            <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+                </a>block_mask<a id="change"> = </a>mask.clone()
+
+            &#47&#47 pad for offsets, if needed
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/charformer-pytorch/commit/93752db1258e73c73a11bbffdf66eab87d3c3f07#diff-b53e4eafe33df5c05215d9d91887926f93106c2e94bd37d4b90472b69243bb2bL110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2555127</div><div id='project'> Project Name: lucidrains/charformer-pytorch</div><div id='commit'> Commit Name: 93752db1258e73c73a11bbffdf66eab87d3c3f07</div><div id='time'> Time: 2021-07-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: charformer_pytorch/charformer_pytorch.py</div><div id='m_class'> M Class Name: GBST</div><div id='n_method'> N Class Name: GBST</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: charformer_pytorch/charformer_pytorch.py</div><div id='n_file'> N File Name: charformer_pytorch/charformer_pytorch.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 124</div><div id='n_start'> N Start Line: 121</div><div id='n_end'> N End Line: 178</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 todo: compute relative position attentions and sum to content_out
+
+        if <a id="change">exists(</a>self.rel_pos_length<a id="change">)</a>:
+            row_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_rows)
+            column_attn_map = einsum(&quotbhdn,ld-&gt;bhnl&quot, q, self.rel_columns)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        content_out = einsum(&quotnde,ndxy-&gt;nexy&quot, context, content_q)
+
+        <a id="change">if </a><a id="change">exists(</a>self.rel_pos_length<a id="change">):
+            </a>Ix = calc_reindexing_tensor(x, L, device)
+            Px = einsum(&quotxir,rd-&gt;xid&quot, Ix, self.rel_rows)
+            Sx<a id="change"> = </a>einsum(&quotndxy,xid-&gt;nixy&quot, q, Px)
+            Yh = einsum(&quotnixy,neiy-&gt;nexy&quot, Sx, v)
+            del Ix
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/global-self-attention-network/commit/6e87bd0b96350f46edc8d4b4ccd582ecc868e22f#diff-af8f87d68d6adf627dabaab6519f02d4b454d6ba08e146c8f5dc18f07e073e31L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2555141</div><div id='project'> Project Name: lucidrains/global-self-attention-network</div><div id='commit'> Commit Name: 6e87bd0b96350f46edc8d4b4ccd582ecc868e22f</div><div id='time'> Time: 2020-10-05</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_class'> M Class Name: GSA</div><div id='n_method'> N Class Name: GSA</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: gsa_pytorch/gsa_pytorch.py</div><div id='n_file'> N File Name: gsa_pytorch/gsa_pytorch.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 74</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 masking
+
+        if <a id="change">exists(</a>mask<a id="change">)</a>:
+            mask_value = -max_value(sim)
+            sim.masked_fill_(~mask, mask_value)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            qk_rel = batched_index_select(qk_rel, indices_with_heads, dim = 3)
+            rel_pos_emb = batched_index_select(rel_pos_emb, indices_with_heads, dim = 3)
+
+            <a id="change">if </a><a id="change">exists(</a>mask<a id="change">):
+                </a>mask<a id="change"> = </a>batched_index_select(mask, indices, dim = 2)
+
+        &#47&#47 add relative positional embeddings to value
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/point-transformer-pytorch/commit/99bc3958138d8c9d3b882e4ac50b1a18a86160fe#diff-86745e6c9b49a24c7fba780e904e254c675b41beaecc25803a17adc67f0035e9L65' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2555129</div><div id='project'> Project Name: lucidrains/point-transformer-pytorch</div><div id='commit'> Commit Name: 99bc3958138d8c9d3b882e4ac50b1a18a86160fe</div><div id='time'> Time: 2022-01-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='m_class'> M Class Name: MultiheadPointTransformerLayer</div><div id='n_method'> N Class Name: MultiheadPointTransformerLayer</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='n_file'> N File Name: point_transformer_pytorch/multihead_point_transformer_pytorch.py</div><div id='m_start'> M Start Line: 92</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 133</div><BR>

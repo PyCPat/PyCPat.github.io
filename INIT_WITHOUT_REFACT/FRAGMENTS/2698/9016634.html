@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        mask = repeat(mask, &quotb j -&gt; (b r) i j&quot, r = (bh // b), i = i)
+        mask = torch.cat((~mask, causal_mask), dim = -1)
+
+        <a id="change">dots_image.masked_fill_(</a>mask, mask_value<a id="change">)</a>
+
+        &#47&#47 attention.
+
+        attn_image = dots_image.softmax(dim = -1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 similarity
+
+        dots_image_to_image = einsum(&quotb x i d, b x j d -&gt; b x i j&quot, q_img, k_img)
+        dots_image_to_text = <a id="change">einsum(&quotb x i d, b j d -&gt; b x i j&quot</a>, q_img, k_text<a id="change">)</a>
+
+        dots = torch.cat((dots_image_to_text, dots_image_to_image), dim = -1)
+
+        &#47&#47 mask so image has full attention to text, but causal along axis</code></pre>

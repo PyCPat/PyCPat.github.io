@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1660
+</h3><img src='6666085.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)
+        &#47&#47 Sample from first sigma distribution
+        x<a id="change"> = </a>sigmas[0] * x
+        &#47&#47 Compute gammas
+        gammas = torch.where(
+            (sigmas &gt;= self.s_tmin) & (sigmas &lt;= self.s_tmax),
+            min(self.s_churn / num_steps, sqrt(2) - 1),
+            0.0,
+        )
+        &#47&#47 Denoise x
+        <a id="change">for i</a> in range(num_steps - 1)<a id="change">:
+            </a>x<a id="change"> = </a>self.step(x, sigma=sigmas[i], sigma_next=sigmas[i + 1], gamma=gammas[i])  &#47&#47 type: ignore &#47&#47 noqa
+
+        x = x.clamp(-1.0, 1.0)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, noise: Tensor, num_steps: Optional[int] = None) -&gt; Tensor:
+        device = noise.device
+        num_steps = default(num_steps, self.num_steps)  &#47&#47 type: ignore
+        <a id="change">assert </a>exists(num_steps), "Parameter `num_steps` must be provided"
+        &#47&#47 Compute sigmas using schedule
+        sigmas = self.sigma_schedule(num_steps, device)
+        &#47&#47 Sample using sampler</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/df197bf615969bc32c1bf9963969c83b24251bcf#diff-2678fbb2636c135caed9b7af07b32741ab81e9722df27eabaabefbc78db80f94L190' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6666085</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: df197bf615969bc32c1bf9963969c83b24251bcf</div><div id='time'> Time: 2022-08-10</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_class'> M Class Name: DiffusionSampler</div><div id='n_method'> N Class Name: DiffusionSampler</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion.py</div><div id='m_start'> M Start Line: 190</div><div id='m_end'> M End Line: 207</div><div id='n_start'> N Start Line: 280</div><div id='n_end'> N End Line: 287</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, predict, target):
+        assert predict.shape == target.shape, &quotpredict & target shape do not match&quot
+        dice = BinaryDiceLoss(**self.kwargs)
+        total_loss<a id="change"> = </a>0
+        predict = F.softmax(predict, dim=1)
+
+        <a id="change">for i</a> in range(target.shape[1])<a id="change">:
+            </a>if i != self.ignore_index:
+                dice_loss = dice(predict[:, i], target[:, i])
+                if self.weight is not None:
+                    assert self.weight.shape[0] == target.shape[1], \
+                        &quotExpect weight shape [{}], get[{}]&quot.format(target.shape[1], self.weight.shape[0])
+                    dice_loss *= self.weights[i]
+                total_loss<a id="change"> += </a>dice_loss
+
+        return total_loss/target.shape[1]</code></pre><h3>After Change</h3><pre><code class='java'>
+        target = self._one_hot_encoder(target)
+        if weight is None:
+            weight = [1] * self.n_classes
+        <a id="change">assert </a>inputs.size() == target.size(), &quotpredict & target shape do not match&quot
+        class_wise_dice = []
+        loss = 0.0
+        for i in range(0, self.n_classes):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/montaellis/pytorch-medical-segmentation/commit/b8a38cb1bdf6cd7c93a5c1945ab23f7a54c87406#diff-0419e9aa72248110d12ce030e3c15e94f00f1f38cbd819d7e6f0d269eee1b832L118' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6666084</div><div id='project'> Project Name: montaellis/pytorch-medical-segmentation</div><div id='commit'> Commit Name: b8a38cb1bdf6cd7c93a5c1945ab23f7a54c87406</div><div id='time'> Time: 2022-06-09</div><div id='author'> Author: elliszkn@163.com</div><div id='file'> File Name: loss_function.py</div><div id='m_class'> M Class Name: DiceLoss</div><div id='n_method'> N Class Name: DiceLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: loss_function.py</div><div id='n_file'> N File Name: loss_function.py</div><div id='m_start'> M Start Line: 118</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 124</div><div id='n_end'> N End Line: 138</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Apply feature randomization for each repetition
+        x = self._randomize(x)
+
+        log_p<a id="change"> = </a>self.leaf(x)
+
+        &#47&#47 Forward through all layers, bottom up
+        <a id="change">for layer</a> in self.layers<a id="change">:
+            </a>log_p<a id="change"> = </a>layer(log_p)
+
+        &#47&#47 Root layer merges all scopes that are left
+        log_p = self.prod(log_p)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 Merge results from the different repetitions into the channel dimension
+        batch_size, features, channels, repetitions = x.size()
+        <a id="change">assert </a>features == 1  &#47&#47 number of features should be 1 at this point
+        assert channels == 1  &#47&#47 number of channels should be 1 at this point
+        x = x.view(batch_size, 1, repetitions, 1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/braun-steven/simple-einet/commit/59ae9b6a6e2fc6413d999439cb40ed0407d79edb#diff-35a1a2e89788f4224c6a113abf09018e54e13fa95eaadf95759c229412ed7a0dL95' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6666087</div><div id='project'> Project Name: braun-steven/simple-einet</div><div id='commit'> Commit Name: 59ae9b6a6e2fc6413d999439cb40ed0407d79edb</div><div id='time'> Time: 2021-11-15</div><div id='author'> Author: steven.lang.mz@gmail.com</div><div id='file'> File Name: einet.py</div><div id='m_class'> M Class Name: Einet</div><div id='n_method'> N Class Name: Einet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: einet.py</div><div id='n_file'> N File Name: einet.py</div><div id='m_start'> M Start Line: 97</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 169</div><div id='n_end'> N End Line: 192</div><BR>

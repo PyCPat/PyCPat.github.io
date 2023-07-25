@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif self.objective == &quotv&quot:
+            target = alpha * noise - sigma * img
+
+        return <a id="change">F.mse_loss(</a>pred, target<a id="change">)</a>
+
+&#47&#47 dataset classes
+
+class Dataset(Dataset):</code></pre><h3>After Change</h3><pre><code class='java'>
+        elif self.objective == &quotv&quot:
+            target = alpha * noise - sigma * img
+
+        loss = <a id="change">F.mse_loss(</a>pred, target<a id="change">, reduction = &quotnone&quot)</a>
+        loss = reduce(loss, &quotb ... -&gt; b&quot, &quotmean&quot)
+
+        &#47&#47 min snr loss weight
+
+        snr = (alpha * alpha) / (sigma * sigma)
+        maybe_clipped_snr = snr.clone()
+
+        if self.min_snr_loss_weight:
+            maybe_clipped_snr.clamp_(min = self.min_snr_gamma)
+
+        if self.objective == &quoteps&quot:
+            loss_weight = maybe_clipped_snr / snr
+
+        elif self.objective == &quotx0&quot:
+            loss_weight = maybe_clipped_snr
+
+        elif self.objective == &quotv&quot:
+            loss_weight = maybe_clipped_snr / (snr + 1)
+
+        return (loss<a id="change"> * </a>loss_weight).mean()
+
+&#47&#47 dataset classes
+</code></pre>

@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :375
+</h3><img src='1495365.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.stem(x)
+        &#47&#47 n c h w -&gt; n c 1 s
+        x = torch.reshape(x, (x.shape[0]<a id="change">, x.shape[1], 1, -1</a>))
+        &#47&#47 n c 1 s -&gt; n s 1 c
+        &#47&#47 x = x.permute(0, 3, 2, 1)
+        x = self.mixer(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x):
+        x = self.stem(x)
+        &#47&#47 n c h w -&gt; n p c
+        x = <a id="change">x.flatten(2</a><a id="change">)</a>.transpose(1, 2)
+        x = self.mixer(x)
+        x = self.norm(x)
+        x = x.mean(dim=1)
+        x<a id="change"> = </a>self.head(x)
+
+        return x
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ffiirree/cv-models/commit/313343bf6514c997b9c8443568486e8311d16ec3#diff-ebdec4ab5d1614d3cf5ab6b9252d7cb57f40a9a2680d63685bccdf6f3c41f0c8L61' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1495365</div><div id='project'> Project Name: ffiirree/cv-models</div><div id='commit'> Commit Name: 313343bf6514c997b9c8443568486e8311d16ec3</div><div id='time'> Time: 2021-10-18</div><div id='author'> Author: ice_qi@163.com</div><div id='file'> File Name: models/mlp_mixer.py</div><div id='m_class'> M Class Name: Mixer</div><div id='n_method'> N Class Name: Mixer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mlp_mixer.py</div><div id='n_file'> N File Name: models/mlp_mixer.py</div><div id='m_start'> M Start Line: 61</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 91</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            output (torch.Tensor): Output tensor of the shape [B, 2 * C, H // 2, W // 2]
+        
+        &#47&#47 Get original shape
+        batch_size<a id="change">, channels, height, width</a> = input.shape  &#47&#47 type: int, int, int, int
+        &#47&#47 Reshape input to [batch size, in channels, height, width]
+        input: torch.Tensor = bchw_to_bhwc(input)
+        &#47&#47 Unfold input</code></pre><h3>After Change</h3><pre><code class='java'>
+            output (torch.Tensor): Output tensor of the shape [B, 2 * C, H // 2, W // 2]
+        
+        x = bchw_to_bhwc(x).unfold(dimension=1, size=2, step=2).unfold(dimension=2, size=2, step=2)
+        x = <a id="change">x.permute(0, 1, 2, 5, 4, 3).flatten(3</a><a id="change">)</a>  &#47&#47 permute maintains compat with ch order in official swin impl
+        x<a id="change"> = </a>self.norm(x)
+        x = bhwc_to_bchw(self.reduction(x))
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3#diff-ed4e73b2f003b1bf594949d63e8066b203ff134a32665c27fe72e45e3a6607afL701' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1495368</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: c6e4b7895a7dbcd9b98396cbef383dd1c72b0ad3</div><div id='time'> Time: 2022-02-23</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_class'> M Class Name: PatchMerging</div><div id='n_method'> N Class Name: PatchMerging</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/swin_transformer_v2_cr.py</div><div id='n_file'> N File Name: timm/models/swin_transformer_v2_cr.py</div><div id='m_start'> M Start Line: 712</div><div id='m_end'> M End Line: 722</div><div id='n_start'> N Start Line: 455</div><div id='n_end'> N End Line: 459</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        feat_erb = torch.view_as_complex(spec).abs().matmul(self.erb_fb)
+        feat_erb = self.erb_comp(feat_erb)
+        feat_spec = self.cplx_comp(spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2))
+        e0<a id="change">, e1, e2, e3, emb, c0, lsnr</a> = self.enc(feat_erb, feat_spec)
+        m = self.erb_dec(emb, e3, e2, e1, e0)
+        spec = self.mask(spec, m, atten_lim)
+        if self.run_df:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 m = self.erb_dec(emb, e3, e2, e1, e0)
+        m, emb, _ = self.erb_stage(feat_erb)
+        lsnr, _ = self.lsnr_net(emb)
+        emb<a id="change"> = </a><a id="change">emb.permute(0,2,3,1).flatten(2</a><a id="change">)</a>
+        spec = self.mask(spec, m, atten_lim)
+        feat_spec = self.cplx_comp(spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2))
+        if self.run_df:
+            df_coefs, df_alpha = self.df_dec(feat_spec, emb)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/5436648f4ebea8ea0e8de9a395a8208511b4ecab#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL274' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1495369</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 5436648f4ebea8ea0e8de9a395a8208511b4ecab</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 286</div><div id='m_end'> M End Line: 291</div><div id='n_start'> N Start Line: 307</div><div id='n_end'> N End Line: 313</div><BR>

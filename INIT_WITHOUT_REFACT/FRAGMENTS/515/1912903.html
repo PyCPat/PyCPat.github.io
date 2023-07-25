@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        R = torch.einsum(&quotbie,bje-&gt;bij&quot, sq, sk).to(q) * (dim ** -0.5)
+
+        if self.n_sortcut &gt; 0:
+            values<a id="change">, indices</a> = torch.topk(R, self.n_sortcut)
+            values = values.reshape(bh, self.n_sortcut, -1)
+            indices = indices.reshape(bh, self.n_sortcut, -1)
+            R = torch.zeros(bh, self.n_sortcut, buckets, device=device, dtype=dtype).scatter(2, indices, values)</code></pre><h3>After Change</h3><pre><code class='java'>
+        kv_buckets = k.shape[1] // kv_bucket_size
+
+        b_q = bucket(buckets, q) if self.n_sortcut == 0 else bucket(1, q)
+        b_k<a id="change"> = </a><a id="change">bucket(</a>kv_buckets, k<a id="change">)</a>
+
+        sq = b_q.mean(dim=2)
+        sk = b_k.mean(dim=2)
+</code></pre>

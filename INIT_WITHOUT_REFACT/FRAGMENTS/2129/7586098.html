@@ -1,0 +1,38 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">return </a>tokens
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, img, iters = None):
+        b, device = img.shape[0], img.device
+        iters = default(iters, self.levels<a id="change"> * </a>2)   &#47&#47 need to have twice the number of levels of iterations in order for information to propagate up and back down. can be overridden
+
+        tokens = self.image_to_tokens(img)
+        n = tokens.shape[1]
+
+        pos_embs = self.pos_emb(torch.arange(n, device = device))
+        bottom_level = tokens + rearrange(pos_embs, &quotn d -&gt; () n d&quot)
+        bottom_level = rearrange(bottom_level, &quotb n d -&gt; b n () d&quot)
+
+        levels = repeat(self.init_levels, &quotl d -&gt; b n l d&quot, b = b, n = n)
+
+        <a id="change">for _</a> in <a id="change">range(</a>iters<a id="change">):
+            </a>levels = torch.cat((bottom_level, levels), dim = -2)  &#47&#47 each iteration, attach original input (with positional embedding) at the bottom level
+
+            bottom_up_out = self.bottom_up(levels[..., :-1, :])
+            top_down_out<a id="change"> = </a>self.top_down(levels[..., 1:, :])
+
+            bottom_up_out = torch.cat((bottom_level, bottom_up_out), dim = -2)
+            top_down_out = F.pad(top_down_out, (0, 0, 0, 1), value = 0.)
+
+            consensus = self.attention(levels)
+
+            levels<a id="change"> = </a>torch.stack((levels, bottom_up_out, top_down_out, consensus)).mean(dim = 0) &#47&#47 hinton said to use the weighted mean of (1) bottom up (2) top down (3) previous level value {t - 1} (4) consensus value
+            levels = levels[..., 1:, :]  &#47&#47 excise out the bottom level
+
+        return levels</code></pre>

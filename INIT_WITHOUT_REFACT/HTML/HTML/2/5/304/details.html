@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :304
+</h3><img src='1284243.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        out = self.layer1(x)
+        out = self.layer2(out)
+        out = out.reshape(out.size(0), -1)
+        out1 = <a id="change">torch.exp(</a>-1.0 * w<a id="change">)</a>
+        out2 = fac1<a id="change"> * </a>torch.cat([out1, 1.0 - out1], dim=1)
+        out0 = torch.cat([out2, out], dim=1)
+        out0 = self.Lrelu(self.fc1(out0))
+        out0 = self.bn1(out0)
+        out0 = torch.cat([a0 * out2, out0], dim=1)
+        out0 = self.Lrelu(self.fc2(out0))
+        out0 = self.bn2(out0)
+        out0 = torch.cat([a0<a id="change"> * </a>out2, out0], dim=1)
+        out0 = self.Lrelu(self.fc3(out0))
+        &#47&#47out0 = self.Lrelu(self.fc4(out0))
+        &#47&#47out0 = torch.cat([a0*out2, out0],dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.layer2(out) 
+        out = out.reshape(out.size(0), -1)
+        out = self.bn1(out)
+        out2 = 5.0<a id="change">*</a><a id="change">torch.exp(</a>-1.0*w<a id="change">)</a>
+        out0 = torch.cat([out2, out],dim=1)
+        out0 = self.Lrelu(self.fc1(out0))
+        out0 = self.bn2(out0)
+        out0 = torch.cat([out2, out0],dim=1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/68401fc91299dbb0105a4c102b26384e15b125dc#diff-abeeb2ed11baef245e7c5a36874f356017e824960463d0c160d20f9ba3a54d31L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1284243</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: 68401fc91299dbb0105a4c102b26384e15b125dc</div><div id='time'> Time: 2020-04-22</div><div id='author'> Author: minsuk000@gmail.com</div><div id='file'> File Name: models/cnn.py</div><div id='m_class'> M Class Name: ConvNet</div><div id='n_method'> N Class Name: ConvNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/cnn.py</div><div id='n_file'> N File Name: models/cnn.py</div><div id='m_start'> M Start Line: 37</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Since we can evaluate all of z in parallel, estimation will be fast.
+        st = self.net(x)
+        s, t = st.split(self.dim, dim=1)
+        z = x<a id="change"> * torch.exp(s) + </a>t
+        &#47&#47 Reverse order, so if we stack MAFs, correct things happen.
+        z = z.flip(dims=(1,)) if self.parity else z
+        log_det = torch.sum(s, dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(self.dim):
+            st = self.net(x.clone())  &#47&#47 clone to avoid in-place op errors if using IAF
+            s, t = st.split(self.dim, dim=1)
+            x[:, i] = (z[:, i] - t[:, i])<a id="change"> * </a><a id="change">torch.exp(</a>-s[:, i]<a id="change">)</a>
+            log_det += -s[:, i]
+        return x, log_det
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/janosh/torch-mnf/commit/89ce9b3eb1de8e735e68602768c84ad28cbdd251#diff-9cf596a23e82fecb1f0de25f5c6da1317126d0764ce1287b505ed3b9dcc9ed01L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1284264</div><div id='project'> Project Name: janosh/torch-mnf</div><div id='commit'> Commit Name: 89ce9b3eb1de8e735e68602768c84ad28cbdd251</div><div id='time'> Time: 2020-08-23</div><div id='author'> Author: janosh.riebesell@gmail.com</div><div id='file'> File Name: torch_mnf/flows/maf.py</div><div id='m_class'> M Class Name: MAF</div><div id='n_method'> N Class Name: MAF</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torch_mnf/flows/maf.py</div><div id='n_file'> N File Name: torch_mnf/flows/maf.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 43</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, alpha, fac1):
+        out = x
+        out2 = <a id="change">torch.exp(</a>-F.interpolate(alpha[:, None], self.in_feat)<a id="change">)</a>[:, 0]
+        out2 = out2<a id="change"> * </a>fac1 + (1 - fac1)
+        return self.fc_out(out<a id="change"> * </a>out2)
+
+
+class GbsConvNet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, alpha, fac1):
+        out1 = x
+        &#47&#47 out2 = torch.exp(-F.interpolate(alpha[:, None], self.in_feat))[:, 0]
+        out2 = <a id="change">torch.exp(</a>-alpha<a id="change">) * </a>fac1
+        out = torch.cat([out1, out2], dim=1)
+        return self.fc_out(out)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sungbinlim/neuboots/commit/4a51a481d957fc2b685e1c373893bbf37ac37d41#diff-80c592f2d59b4b0f54f2d8f0d2ff05fce730280b6a7b2c6b1c551157cc516320L31' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1284255</div><div id='project'> Project Name: sungbinlim/neuboots</div><div id='commit'> Commit Name: 4a51a481d957fc2b685e1c373893bbf37ac37d41</div><div id='time'> Time: 2020-09-28</div><div id='author'> Author: phelahab@gmail.com</div><div id='file'> File Name: models/gbsnet.py</div><div id='m_class'> M Class Name: GbsCls</div><div id='n_method'> N Class Name: GbsCls</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/gbsnet.py</div><div id='n_file'> N File Name: models/gbsnet.py</div><div id='m_start'> M Start Line: 32</div><div id='m_end'> M End Line: 35</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 36</div><BR>

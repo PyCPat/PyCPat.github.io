@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            &#47&#47EMA embedding weight
+            new_ema_w = torch.matmul(encodings.t(), z_flattened)
+            <a id="change">self.embed_avg.data.mul_(self.decay).add_(</a>new_ema_w<a id="change">, alpha=1 - self.decay)</a>   
+
+            &#47&#47normalize embedding weight EMA and update current embedding weight
+            self.embed.data.copy_(self.embed_avg / self.cluster_size.unsqueeze(1))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.training:
+            encodings_sum = encodings.sum(0)
+            embed_sum = z_flattened.transpose(0, 1)<a id="change"> @ </a>encodings
+
+            self.embedding.cluster_size.data.mul_(self.decay).add_(
+                encodings_sum, alpha=1 - self.decay
+            )
+            <a id="change">self.embedding.embed_avg.data.mul_(self.decay).add_(</a>embed_sum<a id="change">, alpha=1 - self.decay)</a>
+            n = self.embedding.cluster_size.sum()
+            cluster_size = (
+                (self.embedding.cluster_size + self.eps) / (n + self.num_tokens * self.eps) * n
+            )</code></pre>

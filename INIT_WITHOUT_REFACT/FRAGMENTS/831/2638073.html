@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        x = self.conv2d(input)
+
+        skips = <a id="change">[]</a>
+        skips.append(x)
+
+        for idx in range(self.num_stacks):
+            x = self.encoder[idx](x)
+            skips.append(x)
+
+        for idx in range(self.num_stacks - 1):
+            skip_idx = self.num_stacks - idx - 1
+            skip<a id="change"> = </a>skips[skip_idx]
+            x = self.decoder[idx](x, skip=skip)
+
+        output = self.bottleneck_conv2d(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        Kh, Kw = self.kernel_size
+        Ph, Pw = Kh - 1, Kw - 1
+        padding_top = Ph // 2
+        padding_bottom<a id="change"> = </a>Ph - padding_top
+        padding_left = Pw // 2
+        padding_right = Pw - padding_left
+
+        input = F.pad(input, (padding_left, padding_right, padding_top, padding_bottom))
+
+        x = self.conv2d(input)
+        x, skip = self.encoder(x)
+        x = self.bottleneck_conv2d(x)
+        x = self.decoder(x, <a id="change">skip[::-1]</a>)
+
+        if self.pointwise_conv2d:
+            output<a id="change"> = </a>self.pointwise_conv2d(x)
+        else:
+            output = x
+        </code></pre>

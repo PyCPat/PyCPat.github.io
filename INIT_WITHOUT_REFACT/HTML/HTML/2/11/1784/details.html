@@ -1,0 +1,177 @@
+<html><h3>Pattern ID :1784
+</h3><img src='6923593.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            if self.with_aux:
+                mask_polyline_indices = [random.randint(0, time_step_len-1) for _ in range(x.size()[0])]
+                for i, idx in enumerate(mask_polyline_indices):
+                    x[i, idx, :]<a id="change"> = 0.0</a>
+
+            global_graph_out = self.global_graph(x, valid_lens)
+            pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
+
+            <a id="change">if </a>self.with_aux<a id="change">:
+                </a>aux_in = torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(self.device)
+                aux_gt<a id="change"> = </a>torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(self.device)
+                <a id="change">for </a>i, idx in enumerate(mask_polyline_indices)<a id="change">:
+                    </a>aux_in[i] = global_graph_out[i, idx].squeeze(0)
+                    aux_gt[i]<a id="change"> = </a>x[i, idx].squeeze(0)
+                aux_out = self.aux_mlp(aux_in)
+
+                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 for one batch, we mask the same polyline features
+            if self.with_aux:
+                mask_polyline_indices = [random.randint(0, time_step_len-1) + i * time_step_len for i in range(x.size()[0])]
+                x<a id="change"> = </a>x.view(-1, self.subgraph_width)
+                aux_gt<a id="change"> = </a>x[mask_polyline_indices]
+                <a id="change">x[mask_polyline_indices] = </a>0.0
+
+                x = x.view(-1, time_step_len, self.subgraph_width)
+                global_graph_out = self.global_graph(x, valid_lens)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL205' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6923593</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: OriginalVectorNet</div><div id='n_method'> N Class Name: OriginalVectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 213</div><div id='m_end'> M End Line: 242</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 237</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            loss += self.mse_gan_loss_weight * mse_fake_loss
+
+        if self.use_hinge_gan_loss and not scores_fake is not None:
+            hinge_fake_loss<a id="change"> = 0</a>
+            <a id="change">if </a>isinstance(scores_fake, list)<a id="change">:
+                </a><a id="change">for score_fake</a> in scores_fake<a id="change">:
+                    </a>fake_loss = self.hinge_loss(score_fake)
+                    hinge_fake_loss<a id="change"> += </a>fake_loss
+            else:
+                fake_loss<a id="change"> = </a>self.hinge_loss(scores_fake)
+                hinge_fake_loss = fake_loss
+            return_dict[&quotG_hinge_fake_loss&quot] = hinge_fake_loss
+            loss += self.hinge_gan_loss_weight * hinge_fake_loss</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, y_hat=None, y=None, scores_fake=None, feats_fake=None, feats_real=None, y_hat_sub=None, y_sub=None):
+        gen_loss = 0
+        adv_loss<a id="change"> = </a>0
+        return_dict = {}
+
+        &#47&#47 STFT Loss
+        if self.use_stft_loss:
+            stft_loss_mg, stft_loss_sc = self.stft_loss(y_hat.squeeze(1), y.squeeze(1))
+            return_dict[&quotG_stft_loss_mg&quot] = stft_loss_mg
+            return_dict[&quotG_stft_loss_sc&quot] = stft_loss_sc
+            gen_loss += self.stft_loss_weight * (stft_loss_mg + stft_loss_sc)
+
+        &#47&#47 subband STFT Loss
+        if self.use_subband_stft_loss:
+            subband_stft_loss_mg, subband_stft_loss_sc = self.subband_stft_loss(y_hat_sub, y_sub)
+            return_dict[&quotG_subband_stft_loss_mg&quot] = subband_stft_loss_mg
+            return_dict[&quotG_subband_stft_loss_sc&quot] = subband_stft_loss_sc
+            gen_loss += self.subband_stft_loss_weight * (subband_stft_loss_mg + subband_stft_loss_sc)
+
+        &#47&#47 multiscale MSE adversarial loss
+        if self.use_mse_gan_loss and scores_fake is not None:
+            mse_fake_loss = _apply_G_adv_loss(scores_fake, self.mse_loss)
+            return_dict[&quotG_mse_fake_loss&quot] = mse_fake_loss
+            adv_loss += self.mse_gan_loss_weight * mse_fake_loss
+
+        &#47&#47 multiscale Hinge adversarial loss
+        if self.use_hinge_gan_loss and not scores_fake is not None:
+            hinge_fake_loss = _apply_G_adv_loss(scores_fake, self.hinge_loss)
+            return_dict[&quotG_hinge_fake_loss&quot] = hinge_fake_loss
+            adv_loss += self.hinge_gan_loss_weight * hinge_fake_loss
+
+        &#47&#47 Feature Matching Loss
+        if self.use_feat_match_loss and not feats_fake:
+            feat_match_loss = self.feat_match_loss(feats_fake, feats_real)
+            return_dict[&quotG_feat_match_loss&quot] = feat_match_loss
+            adv_loss += self.feat_match_loss_weight * feat_match_loss
+        return_dict[&quotG_loss&quot] = gen_loss + adv_loss
+        <a id="change">return_dict[&quotG_gen_loss&quot] = </a>gen_loss
+        return_dict[&quotG_adv_loss&quot]<a id="change"> = </a>adv_loss
+        return return_dict
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/6b1de26869251a3f0af0d22f9f1fe23d0556cc76#diff-b85f85fdc6e8d8bbeef6eb1d6ad03f64af10fddc65feffbc309faf144525b4b7L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6923577</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 6b1de26869251a3f0af0d22f9f1fe23d0556cc76</div><div id='time'> Time: 2020-06-15</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: vocoder/layers/losses.py</div><div id='m_class'> M Class Name: GeneratorLoss</div><div id='n_method'> N Class Name: GeneratorLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vocoder/layers/losses.py</div><div id='n_file'> N File Name: vocoder/layers/losses.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 209</div><div id='n_start'> N Start Line: 212</div><div id='n_end'> N End Line: 249</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            if self.with_aux:
+                mask_polyline_indices = [random.randint(0, time_step_len-1) for _ in range(x.size()[0])]
+                for i, idx in enumerate(mask_polyline_indices):
+                    x[i, idx, :]<a id="change"> = 0.0</a>
+
+            global_graph_out = self.global_graph(x, valid_lens)
+            pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
+
+            <a id="change">if </a>self.with_aux<a id="change">:
+                </a>aux_in = torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(self.device)
+                aux_gt<a id="change"> = </a>torch.empty((global_graph_out.size()[0],
+                                      self.polyline_vec_shape)
+                                     ).to(self.device)
+                <a id="change">for </a>i, <a id="change">idx</a> in enumerate(mask_polyline_indices)<a id="change">:
+                    </a>aux_in[i]<a id="change"> = </a>global_graph_out[i, idx].squeeze(0)
+                    aux_gt[i] = x[i, idx].squeeze(0)
+                aux_out = self.aux_mlp(aux_in)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 for one batch, we mask the same polyline features
+            if self.with_aux:
+                mask_polyline_indices = [random.randint(0, time_step_len-1) + i * time_step_len for i in range(x.size()[0])]
+                x<a id="change"> = </a>x.view(-1, self.subgraph_width)
+                aux_gt<a id="change"> = </a>x[mask_polyline_indices]
+                <a id="change">x[mask_polyline_indices] = </a>0.0
+
+                x = x.view(-1, time_step_len, self.subgraph_width)
+                global_graph_out = self.global_graph(x, valid_lens)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-prediction/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL201' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6923578</div><div id='project'> Project Name: henry1iu/tnt-trajectory-prediction</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: OriginalVectorNet</div><div id='n_method'> N Class Name: OriginalVectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 213</div><div id='m_end'> M End Line: 242</div><div id='n_start'> N Start Line: 205</div><div id='n_end'> N End Line: 237</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Fake Losses
+        if self.use_mse_gan_loss and scores_fake is not None:
+            mse_fake_loss<a id="change"> = 0</a>
+            <a id="change">if </a>isinstance(scores_fake, list)<a id="change">:
+                </a><a id="change">for score_fake</a> in scores_fake<a id="change">:
+                    </a>fake_loss = self.mse_loss(score_fake)
+                    mse_fake_loss<a id="change"> += </a>fake_loss
+            else:
+                fake_loss = self.mse_loss(scores_fake)
+                mse_fake_loss<a id="change"> = </a>fake_loss
+            return_dict[&quotG_mse_fake_loss&quot] = mse_fake_loss
+            loss += self.mse_gan_loss_weight * mse_fake_loss
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, y_hat=None, y=None, scores_fake=None, feats_fake=None, feats_real=None, y_hat_sub=None, y_sub=None):
+        gen_loss = 0
+        adv_loss<a id="change"> = </a>0
+        return_dict = {}
+
+        &#47&#47 STFT Loss
+        if self.use_stft_loss:
+            stft_loss_mg, stft_loss_sc = self.stft_loss(y_hat.squeeze(1), y.squeeze(1))
+            return_dict[&quotG_stft_loss_mg&quot] = stft_loss_mg
+            return_dict[&quotG_stft_loss_sc&quot] = stft_loss_sc
+            gen_loss += self.stft_loss_weight * (stft_loss_mg + stft_loss_sc)
+
+        &#47&#47 subband STFT Loss
+        if self.use_subband_stft_loss:
+            subband_stft_loss_mg, subband_stft_loss_sc = self.subband_stft_loss(y_hat_sub, y_sub)
+            return_dict[&quotG_subband_stft_loss_mg&quot] = subband_stft_loss_mg
+            return_dict[&quotG_subband_stft_loss_sc&quot] = subband_stft_loss_sc
+            gen_loss += self.subband_stft_loss_weight * (subband_stft_loss_mg + subband_stft_loss_sc)
+
+        &#47&#47 multiscale MSE adversarial loss
+        if self.use_mse_gan_loss and scores_fake is not None:
+            mse_fake_loss = _apply_G_adv_loss(scores_fake, self.mse_loss)
+            return_dict[&quotG_mse_fake_loss&quot] = mse_fake_loss
+            adv_loss += self.mse_gan_loss_weight * mse_fake_loss
+
+        &#47&#47 multiscale Hinge adversarial loss
+        if self.use_hinge_gan_loss and not scores_fake is not None:
+            hinge_fake_loss = _apply_G_adv_loss(scores_fake, self.hinge_loss)
+            return_dict[&quotG_hinge_fake_loss&quot] = hinge_fake_loss
+            adv_loss += self.hinge_gan_loss_weight * hinge_fake_loss
+
+        &#47&#47 Feature Matching Loss
+        if self.use_feat_match_loss and not feats_fake:
+            feat_match_loss = self.feat_match_loss(feats_fake, feats_real)
+            return_dict[&quotG_feat_match_loss&quot] = feat_match_loss
+            adv_loss += self.feat_match_loss_weight * feat_match_loss
+        return_dict[&quotG_loss&quot] = gen_loss + adv_loss
+        <a id="change">return_dict[&quotG_gen_loss&quot] = </a>gen_loss
+        return_dict[&quotG_adv_loss&quot]<a id="change"> = </a>adv_loss
+        return return_dict
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/20a9d51cccbe4e995aa34d4965bde8dcd25b8f6b#diff-b85f85fdc6e8d8bbeef6eb1d6ad03f64af10fddc65feffbc309faf144525b4b7L161' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6923598</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 20a9d51cccbe4e995aa34d4965bde8dcd25b8f6b</div><div id='time'> Time: 2020-06-03</div><div id='author'> Author: erogol@hotmail.com</div><div id='file'> File Name: vocoder/layers/losses.py</div><div id='m_class'> M Class Name: GeneratorLoss</div><div id='n_method'> N Class Name: GeneratorLoss</div><div id='m_method'> M Method Name: forward(8)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vocoder/layers/losses.py</div><div id='n_file'> N File Name: vocoder/layers/losses.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 209</div><div id='n_start'> N Start Line: 212</div><div id='n_end'> N End Line: 249</div><BR>

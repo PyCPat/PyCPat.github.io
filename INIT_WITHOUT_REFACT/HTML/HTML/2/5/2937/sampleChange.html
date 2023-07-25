@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+
+        dim_batch = past.size()[0]
+        zero_padding = <a id="change">torch.zeros(1, dim_batch, self.dim_embedding_key * 2).cuda()</a>
+        prediction = torch.Tensor().cuda()
+        present_temp = past[:, -1].unsqueeze(1)
+
+        &#47&#47 past temporal encoding</code></pre><h3>After Change</h3><pre><code class='java'>
+        zero_padding = torch.zeros(1, dim_batch, self.dim_embedding_key * 2)
+        prediction = torch.Tensor()
+        present_temp = past[:, -1].unsqueeze(1)
+        <a id="change">if self.use_cuda</a><a id="change">:
+            </a>zero_padding = zero_padding.cuda()
+            prediction<a id="change"> = </a><a id="change">prediction.cuda()</a>
+
+        &#47&#47 past temporal encoding
+        past = torch.transpose(past, 1, 2)
+        story_embed = self.relu(self.conv_past(past))</code></pre>

@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+            in_features = hid
+        if bn:
+            conv2.append(<a id="change">nn.BatchNorm1d(</a>in_features<a id="change">)</a>)
+        conv2.append(RobustConv(in_features, out_features, gamma=gamma, bias=bias))
+        self.conv2 = conv2
+        self.dropout = nn.Dropout(dropout)</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.bn1 = lambda x : x
+
+        conv2 = nn.ModuleList()
+        bn2<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+
+        in_features = hids[0]
+        for hid, act in zip(hids[1:], acts[1:]):
+            conv2.append(RobustConv(in_features,
+                                    hid,
+                                    bias=bias,
+                                    gamma=gamma,
+                                    activation=activations.get(act)))
+            if bn:
+                bn2.append(nn.BatchNorm1d(hid))
+            else:
+                <a id="change">bn2.append(</a>lambda x : x<a id="change">)</a>
+                
+            in_features = hid
+                
+        conv2.append(RobustConv(in_features, out_features, gamma=gamma, bias=bias))</code></pre>

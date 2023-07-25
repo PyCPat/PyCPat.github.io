@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = F.relu(self.lin2(x))
+        mean = self.action_range * torch.tanh(self.mean_layer(x))
+        cholesky_vector = F.softplus(self.cholesky_layer(x))
+        cholesky = <a id="change">torch.eye(self.action_shape)[None, ...].repeat(cholesky_vector.size(0), 1, 1).to(</a>device<a id="change">)</a> @ cholesky_vector[..., None]
+        return mean, cholesky
+
+    def action(self, state):</code></pre><h3>After Change</h3><pre><code class='java'>
+        :param states: ([State]) a (batch of) state(s) of the environment
+        :return: ([float])([float]) mean and cholesky factorization chosen by policy at given state
+        
+        B<a id="change"> = </a><a id="change">states.size(0</a><a id="change">)</a>
+
+        device = self.lin1.weight.device
+        if self.action_range.device != device:
+            self.action_range = self.action_range.to(device)</code></pre>

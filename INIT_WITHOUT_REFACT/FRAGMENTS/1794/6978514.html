@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 (B, in_dim*K, T_in)
+        &#47&#47 Concat conv1d bank outputs
+        x<a id="change"> = </a>torch.cat(<a id="change">[conv1d(x)[:, :, :T] for conv1d in self.conv1d_banks]</a>, dim=1)
+        assert x.size(1) == self.in_dim * len(self.conv1d_banks)
+        x = self.max_pool1d(x)[:, :, :T]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 (B, in_features*K, T_in)
+        &#47&#47 Concat conv1d bank outputs
+        outs<a id="change"> = </a><a id="change">[]</a>
+        <a id="change">for conv1d</a> in self.conv1d_banks<a id="change">:
+            </a>out = conv1d(x)
+            out<a id="change"> = </a>out[:, :, :T]
+            <a id="change">outs.append(</a>out<a id="change">)</a>
+        
+        x = torch.cat(outs, dim=1)
+        assert x.size(1) == self.in_features * len(self.conv1d_banks)
+</code></pre>

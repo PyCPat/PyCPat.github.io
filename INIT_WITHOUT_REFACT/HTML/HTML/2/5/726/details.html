@@ -1,0 +1,72 @@
+<html><h3>Pattern ID :726
+</h3><img src='2410116.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 if no NaNs for padding varying trial lengths we can batch the computation
+        if not torch.isnan(x).any():
+            trial_embeddings = <a id="change">self.trial_net(x.view(batch * permutation_dim, -1)).view(
+                </a>batch, permutation_dim, <a id="change">-1</a><a id="change">
+            )</a>
+            combined_embedding = self.combining_function(trial_embeddings, dim=1)
+            trial_counts = torch.ones(batch, 1, dtype=torch.float32) * permutation_dim
+
+        &#47&#47 otherwise we need to loop over the batch to account for varying trial lengths</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Get number of trials from non-nan entries
+        num_batch, max_num_trials = x.shape[0], x.shape[self.aggregation_dim]
+        nan_counts = (
+            <a id="change">torch.isnan(x)
+            .sum(dim=self.aggregation_dim)  &#47&#47 count nans over trial dimension
+            .reshape(</a>-1<a id="change">)</a>[:num_batch]  &#47&#47 counts are the same across data dims
+            .unsqueeze(-1)  &#47&#47 make it (batch, 1) to match embeddings below
+        )
+        &#47&#47 number of non-nan trials</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mackelab/sbi/commit/3831fd6d5fda0ca050db8c54868ed30558451042#diff-672ba10e6c3065a6f5554033b9b173c4fe88f4c05ffc31c70a9198691e6c6659L274' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2410116</div><div id='project'> Project Name: mackelab/sbi</div><div id='commit'> Commit Name: 3831fd6d5fda0ca050db8c54868ed30558451042</div><div id='time'> Time: 2023-03-01</div><div id='author'> Author: jan.boelts@tum.de</div><div id='file'> File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_class'> M Class Name: PermutationInvariantEmbedding</div><div id='n_method'> N Class Name: PermutationInvariantEmbedding</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sbi/neural_nets/embedding_nets.py</div><div id='n_file'> N File Name: sbi/neural_nets/embedding_nets.py</div><div id='m_start'> M Start Line: 274</div><div id='m_end'> M End Line: 300</div><div id='n_start'> N Start Line: 279</div><div id='n_end'> N End Line: 306</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x):
+        b, c, h, w = x.shape
+        x = x + self.attn(self.norm1(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        x = x + self.ffn(self.norm2(<a id="change">x.view(</a>b, c, <a id="change">-1</a><a id="change">)</a>.transpose(-2, -1)).transpose(-2, -1).view(b, c, h, w))
+        return x
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        b, c, h, w = x.shape
+        x = x + self.attn(self.norm1(x.reshape(b, c, -1).transpose(-2, -1).contiguous()).transpose(-2, -1)
+                          .contiguous().reshape(b, c, h, w))
+        x = x + self.ffn(self.norm2(<a id="change">x.reshape(</a>b, c, -1<a id="change">)</a>.transpose(-2, -1).contiguous()).transpose(-2, -1)
+                         .contiguous().reshape(b, c, h, w))
+        return x
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/leftthomas/restormer/commit/24dcd377010cc831079023b52a73adcb9ad04e7b#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L55' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2410118</div><div id='project'> Project Name: leftthomas/restormer</div><div id='commit'> Commit Name: 24dcd377010cc831079023b52a73adcb9ad04e7b</div><div id='time'> Time: 2022-02-26</div><div id='author'> Author: leftthomas@qq.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: TransformerBlock</div><div id='n_method'> N Class Name: TransformerBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 57</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 57</div><div id='n_end'> N End Line: 60</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            return ord_prob.view(-1, ord_num, H, W)
+
+        ord_prob = F.softmax(C, dim=1)[:, 1, ::]
+        ord_prob = <a id="change">ord_prob.view(-1</a>, ord_num, H, W<a id="change">)</a>
+        ord_label = <a id="change">torch.sum((ord_prob &gt; 0.5), dim=1).view(-1</a>, 1, H, W<a id="change">)</a>
+        return ord_prob, ord_label
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            return ord_prob
+
+        ord_prob = F.softmax(concat_feats, dim=1)[:, 0, ::]
+        ord_label = <a id="change">torch.sum((ord_prob &gt; 0.5), dim=1).reshape(</a>(N, 1, H, W)<a id="change">)</a>
+        return ord_prob, ord_label
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/dontlovebugs/superviseddepthprediction/commit/07fe1714fc568b25bd80debe8dd3ab800ff576a8#diff-4113dbf82d3c85db8d660e5485c3df3048dd9c7cefb1a9060e9e80ba9a7c2cc5L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2410124</div><div id='project'> Project Name: dontlovebugs/superviseddepthprediction</div><div id='commit'> Commit Name: 07fe1714fc568b25bd80debe8dd3ab800ff576a8</div><div id='time'> Time: 2020-05-02</div><div id='author'> Author: wangxin_buaa@163.com</div><div id='file'> File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_class'> M Class Name: OrdinalRegressionLayer</div><div id='n_method'> N Class Name: OrdinalRegressionLayer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='n_file'> N File Name: dp/modules/decoders/OrdinalRegression.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 28</div><div id='n_end'> N End Line: 45</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            item_eb_hat = torch.sum(self.w[:, :self.seq_len, :, :] * u,
+                                    -1)  &#47&#47 shape=(batch_size, seq_len, hidden_size*interest_num)
+
+        item_eb_hat = <a id="change">item_eb_hat.view(-1</a>, self.seq_len, self.interest_num, self.hidden_size<a id="change">)</a>
+        item_eb_hat = item_eb_hat.permute(0, 2, 1, 3).contiguous()
+        item_eb_hat = <a id="change">item_eb_hat.view(-1</a>, self.interest_num, self.seq_len,
+                                       self.hidden_size<a id="change">)</a>  &#47&#47 [batch_size, num_interest, seq_len, hidden_size]
+
+        &#47&#47 [batch_size, num_interest, seq_len, hidden_size]
+        if self.stop_grad:  &#47&#47 Clip signal for backpropagation, item_emb_hat is not included in gradient calculation</code></pre><h3>After Change</h3><pre><code class='java'>
+            item_eb_hat = torch.sum(self.w[:, :self.seq_len, :, :] * u,
+                                    dim=3)  &#47&#47 shape=(batch_size, maxlen, hidden_size*interest_num)
+
+        item_eb_hat = <a id="change">torch.reshape(</a>item_eb_hat, (-1, self.seq_len, self.interest_num, self.hidden_size)<a id="change">)</a>
+        item_eb_hat = torch.transpose(item_eb_hat, 1, 2).contiguous()
+        item_eb_hat = torch.reshape(item_eb_hat, (-1, self.interest_num, self.seq_len, self.hidden_size))
+
+        &#47&#47 [b, in, s, h]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/edb52c9a2e35045250d5fda164df336768f37599#diff-16584232aba0343bfbe840c65428273f6373d78df60d98d31ac5c2a5f4a698dcL102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2410126</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: edb52c9a2e35045250d5fda164df336768f37599</div><div id='time'> Time: 2023-03-24</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_class'> M Class Name: CapsuleNetwork</div><div id='n_method'> N Class Name: CapsuleNetwork</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/layers/multi_interest.py</div><div id='n_file'> N File Name: rec_pangu/models/layers/multi_interest.py</div><div id='m_start'> M Start Line: 102</div><div id='m_end'> M End Line: 172</div><div id='n_start'> N Start Line: 94</div><div id='n_end'> N End Line: 154</div><BR>

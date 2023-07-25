@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, output, target, target_weights):
+        Forward function.
+        batch_size<a id="change"> = </a>output.size(0)
+        num_joints = output.size(1)
+        if num_joints &lt; self.topk:
+            raise ValueError(f&quottopk ({self.topk}) should not &quot
+                             f&quotlarger than num_joints ({num_joints}).&quot)
+        heatmaps_pred = output.reshape(
+            (batch_size, num_joints, -1)).split(1, 1)
+        heatmaps_gt = target.reshape((batch_size<a id="change">, num_joints, -1</a>)).split(1, 1)
+
+        losses = []
+        for idx in range(num_joints):
+            heatmap_pred<a id="change"> = heatmaps_pred[idx]</a><a id="change">.squeeze(1</a><a id="change">)</a>
+            heatmap_gt = heatmaps_gt[idx].squeeze(1)
+            if self.use_target_weight:
+                target_weight = target_weights[:, idx, None]
+                losses.append(</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.criterion(output[:, idx] * target_weight,
+                                   target[:, idx] * target_weight))
+            else:
+                losses.append(self.criterion(output[:, idx], <a id="change">target[:, idx]</a>))
+
+        losses = [loss.mean(dim=(1, 2)).unsqueeze(dim=1) for loss in losses]
+        losses = torch.cat(losses, dim=1)</code></pre>

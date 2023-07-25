@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 compute scoring gt and loss
+        score_gt = F.softmax(-distance_metric(pred_dict[&quottraj&quot], gt_dict[&quoty&quot])/self.temper, dim=-1)
+        score_loss = torch.sum(torch.mul(<a id="change">- torch.log(pred_dict[&quotscore&quot])</a>, score_gt))
+        loss += self.lambda3 * score_loss
+
+        loss_dict = {"tar_cls_loss": cls_loss, "tar_offset_loss": offset_loss, "traj_loss": reg_loss, "score_loss": score_loss}</code></pre><h3>After Change</h3><pre><code class='java'>
+            pred_dict[&quottarget_prob&quot], gt_dict[&quottarget_prob&quot].float(), reduction=&quotnone&quot)
+
+        gt_idx = gt_dict[&quottarget_prob&quot].nonzero()
+        offset = pred_dict[&quotoffset&quot][gt_idx[:, 0]<a id="change">, gt_idx[:, 1]</a>]
+
+        &#47&#47 cls_loss, indices = torch.topk(cls_loss, self.m, dim=1)    &#47&#47 largest 50
+        cls_loss = cls_loss.sum()</code></pre>

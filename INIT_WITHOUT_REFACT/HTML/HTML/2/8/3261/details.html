@@ -1,0 +1,87 @@
+<html><h3>Pattern ID :3261
+</h3><img src='10383310.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, output, target, target_weights):
+        Forward function.
+        batch_size = <a id="change">output.size(0</a><a id="change">)</a>
+        num_joints = output.size(1)
+        if num_joints &lt; self.topk:
+            raise ValueError(f&quottopk ({self.topk}) should not &quot
+                             f&quotlarger than num_joints ({num_joints}).&quot)
+        heatmaps_pred<a id="change"> = output.reshape(
+            </a>(batch_size, num_joints, -1)<a id="change">)</a>.split(1, 1)
+        heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+
+        losses = []
+        for idx in range(num_joints):
+            heatmap_pred<a id="change"> = </a>heatmaps_pred[idx].squeeze(1)
+            heatmap_gt = heatmaps_gt[idx].squeeze(1)
+            if self.use_target_weight:
+                target_weight = target_weights[:, idx, None]</code></pre><h3>After Change</h3><pre><code class='java'>
+            if self.use_target_weight:
+                target_weight = target_weights[:, idx, None, None]
+                losses.append(
+                    self.criterion(<a id="change">output[:, idx]</a> * target_weight,
+                                   target[:, idx] * target_weight))
+            else:
+                losses.append(self.criterion(output[:, idx], target[:, idx]))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/open-mmlab/mmpose/commit/23954dab675977d9762e61680a0b4a02ee2479f9#diff-6f7db4195f9b076c0397f3e806a1d54846e879457f4c56d5ba72f47b550dfcdfL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10383310</div><div id='project'> Project Name: open-mmlab/mmpose</div><div id='commit'> Commit Name: 23954dab675977d9762e61680a0b4a02ee2479f9</div><div id='time'> Time: 2022-08-02</div><div id='author'> Author: 87690686+liqikai9@users.noreply.github.com</div><div id='file'> File Name: mmpose/models/losses/mse_loss.py</div><div id='m_class'> M Class Name: KeypointOHKMMSELoss</div><div id='n_method'> N Class Name: KeypointOHKMMSELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmpose/models/losses/mse_loss.py</div><div id='n_file'> N File Name: mmpose/models/losses/mse_loss.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 209</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, output, target, target_weights):
+        Forward function.
+        batch_size = <a id="change">output.size(0</a><a id="change">)</a>
+        num_joints = output.size(1)
+        if num_joints &lt; self.topk:
+            raise ValueError(f&quottopk ({self.topk}) should not &quot
+                             f&quotlarger than num_joints ({num_joints}).&quot)
+        heatmaps_pred<a id="change"> = output.reshape(
+            </a>(batch_size, num_joints, -1)<a id="change">)</a>.split(1, 1)
+        heatmaps_gt = target.reshape((batch_size, num_joints, -1)).split(1, 1)
+
+        losses = []
+        for idx in range(num_joints):
+            heatmap_pred<a id="change"> = </a>heatmaps_pred[idx].squeeze(1)
+            heatmap_gt = heatmaps_gt[idx].squeeze(1)
+            if self.use_target_weight:
+                target_weight = target_weights[:, idx, None]</code></pre><h3>After Change</h3><pre><code class='java'>
+                    self.criterion(output[:, idx] * target_weight,
+                                   target[:, idx] * target_weight))
+            else:
+                losses.append(self.criterion(output[:, idx], <a id="change">target[:, idx]</a>))
+
+        losses = [loss.mean(dim=(1, 2)).unsqueeze(dim=1) for loss in losses]
+        losses = torch.cat(losses, dim=1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmpose/commit/23954dab675977d9762e61680a0b4a02ee2479f9#diff-6f7db4195f9b076c0397f3e806a1d54846e879457f4c56d5ba72f47b550dfcdfL130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10383311</div><div id='project'> Project Name: open-mmlab/mmpose</div><div id='commit'> Commit Name: 23954dab675977d9762e61680a0b4a02ee2479f9</div><div id='time'> Time: 2022-08-02</div><div id='author'> Author: 87690686+liqikai9@users.noreply.github.com</div><div id='file'> File Name: mmpose/models/losses/mse_loss.py</div><div id='m_class'> M Class Name: KeypointOHKMMSELoss</div><div id='n_method'> N Class Name: KeypointOHKMMSELoss</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmpose/models/losses/mse_loss.py</div><div id='n_file'> N File Name: mmpose/models/losses/mse_loss.py</div><div id='m_start'> M Start Line: 130</div><div id='m_end'> M End Line: 151</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 209</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs<a id="change"> = inputs.reshape(</a>B, <a id="change">inputs.size(1</a><a id="change">)</a> // self.r, -1<a id="change">)</a>
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-d9b8d279159e71117d405f97592a8727c16e635c5fc8b968d2c0b3bf1f1d9df1L70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10383307</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron.py</div><div id='n_file'> N File Name: model/tacotron.py</div><div id='m_start'> M Start Line: 87</div><div id='m_end'> M End Line: 187</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 180</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if inputs is not None:
+            &#47&#47 Grouping multiple frames if necessary
+            if inputs.size(-1) == self.mel_dim:
+                inputs<a id="change"> = inputs.reshape(</a>B, <a id="change">inputs.size(1</a><a id="change">)</a> // self.r, -1<a id="change">)</a>
+            assert inputs.size(-1) == self.mel_dim * self.r
+            T_decoder<a id="change"> = </a>inputs.size(1)
+
+        &#47&#47 Time first (T&quot, B, mel_dim*r)
+        if inputs is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+        current_input = initial_input
+        while True:
+            if t &gt; 0:
+                current_input = <a id="change">mel_outputs[-1][:, -1, :]</a> if greedy else inputs[t - 1]
+            t += self.r
+
+            &#47&#47 Prenet</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuhcsi/tacotron/commit/fea9ec535ec373aad564646f4f292fbee0217c29#diff-7ad5d3b60745b0b46860cc4003e6b1af82b421d3df25282bfacabd1db690e1b9L110' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10383305</div><div id='project'> Project Name: thuhcsi/tacotron</div><div id='commit'> Commit Name: fea9ec535ec373aad564646f4f292fbee0217c29</div><div id='time'> Time: 2021-03-18</div><div id='author'> Author: johnson.tsing@gmail.com</div><div id='file'> File Name: model/tacotron2.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/tacotron2.py</div><div id='n_file'> N File Name: model/tacotron2.py</div><div id='m_start'> M Start Line: 127</div><div id='m_end'> M End Line: 224</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 216</div><BR>

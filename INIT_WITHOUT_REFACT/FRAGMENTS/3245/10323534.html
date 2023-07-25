@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if causal:
+            mask = torch.ones((n, n), device = device).triu(1).bool()
+            mask_value = <a id="change">-torch.finfo(sim.dtype).max</a>
+            sim = sim.masked_fill(mask, mask_value)
+
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb i j, b j d -&gt; b i d&quot, attn, v)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if causal:
+            causal_mask = torch.ones((n, n), device = device).triu(1).bool()
+            mask_value<a id="change"> = </a><a id="change">max_neg_value(</a>sim<a id="change">)</a>
+            sim = sim.masked_fill(causal_mask, mask_value)
+
+        attn = sim.softmax(dim = -1)
+        out = einsum(&quotb i j, b j d -&gt; b i d&quot, attn, v)</code></pre>

@@ -1,0 +1,47 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        for resnet, resnet2, attn, downsample in self.downs:
+            x = resnet(x, t)
+            x<a id="change"> = </a>resnet2(x, t)
+            x = attn(x)
+            h.append(x)
+            x = downsample(x)
+
+        x = self.mid_block1(x, t)
+        x = self.mid_attn(x)
+        x = self.mid_block2(x, t)
+
+        <a id="change">for </a>resnet, resnet2, attn, <a id="change">upsample</a> in self.ups<a id="change">:
+            </a>x = torch.cat((x, h.pop()), dim=1)
+            x = resnet(x, t)
+            x = resnet2(x, t)
+            x = attn(x)
+            x<a id="change"> = </a>upsample(x)
+
+        return self.final_conv(x)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.final_conv = Block(pre_channel, default(out_channel, in_channel))
+
+    def forward(self, x, time):
+        <a id="change">t</a> = self.time_mlp(time) if exists(self.time_mlp) else None
+
+        feats = []
+        for layer in self.downs:
+            if isinstance(layer, ResnetBlock):
+                x = layer(x, t)
+            else:
+                x = layer(t)
+            feats.append(x)
+
+        for layer in self.mid:
+            <a id="change">if </a>isinstance(layer, ResnetBlock)<a id="change">:
+                </a>x<a id="change"> = </a><a id="change">layer(</a>x, t<a id="change">)</a>
+            else:
+                x<a id="change"> = </a><a id="change">layer(</a>t<a id="change">)</a>
+
+        for layer in self.ups:
+            if isinstance(layer, ResnetBlock):
+                x = layer(torch.cat((x, feats.pop()), dim=1), t)</code></pre>

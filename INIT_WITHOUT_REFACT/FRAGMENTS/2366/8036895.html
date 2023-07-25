@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for idx in range(batch_size):
+            target_ball_global[idx] = create_target_ball(global_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            target_ball_local[idx] = create_target_ball(local_ball_pos_xy[idx], sigma=1., w=self.w, h=self.h, thresh_mask=0.01, device=self.device)
+            target_events[idx] = create_target_events(<a id="change">event_class[idx]</a>, device=self.device)
+
+        global_ball_loss = self.ball_loss_criterion(pred_ball_global, target_ball_global)
+        local_ball_loss = self.ball_loss_criterion(pred_ball_local, target_ball_local)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if pred_ball_local is not None:
+            log_vars_idx += 1
+            target_ball_local<a id="change"> = </a><a id="change">torch.zeros_like(</a>pred_ball_local<a id="change">)</a>
+            for sample_idx in range(batch_size):
+                target_ball_local[sample_idx] = create_target_ball(local_ball_pos_xy[sample_idx], sigma=1., w=self.w,
+                                                                   h=self.h, thresh_mask=0.01, device=self.device)
+            local_ball_loss = self.ball_loss_criterion(pred_ball_local, target_ball_local)</code></pre>

@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, adj, dropout=0):
+        for layer in self.layers:
+            x = layer(x, adj, dropout=dropout)
+        x = <a id="change">F.relu(</a>self.linear1(x)<a id="change">)</a>
+        x<a id="change"> = </a>F.dropout(x, dropout)
+        x<a id="change"> = </a>self.linear2(x)
+
+        return x
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, adj, dropout=0):
+        for layer in self.layers:
+            if isinstance(layer, nn.LayerNorm):
+                x<a id="change"> = </a><a id="change">layer(</a>x<a id="change">)</a>
+            else:
+                x = layer(x, adj, dropout=dropout)
+
+        return x</code></pre>

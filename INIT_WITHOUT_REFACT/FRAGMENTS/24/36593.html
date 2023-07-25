@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        ratio = output_magnitude / (magnitude + self.eps)
+        ratio = torch.where(output_magnitude &gt;= 0, ratio, torch.zeros_like(magnitude))
+        real, imag = ratio * real, ratio * imag
+        output = torch.cat(<a id="change">[</a>real, imag<a id="change"></a>], dim=1)
+        
+        return output
+    </code></pre><h3>After Change</h3><pre><code class='java'>
+        magnitude = torch.abs(input)
+        angle = torch.angle(input)
+        magnitude = F.relu(magnitude + self.bias.unsqueeze(dim=-1))
+        output = magnitude<a id="change"> * </a><a id="change">torch.exp(</a>1j<a id="change"> * </a>angle<a id="change">)</a>
+        
+        if not is_complex:
+            output = torch.view_as_real(output)
+        </code></pre>

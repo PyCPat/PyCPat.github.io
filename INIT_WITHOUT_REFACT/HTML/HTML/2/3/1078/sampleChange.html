@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 [n, k], 3σ rule
+            bernoulli = Bernoulli(logits=meanLogit - 3.0)
+            &#47&#47 [h*w, n, k] -&gt; [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((logit.shape[1]<a id="change"></a>, )).permute(1, 0, 2)
+            randomFalseMask *= -1e9
+            bernoulli = Bernoulli(logits=-meanLogit - 3.0)
+            randomTrueMask = bernoulli.sample((logit.shape[1], )).permute(1, 0, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 [n, h*w, k] (0 or 1 -&gt; choose or not choose)
+            randomFalseMask = bernoulli.sample((n, h*w, )).bool()
+
+            maskedLogit = <a id="change">logit.masked_fill(</a>randomFalseMask, <a id="change">-1e9</a><a id="change">)</a>
+
+            &#47&#47 randomFalseMask *= -1e9
+            &#47&#47 maskedLogit = logit + randomFalseMask &#47&#47 + randomTrueMask
+</code></pre>

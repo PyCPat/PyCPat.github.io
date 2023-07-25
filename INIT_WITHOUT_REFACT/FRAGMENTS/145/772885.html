@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 use codes to index codebook (m, k, d) ==&gt; [n, h, w, m, k] -&gt; [n, c, h, w]
+        &#47&#47 ix = torch.arange(self._m, device=codes.device).expand_as(codes)
+        ix = self._ix.expand_as(codes)
+        <a id="change">return </a><a id="change">self._codebook[ix, codes].reshape(</a>n, h, w, <a id="change">-1</a><a id="change">)</a>.permute(0, 3, 1, 2)
+        &#47&#47 return self.decode(codes)
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 ix = torch.arange(self._m, device=codes.device).expand_as(codes)
+        ix = self._ix.expand_as(codes)
+        &#47&#47 [n, h, w, m, d]
+        indexed<a id="change"> = </a>self._codebook[ix, codes]
+        indexed = torch.einsum("nhwmd,mcd-&gt;nhwmc", indexed, self._wq)<a id="change"> + </a>self._bq
+        <a id="change">return </a>indexed.reshape(n, h, w, -1).permute(0, 3, 1, 2)
+        &#47&#47 return self.decode(codes)
+
+</code></pre>

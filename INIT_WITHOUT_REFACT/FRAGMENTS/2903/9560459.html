@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        return <a id="change">out.squeeze(dim=-1)</a>.squeeze(dim=-1)
+
+
+class GlobalAvgPool1d(_GlobalAvgPool):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, x: TensorType) -&gt; TensorType:
+        out = self._pool(x, kernel_size=x.size()[2:])
+        for _ in range(len(out.shape[<a id="change">2:</a>])):
+            out.squeeze_(dim=-1)
+        return out
+</code></pre>

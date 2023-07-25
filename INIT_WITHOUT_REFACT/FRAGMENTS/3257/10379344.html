@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, feats, coors, mask = None):
+        h = self.heads
+        q, k, v = <a id="change">self.to_qkv(feats).chunk(3</a><a id="change">, dim = -1)</a>
+        q, k, v = map(lambda t: rearrange(t, &quotb n (h d) -&gt; b h n d&quot, h = h), (q, k, v))
+
+        if exists(mask):
+            mask = rearrange(mask, &quotb n -&gt; b () n ()&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, x, queries, mask = None):
+        induced = self.attn1(queries, x, mask = mask)
+        out     = self.attn2(x, induced)
+        return out<a id="change">, 0</a>
+
+class EquivariantAttention(nn.Module):
+    def __init__(
+        self,</code></pre>

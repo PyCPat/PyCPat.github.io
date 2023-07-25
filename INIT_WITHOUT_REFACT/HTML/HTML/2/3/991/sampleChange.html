@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, seq, pair, fname=None):
+        pred_sc, pred_s, pred_bp, param = self.model(seq, return_param=True)
+        ref_sc, ref_s, ref_bp = self.model(seq, param=param, constraint=pair, max_internal_length=None)
+        score_paired = (<a id="change">param[0]</a>[&quotscore_paired&quot]+1)/5
+
+        pred_mat = torch.zeros_like(score_paired, dtype=torch.bool)
+        for i, j in enumerate(pred_bp[0]):</code></pre><h3>After Change</h3><pre><code class='java'>
+        pred_sc, pred_s, pred_bp, param = self.model(seq, return_param=True)
+        ref_sc, ref_s, ref_bp = self.model(seq, param=param, constraint=pair, max_internal_length=None)
+
+        loss = <a id="change">torch.zeros(</a>(len(param)<a id="change"></a>,)<a id="change">, device=param[0][&quotscore_paired&quot].device)</a>
+        for k in range(len(seq)):
+            score_paired = (param[k][&quotscore_paired&quot] + 1) / self.model.gamma
+
+            pred_mat = torch.zeros_like(score_paired, dtype=torch.bool)</code></pre>

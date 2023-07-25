@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        d_t = self.domain_discriminator(f_t)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+
+        <a id="change">self.grl.step()</a>
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))
+        return 0.5 * (self.bce(d_s, d_label_s) + self.bce(d_t, d_label_t))
+
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.domain_discriminator_accuracy = None
+
+    def forward(self, f_s, f_t):
+        f = self.grl(<a id="change">torch.cat(</a>(f_s<a id="change">, f_t</a>)<a id="change">, dim=0)</a>)
+        d = self.domain_discriminator(f)
+        d_s<a id="change">, d_t = </a>d.chunk(2, dim=0)
+        d_label_s = torch.ones((f_s.size(0), 1)).to(f_s.device)
+        d_label_t = torch.zeros((f_t.size(0), 1)).to(f_t.device)
+        self.domain_discriminator_accuracy = 0.5 * (binary_accuracy(d_s, d_label_s) + binary_accuracy(d_t, d_label_t))</code></pre>

@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            λp = self.pos_conv(v)
+            Yp = einsum(&quotb h k n, b k v n -&gt; b h v n&quot, q, λp.flatten(3))
+        else:
+            rel_pos_emb = self.rel_pos_emb[self.rel_pos[:, :, 0], <a id="change">self.rel_pos[:, :, 1]</a>]
+            λp = einsum(&quotn m k u, b u v m -&gt; b n k v&quot, rel_pos_emb, v)
+            Yp = einsum(&quotb h k n, b n k v -&gt; b h v n&quot, q, λp)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            λp = self.pos_conv(v)
+            Yp = einsum(&quotb h k n, b k v n -&gt; b h v n&quot, q, λp.flatten(3))
+        else:
+            n, m = <a id="change">self.rel_pos.unbind(dim = -1)</a>
+            rel_pos_emb = self.rel_pos_emb[n, m]
+            λp = einsum(&quotn m k u, b u v m -&gt; b n k v&quot, rel_pos_emb, v)
+            Yp = einsum(&quotb h k n, b n k v -&gt; b h v n&quot, q, λp)
+</code></pre>

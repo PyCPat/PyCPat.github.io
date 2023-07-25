@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        spatial_cls_tokens = repeat(self.spatial_cls_token, &quot1 1 d -&gt; b f 1 d&quot, b = b, f = f)
+        x = torch.cat((spatial_cls_tokens, x), dim = 2)
+        x += <a id="change">self.pos_embedding[:, :(n + 1)]</a>
+        x = self.dropout(x)
+
+        x = rearrange(x, &quotb f n d -&gt; (b f) n d&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 excise out the spatial cls tokens or average pool for temporal attention
+
+        x = x[:, :, 0]<a id="change"> if </a>not self.global_average_pool<a id="change"> else </a>reduce(x, &quotb f n d -&gt; b f d&quot, &quotmean&quot)
+
+        &#47&#47 append temporal CLS tokens
+</code></pre>

@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :810
+</h3><img src='2588573.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )
+            elif pred.shape[-1] not in (1, self.param_rank):
+                <a id="change">raise </a>ValueError(
+                    f"{self.id} `predict_variance` module output should have `shape[-1]` of "
+                    f"{self.param_rank}, got {pred.shape[-1]}"
+                )</code></pre><h3>After Change</h3><pre><code class='java'>
+            diag_multi = torch.diag_embed(torch.exp(pred))
+            mini_cov = diag_multi @ mini_cov @ diag_multi
+
+        mask<a id="change"> = </a><a id="change">self.mask.unsqueeze(0).unsqueeze(</a>0<a id="change">)</a>
+
+        return mask @ mini_cov @ mask.tranpose(-1, -2)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/strongio/torchcast/commit/d98b47d1ac38c61653093efd887cc672f228917d#diff-65e118e1565802366914308589e1ad788cb0cd050a59e65d1c18b1195749bf05L246' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2588573</div><div id='project'> Project Name: strongio/torchcast</div><div id='commit'> Commit Name: d98b47d1ac38c61653093efd887cc672f228917d</div><div id='time'> Time: 2021-09-01</div><div id='author'> Author: jacob.dink@strong.io</div><div id='file'> File Name: torchcast/covariance/base.py</div><div id='m_class'> M Class Name: Covariance</div><div id='n_method'> N Class Name: Covariance</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchcast/covariance/base.py</div><div id='n_file'> N File Name: torchcast/covariance/base.py</div><div id='m_start'> M Start Line: 246</div><div id='m_end'> M End Line: 266</div><div id='n_start'> N Start Line: 266</div><div id='n_end'> N End Line: 290</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            spembs = spembs.repeat(1, x.shape[1], 1)
+            x = torch.cat((x, spembs), 2)
+        else:
+            <a id="change">raise </a>NotImplementedError("support only add or concat.")
+            
+        return x
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        x shape : (batch, 39, 256)
+        spembs shape : (batch, 256)
+        &quot&quot&quot
+        spembs = <a id="change">spembs.unsqueeze(</a>1<a id="change">)</a>
+        spembs = spembs.repeat(1,x.shape[1] ,1)
+        x<a id="change"> = </a>x + spembs
+            
+        return x
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ga642381/fastspeech2/commit/11454a9ef35dab7c01d1d70dde213ce1c60294e0#diff-ae5323d7b76e8ae717b053d5c11b6e16ad4c1cfb3e978c0403a6c6b795078b87L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2588572</div><div id='project'> Project Name: ga642381/fastspeech2</div><div id='commit'> Commit Name: 11454a9ef35dab7c01d1d70dde213ce1c60294e0</div><div id='time'> Time: 2020-11-01</div><div id='author'> Author: ga642381@gmail.com</div><div id='file'> File Name: modules.py</div><div id='m_class'> M Class Name: SpeakerIntegrator</div><div id='n_method'> N Class Name: SpeakerIntegrator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: modules.py</div><div id='n_file'> N File Name: modules.py</div><div id='m_start'> M Start Line: 31</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 34</div><div id='n_end'> N End Line: 36</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    def forward(self, x, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]
+        &#47&#47 output: single frame: [b, c, h, w]
+        <a id="change">raise </a>NotImplementedError
+
+    def pred_n(self, x, pred_length=1, **kwargs):
+        &#47&#47 input: T frames: [b, T, c, h, w]</code></pre><h3>After Change</h3><pre><code class='java'>
+        loss_dicts = []
+        for i in range(pred_length):
+            pred, loss_dict = self.pred_1(x, **kwargs)
+            pred = <a id="change">pred.unsqueeze(dim=1)</a>
+            preds.append(pred)
+            loss_dicts.append(loss_dict)
+            x<a id="change"> = </a>torch.cat([x[:, 1:], pred], dim=1)
+
+        pred = torch.cat(preds, dim=1)
+        if loss_dicts[0] is not None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ais-bonn/vp-suite/commit/b1ebac921dc35dcaf5e5c3f9fe803c4c9e2d78f8#diff-5d20954daff7dcc215ae55822581edcf94d33938f852c929207188cdd3385a40L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2588570</div><div id='project'> Project Name: ais-bonn/vp-suite</div><div id='commit'> Commit Name: b1ebac921dc35dcaf5e5c3f9fe803c4c9e2d78f8</div><div id='time'> Time: 2022-01-14</div><div id='author'> Author: boltres@ais.uni-bonn.de</div><div id='file'> File Name: vp_suite/models/_base_model.py</div><div id='m_class'> M Class Name: VideoPredictionModel</div><div id='n_method'> N Class Name: VideoPredictionModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vp_suite/models/_base_model.py</div><div id='n_file'> N File Name: vp_suite/models/_base_model.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 45</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 69</div><BR>

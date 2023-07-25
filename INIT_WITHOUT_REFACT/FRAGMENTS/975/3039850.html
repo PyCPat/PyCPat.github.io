@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        total_loss = 0
+        predict = F.softmax(predict, dim=1)
+
+        <a id="change">for i</a> in range(target.shape[1])<a id="change">:
+            </a>if i != self.ignore_index:
+                dice_loss, _ = dice(predict[:, i], {&quottargets&quot: target[:, i]}, device)
+                if self.weight is not None:
+                    assert self.weight.shape[0] == target.shape[1], \
+                        &quotExpect weight shape [{}], get[{}]&quot.format(target.shape[1], self.weight.shape[0])
+                    dice_loss<a id="change"> *= </a>self.weights[i]
+                total_loss += dice_loss
+
+        loss = total_loss/target.shape[1]</code></pre><h3>After Change</h3><pre><code class='java'>
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = <a id="change">(inputs * targets).sum()</a>                            
+        dice<a id="change"> = </a>(2.*intersection + self.eps)<a id="change">/</a>(inputs.sum() + targets.sum() + self.eps)  
+        
+        loss =  1 - dice
+</code></pre>

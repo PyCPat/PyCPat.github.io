@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, x, arg_route = (True, True), **kwargs):
+        f_args, g_args = map(lambda route: kwargs if route else {}, arg_route)
+        block_kwargs = <a id="change">{</a>&quotf_args&quot: f_args, &quotg_args&quot: g_args<a id="change">}</a>
+        return _ReversibleFunction.apply(x, self.blocks, block_kwargs)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        layers_and_args = list(zip(blocks, args))
+
+        <a id="change">if </a><a id="change">self.training and self.layer_dropout &gt; 0:
+            </a>layers_and_args = layer_drop(layers_and_args, self.layer_dropout)
+            blocks<a id="change">, args = </a>map(lambda ind: list(map(itemgetter(ind), layers_and_args)), (0, 1))
+
+        out =  _ReversibleFunction.apply(x, blocks, args)
+        return torch.stack(out.chunk(2, dim=-1)).sum(dim=0)</code></pre>

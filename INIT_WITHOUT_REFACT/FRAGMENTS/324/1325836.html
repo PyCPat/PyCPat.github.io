@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        a = t.relu(self.fc1(state))
+        a = t.relu(self.fc2(a))
+        a = t.tanh(self.fc3(a)) * self.action_range
+        <a id="change">return </a>a
+
+
+class ActorDiscreet(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        a = t.relu(self.fc2(a))
+        mu = t.tanh(self.mu_head(a)) * self.action_range
+        sigma = softplus(self.sigma_head(a))
+        dist = <a id="change">Normal(</a>mu, sigma<a id="change">)</a>
+        act = (action
+               if action is not None
+               else dist.sample())
+        act_entropy<a id="change"> = </a>dist.entropy()
+        act_log_prob = dist.log_prob(act)
+        <a id="change">return </a>act, act_log_prob, act_entropy
+
+
+class Critic(nn.Module):</code></pre>

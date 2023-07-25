@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(ActionDecoder, self).__init__()
+    
+    def forward(self, x):
+        <a id="change">return </a>x
+
+
+class RewardDecoder(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.model = nn.Sequential(*self.layers)
+    
+    def forward(self, x):
+        raw_init_std = <a id="change">np.log(</a>np.exp(self.init_std)<a id="change"> - 1</a><a id="change">)</a>
+        x = self.model(x)
+        mean, std = torch.chunk(x, 2, dim=-1)
+        mean = self.mean_scale * torch.tanh(mean / self.mean_scale)
+        std = self.softplus(std + raw_init_std)<a id="change"> + </a>self.min_std
+        dist = td.Normal(mean, std)
+        transforms = [TanhBijector()]
+        dist<a id="change"> = </a>td.transformed_distribution.TransformedDistribution(
+            dist, transforms)
+        dist = td.Independent(dist, 1)
+        <a id="change">return </a>dist
+
+
+class DenseDecoder(nn.Module):</code></pre>

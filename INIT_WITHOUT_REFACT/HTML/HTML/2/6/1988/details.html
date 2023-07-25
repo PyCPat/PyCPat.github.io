@@ -1,0 +1,54 @@
+<html><h3>Pattern ID :1988
+</h3><img src='7407185.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        out = self.net(inp, **kwargs)
+
+        out<a id="change"> = </a><a id="change">out.transpose(1</a>, <a id="change">2</a><a id="change">)</a>
+
+        loss = F.cross_entropy(
+            out,
+            target,</code></pre><h3>After Change</h3><pre><code class='java'>
+        logits = self.net(inp, **kwargs)
+
+        loss = F.cross_entropy(
+            <a id="change">rearrange(</a>logits, <a id="change">&quotb n c -&gt; b c n&quot</a><a id="change">)</a>,
+            target,
+            ignore_index = ignore_index
+        )</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/25da06ef763f8241081ab5e5b6dbd994a3841ad7#diff-b70a3173d353a448f8f499d8b685672d9bccac7b78bc1d36b77f84afe33be694L135' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407185</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 25da06ef763f8241081ab5e5b6dbd994a3841ad7</div><div id='time'> Time: 2023-04-29</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_class'> M Class Name: AutoregressiveWrapper</div><div id='n_method'> N Class Name: AutoregressiveWrapper</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/autoregressive_wrapper.py</div><div id='n_file'> N File Name: x_transformers/autoregressive_wrapper.py</div><div id='m_start'> M Start Line: 135</div><div id='m_end'> M End Line: 140</div><div id='n_start'> N Start Line: 141</div><div id='n_end'> N End Line: 144</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 The use of negative indices on the transpose allow for expanded SqueezeExcite
+        batch, channels, timesteps = x.size()[:3]
+        y = self.pool(x)  &#47&#47 [B, C, T - context_window + 1]
+        y<a id="change"> = </a><a id="change">y.transpose(1</a>, <a id="change">-1</a><a id="change">)</a>  &#47&#47 [B, T - context_window + 1, C]
+        y = self.fc(y)  &#47&#47 [B, T - context_window + 1, C]
+        y = y.transpose(1, -1)  &#47&#47 [B, C, T - context_window + 1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        batch, channels, timesteps = x.size()[:3]
+        y = self.pool(x)  &#47&#47 [B, C, T - context_window + 1]
+        y = <a id="change">rearrange(</a>y, <a id="change">"b c t_pool -&gt; b t_pool c"</a><a id="change">)</a>
+        y = self.fc(y)  &#47&#47 [B, T - context_window + 1, C]
+        y = rearrange(y, "b t_pool c -&gt; b c t_pool")
+
+        if self.context_window &gt; 0:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/819444f2719496d6230b76c683b543159ed8b44f#diff-466f09dc94a8d0261c5affeb35283ea929f8f99c0560176aff78070c963baf18L299' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407184</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 819444f2719496d6230b76c683b543159ed8b44f</div><div id='time'> Time: 2021-02-01</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/jasper/blocks.py</div><div id='m_class'> M Class Name: SqueezeExcite</div><div id='n_method'> N Class Name: SqueezeExcite</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/jasper/blocks.py</div><div id='n_file'> N File Name: src/thunder/jasper/blocks.py</div><div id='m_start'> M Start Line: 299</div><div id='m_end'> M End Line: 305</div><div id='n_start'> N Start Line: 296</div><div id='n_end'> N End Line: 308</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
+        q, k, v = qkv[0], qkv[1], qkv[2]
+
+        attn = (q @ <a id="change">k.transpose(-2</a>, <a id="change">-1</a><a id="change">)</a>) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x<a id="change"> = </a>(attn @ v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x</code></pre><h3>After Change</h3><pre><code class='java'>
+        attn = self.attn_drop(attn)
+
+        x = einsum(&quotb h i j, b h j d -&gt; b h i d&quot, attn, v)
+        x = <a id="change">rearrange(</a>x, <a id="change">&quotb h n d -&gt; b n (h d)&quot</a><a id="change">)</a>
+
+        return self.proj_drop(self.proj(x))
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/vit-pytorch/commit/cb6d749821bbf3b0bd17c9e8e64eb343f40b3f69#diff-d9cf888a006662bd788cc31712f154ca4e86227d51998c7d5bca6e17d1197c07L78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7407190</div><div id='project'> Project Name: lucidrains/vit-pytorch</div><div id='commit'> Commit Name: cb6d749821bbf3b0bd17c9e8e64eb343f40b3f69</div><div id='time'> Time: 2022-10-29</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: vit_pytorch/cct.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vit_pytorch/cct.py</div><div id='n_file'> N File Name: vit_pytorch/cct.py</div><div id='m_start'> M Start Line: 80</div><div id='m_end'> M End Line: 90</div><div id='n_start'> N Start Line: 99</div><div id='n_end'> N End Line: 111</div><BR>

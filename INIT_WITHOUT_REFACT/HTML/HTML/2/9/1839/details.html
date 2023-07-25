@@ -1,0 +1,100 @@
+<html><h3>Pattern ID :1839
+</h3><img src='7167759.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        scores, feats = self.mpd(x)
+        score_sd, feats_sd = self.sd(x)
+        <a id="change">return </a>scores + [score_sd], feats + [feats_sd]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        x_scores = []
+        x_hat_scores = [] if x_hat is not None else None
+        <a id="change">x_feats</a><a id="change"> = []</a>
+        x_hat_feats = [] if x_hat is not None else None
+        <a id="change">for net</a> in self.nets<a id="change">:
+            </a>x_score, x_feat = net(x)
+            x_scores.append(x_score)
+            <a id="change">x_feats.append(</a>x_feat<a id="change">)</a>
+            if x_hat is not None:
+                x_hat_score, x_hat_feat = net(x_hat)
+                x_hat_scores.append(x_hat_score)
+                x_hat_feats.append(x_hat_feat)
+        <a id="change">return </a>x_scores<a id="change">, x_feats, x_hat_scores, x_hat_feats</a>
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 7</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/49e1181ea40ee95df29250120d2e343712a70793#diff-bddc08859f82b00b3928c39fcbbe7e6eefe9c71973f1e98e98ad571dcbb0ef99L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167759</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 49e1181ea40ee95df29250120d2e343712a70793</div><div id='time'> Time: 2021-08-26</div><div id='author'> Author: egolge@coqui.ai</div><div id='file'> File Name: TTS/tts/layers/vits/discriminator.py</div><div id='m_class'> M Class Name: VitsDiscriminator</div><div id='n_method'> N Class Name: VitsDiscriminator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/tts/layers/vits/discriminator.py</div><div id='n_file'> N File Name: TTS/tts/layers/vits/discriminator.py</div><div id='m_start'> M Start Line: 75</div><div id='m_end'> M End Line: 77</div><div id='n_start'> N Start Line: 69</div><div id='n_end'> N End Line: 91</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        c = c.view(c.size(0), c.size(1), 1, 1)
+        c = c.repeat(1, 1, x.size(2), x.size(3))
+        x = torch.cat([x, c], dim=1)
+        <a id="change">return </a>self.main(x)
+
+
+class Discriminator(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        c = c.repeat(1, 1, x.size(2), x.size(3))
+        x = torch.cat([x, c], dim=1)
+
+        <a id="change">feature_maps</a><a id="change"> = []</a>
+
+        &#47&#47 Get intermediate feature maps
+        <a id="change">for layer</a> in self.main<a id="change">:
+            </a>x = layer(x)
+            <a id="change">feature_maps.append(</a>x<a id="change">)</a>
+
+        <a id="change">return </a>x<a id="change">, feature_maps</a>
+
+
+class Discriminator(nn.Module):
+    Discriminator network with PatchGAN.</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/natanielruiz/disrupting-deepfakes/commit/65fa72e564614a020aeb9b1ec76afddb8bd8e402#diff-8dc1be6d1f8149df97692f73e0d90e7985527884ad86ae94234b781a5faaeba2L57' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167761</div><div id='project'> Project Name: natanielruiz/disrupting-deepfakes</div><div id='commit'> Commit Name: 65fa72e564614a020aeb9b1ec76afddb8bd8e402</div><div id='time'> Time: 2019-12-23</div><div id='author'> Author: nruiz@Nataniels-MacBook-Pro.local</div><div id='file'> File Name: stargan/model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: stargan/model.py</div><div id='n_file'> N File Name: stargan/model.py</div><div id='m_start'> M Start Line: 63</div><div id='m_end'> M End Line: 64</div><div id='n_start'> N Start Line: 63</div><div id='n_end'> N End Line: 72</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        out = self.tanh(self.conv7(torch.cat((out6, out1), 1)))
+
+        <a id="change">return </a>out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        alpha_stacked = self.tanh(self.conv7(torch.cat((out6, out1), 1)))
+
+        alphas = torch.split(alpha_stacked, 3, 1)
+        <a id="change">results</a><a id="change"> = [</a>x<a id="change"></a>]
+        <a id="change">for i</a> in range(self.n)<a id="change">:
+            &#47&#47 x = x + alphas[i] * (x - x**2)  &#47&#47 as described in the paper
+            &#47&#47 sign doesn&quott really matter becaus of symmetry.
+            </a>x = x + alphas[i] * (torch.pow(x, 2) - x)
+            if i + 1 in self.ret:
+                <a id="change">results.append(</a>x<a id="change">)</a>
+
+        <a id="change">return </a>results<a id="change">, alpha_stacked</a>
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bsun0802/zero-dce/commit/62f6f08b3141a697519bc2d480b342d19f21cf3e#diff-3c68424fa3c3e2e27a6aed55b945978a3d2c11b63a551ebfa3e0426522ac0254L37' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167760</div><div id='project'> Project Name: bsun0802/zero-dce</div><div id='commit'> Commit Name: 62f6f08b3141a697519bc2d480b342d19f21cf3e</div><div id='time'> Time: 2020-07-23</div><div id='author'> Author: bos@usc.edu</div><div id='file'> File Name: code/model.py</div><div id='m_class'> M Class Name: DCENet</div><div id='n_method'> N Class Name: DCENet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: code/model.py</div><div id='n_file'> N File Name: code/model.py</div><div id='m_start'> M Start Line: 47</div><div id='m_end'> M End Line: 49</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 51</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+    def forward(self, x):
+        <a id="change">return </a>x
+
+class Teacher(nn.Module):
+    def __init__(</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        gru_input = torch.cat((proprio, latent_extero), dim = -1)
+
+        <a id="change">next_hiddens</a><a id="change"> = []</a>
+        <a id="change">for </a>gru_cell, <a id="change">prev_hidden</a> in zip(self.gru_cells, hiddens)<a id="change">:
+            </a>gru_input = gru_cell(gru_input, prev_hidden)
+            <a id="change">next_hiddens.append(</a>gru_input<a id="change">)</a>
+
+        gru_output = gru_input
+
+        &#47&#47 attention gating of exteroception
+
+        attention_gate = self.to_extero_attn_gate(gru_output)
+        gated_extero = latent_extero * attention_gate.sigmoid()
+
+        &#47&#47 belief state and add gated exteroception
+
+        belief_state = self.belief_state_encoder(gru_output)
+        belief_state = sum_with_zeropad(belief_state, gated_extero)
+
+        &#47&#47 to action logits
+
+        action_logits = self.to_action_logits(belief_state)
+        <a id="change">return </a>action_logits<a id="change">, next_hiddens</a>
+
+class Teacher(nn.Module):
+    def __init__(
+        self,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/anymal-belief-state-encoder-decoder-pytorch/commit/31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea#diff-73be6483f8f8caa2ae70e99ad4ab6af1d1c938d94af55a7444fe6a52139b298bL74' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7167763</div><div id='project'> Project Name: lucidrains/anymal-belief-state-encoder-decoder-pytorch</div><div id='commit'> Commit Name: 31d37d8d81db1d32cbfae83f1e43a669e4c8d5ea</div><div id='time'> Time: 2022-04-17</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_class'> M Class Name: Student</div><div id='n_method'> N Class Name: Student</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='n_file'> N File Name: anymal_belief_state_encoder_decoder_pytorch/networks.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 75</div><div id='n_start'> N Start Line: 119</div><div id='n_end'> N End Line: 157</div><BR>

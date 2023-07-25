@@ -1,0 +1,58 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ConvOut1d(
+                channels=out_channels,
+                kernel_sizes=kernel_sizes_out,
+            )<a id="change">
+            if </a><a id="change">exists(</a>kernel_sizes_out<a id="change">)
+            else </a>nn.Identity(),
+        )
+
+    def get_channels(</code></pre><h3>After Change</h3><pre><code class='java'>
+        out_channels = default(out_channels, in_channels)
+        context_channels = list(default(context_channels, []))
+        num_layers = len(multipliers) - 1
+        use_context_features = <a id="change">exists(</a>context_features<a id="change">)</a>
+        use_context_channels = len(context_channels) &gt; 0
+        context_mapping_features = None
+
+        self.num_layers = num_layers
+        self.use_context_time = use_context_time
+        self.use_context_features = use_context_features
+        self.use_context_channels = use_context_channels
+        self.use_post_out_block = exists(kernel_sizes_out)
+
+        context_channels_pad_length = num_layers + 1 - len(context_channels)
+        context_channels = context_channels + [0] * context_channels_pad_length
+        self.context_channels = context_channels
+
+        if use_context_channels:
+            has_context = [c &gt; 0 for c in context_channels]
+            self.has_context = has_context
+            self.channels_ids = [sum(has_context[:i]) for i in range(len(has_context))]
+
+        assert (
+            len(factors) == num_layers
+            and len(attentions) == num_layers
+            and len(num_blocks) == num_layers
+        )
+
+        self.to_in = nn.Sequential(
+            Rearrange("b c (l p) -&gt; b (c p) l", p=patch_size),
+            CrossEmbed1d(
+                in_channels=(in_channels + context_channels[0]) * patch_size,
+                out_channels=channels,
+                kernel_sizes=kernel_sizes_init,
+                stride=1,
+            ),
+        )
+
+        <a id="change">if </a>use_context_time or use_context_features<a id="change">:
+            </a>context_mapping_features = channels * 4
+
+            self.to_mapping<a id="change"> = </a>nn.Sequential(
+                nn.Linear(context_mapping_features, context_mapping_features),
+                nn.GELU(),
+                nn.Linear(context_mapping_features, context_mapping_features),</code></pre>

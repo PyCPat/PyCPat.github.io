@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            pred = self.var_predict_multi * self.var_predict_module(input)
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if <a id="change">len(pred.shape) == 1</a>:
+                raise ValueError(
+                    f"{self.id} `predict_variance` module output should have 2D output, got {len(pred.shape)}"
+                )
+            elif <a id="change">pred.shape[-1] not in (1, self.param_rank)</a><a id="change">:
+                </a><a id="change">raise </a><a id="change">ValueError(
+                    f"{self.id} `predict_variance` module output should have `shape[-1]` of "
+                    f"{self.param_rank}, got {pred.shape[-1]}"</a><a id="change">
+                )</a>
+        if pred is not None:
+            diag_multi = torch.diag_embed(torch.exp(pred))
+            mini_cov = diag_multi @ mini_cov @ diag_multi
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        pred = None
+        if self.var_predict_module is not None and not _ignore_input:
+            pred = self.var_predict_module(*[<a id="change">inputs[x]</a> for x in self.expected_kwargs])
+            if torch.isnan(pred).any() or torch.isinf(pred).any():
+                raise RuntimeError(f"{self.id}&quots `predict_variance` produced nans/infs")
+            if (pred &lt; 0).any():</code></pre>

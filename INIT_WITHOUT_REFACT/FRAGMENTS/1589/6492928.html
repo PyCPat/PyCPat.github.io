@@ -1,0 +1,63 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.init_embed_(flatten)
+
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+        embed<a id="change"> = </a><a id="change">self.embed.t()</a>
+
+        dist = -(
+            flatten.pow(2).sum(1, keepdim=True)
+            - 2 * flatten @ embed</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    @autocast(enabled = False)
+    def forward(self, x):
+        <a id="change">needs_codebook_dim</a> = x.ndim &lt; 4
+
+        x = x.float()
+
+        if needs_codebook_dim:
+            x = rearrange(x, &quot... -&gt; 1 ...&quot)
+
+        shape, dtype = x.shape, x.dtype
+        flatten<a id="change"> = </a>rearrange(x, &quoth ... d -&gt; h (...) d&quot)
+
+        self.init_embed_(flatten)
+
+        embed = self.embed if not self.learnable_codebook else self.embed.detach()
+
+        embed = rearrange(embed, &quot... n d -&gt; ... d n&quot)
+
+        dist = -(
+            (flatten ** 2).sum(dim = -1, keepdim=True)
+            - 2 * flatten @ embed
+            + (embed ** 2).sum(dim = -2, keepdim=True)
+        )
+
+        embed_ind = gumbel_sample(dist, dim = -1, temperature = self.sample_codebook_temp)
+        embed_onehot = F.one_hot(embed_ind, self.codebook_size).type(dtype)
+        embed_ind = embed_ind.view(*shape[:-1])
+
+        quantize = batched_embedding(embed_ind, self.embed)
+
+        if self.training:
+            cluster_size = embed_onehot.sum(dim = 1)
+
+            self.all_reduce_fn(cluster_size)
+            ema_inplace(self.cluster_size, cluster_size, self.decay)
+
+            embed_sum = einsum(&quoth n d, h n c -&gt; h c d&quot, flatten, embed_onehot)
+            self.all_reduce_fn(embed_sum)
+
+            cluster_size = laplace_smoothing(self.cluster_size, self.codebook_size, self.eps) * self.cluster_size.sum()
+
+            embed_normalized = self.embed_avg / rearrange(cluster_size, &quot... -&gt; ... 1&quot)
+            self.embed.data.copy_(embed_normalized)
+            self.expire_codes_(x)
+
+        <a id="change">if needs_codebook_dim</a><a id="change">:
+            </a>quantize, embed_ind = map(lambda t: rearrange(t, &quot1 ... -&gt; ...&quot), (quantize<a id="change">, embed_ind</a>))
+
+        return quantize, embed_ind
+</code></pre>

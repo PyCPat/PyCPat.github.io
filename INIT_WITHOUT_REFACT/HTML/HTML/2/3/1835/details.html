@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1835
+</h3><img src='7134616.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 sum(-logP) / ()
+        &#47&#47 bppLoss = (F.cross_entropy(l1, c1, reduction="mean") + F.cross_entropy(l2, c2, reduction="mean")) / math.log(2)
+
+        l1 = l1.mean((2<a id="change">,3</a>))
+        l2 = l2.mean((2,3))
+
+        posterior1 = torch.distributions.Categorical(logits=l1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            reg = torch.distributions.kl_divergence(posterior, prior).mean()
+            regs.append(reg)
+
+        <a id="change">return </a>ssimLoss, contextLoss, <a id="change">sum(</a>regs<a id="change">)</a>
+
+
+class CompressionLossQ(nn.Module):
+    def __init__(self):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/xiaosu-zhu/mcquic/commit/290ac3b044e8dcee03a63e86c2356c47628be8a6#diff-3011478e20a73863fd2a7b6d06c5f4e8d11dbabe016cd75181b121bff42db884L137' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7134616</div><div id='project'> Project Name: xiaosu-zhu/mcquic</div><div id='commit'> Commit Name: 290ac3b044e8dcee03a63e86c2356c47628be8a6</div><div id='time'> Time: 2021-09-16</div><div id='author'> Author: xiaosu.zhu@outlook.com</div><div id='file'> File Name: src/mcqc/losses/quantization.py</div><div id='m_class'> M Class Name: CompressionLossBig</div><div id='n_method'> N Class Name: CompressionLossBig</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/mcqc/losses/quantization.py</div><div id='n_file'> N File Name: src/mcqc/losses/quantization.py</div><div id='m_start'> M Start Line: 137</div><div id='m_end'> M End Line: 164</div><div id='n_start'> N Start Line: 140</div><div id='n_end'> N End Line: 158</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, score, target):
+        ph, pw = score.size(2), score.size(3)
+        h<a id="change">, w</a> = target.size(1), target.size(2)
+        if ph != h or pw != w:
+            score = F.upsample(
+                    input=score, size=(h, w), mode=&quotbilinear&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        weights = config.LOSS.BALANCE_WEIGHTS
+        assert len(weights) == len(score)
+
+        <a id="change">return </a><a id="change">sum(</a>[w * self._forward(x, target) for (w, x) in zip(weights, score)]<a id="change">)</a>
+
+
+class OhemCrossEntropy(nn.Module):
+    def __init__(self, ignore_label=-1, thres=0.7,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/chenjun2hao/ddrnet.pytorch/commit/3ce340bc520946fb220e83075f6e015bbe87cfe5#diff-87de9e9894a51d531879f3422570eeeb987506cd19d44cd28cf06d1dc4537642L19' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7134618</div><div id='project'> Project Name: chenjun2hao/ddrnet.pytorch</div><div id='commit'> Commit Name: 3ce340bc520946fb220e83075f6e015bbe87cfe5</div><div id='time'> Time: 2019-12-12</div><div id='author'> Author: hsfzxjy@gmail.com</div><div id='file'> File Name: lib/core/criterion.py</div><div id='m_class'> M Class Name: CrossEntropy</div><div id='n_method'> N Class Name: CrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/core/criterion.py</div><div id='n_file'> N File Name: lib/core/criterion.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 28</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 42</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        loss_hard = loss[loss &gt; self.thresh]
+
+        if loss_hard.numel() &lt; n_min:
+            loss_hard<a id="change">, _</a> = loss.topk(n_min)
+
+        return torch.mean(loss_hard)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, preds, labels: Tensor) -&gt; Tensor:
+        if isinstance(preds, list):
+            <a id="change">return </a><a id="change">sum(</a>[w * self._forward(pred, labels) for (pred, w) in zip(preds, self.aux_weights)]<a id="change">)</a>
+        return self._forward(preds, labels)
+
+
+class Dice(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/sithu31296/semantic-segmentation/commit/b68900992fb24dd5166b2b34e3d35d19493d747d#diff-398000df2b6d6378b8d9a548745ebe3aaececba8113d07b75eaa56c45c371cbcL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 7134611</div><div id='project'> Project Name: sithu31296/semantic-segmentation</div><div id='commit'> Commit Name: b68900992fb24dd5166b2b34e3d35d19493d747d</div><div id='time'> Time: 2021-08-21</div><div id='author'> Author: sithu31296@gmail.com</div><div id='file'> File Name: utils/losses.py</div><div id='m_class'> M Class Name: OhemCrossEntropy</div><div id='n_method'> N Class Name: OhemCrossEntropy</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: utils/losses.py</div><div id='n_file'> N File Name: utils/losses.py</div><div id='m_start'> M Start Line: 25</div><div id='m_end'> M End Line: 37</div><div id='n_start'> N Start Line: 46</div><div id='n_end'> N End Line: 49</div><BR>

@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 similarity
+
+        dots_image = <a id="change">einsum(&quotb i d, b j d -&gt; b i j&quot</a>, q_img, k_img<a id="change">)</a>
+
+        &#47&#47 mask so image has full attention to text, but causal along axis
+
+        bh<a id="change">, i, j = </a>dots_image.shape
+        causal_mask = torch.ones(i, img_size, device = device).triu_(img_size - i + 1).bool()
+        causal_mask = repeat(causal_mask, &quoti j -&gt; b i j&quot, b = bh)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 aggregate
+
+        attn_image_to_text, attn_image_to_image = <a id="change">attn[..., :text_len]</a>, attn[..., text_len:]
+
+        out_image_to_image = einsum(&quotb x i j, b x j d -&gt; b x i d&quot, attn_image_to_image, v_img)
+        out_image_to_text = einsum(&quotb x i j, b j d -&gt; b x i d&quot, attn_image_to_text, v_text)</code></pre>

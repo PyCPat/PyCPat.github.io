@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        skips = None
+        for conv in self.conv_layers:
+            x, h = conv(x)
+            <a id="change">if </a>skips is None<a id="change">:
+                </a>skips<a id="change"> = h[..., self.l_diff:-self.l_diff]</a>
+            else:
+                skips<a id="change"> += </a>h[..., self.l_diff:-self.l_diff]
+
+        x = skips
+        x = self.last_conv_layers(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+            x, h = conv(x)
+            skips += h
+
+        skips *= math.sqrt(1.0 / <a id="change">len(</a>self.conv_layers<a id="change">)</a>)
+        x = skips
+        x = self.last_conv_layers(x)
+</code></pre>

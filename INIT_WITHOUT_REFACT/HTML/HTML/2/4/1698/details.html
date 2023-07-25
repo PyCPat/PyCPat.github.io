@@ -1,0 +1,64 @@
+<html><h3>Pattern ID :1698
+</h3><img src='6716560.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 m = self.erb_dec(emb, e3, e2, e1, e0)
+        m, emb, _ = self.erb_stage(feat_erb)
+        lsnr, _ = self.lsnr_net(emb)
+        emb = <a id="change">emb.permute(0, 2, 3, 1).flatten(2</a><a id="change">)</a>
+        spec = self.mask(spec, m, atten_lim)
+        feat_spec = self.cplx_comp(spec.squeeze(1)[:, :, : self.df_bins].permute(0, 3, 1, 2))
+        df_alpha = None
+        if self.run_df:</code></pre><h3>After Change</h3><pre><code class='java'>
+        feat_spec: Tensor,  &#47&#47 Not used, take spec modified by mask instead
+    ) -&gt; Tuple[Tensor, Tensor, Tensor, Tensor]:
+        &#47&#47 ic(feat_erb.shape)
+        feat_spec = <a id="change">feat_spec.squeeze(1</a><a id="change">)</a>.permute(0, 3, 1, 2)
+
+        &#47&#47 ic(self.erb_comp.c, self.erb_comp.mn)
+        &#47&#47 feat_erb = torch.view_as_complex(spec).abs().matmul(self.erb_fb)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 2</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rikorose/deepfilternet/commit/5dd7650c4ec141968affd0d3594c8e41a2c89b1c#diff-c68fcf7e3e857dc9d67e36d42a07b6bdcc0eafa25601537f8f70149f37a07bccL333' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716560</div><div id='project'> Project Name: rikorose/deepfilternet</div><div id='commit'> Commit Name: 5dd7650c4ec141968affd0d3594c8e41a2c89b1c</div><div id='time'> Time: 2022-04-12</div><div id='author'> Author: h.schroeter@pm.me</div><div id='file'> File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_class'> M Class Name: DfNet</div><div id='n_method'> N Class Name: DfNet</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='n_file'> N File Name: DeepFilterNet/df/deepfilternet2.py</div><div id='m_start'> M Start Line: 333</div><div id='m_end'> M End Line: 356</div><div id='n_start'> N Start Line: 346</div><div id='n_end'> N End Line: 372</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, inputs):
+        x = self.signal_encoder(inputs)
+        x = self.pos_encoding(<a id="change">x.flatten(2</a><a id="change">)</a>)
+        x = self.transformer(x)
+        x = x.flatten(1)
+        x = self.mlp_head(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, inputs):
+        x = self.signal_encoder(inputs)
+
+        x = <a id="change">x.squeeze(1</a><a id="change">)</a>.permute(0, 2, 1)
+
+        x = self.transformer(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kolaszko/haptic_transformer/commit/aed59ae5263f8f3490b9ead581d7b112589a9f27#diff-9a02f4e72f98b173cff993e361b8c108ffdd07649fe9a77c6611a0c5af9ecb4aL25' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716561</div><div id='project'> Project Name: kolaszko/haptic_transformer</div><div id='commit'> Commit Name: aed59ae5263f8f3490b9ead581d7b112589a9f27</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: mikolaj.lysakowski.bk@gmail.com</div><div id='file'> File Name: models/haptr.py</div><div id='m_class'> M Class Name: HAPTR</div><div id='n_method'> N Class Name: HAPTR</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/haptr.py</div><div id='n_file'> N File Name: models/haptr.py</div><div id='m_start'> M Start Line: 26</div><div id='m_end'> M End Line: 27</div><div id='n_start'> N Start Line: 31</div><div id='n_end'> N End Line: 41</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        combined = self.norm_1(combined)
+
+        cls_token, _ = self.attn(combined[:,:1], combined, combined, need_weights=False)
+        cls_token = <a id="change">torch.flatten(</a>cls_token, <a id="change">1</a><a id="change">)</a>                     &#47&#47 (N, 1, C) -&gt; (N, C)
+        cls_token = cls_token + self.drop_path(cls_token * self.layer_scale_1)
+        cls_token = self.norm_2(cls_token)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        out = self.mlp(out)
+        cls_token = cls_token + self.drop_path(out * self.layer_scale_2)
+        
+        out = <a id="change">self.norm_3(cls_token).squeeze(1</a><a id="change">)</a>     &#47&#47 (N, 1, C) -&gt; (N, C)
+        return out
+
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/gau-nernst/vision-toolbox/commit/9c33936b15da329b7d51d981196aca20d5e00077#diff-06aa870b4857860e20e31864ed75afe923611be3298c7662abf5065cbc7d651aL117' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716558</div><div id='project'> Project Name: gau-nernst/vision-toolbox</div><div id='commit'> Commit Name: 9c33936b15da329b7d51d981196aca20d5e00077</div><div id='time'> Time: 2022-03-04</div><div id='author'> Author: gau.nernst@yahoo.com.sg</div><div id='file'> File Name: vision_toolbox/backbones/patchconvnet.py</div><div id='m_class'> M Class Name: AttentionPooling</div><div id='n_method'> N Class Name: AttentionPooling</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: vision_toolbox/backbones/patchconvnet.py</div><div id='n_file'> N File Name: vision_toolbox/backbones/patchconvnet.py</div><div id='m_start'> M Start Line: 119</div><div id='m_end'> M End Line: 132</div><div id='n_start'> N Start Line: 141</div><div id='n_end'> N End Line: 151</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+    def forward(self, data):
+        sparse_emb = self.emb_layer(data)
+        sparse_emb = <a id="change">torch.stack(sparse_emb, dim=1).flatten(1</a><a id="change">)</a>
+        dense_input = get_linear_input(self.enc_dict, data)
+        dnn_input = torch.cat((sparse_emb, dense_input), dim=1)
+        out = self.fc(dnn_input)
+        return out</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fc = nn.Linear(self.dnn_input_dim, 1)
+
+    def forward(self, data):
+        sparse_emb = <a id="change">self.emb_layer(data).squeeze(-1</a><a id="change">)</a>
+        dense_input = get_linear_input(self.enc_dict, data)
+        dnn_input = torch.cat((sparse_emb, dense_input), dim=1)
+        out = self.fc(dnn_input)
+        return out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hasai666/rec_pangu/commit/fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1#diff-43d212ce9a0542077c9ea3cb689f49c5c5e72985ee6f0d7c92f913324a802f52L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716559</div><div id='project'> Project Name: hasai666/rec_pangu</div><div id='commit'> Commit Name: fde9c0f89b7cf58fb4737cfab2b982036aa7e8c1</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: wangkai@fuzhi.ai</div><div id='file'> File Name: rec_pangu/models/layers/shallow.py</div><div id='m_class'> M Class Name: LR_Layer</div><div id='n_method'> N Class Name: LR_Layer</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rec_pangu/models/layers/shallow.py</div><div id='n_file'> N File Name: rec_pangu/models/layers/shallow.py</div><div id='m_start'> M Start Line: 22</div><div id='m_end'> M End Line: 23</div><div id='n_start'> N Start Line: 22</div><div id='n_end'> N End Line: 22</div><BR>

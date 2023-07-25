@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert not ImagenTrainer.locked, &quotImagenTrainer can only be initialized once per process - for the sake of distributed training, you will now have to create a separate script to train each unet (or a script that accepts unet number as an argument)&quot
+        assert exists(imagen) ^ exists(imagen_checkpoint_path), &quoteither imagen instance is passed into the trainer, or a checkpoint path that contains the imagen config&quot
+
+        <a id="change">if </a>exists(imagen_checkpoint_path)<a id="change">:
+            </a>checkpoint_path<a id="change"> = </a>Path(imagen_checkpoint_path)
+            assert checkpoint_path.exists()
+            loaded = torch.load(str(imagen_checkpoint_path))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.checkpoint_every = checkpoint_every
+        self.max_checkpoints_keep = max_checkpoints_keep
+
+        self.can_checkpoint = self.is_local_main if <a id="change">isinstance(</a>checkpoint_fs, LocalFileSystem<a id="change">)</a> else self.is_main
+
+        if exists(checkpoint_path) and self.can_checkpoint:
+            if not fs.exists(checkpoint_path):</code></pre>

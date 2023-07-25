@@ -1,0 +1,58 @@
+<html><h3>Pattern ID :2590
+</h3><img src='8455169.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        b, _, w, h = x.shape
+        p = x.flatten(2)
+        p = p.unsqueeze(0)
+        p = <a id="change">p.transpose(0</a>, <a id="change">3</a><a id="change">)</a>
+        p<a id="change"> = </a>p.squeeze(3)
+        e = self.linear(p)
+        x = p + e
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.conv is not None:
+            x = self.conv(x)
+        b, _, w, h = x.shape
+        p = <a id="change">x.flatten(2).permute(2</a>, <a id="change">0</a>, <a id="change">1</a><a id="change">)</a>
+        return <a id="change">self.tr(p + self.linear(p)).permute(1</a>, <a id="change">2</a>, <a id="change">0</a><a id="change">)</a>.reshape(b, self.c2, w, h)
+
+
+class Bottleneck(nn.Module):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bobo-y/flexible-yolov5/commit/9fb058ef7b7925a243a436788f3f55dbb4b3e263#diff-7357e4f39d70b8aa048013576541498791dbafcd9e63159e3efb429b17eb3054L75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8455169</div><div id='project'> Project Name: bobo-y/flexible-yolov5</div><div id='commit'> Commit Name: 9fb058ef7b7925a243a436788f3f55dbb4b3e263</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: yl305237731@gmail.com</div><div id='file'> File Name: od/models/modules/common.py</div><div id='m_class'> M Class Name: TransformerBlock</div><div id='n_method'> N Class Name: TransformerBlock</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: od/models/modules/common.py</div><div id='n_file'> N File Name: od/models/modules/common.py</div><div id='m_start'> M Start Line: 114</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 76</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 [B, N, L]
+        x = self.conv1d(x)
+        if self.use_global_pos_enc:
+            x<a id="change"> = </a><a id="change">self.pos_enc(x.transpose(1, -1)).transpose(1</a>, <a id="change">-1</a><a id="change">)</a> + x * (
+                x.size(1) ** 0.5
+            )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+
+        &#47&#47 [B, L, N]
+        x = <a id="change">self.norm(x.permute(0, 2, 1)).permute(0</a>, <a id="change">2</a>, <a id="change">1</a><a id="change">)</a>
+        &#47&#47 [B, L, N]
+        x = self.conv1d(x)
+
+        &#47&#47 [B, K, S, N]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/a34758d23ee7dcd9a7ec0c87063e9f8f06186985#diff-40b82ab7121b1425a4bf5a89e920ed2c1dc57a81e3c33ce594018e7387af16bcL982' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8455159</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: a34758d23ee7dcd9a7ec0c87063e9f8f06186985</div><div id='time'> Time: 2020-12-10</div><div id='author'> Author: csubakan@gmail.com</div><div id='file'> File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_class'> M Class Name: Dual_Path_Model</div><div id='n_method'> N Class Name: Dual_Path_Model</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/lobes/models/dual_path.py</div><div id='n_file'> N File Name: speechbrain/lobes/models/dual_path.py</div><div id='m_start'> M Start Line: 1004</div><div id='m_end'> M End Line: 1032</div><div id='n_start'> N Start Line: 1026</div><div id='n_end'> N End Line: 1054</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        attn_scores = F.softmax(scores, dim=-1)
+
+        out = torch.matmul(attn_scores, v)
+        out<a id="change"> = </a><a id="change">out.transpose(1</a>, <a id="change">2</a><a id="change">)</a>.contiguous().view(b, -1, self.heads * self.head_dim)
+        out = self.out(out)
+        return out
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        k = self.key(x, dims=([2], [0]))
+        v = self.value(x, dims=([2], [0]))
+
+        q = <a id="change">q.permute(0</a>, 2, <a id="change">1</a>, <a id="change">3</a><a id="change">)</a>
+        k = k.permute(0, 2, 1, 3)
+        v = v.permute(0, 2, 1, 3)
+
+        attn_weights = torch.matmul(q, k.transpose(-2, -1)) / self.scale
+        attn_weights = F.softmax(attn_weights, dim=-1)
+        out = torch.matmul(attn_weights, v)
+        out = <a id="change">out.permute(0</a>, <a id="change">2</a>, 1, <a id="change">3</a><a id="change">)</a>
+
+        out = self.out(out, dims=([2, 3], [0, 1]))
+
+        return out</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/asyml/vision-transformer-pytorch/commit/49517e96e5eccb618d99e3a8909d689020a1612e#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 8455117</div><div id='project'> Project Name: asyml/vision-transformer-pytorch</div><div id='commit'> Commit Name: 49517e96e5eccb618d99e3a8909d689020a1612e</div><div id='time'> Time: 2020-11-14</div><div id='author'> Author: haoc3@andrew.cmu.edu</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: SelfAttention</div><div id='n_method'> N Class Name: SelfAttention</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 96</div><BR>

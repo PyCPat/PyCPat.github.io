@@ -1,0 +1,53 @@
+<html><h3>Pattern ID :3212
+</h3><img src='10246184.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        x = x.unsqueeze(-1)
+        x = self.project_to_steps(x)  &#47&#47 BxCxTxS
+        x = self.dropout(x)
+        x = <a id="change">x.unsqueeze(0).expand(</a>targets.size(0), -1, -1, -1, -1<a id="change">)</a>
+
+        copies, bsz, dim, tsz, steps = x.shape
+        steps = min(steps, tsz - self.offset)
+        predictions = x.new(bsz * copies * (tsz - self.offset + 1) * steps - ((steps + 1) * steps // 2) * copies * bsz)</code></pre><h3>After Change</h3><pre><code class='java'>
+            else:
+                pos_num = (end - start) // copies
+                predictions[start:end] = torch.einsum(
+                    "bct,nbct-&gt;nbt", x[..., :-offset, i], <a id="change">targets[..., offset:]</a>
+                ).flatten()
+                labels[start : start + pos_num] = 1.0
+                if weights is not None:
+                    weights[start : start + pos_num] = 1.0</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/kssteven418/i-bert/commit/3335de5f441ee1b3824e16dcd98db620e40beaba#diff-9b4dd2bdb515c86c631253c805af3041e9bbf4ce7f68af6a1900ef5b4ffa5c5aL411' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10246184</div><div id='project'> Project Name: kssteven418/i-bert</div><div id='commit'> Commit Name: 3335de5f441ee1b3824e16dcd98db620e40beaba</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: alexei.b@gmail.com</div><div id='file'> File Name: fairseq/models/wav2vec.py</div><div id='m_class'> M Class Name: Wav2VecPredictionsModel</div><div id='n_method'> N Class Name: Wav2VecPredictionsModel</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: fairseq/models/wav2vec.py</div><div id='n_file'> N File Name: fairseq/models/wav2vec.py</div><div id='m_start'> M Start Line: 411</div><div id='m_end'> M End Line: 439</div><div id='n_start'> N Start Line: 638</div><div id='n_end'> N End Line: 691</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        g_t = torch.softmax(g_t, dim=-1) / sig_t + self.eps
+
+        &#47&#47 each B x K x T_in
+        g_t = <a id="change">g_t.unsqueeze(2).expand(</a>g_t.size(0),
+                                      g_t.size(1),
+                                      inputs.size(1)<a id="change">)</a>
+        sig_t = sig_t.unsqueeze(2).expand_as(g_t)
+        mu_t_ = mu_t.unsqueeze(2).expand_as(g_t)
+        j = self.J[:g_t.size(0), :, :inputs.size(1)]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 discritize attention weights
+        alpha_t = self.COEF * torch.sum(phi_t, 1)
+        alpha_t = <a id="change">alpha_t[:, 1:]</a> - alpha_t[:, :-1]
+
+        &#47&#47 apply masking
+        if mask is not None:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/5e148038be5971f2c7c811d46a1d7b28c759ecda#diff-1ca76b8dab5cda419aaf68884653245f0428af8e57cdb707fc538936bb59af29L144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10246181</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 5e148038be5971f2c7c811d46a1d7b28c759ecda</div><div id='time'> Time: 2020-01-09</div><div id='author'> Author: root@sp-mlc3-5423-0.mlc</div><div id='file'> File Name: layers/common_layers.py</div><div id='m_class'> M Class Name: GravesAttention</div><div id='n_method'> N Class Name: GravesAttention</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/common_layers.py</div><div id='n_file'> N File Name: layers/common_layers.py</div><div id='m_start'> M Start Line: 162</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 162</div><div id='n_end'> N End Line: 174</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        batch_size, max_num_atoms, _ = h.size()
+        h = self.node_gnn(h, pos_enc,mask)
+
+        readout_query = <a id="change">self.readout_query[None, None, :].expand(</a>(batch_size, -1, -1)<a id="change">)</a>
+        &#47&#47 pooled: [batch_size, 1, hidden_dim]
+        pooled, attention_weights = self.readout_attention(readout_query, h, h, key_padding_mask=mask)
+        pooled = pooled.squeeze() &#47&#47 pooled: [batch_size, hidden_dim]
+        return self.output(pooled)</code></pre><h3>After Change</h3><pre><code class='java'>
+        h = self.node_gnn(h, pos_enc, mask) &#47&#47 [batch_size, max_num_atoms + 1, hidden_dim]
+
+        &#47&#47 the first node is the one that was added for readout
+        return self.output(<a id="change">h[:,0,:]</a>)
+
+
+class TransformerGNN(nn.Module):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/a165907548f15c7571758457fe0867a83ad049dc#diff-e34e919520ffcf961fbcbe6e33d514c3eebea9323c4324e1fecb6c407343d426L49' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 10246182</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: a165907548f15c7571758457fe0867a83ad049dc</div><div id='time'> Time: 2021-07-03</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/transformer.py</div><div id='m_class'> M Class Name: TransformerPlain</div><div id='n_method'> N Class Name: TransformerPlain</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/transformer.py</div><div id='n_file'> N File Name: models/transformer.py</div><div id='m_start'> M Start Line: 51</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 40</div><div id='n_end'> N End Line: 43</div><BR>

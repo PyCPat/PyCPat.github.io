@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if input_mask is None:
+            input_mask = torch.full_like(x, True, device=device, dtype=torch.bool)
+
+        <a id="change">for </a>ind, x in <a id="change">enumerate(</a>args<a id="change">):
+            </a>x, padding = pad_to_multiple(x, self.pad_multiple, dim=self.pad_dim)
+            args[ind] = x
+
+        if padding != 0:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+    def forward(self, *args, **kwargs):
+        q, args = args[0], list(args)
+        b<a id="change">, h, t, _, device</a> = *q.shape, q.device
+
+        input_mask = kwargs.get(&quotinput_mask&quot)
+
+        if input_mask is None:
+            input_mask = torch.full((b<a id="change">, t</a>), True, device=device, dtype=torch.bool)
+
+        args = map(lambda t: pad_to_multiple(t, self.pad_multiple, dim=-2), args)
+        new_mask = pad_to_multiple(input_mask, self.pad_multiple, dim=-1, value=False)</code></pre>
