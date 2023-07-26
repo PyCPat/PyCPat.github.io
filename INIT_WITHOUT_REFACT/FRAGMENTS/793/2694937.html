@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        get_norm = lambda: nn.LayerNorm(channels)
+
+        for index in range(depth):
+            self.layers.append(nn.ModuleList(<a id="change">[</a>get_attn(max(1, dim_k - index*k_reduce_by_layer)), get_norm()<a id="change"></a>]))
+            if include_ff:
+                self.layers.append(nn.ModuleList([get_ff(), get_norm()]))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            attn_layer = get_attn(max(1, dim_k - index*k_reduce_by_layer))
+            ff_layer = get_ff()
+
+            attn_layer<a id="change">, ff_layer = </a><a id="change">map(</a>lambda fn: Residual(PreNorm(channels, fn)), (attn_layer<a id="change">, ff_layer</a>)<a id="change">)</a>
+
+            if include_ff:
+                layers.extend([attn_layer, ff_layer])
+            else:</code></pre>

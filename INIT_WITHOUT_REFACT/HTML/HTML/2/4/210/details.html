@@ -1,0 +1,77 @@
+<html><h3>Pattern ID :210
+</h3><img src='897717.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.use_embedding = exists(context_embedding_features)
+
+        self.to_time_embedding = (
+            <a id="change">nn.Sequential(
+                </a>nn.SiLU(),
+                <a id="change">nn.Linear(
+                    in_features=context_time_features, out_features=out_channels * 2
+                ),
+            )</a>
+            if exists(context_time_features)
+            else None
+        )
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        if self.use_mapping:
+            <a id="change">assert </a>exists(context_mapping_features)
+            self.to_scale_shift = MappingToScaleShift(
+                features=context_mapping_features, channels=out_channels
+            )</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/3c710edf168da06dcc89c23ef12023d0f8b63043#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L147' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 897717</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 3c710edf168da06dcc89c23ef12023d0f8b63043</div><div id='time'> Time: 2022-09-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: ResnetBlock1d</div><div id='n_method'> N Class Name: ResnetBlock1d</div><div id='m_method'> M Method Name: __init__(0)</div><div id='n_method'> N Method Name: __init__(0)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 163</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.pool = pool
+        self.to_latent = nn.Identity()
+
+        self.mlp_head = <a id="change">nn.Sequential(</a>nn.LayerNorm(dim), <a id="change">nn.Linear(</a>dim, num_classes<a id="change">))</a>
+
+    def forward(self, img):
+        x = self.to_patch_embedding(img)
+        b, n, _ = x.shape</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        num_patches = (image_height // patch_height) * (image_width // patch_width)
+        patch_dim = channels * patch_height * patch_width
+        <a id="change">assert </a>pool in {&quotcls&quot, &quotmean&quot}, &quotpool type must be either cls (cls token) or mean (mean pooling)&quot
+
+        self.to_patch_embedding = nn.Sequential(
+            Rearrange(&quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1 = patch_height, p2 = patch_width),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/rl-vig/libfewshot/commit/c1d09286489c7ba5633890a220bd33eebbbc6f04#diff-57f9b0f98c5ceec25f57aa59d6827dec32f524974f80271322cae6fb68c0ea97L102' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 897716</div><div id='project'> Project Name: rl-vig/libfewshot</div><div id='commit'> Commit Name: c1d09286489c7ba5633890a220bd33eebbbc6f04</div><div id='time'> Time: 2021-12-12</div><div id='author'> Author: yangcedrus@gmail.com</div><div id='file'> File Name: core/model/backbone/vit.py</div><div id='m_class'> M Class Name: ViT</div><div id='n_method'> N Class Name: ViT</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/backbone/vit.py</div><div id='n_file'> N File Name: core/model/backbone/vit.py</div><div id='m_start'> M Start Line: 112</div><div id='m_end'> M End Line: 148</div><div id='n_start'> N Start Line: 83</div><div id='n_end'> N End Line: 91</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.use_bottleneck = use_bottleneck
+        self.num_classes = num_classes
+        if self.use_bottleneck:
+            self.bottleneck = <a id="change">nn.Sequential(
+                </a><a id="change">nn.Linear(</a>backbone.out_features, bottleneck_dim<a id="change">)</a>,
+                nn.BatchNorm1d(bottleneck_dim)<a id="change">
+            )</a>
+            self.fc = nn.Linear(bottleneck_dim, num_classes)
+        else:
+            self.bottleneck = nn.Identity()
+            self.fc = nn.Linear(backbone.out_features, num_classes)</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.fc = nn.Linear(backbone.out_features, num_classes)
+        else:
+            self.bottleneck = bottleneck
+            <a id="change">assert </a>bottleneck_dim &gt; 0
+            self.fc = nn.Linear(bottleneck_dim, num_classes)
+
+    @property</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/thuml/transfer-learning-library/commit/713af92b72996eb5ef8ab3e85072a2f06e186050#diff-26235f1e199e9ec307bafc5e948a3249c48bef563fb7c17a8a7772de432bd373L26' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 897718</div><div id='project'> Project Name: thuml/transfer-learning-library</div><div id='commit'> Commit Name: 713af92b72996eb5ef8ab3e85072a2f06e186050</div><div id='time'> Time: 2020-02-29</div><div id='author'> Author: JiangJunguang1123@outlook.com</div><div id='file'> File Name: dalib/models/classifier.py</div><div id='m_class'> M Class Name: Classifier</div><div id='n_method'> N Class Name: Classifier</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalib/models/classifier.py</div><div id='n_file'> N File Name: dalib/models/classifier.py</div><div id='m_start'> M Start Line: 29</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 32</div><div id='n_end'> N End Line: 37</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 create small network that will take features as input
+        &#47&#47 TODO: got to figure out what is input size
+        self.addon_nn = <a id="change">nn.Sequential(
+            </a><a id="change">nn.Linear(</a>feat_size, 4096<a id="change">)</a>, 
+            nn.ReLU(), 
+            nn.Linear(4096, 4096), 
+            nn.ReLU(), 
+            nn.Linear(4096, num_classes)<a id="change">)</a> 
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        &#47&#47 pass through the original network up to the penultimate layer</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, model:Network, num_classes:int=10, stack_num=1)-&gt;None:
+        super(AddonNN, self).__init__()
+
+        <a id="change">assert </a>stack_num in set((1,2,3))
+
+        self.FEAT_SIZE = {1: 32768, 2: 16384, 3: 32768}
+        </code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/microsoft/archai/commit/16a8b37ef55c82318b3c89402322a1a36f063113#diff-78d7ef277c143adf9ed48114cd24da6d03296baf18dcd78c4a97084c8797caa9L12' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 897712</div><div id='project'> Project Name: microsoft/archai</div><div id='commit'> Commit Name: 16a8b37ef55c82318b3c89402322a1a36f063113</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: dedey@microsoft.com</div><div id='file'> File Name: archai/algos/proxynas/addon_nn.py</div><div id='m_class'> M Class Name: AddonNN</div><div id='n_method'> N Class Name: AddonNN</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: archai/algos/proxynas/addon_nn.py</div><div id='n_file'> N File Name: archai/algos/proxynas/addon_nn.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 8</div><div id='n_end'> N End Line: 23</div><BR>

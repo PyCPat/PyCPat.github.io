@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ff = FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+            attn = PreNorm(dim, attn)
+            ff = <a id="change">PreNorm(</a>dim, ff<a id="change">)</a>
+
+            layers.append(nn.ModuleList([attn, ff]))
+
+        execute_type = ReversibleSequence if reversible else SequentialSequence</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert all([local_heads &lt;= heads for local_heads in n_local_attn_heads]), &quotnumber of local attn heads must be less than the maximum number of heads&quot
+
+        layers = nn.ModuleList([])
+        fn_wrapper<a id="change"> = </a><a id="change">partial(</a>PreNorm, dim<a id="change">)</a>
+
+        for ind, local_heads in zip(range(depth), n_local_attn_heads):
+            attn = SelfAttention(dim, depth, max_seq_len, heads, local_heads, window_size, causal = causal, attn_dropout = attn_dropout, dropout = attn_layer_dropout)
+            ff = Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, glu = ff_glu))</code></pre>

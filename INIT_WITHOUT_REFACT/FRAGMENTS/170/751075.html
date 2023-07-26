@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.Sequential()
+        for index, output_size in enumerate(output_sizes):
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">self.layers.add_module(</a>"linear_%d"<a id="change"> % </a>index, nn.LazyLinear(output_size)<a id="change">)</a>
+        &#47&#47 self.layers.add_module("relu", nn.ReLU6())
+
+    def forward(self, input):
+        input = input.to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for index, output_size in enumerate(output_sizes):
+            self._layers_ordered_dict["linear_" + str(index)] = nn.LazyLinear(output_size)
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">if index &lt; (num_layers - 1)</a><a id="change">:
+                </a>self._layers_ordered_dict["relu_" + str(index)] = nn.ReLU()
+        self.layers = nn.Sequential(self._layers_ordered_dict)
+
+    def forward(self, input):</code></pre>

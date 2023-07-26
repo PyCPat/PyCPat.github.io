@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                for size in kernel_size
+            ]
+        )
+        <a id="change">for </a>size, std, mgrid in zip(kernel_size, sigma, meshgrids)<a id="change">:
+            </a>mean = (size - 1) / 2
+            kernel *= 1 / (std * math.sqrt(2 * math.pi)) * \
+                      torch.exp(-((mgrid - mean) / (2 * std)) ** 2)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            kernel_size = [kernel_size] * dim
+        if isinstance(sigma, numbers.Number):
+            sigma = [sigma] * dim
+        <a id="change">self.kernel_f</a> = kernel_f
+
+        &#47&#47 The gaussian kernel is the product of the
+        &#47&#47 gaussian function of each dimension.
+        kernel = 1
+        meshgrids = torch.meshgrid(
+            [
+                torch.arange(size, dtype=torch.float32)
+                for size in kernel_size
+            ]
+        )
+        <a id="change">if self.kernel_f == &quotgaussian&quot</a><a id="change">:
+            </a><a id="change">for </a>size, std, mgrid in zip(kernel_size, sigma, meshgrids)<a id="change">:
+                </a>mean = (size - 1) / 2
+                kernel *= 1 / (std * math.sqrt(2 * math.pi)) * \
+                          torch.exp(-((mgrid - mean) / (2 * std)) ** 2)
+        elif <a id="change">self.kernel_f == &quotlaplacian&quot</a><a id="change">:
+            </a>for size, std, mgrid in zip(kernel_size, sigma, meshgrids):
+                mean = (size - 1) / 2
+                kernel<a id="change"> *= </a>1 / (2 * std) * torch.exp(-torch.abs((mgrid - mean)) / std)
+        else:
+            <a id="change">raise </a>ValueError("Mode must either be gaussian or laplacian.")
+
+        &#47&#47 Make sure sum of values in gaussian kernel equals 1.
+        kernel = kernel / torch.sum(kernel)</code></pre>

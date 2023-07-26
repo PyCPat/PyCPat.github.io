@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.bn1 = nn.GroupNorm(8, outChans)
+        self.do1 = passthrough
+        self.relu1 = ELUCons(elu, outChans)
+        self.relu2 = <a id="change">ELUCons(</a>elu, outChans<a id="change">)</a>
+        if dropout:
+            self.do1 = nn.Dropout3d()
+        self.ops = _make_nConv3d(outChans, nConvs, elu)</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(DownTransition3d, self).__init__()
+        self.down_conv = nn.Conv3d(inChans, outChans, kernel_size=2, stride=2)
+        self.bn1 = nn.GroupNorm(8, outChans)
+        self.drop = <a id="change">nn.Dropout3d(p=prob, inplace=True)</a>
+        self.relu1 = <a id="change">nn.ReLU(inplace=True)</a>
+        self.ops = _make_nConv3d(outChans, nConvs, prob)
+
+    def forward(self, x):</code></pre>

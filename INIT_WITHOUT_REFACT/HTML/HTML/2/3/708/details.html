@@ -1,0 +1,101 @@
+<html><h3>Pattern ID :708
+</h3><img src='2539428.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.block_aggs = nn.ModuleList([])
+        drop_path_rates = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
+        for lix in range(self.num_levels):
+            dpr = drop_path_rates[sum(depths[:lix]):<a id="change">sum(</a>depths[:lix+1]<a id="change">)</a>]
+            self.levels.append(NestLevel(
+                self.num_blocks[lix], self.block_size, self.seq_length, num_heads[lix], depths[lix],
+                embed_dims[lix], mlp_ratio, qkv_bias, drop_rate, attn_drop_rate, dpr, norm_layer,</code></pre><h3>After Change</h3><pre><code class='java'>
+        depths = to_ntuple(num_levels)(depths)
+        self.num_classes = num_classes
+        self.num_features = embed_dims[-1]
+        self.feature_info = <a id="change">[]</a>
+        norm_layer = norm_layer or partial(nn.LayerNorm, eps=1e-6)
+        act_layer = act_layer or nn.GELU
+        self.drop_rate = drop_rate
+        self.num_levels = num_levels
+        if isinstance(img_size, collections.abc.Sequence):
+            assert img_size[0] == img_size[1], &quotModel only handles square inputs&quot
+            img_size = img_size[0]
+        assert img_size % patch_size == 0, &quot`patch_size` must divide `img_size` evenly&quot
+        self.patch_size = patch_size
+
+        &#47&#47 Number of blocks at each level
+        self.num_blocks = (4 ** torch.arange(num_levels)).flip(0).tolist()
+        assert (img_size // patch_size) % math.sqrt(self.num_blocks[0]) == 0, \
+            &quotFirst level blocks don\&quott fit evenly. Check `img_size`, `patch_size`, and `num_levels`&quot
+
+        &#47&#47 Block edge size in units of patches
+        &#47&#47 Hint: (img_size // patch_size) gives number of patches along edge of image. sqrt(self.num_blocks[0]) is the
+        &#47&#47  number of blocks along edge of image
+        self.block_size = int((img_size // patch_size) // math.sqrt(self.num_blocks[0]))
+        
+        &#47&#47 Patch embedding
+        self.patch_embed = PatchEmbed(
+            img_size=img_size, patch_size=patch_size, in_chans=in_chans, embed_dim=embed_dims[0], flatten=False)
+        self.num_patches = self.patch_embed.num_patches
+        self.seq_length = self.num_patches // self.num_blocks[0]
+
+        &#47&#47 Build up each hierarchical level
+        levels = []
+        dp_rates = [x.tolist() for x in torch.linspace(0, drop_path_rate, sum(depths)).split(depths)]
+        prev_dim = None
+        curr_stride = 4
+        for i in range(len(self.num_blocks)):
+            dim = embed_dims[i]
+            levels.append(NestLevel(
+                self.num_blocks[i], self.block_size, self.seq_length, num_heads[i], depths[i], dim, prev_dim,
+                mlp_ratio, qkv_bias, drop_rate, attn_drop_rate, dp_rates[i], norm_layer, act_layer, pad_type=pad_type))
+            self.feature_info<a id="change"> += </a>[dict(num_chs=dim, reduction=curr_stride, module=f&quotlevels.{i}&quot)]
+            prev_dim = dim
+            curr_stride *= 2
+        self.levels = nn.Sequential(*levels)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/feng-lab/pytorch-image-models/commit/81cd6863c8c9515de8884e8a8ea0445ec08b4486#diff-e211399888fa3b741d9160f3d951ddc724fe39ee05d9e83b46718906f0098cbcL216' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2539428</div><div id='project'> Project Name: feng-lab/pytorch-image-models</div><div id='commit'> Commit Name: 81cd6863c8c9515de8884e8a8ea0445ec08b4486</div><div id='time'> Time: 2021-07-05</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: timm/models/nest.py</div><div id='m_class'> M Class Name: Nest</div><div id='n_method'> N Class Name: Nest</div><div id='m_method'> M Method Name: __init__(19)</div><div id='n_method'> N Method Name: __init__(19)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: timm/models/nest.py</div><div id='n_file'> N File Name: timm/models/nest.py</div><div id='m_start'> M Start Line: 216</div><div id='m_end'> M End Line: 301</div><div id='n_start'> N Start Line: 220</div><div id='n_end'> N End Line: 300</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        if use_se:
+            use_ses = [False] * (layers[0] + layers[1]) + \
+                [True] * <a id="change">sum(</a>layers[2:]<a id="change">)</a>
+        else:
+            use_ses = [False] * sum(layers[:])
+
+        for block_idx, (in_c, c, t, s, se) in enumerate(zip(in_channels_group, channels_group, ts, strides, use_ses)):</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        layers = [1, 2, 2, 3, 3, 5]
+        strides = [1, 2, 2, 2, 1, 2]
+        use_ses<a id="change"> = </a><a id="change">[</a>False, False, True, True, True, True<a id="change"></a>]
+
+        layers = [ceil(element * depth_mult) for element in layers]
+        strides = sum([[element] + [1] * (layers[idx] - 1)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/clovaai/rexnet/commit/104f2184754d97b8050f24bdf39f650b3e80cad8#diff-9dbce1d7fc4eb5cf978130006a1cbbbe8b6acdf1aa56edca0bbf7889426d7fa2L111' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2539426</div><div id='project'> Project Name: clovaai/rexnet</div><div id='commit'> Commit Name: 104f2184754d97b8050f24bdf39f650b3e80cad8</div><div id='time'> Time: 2020-08-04</div><div id='author'> Author: dongyoon.han@navercorp.com</div><div id='file'> File Name: rexnetv1.py</div><div id='m_class'> M Class Name: ReXNetV1</div><div id='n_method'> N Class Name: ReXNetV1</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(11)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rexnetv1.py</div><div id='n_file'> N File Name: rexnetv1.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 162</div><div id='n_start'> N Start Line: 133</div><div id='n_end'> N End Line: 172</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            net.append(MultiDilatedConvBlock(num_features, growth_rate[idx], kernel_size=kernel_size, norm=norm, nonlinear=nonlinear, eps=eps))
+        self.net = nn.Sequential(*net)
+
+        self.out_channels = <a id="change">sum(</a>growth_rate<a id="change">)</a>
+        self.eps = eps
+    
+    def forward(self, input):
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if type(growth_rate) is int:
+            assert depth is not None, "Specify `depth`"
+            growth_rate = <a id="change">[</a>growth_rate<a id="change"></a>] * depth
+        elif type(growth_rate) is list:
+            if depth is not None:
+                assert depth == len(growth_rate), "`depth` is different from `len(growth_rate)`"
+            depth = len(growth_rate)
+        else:
+            raise ValueError("Not support growth_rate={}".format(growth_rate))
+        
+        self.growth_rate = growth_rate
+        self.depth = depth
+
+        net = []
+        _in_channels = in_channels
+
+        for idx in range(depth):
+            _out_channels<a id="change"> = </a>sum(growth_rate[idx:])
+            dilation = 2**idx
+            conv_block = ConvBlock2d(_in_channels, _out_channels, kernel_size=kernel_size, stride=1, dilation=dilation, eps=eps)
+            net.append(conv_block)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/8fb5cd5f4f8b4a435d058aef6204904f657abea0#diff-4e490b3e01a8e284b6da0e8730130ffb4c4441e7b12d0571490f0cedc6ae6489L10' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2539420</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 8fb5cd5f4f8b4a435d058aef6204904f657abea0</div><div id='time'> Time: 2021-06-06</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d2net.py</div><div id='m_class'> M Class Name: D2Block</div><div id='n_method'> N Class Name: D2Block</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d2net.py</div><div id='n_file'> N File Name: src/models/d2net.py</div><div id='m_start'> M Start Line: 10</div><div id='m_end'> M End Line: 40</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 42</div><BR>

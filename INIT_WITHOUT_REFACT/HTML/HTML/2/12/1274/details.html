@@ -1,0 +1,79 @@
+<html><h3>Pattern ID :1274
+</h3><img src='3684056.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		img_size = config[&quotimg_shape&quot][0]
+
+		dim_in = 2**14 // img_size
+		blocks<a id="change"> = []</a>
+		blocks += [nn.Conv2d(3, dim_in, 3, 1, 1)]
+
+		repeat_num = int(np.log2(img_size)) - 2
+		<a id="change">for _</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			</a>dim_out = min(dim_in*2, max_conv_dim)
+			blocks<a id="change"> += [</a>ResBlk(dim_in, dim_out, downsample=True)<a id="change"></a>]
+			dim_in = dim_out
+
+		blocks += [nn.LeakyReLU(0.2)]</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.n_filters = 64
+
+		layers = []
+		<a id="change">for i</a> in <a id="change">range(4</a><a id="change">):
+			</a>in_channels = self.n_filters * (2 ** (i - 1)) if i &gt; 0 else 3
+			out_channels = 2 * in_channels if i &gt; 0 else self.n_filters
+
+			layers += <a id="change">[
+				</a>nn.ReflectionPad2d(padding=1),
+				nn.Conv2d(in_channels, out_channels, kernel_size=4, stride=2),
+				nn.LeakyReLU(negative_slope=0.2, inplace=True)<a id="change"></a>
+			]
+
+		layers += [
+			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/cd6226565b0cb3d4ca065160d7f47c976ea9e5d4#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L188' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3684056</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: cd6226565b0cb3d4ca065160d7f47c976ea9e5d4</div><div id='time'> Time: 2020-05-23</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 188</div><div id='m_end'> M End Line: 210</div><div id='n_start'> N Start Line: 192</div><div id='n_end'> N End Line: 205</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        self.conv1 = nn.Sequential(nn.ReflectionPad2d(1), nn.Conv2d(in_channels, num_init_features, 3), nn.ReLU())
+
+        basic_block_layer<a id="change"> = []</a>
+
+        <a id="change">for _</a> in <a id="change">range(</a>n_basic_block<a id="change">):
+            </a>basic_block_layer<a id="change"> += [</a>ResidualInResidualDenseBlock(num_init_features, growth_rate)<a id="change"></a>]
+
+        self.basic_block = nn.Sequential(*basic_block_layer)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 23 ResidualInResidualDenseBlock layer
+        rrdb_layers = []
+        <a id="change">for _</a> in <a id="change">range(23</a><a id="change">):
+            </a>rrdb_layers += <a id="change">[</a>ResidualInResidualDenseBlock(64, 32)<a id="change"></a>]
+        self.residual_residual_dense_blocks = nn.Sequential(*rrdb_layers)
+
+        &#47&#47 Second conv layer post residual blocks</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lornatang/esrgan-pytorch/commit/8ef58f0f8458d618a99fffa07433927c9b9ef70f#diff-922d5955c025c76c1ff83c159f3370bb61503752c2b24aa0d2bb20c38bd37596L99' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3684057</div><div id='project'> Project Name: lornatang/esrgan-pytorch</div><div id='commit'> Commit Name: 8ef58f0f8458d618a99fffa07433927c9b9ef70f</div><div id='time'> Time: 2020-10-12</div><div id='author'> Author: liuchangyu1111@gmail.com</div><div id='file'> File Name: esrgan_pytorch/model.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: esrgan_pytorch/model.py</div><div id='n_file'> N File Name: esrgan_pytorch/model.py</div><div id='m_start'> M Start Line: 99</div><div id='m_end'> M End Line: 125</div><div id='n_start'> N Start Line: 181</div><div id='n_end'> N End Line: 210</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		self.n_filters = 64
+
+		layers = []
+		<a id="change">for i</a> in <a id="change">range(4</a><a id="change">):
+			</a>in_channels = self.n_filters * (2 ** (i - 1)) if i &gt; 0 else 3
+			out_channels = 2 * in_channels if i &gt; 0 else self.n_filters
+
+			layers += <a id="change">[
+				</a>nn.ReflectionPad2d(padding=1),
+				nn.Conv2d(in_channels, out_channels, kernel_size=4, stride=2),
+				nn.LeakyReLU(negative_slope=0.2, inplace=True)<a id="change"></a>
+			]
+
+		layers += [
+			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		img_size = config[&quotimg_shape&quot][0]
+
+		dim_in = 256  &#47&#472**14 // img_size
+		blocks<a id="change"> = []</a>
+		blocks += [nn.Conv2d(3, dim_in, 3, 1, 1)]
+
+		repeat_num = int(np.log2(img_size)) - 2
+		<a id="change">for _</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			</a>dim_out = min(dim_in*2, max_conv_dim)
+			blocks<a id="change"> += [</a>ResBlk(dim_in, dim_out, downsample=True)<a id="change"></a>]
+			dim_in = dim_out
+
+		blocks += [nn.LeakyReLU(0.2)]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/fa020664bf0dcbd11e72953117146be2cdbc3b48#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L189' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3684052</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: fa020664bf0dcbd11e72953117146be2cdbc3b48</div><div id='time'> Time: 2020-05-29</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 193</div><div id='m_end'> M End Line: 206</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 103</div><BR>

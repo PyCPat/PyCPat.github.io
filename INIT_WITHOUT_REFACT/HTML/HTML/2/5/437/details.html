@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :437
+</h3><img src='1411861.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.merge_count = int(math.log2(merge_count))
+
+        self.norm_factor = math.sqrt(
+            <a id="change">math.sqrt(</a>self.config.hidden_size<a id="change"> // </a>self.config.heads<a id="change">)</a>)
+        self.qkv_merging = qkv_merging
+
+        if self.config.scale_attn_by_inverse_layer_idx is True:</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.q_groups = q_groups
+        self.merge_count = int(math.log2(merge_count))
+
+        self.norm_factor = <a id="change">math.sqrt(</a>self.config.hidden_size<a id="change"> // </a>self.config.heads<a id="change">)</a>
+        if not config.use_mup:
+            self.norm_factor<a id="change"> = </a>math.sqrt(self.norm_factor)
+        self.qkv_merging = qkv_merging
+
+        if self.config.scale_attn_by_inverse_layer_idx is True:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/microsoft/deepspeed/commit/d9b788d773ce97281ee63064cc99993cb82397e2#diff-88a3148746124b4093264a91ae8cac5be0bb592bfb2868d5df944836e55d93dbL64' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1411861</div><div id='project'> Project Name: microsoft/deepspeed</div><div id='commit'> Commit Name: d9b788d773ce97281ee63064cc99993cb82397e2</div><div id='time'> Time: 2022-12-28</div><div id='author'> Author: jerasley@microsoft.com</div><div id='file'> File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='m_class'> M Class Name: DeepSpeedSelfAttention</div><div id='n_method'> N Class Name: DeepSpeedSelfAttention</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='n_file'> N File Name: deepspeed/ops/transformer/inference/ds_attention.py</div><div id='m_start'> M Start Line: 64</div><div id='m_end'> M End Line: 65</div><div id='n_start'> N Start Line: 64</div><div id='n_end'> N End Line: 67</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        alphas_cumprod = diffusion.alphas_cumprod
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], pad=(1, 0), value=1.0)
+
+        self.register("sqrt_recip_alphas_cumprod", <a id="change">torch.sqrt(</a>1.0<a id="change"> / </a>alphas_cumprod<a id="change">)</a>)
+        self.register(
+            "sqrt_recipm1_alphas_cumprod", torch.sqrt(1.0 / alphas_cumprod - 1)
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+        alphas_cumprod = diffusion.alphas_cumprod
+        alphas_cumprod_prev = F.pad(alphas_cumprod[:-1], pad=(1, 0), value=1.0)
+
+        sqrt_recip_alphas_cumprod<a id="change"> = </a><a id="change">torch.sqrt(</a>1.0<a id="change"> / </a>alphas_cumprod<a id="change">)</a>
+        self.register("sqrt_recip_alphas_cumprod", sqrt_recip_alphas_cumprod)
+        sqrt_recipm1_alphas_cumprod = torch.sqrt(1.0 / alphas_cumprod - 1)
+        self.register("sqrt_recipm1_alphas_cumprod", sqrt_recipm1_alphas_cumprod)
+        &#47&#47 calculations for posterior q(x_{t-1} | x_t, x_0)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/a009473c67fe6f2f852bbf6ce03d6715e5fd36c7#diff-b786f8c498a43ec3a2bd02f68a2502560efb8ffc5e06c73ebdc47a67dadf8a8dL86' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1411860</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: a009473c67fe6f2f852bbf6ce03d6715e5fd36c7</div><div id='time'> Time: 2022-07-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='m_class'> M Class Name: DiffusionSampler</div><div id='n_method'> N Class Name: DiffusionSampler</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='m_start'> M Start Line: 97</div><div id='m_end'> M End Line: 119</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 124</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.register("alphas_cumprod", torch.cumprod(self.alphas, axis=0))
+        self.register("sqrt_alphas_cumprod", torch.sqrt(self.alphas_cumprod))
+        self.register(
+            "sqrt_one_minus_alphas_cumprod", <a id="change">torch.sqrt(</a>1.0<a id="change"> - </a>self.alphas_cumprod<a id="change">)</a>
+        )
+        self.register(
+            "loss_weight",
+            (loss_weight_k + self.alphas_cumprod / (1 - self.alphas_cumprod))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.register("alphas_cumprod", alphas_cumprod)
+        sqrt_alphas_cumprod = torch.sqrt(alphas_cumprod)
+        self.register("sqrt_alphas_cumprod", sqrt_alphas_cumprod)
+        sqrt_one_minus_alphas_cumprod<a id="change"> = </a><a id="change">torch.sqrt(</a>1.0<a id="change"> - </a>alphas_cumprod<a id="change">)</a>
+        self.register("sqrt_one_minus_alphas_cumprod", sqrt_one_minus_alphas_cumprod)
+        loss_weight = (
+            loss_weight_k + alphas_cumprod / (1 - alphas_cumprod)
+        ) ** -loss_weight_gamma</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/a009473c67fe6f2f852bbf6ce03d6715e5fd36c7#diff-b786f8c498a43ec3a2bd02f68a2502560efb8ffc5e06c73ebdc47a67dadf8a8dL30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1411865</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: a009473c67fe6f2f852bbf6ce03d6715e5fd36c7</div><div id='time'> Time: 2022-07-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='m_class'> M Class Name: Diffusion</div><div id='n_method'> N Class Name: Diffusion</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/diffusion/ddpm.py</div><div id='m_start'> M Start Line: 45</div><div id='m_end'> M End Line: 56</div><div id='n_start'> N Start Line: 45</div><div id='n_end'> N End Line: 60</div><BR>

@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :699
+</h3><img src='2522432.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.encoder_layers.append(nn.ModuleList([
+                FrequencyAttention(K = K, dropout = dropout),
+                MHESA(dim = model_dim, dim_head = dim_head, heads = heads, dropout = dropout),
+                <a id="change">nn.LayerNorm(</a>model_dim<a id="change">)</a>,
+                FeedForwardBlock(dim = model_dim) if not is_last_layer else None,
+                Level(time_features = time_features, model_dim = model_dim)
+            ]))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.growth_dampening_module = GrowthDampening(dim = model_dim, heads = heads)
+
+        self.latents_to_time_features<a id="change"> = </a><a id="change">nn.Linear(</a>model_dim, time_features<a id="change">)</a>
+        self.level_stack = LevelStack()
+
+    def forward(self, x, *, num_steps_forecast):
+        z = self.embed(x)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/etsformer-pytorch/commit/4dad061c0b0b6fc6d2515d00d6e0519a8dd384d4#diff-b4b8264f25f5dfdaf86bc5e5eff19dd88e54974eb3ebdbb09741da0265b56130L259' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2522432</div><div id='project'> Project Name: lucidrains/etsformer-pytorch</div><div id='commit'> Commit Name: 4dad061c0b0b6fc6d2515d00d6e0519a8dd384d4</div><div id='time'> Time: 2022-03-14</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_class'> M Class Name: ETSFormer</div><div id='n_method'> N Class Name: ETSFormer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='n_file'> N File Name: etsformer_pytorch/etsformer_pytorch.py</div><div id='m_start'> M Start Line: 259</div><div id='m_end'> M End Line: 259</div><div id='n_start'> N Start Line: 273</div><div id='n_end'> N End Line: 290</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                )
+
+            &#47&#47 transform residual for flattened_grn
+            self.residual_norm = <a id="change">nn.LayerNorm(</a>self.num_inputs<a id="change">)</a>
+
+        self.single_variable_grns = nn.ModuleDict()
+        for name, input_size in self.input_sizes.items():
+            if name in single_variable_grns:</code></pre><h3>After Change</h3><pre><code class='java'>
+                if name in prescalers:
+                    self.prescalers[name] = prescalers[name]
+                else:
+                    self.prescalers[name]<a id="change"> = </a><a id="change">nn.Linear(</a>1, input_size<a id="change">)</a>  &#47&#47 reals need to be first scaled up
+                self.single_variable_grns[name] = GatedResidualNetwork(
+                    input_size,
+                    self.hidden_size,  &#47&#47 alternative: min(input_size, self.hidden_size),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jdb78/pytorch-forecasting/commit/4b0e3005131eafedd8fe0d16081984f90c284a62#diff-9a8b783572f864adbf7d350ca9150d50513b8e1d871585f96c7310e6336d1c87L247' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2522430</div><div id='project'> Project Name: jdb78/pytorch-forecasting</div><div id='commit'> Commit Name: 4b0e3005131eafedd8fe0d16081984f90c284a62</div><div id='time'> Time: 2020-08-12</div><div id='author'> Author: beitner.jan@bcg.com</div><div id='file'> File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='m_class'> M Class Name: VariableSelectionNetwork</div><div id='n_method'> N Class Name: VariableSelectionNetwork</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='n_file'> N File Name: pytorch_forecasting/models/temporal_fusion_transformer/sub_modules.py</div><div id='m_start'> M Start Line: 261</div><div id='m_end'> M End Line: 297</div><div id='n_start'> N Start Line: 281</div><div id='n_end'> N End Line: 334</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        encoder_layer = nn.TransformerEncoderLayer(d_model=hidden_dim, nhead=nheads)
+        self.transformer = nn.TransformerEncoder(encoder_layer, num_encoder_layers)
+        self.mlp_head = nn.Sequential(
+            <a id="change">nn.LayerNorm(</a>hidden_dim*64<a id="change">)</a>,
+            nn.Linear(hidden_dim*64, hidden_dim*32),
+            nn.LayerNorm(hidden_dim * 32),
+            nn.Linear(hidden_dim * 32, num_classes)</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        self.dropout = nn.Dropout(dropout)
+        self.classifier<a id="change"> = </a><a id="change">nn.Linear(</a>mlp_head_dims[1], num_classes<a id="change">)</a>
+
+    def forward(self, inputs):
+        x = self.signal_encoder(inputs)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kolaszko/haptic_transformer/commit/aed59ae5263f8f3490b9ead581d7b112589a9f27#diff-9a02f4e72f98b173cff993e361b8c108ffdd07649fe9a77c6611a0c5af9ecb4aL9' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2522428</div><div id='project'> Project Name: kolaszko/haptic_transformer</div><div id='commit'> Commit Name: aed59ae5263f8f3490b9ead581d7b112589a9f27</div><div id='time'> Time: 2021-03-02</div><div id='author'> Author: mikolaj.lysakowski.bk@gmail.com</div><div id='file'> File Name: models/haptr.py</div><div id='m_class'> M Class Name: HAPTR</div><div id='n_method'> N Class Name: HAPTR</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/haptr.py</div><div id='n_file'> N File Name: models/haptr.py</div><div id='m_start'> M Start Line: 12</div><div id='m_end'> M End Line: 22</div><div id='n_start'> N Start Line: 7</div><div id='n_end'> N End Line: 28</div><BR>

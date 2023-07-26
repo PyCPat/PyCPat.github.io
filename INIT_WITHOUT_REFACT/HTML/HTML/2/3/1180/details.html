@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :1180
+</h3><img src='3327026.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ))
+        input_channel = output_channel
+        for t, c, n, s in setting:
+            output_channel = <a id="change">int(</a>c<a id="change"> * </a>width_mult<a id="change">)</a>
+            for i in range(n):
+                self.features.append(InvertedResidual(input_channel, output_channel, s, expand_ratio=t))
+                input_channel = output_channel
+        self.features.append(conv_1x1_bn(input_channel, last_channel))</code></pre><h3>After Change</h3><pre><code class='java'>
+                self.features.append(InvertedResidual(input_channel, output_channel, s, expand_ratio=t,free=t_free))
+                input_channel = output_channel
+        self.features.append(
+            <a id="change">nn.Sequential(
+                </a>nn.Conv2d(input_channel * t_free, last_channel, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(last_channel),
+                nn.ReLU6(inplace=True)<a id="change">
+            )</a>
+        )
+        self.features = nn.Sequential(*self.features)
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.2),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/fxmeng/rmnet/commit/fc5f0bab48cf43723d58ad7e34ac2fe4f4ec82d7#diff-2db0716bd61eb15ec95c16ce01b6a76f30fa33c3e9504120814679bf4d626fc0L122' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3327026</div><div id='project'> Project Name: fxmeng/rmnet</div><div id='commit'> Commit Name: fc5f0bab48cf43723d58ad7e34ac2fe4f4ec82d7</div><div id='time'> Time: 2022-01-05</div><div id='author'> Author: 60565778+fxmeng@users.noreply.github.com</div><div id='file'> File Name: models/rmobilenet.py</div><div id='m_class'> M Class Name: RMobileNet</div><div id='n_method'> N Class Name: RMobileNet</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/rmobilenet.py</div><div id='n_file'> N File Name: models/rmobilenet.py</div><div id='m_start'> M Start Line: 136</div><div id='m_end'> M End Line: 154</div><div id='n_start'> N Start Line: 122</div><div id='n_end'> N End Line: 152</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.period = period
+        inp = 1
+        for l in range(4):
+            out = <a id="change">int(</a>2 ** (5<a id="change"> + </a>l + 1)<a id="change">)</a>
+            layer += [
+                nn.utils.weight_norm(nn.Conv2d(inp, out, kernel_size=(5, 1), stride=(3, 1))),
+                nn.LeakyReLU(0.2)
+            ]</code></pre><h3>After Change</h3><pre><code class='java'>
+                nn.utils.weight_norm(nn.Conv2d(128, 256, kernel_size=(5, 1), stride=(3, 1))),
+                nn.LeakyReLU(0.2, inplace=True),
+            ),
+            <a id="change">nn.Sequential(
+                </a>nn.utils.weight_norm(nn.Conv2d(256, 512, kernel_size=(5, 1), stride=(3, 1))),
+                nn.LeakyReLU(0.2, inplace=True)<a id="change">,
+            )</a>,
+            nn.Sequential(
+                nn.utils.weight_norm(nn.Conv2d(512, 1024, kernel_size=(5, 1))),
+                nn.LeakyReLU(0.2, inplace=True),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/7b7c5d635fc42be520f86524c6d3c79d7ef48d39#diff-01777bc1a956fe851406465c2565783da4b44574ab3626ed1651d6f230ec6ec6L7' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3327024</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: 7b7c5d635fc42be520f86524c6d3c79d7ef48d39</div><div id='time'> Time: 2021-04-08</div><div id='author'> Author: rishikksh20@gmail.com</div><div id='file'> File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='m_class'> M Class Name: PeriodDiscriminator</div><div id='n_method'> N Class Name: PeriodDiscriminator</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='n_file'> N File Name: TTS/vocoder/models/hifigan_mpd_discriminator.py</div><div id='m_start'> M Start Line: 9</div><div id='m_end'> M End Line: 24</div><div id='n_start'> N Start Line: 11</div><div id='n_end'> N End Line: 33</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Create progression blocks and rgb layers
+        channels = in_channels
+        for idx in range(<a id="change">int(</a>log2(img_size<a id="change">/</a>4)<a id="change">)</a> + 1):
+            conv_in = int(in_channels * factors[idx])
+            conv_out = channels
+            self.rgb_layers.append(WSConv2d(img_channels, conv_in, kernel_size=1, stride=1, padding=0))</code></pre><h3>After Change</h3><pre><code class='java'>
+        )  &#47&#47 down sampling using avg pool
+
+        &#47&#47 this is the block for 4x4 input size
+        self.final_block = <a id="change">nn.Sequential(
+            &#47&#47 +1 to in_channels because we concatenate from MiniBatch std
+            </a>WSConv2d(in_channels + 1, in_channels, kernel_size=3, padding=1),
+            nn.LeakyReLU(0.2),
+            WSConv2d(in_channels, in_channels, kernel_size=4, padding=0, stride=1),
+            nn.LeakyReLU(0.2),
+            WSConv2d(
+                in_channels, 1, kernel_size=1, padding=0, stride=1
+            )<a id="change">,  &#47&#47 we use this instead of linear layer
+        )</a>
+
+    def fade_in(self, alpha, downscaled, out):
+        Used to fade in downscaled using avg pooling and output from CNN
+        &#47&#47 alpha should be scalar within [0, 1], and upscale.shape == generated.shape</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/aladdinpersson/machine-learning-collection/commit/2c53205f12824a4b160fb6e727e960ed83faa563#diff-4ddfc8c165307f6845d1eb99d3b8e232f97d0f166a33bac4109e76db6b8515afL133' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3327034</div><div id='project'> Project Name: aladdinpersson/machine-learning-collection</div><div id='commit'> Commit Name: 2c53205f12824a4b160fb6e727e960ed83faa563</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: aladdin.persson@hotmail.com</div><div id='file'> File Name: ML/Pytorch/GANs/ProGAN/model.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: ML/Pytorch/GANs/ProGAN/model.py</div><div id='n_file'> N File Name: ML/Pytorch/GANs/ProGAN/model.py</div><div id='m_start'> M Start Line: 133</div><div id='m_end'> M End Line: 149</div><div id='n_start'> N Start Line: 140</div><div id='n_end'> N End Line: 173</div><BR>

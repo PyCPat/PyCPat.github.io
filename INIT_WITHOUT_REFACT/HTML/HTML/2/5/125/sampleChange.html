@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.conv2d_7b = BasicConv2d(2080, self.num_features, kernel_size=1, stride=1)
+        self.feature_info += [dict(num_chs=self.num_features, reduction=32, module=&quotconv2d_7b&quot)]
+
+        self.global_pool = <a id="change">SelectAdaptivePool2d(pool_type=global_pool)</a>
+        &#47&#47 NOTE some variants/checkpoints for this model may have &quotlast_linear&quot as the name for the FC
+        self.classif<a id="change"> = </a>nn.Linear(self.num_features<a id="change"> * self.global_pool.feat_mult()</a>, num_classes)
+
+    def get_classifier(self):
+        return self.classif</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.conv2d_7b = BasicConv2d(2080, self.num_features, kernel_size=1, stride=1)
+        self.feature_info += [dict(num_chs=self.num_features, reduction=32, module=&quotconv2d_7b&quot)]
+
+        self.global_pool<a id="change">, self.classif</a> = create_classifier(self.num_features, self.num_classes, pool_type=global_pool)
+
+    def get_classifier(self):
+        return self.classif</code></pre>

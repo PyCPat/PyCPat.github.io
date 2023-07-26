@@ -1,0 +1,103 @@
+<html><h3>Pattern ID :1512
+</h3><img src='4197327.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        if bilinear_upsample:
+            upsample_klass = partial(InterpolateUpsample, mode = &quotbilinear&quot)
+        elif <a id="change"></a>nearest_neighbor_upsample<a id="change">:
+            </a>upsample_klass<a id="change"> = </a>partial(InterpolateUpsample, mode = &quotnearest&quot)
+        else:
+            upsample_klass<a id="change"> = </a>Upsample
+
+        &#47&#47 upsampling layers
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            skip_connect_dims.append(current_dim)
+
+            self.downs.append(<a id="change">nn.ModuleList([
+                </a>pre_downsample,
+                ResnetBlock(current_dim, current_dim, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(current_dim, current_dim, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = current_dim, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),
+                downsample_klass(current_dim, dim_out) if not memory_efficient and not is_last else None<a id="change"></a>,
+            ]<a id="change">)</a>)
+
+        &#47&#47 middle layers
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/36bdefca0e8670ca42b39236315121b703b9533f#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L1148' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4197327</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: 36bdefca0e8670ca42b39236315121b703b9533f</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1178</div><div id='m_end'> M End Line: 1250</div><div id='n_start'> N Start Line: 1148</div><div id='n_end'> N End Line: 1221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                raise TypeError("Unknown Type:\t{}".format(norm))
+        self.norm0 = norm(out_channels)
+
+        <a id="change">if </a>self.concat<a id="change">:
+            </a>if self.mode == &quotres_mask&quot:
+                k= 2*out_channels + 1
+            else:
+                k = 2*out_channels
+            self.conv1<a id="change"> = </a>conv3x3(k, out_channels)
+            self.norm1<a id="change"> = </a>norm(out_channels)
+        else:
+            self.conv1 = conv3x3(out_channels, out_channels)
+            self.norm1 = norm(out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 residual structure
+        self.conv2 = []
+        self.conv3 = <a id="change">[]</a>
+        for i in range(blocks):
+            self.conv2.append(
+                nn.Sequential(*[
+                    nn.Conv2d(out_channels // 2 + 1, out_channels // 4, 5, 1, 2),
+                    nn.ReLU(True),
+                    nn.Conv2d(out_channels // 4, 1, 5, 1, 2),
+                    nn.Sigmoid()
+                ])
+            )
+            self.conv3.append(conv3x3(out_channels // 2, out_channels))
+        
+        self.bn = []
+        for _ in range(blocks):
+            self.bn.append(norm(out_channels))
+        self.bn = nn.ModuleList(self.bn)
+        self.conv2 = nn.ModuleList(self.conv2)
+        self.conv3 = <a id="change">nn.ModuleList(</a>self.conv3<a id="change">)</a>
+        self.act = act
+
+    def forward(self, from_up, from_down, mask=None):
+        from_up = self.act(self.norm0(self.up_conv(from_up)))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-21665f19cd9acd8db0bae320b79f986ec6a79eabb60d74c4c2e813314554df4aL205' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4197330</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/blocks.py</div><div id='m_class'> M Class Name: MBEBlock</div><div id='n_method'> N Class Name: MBEBlock</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(10)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/blocks.py</div><div id='n_file'> N File Name: src/networks/blocks.py</div><div id='m_start'> M Start Line: 208</div><div id='m_end'> M End Line: 235</div><div id='n_start'> N Start Line: 208</div><div id='n_end'> N End Line: 248</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.out_channels  =out_channels
+        self.dim = dim
+
+        <a id="change">if </a>self.dim ==2<a id="change">:
+            </a>make_conv<a id="change"> = </a>ConvNormActive2D
+        elif dim ==3:
+            make_conv<a id="change"> = </a>ConvNormActive3D
+        else:
+            raise ValueError(&quotdim should be 2 or 3&quot)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.conv_list.append(ConvNormActive(in_channels, out_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(out_channels, out_channels, kernel_size=3, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim))
+        elif self.type == &quot131&quot:
+            self.conv_list = <a id="change">nn.ModuleList([]</a><a id="change">)</a>
+            self.conv_list.append(ConvNormActive(in_channels, middle_channels, kernel_size=1, norm=norm, active=active, gn_c = gn_c, dim = dim, padding=0))
+            self.conv_list.append(ConvNormActive(middle_channels, middle_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(middle_channels, out_channels, kernel_size=1, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim, padding=0))
+        else:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/b2bf89e72b262002500e8271f984d6f8afac7eb3#diff-fd72c83d7a844cbbdef927405a10ec8803d51b0f46ea91e27f31e7b97e5e3c1cL362' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4197335</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: b2bf89e72b262002500e8271f984d6f8afac7eb3</div><div id='time'> Time: 2022-10-25</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/BaseModule.py</div><div id='m_class'> M Class Name: ResBlock</div><div id='n_method'> N Class Name: ResBlock</div><div id='m_method'> M Method Name: __init__(9)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/BaseModule.py</div><div id='n_file'> N File Name: wama_modules/BaseModule.py</div><div id='m_start'> M Start Line: 362</div><div id='m_end'> M End Line: 384</div><div id='n_start'> N Start Line: 357</div><div id='n_end'> N End Line: 389</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        get_attn = lambda: SinkhornSelfAttention(dim, causal = causal, heads = heads, buckets = buckets, kv_buckets = kv_buckets, non_permutative = non_permutative, sinkhorn_iter = sinkhorn_iter, n_sortcut = n_sortcut, temperature = temperature, attn_dropout = attn_dropout, dropout = attn_layer_dropout, attn_sort_net = attn_sort_net)
+        get_ff = lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+        <a id="change">if </a>weight_tie<a id="change">:
+            </a>get_attn<a id="change"> = </a>cache_fn(get_attn)
+            get_ff<a id="change"> = </a>cache_fn(get_ff)
+
+        for _ in range(depth):
+            layers.append(nn.ModuleList([</code></pre><h3>After Change</h3><pre><code class='java'>
+            ]))
+
+            if receives_context:
+                layers.append(<a id="change">nn.ModuleList([
+                    </a>PreNorm(nn.LayerNorm, dim, get_attn_context()),
+                    PreNorm(nn.LayerNorm, dim, Chunk(ff_chunks, get_ff_context(), along_dim=1))<a id="change"></a>
+                ]<a id="change">)</a>)
+
+        execute_type = Reversible if reversible else Sequential
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/sinkhorn-transformer/commit/c2662a20cb783efd3351936cfabc83131060a2a6#diff-2ed19ae7feb552dc52b4c7a7c89a078c0fd371c922789f894af09ff01f35eccbL543' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4197336</div><div id='project'> Project Name: lucidrains/sinkhorn-transformer</div><div id='commit'> Commit Name: c2662a20cb783efd3351936cfabc83131060a2a6</div><div id='time'> Time: 2020-04-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_class'> M Class Name: SinkhornTransformer</div><div id='n_method'> N Class Name: SinkhornTransformer</div><div id='m_method'> M Method Name: __init__(20)</div><div id='n_method'> N Method Name: __init__(19)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='n_file'> N File Name: sinkhorn_transformer/sinkhorn_transformer.py</div><div id='m_start'> M Start Line: 547</div><div id='m_end'> M End Line: 554</div><div id='n_start'> N Start Line: 546</div><div id='n_end'> N End Line: 576</div><BR>

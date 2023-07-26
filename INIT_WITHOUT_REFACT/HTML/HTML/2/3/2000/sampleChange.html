@@ -1,0 +1,43 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.use_res_connect = self.stride == 1 and in_channels == out_channels
+
+        self.inv_block = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(in_channels, in_channels * expand_ratio, 1, 1, 0, bias=False),
+            nn.BatchNorm2d(in_channels * expand_ratio),
+            nn.PReLU(),
+
+            nn.Conv2d(in_channels * expand_ratio, in_channels * expand_ratio, 3, stride, 1,
+                      groups=in_channels * expand_ratio, bias=False),
+            nn.BatchNorm2d(in_channels * expand_ratio),
+            nn.PReLU(),
+
+            nn.Conv2d(in_channels * expand_ratio, out_channels, 1, 1, 0, bias=False),
+            nn.BatchNorm2d(out_channels),
+            SELayer(out_channels, 8, nn.PReLU, outp_size)<a id="change">
+        )</a>
+
+    def forward(self, x):
+        if self.use_res_connect:
+            return x + self.inv_block(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        hidden_dim = int(round(inp * expand_ratio))
+        self.use_res_connect = self.stride == 1 and inp == oup
+
+        layers = <a id="change">[]</a>
+        if expand_ratio != 1:
+            &#47&#47 pw
+            layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
+        <a id="change">layers.extend(</a>[
+            &#47&#47 dw
+            ConvBNReLU(hidden_dim, hidden_dim, stride=stride, groups=hidden_dim),
+            &#47&#47 pw-linear
+            nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+            nn.BatchNorm2d(oup),
+        ]<a id="change">)</a>
+        self.conv = nn.Sequential(*layers)
+
+    def forward(self, x):
+        if self.use_res_connect:</code></pre>

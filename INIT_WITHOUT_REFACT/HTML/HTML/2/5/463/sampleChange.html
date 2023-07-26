@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
+            self.device = diffusion_prior_device
+        else:
+            self.device = accelerator.device<a id="change"> if </a><a id="change">exists(</a>accelerator<a id="change">) else </a>device
+            diffusion_prior.to(self.device)
+
+        &#47&#47 save model</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 mixed precision checks
+
+        <a id="change">if </a>(
+            exists(self.accelerator) 
+            and self.accelerator.distributed_type == DistributedType.DEEPSPEED 
+            and self.diffusion_prior.clip is not None
+            )<a id="change">:
+            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
+            </a>cast_type_map = {
+                "fp16": torch.half,
+                "bf16": torch.bfloat16,
+                "no": torch.float
+            }
+            precision_type<a id="change"> = </a>cast_type_map[accelerator.mixed_precision]
+            <a id="change">assert </a>precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
+            self.diffusion_prior.clip.to(precision_type)
+
+        &#47&#47 optimizer stuff</code></pre>

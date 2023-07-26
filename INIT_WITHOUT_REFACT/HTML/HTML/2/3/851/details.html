@@ -1,0 +1,52 @@
+<html><h3>Pattern ID :851
+</h3><img src='2937903.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.master_node = args.master_node
+        self.master_dim = args.master_dim
+
+        self.dropout_layer = <a id="change">nn.Dropout(p=self.dropout)</a>
+        self.W_i = nn.Linear(get_atom_fdim(args) + get_bond_fdim(args), args.hidden_size, bias=False)
+        if self.message_attention:
+            self.num_heads = args.message_attention_heads
+            self.W_h = nn.Linear(self.num_heads*args.hidden_size, args.hidden_size, bias=False)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if self.deepset:
+            self.W_s2s_a = nn.Linear(args.hidden_size, args.hidden_size, bias=self.bias)
+            self.W_s2s_b<a id="change"> = </a><a id="change">nn.Linear(</a>args.hidden_size, args.hidden_size<a id="change">, bias=self.bias)</a>
+
+        if self.attention:
+            self.W_a = nn.Linear(args.hidden_size, args.hidden_size, bias=self.bias)
+            self.W_b = nn.Linear(args.hidden_size, args.hidden_size)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/aamini/chemprop/commit/ddcdae2edb70f359d1d98863532cfe51709b1391#diff-91b4e1ef89fbd915183928818e07287d60ba2d013478779025955bb686f6410dL272' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937903</div><div id='project'> Project Name: aamini/chemprop</div><div id='commit'> Commit Name: ddcdae2edb70f359d1d98863532cfe51709b1391</div><div id='time'> Time: 2018-09-30</div><div id='author'> Author: swansonk.14@gmail.com</div><div id='file'> File Name: mpn.py</div><div id='m_class'> M Class Name: MPN</div><div id='n_method'> N Class Name: MPN</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mpn.py</div><div id='n_file'> N File Name: mpn.py</div><div id='m_start'> M Start Line: 275</div><div id='m_end'> M End Line: 301</div><div id='n_start'> N Start Line: 272</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.to_k = nn.Linear(dim, qk_dim, bias=False)
+        self.to_v = nn.Linear(dim, v_dim, bias=False)
+
+        self.dropout = <a id="change">nn.Dropout(</a>dropout<a id="change">)</a>
+        self.attn_fn = F.softmax
+        self.to_out = nn.Linear(v_dim, dim)
+
+    @typechecked</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        if use_previous_attention:
+            &#47&#47 If we use the attention pattern from the last attention layer, we don&quott need queries and keys
+            self.to_v<a id="change"> = </a><a id="change">nn.Linear(</a>dim, v_dim<a id="change">, bias=False)</a>
+
+        else:
+            &#47&#47 Standard attention layer that will calculate the attention pattern from queries and keys
+            self.to_q = nn.Linear(dim, qk_dim, bias=False)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/antofuller/configaformers/commit/f2fa8c59ce1537b400a3288f9c556e84ca993807#diff-fcf59ce11a888c8312fa1547129217a783407a793109b95d67b265e47d08375bL119' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937909</div><div id='project'> Project Name: antofuller/configaformers</div><div id='commit'> Commit Name: f2fa8c59ce1537b400a3288f9c556e84ca993807</div><div id='time'> Time: 2021-09-04</div><div id='author'> Author: afuller187187@gmail.com</div><div id='file'> File Name: building_blocks.py</div><div id='m_class'> M Class Name: Attention</div><div id='n_method'> N Class Name: Attention</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: building_blocks.py</div><div id='n_file'> N File Name: building_blocks.py</div><div id='m_start'> M Start Line: 124</div><div id='m_end'> M End Line: 149</div><div id='n_start'> N Start Line: 301</div><div id='n_end'> N End Line: 313</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Final convolution is initialized differently form the rest
+        final_conv = nn.Conv2d(512, self.num_classes, kernel_size=1)
+        self.classifier = nn.Sequential(
+            <a id="change">nn.Dropout(p=0.5)</a>,
+            final_conv,
+            nn.ReLU(inplace=True),
+            nn.AdaptiveAvgPool2d(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.global_avgpool = nn.AdaptiveAvgPool2d(1)
+        self.fc = self._construct_fc_layer(fc_dims, 512, dropout_p)
+        self.classifier<a id="change"> = </a><a id="change">nn.Linear(</a>self.feature_dim, num_classes<a id="change">)</a>
+
+        self._init_params()
+
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vlsomers/bpbreid/commit/3ddf9ce6998e6a5d2052aba4286b8b899e03149e#diff-83c753925e8ca4134d272ad898aceb5423eb0f5ee01ec40bf0eddb1b72473213L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2937905</div><div id='project'> Project Name: vlsomers/bpbreid</div><div id='commit'> Commit Name: 3ddf9ce6998e6a5d2052aba4286b8b899e03149e</div><div id='time'> Time: 2018-10-27</div><div id='author'> Author: k.zhou@qmul.ac.uk</div><div id='file'> File Name: torchreid/models/squeezenet.py</div><div id='m_class'> M Class Name: SqueezeNet</div><div id='n_method'> N Class Name: SqueezeNet</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: torchreid/models/squeezenet.py</div><div id='n_file'> N File Name: torchreid/models/squeezenet.py</div><div id='m_start'> M Start Line: 62</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 102</div><BR>

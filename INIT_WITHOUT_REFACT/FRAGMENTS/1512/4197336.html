@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        get_attn = lambda: SinkhornSelfAttention(dim, causal = causal, heads = heads, buckets = buckets, kv_buckets = kv_buckets, non_permutative = non_permutative, sinkhorn_iter = sinkhorn_iter, n_sortcut = n_sortcut, temperature = temperature, attn_dropout = attn_dropout, dropout = attn_layer_dropout, attn_sort_net = attn_sort_net)
+        get_ff = lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+        <a id="change">if </a>weight_tie<a id="change">:
+            </a>get_attn<a id="change"> = </a>cache_fn(get_attn)
+            get_ff<a id="change"> = </a>cache_fn(get_ff)
+
+        for _ in range(depth):
+            layers.append(nn.ModuleList([</code></pre><h3>After Change</h3><pre><code class='java'>
+            ]))
+
+            if receives_context:
+                layers.append(<a id="change">nn.ModuleList([
+                    </a>PreNorm(nn.LayerNorm, dim, get_attn_context()),
+                    PreNorm(nn.LayerNorm, dim, Chunk(ff_chunks, get_ff_context(), along_dim=1))<a id="change"></a>
+                ]<a id="change">)</a>)
+
+        execute_type = Reversible if reversible else Sequential
+</code></pre>

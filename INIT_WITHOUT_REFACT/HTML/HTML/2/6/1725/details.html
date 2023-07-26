@@ -1,0 +1,65 @@
+<html><h3>Pattern ID :1725
+</h3><img src='4560045.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.rnn = nn.LSTM(n_bins, hidden_channels, num_layers=num_blocks, batch_first=True, bidirectional=bidirectional, dropout=dropout)
+        self.fc = nn.Linear(num_directions*hidden_channels, n_bins*embed_dim)
+        
+        <a id="change">if mask_nonlinear == &quotsigmoid&quot</a><a id="change">:
+            </a>self.mask_nonlinear2d = nn.Sigmoid()
+        elif mask_nonlinear == &quotsoftmax&quot:
+            self.mask_nonlinear2d = <a id="change">nn.Softmax(dim=1)</a>
+        else:
+            raise NotImplementedError("")
+        
+        self.take_log, self.take_db = take_log, take_db</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.rnn = nn.LSTM(n_bins, hidden_channels, num_layers=num_blocks, batch_first=True, bidirectional=bidirectional, dropout=dropout)
+        self.fc = nn.Linear(num_directions*hidden_channels, n_bins*embed_dim)
+        
+        kwargs<a id="change"> = </a><a id="change">{}</a>
+        
+        if mask_nonlinear == &quotsoftmax&quot:
+            kwargs["dim"] = 1
+        </code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/6333394de0e49d076fa5e5f6d06d7f145ec8bcec#diff-f02896a956c5a8c637fe40844934a4cad3cc5c5df11d362f37de32989aa10f6bL48' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4560045</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 6333394de0e49d076fa5e5f6d06d7f145ec8bcec</div><div id='time'> Time: 2021-11-22</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/models/danet.py</div><div id='m_class'> M Class Name: DANet</div><div id='n_method'> N Class Name: DANet</div><div id='m_method'> M Method Name: __init__(11)</div><div id='n_method'> N Method Name: __init__(11)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/danet.py</div><div id='n_file'> N File Name: src/models/danet.py</div><div id='m_start'> M Start Line: 48</div><div id='m_end'> M End Line: 55</div><div id='n_start'> N Start Line: 49</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        end_net.append(nn.Conv1d(hidden_channels, out_channels, kernel_size=1, stride=1, bias=False))
+        
+        if output_nonlinear is not None:
+            <a id="change">if output_nonlinear == &quottanh&quot</a><a id="change">:
+                </a>end_net.append(nn.Tanh())
+            elif output_nonlinear == &quotsoftmax&quot:
+                end_net.append(<a id="change">nn.Softmax(dim=1)</a>)
+            else:
+                raise ValueError("Not support {}".format(output_nonlinear))
+        </code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        if output_nonlinear is not None:
+            if output_nonlinear == &quotsoftmax&quot:
+                kwargs<a id="change"> = </a><a id="change">{
+                    </a>"dim": 1<a id="change">
+                }</a>
+            else:
+                kwargs = {}
+            
+            module = choose_nonlinear(output_nonlinear, **kwargs)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/10282099ca12b94e9b9870841d4de0252506baab#diff-7d98833d7ed3e0a3f7192ed73972c8cebfc8751aa26da222fe6a9c1fd1b497d5L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4560044</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 10282099ca12b94e9b9870841d4de0252506baab</div><div id='time'> Time: 2021-12-05</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/models/wavenet.py</div><div id='m_class'> M Class Name: WaveNet</div><div id='n_method'> N Class Name: WaveNet</div><div id='m_method'> M Method Name: __init__(19)</div><div id='n_method'> N Method Name: __init__(19)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/wavenet.py</div><div id='n_file'> N File Name: src/models/wavenet.py</div><div id='m_start'> M Start Line: 24</div><div id='m_end'> M End Line: 39</div><div id='n_start'> N Start Line: 33</div><div id='n_end'> N End Line: 41</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.map = nn.Conv1d(bottleneck_channels, n_sources*num_features, kernel_size=1, stride=1)
+        self.gtu = GTU1d(num_features, num_features, kernel_size=1, stride=1)
+        
+        <a id="change">if mask_nonlinear == &quotrelu&quot</a><a id="change">:
+            </a>self.mask_nonlinear = nn.ReLU()
+        elif mask_nonlinear == &quotsigmoid&quot:
+            self.mask_nonlinear = nn.Sigmoid()
+        elif mask_nonlinear == &quotsoftmax&quot:
+            self.mask_nonlinear = <a id="change">nn.Softmax(dim=1)</a>
+        else:
+            raise ValueError("Cannot support {}".format(mask_nonlinear))
+            
+    def forward(self, input):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.gtu = GTU1d(num_features, num_features, kernel_size=1, stride=1)
+        
+        if mask_nonlinear in [&quotrelu&quot, &quotsigmoid&quot]:
+            kwargs<a id="change"> = </a><a id="change">{}</a>
+        elif mask_nonlinear == &quotsoftmax&quot:
+            kwargs = {
+                &quotdim&quot: 1
+            }</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/87afd25f53e66db234ad9349e8fdedc0061d33b1#diff-a712e6d4667c0d438881ba0724eb7c9776d321f8e1bb9f78897ad3e879e2e48eL217' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4560041</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: 87afd25f53e66db234ad9349e8fdedc0061d33b1</div><div id='time'> Time: 2021-11-13</div><div id='author'> Author: delta9guitar97@gmail.com</div><div id='file'> File Name: src/models/dptnet.py</div><div id='m_class'> M Class Name: Separator</div><div id='n_method'> N Class Name: Separator</div><div id='m_method'> M Method Name: __init__(15)</div><div id='n_method'> N Method Name: __init__(15)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/dptnet.py</div><div id='n_file'> N File Name: src/models/dptnet.py</div><div id='m_start'> M Start Line: 253</div><div id='m_end'> M End Line: 262</div><div id='n_start'> N Start Line: 253</div><div id='n_end'> N End Line: 262</div><BR>

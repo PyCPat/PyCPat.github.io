@@ -1,0 +1,64 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.add_module(self.norm_name, norm)
+
+        if self.with_activatation:
+            <a id="change">assert </a>activation in [&quotrelu&quot], &quotOnly ReLU supported.&quot
+            if self.activation == &quotrelu&quot:
+                self.activate = nn.ReLU(inplace=inplace)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        <a id="change">self.activation</a> = activation
+        self.inplace = inplace
+        self.activate_last = activate_last
+
+        self.with_norm = norm_cfg is not None
+        self.with_activatation = activation is not None
+        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
+        if bias == &quotauto&quot:
+            bias = False if self.with_norm else True
+        self.with_bias = bias
+
+        if self.with_norm and self.with_bias:
+            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
+
+        &#47&#47 build convolution layer
+        self.conv = build_conv_layer(conv_cfg,
+                                     in_channels,
+                                     out_channels,
+                                     kernel_size,
+                                     stride=stride,
+                                     padding=padding,
+                                     dilation=dilation,
+                                     groups=groups,
+                                     bias=bias)
+        &#47&#47 export the attributes of self.conv to a higher level for convenience
+        self.in_channels = self.conv.in_channels
+        self.out_channels = self.conv.out_channels
+        self.kernel_size = self.conv.kernel_size
+        self.stride = self.conv.stride
+        self.padding = self.conv.padding
+        self.dilation = self.conv.dilation
+        self.transposed = self.conv.transposed
+        self.output_padding = self.conv.output_padding
+        self.groups = self.conv.groups
+
+        &#47&#47 build normalization layers
+        if self.with_norm:
+            norm_channels = out_channels if self.activate_last else in_channels
+            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
+            self.add_module(self.norm_name, norm)
+
+        &#47&#47 build activation layer
+        if self.with_activatation:
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise ValueError(</a><a id="change">&quot{} is currently not supported.&quot.format(
+                    </a>self.activation<a id="change">))</a>
+            if self.activation == &quotrelu&quot:
+                self.activate = nn.ReLU(inplace=inplace)
+
+        &#47&#47 Use msra init by default</code></pre>

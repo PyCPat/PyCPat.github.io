@@ -1,0 +1,93 @@
+<html><h3>Pattern ID :1629
+</h3><img src='4418563.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            norm="batch_norm", final_sigmoid=True):
+        super(Discriminator, self).__init__()
+        self.norm = norm
+        self.disc = nn.Sequential(<a id="change">OrderedDict(</a>[
+            &#47&#47 input: N x channels_img x 64 x 64
+            (&quotconv_in&quot, nn.Conv2d(
+                channels_img, features_d, kernel_size=4,
+                stride=2, padding=1, bias=False
+            )),
+            (&quotleaky_relu&quot, nn.LeakyReLU(0.2)),
+            &#47&#47 _block(in_channels, out_channels, kernel_size, stride, padding)
+            (<a id="change">&quotblock1&quot</a><a id="change">, self._block(features_d, features_d * 2, 4, 2, 1)</a>),
+            (<a id="change">&quotblock2&quot</a><a id="change">, self._block(features_d * 2, features_d * 4, 4, 2, 1)</a>),
+            (&quotblock3&quot, self._block(features_d * 4, features_d * 8, 4, 2, 1)),
+            &#47&#47 After all _block img output is 4x4 (Conv2d below makes into 1x1)
+            (&quotconv_out&quot, nn.Conv2d(features_d * 8, 1, kernel_size=4,
+                stride=2, padding=0, bias=False)),
+            (&quotsigmoid&quot, nn.Sigmoid()) if final_sigmoid\
+                    else (&quotidentity&quot, nn.Identity())
+            ]<a id="change">)</a>)
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        return nn.Sequential(OrderedDict([</code></pre><h3>After Change</h3><pre><code class='java'>
+            (&quotsigmoid&quot, nn.Sigmoid()) if final_sigmoid\
+                    else (&quotidentity&quot, nn.Identity())
+            ]
+        self.disc = <a id="change">nn.Sequential(</a><a id="change">OrderedDict(</a>full_list<a id="change">))</a>
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        return nn.Sequential(OrderedDict([
+            (&quotconv&quot, nn.Conv2d(</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/dd5cb05b9edf8b06b7a7277aff29bb4ed0a4506e#diff-13843d1af9a61aa08d2fb6ae82bb335bbf8d79060ea9cbab84a4ddf574240466L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4418563</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: dd5cb05b9edf8b06b7a7277aff29bb4ed0a4506e</div><div id='time'> Time: 2021-04-21</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/models/standard_networks.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/models/standard_networks.py</div><div id='n_file'> N File Name: core/models/standard_networks.py</div><div id='m_start'> M Start Line: 13</div><div id='m_end'> M End Line: 29</div><div id='n_start'> N Start Line: 11</div><div id='n_end'> N End Line: 32</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        squeezed_channels = make_divisible(int(channels * ratio), 8)
+        gating_fn = gating_fn if gating_fn else _SE_GATING_FN
+
+        self.se = nn.Sequential(<a id="change">OrderedDict(</a>[
+            (&quotpooling&quot, nn.AdaptiveAvgPool2d((1, 1))),
+            (<a id="change">&quotreduce&quot</a><a id="change">, Conv2d1x1(channels, squeezed_channels, bias=True)</a>),
+            (&quotrelu&quot, inner_activation_fn(inplace=True)),
+            (<a id="change">&quotexpand&quot</a><a id="change">, Conv2d1x1(squeezed_channels, channels, bias=True)</a>),
+            (&quotsigmoid&quot, gating_fn()),
+        ]<a id="change">)</a>)
+
+    def forward(self, x):
+        return x * self.se(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        squeezed_channels = make_divisible(int(channels * ratio), _SE_DIVISOR)
+        gating_fn = gating_fn if gating_fn else _SE_GATING_FN
+
+        layers = <a id="change">OrderedDict(</a>[]<a id="change">)</a>
+
+        layers[&quotpooling&quot] = nn.AdaptiveAvgPool2d((1, 1))
+        layers[&quotreduce&quot] = Conv2d1x1(channels, squeezed_channels, bias=True)
+        if _SE_USE_NORM:
+            layers[&quotnorm&quot] = nn.BatchNorm2d(squeezed_channels)
+        layers[&quotrelu&quot] = inner_activation_fn(inplace=True)
+        layers[&quotexpand&quot] = Conv2d1x1(squeezed_channels, channels, bias=True)
+        layers[&quotsigmoid&quot] = gating_fn()
+
+        self.se = <a id="change">nn.Sequential(</a>layers<a id="change">)</a>
+
+    def forward(self, x):
+        return x * self.se(x)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ffiirree/cv-models/commit/e622b26dcf62b8ec88e80183f5ba0cef941cb223#diff-355c882d2c8458802245dc4426f748876ba63251c0b0caec55649e8d4e95c965L438' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4418562</div><div id='project'> Project Name: ffiirree/cv-models</div><div id='commit'> Commit Name: e622b26dcf62b8ec88e80183f5ba0cef941cb223</div><div id='time'> Time: 2021-09-13</div><div id='author'> Author: ice_qi@163.com</div><div id='file'> File Name: models/core/blocks.py</div><div id='m_class'> M Class Name: SEBlock</div><div id='n_method'> N Class Name: SEBlock</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/core/blocks.py</div><div id='n_file'> N File Name: models/core/blocks.py</div><div id='m_start'> M Start Line: 447</div><div id='m_end'> M End Line: 456</div><div id='n_start'> N Start Line: 462</div><div id='n_end'> N End Line: 475</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+class Generator(nn.Module):
+    def __init__(self, channels_noise, channels_img, features_g):
+        super(Generator, self).__init__()
+        self.net = nn.Sequential(<a id="change">OrderedDict(</a>[
+            &#47&#47 Input: N x channels_noise x 1 x 1
+            (<a id="change">&quotblock1&quot</a><a id="change">, self._block(channels_noise, features_g * 16, 4, 1, 0)</a>),  &#47&#47 img: 4x4
+            (<a id="change">&quotblock2&quot</a><a id="change">, self._block(features_g * 16, features_g * 8, 4, 2, 1)</a>),  &#47&#47 img: 8x8
+            (&quotblock3&quot, self._block(features_g * 8, features_g * 4, 4, 2, 1)),  &#47&#47 img: 16x16
+            (&quotblock4&quot, self._block(features_g * 4, features_g * 2, 4, 2, 1)),  &#47&#47 img: 32x32
+            (&quottranspose_conv_out&quot, nn.ConvTranspose2d(
+                features_g * 2, channels_img, kernel_size=4,
+                stride=2, padding=1, bias=False)),
+            &#47&#47 Output: N x channels_img x 64 x 64
+            (&quottanh&quot, nn.Tanh()),
+            ]<a id="change">)</a>)
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        return nn.Sequential(OrderedDict([</code></pre><h3>After Change</h3><pre><code class='java'>
+            &#47&#47 Output: N x channels_img x img_size x img_size
+            (&quottanh&quot, nn.Tanh()),
+            ]
+        self.net = <a id="change">nn.Sequential(</a><a id="change">OrderedDict(</a>full_list<a id="change">))</a>
+
+    def _block(self, in_channels, out_channels, kernel_size, stride, padding):
+        return nn.Sequential(OrderedDict([
+            (&quottranspose_conv&quot, nn.ConvTranspose2d(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ebartrum/lightning_gan_zoo/commit/33cb57daa95823255bd830c1a9686d2515df75af#diff-13843d1af9a61aa08d2fb6ae82bb335bbf8d79060ea9cbab84a4ddf574240466L56' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4418550</div><div id='project'> Project Name: ebartrum/lightning_gan_zoo</div><div id='commit'> Commit Name: 33cb57daa95823255bd830c1a9686d2515df75af</div><div id='time'> Time: 2021-04-22</div><div id='author'> Author: edward.bartrum@gmail.com</div><div id='file'> File Name: core/models/standard_networks.py</div><div id='m_class'> M Class Name: Generator</div><div id='n_method'> N Class Name: Generator</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/models/standard_networks.py</div><div id='n_file'> N File Name: core/models/standard_networks.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 69</div><div id='n_start'> N Start Line: 56</div><div id='n_end'> N End Line: 75</div><BR>

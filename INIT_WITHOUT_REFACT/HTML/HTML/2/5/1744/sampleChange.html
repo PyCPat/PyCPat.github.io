@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.p1_1 = nn.Conv2d(in_c, c1, kernel_size=1)
+        &#47&#47 线路2，1 x 1卷积层后接3 x 3卷积层
+        self.p2_1 = nn.Conv2d(in_c, c2[0], kernel_size=1)
+        self.p2_2 = nn.Conv2d(<a id="change">c2[0]</a>, c2[1], kernel_size=3, padding=1)
+        &#47&#47 线路3，1 x 1卷积层后接5 x 5卷积层
+        self.p3_1 = nn.Conv2d(in_c, c3[0], kernel_size=1)
+        self.p3_2 = nn.Conv2d(c3[0], c3[1], kernel_size=5, padding=2)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.b1 = nn.Sequential(
+            nn.Conv2d(in_planes, n1x1, kernel_size=1),
+            nn.BatchNorm2d(n1x1),
+            <a id="change">nn.ReLU(</a>True<a id="change">)</a>,
+        )
+
+        &#47&#47 1x1 conv -&gt; 3x3 conv branch
+        self.b2 = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(in_planes, n3x3red, kernel_size=1),
+            nn.BatchNorm2d(n3x3red),
+            nn.ReLU(True),
+            nn.Conv2d(n3x3red, n3x3, kernel_size=3, padding=1),
+            nn.BatchNorm2d(n3x3),
+            nn.ReLU(True)<a id="change">,
+        )</a>
+
+        &#47&#47 1x1 conv -&gt; 5x5 conv branch
+        self.b3 = nn.Sequential(
+            nn.Conv2d(in_planes, n5x5red, kernel_size=1),</code></pre>

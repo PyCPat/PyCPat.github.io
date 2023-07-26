@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            nn.PReLU(d)
+        )
+        self.mid_part = [nn.Conv2d(d, s, kernel_size=1), nn.PReLU(s)]
+        <a id="change">for _</a> in <a id="change">range(</a>m<a id="change">)</a><a id="change">:
+            </a>self.mid_part.extend(
+                <a id="change">[</a>nn.Conv2d(s, s, kernel_size=3, padding=3 // 2), nn.PReLU(s)<a id="change"></a>])
+        self.mid_part.extend([nn.Conv2d(s, d, kernel_size=1), nn.PReLU(d)])
+        self.mid_part = nn.Sequential(*self.mid_part)
+        self.last_part = nn.ConvTranspose2d(d, num_channels, kernel_size=9,</code></pre><h3>After Change</h3><pre><code class='java'>
+            nn.Conv2d(in_channels=num_channels, out_channels=64, kernel_size=5, stride=1, padding=2),
+            nn.PReLU())
+
+        self.mid_part = <a id="change">nn.Sequential(
+            </a>nn.Conv2d(in_channels=64, out_channels=12, kernel_size=1, stride=1, padding=0),
+            nn.PReLU(),
+
+            nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=12, out_channels=12, kernel_size=3, stride=1, padding=1),
+            nn.PReLU(),
+
+            nn.Conv2d(in_channels=12, out_channels=64, kernel_size=1, stride=1, padding=0),
+            nn.PReLU()<a id="change">
+        )</a>
+
+        &#47&#47 Deconvolution
+        self.last_part = nn.ConvTranspose2d(in_channels=64, out_channels=num_channels, kernel_size=9,
+                                            stride=scale_factor, padding=3, output_padding=1)</code></pre>

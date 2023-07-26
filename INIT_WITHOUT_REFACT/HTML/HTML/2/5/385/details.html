@@ -1,0 +1,59 @@
+<html><h3>Pattern ID :385
+</h3><img src='1259595.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                last_activation=last_activation,
+            )
+        self.mp_layers = nn.ModuleList()
+        <a id="change">for </a>_ in <a id="change">range(</a>propagation_depth<a id="change">):
+            </a>self.mp_layers.append(MPNNLayer(in_dim=hidden_dim,
+                                           out_dim=int(hidden_dim),
+                                           in_dim_edges=edge_dim,
+                                           pairwise_distances=pairwise_distances,</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.edge_feat:
+            self.embedding_e = BondEncoder(edge_hidden_dim)
+
+        self.layers = nn.ModuleList(<a id="change">[MPLayer(in_dim=hidden_dim, out_dim=hidden_dim, dropout=dropout,
+                                             graph_norm=graph_norm, mid_batch_norm=mid_batch_norm,
+                                             last_batch_norm=last_batch_norm, residual=residual,
+                                             edge_features=edge_feat, edge_hidden_dim=edge_hidden_dim,
+                                             aggregation=aggregation, pretrans_layers=pretrans_layers,
+                                             posttrans_layers=posttrans_layers) for _
+                                     in range(propagation_depth - 1)]</a>)
+        self.layers.append(MPLayer(in_dim=hidden_dim, out_dim=last_layer_dim, dropout=dropout, graph_norm=graph_norm,
+                                   mid_batch_norm=mid_batch_norm, last_batch_norm=last_batch_norm, residual=residual,
+                                   aggregation=aggregation, edge_features=edge_feat, edge_hidden_dim=edge_hidden_dim,</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/hannesstark/3dinfomax/commit/7ce60298483a64e8dfea77ad61d4feec18007ac3#diff-ba1dcef31074968b22979e6810ce1e30610f0589cb64add814954f5d28ecbd15L42' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1259595</div><div id='project'> Project Name: hannesstark/3dinfomax</div><div id='commit'> Commit Name: 7ce60298483a64e8dfea77ad61d4feec18007ac3</div><div id='time'> Time: 2021-06-24</div><div id='author'> Author: hannes.staerk@gmail.com</div><div id='file'> File Name: models/mpnn.py</div><div id='m_class'> M Class Name: MPNNGNN</div><div id='n_method'> N Class Name: MPNNGNN</div><div id='m_method'> M Method Name: __init__(17)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/mpnn.py</div><div id='n_file'> N File Name: models/mpnn.py</div><div id='m_start'> M Start Line: 66</div><div id='m_end'> M End Line: 123</div><div id='n_start'> N Start Line: 42</div><div id='n_end'> N End Line: 69</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.latents_attend_to_patches = Attention(dim, norm = True, norm_context = True, **attn_kwargs)
+
+        self.latent_self_attns = nn.ModuleList([])
+        <a id="change">for </a>_ in <a id="change">range(</a>latent_self_attn_depth<a id="change">):
+            </a>self.latent_self_attns.append(nn.ModuleList([
+                Attention(dim, norm = True, **attn_kwargs),
+                FeedForward(dim)
+            ]))</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        attn_kwargs = {**attn_kwargs, &quottime_cond_dim&quot: time_dim}
+
+        self.blocks = nn.ModuleList(<a id="change">[RINBlock(dim, latent_self_attn_depth = latent_self_attn_depth, **attn_kwargs) for _ in range(depth)]</a>)
+
+    def forward(
+        self,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/recurrent-interface-network-pytorch/commit/a81dbfaf9e61843bc0da154cf547099de9ffc093#diff-c245517a15c6c34e71df6f08ed422324484176189f4795463b7e58278d35b9cdL271' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1259597</div><div id='project'> Project Name: lucidrains/recurrent-interface-network-pytorch</div><div id='commit'> Commit Name: a81dbfaf9e61843bc0da154cf547099de9ffc093</div><div id='time'> Time: 2022-12-26</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: rin_pytorch/rin_pytorch.py</div><div id='m_class'> M Class Name: RIN</div><div id='n_method'> N Class Name: RIN</div><div id='m_method'> M Method Name: __init__(9)</div><div id='n_method'> N Method Name: __init__(9)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: rin_pytorch/rin_pytorch.py</div><div id='n_file'> N File Name: rin_pytorch/rin_pytorch.py</div><div id='m_start'> M Start Line: 332</div><div id='m_end'> M End Line: 350</div><div id='n_start'> N Start Line: 385</div><div id='n_end'> N End Line: 385</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        &#47&#47 One GAT layer for each meta-path based adjacency matrix
+        self.gat_layers = nn.ModuleList()
+        <a id="change">for </a>i in <a id="change">range(</a>num_meta_paths<a id="change">):
+            </a>self.gat_layers.append(GATConv(
+                in_size, out_size, layer_num_heads, dropout, dropout, activation=F.elu
+            ))
+        self.semantic_attention = SemanticAttention(in_size=out_size * layer_num_heads)</code></pre><h3>After Change</h3><pre><code class='java'>
+        
+        super().__init__()
+        &#47&#47 顶点层次的注意力，每个GAT层对应一个元路径
+        self.gats = nn.ModuleList(<a id="change">[
+            GATConv(in_dim, out_dim, num_heads, dropout, dropout, activation=F.elu)
+            for _ in range(num_metapaths)
+        ]</a>)
+        &#47&#47 语义层次的注意力
+        self.semantic_attention = SemanticAttention(in_dim=num_heads * out_dim)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zzy979/pytorch-tutorial/commit/682a28dce444c6fd981b26ee917632039a76a610#diff-d920ffba827d039ba56238ed573baa117795916b55b879a829d38d76b6a02c80L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1259596</div><div id='project'> Project Name: zzy979/pytorch-tutorial</div><div id='commit'> Commit Name: 682a28dce444c6fd981b26ee917632039a76a610</div><div id='time'> Time: 2021-01-06</div><div id='author'> Author: 979481894@qq.com</div><div id='file'> File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_class'> M Class Name: HANLayer</div><div id='n_method'> N Class Name: HANLayer</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pytorch_tutorial/gnn/han/model.py</div><div id='n_file'> N File Name: pytorch_tutorial/gnn/han/model.py</div><div id='m_start'> M Start Line: 44</div><div id='m_end'> M End Line: 50</div><div id='n_start'> N Start Line: 54</div><div id='n_end'> N End Line: 57</div><BR>

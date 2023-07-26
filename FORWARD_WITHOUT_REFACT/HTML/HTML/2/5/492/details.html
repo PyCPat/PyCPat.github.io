@@ -1,0 +1,57 @@
+<html><h3>Pattern ID :492
+</h3><img src='1755247.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            inputs: network output tensor with r x memory_dim feature dimension.
+            rnn_hidden: hidden state of the RNN cell.
+        
+        rnn_hidden<a id="change"> = </a>self.rnn(inputs, rnn_hidden)
+        outputs = self.relu(rnn_hidden)
+        outputs = self.linear(outputs)
+        outputs = self.sigmoid(outputs)
+        <a id="change">return </a>outputs<a id="change">, rnn_hidden</a>
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    def forward(self, inputs):
+        &#47&#47 rnn_hidden = self.rnn(inputs, rnn_hidden)
+        &#47&#47 outputs = self.relu(rnn_hidden)
+        outputs<a id="change"> = </a><a id="change">self.dropout(</a>inputs<a id="change">)</a>
+        outputs = self.linear(outputs)
+        outputs = self.sigmoid(outputs)
+        return outputs</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/coqui-ai/tts/commit/c8a552e62763ed7172b98822bb65838d72fbdb7b#diff-63415e5bdfe9c172be8a9cadb35d1f47d718fea5f15c6879f5715ebb9e331155L428' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1755247</div><div id='project'> Project Name: coqui-ai/tts</div><div id='commit'> Commit Name: c8a552e62763ed7172b98822bb65838d72fbdb7b</div><div id='time'> Time: 2018-11-02</div><div id='author'> Author: egolge@mozilla.com</div><div id='file'> File Name: layers/tacotron.py</div><div id='m_class'> M Class Name: StopNet</div><div id='n_method'> N Class Name: StopNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: layers/tacotron.py</div><div id='n_file'> N File Name: layers/tacotron.py</div><div id='m_start'> M Start Line: 428</div><div id='m_end'> M End Line: 438</div><div id='n_start'> N Start Line: 462</div><div id='n_end'> N End Line: 466</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if not self.training:
+            return f
+
+        y<a id="change"> = </a>self.classifier(f)
+
+        if self.loss == {&quotxent&quot}:
+            return y
+        elif self.loss == {&quotxent&quot, &quothtri&quot}:
+            <a id="change">return </a>y<a id="change">, f</a>
+        elif self.loss == {&quotcent&quot}:
+            return y, f
+        else:
+            raise KeyError("Unsupported loss: {}".format(self.loss))</code></pre><h3>After Change</h3><pre><code class='java'>
+        x9 = self.fire9(x8)
+        if self.bypass:
+            x9 = x9 + x8
+        x9<a id="change"> = </a><a id="change">F.dropout(</a>x9<a id="change">, training=self.training)</a>
+        x10 = F.relu(self.conv10(x9))
+        f = F.avg_pool2d(x10, x10.size()[2:]).view(x10.size(0), -1)
+
+        if self.loss == {&quotxent&quot}:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vlsomers/bpbreid/commit/2e5b28b3d9dde5865ffbdedceead869fccad9e93#diff-15219586537340d9434ed8535b8866c71ab598dcb3a646b5364c7025fcec1965L87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1755248</div><div id='project'> Project Name: vlsomers/bpbreid</div><div id='commit'> Commit Name: 2e5b28b3d9dde5865ffbdedceead869fccad9e93</div><div id='time'> Time: 2018-04-28</div><div id='author'> Author: k.zhou@qmul.ac.uk</div><div id='file'> File Name: models/SqueezeNet.py</div><div id='m_class'> M Class Name: SqueezeNet</div><div id='n_method'> N Class Name: SqueezeNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/SqueezeNet.py</div><div id='n_file'> N File Name: models/SqueezeNet.py</div><div id='m_start'> M Start Line: 105</div><div id='m_end'> M End Line: 121</div><div id='n_start'> N Start Line: 104</div><div id='n_end'> N End Line: 114</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            dec_enc_attns.append(dec_enc_attn)
+        predictions = self.projection(dec_outputs)
+        &#47&#47 TODO: 暂时全部为0, return dec_self_attns, dec_enc_attns
+        alphas<a id="change"> = </a>torch.tensor(np.zeros((batch_size, 52, 196))).to(device)
+        <a id="change">return </a>predictions<a id="change">, encoded_captions, decode_lengths, alphas, sort_ind</a>
+
+
+class EncoderLayer(nn.Module):</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 0 0 0 0 1 2
+        &#47&#47 0 0 0 0 1 1
+        dec_outputs = self.tgt_emb(encoded_captions) + self.pos_emb(torch.LongTensor([list(range(52))]*batch_size).to(device))
+        dec_outputs<a id="change"> = </a><a id="change">self.dropout(</a>dec_outputs<a id="change">)</a>
+        dec_self_attn_pad_mask = self.get_attn_pad_mask(encoded_captions, encoded_captions)
+        dec_self_attn_subsequent_mask = self.get_attn_subsequent_mask(encoded_captions)
+        dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/royalskye/image-caption/commit/569502dd85be28a1e6a10bc8873b7cd0446556b8#diff-7b7030687899150ad5cd420914b35858a8cc34b1d59e5cab0d629393a328448cL144' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1755249</div><div id='project'> Project Name: royalskye/image-caption</div><div id='commit'> Commit Name: 569502dd85be28a1e6a10bc8873b7cd0446556b8</div><div id='time'> Time: 2020-04-06</div><div id='author'> Author: a19970417b@qq.com</div><div id='file'> File Name: transformer.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: transformer.py</div><div id='n_file'> N File Name: transformer.py</div><div id='m_start'> M Start Line: 150</div><div id='m_end'> M End Line: 189</div><div id='n_start'> N Start Line: 160</div><div id='n_end'> N End Line: 191</div><BR>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.mlp = GPT2MLP(inner_dim, config)
+        adapter_dict = {}
+        <a id="change">if </a>self.use_adapters<a id="change">:
+            </a>for key, value in self.domain_dict:
+                adapter_dict[key]<a id="change"> = </a>Adapter(config)
+        self.adapter_dict = adapter_dict
+
+        &#47&#47 self.domain_dict = config.domain_dict</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mlp = GPT2MLP(inner_dim, config)
+
+        self.domain_dict = config.domain_dict
+        adapter_list<a id="change"> = []</a>
+        if self.use_adapters:
+            for _ in self.domain_dict.keys():
+                <a id="change">adapter_list.append(</a>Adapter(config)<a id="change">)</a>
+            self.adapter_module<a id="change"> = </a>nn.ModuleList(adapter_list)
+
+            logger.info(f"I was given a tree with {len(self.domain_dict.keys())} nodes and I initialized {len(adapter_list)} adapters!")
+</code></pre>

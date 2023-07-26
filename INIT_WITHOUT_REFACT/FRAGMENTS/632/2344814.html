@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+
+        if vocab_size &gt; cutoff[-1]:
+            <a id="change">cutoff</a> = cutoff + [vocab_size]
+        else:
+            assert vocab_size == cutoff[
+                -1], &quotcannot specify cutoff smaller than vocab size&quot
+
+        output_dim = cutoff[0] + len(cutoff) - 1
+
+        self.vocab_size = vocab_size
+        self.cutoff = cutoff
+        self.dropout = dropout
+
+        self.lsm = nn.LogSoftmax(dim=1)
+        self.head = nn.Linear(input_dim, output_dim, bias=False)
+        self.tail<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+
+        <a id="change">extra_denom</a> = 1 if half_size else 0
+
+        <a id="change">for </a><a id="change">i</a> in <a id="change">range(len(</a>cutoff<a id="change">)</a><a id="change"> - 1</a><a id="change">):
+            </a><a id="change">self.tail.append(
+                </a><a id="change">nn.Sequential(
+                    </a><a id="change">nn.Linear(</a>input_dim, input_dim<a id="change"> // 4</a><a id="change"> ** </a>(i<a id="change"> + </a>extra_denom)<a id="change">, bias=False)</a>,
+                    <a id="change">nn.Dropout(</a>dropout<a id="change">)</a>,
+                    <a id="change">nn.Linear(</a>input_dim<a id="change"> // 4</a><a id="change"> ** </a>(i<a id="change"> + </a>extra_denom), <a id="change">cutoff[i + 1]</a><a id="change"> - cutoff[i], bias=False)</a><a id="change">
+                )
+            )</a>
+
+        def init_weights(m):
+            if hasattr(m, &quotweight&quot):
+                nn.init.xavier_uniform_(m.weight)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.lsm = nn.LogSoftmax(dim=1)
+        self.head = nn.Linear(input_dim, output_dim, bias=False)
+        <a id="change">self._make_tail(</a>True<a id="change">)</a>
+
+        def init_weights(m):
+            if hasattr(m, &quotweight&quot):
+                nn.init.xavier_uniform_(m.weight)</code></pre>

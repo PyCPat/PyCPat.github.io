@@ -2,21 +2,24 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-        
-        &#47&#47 device = output.device
-        batch_size = len(x)
-        <a id="change">batch_size</a> = batch_size<a id="change"> // 2</a>
+        net = []
+        num_features = []
 
-        x1, x2 = x[<a id="change">:batch_size</a>], <a id="change">x[batch_size:]</a>
+        <a id="change">for </a><a id="change">idx</a> in <a id="change">range(</a>self.depth<a id="change">):
+            </a>if idx == 0:
+                <a id="change">num_features.append(</a>in_channels<a id="change">)</a>
+            else:
+                <a id="change">num_features.append(</a>growth_rate[idx-1]<a id="change">)</a>
+            <a id="change">net.append(</a>MultiDilatedConvBlock(num_features, growth_rate[idx], kernel_size=kernel_size, norm=norm, nonlinear=nonlinear, eps=eps)<a id="change">)</a>
+        self.net = nn.Sequential(*net)
 
-        emb1, emb2 = self.backbone(x1), self.backbone(x2)
-        emb1, emb2 = emb1.squeeze(), emb2.squeeze()
-        z1, z2 = self.projection_mlp(emb1), self.projection_mlp(emb2)</code></pre><h3>After Change</h3><pre><code class='java'>
-        out0, out1 = (z0, p0), (z1, p1)
+        self.out_channels = sum(growth_rate)
+        self.eps = eps</code></pre><h3>After Change</h3><pre><code class='java'>
+        net = []
+        _in_channels = in_channels
 
-        &#47&#47 append features if requested
-        <a id="change">if </a>return_features<a id="change">:
-            </a>out0<a id="change">, out1</a> = (out0, f0), (out1, f1)
-
-        return out0, out1
-</code></pre>
+        <a id="change">for </a>idx in range(depth)<a id="change">:
+            </a>_out_channels = sum(growth_rate[idx:])
+            dilation = 2**idx
+            conv_block = ConvBlock2d(_in_channels, _out_channels, kernel_size=kernel_size, stride=1, dilation=dilation, eps=eps)
+            net.append(conv_block)</code></pre>

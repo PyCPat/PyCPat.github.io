@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif "conv_layer" in self.custom_config["model_arch_args"]:
+            input_dim = obs_space.shape[2]
+            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
+                conv_f<a id="change"> = nn</a><a id="change">.Conv2d(
+                    in_channels=input_dim,
+                    out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                    kernel_size=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                    stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                    padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                )</a>
+                relu_f<a id="change"> = nn</a><a id="change">.ReLU()</a>
+                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
+
+                <a id="change">layers.append(</a>conv_f<a id="change">)</a>
+                <a id="change">layers.append(</a>relu_f<a id="change">)</a>
+                layers.append(pool_f)
+
+                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.obs_size = self.full_obs_space.shape
+            input_dim = self.obs_size[2]
+            for i in range(self.custom_config["model_arch_args"]["conv_layer"]):
+                <a id="change">layers.append(
+                    SlimConv2d(
+                        in_channels=input_dim,
+                        out_channels=self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)],
+                        kernel=self.custom_config["model_arch_args"]["kernel_size_layer_{}".format(i)],
+                        stride=self.custom_config["model_arch_args"]["stride_layer_{}".format(i)],
+                        padding=self.custom_config["model_arch_args"]["padding_layer_{}".format(i)],
+                        activation_fn=self.activation
+                    )</a><a id="change">
+                )</a>
+                pool_f = nn.MaxPool2d(kernel_size=self.custom_config["model_arch_args"]["pool_size_layer_{}".format(i)])
+                layers.append(pool_f)
+
+                input_dim = self.custom_config["model_arch_args"]["out_channel_layer_{}".format(i)]</code></pre>

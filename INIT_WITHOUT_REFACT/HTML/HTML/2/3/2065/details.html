@@ -1,0 +1,51 @@
+<html><h3>Pattern ID :2065
+</h3><img src='6418481.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                Residual(PreNorm(dim, Attention(dim, dim_head = dim_head, heads = heads, causal = True))),
+                Residual(<a id="change">PreNorm(</a>dim, Attention(dim, dim_head = dim_head, heads = heads)<a id="change">)</a>) if cross_attend else None,
+                Residual(PreNorm(dim, FeedForward(dim))),
+            ]))
+    def forward(self, x, context = None, mask = None, context_mask = None):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.dim = dim
+        self.layers = nn.ModuleList([])
+        norm_class = ScaleNorm if use_scalenorm else nn.LayerNorm
+        prenorm_fn<a id="change"> = </a><a id="change">partial(</a>PreNorm, dim<a id="change">, norm_class = norm_class)</a>
+
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                prenorm_fn(Attention(dim, dim_head = dim_head, heads = heads, causal = True)),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/11a90584ab819e9b975dc3dc85249790e9cb6be6#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL116' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6418481</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 11a90584ab819e9b975dc3dc85249790e9cb6be6</div><div id='time'> Time: 2020-11-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 116</div><div id='m_end'> M End Line: 118</div><div id='n_start'> N Start Line: 129</div><div id='n_end'> N End Line: 139</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            ff = FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+            attn = PreNorm(dim, attn)
+            ff = <a id="change">PreNorm(</a>dim, ff<a id="change">)</a>
+
+            layers.append(nn.ModuleList([attn, ff]))
+
+        execute_type = ReversibleSequence if reversible else SequentialSequence</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert all([local_heads &lt;= heads for local_heads in n_local_attn_heads]), &quotnumber of local attn heads must be less than the maximum number of heads&quot
+
+        layers = nn.ModuleList([])
+        fn_wrapper<a id="change"> = </a><a id="change">partial(</a>PreNorm, dim<a id="change">)</a>
+
+        for ind, local_heads in zip(range(depth), n_local_attn_heads):
+            attn = SelfAttention(dim, depth, max_seq_len, heads, local_heads, window_size, causal = causal, attn_dropout = attn_dropout, dropout = attn_layer_dropout)
+            ff = Chunk(ff_chunks, FeedForward(dim, dropout = ff_dropout, glu = ff_glu))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/routing-transformer/commit/1b67a049d33b7d43f3a92bba25627f5bcff09607#diff-1a96ccaa437a86e24c768ea078dd19db87f8694dae807ecbb231a703aba4702dL420' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6418483</div><div id='project'> Project Name: lucidrains/routing-transformer</div><div id='commit'> Commit Name: 1b67a049d33b7d43f3a92bba25627f5bcff09607</div><div id='time'> Time: 2020-05-23</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: routing_transformer/routing_transformer.py</div><div id='m_class'> M Class Name: RoutingTransformer</div><div id='n_method'> N Class Name: RoutingTransformer</div><div id='m_method'> M Method Name: __init__(15)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: routing_transformer/routing_transformer.py</div><div id='n_file'> N File Name: routing_transformer/routing_transformer.py</div><div id='m_start'> M Start Line: 430</div><div id='m_end'> M End Line: 442</div><div id='n_start'> N Start Line: 435</div><div id='n_end'> N End Line: 457</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                Residual(<a id="change">PreNorm(</a>dim, Attention(dim, dim_head = dim_head, heads = heads)<a id="change">)</a>),
+                Residual(PreNorm(dim, FeedForward(dim)))
+            ]))
+    def forward(self, x, context = None, mask = None):</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.dim = dim
+        self.layers = nn.ModuleList([])
+        norm_class = ScaleNorm if use_scalenorm else nn.LayerNorm
+        prenorm_fn<a id="change"> = </a><a id="change">partial(</a>PreNorm, dim<a id="change">, norm_class = norm_class)</a>
+
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                prenorm_fn(Attention(dim, dim_head = dim_head, heads = heads)),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/11a90584ab819e9b975dc3dc85249790e9cb6be6#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6418484</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 11a90584ab819e9b975dc3dc85249790e9cb6be6</div><div id='time'> Time: 2020-11-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: Encoder</div><div id='n_method'> N Class Name: Encoder</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 100</div><div id='m_end'> M End Line: 101</div><div id='n_start'> N Start Line: 110</div><div id='n_end'> N End Line: 119</div><BR>

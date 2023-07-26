@@ -1,0 +1,110 @@
+<html><h3>Pattern ID :1045
+</h3><img src='3213731.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.input_feat_len = input_feat_len
+
+        self.net = <a id="change">nn.Sequential(
+            nn.Linear(</a>self.input_feat_len, self.input_feat_len<a id="change">*</a>3<a id="change">)</a>,
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(self.input_feat_len*3, self.input_feat_len*3),
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(self.input_feat_len*3, self.input_feat_len),
+            nn.ReLU(),
+            nn.Linear(self.input_feat_len, 1)<a id="change">
+        )</a>
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        return self.net(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.num_layers = num_layers
+        self.width = width
+
+        self.linears = nn.ModuleList(<a id="change">[</a>nn.Linear(self.input_feat_len, width)<a id="change"></a>])
+        self.linears.extend([nn.Linear(width, width) for i in range(1, self.num_layers-1)])
+        self.output = nn.Linear(width, 1)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/microsoft/archai/commit/de9f58e7d18749d3dc65f6edada0285fb264dd04#diff-39212ff150e119ccf87d2787c8f8aa3b139d000abcf63c649107ea2400203168L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3213731</div><div id='project'> Project Name: microsoft/archai</div><div id='commit'> Commit Name: de9f58e7d18749d3dc65f6edada0285fb264dd04</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: dedey@microsoft.com</div><div id='file'> File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_class'> M Class Name: FFEnsembleMember</div><div id='n_method'> N Class Name: FFEnsembleMember</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='n_file'> N File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 97</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        l = input_size // 8
+        mult1, mult2 = mlp_hidden_mults
+
+        self.mlp = <a id="change">nn.Sequential(
+            </a>nn.Linear(input_size, l * mult1),
+            <a id="change">nn.ReLU()</a>,
+            <a id="change">nn.Linear(</a>l<a id="change"> * </a>mult1, l * mult2<a id="change">)</a>,
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(l * mult2, dim_out)<a id="change">
+        )</a>
+
+    def forward(self, x_categ, x_cont):
+        assert x_categ.shape[-1] == self.num_categories, f&quotyou must pass in {self.num_categories} values for your categories input&quot
+        x_categ += self.categories_offset</code></pre><h3>After Change</h3><pre><code class='java'>
+        l = input_size // 8
+
+        hidden_dimensions = list(map(lambda t: l * t, mlp_hidden_mults))
+        all_dimensions = <a id="change">[</a>input_size, *hidden_dimensions, dim_out<a id="change"></a>]
+        self.mlp = MLP(all_dimensions)
+
+    def forward(self, x_categ, x_cont):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/tab-transformer-pytorch/commit/474d9654d739c8004502c08a49ba6fed51afadb6#diff-d87dc12538c5ed85349330c1ea686aed85875355e3b485c6d2ab4ae1d54231c6L75' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3213697</div><div id='project'> Project Name: lucidrains/tab-transformer-pytorch</div><div id='commit'> Commit Name: 474d9654d739c8004502c08a49ba6fed51afadb6</div><div id='time'> Time: 2020-12-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: tab_transformer_pytorch/tab_transformer_pytorch.py</div><div id='m_class'> M Class Name: TabTransformer</div><div id='n_method'> N Class Name: TabTransformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tab_transformer_pytorch/tab_transformer_pytorch.py</div><div id='n_file'> N File Name: tab_transformer_pytorch/tab_transformer_pytorch.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 134</div><div id='n_start'> N Start Line: 145</div><div id='n_end'> N End Line: 150</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        self.input_feat_len = input_feat_len
+
+        self.net = <a id="change">nn.Sequential(
+            nn.Linear(</a>self.input_feat_len, self.input_feat_len<a id="change">*</a>3<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Linear(self.input_feat_len*3, self.input_feat_len*3),
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(self.input_feat_len*3, self.input_feat_len),
+            <a id="change">nn.ReLU()</a>,
+            nn.Linear(self.input_feat_len, 1)<a id="change">
+        )</a>
+
+    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:
+        return self.net(x)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.num_layers = num_layers
+        self.width = width
+
+        self.linears = nn.ModuleList(<a id="change">[</a>nn.Linear(self.input_feat_len, width)<a id="change"></a>])
+        self.linears.extend([nn.Linear(width, width) for i in range(1, self.num_layers-1)])
+        self.output = nn.Linear(width, 1)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/microsoft/archai/commit/de9f58e7d18749d3dc65f6edada0285fb264dd04#diff-39212ff150e119ccf87d2787c8f8aa3b139d000abcf63c649107ea2400203168L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3213735</div><div id='project'> Project Name: microsoft/archai</div><div id='commit'> Commit Name: de9f58e7d18749d3dc65f6edada0285fb264dd04</div><div id='time'> Time: 2022-12-16</div><div id='author'> Author: dedey@microsoft.com</div><div id='file'> File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_class'> M Class Name: FFEnsembleMember</div><div id='n_method'> N Class Name: FFEnsembleMember</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='n_file'> N File Name: archai/nas/predictive_dnn_ensemble.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 103</div><div id='n_start'> N Start Line: 97</div><div id='n_end'> N End Line: 106</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                        stride=np.array(stride, dtype=np.float32),
+                    )
+                &#47&#47 noinspection PyUnboundLocalVariable
+                self.rgb_cnn = <a id="change">nn.Sequential(
+                    </a>nn.Conv2d(
+                        in_channels=self._n_input_rgb,
+                        out_channels=32,
+                        kernel_size=self._cnn_layers_kernel_size[0],
+                        stride=self._cnn_layers_stride[0],
+                    ),
+                    nn.ReLU(True),
+                    nn.Conv2d(
+                        in_channels=32,
+                        out_channels=64,
+                        kernel_size=self._cnn_layers_kernel_size[1],
+                        stride=self._cnn_layers_stride[1],
+                    ),
+                    <a id="change">nn.ReLU(</a>True<a id="change">)</a>,
+                    nn.Conv2d(
+                        in_channels=64,
+                        out_channels=32,
+                        kernel_size=self._cnn_layers_kernel_size[2],
+                        stride=self._cnn_layers_stride[2],
+                    ),
+                    &#47&#47  nn.ReLU(True),
+                    nn.Flatten(),
+                    <a id="change">nn.Linear(</a>32<a id="change"> * rgb_cnn_dims[0] * </a>rgb_cnn_dims[1], output_size<a id="change">)</a>,
+                    <a id="change">nn.ReLU(</a>True<a id="change">),
+                )</a>
+                self.layer_init(self.rgb_cnn)
+
+            if self._n_input_depth &gt; 0:
+                for kernel_size, stride in zip(</code></pre><h3>After Change</h3><pre><code class='java'>
+                        kernel_size=np.array(kernel_size, dtype=np.float32),
+                        stride=np.array(stride, dtype=np.float32),
+                    )
+                layer_channels = <a id="change">[</a>32, 64, 32<a id="change"></a>]
+                &#47&#47 noinspection PyUnboundLocalVariable
+                self.rgb_cnn = make_cnn(
+                    input_channels=self._n_input_rgb,</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/allenai/allenact/commit/ce6f216b3b535e9f7730dd3ea153f8f86c2c9c99#diff-79d354167caee1b1c72deb08d3ff2ec56246c59bea51c9c356eda36051decb9fL38' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3213739</div><div id='project'> Project Name: allenai/allenact</div><div id='commit'> Commit Name: ce6f216b3b535e9f7730dd3ea153f8f86c2c9c99</div><div id='time'> Time: 2020-03-27</div><div id='author'> Author: jordis@allenai.org</div><div id='file'> File Name: models/basic_models.py</div><div id='m_class'> M Class Name: SimpleCNN</div><div id='n_method'> N Class Name: SimpleCNN</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/basic_models.py</div><div id='n_file'> N File Name: models/basic_models.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 156</div><div id='n_start'> N Start Line: 91</div><div id='n_end'> N End Line: 126</div><BR>

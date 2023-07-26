@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        stage_with_gcb = [False, False, False, False]
+        if gcb and stage_with_gcb_str:
+            stage_with_gcb_list = map(int, stage_with_gcb_str.split(&quot,&quot))
+            <a id="change">for n</a> in stage_with_gcb_list<a id="change">:
+                </a>stage_with_gcb[n]<a id="change"> = </a>True
+        if num_layers in [50, 101, &quot101_32x8d&quot]:
+            if num_layers == 50:
+                resnet_fn = resnet50</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.bn = nn.Sequential(nn.BatchNorm2d(reduce_dim))
+        self._init_bn(self.bn)
+
+        self.loss_type<a id="change"> = </a>loss_type
+        <a id="change">if &quotsoftmax&quot in self.loss_type</a><a id="change">:
+            </a>self.fc_layer = nn.Sequential(nn.Dropout(), nn.Linear(reduce_dim, num_classes))
+            self._init_fc(self.fc_layer)
+            if &quotlabelsmooth&quot in self.loss_type:
+                self.ce_loss<a id="change"> = </a>CrossEntropyLabelSmooth(num_classes)
+            else:
+                self.ce_loss<a id="change"> = </a>nn.CrossEntropyLoss()  &#47&#47 .cuda()
+        elif &quotarcface&quot in self.loss_type:
+            pass
+        elif &quotcircle&quot in self.loss_type:
+            self.fc_layer<a id="change"> = </a>Circle(num_classes, reduce_dim)
+
+        if &quottriplet&quot in self.loss_type:
+            self.tri_loss = TripletLoss(margin, normalize_feature=not &quotcircle&quot in self.loss_type) &#47&#47.cuda()</code></pre>

@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 mixup args
+        assert mix_mode in [
+            "mixup", "manifoldmix", "cutmix", "saliencymix", "resizemix", "fmix"]
+        if mix_mode in <a id="change">[</a>"manifoldmix"<a id="change"></a>]:
+            assert 0 == min(mix_args[mix_mode]["layer"]) and max(mix_args[mix_mode]["layer"]) &lt; 4
+        if mix_mode == "resizemix":
+            assert 0 &lt;= min(mix_args[mix_mode]["scope"]) and max(mix_args[mix_mode]["scope"]) &lt;= 1</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert 1 &lt;= ratio_ul and 0 &lt; p_cutoff &lt;= 1
+
+        &#47&#47 mixup args
+        self.mix_mode = mix_mode if <a id="change">isinstance(</a>mix_mode, list<a id="change">)</a> else [str(mix_mode)]
+        for _mode in self.mix_mode:
+            assert _mode in ["vanilla", "mixup", "manifoldmix", "cutmix", "saliencymix", "resizemix", "fmix"]
+            if _mode == "manifoldmix":
+                assert 0 &lt;= min(mix_args[_mode]["layer"]) and max(mix_args[_mode]["layer"]) &lt; 4
+            if _mode == "resizemix":
+                assert 0 &lt;= min(mix_args[_mode]["scope"]) and max(mix_args[_mode]["scope"]) &lt;= 1
+        self.alpha = alpha if isinstance(alpha, list) else [float(alpha)]
+        assert len(self.alpha) == len(self.mix_mode) and len(self.mix_mode) &lt; 6
+        self.idx_list = [i for i in range(len(self.mix_mode))]
+        self.mix_args = mix_args
+        self.mix_prob = mix_prob if <a id="change">isinstance(</a>mix_prob, list<a id="change">)</a> else None
+        if self.mix_prob is not None:
+            assert len(self.mix_prob) == len(self.alpha) and abs(sum(self.mix_prob)-1e-10) &lt;= 1, \
+                "mix_prob={}, sum={}, alpha={}".format(self.mix_prob, sum(self.mix_prob), self.alpha)</code></pre>

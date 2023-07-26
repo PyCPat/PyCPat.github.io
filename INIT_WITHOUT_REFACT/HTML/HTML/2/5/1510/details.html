@@ -1,0 +1,60 @@
+<html><h3>Pattern ID :1510
+</h3><img src='4196184.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        bias_value = -math.log((1 - prior_prob) / prior_prob)
+        for modules in self.conf:
+            for l in modules.modules():
+                <a id="change">if isinstance(l</a>, nn.Conv2d<a id="change">)</a><a id="change">:
+                    </a>torch.nn.init.normal_(l.weight, std=0.01)
+                    <a id="change">torch.nn.init.constant_(</a>l.bias, bias_value<a id="change">)</a>
+
+    def forward(self, x):
+        loc = list()
+        conf = list()</code></pre><h3>After Change</h3><pre><code class='java'>
+        bias_value = -math.log((1 - prior_prob) / prior_prob)
+        for modules in self.conf:
+            torch.nn.init.normal_(modules[-1].weight, std=0.01)
+            <a id="change">torch.nn.init.constant_(</a>modules[-1].bias, bias_value<a id="change">)</a>
+
+    def forward(self, x):
+        fea = list()
+        loc = list()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/a1922567db242ed73012d090b249066d1159a902#diff-173712d78c4a4bd55ef9e83dfc90dcc8b50acd30105eeeb8efc089e7b558a265L33' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4196184</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: a1922567db242ed73012d090b249066d1159a902</div><div id='time'> Time: 2021-06-01</div><div id='author'> Author: heng.zhang@irisa.fr</div><div id='file'> File Name: models/detector.py</div><div id='m_class'> M Class Name: Detector</div><div id='n_method'> N Class Name: Detector</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/detector.py</div><div id='n_file'> N File Name: models/detector.py</div><div id='m_start'> M Start Line: 33</div><div id='m_end'> M End Line: 88</div><div id='n_start'> N Start Line: 44</div><div id='n_end'> N End Line: 103</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.fpn = fpn_module(numClass)
+
+        &#47&#47 init fpn
+        for <a id="change">m</a> in self.fpn.children():
+            <a id="change">if </a>not <a id="change">isinstance(</a>m, ASPP<a id="change">)</a><a id="change">:
+                </a>nn.init.normal_(m.weight, mean=0, std=0.01)
+                <a id="change">nn.init.constant_(</a>m.bias, 0<a id="change">)</a>
+
+    def forward(self, x):
+        &#47&#47 Top-down</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 init fpn
+        for m in self.fpn.children():
+            nn.init.normal_(m.weight, mean=0, std=0.01)
+            <a id="change">nn.init.constant_(</a>m.bias, 0<a id="change">)</a>
+
+    def forward(self, x):
+        &#47&#47 Top-down</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/shenzheng2000/sapnet-for-image-deraining/commit/b3362b2ddf2c17540609f4a832b00d91fca400ab#diff-c800a1e2b3c4c1ee8b0d3a02ef0d1e2359459749c9047777c66f603d888f2284L84' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4196188</div><div id='project'> Project Name: shenzheng2000/sapnet-for-image-deraining</div><div id='commit'> Commit Name: b3362b2ddf2c17540609f4a832b00d91fca400ab</div><div id='time'> Time: 2021-08-11</div><div id='author'> Author: 69662345+ShenZheng2000@users.noreply.github.com</div><div id='file'> File Name: Modeling/fpn.py</div><div id='m_class'> M Class Name: fpn</div><div id='n_method'> N Class Name: fpn</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: Modeling/fpn.py</div><div id='n_file'> N File Name: Modeling/fpn.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 98</div><div id='n_start'> N Start Line: 87</div><div id='n_end'> N End Line: 88</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 so that the residual branch starts with zeros, and each residual block behaves like an identity.
+        &#47&#47 This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for <a id="change">m</a> in self.modules():
+                <a id="change">if isinstance(</a>m, Bottleneck<a id="change">)</a><a id="change">:
+                    </a>nn.init.constant_(m.bn3.weight, 0)
+                elif isinstance(m, BasicBlock):
+                    <a id="change">nn.init.constant_(</a>m.bn2.weight, 0<a id="change">)</a>
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for m in self.modules():
+                <a id="change">nn.init.constant_(</a>m.bn2.weight, 0<a id="change">)</a>
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.inplanes != planes * block.expansion:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/jimmyyhwu/spatial-intention-maps/commit/ac6611579df7ff942886d49f8ed8f090f8b26235#diff-f0c59a5240882ba91c2abe5016bdd1ff0620e0b8ce5c46e8421d3962a5c4c278L93' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4196190</div><div id='project'> Project Name: jimmyyhwu/spatial-intention-maps</div><div id='commit'> Commit Name: ac6611579df7ff942886d49f8ed8f090f8b26235</div><div id='time'> Time: 2021-03-31</div><div id='author'> Author: jimmywu@alum.mit.edu</div><div id='file'> File Name: resnet.py</div><div id='m_class'> M Class Name: ResNet</div><div id='n_method'> N Class Name: ResNet</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: resnet.py</div><div id='n_file'> N File Name: resnet.py</div><div id='m_start'> M Start Line: 122</div><div id='m_end'> M End Line: 128</div><div id='n_start'> N Start Line: 84</div><div id='n_end'> N End Line: 84</div><BR>

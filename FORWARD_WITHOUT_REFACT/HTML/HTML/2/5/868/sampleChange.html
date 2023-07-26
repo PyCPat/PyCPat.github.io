@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        l_neg = torch.einsum(&quotnc,ck-&gt;nk&quot, [q, self.queue.clone().detach()])
+
+        &#47&#47 logits: Nx(1+K)
+        logits<a id="change"> = </a>torch.cat([l_pos, l_neg], dim=1)
+
+        &#47&#47 apply temperature
+        logits /= self.T
+
+        &#47&#47 labels: positive key indicators
+        labels = torch.zeros(logits.shape[0], dtype=torch.long).cuda()
+
+
+        &#47&#47&#47&#47 densecl logits
+        d_pos = torch.einsum(&quotncm,ncm-&gt;nm&quot, dense_q, dense_k_norm).unsqueeze(1)
+        d_neg = torch.einsum(&quotncm,ck-&gt;nkm&quot, dense_q, self.queue_dense.clone().detach())
+        logits_dense = torch.cat([d_pos, d_neg], dim=1)
+        logits_dense = logits_dense / self.T
+        labels_dense<a id="change"> = </a><a id="change">torch.zeros(</a>(n, h*w)<a id="change">, dtype=torch.long)</a>.cuda()
+
+        &#47&#47 dequeue and enqueue
+        self._dequeue_and_enqueue(k, dense_k)
+
+        return logits<a id="change">, labels, logits_dense, labels_dense</a>
+
+
+&#47&#47 utils
+@torch.no_grad()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 negative logits: NxK
+        l_neg = torch.einsum(&quotnc,ck-&gt;nk&quot, [q, self.queue.clone().detach()])
+
+        l_pos, l_neg = l_pos / self.T<a id="change">, l_neg / self.T</a>
+
+        &#47&#47  &#47&#47 logits: Nx(1+K)
+        &#47&#47  logits = torch.cat([l_pos, l_neg], dim=1)
+        &#47&#47</code></pre>

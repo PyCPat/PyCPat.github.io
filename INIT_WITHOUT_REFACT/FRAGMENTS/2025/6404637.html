@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.blur_filter_size = blur_filter_size
+        self.stride = stride
+
+        <a id="change">if </a>blur_filter_size == 3<a id="change">:
+            </a>pad_size = <a id="change">[1</a>] * 4
+            blur_matrix<a id="change"> = </a>torch.Tensor([<a id="change">[1.</a>, <a id="change">2.</a>, <a id="change">1</a>]]) / 4  &#47&#47 binomial filter b2
+        else:
+            pad_size<a id="change"> = </a><a id="change">[2</a>] * 4
+            blur_matrix = torch.Tensor([<a id="change">[1.</a>, <a id="change">4.</a>, <a id="change">6.</a>, <a id="change">4.</a>, <a id="change">1.</a>]]) / 16  &#47&#47 binomial filter b4
+
+        self.padding = nn.ReflectionPad2d(pad_size)
+        blur_filter = blur_matrix * blur_matrix.T</code></pre><h3>After Change</h3><pre><code class='java'>
+        pad_size = [get_padding(blur_filter_size, stride, dilation=1)] * 4
+        self.padding = nn.ReflectionPad2d(pad_size)
+
+        blur_matrix = (np.poly1d((<a id="change">0.5</a><a id="change">, 0.5</a>)) ** (blur_filter_size - 1)).coeffs
+        blur_filter = torch.Tensor(blur_matrix[:, None] * blur_matrix[None, :])
+        &#47&#47 FIXME figure a clean hack to prevent the filter from getting saved in weights, but still
+        &#47&#47 plays nice with recursive module apply for fn like .cuda(), .type(), etc -RW</code></pre>

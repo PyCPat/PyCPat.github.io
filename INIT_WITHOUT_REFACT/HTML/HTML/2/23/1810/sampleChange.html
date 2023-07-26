@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                padding=1
+            )
+
+        self.conv1<a id="change"> = </a><a id="change">nn.Conv2d(</a>in_channels, out_channels, <a id="change">3</a>, <a id="change">1</a><a id="change">, padding=1)</a>
+        self.conv2<a id="change"> = </a><a id="change">nn.Conv2d(</a>out_channels, out_channels, <a id="change">3</a>, <a id="change">1</a><a id="change">, padding=1)</a>
+
+        &#47&#47 Batch Normalization
+        self.bn1<a id="change"> = </a><a id="change">nn.BatchNorm2d(</a>in_channels<a id="change">)</a>
+        self.bn2<a id="change"> = </a><a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">)</a>
+
+        self.model1 = nn.Sequential(
+            self.bn1,
+            nn.ReLU(),</code></pre><h3>After Change</h3><pre><code class='java'>
+            noise_channel, out_channels, use_affine_level)
+
+        self.model1 = nn.Sequential(
+            <a id="change">nn.BatchNorm2d(</a>in_channels<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Upsample(scale_factor=2) if stride &gt; 1 else nn.Identity(),
+            <a id="change">nn.Conv2d(</a>in_channels, out_channels, <a id="change">3</a>, <a id="change">1</a><a id="change">, padding=1)</a>
+        )
+        self.model2 = nn.Sequential(
+            <a id="change">nn.BatchNorm2d(</a>out_channels<a id="change">)</a>,
+            nn.ReLU(),
+            nn.Dropout(dropout) if dropout &gt; 0 else nn.Identity(),
+            <a id="change">nn.Conv2d(</a>out_channels, out_channels, <a id="change">3</a>, <a id="change">1</a><a id="change">, padding=1)</a>
+        )
+        self.bypass = <a id="change">nn.Sequential(
+            </a>nn.Upsample(scale_factor=2) if stride &gt; 1 else nn.Identity(),
+            nn.Conv2d(in_channels, out_channels, 1, 1)<a id="change">
+        )</a>
+
+    def forward(self, x_in, noise_embed):
+        x = self.model1(x_in)
+        x = self.noise_func(x, noise_embed)</code></pre>

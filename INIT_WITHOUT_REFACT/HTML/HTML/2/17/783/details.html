@@ -1,0 +1,95 @@
+<html><h3>Pattern ID :783
+</h3><img src='2671113.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            raise ValueError
+        inverted_residual=InvertedResidual
+
+        <a id="change">if len(stages_repeats) != 3</a><a id="change">:
+            </a>raise ValueError(&quotexpected stages_repeats as list of 3 positive ints&quot)
+        <a id="change">if len(stages_out_channels) != 5</a><a id="change">:
+            </a><a id="change">raise ValueError(&quotexpected stages_out_channels as list of 5 positive ints&quot</a><a id="change">)</a>
+        self._stage_out_channels = stages_out_channels
+
+        input_channels = 3
+        output_channels = self._stage_out_channels[0]</code></pre><h3>After Change</h3><pre><code class='java'>
+        if self.version == "shufflenet-0.5":
+            self._stage_out_channels = [24, 48, 96, 192, 1024]
+            self.out_channels = (96, 192)
+        elif <a id="change">self.version == "shufflenet-1.0"</a><a id="change">:
+            </a>self._stage_out_channels = [24, 116, 232, 464, 1024]
+            self.out_channels = (232, 464)
+        elif <a id="change">self.version == "shufflenet-1.5"</a><a id="change">:
+            </a>self._stage_out_channels = <a id="change">[</a>24, 176, 352, 704, 1024<a id="change"></a>]
+            self.out_channels = (352, 704)
+        elif self.version == "shufflenet-2.0":
+            self._stage_out_channels = [24, 244, 488, 976, 2048]</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 11</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/zhangheng19931123/mutualguide/commit/e34b6b0002f1571fad0fa9bf00707f377f5fc431#diff-4892922bde066f0db4875cc0fb518b43128cfd93170f612f72b9760feee3e78bL69' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2671113</div><div id='project'> Project Name: zhangheng19931123/mutualguide</div><div id='commit'> Commit Name: e34b6b0002f1571fad0fa9bf00707f377f5fc431</div><div id='time'> Time: 2022-07-01</div><div id='author'> Author: zhanghengdev@outlook.com</div><div id='file'> File Name: models/backbone/shufflenet_backbone.py</div><div id='m_class'> M Class Name: ShuffleNetBackbone</div><div id='n_method'> N Class Name: ShuffleNetBackbone</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/backbone/shufflenet_backbone.py</div><div id='n_file'> N File Name: models/backbone/shufflenet_backbone.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 106</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 136</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.out_channels  =out_channels
+        self.dim = dim
+
+        <a id="change">if self.dim ==2</a><a id="change">:
+            </a>make_conv = ConvNormActive2D
+        elif <a id="change">dim ==3</a><a id="change">:
+            </a>make_conv = ConvNormActive3D
+        else:
+            <a id="change">raise ValueError(&quotdim should be 2 or 3&quot</a><a id="change">)</a>
+
+        &#47&#47 构建projection
+        if self.out_channels != self.in_channels: &#47&#47 输入输出channel不一样，则添加projection改变输入通道,用于不同stage的过渡处
+            self.projection = make_conv(in_channels=self.in_channels,out_channels=self.out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+    
+    def __init__(self, type, in_channels, middle_channels, out_channels, norm=&quotbn&quot, active=&quotrelu&quot, gn_c=8, dim=2):
+        super().__init__()
+        <a id="change">self.type</a> = type
+        self.in_channels = in_channels
+        self.middle_channels = middle_channels
+        self.out_channels = out_channels
+        self.dim = dim
+
+        
+        If the input/output channels are different, 
+        add projection to alter the input channel for transitions at different stages
+        
+        if self.out_channels != self.in_channels:
+            self.projection = MakeConv(in_channels=self.in_channels, out_channels=self.out_channels, kernel_size=1, dim=dim,padding=0)
+        else:
+            self.projection = nn.Identity()
+
+
+        &#47&#47 build list
+        <a id="change">if self.type == &quot33&quot</a><a id="change">:
+            </a>self.conv_list = nn.ModuleList([])
+            self.conv_list.append(ConvNormActive(in_channels, out_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(out_channels, out_channels, kernel_size=3, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim))
+        elif <a id="change">self.type == &quot131&quot</a><a id="change">:
+            </a>self.conv_list = nn.ModuleList(<a id="change">[]</a>)
+            self.conv_list.append(ConvNormActive(in_channels, middle_channels, kernel_size=1, norm=norm, active=active, gn_c = gn_c, dim = dim, padding=0))
+            self.conv_list.append(ConvNormActive(middle_channels, middle_channels, kernel_size=3, norm=norm, active=active, gn_c = gn_c, dim = dim))
+            self.conv_list.append(ConvNormActive(middle_channels, out_channels, kernel_size=1, norm=norm, active=&quotNone&quot, gn_c = gn_c, dim = dim, padding=0))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wamawama/wama_modules/commit/b2bf89e72b262002500e8271f984d6f8afac7eb3#diff-fd72c83d7a844cbbdef927405a10ec8803d51b0f46ea91e27f31e7b97e5e3c1cL362' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2671114</div><div id='project'> Project Name: wamawama/wama_modules</div><div id='commit'> Commit Name: b2bf89e72b262002500e8271f984d6f8afac7eb3</div><div id='time'> Time: 2022-10-25</div><div id='author'> Author: wmy19970215@gmail.com</div><div id='file'> File Name: wama_modules/BaseModule.py</div><div id='m_class'> M Class Name: ResBlock</div><div id='n_method'> N Class Name: ResBlock</div><div id='m_method'> M Method Name: __init__(9)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: wama_modules/BaseModule.py</div><div id='n_file'> N File Name: wama_modules/BaseModule.py</div><div id='m_start'> M Start Line: 362</div><div id='m_end'> M End Line: 384</div><div id='n_start'> N Start Line: 357</div><div id='n_end'> N End Line: 389</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            raise ValueError
+        inverted_residual=InvertedResidual
+
+        <a id="change">if len(stages_repeats) != 3</a><a id="change">:
+            </a>raise ValueError(&quotexpected stages_repeats as list of 3 positive ints&quot)
+        <a id="change">if len(stages_out_channels) != 5</a><a id="change">:
+            </a><a id="change">raise ValueError(&quotexpected stages_out_channels as list of 5 positive ints&quot</a><a id="change">)</a>
+        self._stage_out_channels = stages_out_channels
+
+        input_channels = 3
+        output_channels = self._stage_out_channels[0]</code></pre><h3>After Change</h3><pre><code class='java'>
+class ShuffleNetBackbone(nn.Module):
+    def __init__(self, version="shufflenet-1.0", pretrained=True):
+        super(ShuffleNetBackbone, self).__init__()
+        <a id="change">self.version</a> = version
+        if self.version == "shufflenet-0.5":
+            self._stage_out_channels = [24, 48, 96, 192, 1024]
+            self.out_channels = (96, 192)
+        elif <a id="change">self.version == "shufflenet-1.0"</a><a id="change">:
+            </a>self._stage_out_channels = [24, 116, 232, 464, 1024]
+            self.out_channels = (232, 464)
+        elif <a id="change">self.version == "shufflenet-1.5"</a><a id="change">:
+            </a>self._stage_out_channels = <a id="change">[</a>24, 176, 352, 704, 1024<a id="change"></a>]
+            self.out_channels = (352, 704)
+        elif self.version == "shufflenet-2.0":
+            self._stage_out_channels = [24, 244, 488, 976, 2048]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/zhanghengdev/mutualguide/commit/e34b6b0002f1571fad0fa9bf00707f377f5fc431#diff-4892922bde066f0db4875cc0fb518b43128cfd93170f612f72b9760feee3e78bL66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2671115</div><div id='project'> Project Name: zhanghengdev/mutualguide</div><div id='commit'> Commit Name: e34b6b0002f1571fad0fa9bf00707f377f5fc431</div><div id='time'> Time: 2022-07-01</div><div id='author'> Author: zhanghengdev@outlook.com</div><div id='file'> File Name: models/backbone/shufflenet_backbone.py</div><div id='m_class'> M Class Name: ShuffleNetBackbone</div><div id='n_method'> N Class Name: ShuffleNetBackbone</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/backbone/shufflenet_backbone.py</div><div id='n_file'> N File Name: models/backbone/shufflenet_backbone.py</div><div id='m_start'> M Start Line: 69</div><div id='m_end'> M End Line: 106</div><div id='n_start'> N Start Line: 92</div><div id='n_end'> N End Line: 136</div><BR>

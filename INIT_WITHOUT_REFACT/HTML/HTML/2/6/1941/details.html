@@ -1,0 +1,66 @@
+<html><h3>Pattern ID :1941
+</h3><img src='5049517.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.output_tokens = output_tokens
+        self.image_size = to_2tuple(image_size)
+        self.patch_size = to_2tuple(patch_size)
+        self.grid_size = (<a id="change">self.image_size[0]</a> // self.patch_size[0], <a id="change">self.image_size[1]</a> // self.patch_size[1])
+        self.output_dim = output_dim
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if dual_patchnorm:
+            patch_input_dim = patch_height * patch_width * 3
+            self.patchnorm_pre_ln = LayerNorm(patch_input_dim)
+            self.conv1 = <a id="change">nn.Linear(</a>patch_input_dim, width<a id="change">)</a>
+        else:
+            self.patchnorm_pre_ln = nn.Identity()
+            self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/mlfoundations/open_clip/commit/bd82c5e61542a9e160df383f96611896528eb9b7#diff-6ab3a5f5da1d07042589cbaeae3ff6e10b05897bf1684f2f9b2b688ae7ecee16L341' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5049517</div><div id='project'> Project Name: mlfoundations/open_clip</div><div id='commit'> Commit Name: bd82c5e61542a9e160df383f96611896528eb9b7</div><div id='time'> Time: 2023-02-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: src/open_clip/transformer.py</div><div id='m_class'> M Class Name: VisionTransformer</div><div id='n_method'> N Class Name: VisionTransformer</div><div id='m_method'> M Method Name: __init__(18)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/open_clip/transformer.py</div><div id='n_file'> N File Name: src/open_clip/transformer.py</div><div id='m_start'> M Start Line: 347</div><div id='m_end'> M End Line: 351</div><div id='n_start'> N Start Line: 341</div><div id='n_end'> N End Line: 365</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            channels += num_filters * tc_layers[i]
+
+        self.layers.add_module("attention_{}".format(len(att_layers)-1),
+                               AttentionBlock(channels, att_layers[-1][0], <a id="change">att_layers[-1]</a>[1], device))
+        channels += <a id="change">att_layers[-1]</a>[1]
+
+        channels += additional_length
+        fc_layers = list(fc_layers) + [out_channels]</code></pre><h3>After Change</h3><pre><code class='java'>
+        channels += additional_length
+        fc_layers = list(fc_layers) + [out_channels]
+
+        self.layers.add_module("fc_amalgamate", <a id="change">nn.Linear(</a>seq_length, 1<a id="change">)</a>.to(device))
+        for i in range(len(fc_layers)):
+            self.layers.add_module("fc_{}".format(i), nn.Linear(channels, fc_layers[i]).to(device))
+            channels = fc_layers[i]</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/iffix/machin/commit/5b8d4a14723b753d9ee9d6dece151e40b3531c98#diff-b99a43ebb8bdea7f7a9ff2be74dc2b460878eec11cb5e5374efa147eedc92cf6L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5049516</div><div id='project'> Project Name: iffix/machin</div><div id='commit'> Commit Name: 5b8d4a14723b753d9ee9d6dece151e40b3531c98</div><div id='time'> Time: 2020-04-25</div><div id='author'> Author: hanhanmumuqq@163.com</div><div id='file'> File Name: models/base/tcdnnet.py</div><div id='m_class'> M Class Name: TCDNNet</div><div id='n_method'> N Class Name: TCDNNet</div><div id='m_method'> M Method Name: __init__(11)</div><div id='n_method'> N Method Name: __init__(11)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/base/tcdnnet.py</div><div id='n_file'> N File Name: models/base/tcdnnet.py</div><div id='m_start'> M Start Line: 109</div><div id='m_end'> M End Line: 139</div><div id='n_start'> N Start Line: 195</div><div id='n_end'> N End Line: 218</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+    ):
+        super().__init__()
+        self.output_tokens = output_tokens
+        <a id="change">self.image_size</a> = to_2tuple(image_size)
+        self.patch_size = to_2tuple(patch_size)
+        self.grid_size = (<a id="change">self.image_size[0]</a> // self.patch_size[0], <a id="change">self.image_size[1]</a> // self.patch_size[1])
+        self.output_dim = output_dim
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if dual_patchnorm:
+            patch_input_dim = patch_height * patch_width * 3
+            self.patchnorm_pre_ln = LayerNorm(patch_input_dim)
+            self.conv1 = <a id="change">nn.Linear(</a>patch_input_dim, width<a id="change">)</a>
+        else:
+            self.patchnorm_pre_ln = nn.Identity()
+            self.conv1 = nn.Conv2d(in_channels=3, out_channels=width, kernel_size=patch_size, stride=patch_size, bias=False)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mlfoundations/open_clip/commit/bd82c5e61542a9e160df383f96611896528eb9b7#diff-6ab3a5f5da1d07042589cbaeae3ff6e10b05897bf1684f2f9b2b688ae7ecee16L326' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5049519</div><div id='project'> Project Name: mlfoundations/open_clip</div><div id='commit'> Commit Name: bd82c5e61542a9e160df383f96611896528eb9b7</div><div id='time'> Time: 2023-02-06</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: src/open_clip/transformer.py</div><div id='m_class'> M Class Name: VisionTransformer</div><div id='n_method'> N Class Name: VisionTransformer</div><div id='m_method'> M Method Name: __init__(18)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/open_clip/transformer.py</div><div id='n_file'> N File Name: src/open_clip/transformer.py</div><div id='m_start'> M Start Line: 347</div><div id='m_end'> M End Line: 351</div><div id='n_start'> N Start Line: 341</div><div id='n_end'> N End Line: 365</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                                 padding=kernel_size[i] // 2))
+            net.append(nn.LeakyReLU(leaky))
+        net.append(nn.Flatten())
+        net.append(nn.Linear(<a id="change">output_units[0]</a>, <a id="change">output_units[0]</a>))
+        self.net = nn.Sequential(*net)
+
+    def forward(self, x):</code></pre><h3>After Change</h3><pre><code class='java'>
+                                 padding=kernel_size[i] // 2))
+            net.append(nn.LeakyReLU(leaky))
+        net.append(nn.Flatten())
+        net.append(<a id="change">nn.Linear(</a>*<a id="change">output_units)</a>)
+        self.net = nn.Sequential(*net)
+
+    def forward(self, x):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/vincentstimper/resampled-base-flows/commit/b6dd8dba417711f5536a493c3f21bcc63e1b16c7#diff-c513fa6313ecd8f43110fd6e261a49cfa266133b31d9c46843eae98955f8ed96L11' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5049524</div><div id='project'> Project Name: vincentstimper/resampled-base-flows</div><div id='commit'> Commit Name: b6dd8dba417711f5536a493c3f21bcc63e1b16c7</div><div id='time'> Time: 2020-09-25</div><div id='author'> Author: vincent.stimper@gmail.com</div><div id='file'> File Name: larsflow/nets.py</div><div id='m_class'> M Class Name: ConvNet2d</div><div id='n_method'> N Class Name: ConvNet2d</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: larsflow/nets.py</div><div id='n_file'> N File Name: larsflow/nets.py</div><div id='m_start'> M Start Line: 27</div><div id='m_end'> M End Line: 27</div><div id='n_start'> N Start Line: 27</div><div id='n_end'> N End Line: 27</div><BR>

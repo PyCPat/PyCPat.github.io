@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.mode = mode
+        assert self.mode in [&quotLoG&quot, &quotDoG&quot,]
+        grayscale = nn.Conv2d(3, 1, kernel_size=1, stride=1, padding=0, bias=False)
+        <a id="change">grayscale.weight.data.fill_(</a>1.0 / 3.0<a id="change">)</a>
+        laplacian_filter = nn.Conv2d(1, 1, kernel_size=5, stride=1, padding=2, bias=False)
+        if self.mode == &quotLoG&quot:
+            laplacian_filter.weight.data[0, 0].copy_(
+                torch.FloatTensor([[0,  0,   1,  0,  0,],</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mode = mode
+        self.use_threshold = use_threshold
+        assert self.mode in [&quotLoG&quot, &quotDoG&quot,]
+        <a id="change">if </a>to_grayscale<a id="change">:
+            </a>grayscale = nn.Conv2d(
+                in_channels=3, out_channels=1, kernel_size=1, bias=False)
+            <a id="change">grayscale.weight.data.fill_(</a>1.0 / 3.0<a id="change">)</a>
+        else:
+            grayscale = nn.Identity()
+        laplacian_filter = nn.Conv2d(
+            in_channels=1, out_channels=1, kernel_size=5, stride=1,</code></pre>

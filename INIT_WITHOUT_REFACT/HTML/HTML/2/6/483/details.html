@@ -1,0 +1,78 @@
+<html><h3>Pattern ID :483
+</h3><img src='1567447.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        if residual:
+            res_list = nn.ModuleList()
+
+            <a id="change">if </a>residual_mode == "stride_add"<a id="change">:
+                </a>stride_val<a id="change"> = </a>stride
+            else:
+                stride_val = [1]
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        stride_last: bool = False,
+    ):
+        super().__init__()
+        if <a id="change">separable and heads != -1</a>:
+            raise ValueError(
+                "Separable convolutions are not compatible with multiple heads"
+            )
+
+        kernel_size_factor = float(kernel_size_factor)
+        kernel_size = [
+            compute_new_kernel_size(k, kernel_size_factor) for k in kernel_size
+        ]
+        padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
+
+        self.residual_mode = residual_mode
+
+        inplanes_loop = inplanes
+        conv<a id="change"> = []</a>
+
+        for _ in range(repeat - 1):
+            &#47&#47 Stride last means only the last convolution in block will have stride
+            if stride_last:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/scart97/thunder-speech/commit/7d74ab01c5cba3921b0c91bdd1354b85daa8c2f8#diff-466f09dc94a8d0261c5affeb35283ea929f8f99c0560176aff78070c963baf18L342' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1567447</div><div id='project'> Project Name: scart97/thunder-speech</div><div id='commit'> Commit Name: 7d74ab01c5cba3921b0c91bdd1354b85daa8c2f8</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: scart.lucas@gmail.com</div><div id='file'> File Name: src/thunder/jasper/blocks.py</div><div id='m_class'> M Class Name: JasperBlock</div><div id='n_method'> N Class Name: JasperBlock</div><div id='m_method'> M Method Name: __init__(23)</div><div id='n_method'> N Method Name: __init__(25)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/thunder/jasper/blocks.py</div><div id='n_file'> N File Name: src/thunder/jasper/blocks.py</div><div id='m_start'> M Start Line: 342</div><div id='m_end'> M End Line: 466</div><div id='n_start'> N Start Line: 419</div><div id='n_end'> N End Line: 538</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 setting the device
+
+        <a id="change">if </a>not exists(accelerator) and not exists(device)<a id="change">:
+            </a>diffusion_prior_device<a id="change"> = </a>next(diffusion_prior.parameters()).device
+            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
+            self.device = diffusion_prior_device
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 mixed precision checks
+
+        if <a id="change">(
+            exists(self.accelerator) 
+            and self.accelerator.distributed_type == DistributedType.DEEPSPEED 
+            and self.diffusion_prior.clip is not None
+            )</a>:
+            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
+            cast_type_map<a id="change"> = {
+                </a>"fp16": torch.half,
+                "bf16": torch.bfloat16,
+                "no": torch.float<a id="change">
+            }</a>
+            precision_type = cast_type_map[accelerator.mixed_precision]
+            assert precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
+            self.diffusion_prior.clip.to(precision_type)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/f9423d308b6f36e51152c2c45045ff4ebb308287#diff-617450527162fa367141dbf45e8b201673573479820af0ffc56ba93b7f70947fL174' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1567445</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: f9423d308b6f36e51152c2c45045ff4ebb308287</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: 51308183+nousr@users.noreply.github.com</div><div id='file'> File Name: dalle2_pytorch/trainer.py</div><div id='m_class'> M Class Name: DiffusionPriorTrainer</div><div id='n_method'> N Class Name: DiffusionPriorTrainer</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/trainer.py</div><div id='n_file'> N File Name: dalle2_pytorch/trainer.py</div><div id='m_start'> M Start Line: 182</div><div id='m_end'> M End Line: 240</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 246</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        if first_input is not None:
+
+            &#47&#47 Shape check
+            <a id="change">if </a>len(first_input[0].shape) &gt; 5 or len(first_input[0].shape) &lt; 2<a id="change">:
+
+                </a>err_msg<a id="change"> = </a>(
+                    &quotThe input of "linear" must be a tensor with one of the  &quot
+                    "following dimensions: [time] or [batch,time] or "
+                    "[batch,channels,time]. Got %s "</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 Ensure kernel_size and padding are lists
+        if not isinstance(self.kernel_size, list):
+            self.kernel_size = [self.kernel_size]
+        if <a id="change">self.padding is not None and not isinstance(self.padding, list)</a>:
+            self.padding<a id="change"> = [</a>self.padding<a id="change"></a>]
+
+        &#47&#47 Making sure that the kernel size is odd (if the kernel is not
+        &#47&#47 symmetric there could a problem with the padding function)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/speechbrain/speechbrain/commit/0ff34ea8f75b108dc69542658d39b70118bf01ca#diff-a7c3190f943cb09b3b7e0b688790f61f6e5e838546dec54468346ae1c2be7e08L449' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1567444</div><div id='project'> Project Name: speechbrain/speechbrain</div><div id='commit'> Commit Name: 0ff34ea8f75b108dc69542658d39b70118bf01ca</div><div id='time'> Time: 2020-03-31</div><div id='author'> Author: plantinga.peter@gmail.com</div><div id='file'> File Name: speechbrain/nnet/architectures.py</div><div id='m_class'> M Class Name: conv</div><div id='n_method'> N Class Name: conv</div><div id='m_method'> M Method Name: __init__(12)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: speechbrain/nnet/architectures.py</div><div id='n_file'> N File Name: speechbrain/nnet/architectures.py</div><div id='m_start'> M Start Line: 458</div><div id='m_end'> M End Line: 611</div><div id='n_start'> N Start Line: 387</div><div id='n_end'> N End Line: 516</div><BR>

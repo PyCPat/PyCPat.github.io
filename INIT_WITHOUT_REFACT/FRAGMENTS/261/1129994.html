@@ -1,0 +1,19 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super(Conv, self).__init__()
+        self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        self.act = nn.Hardswish() if act else <a id="change">nn.Identity()</a>
+
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(Conv, self).__init__()
+        self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
+        self.bn = nn.BatchNorm2d(c2)
+        self.act = nn.Hardswish() if <a id="change">act is True</a> else (act<a id="change"> if isinstance(</a>act, nn.Module<a id="change">)</a><a id="change"> else </a><a id="change">nn.Identity()</a>)
+
+    def forward(self, x):
+        return self.act(self.bn(self.conv(x)))</code></pre>

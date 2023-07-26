@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :1569
+</h3><img src='4220053.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                Residual(PreNorm(dim, Attention(dim = dim, heads = heads, dim_head = dim_head, dropout = attn_dropout))),
+                <a id="change">Residual(PreNorm(</a>dim, FeedForward(dim = dim, dropout = ff_dropout)<a id="change">)</a><a id="change">)</a>
+            ]))
+
+        self.to_logits = nn.Sequential(
+            nn.LayerNorm(dim),</code></pre><h3>After Change</h3><pre><code class='java'>
+            attn.to_kv = shared_kv_proj
+
+            self.layers.append(nn.ModuleList([
+                <a id="change">Residual(PreNorm(</a>dim, attn<a id="change">)</a><a id="change">)</a>,
+                Residual(PreNorm(dim, ff))
+            ]))
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/feedback-transformer-pytorch/commit/8044063db1a5fc092c9ce68998dc1e301d9f7818#diff-6b348c286a3e8b8e064ec9c64a1f61ec6d6b66e7f14bae4c1b91af070d30c72eL192' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4220053</div><div id='project'> Project Name: lucidrains/feedback-transformer-pytorch</div><div id='commit'> Commit Name: 8044063db1a5fc092c9ce68998dc1e301d9f7818</div><div id='time'> Time: 2021-02-02</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='m_class'> M Class Name: FeedbackTransformer</div><div id='n_method'> N Class Name: FeedbackTransformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='n_file'> N File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='m_start'> M Start Line: 192</div><div id='m_end'> M End Line: 204</div><div id='n_start'> N Start Line: 194</div><div id='n_end'> N End Line: 212</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.ModuleList([])
+
+        for _ in range(depth):
+            layer = <a id="change">Residual(PreNorm(</a>dim, AdjacentAttention(
+                dim = dim,
+                dim_head = dim_head,
+                heads = heads
+            )<a id="change">)</a><a id="change">)</a>
+            self.layers.append(layer)
+
+    def forward(self, x, adjacency_mat, mask = None):
+        device = x.device</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                <a id="change">Residual(PreNorm(</a>dim, AdjacentAttention(
+                    dim = dim,
+                    dim_head = dim_head,
+                    heads = heads
+                )<a id="change">)</a><a id="change">)</a>,
+                Residual(PreNorm(dim, FeedForward(
+                    dim = dim
+                )))</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/adjacent-attention-network/commit/fa7a72d7d257d72c159b59572297133ee91905cb#diff-71f2ddd08dfbd4dae492be6a13060eb54c6e79f8b54246b5f612c2e7c269ab4fL94' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4220056</div><div id='project'> Project Name: lucidrains/adjacent-attention-network</div><div id='commit'> Commit Name: fa7a72d7d257d72c159b59572297133ee91905cb</div><div id='time'> Time: 2020-12-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='m_class'> M Class Name: AdjacentAttentionNetwork</div><div id='n_method'> N Class Name: AdjacentAttentionNetwork</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='n_file'> N File Name: adjacent_attention_network/adjacent_attention_network.py</div><div id='m_start'> M Start Line: 103</div><div id='m_end'> M End Line: 111</div><div id='n_start'> N Start Line: 114</div><div id='n_end'> N End Line: 126</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        layers = []
+        for _ in range(depth):
+            layers.extend([
+                <a id="change">Residual(PreNorm(</a>dim, SelfAttention(dim, heads)<a id="change">)</a><a id="change">)</a>,
+                Residual(PreNorm(dim, FeedForward(dim)))
+            ])
+        self.layers = nn.Sequential(*layers)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.pos_emb = RelativePositionalEmbedding
+        self.to_logits = nn.Linear(dim, num_tokens)
+
+        self.attn_layers = nn.ModuleList([<a id="change">Residual(PreNorm(</a>dim, SelfAttention(dim, heads)<a id="change">)</a><a id="change">)</a> for _ in range(depth)])
+        self.ff_layers = nn.ModuleList([Residual(PreNorm(dim, FeedForward(dim))) for _ in range(depth)])
+
+    def forward(self, x, mem = None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/compressive-transformer-pytorch/commit/47a5b8448090fce7ca1f7356001fb2ac381c2239#diff-493cd95e4b724ba15b0c327254df365435ee9204e2a14c51200a07a55d030b8dL87' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4220058</div><div id='project'> Project Name: lucidrains/compressive-transformer-pytorch</div><div id='commit'> Commit Name: 47a5b8448090fce7ca1f7356001fb2ac381c2239</div><div id='time'> Time: 2020-06-30</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_class'> M Class Name: CompressiveTransformer</div><div id='n_method'> N Class Name: CompressiveTransformer</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='n_file'> N File Name: compressive_transformer_pytorch/compressive_transformer_pytorch.py</div><div id='m_start'> M Start Line: 93</div><div id='m_end'> M End Line: 99</div><div id='n_start'> N Start Line: 100</div><div id='n_end'> N End Line: 110</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                Residual(PreNorm(dim, Attention(dim, heads = heads, causal = True))),
+                <a id="change">Residual(PreNorm(</a>dim, Attention(dim, heads = heads)<a id="change">)</a><a id="change">)</a>,
+                Residual(PreNorm(dim, FeedForward(dim))),
+            ]))
+    def forward(self, x, context = None, mask = None, context_mask = None):</code></pre><h3>After Change</h3><pre><code class='java'>
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList([
+                Residual(PreNorm(dim, Attention(dim, heads = heads, causal = True))),
+                <a id="change">Residual(PreNorm(</a>dim, Attention(dim, heads = heads)<a id="change">)</a><a id="change">)</a> if cross_attend else None,
+                Residual(PreNorm(dim, FeedForward(dim))),
+            ]))
+    def forward(self, x, context = None, mask = None, context_mask = None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/ff90da8c5f3d973d0088cf9b1b134abc70e26693#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL107' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4220059</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: ff90da8c5f3d973d0088cf9b1b134abc70e26693</div><div id='time'> Time: 2020-11-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: Decoder</div><div id='n_method'> N Class Name: Decoder</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 113</div><div id='m_end'> M End Line: 113</div><div id='n_start'> N Start Line: 108</div><div id='n_end'> N End Line: 115</div><BR>

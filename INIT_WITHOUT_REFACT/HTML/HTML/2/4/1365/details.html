@@ -1,0 +1,85 @@
+<html><h3>Pattern ID :1365
+</h3><img src='3884938.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.last_conv = nn.Conv2d(dim, 3, 3, 1, 1)
+        self.lrelu = nn.LeakyReLU(negative_slope=0.1, inplace=True)
+
+        num_parameters = sum(map(lambda x: x.numel(), <a id="change">self.parameters()</a>))
+        print(&quot&#47&#47Params : {:&lt;.4f} [K]&quot.format(num_parameters / 10 ** 3))
+
+    def forward(self, x, target=None):</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, model_type: str, upscale: int):
+        super(HPINet, self).__init__()
+        model_type = model_type.upper()
+        <a id="change">if model_type not in self.model_settings</a><a id="change">:
+            </a>raise KeyError(&quotUndefined model type: {}&quot.format(model_type))
+        self.model_type = model_type
+        setting = self.model_settings[model_type]
+
+        self.dim = setting[&quotdim&quot]
+        self.block_num = setting[&quotblock_num&quot]
+        self.patch_size = setting[&quotpatch_size&quot]
+        self.qk_dim = setting[&quotqk_dim&quot]
+        self.mlp_dim<a id="change"> = </a>setting[&quotmlp_dim&quot]
+        self.upscale = upscale
+
+        self.first_conv = nn.Conv2d(3, self.dim, 3, 1, 1)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/passerer/hpinet/commit/bfc39ecd4a02e58eb396400406317ed61f2238dd#diff-751127ff6850f191c5dd0298f5e2652127e991ee0c1c0d1383c5cade0b50671cL98' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3884938</div><div id='project'> Project Name: passerer/hpinet</div><div id='commit'> Commit Name: bfc39ecd4a02e58eb396400406317ed61f2238dd</div><div id='time'> Time: 2022-12-29</div><div id='author'> Author: jieliu@smail.nju.edu.cn</div><div id='file'> File Name: HPINet.py</div><div id='m_class'> M Class Name: HPINet</div><div id='n_method'> N Class Name: HPINet</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: HPINet.py</div><div id='n_file'> N File Name: HPINet.py</div><div id='m_start'> M Start Line: 98</div><div id='m_end'> M End Line: 127</div><div id='n_start'> N Start Line: 259</div><div id='n_end'> N End Line: 293</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            &#47&#47 Freeze all previous layers.
+            for param in self.features1.parameters():
+                param.requires_grad = False
+            for param in <a id="change">self.features2.parameters()</a>:
+                param.requires_grad = False
+            &#47&#47 Initialize the fc layers.
+            nn.init.kaiming_normal_(self.fc.weight.data)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.features1 = nn.Sequential(*list(self.features1.children())
+                                            [:-1])
+        scnn = SCNN(use_bn=use_bn)
+        <a id="change">if pretrained_scnn_path is not None</a><a id="change">:
+            </a>old_dict<a id="change"> = </a>torch.load(pretrained_scnn_path)
+            new_dict = {}
+            for k, v in old_dict.items():
+                new_dict[k.replace(&quotmodule.&quot, &quot&quot)] = v</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/chaofengc/iqa-pytorch/commit/ef70142dd8a3db450386039d657152fbb6b102bd#diff-b20113a6f40f3344b978024d062484292303d43148b55f2b469981fcfd7f340bL73' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3884936</div><div id='project'> Project Name: chaofengc/iqa-pytorch</div><div id='commit'> Commit Name: ef70142dd8a3db450386039d657152fbb6b102bd</div><div id='time'> Time: 2021-12-30</div><div id='author'> Author: chaofenghust@gmail.com</div><div id='file'> File Name: pyiqa/archs/dbcnn_arch.py</div><div id='m_class'> M Class Name: DBCNN</div><div id='n_method'> N Class Name: DBCNN</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: pyiqa/archs/dbcnn_arch.py</div><div id='n_file'> N File Name: pyiqa/archs/dbcnn_arch.py</div><div id='m_start'> M Start Line: 82</div><div id='m_end'> M End Line: 94</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 98</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 setting the device
+
+        if not exists(accelerator) and not exists(device):
+            diffusion_prior_device = next(<a id="change">diffusion_prior.parameters()</a>).device
+            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
+            self.device = diffusion_prior_device
+        else:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 mixed precision checks
+
+        <a id="change">if </a>(
+            exists(self.accelerator) 
+            and self.accelerator.distributed_type == DistributedType.DEEPSPEED 
+            and <a id="change">self.diffusion_prior.clip is not None</a>
+            )<a id="change">:
+            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
+            </a>cast_type_map = {
+                "fp16": torch.half,
+                "bf16": torch.bfloat16,
+                "no": torch.float
+            }
+            precision_type<a id="change"> = </a>cast_type_map[accelerator.mixed_precision]
+            assert precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
+            self.diffusion_prior.clip.to(precision_type)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/f9423d308b6f36e51152c2c45045ff4ebb308287#diff-617450527162fa367141dbf45e8b201673573479820af0ffc56ba93b7f70947fL174' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3884931</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: f9423d308b6f36e51152c2c45045ff4ebb308287</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: 51308183+nousr@users.noreply.github.com</div><div id='file'> File Name: dalle2_pytorch/trainer.py</div><div id='m_class'> M Class Name: DiffusionPriorTrainer</div><div id='n_method'> N Class Name: DiffusionPriorTrainer</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/trainer.py</div><div id='n_file'> N File Name: dalle2_pytorch/trainer.py</div><div id='m_start'> M Start Line: 182</div><div id='m_end'> M End Line: 240</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 246</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+            else:
+
+                print("Number of Layers: " + str(len(list(<a id="change">self.encoderModel.encoder.parameters()</a>))))
+
+                layers_to_freeze = self.encoderModel.encoder.layer[:frozen_layer_count]
+                for module in layers_to_freeze:</code></pre><h3>After Change</h3><pre><code class='java'>
+
+                for i, m in enumerate(self.encoderModel.encoder.block):        
+                    &#47&#47Only un-freeze the last n transformer blocks
+                    <a id="change">if i+1 &gt; 24 - frozen_layer_count</a><a id="change">:
+                        </a>print(str(i) + " Layer")
+                        for parameter in m.parameters():
+                            parameter.requires_grad<a id="change"> = </a>True
+
+            else:
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/allenai/embeddingrecycling/commit/34adb3db5524908874d994a6340957a3fa86ab78#diff-c6f85768726fd61990e53317c130ed9bbc46f144f0147a14eefabfadd7bb7038L30' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3884933</div><div id='project'> Project Name: allenai/embeddingrecycling</div><div id='commit'> Commit Name: 34adb3db5524908874d994a6340957a3fa86ab78</div><div id='time'> Time: 2022-03-23</div><div id='author'> Author: jonsaadfalcon@gmail.com</div><div id='file'> File Name: GeneralLinearClassifier.py</div><div id='m_class'> M Class Name: CustomBERTModel</div><div id='n_method'> N Class Name: CustomBERTModel</div><div id='m_method'> M Method Name: __init__(8)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: GeneralLinearClassifier.py</div><div id='n_file'> N File Name: GeneralLinearClassifier.py</div><div id='m_start'> M Start Line: 74</div><div id='m_end'> M End Line: 83</div><div id='n_start'> N Start Line: 39</div><div id='n_end'> N End Line: 87</div><BR>

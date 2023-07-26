@@ -1,0 +1,126 @@
+<html><h3>Pattern ID :1483
+</h3><img src='4176718.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        assert not (nearest_neighbor_upsample and bilinear_upsample)
+
+        <a id="change">if </a>bilinear_upsample<a id="change">:
+            </a>upsample_klass = partial(InterpolateUpsample, mode = &quotbilinear&quot)
+        elif nearest_neighbor_upsample:
+            upsample_klass = partial(InterpolateUpsample, mode = &quotnearest&quot)
+        else:
+            upsample_klass<a id="change"> = </a>Upsample
+
+        &#47&#47 upsampling layers
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 downsampling layers
+
+        skip_connect_dims<a id="change"> = []</a> &#47&#47 keep track of skip connection dimensions
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(in_out, *layer_params)):
+            is_last = ind &gt;= (num_resolutions - 1)
+
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            current_dim = dim_in
+
+            &#47&#47 whether to pre-downsample, from memory efficient unet
+
+            pre_downsample = None
+
+            if memory_efficient:
+                pre_downsample = downsample_klass(dim_in, dim_out)
+                current_dim = dim_out
+
+            <a id="change">skip_connect_dims.append(</a>current_dim<a id="change">)</a>
+
+            self.downs.append(nn.ModuleList([
+                pre_downsample,
+                ResnetBlock(current_dim, current_dim, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),
+                nn.ModuleList([ResnetBlock(current_dim, current_dim, time_cond_dim = time_cond_dim, groups = groups, use_gca = use_global_context_attn) for _ in range(layer_num_resnet_blocks)]),
+                transformer_block_klass(dim = current_dim, heads = attn_heads, dim_head = attn_dim_head, ff_mult = ff_mult),
+                downsample_klass(current_dim, dim_out) if not memory_efficient and not is_last else None,
+            ]))
+
+        &#47&#47 middle layers
+
+        mid_dim = dims[-1]
+
+        self.mid_block1 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+        self.mid_attn = EinopsToAndFrom(&quotb c h w&quot, &quotb (h w) c&quot, Residual(Attention(mid_dim, **attn_kwargs))) if attend_at_middle else None
+        self.mid_block2 = ResnetBlock(mid_dim, mid_dim, cond_dim = cond_dim, time_cond_dim = time_cond_dim, groups = resnet_groups[-1])
+
+        &#47&#47 upsampling layers
+
+        for ind, ((dim_in, dim_out), layer_num_resnet_blocks, groups, layer_attn, layer_cross_attn) in enumerate(zip(reversed(in_out), *reversed_layer_params)):
+            is_last = ind == (len(in_out) - 1)
+            layer_use_linear_cross_attn = not layer_cross_attn and use_linear_cross_attn
+            layer_cond_dim = cond_dim if layer_cross_attn or layer_use_linear_cross_attn else None
+            transformer_block_klass = TransformerBlock if layer_attn else (LinearAttentionTransformerBlock if use_linear_attn else nn.Identity)
+
+            skip_connect_dim<a id="change"> = </a>skip_connect_dims.pop()
+
+            self.ups.append(nn.ModuleList([
+                ResnetBlock(dim_out + skip_connect_dim, dim_out, cond_dim = layer_cond_dim, linear_attn = layer_use_linear_cross_attn, time_cond_dim = time_cond_dim, groups = groups),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 6</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/36bdefca0e8670ca42b39236315121b703b9533f#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L1148' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4176718</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: 36bdefca0e8670ca42b39236315121b703b9533f</div><div id='time'> Time: 2022-06-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1178</div><div id='m_end'> M End Line: 1250</div><div id='n_start'> N Start Line: 1148</div><div id='n_end'> N End Line: 1221</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                raise TypeError("Unknown Type:\t{}".format(norm))
+        self.norm0 = norm(out_channels)
+
+        <a id="change">if </a>self.concat<a id="change">:
+            </a>if self.mode == &quotres_mask&quot:
+                k= 2*out_channels + 1
+            else:
+                k = 2*out_channels
+            self.conv1<a id="change"> = </a>conv3x3(k, out_channels)
+            self.norm1 = norm(out_channels)
+        else:
+            self.conv1 = conv3x3(out_channels, out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 residual structure
+        self.conv2 = []
+        self.conv3<a id="change"> = []</a>
+        for i in range(blocks):
+            self.conv2.append(
+                nn.Sequential(*[
+                    nn.Conv2d(out_channels // 2 + 1, out_channels // 4, 5, 1, 2),
+                    nn.ReLU(True),
+                    nn.Conv2d(out_channels // 4, 1, 5, 1, 2),
+                    nn.Sigmoid()
+                ])
+            )
+            <a id="change">self.conv3.append(</a>conv3x3(out_channels // 2, out_channels)<a id="change">)</a>
+        
+        self.bn = []
+        for _ in range(blocks):
+            self.bn.append(norm(out_channels))
+        self.bn = nn.ModuleList(self.bn)
+        self.conv2 = nn.ModuleList(self.conv2)
+        self.conv3<a id="change"> = </a>nn.ModuleList(self.conv3)
+        self.act = act
+
+    def forward(self, from_up, from_down, mask=None):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bcmi/slbr-visible-watermark-removal/commit/43e84b70895d28955496122816e50857863e5bfd#diff-21665f19cd9acd8db0bae320b79f986ec6a79eabb60d74c4c2e813314554df4aL205' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4176684</div><div id='project'> Project Name: bcmi/slbr-visible-watermark-removal</div><div id='commit'> Commit Name: 43e84b70895d28955496122816e50857863e5bfd</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: lj200820082007@163.com</div><div id='file'> File Name: src/networks/blocks.py</div><div id='m_class'> M Class Name: MBEBlock</div><div id='n_method'> N Class Name: MBEBlock</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(10)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/networks/blocks.py</div><div id='n_file'> N File Name: src/networks/blocks.py</div><div id='m_start'> M Start Line: 208</div><div id='m_end'> M End Line: 235</div><div id='n_start'> N Start Line: 208</div><div id='n_end'> N End Line: 248</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        self.mlp = GPT2MLP(inner_dim, config)
+        adapter_dict = {}
+        <a id="change">if </a>self.use_adapters<a id="change">:
+            </a>for key, value in self.domain_dict:
+                adapter_dict[key]<a id="change"> = </a>Adapter(config)
+        self.adapter_dict = adapter_dict
+
+        &#47&#47 self.domain_dict = config.domain_dict</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mlp = GPT2MLP(inner_dim, config)
+
+        self.domain_dict = config.domain_dict
+        adapter_list<a id="change"> = []</a>
+        if self.use_adapters:
+            for _ in self.domain_dict.keys():
+                <a id="change">adapter_list.append(</a>Adapter(config)<a id="change">)</a>
+            self.adapter_module<a id="change"> = </a>nn.ModuleList(adapter_list)
+
+            logger.info(f"I was given a tree with {len(self.domain_dict.keys())} nodes and I initialized {len(adapter_list)} adapters!")
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alexandra-chron/hierarchical-domain-adaptation/commit/d7af68e8dab4cedbe21346e2bf8ef39853a6194f#diff-e1c6a933cfc622afa66df53726ff4453d7ebaf5b54aaeb7b0adb6c9913b68116L317' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4176708</div><div id='project'> Project Name: alexandra-chron/hierarchical-domain-adaptation</div><div id='commit'> Commit Name: d7af68e8dab4cedbe21346e2bf8ef39853a6194f</div><div id='time'> Time: 2021-07-29</div><div id='author'> Author: alexandra.xron@gmail.com</div><div id='file'> File Name: models/modeling_gpt2.py</div><div id='m_class'> M Class Name: GPT2Block</div><div id='n_method'> N Class Name: GPT2Block</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models/modeling_gpt2.py</div><div id='n_file'> N File Name: models/modeling_gpt2.py</div><div id='m_start'> M Start Line: 325</div><div id='m_end'> M End Line: 338</div><div id='n_start'> N Start Line: 324</div><div id='n_end'> N End Line: 340</div><BR>

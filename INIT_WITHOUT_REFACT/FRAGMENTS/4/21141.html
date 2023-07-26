@@ -1,0 +1,29 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                 with_cp=False):
+        super(BasicBlock, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride, dilation)
+        self.bn1 = <a id="change">nn.BatchNorm2d(</a>planes<a id="change">)</a>
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2<a id="change"> = </a><a id="change">nn.BatchNorm2d(</a>planes<a id="change">)</a>
+        self.downsample = downsample
+        self.stride = stride
+        self.dilation = dilation
+        assert not with_cp</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(BasicBlock, self).__init__()
+        self.conv1 = conv3x3(inplanes, planes, stride, dilation)
+
+        <a id="change">norm_layers</a> = <a id="change">[]</a>
+        <a id="change">norm_layers.append(</a><a id="change">build_norm_layer(</a>normalize, planes<a id="change">))</a>
+        <a id="change">norm_layers.append(</a><a id="change">build_norm_layer(</a>normalize, planes<a id="change">))</a>
+        self.norm_names = (<a id="change">[&quotgn1&quot</a>, <a id="change">&quotgn2&quot</a>]<a id="change"> if </a><a id="change">normalize[&quottype&quot] == &quotGN&quot
+                           else [&quotbn1&quot</a>, <a id="change">&quotbn2&quot</a>])
+        <a id="change">for </a>name, <a id="change">layer</a> in <a id="change">zip(</a>self.norm_names, norm_layers<a id="change">)</a><a id="change">:
+            self.add_module(</a>name, layer<a id="change">)</a>
+
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.downsample = downsample</code></pre>

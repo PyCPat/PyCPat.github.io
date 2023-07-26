@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :1518
+</h3><img src='4198202.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                 pretrained=None,
+                 aggregation=&quotattn&quot):
+        super().__init__()
+        norm_layer<a id="change"> = </a>norm_layer or <a id="change">partial(</a>nn.LayerNorm<a id="change">, eps=1e-6)</a>
+        self.num_classes = num_classes
+        self.num_features = self.embed_dim = embed_dim  &#47&#47 num_features for consistency with other models
+
+        if hybrid_backbone is not None:</code></pre><h3>After Change</h3><pre><code class='java'>
+            num_patches = (pretrain_img_size // patch_size) * (
+                pretrain_img_size // patch_size)
+            num_positions = (num_patches +
+                             1)<a id="change"> if </a>pretrain_use_cls_token<a id="change"> else </a>num_patches
+            self.pos_embed = nn.Parameter(
+                torch.zeros(1, num_positions, embed_dim))
+        else:</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/alibaba/easycv/commit/9f01a37ad4df57b30430c41df08459025174e8fd#diff-78f05b57f42dcd5f7f060081ceac6dd4b971872c6edf8842805ae881484d5589L357' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4198202</div><div id='project'> Project Name: alibaba/easycv</div><div id='commit'> Commit Name: 9f01a37ad4df57b30430c41df08459025174e8fd</div><div id='time'> Time: 2022-09-15</div><div id='author'> Author: 38110862+tuofeilunhifi@users.noreply.github.com</div><div id='file'> File Name: easycv/models/backbones/vitdet.py</div><div id='m_class'> M Class Name: ViTDet</div><div id='n_method'> N Class Name: ViTDet</div><div id='m_method'> M Method Name: __init__(22)</div><div id='n_method'> N Method Name: __init__(25)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: easycv/models/backbones/vitdet.py</div><div id='n_file'> N File Name: easycv/models/backbones/vitdet.py</div><div id='m_start'> M Start Line: 606</div><div id='m_end'> M End Line: 686</div><div id='n_start'> N Start Line: 357</div><div id='n_end'> N End Line: 440</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.ups = nn.ModuleList([])
+
+        num_resolutions = len(in_out)
+        conv_next<a id="change"> = </a><a id="change">partial(</a>ConvNextBlock<a id="change">, time_emb_dim = time_dim)</a>
+
+        for ind, (dim_in, dim_out) in enumerate(in_out):
+            is_last = ind &gt;= (num_resolutions - 1)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        )
+
+        self.has_cond = exists(cond_dim)
+        self.null_cond_emb = nn.Parameter(torch.randn(1, cond_dim))<a id="change"> if </a>self.has_cond<a id="change"> else </a>None
+
+        cond_dim = time_dim + int(cond_dim)
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/video-diffusion-pytorch/commit/4303661251b10ebd99a44d7f1fe6f2177678b248#diff-4ff1a95f5e6b9add82d0e523fd2d858ca38e67b393ea87c2ae88a8b14a0fbb1cL216' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4198203</div><div id='project'> Project Name: lucidrains/video-diffusion-pytorch</div><div id='commit'> Commit Name: 4303661251b10ebd99a44d7f1fe6f2177678b248</div><div id='time'> Time: 2022-04-13</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_class'> M Class Name: Unet3D</div><div id='n_method'> N Class Name: Unet3D</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='n_file'> N File Name: video_diffusion_pytorch/video_diffusion_pytorch.py</div><div id='m_start'> M Start Line: 241</div><div id='m_end'> M End Line: 241</div><div id='n_start'> N Start Line: 227</div><div id='n_end'> N End Line: 255</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            downsample_klass = partial(CrossEmbedLayer, kernel_sizes = cross_embed_downsample_kernel_sizes)
+
+        if antialias_downsample:
+            downsample_klass<a id="change"> = </a><a id="change">partial(</a>downsample_klass<a id="change">, antialias = True)</a>
+
+        &#47&#47 scale for resnet skip connections
+
+        skip_connect_scale = 1. if not scale_resnet_skip_connection else (2 ** -0.5)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 downsample klass
+
+        downsample_klass = DownsampleWithBlur<a id="change"> if </a>antialias_downsample<a id="change"> else </a>Downsample
+
+        if cross_embed_downsample:
+            downsample_klass = partial(CrossEmbedLayer, kernel_sizes = cross_embed_downsample_kernel_sizes)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/4c7920a54b5fe1fc96e13ff32f2cff7c458ec5d5#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L977' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4198205</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: 4c7920a54b5fe1fc96e13ff32f2cff7c458ec5d5</div><div id='time'> Time: 2022-06-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1176</div><div id='m_end'> M End Line: 1186</div><div id='n_start'> N Start Line: 1176</div><div id='n_end'> N End Line: 1176</div><BR>

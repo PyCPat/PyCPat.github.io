@@ -1,0 +1,31 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        assert 2 ** round(np.log2(res)) == res
+        self.res = res
+        self.in_channels = 3 if RGB else 1
+        <a id="change">self.blocks</a> = []
+
+        &#47&#47 Calculating the number of channels for each resolution
+        self.map_channels = Generate_map_channels(res, last_res, max_channels)
+
+        &#47&#47 Creating blocks
+        to_res = res // 2
+        while to_res &gt;= last_res:
+            cur_res = 2 * to_res
+            in_channels = self.map_channels[cur_res]
+            out_channels = self.map_channels[to_res]
+            <a id="change">self.blocks.append(</a>BlockD(cur_res, cur_res, in_channels, out_channels)<a id="change">)</a>
+            <a id="change">self.blocks.append(</a>BlockD(cur_res, to_res, out_channels, out_channels)<a id="change">)</a>
+            to_res //= 2
+
+        self.fromRGB = nn.Conv2d(self.in_channels, self.map_channels[res], 1, 1)
+        self.Linear = nn.Linear(self.map_channels[last_res] * last_res ** 2, 1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            cur_res = 2 * to_res
+            in_channels = self.map_channels[cur_res]
+            out_channels = self.map_channels[to_res]
+            <a id="change">self.blocks[f&quotres {cur_res}&quot]</a> = BlockD(cur_res, to_res, in_channels, out_channels)
+            to_res //= 2
+
+        self.fromRGB = nn.Conv2d(self.in_channels, self.map_channels[res], 1, 1)</code></pre>

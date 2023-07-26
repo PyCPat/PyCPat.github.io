@@ -1,0 +1,56 @@
+<html><h3>Pattern ID :170
+</h3><img src='751075.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.Sequential()
+        for index, output_size in enumerate(output_sizes):
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">self.layers.add_module(</a>"linear_%d"<a id="change"> % </a>index, nn.LazyLinear(output_size)<a id="change">)</a>
+        &#47&#47 self.layers.add_module("relu", nn.ReLU6())
+
+    def forward(self, input):
+        input = input.to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for index, output_size in enumerate(output_sizes):
+            self._layers_ordered_dict["linear_" + str(index)] = nn.LazyLinear(output_size)
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">if index &lt; (num_layers - 1)</a><a id="change">:
+                </a>self._layers_ordered_dict["relu_" + str(index)] = nn.ReLU()
+        self.layers = nn.Sequential(self._layers_ordered_dict)
+
+    def forward(self, input):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/wwmark/meshgraphnets/commit/230815cb6b38dd30b8d25bec0083efb8358d68e2#diff-f98409e68daccfa078c64611e308738c8aa5cb93dd0104f710141b7552af93b6L36' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 751075</div><div id='project'> Project Name: wwmark/meshgraphnets</div><div id='commit'> Commit Name: 230815cb6b38dd30b8d25bec0083efb8358d68e2</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: ruoheng.ma@gmail.com</div><div id='file'> File Name: encode_process_decode_max_pooling.py</div><div id='m_class'> M Class Name: LazyMLP</div><div id='n_method'> N Class Name: LazyMLP</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: encode_process_decode_max_pooling.py</div><div id='n_file'> N File Name: encode_process_decode_max_pooling.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.layers = nn.Sequential()
+        for index, output_size in enumerate(output_sizes):
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">self.layers.add_module(</a>"linear_%d"<a id="change"> % </a>index, nn.LazyLinear(output_size)<a id="change">)</a>
+        &#47&#47 self.layers.add_module("relu", nn.ReLU6())
+
+    def forward(self, input):
+        input = input.to(device)</code></pre><h3>After Change</h3><pre><code class='java'>
+        for index, output_size in enumerate(output_sizes):
+            self._layers_ordered_dict["linear_" + str(index)] = nn.LazyLinear(output_size)
+            &#47&#47 self.layers.add_module("linear_%d" % index, LazyLinear(output_size))
+            <a id="change">if index &lt; (num_layers - 1)</a><a id="change">:
+                </a>self._layers_ordered_dict["relu_" + str(index)] = nn.ReLU()
+        self.layers = nn.Sequential(self._layers_ordered_dict)
+
+    def forward(self, input):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wwmark/meshgraphnets/commit/9be9ef87016e6502ff5ef60a988866e0d7fc9ecb#diff-2a1838fd89edbf7fc22eb003fbdcbe4ac68927faa9e4cbd1df4afa4bbc9bda9aL34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 751067</div><div id='project'> Project Name: wwmark/meshgraphnets</div><div id='commit'> Commit Name: 9be9ef87016e6502ff5ef60a988866e0d7fc9ecb</div><div id='time'> Time: 2021-10-08</div><div id='author'> Author: ruoheng.ma@gmail.com</div><div id='file'> File Name: encode_process_decode.py</div><div id='m_class'> M Class Name: LazyMLP</div><div id='n_method'> N Class Name: LazyMLP</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: encode_process_decode.py</div><div id='n_file'> N File Name: encode_process_decode.py</div><div id='m_start'> M Start Line: 36</div><div id='m_end'> M End Line: 42</div><div id='n_start'> N Start Line: 36</div><div id='n_end'> N End Line: 43</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 Objectness scores (2), center residual (3),
+        &#47&#47 heading class+residual (num_dir_bins*2),
+        &#47&#47 size class+residual(num_sizes*4)
+        conv_out_channel = (2 + 3 + self.num_dir_bins * 2 +<a id="change">
+                            self.num_sizes * 4 + </a>num_classes)
+        <a id="change">self.conv_pred.add_module(</a>&quotconv_out&quot,
+                                  nn.Conv1d(prev_channel, conv_out_channel, 1)<a id="change">)</a>
+
+    def init_weights(self):
+        Initialize weights of VoteHead.
+        pass</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.size_res_loss = build_loss(size_res_loss)
+        if size_class_loss is not None:
+            self.size_class_loss = build_loss(size_class_loss)
+        <a id="change">if semantic_loss is not None</a><a id="change">:
+            </a>self.semantic_loss = build_loss(semantic_loss)
+
+        self.bbox_coder = build_bbox_coder(bbox_coder)
+        self.num_sizes = self.bbox_coder.num_sizes</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmdetection3d/commit/460f6b3bf2320ceddeba58054c122836af2e6872#diff-160e26af048c8fecd017af21acddc18ec3c7c6fa64ece0827cf33d96ef3f1220L41' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 751073</div><div id='project'> Project Name: open-mmlab/mmdetection3d</div><div id='commit'> Commit Name: 460f6b3bf2320ceddeba58054c122836af2e6872</div><div id='time'> Time: 2020-09-13</div><div id='author'> Author: zhoujiaming@sensetime.com</div><div id='file'> File Name: mmdet3d/models/dense_heads/vote_head.py</div><div id='m_class'> M Class Name: VoteHead</div><div id='n_method'> N Class Name: VoteHead</div><div id='m_method'> M Method Name: __init__(17)</div><div id='n_method'> N Method Name: __init__(17)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet3d/models/dense_heads/vote_head.py</div><div id='n_file'> N File Name: mmdet3d/models/dense_heads/vote_head.py</div><div id='m_start'> M Start Line: 68</div><div id='m_end'> M End Line: 105</div><div id='n_start'> N Start Line: 67</div><div id='n_end'> N End Line: 86</div><BR>

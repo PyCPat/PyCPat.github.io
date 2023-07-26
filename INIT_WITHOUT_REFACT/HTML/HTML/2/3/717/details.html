@@ -1,0 +1,50 @@
+<html><h3>Pattern ID :717
+</h3><img src='2540646.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        sparse_layer = cast_tuple(sparse_attn, depth)
+
+        for _, sparse_attn in zip(range(depth), sparse_layer):
+            attn_class = Attention<a id="change"> if </a>not sparse_attn<a id="change"> else </a>partial(SparseAttention, sparse_attn_global_indices = sparse_attn_global_indices)
+
+            layers.append(nn.ModuleList([
+                PreNorm(dim, attn_class(dim, causal = causal, seq_len = seq_len, heads = heads, dim_head = dim_head, dropout = attn_dropout, noncausal_attn_len = noncausal_attn_len)),</code></pre><h3>After Change</h3><pre><code class='java'>
+            elif attn_type == &quotsparse&quot:
+                attn_class = partial(SparseAttention, sparse_attn_global_indices = sparse_attn_global_indices)
+            elif attn_type == &quotaxial_row&quot:
+                attn_class<a id="change"> = </a><a id="change">partial(</a>SparseAxialCausalAttention<a id="change">, seq_len = seq_len, axis = 0, image_size = image_fmap_size)</a>
+            elif attn_type == &quotaxial_col&quot:
+                attn_class = partial(SparseAxialCausalAttention, seq_len = seq_len, axis = 1, image_size = image_fmap_size)
+            elif attn_type == &quotconv_like&quot:
+                attn_class = partial(SparseConvCausalAttention, seq_len = seq_len, image_size = image_fmap_size)</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle-pytorch/commit/de732e8756750e161f0e51fac8baf9bcdb13182e#diff-ee397916e2ccc5603bb55b6ea44f20d581aae722f1e26d17108234ff0411b1beL67' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2540646</div><div id='project'> Project Name: lucidrains/dalle-pytorch</div><div id='commit'> Commit Name: de732e8756750e161f0e51fac8baf9bcdb13182e</div><div id='time'> Time: 2021-02-10</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: dalle_pytorch/transformer.py</div><div id='m_class'> M Class Name: Transformer</div><div id='n_method'> N Class Name: Transformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle_pytorch/transformer.py</div><div id='n_file'> N File Name: dalle_pytorch/transformer.py</div><div id='m_start'> M Start Line: 67</div><div id='m_end'> M End Line: 68</div><div id='n_start'> N Start Line: 75</div><div id='n_end'> N End Line: 92</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        norm_class = ScaleNorm if use_scalenorm else nn.LayerNorm
+        prenorm_fn = partial(PreNorm, dim, norm_class = norm_class)
+        prenorm_fn = Rezero<a id="change"> if </a>use_rezero<a id="change"> else </a>prenorm_fn
+
+        ff_kwargs, kwargs = groupby_prefix_and_trim(&quotff_&quot, kwargs)
+        attn_kwargs, _ = groupby_prefix_and_trim(&quotattn_&quot, kwargs)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.residual_attn = residual_attn
+
+        norm_class = ScaleNorm if use_scalenorm else nn.LayerNorm
+        norm_fn<a id="change"> = </a><a id="change">partial(</a>norm_class, dim<a id="change">)</a>
+
+        norm_fn = nn.Identity if use_rezero else norm_fn
+        branch_fn = Rezero if use_rezero else None
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/x-transformers/commit/257fee10394c3cfb3467537dba53d8a610dc8aee#diff-2e64ac8840195d7dc3e07a3aac70b50bbab1cdf80f3a7432be40105e6097fc0aL272' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2540647</div><div id='project'> Project Name: lucidrains/x-transformers</div><div id='commit'> Commit Name: 257fee10394c3cfb3467537dba53d8a610dc8aee</div><div id='time'> Time: 2020-12-27</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: x_transformers/x_transformers.py</div><div id='m_class'> M Class Name: AttentionLayers</div><div id='n_method'> N Class Name: AttentionLayers</div><div id='m_method'> M Method Name: __init__(15)</div><div id='n_method'> N Method Name: __init__(13)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: x_transformers/x_transformers.py</div><div id='n_file'> N File Name: x_transformers/x_transformers.py</div><div id='m_start'> M Start Line: 294</div><div id='m_end'> M End Line: 331</div><div id='n_start'> N Start Line: 288</div><div id='n_end'> N End Line: 347</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 upsampling klass
+
+        upsample_klass = BilinearUpsample<a id="change"> if </a>bilinear_upsample<a id="change"> else </a>Upsample
+
+        &#47&#47 upsampling layers
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        if bilinear_upsample:
+            upsample_klass = partial(InterpolateUpsample, mode = &quotbilinear&quot)
+        elif nearest_neighbor_upsample:
+            upsample_klass<a id="change"> = </a><a id="change">partial(</a>InterpolateUpsample<a id="change">, mode = &quotnearest&quot)</a>
+        else:
+            upsample_klass = Upsample
+
+        &#47&#47 upsampling layers</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/f5d904c44c2dd9cb89fc7f729e7546a263b2f91f#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L978' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2540658</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: f5d904c44c2dd9cb89fc7f729e7546a263b2f91f</div><div id='time'> Time: 2022-06-26</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Unet</div><div id='n_method'> N Class Name: Unet</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 1227</div><div id='m_end'> M End Line: 1227</div><div id='n_start'> N Start Line: 1228</div><div id='n_end'> N End Line: 1239</div><BR>

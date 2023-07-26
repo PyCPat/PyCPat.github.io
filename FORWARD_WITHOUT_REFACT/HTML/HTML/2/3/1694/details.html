@@ -1,0 +1,61 @@
+<html><h3>Pattern ID :1694
+</h3><img src='6716102.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            rel_pos = rearrange(grid, &quoti c -&gt; i 1 c&quot) - rearrange(grid, &quotj c -&gt; 1 j c&quot)
+
+            if self.log_dist:
+                rel_pos = torch.sign(rel_pos)<a id="change"> * </a><a id="change">torch.log(</a>rel_pos.abs() + 1<a id="change">)</a>
+
+            self.register_buffer(&quotrel_pos&quot, rel_pos, persistent = False)
+
+        rel_pos = self.rel_pos.float()</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 calculate strides
+
+        strides = torch.flip(rel_pos_shape, (0,)).cumprod(dim = -1)
+        strides = torch.flip(F.pad(strides, (1<a id="change">, -1</a>), value = 1), (0,))
+
+        &#47&#47 get all positions and calculate all the relative distances
+</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/make-a-video-pytorch/commit/b6e0a17c5488b923d884272f7e46170352b0f0d5#diff-a7a81e9a1aa252916dd3f29e813ef72db53e9b9a100d00fdf0a022c1823ac77bL105' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716102</div><div id='project'> Project Name: lucidrains/make-a-video-pytorch</div><div id='commit'> Commit Name: b6e0a17c5488b923d884272f7e46170352b0f0d5</div><div id='time'> Time: 2023-03-18</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_class'> M Class Name: ContinuousPositionBias</div><div id='n_method'> N Class Name: ContinuousPositionBias</div><div id='m_method'> M Method Name: forward(1)</div><div id='n_method'> N Method Name: forward(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: make_a_video_pytorch/make_a_video.py</div><div id='n_file'> N File Name: make_a_video_pytorch/make_a_video.py</div><div id='m_start'> M Start Line: 110</div><div id='m_end'> M End Line: 126</div><div id='n_start'> N Start Line: 105</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        action = a_distribution.rsample()
+
+        logp_pi = a_distribution.log_prob(action).sum(axis=-1)
+        logp_pi -= (2<a id="change"> * </a>(<a id="change">np.log(</a>2<a id="change">)</a> - action - F.softplus(-2 * action))).sum(axis=1)
+        logp_pi = torch.unsqueeze(logp_pi, dim=1)
+
+        action = self.max_action * torch.tanh(action)</code></pre><h3>After Change</h3><pre><code class='java'>
+        return a_distribution, a_tanh_mode
+
+    def forward(self, state):
+        a_dist<a id="change">, a_tanh_mode</a> = self._get_outputs(state)
+        action = a_dist.rsample()
+        logp_pi = a_dist.log_prob(action).sum(axis=-1)
+        return action, logp_pi, a_tanh_mode</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/ryanxhr/dwbc/commit/b3791e408af7125fde12cda1cdeaefbaa400aacc#diff-75aa8d0a222c16ec3e4bb78749eef436b3d51c25ea931fe019fed10965e94549L34' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716087</div><div id='project'> Project Name: ryanxhr/dwbc</div><div id='commit'> Commit Name: b3791e408af7125fde12cda1cdeaefbaa400aacc</div><div id='time'> Time: 2022-06-30</div><div id='author'> Author: xuhaoran8@jd.com</div><div id='file'> File Name: algos/DWBC.py</div><div id='m_class'> M Class Name: Actor</div><div id='n_method'> N Class Name: Actor</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: algos/DWBC.py</div><div id='n_file'> N File Name: algos/DWBC.py</div><div id='m_start'> M Start Line: 35</div><div id='m_end'> M End Line: 52</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 54</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            audio_mask = (torch.arange(audio.shape[1], device=audio.device)[None, :, None] &lt; audio_len[:, None, None]).float()
+            x = torch.exp(audio - 1e-6) * audio_mask
+            y = torch.cat([x[1:], x[:1]])
+            return <a id="change">torch.log(</a>0.9 * x + 0.1 * y + 1e-6<a id="change">) * </a>audio_mask, audio_len
+        return audio, audio_len
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        assert len(audio.shape) == 3
+
+        if self.do_timestretch and random.random() &lt; AUGUMENT_RATE:
+            audio<a id="change">, audio_len</a> = self.timestretch(audio, audio_len)
+        if random.random() &lt; AUGUMENT_RATE:
+            audio = self.pitchshift(audio)
+        if random.random() &lt; AUGUMENT_RATE:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/kaiidams/voice100/commit/dfe0234fcc858357cb2a91bcba1da06792eabab7#diff-45ca1489e7a6bb94fd69ca7ad1bd30c3de58adc27fb2b6c0b31cafc1bf90ceffL72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716094</div><div id='project'> Project Name: kaiidams/voice100</div><div id='commit'> Commit Name: dfe0234fcc858357cb2a91bcba1da06792eabab7</div><div id='time'> Time: 2021-06-25</div><div id='author'> Author: katsuya.iida@gmail.com</div><div id='file'> File Name: voice100/audio.py</div><div id='m_class'> M Class Name: BatchSpectrogramAugumentation</div><div id='n_method'> N Class Name: BatchSpectrogramAugumentation</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(3)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: voice100/audio.py</div><div id='n_file'> N File Name: voice100/audio.py</div><div id='m_start'> M Start Line: 73</div><div id='m_end'> M End Line: 78</div><div id='n_start'> N Start Line: 80</div><div id='n_end'> N End Line: 95</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 compute scoring gt and loss
+        score_gt = F.softmax(-distance_metric(pred_dict[&quottraj&quot], gt_dict[&quoty&quot])/self.temper, dim=-1)
+        score_loss = torch.sum(torch.mul(<a id="change">- torch.log(pred_dict[&quotscore&quot])</a>, score_gt))
+        loss += self.lambda3 * score_loss
+
+        loss_dict = {"tar_cls_loss": cls_loss, "tar_offset_loss": offset_loss, "traj_loss": reg_loss, "score_loss": score_loss}</code></pre><h3>After Change</h3><pre><code class='java'>
+            pred_dict[&quottarget_prob&quot], gt_dict[&quottarget_prob&quot].float(), reduction=&quotnone&quot)
+
+        gt_idx = gt_dict[&quottarget_prob&quot].nonzero()
+        offset = pred_dict[&quotoffset&quot][gt_idx[:, 0]<a id="change">, gt_idx[:, 1]</a>]
+
+        &#47&#47 cls_loss, indices = torch.topk(cls_loss, self.m, dim=1)    &#47&#47 largest 50
+        cls_loss = cls_loss.sum()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/3407448e60091157b38747900b5a0131660c974c#diff-3cb8f127746df46ede66e9ddac497115292a2b2c75db4113e159b1910e63433eL76' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 6716090</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: 3407448e60091157b38747900b5a0131660c974c</div><div id='time'> Time: 2022-03-21</div><div id='author'> Author: liu.jb.henry@gmail.com</div><div id='file'> File Name: core/loss.py</div><div id='m_class'> M Class Name: TNTLoss</div><div id='n_method'> N Class Name: TNTLoss</div><div id='m_method'> M Method Name: forward(5)</div><div id='n_method'> N Method Name: forward(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/loss.py</div><div id='n_file'> N File Name: core/loss.py</div><div id='m_start'> M Start Line: 97</div><div id='m_end'> M End Line: 117</div><div id='n_start'> N Start Line: 109</div><div id='n_end'> N End Line: 128</div><BR>

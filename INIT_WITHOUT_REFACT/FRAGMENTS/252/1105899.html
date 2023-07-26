@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47     modules.append(nn.ReLU())
+        &#47&#47     if self.batch_normalization:
+        &#47&#47         modules.append(nn.BatchNorm1d(dim))
+        <a id="change">modules.append(</a>nn.Linear(100, dims[-1] * prediction_length)<a id="change">)</a>
+        modules.append(
+            LambdaLayer(lambda o: torch.reshape(o, (-1, prediction_length, dims[-1])))
+        )
+        self.mlp = nn.Sequential(*modules)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.mean_scaling = mean_scaling
+        self.distr_output = distr_output
+
+        <a id="change">modules</a> = []
+        dims = self.num_hidden_dimensions
+        for i, units in enumerate(dims[:-1]):
+            if i == 0:
+                input_size = context_length
+            else:
+                input_size = dims[i-1]
+            modules += [nn.Linear(input_size, units), nn.ReLU()]
+            if self.batch_normalization:
+                modules.append(nn.BatchNorm1d(units))
+        <a id="change">if len(dims) == 1</a><a id="change">:
+            </a><a id="change">modules.append(</a>nn.Linear(context_length, dims[-1] * prediction_length)<a id="change">)</a>
+        else:
+            <a id="change">modules.append(</a>nn.Linear(dims[-2], dims[-1]<a id="change"> * </a>prediction_length)<a id="change">)</a>
+        modules.append(
+            LambdaLayer(lambda o: torch.reshape(o, (-1, prediction_length, dims[-1])))
+        )
+        self.mlp = nn.Sequential(*modules)</code></pre>

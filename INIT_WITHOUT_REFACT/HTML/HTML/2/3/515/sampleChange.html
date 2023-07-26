@@ -2,18 +2,19 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                Upsample(dim_in) if not is_last else nn.Identity()
+            ]))
 
-        Wsq, Wsk, pos_q, pos_k = map(partial(expand_batch_and_merge_head, b), (self.linear_sort_q, self.linear_sort_k, self.q_pos_emb, self.k_pos_emb))
+        out_dim = <a id="change">default(</a>out_dim, 3<a id="change">)</a>
+        self.final_conv = nn.Sequential(
+            Block(dim, dim),
+            nn.Conv2d(dim, out_dim, 1)
+        )</code></pre><h3>After Change</h3><pre><code class='java'>
+                Upsample(dim_in) if not is_last else nn.Identity()
+            ]))
 
-        k_r = torch.cat((cumavg(k, dim=1)<a id="change">, k</a>), dim=-1)
-        k_r = bucket(buckets, k_r)
-
-        b_q_r = b_k_r = k_r[:, :, 0]</code></pre><h3>After Change</h3><pre><code class='java'>
-
-        pos_q, pos_k = map(partial(expand_batch_and_merge_head, b), (self.q_pos_emb, self.k_pos_emb))
-
-        q_r<a id="change"> = </a><a id="change">bucket(</a>buckets, cumavg(q, dim=1)<a id="change">)</a>
-        k_r = bucket(buckets, cumavg(k, dim=1))
-
-        b_q_r = q_r[:, :, 0]
-        b_k_r = k_r.sum(dim=2)</code></pre>
+        out_dim<a id="change"> = </a><a id="change">default(</a>out_dim, channels<a id="change">)</a>
+        self.final_conv = nn.Sequential(
+            Block(dim, dim),
+            nn.Conv2d(dim, out_dim, 1)
+        )</code></pre>

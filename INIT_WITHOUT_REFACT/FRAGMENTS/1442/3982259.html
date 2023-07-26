@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                Fire(512, 64, 256, 256),
+            )
+        &#47&#47 Final convolution is initialized differently form the rest
+        final_conv = <a id="change">nn.Conv2d(512</a>, self.num_classes<a id="change">, kernel_size=1)</a>
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=0.5),
+            final_conv,
+            nn.ReLU(inplace=True),</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        self.global_avgpool = nn.AdaptiveAvgPool2d(1)
+        self.fc = self._construct_fc_layer(fc_dims, 512, dropout_p)
+        self.classifier<a id="change"> = </a><a id="change">nn.Linear(</a>self.feature_dim, num_classes<a id="change">)</a>
+
+        self._init_params()
+
+    def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):</code></pre>

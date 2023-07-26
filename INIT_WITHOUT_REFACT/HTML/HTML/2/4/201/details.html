@@ -1,41 +1,49 @@
 <html><h3>Pattern ID :201
-</h3><img src='839996.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='896239.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-            anchor_boxes = self._anchor_cache
-        indices = indices.cpu().numpy()
-        classes = classes.cpu().numpy()
-        image_ids<a id="change"> = image_ids.cpu()</a><a id="change">.numpy()</a>
-        image_scale = image_scales.cpu().numpy()
-        for i in range(x.shape[0]):
-            detections = generate_detections(
-                class_out[i], box_out[i], anchor_boxes, indices[i], classes[i],</code></pre><h3>After Change</h3><pre><code class='java'>
-            detections = generate_detections_pt(
-                class_out[i], box_out[i], anchor_boxes, indices[i], classes[i], image_scales[i])
-            batch_detections.append(detections)
-        <a id="change">return </a>torch.stack(batch_detections, dim=0)
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w d -&gt; b d h w&quot),
+            nn.Conv2d(dim, hidden_dim, 1),
+            <a id="change">Rearrange(&quotb d h w -&gt; b (d h) w&quot</a><a id="change">)</a>,
+            nn.Conv1d(hidden_dim * h, h * h, 1, groups=segment),
+            Rearrange(&quotb (h1 h2) w -&gt; b w h1 h2&quot, h1 = h),
+            nn.Softmax(dim = -1),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.segment = segment
+        self.reshape = Rearrange(&quotb h w (s d) -&gt; b w s h d&quot, s = segment)
 
-</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/rwightman/efficientdet-pytorch/commit/5af9da70e8549e2b1a901691a214cc7a394b5b4f#diff-d6d700de47c51274bb8931077abc73712c36f2a317b2ff6672380ea1ecf4353fL85' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 839996</div><div id='project'> Project Name: rwightman/efficientdet-pytorch</div><div id='commit'> Commit Name: 5af9da70e8549e2b1a901691a214cc7a394b5b4f</div><div id='time'> Time: 2020-04-10</div><div id='author'> Author: rwightman@gmail.com</div><div id='file'> File Name: effdet/bench.py</div><div id='m_class'> M Class Name: DetBenchEval</div><div id='n_method'> N Class Name: DetBenchEval</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: effdet/bench.py</div><div id='n_file'> N File Name: effdet/bench.py</div><div id='m_start'> M Start Line: 98</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 85</div><div id='n_end'> N End Line: 96</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-            dump_distograms_path = Path(dump_distograms_path)
-            for i, output in enumerate(outputs):
-                pt, pp, pd, po = output  &#47&#47 pylint: disable=unused-variable
-                distogram_distribution<a id="change"> = pd.cpu()</a><a id="change">.detach().numpy()</a>
-                distogram = distogram_distribution_to_distogram(distogram_distribution)
-                plot_distogram(
-                    distogram, dump_distograms_path / f"dist_model_{i:02}.jpg"
-                )</code></pre><h3>After Change</h3><pre><code class='java'>
-                    distogram, dump_distograms_path / f"dist_model_{i:02}.jpg"
-                )
+        self.Wd<a id="change"> = </a>nn.ModuleList([<a id="change">nn.Linear(</a>dim, hidden_dim<a id="change">)</a> for i in range(segment)])
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w (s d) -&gt; b w s (h d)&quot, s = segment),
+            nn.Linear(int(hidden_dim * h), h * h),</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 3</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L58' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 896239</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_h</div><div id='n_method'> N Class Name: DynaMixerOp_h</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 58</div><div id='m_end'> M End Line: 60</div><div id='n_start'> N Start Line: 68</div><div id='n_end'> N End Line: 79</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w d -&gt; b d w h&quot),
+            nn.Conv2d(dim, hidden_dim, 1),
+            <a id="change">Rearrange(&quotb d w h -&gt; b (d w) h&quot</a><a id="change">)</a>,
+            nn.Conv1d(hidden_dim * w, w * w, 1, groups=segment),
+            Rearrange(&quotb (w1 w2) h -&gt; b h w1 w2&quot, w1 = w),
+            nn.Softmax(dim = -1),</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.segment = segment
+        self.reshape = Rearrange(&quotb h w (s d) -&gt; b h s w d&quot, s = segment)
 
-        <a id="change">return </a>average_dict(outputs)
-</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/learn-ventures/trdesign-pytorch/commit/3781c5aaf6b84c2935adf5a195e8c032e64e0819#diff-44d6eb2547ac5b1221761f0970fc1819fbeca0abeedac88ef1a8385fcb4ca437L245' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 839997</div><div id='project'> Project Name: learn-ventures/trdesign-pytorch</div><div id='commit'> Commit Name: 3781c5aaf6b84c2935adf5a195e8c032e64e0819</div><div id='time'> Time: 2021-03-17</div><div id='author'> Author: xandersteenbruggex@gmail.com</div><div id='file'> File Name: src/tr_Rosetta_model.py</div><div id='m_class'> M Class Name: trRosettaEnsemble</div><div id='n_method'> N Class Name: trRosettaEnsemble</div><div id='m_method'> M Method Name: forward(4)</div><div id='n_method'> N Method Name: forward(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/tr_Rosetta_model.py</div><div id='n_file'> N File Name: src/tr_Rosetta_model.py</div><div id='m_start'> M Start Line: 251</div><div id='m_end'> M End Line: 269</div><div id='n_start'> N Start Line: 257</div><div id='n_end'> N End Line: 270</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
-            print(&quotyr&quot, yr)
-        preds = torch.unsqueeze(new_data_final, dim=1)
+        self.Wd<a id="change"> = </a>nn.ModuleList([<a id="change">nn.Linear(</a>dim, hidden_dim<a id="change">)</a> for i in range(segment)])
+        self.attend = nn.Sequential(
+            Rearrange(&quotb h w (s d) -&gt; b h s (w d)&quot, s = segment),
+            nn.Linear(int(hidden_dim * w), w * w),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/liuruiyang98/jittor-mlp/commit/387d77eca07e13e6fb4fc53ccb0304bad40e2942#diff-7fcdafa15a4dd6dd568c6fa56215d7cf367b78c3d921d8df06536474032c53f3L35' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 896241</div><div id='project'> Project Name: liuruiyang98/jittor-mlp</div><div id='commit'> Commit Name: 387d77eca07e13e6fb4fc53ccb0304bad40e2942</div><div id='time'> Time: 2022-02-27</div><div id='author'> Author: 865296294@qq.com</div><div id='file'> File Name: models_pytorch/dyna_mlp.py</div><div id='m_class'> M Class Name: DynaMixerOp_w</div><div id='n_method'> N Class Name: DynaMixerOp_w</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: models_pytorch/dyna_mlp.py</div><div id='n_file'> N File Name: models_pytorch/dyna_mlp.py</div><div id='m_start'> M Start Line: 39</div><div id='m_end'> M End Line: 41</div><div id='n_start'> N Start Line: 37</div><div id='n_end'> N End Line: 48</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.coors_mlp = nn.Sequential(
+                nn.GELU(),
+                nn.Linear(heads, 1),
+                <a id="change">Rearrange(&quot... () -&gt; ...&quot</a><a id="change">)</a>
+            )
+        else:
+            self.coors_mlp = nn.Sequential(
+                nn.Linear(heads, coors_hidden_dim),</code></pre><h3>After Change</h3><pre><code class='java'>
+                nn.Linear(coors_hidden_dim, heads)
+            )
 
-        pred = <a id="change">np.squeeze(preds).cpu().data.numpy()</a>
-        multi_fuse<a id="change"> = </a>255 * pred</code></pre><h3>After Change</h3><pre><code class='java'>
-            print(&quotyr&quot, yr)
-        preds = torch.unsqueeze(new_data_final, dim=1)
-        print(preds.min())
-        <a id="change">return </a>preds</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/plemeri/inspyrenet/commit/e41f0794a2c35c83f309da6ff5cd55dc0bd00e94#diff-e663036155d2dcb0d7a165aac5788e8f2e07670eaed6aae915f660ce317df1dcL709' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 839989</div><div id='project'> Project Name: plemeri/inspyrenet</div><div id='commit'> Commit Name: e41f0794a2c35c83f309da6ff5cd55dc0bd00e94</div><div id='time'> Time: 2021-11-11</div><div id='author'> Author: taehoon1018@postech.ac.kr</div><div id='file'> File Name: lib/SotA/PA_KRN.py</div><div id='m_class'> M Class Name: PA_KRN</div><div id='n_method'> N Class Name: PA_KRN</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: lib/SotA/PA_KRN.py</div><div id='n_file'> N File Name: lib/SotA/PA_KRN.py</div><div id='m_start'> M Start Line: 751</div><div id='m_end'> M End Line: 797</div><div id='n_start'> N Start Line: 791</div><div id='n_end'> N End Line: 794</div><BR>
+        self.coors_gate<a id="change"> = </a>nn.Sequential(
+            <a id="change">nn.Linear(</a>heads, heads<a id="change">)</a>,
+            nn.Tanh()
+        )
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/en-transformer/commit/3cf2206856883bba9a13ba4541510b4fe48a6628#diff-f288a1692c1c58a186cb9ac763046f632757db1647271b97852e59e3fc5696b9L101' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 896240</div><div id='project'> Project Name: lucidrains/en-transformer</div><div id='commit'> Commit Name: 3cf2206856883bba9a13ba4541510b4fe48a6628</div><div id='time'> Time: 2021-05-16</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: en_transformer/en_transformer.py</div><div id='m_class'> M Class Name: EquivariantAttention</div><div id='n_method'> N Class Name: EquivariantAttention</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: en_transformer/en_transformer.py</div><div id='n_file'> N File Name: en_transformer/en_transformer.py</div><div id='m_start'> M Start Line: 144</div><div id='m_end'> M End Line: 152</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 162</div><BR>

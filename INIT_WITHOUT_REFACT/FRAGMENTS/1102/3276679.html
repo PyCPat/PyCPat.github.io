@@ -1,0 +1,80 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            task_per_metric = 1
+            self._tasks_iter = self._unfused_tasks_iter
+
+        self._metrics_computations<a id="change">: nn.ModuleList = </a><a id="change">nn.ModuleList(
+            [
+                &#47&#47 This Pyre error seems to be Pyre&quots bug as it can be inferred by mypy
+                &#47&#47 according to https://github.com/python/mypy/issues/3048.
+                &#47&#47 pyre-fixme[45]: Cannot instantiate abstract class `RecMetricCoputation`.
+                self._computation_class(
+                    my_rank,
+                    batch_size,
+                    task_per_metric,
+                    self._window_size,
+                    compute_on_all_ranks,
+                    self._should_validate_update,
+                    process_group,
+                    **{**kwargs, **self._get_task_kwargs(task_config)},
+                )
+                for task_config in (
+                    [self._tasks]
+                    if compute_mode == RecComputeMode.FUSED_TASKS_COMPUTATION
+                    else self._tasks
+                )
+            ]</a><a id="change">
+        )</a>
+
+    def _get_task_kwargs(
+        self, task_config: Union[RecTaskInfo, List[RecTaskInfo]]
+    ) -&gt; Dict[str, Any]:</code></pre><h3>After Change</h3><pre><code class='java'>
+        self._my_rank = my_rank
+        self._window_size = math.ceil(window_size / world_size)
+        self._batch_size = batch_size
+        self._metrics_computations<a id="change"> = nn.ModuleList()</a>
+        self._tasks = tasks
+        self._compute_mode = compute_mode
+        self._fused_update_limit = fused_update_limit
+        self._should_validate_update = should_validate_update
+        self._default_weights = {}
+        self._required_inputs = set()
+        self._update_buffers = {
+            self.PREDICTIONS: [],
+            self.LABELS: [],
+            self.WEIGHTS: [],
+        }
+        if compute_mode == RecComputeMode.FUSED_TASKS_COMPUTATION:
+            task_per_metric = len(self._tasks)
+            self._tasks_iter = self._fused_tasks_iter
+        else:
+            task_per_metric = 1
+            self._tasks_iter = self._unfused_tasks_iter
+
+        <a id="change">for task_config</a> in (
+            [self._tasks]
+            if compute_mode == RecComputeMode.FUSED_TASKS_COMPUTATION
+            else self._tasks
+        )<a id="change">:
+            &#47&#47 This Pyre error seems to be Pyre&quots bug as it can be inferred by mypy
+            &#47&#47 according to https://github.com/python/mypy/issues/3048.
+            &#47&#47 pyre-fixme[45]: Cannot instantiate abstract class `RecMetricCoputation`.
+            </a>metric_computation<a id="change"> = </a>self._computation_class(
+                my_rank,
+                batch_size,
+                task_per_metric,
+                self._window_size,
+                compute_on_all_ranks,
+                self._should_validate_update,
+                process_group,
+                **{**kwargs, **self._get_task_kwargs(task_config)},
+            )
+            required_inputs = self._get_task_required_inputs(task_config)
+
+            <a id="change">self._metrics_computations.append(</a>metric_computation<a id="change">)</a>
+            self._required_inputs.update(required_inputs)
+
+    def _get_task_kwargs(
+        self, task_config: Union[RecTaskInfo, List[RecTaskInfo]]</code></pre>

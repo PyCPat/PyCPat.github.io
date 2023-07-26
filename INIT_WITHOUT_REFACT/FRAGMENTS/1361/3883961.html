@@ -1,0 +1,33 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        
+        layers.append(MiniBatchStd())
+        layers += [
+            EqualizedConv2d(<a id="change">resl2ch[4]</a>+1, resl2ch[4], 3, padding=1, bias=False),
+            FusedLeakyReLU(resl2ch[4]),
+            Flatten(),
+            EqualizedLinear(resl2ch[4]*4**2, resl2ch[4]),</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, image_size=128, image_channels=3, channels=32, max_channels=512, block_num_conv=2, mbsd_groups=4):
+        super().__init__()
+        check_c = functools.partial(min, max_channels)
+        ochannels<a id="change"> = </a>channels
+        self.from_rgb = nn.Sequential(
+            Conv2d(&quotelr&quot, image_channels, ochannels, 1),
+            nn.LeakyReLU(0.2, inplace=True)
+        )
+        resl = image_size
+        <a id="change">blocks</a> = <a id="change">[]</a>
+        while resl &gt; 4:
+            resl = resl // 2
+            channels *= 2
+            ichannels, ochannels = ochannels, check_c(channels)
+            <a id="change">blocks.append(
+                </a>DBlock(ichannels, ochannels, block_num_conv)<a id="change">
+            )</a>
+        <a id="change">blocks.append(</a>MiniBatchStdDev(mbsd_groups)<a id="change">)</a>
+        blocks.extend([
+            Conv2d(&quotelr&quot, ochannels+1, ochannels, 3, padding=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            Flatten(),</code></pre>

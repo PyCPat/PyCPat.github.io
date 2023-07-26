@@ -1,0 +1,37 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+		self.config = config
+
+		layers = []
+		<a id="change">for i</a> in range(self.config[&quotdiscriminator&quot][&quotn_layers&quot])<a id="change">:
+			</a>in_channels = self.config[&quotdiscriminator&quot][&quotfilters&quot] * (2 ** (i - 1)) if i &gt; 0 else 3
+			out_channels = 2 * in_channels if i &gt; 0 else self.config[&quotdiscriminator&quot][&quotfilters&quot]
+
+			layers += <a id="change">[
+				</a>nn.ReflectionPad2d(padding=1),
+				<a id="change">nn.Conv2d(</a>in_channels, out_channels<a id="change">, kernel_size=4, stride=2)</a>,
+				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
+			]
+
+		layers += [
+			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+		dim_in = 2**14 // img_size
+		blocks = []
+		blocks += [<a id="change">nn.Conv2d(</a>3, dim_in, <a id="change">3</a>, <a id="change">1</a>, 1<a id="change">)</a>]
+
+		repeat_num = int(np.log2(img_size)) - 2
+		for _ in range(repeat_num):
+			dim_out = min(dim_in*2, max_conv_dim)
+			blocks += [ResBlk(dim_in, dim_out, downsample=True)]
+			dim_in = dim_out
+
+		blocks += [<a id="change">nn.LeakyReLU(</a>0.2<a id="change">)</a>]
+		blocks += [nn.Conv2d(dim_out, dim_out, 4, 1, 0)]
+		blocks += [<a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks += [<a id="change">nn.Conv2d(</a>dim_out, config[&quotn_classes&quot], <a id="change">1</a>, <a id="change">1</a>, 0<a id="change">)</a>]
+		self.main = nn.Sequential(*blocks)
+
+	def forward(self, x, y):</code></pre>

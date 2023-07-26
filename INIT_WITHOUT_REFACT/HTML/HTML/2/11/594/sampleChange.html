@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        elif self.config[&quotglobal_pool&quot] == &quotsum&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a>&quot{} pooling is not supported&quot<a id="change"> )</a>
+
+    def forward(self, positions):
+        batch_size = positions.size(0)
+        n_vertices = positions.size(1)</code></pre><h3>After Change</h3><pre><code class='java'>
+            self.gpool_layers = nn.ModuleList()
+            for _ in range(0, self.config[&quotconv_depth&quot]):
+                self.gpool_layers.append(
+                    DynamicTopKPool(<a id="change">self.config[&quotEConv_feature&quot]</a>, k=self.config[&quotk_neighbors&quot], pool_ratio=self.config[&quotpool_ratio&quot]))
+
+        &#47&#47 global pooling layer based on config
+        if self.config[&quotglobal_pool&quot] == &quotmax&quot:
+            self.global_pool = geometric.global_max_pool
+        elif self.config[&quotglobal_pool&quot] == &quotmean&quot:
+            self.global_pool = geometric.global_mean_pool
+        elif self.config[&quotglobal_pool&quot] == &quotadd&quot:
+            self.global_pool = geometric.global_add_pool
+        else: &#47&#47 max
+            <a id="change">raise ValueError(</a><a id="change">&quot{} pooling is not supported&quot.format(self.config[&quotglobal_pool&quot]</a><a id="change">))</a>
+            
+        &#47&#47 Output linear layer
+        out_features = self.config[&quotEConv_feature&quot] * self.config[&quotconv_depth&quot] if self.config[&quotskip_connections&quot] else self.config[&quotEConv_feature&quot]
+        self.lin = nn.Linear(out_features, out_size)</code></pre>

@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    export = False  &#47&#47 onnx export
+
+    def __init__(self, nc=80, anchors=(), ch=()):  &#47&#47 detection layer
+        <a id="change">super(</a>Detect, <a id="change">self</a><a id="change">)</a>.__init__()
+        self.nc = nc  &#47&#47 number of classes
+        self.no = nc + 5  &#47&#47 number of outputs per anchor
+        self.nl = len(anchors)  &#47&#47 number of detection layers
+        self.na = len(anchors[0]) // 2  &#47&#47 number of anchors
+        self.grid = [torch.zeros(1)] * self.nl  &#47&#47 init grid
+        a = torch.tensor(anchors).float().view(self.nl, -1, 2)
+        <a id="change">self.register_buffer(&quotanchors&quot</a>, a<a id="change">)</a>  &#47&#47 shape(nl,na,2)
+        self.register_buffer(&quotanchor_grid&quot, a.clone().view(self.nl, 1, -1, 1, 1, 2))  &#47&#47 shape(nl,1,na,1,1,2)
+        self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  &#47&#47 output conv
+</code></pre><h3>After Change</h3><pre><code class='java'>
+    onnx_dynamic = False  &#47&#47 ONNX export parameter
+
+    def __init__(self, nc=80, anchors=(), ch=(), inplace=True):  &#47&#47 detection layer
+        <a id="change">super()</a>.__init__()
+        self.nc = nc  &#47&#47 number of classes
+        self.no = nc + 5  &#47&#47 number of outputs per anchor
+        self.nl = len(anchors)  &#47&#47 number of detection layers</code></pre>

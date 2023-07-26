@@ -1,0 +1,40 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                raise TypeError("Unknown Type:\t{}".format(norm))
+        self.norm0 = norm(out_channels)
+
+        <a id="change">if </a>self.concat<a id="change">:
+            </a>if self.mode == &quotres_mask&quot:
+                k= 2*out_channels + 1
+            else:
+                k = 2*out_channels
+            self.conv1<a id="change"> = </a>conv3x3(k, out_channels)
+            self.norm1 = norm(out_channels)
+        else:
+            self.conv1 = conv3x3(out_channels, out_channels)</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 residual structure
+        self.conv2 = []
+        self.conv3<a id="change"> = []</a>
+        for i in range(blocks):
+            self.conv2.append(
+                nn.Sequential(*[
+                    nn.Conv2d(out_channels // 2 + 1, out_channels // 4, 5, 1, 2),
+                    nn.ReLU(True),
+                    nn.Conv2d(out_channels // 4, 1, 5, 1, 2),
+                    nn.Sigmoid()
+                ])
+            )
+            <a id="change">self.conv3.append(</a>conv3x3(out_channels // 2, out_channels)<a id="change">)</a>
+        
+        self.bn = []
+        for _ in range(blocks):
+            self.bn.append(norm(out_channels))
+        self.bn = nn.ModuleList(self.bn)
+        self.conv2 = nn.ModuleList(self.conv2)
+        self.conv3<a id="change"> = </a>nn.ModuleList(self.conv3)
+        self.act = act
+
+    def forward(self, from_up, from_down, mask=None):</code></pre>

@@ -1,0 +1,24 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            ))
+        input_channel = output_channel
+        for t, c, n, s in setting:
+            output_channel = <a id="change">int(</a>c<a id="change"> * </a>width_mult<a id="change">)</a>
+            for i in range(n):
+                self.features.append(InvertedResidual(input_channel, output_channel, s, expand_ratio=t))
+                input_channel = output_channel
+        self.features.append(conv_1x1_bn(input_channel, last_channel))</code></pre><h3>After Change</h3><pre><code class='java'>
+                self.features.append(InvertedResidual(input_channel, output_channel, s, expand_ratio=t,free=t_free))
+                input_channel = output_channel
+        self.features.append(
+            <a id="change">nn.Sequential(
+                </a>nn.Conv2d(input_channel * t_free, last_channel, 1, 1, 0, bias=False),
+                nn.BatchNorm2d(last_channel),
+                nn.ReLU6(inplace=True)<a id="change">
+            )</a>
+        )
+        self.features = nn.Sequential(*self.features)
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.2),</code></pre>

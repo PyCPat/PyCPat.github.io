@@ -1,0 +1,144 @@
+<html><h3>Pattern ID :61
+</h3><img src='386564.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+		self.config = config
+
+		layers = <a id="change">[]</a>
+		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotstyle_encoder&quot][&quotn_layers&quot]<a id="change">):
+			</a>in_channels = self.config[&quotstyle_encoder&quot][&quotfilters&quot]<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(<a id="change">i</a><a id="change"> - 1</a>))<a id="change"> if i</a><a id="change"> &gt; 0 else </a>3
+			out_channels = <a id="change">2</a><a id="change"> * in_channels</a><a id="change"> if i</a><a id="change"> &gt; 0 else </a>self.config[&quotstyle_encoder&quot][&quotfilters&quot]
+
+			layers<a id="change"> += </a><a id="change">[
+				nn.Conv2d(in_channels</a>, out_channels<a id="change">, kernel_size=4, stride=2, padding=1)</a>,
+				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
+			]
+
+		self.convs = nn.Sequential(*layers)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		img_size = config[&quotimg_shape&quot][0]
+
+		dim_in = 2**14 // img_size
+		blocks<a id="change"> = </a><a id="change">[]</a>
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(3</a>, <a id="change">dim_in</a>, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>]
+
+		repeat_num<a id="change"> = </a><a id="change">int(np.log2(</a>img_size<a id="change">)</a><a id="change">)</a><a id="change"> - 2</a>
+		<a id="change">for </a><a id="change">_</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			dim_out = </a><a id="change">min(dim_in</a><a id="change">*2</a>, max_conv_dim<a id="change">)</a>
+			blocks<a id="change"> += </a><a id="change">[ResBlk(dim_in</a>, <a id="change">dim_out</a><a id="change">, downsample=True)</a>]
+			dim_in<a id="change"> = dim_out</a>
+
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[nn</a><a id="change">.Conv2d(</a>dim_out, dim_out, <a id="change">4</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[nn</a><a id="change">.LeakyReLU(0.2</a><a id="change">)</a>]
+		self.shared = nn.Sequential(*blocks)
+
+		self.unshared = nn.ModuleList()</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 42</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/dffe3cb71a1c6c5500c019edf4a07d4443b84cd8#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L130' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 386564</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: dffe3cb71a1c6c5500c019edf4a07d4443b84cd8</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: StyleEncoder</div><div id='n_method'> N Class Name: StyleEncoder</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 209</div><div id='m_end'> M End Line: 226</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 155</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+		self.config = config
+
+		layers = <a id="change">[]</a>
+		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotstyle_encoder&quot][&quotn_layers&quot]<a id="change">):
+			in_channels</a> = self.config[&quotstyle_encoder&quot][&quotfilters&quot]<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(i<a id="change"> - 1</a>))<a id="change"> if </a><a id="change">i &gt; 0 else </a>3
+			out_channels = <a id="change">2</a><a id="change"> * </a>in_channels<a id="change"> if </a><a id="change">i &gt; 0 else </a>self.config[&quotstyle_encoder&quot][&quotfilters&quot]
+
+			layers<a id="change"> += </a><a id="change">[
+				nn.Conv2d(</a>in_channels, out_channels<a id="change">, kernel_size=4, stride=2, padding=1)</a>,
+				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
+			]
+
+		self.convs = nn.Sequential(*layers)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.config = config
+		img_size = config[&quotimg_shape&quot][0]
+
+		<a id="change">dim_in</a> = 2**14 // img_size
+		blocks<a id="change"> = </a><a id="change">[]</a>
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(3</a>, dim_in, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>]
+
+		repeat_num<a id="change"> = </a><a id="change">int(np.log2(</a>img_size<a id="change">)</a><a id="change">)</a><a id="change"> - 2</a>
+		<a id="change">for </a><a id="change">_</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			dim_out = </a><a id="change">min(</a>dim_in<a id="change">*2</a>, max_conv_dim<a id="change">)</a>
+			blocks<a id="change"> += </a><a id="change">[ResBlk(</a>dim_in, dim_out<a id="change">, downsample=True)</a>]
+			dim_in<a id="change"> = </a>dim_out
+
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(</a>dim_out, dim_out, <a id="change">4</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		self.shared = nn.Sequential(*blocks)
+
+		self.unshared = nn.ModuleList()</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/dffe3cb71a1c6c5500c019edf4a07d4443b84cd8#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L206' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 386566</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: dffe3cb71a1c6c5500c019edf4a07d4443b84cd8</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: StyleEncoder</div><div id='n_method'> N Class Name: StyleEncoder</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 209</div><div id='m_end'> M End Line: 226</div><div id='n_start'> N Start Line: 130</div><div id='n_end'> N End Line: 155</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+		self.config = config
+
+		layers = <a id="change">[]</a>
+		<a id="change">for i</a> in <a id="change">range(</a>self.config[&quotdiscriminator&quot][&quotn_layers&quot]<a id="change">):
+			in_channels</a> = self.config[&quotdiscriminator&quot][&quotfilters&quot]<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(i<a id="change"> - 1</a>))<a id="change"> if </a><a id="change">i &gt; 0 else </a>3
+			out_channels = <a id="change">2</a><a id="change"> * </a>in_channels<a id="change"> if </a><a id="change">i &gt; 0 else </a>self.config[&quotdiscriminator&quot][&quotfilters&quot]
+
+			layers<a id="change"> += </a><a id="change">[
+				</a>nn.ReflectionPad2d(padding=1),
+				<a id="change">nn.Conv2d(</a>in_channels, out_channels<a id="change">, kernel_size=4, stride=2)</a>,
+				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
+			]
+
+		layers += [
+			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.config = config
+		img_size = config[&quotimg_shape&quot][0]
+
+		<a id="change">dim_in</a> = 2**14 // img_size
+		blocks<a id="change"> = </a><a id="change">[]</a>
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(3</a>, dim_in, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>]
+
+		repeat_num<a id="change"> = </a><a id="change">int(np.log2(</a>img_size<a id="change">)</a><a id="change">)</a><a id="change"> - 2</a>
+		<a id="change">for </a><a id="change">_</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			dim_out = </a><a id="change">min(</a>dim_in<a id="change">*2</a>, max_conv_dim<a id="change">)</a>
+			blocks<a id="change"> += </a><a id="change">[ResBlk(</a>dim_in, dim_out<a id="change">, downsample=True)</a>]
+			dim_in<a id="change"> = </a>dim_out
+
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks += [nn.Conv2d(dim_out, dim_out, 4, 1, 0)]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(</a>dim_out, config[&quotn_classes&quot], <a id="change">1</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
+		self.main = nn.Sequential(*blocks)
+
+	def forward(self, x, y):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/dffe3cb71a1c6c5500c019edf4a07d4443b84cd8#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L163' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 386563</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: dffe3cb71a1c6c5500c019edf4a07d4443b84cd8</div><div id='time'> Time: 2020-05-19</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 166</div><div id='m_end'> M End Line: 179</div><div id='n_start'> N Start Line: 98</div><div id='n_end'> N End Line: 117</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+		self.config = config
+		self.n_filters = 64
+
+		layers = <a id="change">[]</a>
+		<a id="change">for i</a> in <a id="change">range(</a>4<a id="change">):
+			in_channels</a> = self.n_filters<a id="change"> * </a>(<a id="change">2</a><a id="change"> ** </a>(i<a id="change"> - 1</a>))<a id="change"> if </a><a id="change">i &gt; 0 else </a>3
+			out_channels = <a id="change">2</a><a id="change"> * </a>in_channels<a id="change"> if </a><a id="change">i &gt; 0 else </a>self.n_filters
+
+			layers<a id="change"> += </a><a id="change">[
+				</a>nn.ReflectionPad2d(padding=1),
+				<a id="change">nn.Conv2d(</a>in_channels, out_channels<a id="change">, kernel_size=4, stride=2)</a>,
+				<a id="change">nn.LeakyReLU(negative_slope=0.2, inplace=True)</a>
+			]
+
+		layers += [
+			nn.Conv2d(in_channels=out_channels, out_channels=1, kernel_size=1, stride=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+		self.config = config
+		img_size = config[&quotimg_shape&quot][0]
+
+		<a id="change">dim_in</a> = 256  &#47&#472**14 // img_size
+		blocks<a id="change"> = </a><a id="change">[]</a>
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(3</a>, dim_in, <a id="change">3</a>, <a id="change">1</a>, <a id="change">1</a><a id="change">)</a>]
+
+		repeat_num<a id="change"> = </a><a id="change">int(np.log2(</a>img_size<a id="change">)</a><a id="change">)</a><a id="change"> - 2</a>
+		<a id="change">for </a><a id="change">_</a> in <a id="change">range(</a>repeat_num<a id="change">):
+			dim_out = </a><a id="change">min(</a>dim_in<a id="change">*2</a>, max_conv_dim<a id="change">)</a>
+			blocks<a id="change"> += </a><a id="change">[ResBlk(</a>dim_in, dim_out<a id="change">, downsample=True)</a>]
+			dim_in<a id="change"> = </a>dim_out
+
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks += [nn.Conv2d(dim_out, dim_out, 4, 1, 0)]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.LeakyReLU(0.2</a><a id="change">)</a>]
+		blocks<a id="change"> += </a><a id="change">[</a><a id="change">nn.Conv2d(</a>dim_out, config[&quotn_classes&quot], <a id="change">1</a>, <a id="change">1</a>, <a id="change">0</a><a id="change">)</a>]
+		self.main = nn.Sequential(*blocks)
+
+		self.apply(he_init)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/avivga/overlord/commit/fa020664bf0dcbd11e72953117146be2cdbc3b48#diff-44dac3f4f06b62a8129520d279f589b0b2144de4f2a7720992f263c496651b43L189' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 386572</div><div id='project'> Project Name: avivga/overlord</div><div id='commit'> Commit Name: fa020664bf0dcbd11e72953117146be2cdbc3b48</div><div id='time'> Time: 2020-05-29</div><div id='author'> Author: avivga@gmail.com</div><div id='file'> File Name: model/modules.py</div><div id='m_class'> M Class Name: Discriminator</div><div id='n_method'> N Class Name: Discriminator</div><div id='m_method'> M Method Name: __init__(3)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model/modules.py</div><div id='n_file'> N File Name: model/modules.py</div><div id='m_start'> M Start Line: 193</div><div id='m_end'> M End Line: 206</div><div id='n_start'> N Start Line: 81</div><div id='n_end'> N End Line: 103</div><BR>

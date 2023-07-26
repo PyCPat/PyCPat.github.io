@@ -1,0 +1,71 @@
+<html><h3>Pattern ID :1919
+</h3><img src='5006932.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.alibi = AlibiPositionalBias(heads = heads)
+
+        self.to_q<a id="change"> = </a><a id="change">nn.Sequential(
+            </a>nn.Conv1d(dim, inner_dim, 1, bias = False),
+            nn.Conv1d(inner_dim, inner_dim, 3, bias = False, groups = inner_dim)<a id="change">
+        )</a>
+
+        self.to_k = nn.Sequential(
+            nn.Conv1d(dim, inner_dim, 1, bias = False),
+            nn.Conv1d(inner_dim, inner_dim, 3, bias = False, groups = inner_dim)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.qkv_ds_convs = nn.ModuleList([])
+
+        for _ in range(3): &#47&#47 for queries, keys, values
+            ds_convs<a id="change"> = </a><a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
+
+            for kernel_size in ds_conv_kernel_sizes:
+                if kernel_size == 0:
+                    ds_convs.append(nn.Identity())
+                    continue
+
+                <a id="change">ds_convs.append(</a>CausalDepthwiseConv1d(inner_dim, kernel_size)<a id="change">)</a>
+
+            self.qkv_ds_convs.append(ds_convs)
+
+        &#47&#47 learned alibi positional bias for 4 groups of heads</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/tranception-pytorch/commit/b2eaf893294394093839a66effb621645d54cd6c#diff-18b0a7fd74d6ed16b8ebef089a2a63eb9b5ff5662fc464204330a63b2b4466c1L90' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5006932</div><div id='project'> Project Name: lucidrains/tranception-pytorch</div><div id='commit'> Commit Name: b2eaf893294394093839a66effb621645d54cd6c</div><div id='time'> Time: 2022-06-12</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: tranception_pytorch/tranception_pytorch.py</div><div id='m_class'> M Class Name: CausalAttention</div><div id='n_method'> N Class Name: CausalAttention</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: tranception_pytorch/tranception_pytorch.py</div><div id='n_file'> N File Name: tranception_pytorch/tranception_pytorch.py</div><div id='m_start'> M Start Line: 90</div><div id='m_end'> M End Line: 109</div><div id='n_start'> N Start Line: 99</div><div id='n_end'> N End Line: 127</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self._submodules_ordered_dict[str(index)] = GraphNetBlock(model_fn=make_mlp, output_size=output_size,
+                                                                      message_passing_aggregator=message_passing_aggregator,
+                                                                      attention=attention)
+        self.submodules<a id="change"> = </a><a id="change">nn.Sequential(</a>self._submodules_ordered_dict<a id="change">)</a>
+
+    def forward(self, latent_graph):
+        return self.submodules(latent_graph)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+                 stochastic_message_passing_used=False):
+        super().__init__()
+        self.stochastic_message_passing_used = stochastic_message_passing_used
+        self.graphnet_blocks<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        for index in range(message_passing_steps):
+            <a id="change">self.graphnet_blocks.append(</a>GraphNetBlock(model_fn=make_mlp, output_size=output_size,
+                                                      message_passing_aggregator=message_passing_aggregator,
+                                                      attention=attention)<a id="change">)</a>
+
+    def forward(self, latent_graph, normalized_adj_mat=None):
+        if self.stochastic_message_passing_used:
+            for graphnet_block in self.graphnet_blocks:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wwmark/meshgraphnets/commit/e4e3108cc75391e9ec27d848ef92f94334e0915b#diff-29973b9f31200f62639094a281ceab62f28365601cd36811142566fbbc38da0cL321' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5006933</div><div id='project'> Project Name: wwmark/meshgraphnets</div><div id='commit'> Commit Name: e4e3108cc75391e9ec27d848ef92f94334e0915b</div><div id='time'> Time: 2021-11-07</div><div id='author'> Author: ruoheng.ma@gmail.com</div><div id='file'> File Name: encode_process_decode_ripple.py</div><div id='m_class'> M Class Name: Processor</div><div id='n_method'> N Class Name: Processor</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(6)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: encode_process_decode_ripple.py</div><div id='n_file'> N File Name: encode_process_decode_ripple.py</div><div id='m_start'> M Start Line: 323</div><div id='m_end'> M End Line: 328</div><div id='n_start'> N Start Line: 323</div><div id='n_end'> N End Line: 330</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self._submodules_ordered_dict = OrderedDict()
+        for index in range(message_passing_steps):
+            self._submodules_ordered_dict[str(index)] = GraphNetBlock(model_fn=make_mlp, output_size=output_size, message_passing_aggregator=message_passing_aggregator)
+        self.submodules<a id="change"> = </a><a id="change">nn.Sequential(</a>self._submodules_ordered_dict<a id="change">)</a>
+        &quot&quot&quot
+        super().__init__()
+        self._message_passing_steps = message_passing_steps
+        self.submodule = GraphNetBlock(model_fn=make_mlp, output_size=output_size)</code></pre><h3>After Change</h3><pre><code class='java'>
+                 stochastic_message_passing_used=False):
+        super().__init__()
+        self.stochastic_message_passing_used = stochastic_message_passing_used
+        self.graphnet_blocks<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        for index in range(message_passing_steps):
+            <a id="change">self.graphnet_blocks.append(</a>GraphNetBlock(model_fn=make_mlp, output_size=output_size,
+                                                      message_passing_aggregator=message_passing_aggregator,
+                                                      attention=attention)<a id="change">)</a>
+
+    def forward(self, latent_graph, normalized_adj_mat=None):
+        if self.stochastic_message_passing_used:
+            for graphnet_block in self.graphnet_blocks:</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/wwmark/meshgraphnets/commit/2e65d2b0e36033a5a2a0ddcb73d7601635f223ba#diff-2a1838fd89edbf7fc22eb003fbdcbe4ac68927faa9e4cbd1df4afa4bbc9bda9aL169' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 5006929</div><div id='project'> Project Name: wwmark/meshgraphnets</div><div id='commit'> Commit Name: 2e65d2b0e36033a5a2a0ddcb73d7601635f223ba</div><div id='time'> Time: 2021-11-21</div><div id='author'> Author: ruoheng.ma@gmail.com</div><div id='file'> File Name: encode_process_decode.py</div><div id='m_class'> M Class Name: Processor</div><div id='n_method'> N Class Name: Processor</div><div id='m_method'> M Method Name: __init__(7)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: encode_process_decode.py</div><div id='n_file'> N File Name: encode_process_decode.py</div><div id='m_start'> M Start Line: 171</div><div id='m_end'> M End Line: 174</div><div id='n_start'> N Start Line: 222</div><div id='n_end'> N End Line: 230</div><BR>

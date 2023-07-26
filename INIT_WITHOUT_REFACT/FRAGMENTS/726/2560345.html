@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        super().__init__()
+        emb_dim = default(emb_dim, dim)
+        self.token_emb = nn.Embedding(num_tokens, emb_dim)
+        self.pos_emb = <a id="change">nn.Embedding(</a>max_seq_len, emb_dim<a id="change">)</a>
+        self.to_model_dim = identity if emb_dim == dim else nn.Linear(emb_dim, dim)
+
+        self.reformer = Reformer(dim, depth, max_seq_len, heads = heads, bucket_size = bucket_size, n_hashes = n_hashes, ff_chunks = ff_chunks, attn_chunks = attn_chunks, causal = causal, weight_tie = weight_tie, lsh_dropout = lsh_dropout, random_rotations_per_head = random_rotations_per_head, twin_attention = twin_attention, use_scale_norm = use_scale_norm, use_full_attn = use_full_attn, full_attn_thres = full_attn_thres, num_mem_kv = num_mem_kv)
+        self.to_logits = identity if return_embeddings else nn.Linear(dim, num_tokens)</code></pre><h3>After Change</h3><pre><code class='java'>
+        super().__init__()
+        emb_dim = default(emb_dim, dim)
+        self.token_emb = nn.Embedding(num_tokens, emb_dim)
+        self.pos_emb = FixedPositionEmbedding(emb_dim)<a id="change"> if </a>fixed_position_emb<a id="change"> else </a><a id="change">nn.Embedding(</a>max_seq_len, emb_dim<a id="change">)</a>
+        self.to_model_dim = identity if emb_dim == dim else nn.Linear(emb_dim, dim)
+
+        self.reformer = Reformer(dim, depth, max_seq_len, heads = heads, bucket_size = bucket_size, n_hashes = n_hashes, ff_chunks = ff_chunks, attn_chunks = attn_chunks, causal = causal, weight_tie = weight_tie, lsh_dropout = lsh_dropout, random_rotations_per_head = random_rotations_per_head, twin_attention = twin_attention, use_scale_norm = use_scale_norm, use_full_attn = use_full_attn, full_attn_thres = full_attn_thres, num_mem_kv = num_mem_kv)
+        self.to_logits = identity if return_embeddings else nn.Linear(dim, num_tokens)</code></pre>

@@ -1,0 +1,67 @@
+<html><h3>Pattern ID :463
+</h3><img src='1463351.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.print(f&quotaccelerator not given, and device not specified: defaulting to device of diffusion prior parameters - {diffusion_prior_device}&quot)
+            self.device = diffusion_prior_device
+        else:
+            self.device = accelerator.device<a id="change"> if </a><a id="change">exists(</a>accelerator<a id="change">) else </a>device
+            diffusion_prior.to(self.device)
+
+        &#47&#47 save model</code></pre><h3>After Change</h3><pre><code class='java'>
+
+        &#47&#47 mixed precision checks
+
+        <a id="change">if </a>(
+            exists(self.accelerator) 
+            and self.accelerator.distributed_type == DistributedType.DEEPSPEED 
+            and self.diffusion_prior.clip is not None
+            )<a id="change">:
+            &#47&#47 Then we need to make sure clip is using the correct precision or else deepspeed will error
+            </a>cast_type_map = {
+                "fp16": torch.half,
+                "bf16": torch.bfloat16,
+                "no": torch.float
+            }
+            precision_type<a id="change"> = </a>cast_type_map[accelerator.mixed_precision]
+            <a id="change">assert </a>precision_type == torch.float, "DeepSpeed currently only supports float32 precision when using on the fly embedding generation from clip"
+            self.diffusion_prior.clip.to(precision_type)
+
+        &#47&#47 optimizer stuff</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 5</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/dalle2-pytorch/commit/f9423d308b6f36e51152c2c45045ff4ebb308287#diff-617450527162fa367141dbf45e8b201673573479820af0ffc56ba93b7f70947fL177' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1463351</div><div id='project'> Project Name: lucidrains/dalle2-pytorch</div><div id='commit'> Commit Name: f9423d308b6f36e51152c2c45045ff4ebb308287</div><div id='time'> Time: 2022-07-20</div><div id='author'> Author: 51308183+nousr@users.noreply.github.com</div><div id='file'> File Name: dalle2_pytorch/trainer.py</div><div id='m_class'> M Class Name: DiffusionPriorTrainer</div><div id='n_method'> N Class Name: DiffusionPriorTrainer</div><div id='m_method'> M Method Name: __init__(10)</div><div id='n_method'> N Method Name: __init__(12)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dalle2_pytorch/trainer.py</div><div id='n_file'> N File Name: dalle2_pytorch/trainer.py</div><div id='m_start'> M Start Line: 182</div><div id='m_end'> M End Line: 240</div><div id='n_start'> N Start Line: 177</div><div id='n_end'> N End Line: 246</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+                nn.Linear(
+                    in_features=context_time_features, out_features=out_channels * 2
+                ),
+            )<a id="change">
+            if </a><a id="change">exists(</a>context_time_features<a id="change">)
+            else </a>None
+        )
+
+        self.block1 = ConvBlock1d(</code></pre><h3>After Change</h3><pre><code class='java'>
+            dilation=dilation,
+        )
+
+        <a id="change">if </a>self.use_mapping<a id="change">:
+            assert </a>exists(context_mapping_features)
+            self.to_scale_shift<a id="change"> = </a>MappingToScaleShift(
+                features=context_mapping_features, channels=out_channels
+            )
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/3c710edf168da06dcc89c23ef12023d0f8b63043#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L151' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1463354</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 3c710edf168da06dcc89c23ef12023d0f8b63043</div><div id='time'> Time: 2022-09-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: ResnetBlock1d</div><div id='n_method'> N Class Name: ResnetBlock1d</div><div id='m_method'> M Method Name: __init__(0)</div><div id='n_method'> N Method Name: __init__(0)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 167</div><div id='m_end'> M End Line: 176</div><div id='n_start'> N Start Line: 147</div><div id='n_end'> N End Line: 163</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            ConvOut1d(
+                channels=out_channels,
+                kernel_sizes=kernel_sizes_out,
+            )<a id="change">
+            if </a><a id="change">exists(</a>kernel_sizes_out<a id="change">)
+            else </a>nn.Identity(),
+        )
+
+    def get_channels(</code></pre><h3>After Change</h3><pre><code class='java'>
+                nn.GELU(),
+            )
+
+        <a id="change">if </a>use_context_features<a id="change">:
+            assert </a>exists(context_features) and exists(context_mapping_features)
+            self.to_features<a id="change"> = </a>nn.Sequential(
+                nn.Linear(
+                    in_features=context_features, out_features=context_mapping_features
+                ),</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/archinetai/audio-diffusion-pytorch/commit/3c710edf168da06dcc89c23ef12023d0f8b63043#diff-daa41e4baa3d2f79ac9df5a1fdce9cb4f87f4b10c9335e3653c38e64ecae3966L796' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 1463355</div><div id='project'> Project Name: archinetai/audio-diffusion-pytorch</div><div id='commit'> Commit Name: 3c710edf168da06dcc89c23ef12023d0f8b63043</div><div id='time'> Time: 2022-09-21</div><div id='author'> Author: flavio.schneider.97@gmail.com</div><div id='file'> File Name: audio_diffusion_pytorch/modules.py</div><div id='m_class'> M Class Name: UNet1d</div><div id='n_method'> N Class Name: UNet1d</div><div id='m_method'> M Method Name: __init__(23)</div><div id='n_method'> N Method Name: __init__(21)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: audio_diffusion_pytorch/modules.py</div><div id='n_file'> N File Name: audio_diffusion_pytorch/modules.py</div><div id='m_start'> M Start Line: 823</div><div id='m_end'> M End Line: 938</div><div id='n_start'> N Start Line: 842</div><div id='n_end'> N End Line: 997</div><BR>

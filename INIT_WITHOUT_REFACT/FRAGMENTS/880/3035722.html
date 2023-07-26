@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.head = nn.ModuleList([nn.Linear(embed_dim[i], num_classes) if num_classes &gt; 0 else nn.Identity() for i in range(self.num_branches)])
+
+        for i in range(self.num_branches):
+            <a id="change">if </a>self.pos_embed[i].requires_grad<a id="change">:
+                </a><a id="change">trunc_normal_(</a>self.pos_embed[i]<a id="change">, std=.02)</a>
+            trunc_normal_(self.cls_token[i], std=.02)
+
+        self.apply(self._init_weights)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for i in range(self.num_branches):
+            if hasattr(self, f&quotpos_embed_{i}&quot):
+            &#47&#47 if self.pos_embed[i].requires_grad:
+                <a id="change">trunc_normal_(</a>getattr(self, f&quotpos_embed_{i}&quot)<a id="change">, std=.02)</a>
+            trunc_normal_(getattr(self, f&quotcls_token_{i}&quot), std=.02)
+
+        self.apply(self._init_weights)
+</code></pre>

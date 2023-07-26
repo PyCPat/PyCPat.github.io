@@ -1,0 +1,85 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        self.gcb = gcb
+        self.with_gcb = gcb is not None
+        self.gen_attention = gen_attention
+        self.with_gen_attention = <a id="change">gen_attention is not None</a>
+
+        if self.style == &quotpytorch&quot:
+            self.conv1_stride = 1
+            self.conv2_stride = stride
+        else:
+            self.conv1_stride = stride
+            self.conv2_stride = 1
+
+        self.norm1_name, norm1 = build_norm_layer(norm_cfg, planes, postfix=1)
+        self.norm2_name, norm2 = build_norm_layer(norm_cfg, planes, postfix=2)
+        self.norm3_name, norm3 = build_norm_layer(
+            norm_cfg, planes * self.expansion, postfix=3)
+
+        self.conv1 = build_conv_layer(
+            conv_cfg,
+            inplanes,
+            planes,
+            kernel_size=1,
+            stride=self.conv1_stride,
+            bias=False)
+        self.add_module(self.norm1_name, norm1)
+        fallback_on_stride = False
+        if self.with_dcn:
+            fallback_on_stride = dcn.pop(&quotfallback_on_stride&quot, False)
+        if not self.with_dcn or fallback_on_stride:
+            self.conv2 = build_conv_layer(
+                conv_cfg,
+                planes,
+                planes,
+                kernel_size=3,
+                stride=self.conv2_stride,
+                padding=dilation,
+                dilation=dilation,
+                bias=False)
+        else:
+            assert self.conv_cfg is None, &quotconv_cfg must be None for DCN&quot
+            self.conv2 = build_conv_layer(
+                dcn,
+                planes,
+                planes,
+                kernel_size=3,
+                stride=self.conv2_stride,
+                padding=dilation,
+                dilation=dilation,
+                bias=False)
+
+        self.add_module(self.norm2_name, norm2)
+        self.conv3 = build_conv_layer(
+            conv_cfg,
+            planes,
+            planes * self.expansion,
+            kernel_size=1,
+            bias=False)
+        self.add_module(self.norm3_name, norm3)
+
+        self.relu = nn.ReLU(inplace=True)
+        self.downsample = downsample
+
+        if self.with_gcb:
+            gcb_inplanes = planes * self.expansion
+            self.context_block = ContextBlock(inplanes=gcb_inplanes, **gcb)
+
+        &#47&#47 gen_attention
+        <a id="change">if </a>self.with_gen_attention<a id="change">:
+            </a>self.gen_attention_block<a id="change"> = </a>GeneralizedAttention(
+                planes, **gen_attention)
+
+    @property</code></pre><h3>After Change</h3><pre><code class='java'>
+                if plugin[&quotposition&quot] == &quotafter_conv2&quot
+            ]
+            self.after_conv3_plugins = [
+                <a id="change">plugin[&quotcfg&quot]</a> for plugin in plugins
+                if <a id="change">plugin[&quotposition&quot] == &quotafter_conv3&quot</a>
+            ]
+
+        if self.style == &quotpytorch&quot:
+            self.conv1_stride = 1</code></pre>

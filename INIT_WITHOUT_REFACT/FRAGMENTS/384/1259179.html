@@ -1,0 +1,22 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for ind in reversed(range(num_mults)):
+            is_last = (ind &lt; 1)
+            channel_mult = inner_channel * channel_mults[ind]
+            <a id="change">for </a>_ in <a id="change">range(0</a>, res_blocks-1<a id="change">):
+                </a>ups.append(ResBlockDown(
+                    pre_channel, channel_mult, use_affine_level=use_affine_level, noise_channel=inner_channel*4, dropout=dropout, stride=1))
+                pre_channel = channel_mult
+            if not is_last:</code></pre><h3>After Change</h3><pre><code class='java'>
+            if not is_last:
+                ups.append(ResBlockUp(
+                    pre_channel, pre_channel, use_affine_level=use_affine_level, noise_channel=noise_channel, dropout=dropout, stride=2))
+            <a id="change">for _</a> in <a id="change">range(</a>0, res_blocks<a id="change">-2</a><a id="change">)</a><a id="change">:
+                </a>ups.append(ResBlockUp(
+                    pre_channel, channel_mult, use_affine_level=use_affine_level, noise_channel=noise_channel, dropout=dropout, stride=1))
+                pre_channel<a id="change"> = </a>channel_mult
+        self.ups = nn.ModuleList(ups)
+
+        self.final_conv = nn.Sequential(</code></pre>

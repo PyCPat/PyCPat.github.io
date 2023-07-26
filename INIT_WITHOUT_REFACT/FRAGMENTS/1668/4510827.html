@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 Create progression blocks and rgb layers
+        channels = in_channels
+        for idx in range(<a id="change">int(</a>log2(img_size<a id="change">/</a>4)<a id="change">)</a> + 1):
+            conv_in = int(in_channels * factors[idx])
+            conv_out = channels
+            self.rgb_layers.append(WSConv2d(img_channels, conv_in, kernel_size=1, stride=1, padding=0))</code></pre><h3>After Change</h3><pre><code class='java'>
+        &#47&#47 here we work back ways from factors because the discriminator
+        &#47&#47 should be mirrored from the generator. So the first prog_block and
+        &#47&#47 rgb layer we append will work for input size 1024x1024, then 512-&gt;256-&gt; etc
+        for i in <a id="change">range(</a>len(factors) - 1, 0, -1<a id="change">)</a>:
+            conv_in = int(in_channels * factors[i])
+            conv_out = int(in_channels * factors[i - 1])
+            self.prog_blocks.append(ConvBlock(conv_in, conv_out, use_pixelnorm=False))</code></pre>

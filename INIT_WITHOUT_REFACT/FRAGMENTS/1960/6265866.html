@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        for _, local_heads in zip(range(depth), n_local_attn_heads):
+            layer = nn.ModuleList([
+                PreNorm(dim, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head, blindspot_size = blindspot_size, n_local_attn_heads = local_heads, local_attn_window_size = local_attn_window_size, psi_fn = psi_fn)),
+                PreNorm(dim, <a id="change">Chunk(</a>ff_chunks, <a id="change">FeedForward(</a>dim<a id="change">)</a><a id="change">, along_dim = 1)</a>)
+            ])
+            layers.append(layer)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+            layer_num = ind + 1
+            use_pkm = layer_num in cast_tuple(pkm_layers)
+
+            parallel_net = <a id="change">Chunk(</a>ff_chunks, <a id="change">FeedForward(</a>dim<a id="change">)</a><a id="change">, along_dim = 1)</a> if not use_pkm else PKM(dim)
+
+            layer = nn.ModuleList([
+                PreNorm(dim, SelfAttention(dim, heads, causal, one_kv_head = one_kv_head, blindspot_size = blindspot_size, n_local_attn_heads = local_heads, local_attn_window_size = local_attn_window_size, psi_fn = psi_fn)),</code></pre>

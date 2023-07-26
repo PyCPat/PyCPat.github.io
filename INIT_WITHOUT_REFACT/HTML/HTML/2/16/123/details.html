@@ -1,0 +1,173 @@
+<html><h3>Pattern ID :123
+</h3><img src='622601.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.channels_out = <a id="change">{
+            </a>&quotinner_p3&quot: inner_p3,
+            &quotinner_p4&quot: inner_p4,
+            &quotinner_p5&quot: inner_p5<a id="change">
+        }</a>
+        self.re_channels_out()
+
+        self.P3_size = P3_size
+        self.P4_size = P4_size
+        self.P5_size = P5_size
+        self.inner_p3 = self.channels_out[&quotinner_p3&quot]
+        self.inner_p4<a id="change"> = </a>self.channels_out[&quotinner_p4&quot]
+        self.inner_p5 = self.channels_out[&quotinner_p5&quot]
+        self.P3 = C3(self.P3_size, self.inner_p3, self.get_depth(3), False)
+        self.convP3 = Conv(self.inner_p3, self.inner_p3, 3, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, P3_size=256, P4_size=256, P5_size=512, channels_outs=[512, 1024], version=&quots&quot):
+        super(PAN, self).__init__()
+        self.version = str(version)
+        <a id="change">self.channels_outs = </a>channels_outs
+        gains = {
+                &quotn&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.25},
+                &quots&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.5},
+                &quotm&quot: {&quotgd&quot: 0.67, &quotgw&quot: 0.75},
+                &quotl&quot: {&quotgd&quot: 1, &quotgw&quot: 1},
+                &quotx&quot: {&quotgd&quot: 1.33, &quotgw&quot: 1.25}
+                }
+
+        if self.version.lower() in gains:
+            &#47&#47 only for yolov5
+            self.gd = gains[self.version.lower()][&quotgd&quot]  &#47&#47 depth gain
+            self.gw = gains[self.version.lower()][&quotgw&quot]  &#47&#47 width gain
+        else:
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.re_channels_out()
+
+        self.P3_size = P3_size
+        self.P4_size = P4_size
+        self.P5_size = P5_size
+
+        self.convP3 = Conv(self.P3_size, self.P3_size, 3, 2)
+        self.P4 = C3(self.P3_size + self.P4_size, <a id="change">self.channels_outs[0]</a>, self.get_depth(3), False)
+
+        self.convP4 = Conv(<a id="change">self.channels_outs[0]</a>, self.channels_outs[0], 3, 2)
+        self.P5 = C3(self.channels_outs[0] + self.P5_size, <a id="change">self.channels_outs[1]</a>, self.get_depth(3), False)
+
+        self.concat = Concat()
+        self.out_shape = [self.P3_size, <a id="change">self.channels_outs[0]</a>, <a id="change">self.channels_outs[1]</a>]
+        print("PAN input channel size: P3 {}, P4 {}, P5 {}".format(self.P3_size, self.P4_size, self.P5_size))
+        print("PAN output channel size: PP3 {}, PP4 {}, PP5 {}".format(self.P3_size, self.channels_outs[0], <a id="change">self.channels_outs[1]</a>))
+
+    def get_depth(self, n):
+        return max(round(n * self.gd), 1) if n &gt; 1 else n</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 9</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/bobo-y/flexible-yolov5/commit/9fb058ef7b7925a243a436788f3f55dbb4b3e263#diff-6a24bb0986bc07ebe13306404d2f8e3a46f6660a66c6dc9e77f0561c3c56a901L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 622601</div><div id='project'> Project Name: bobo-y/flexible-yolov5</div><div id='commit'> Commit Name: 9fb058ef7b7925a243a436788f3f55dbb4b3e263</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: yl305237731@gmail.com</div><div id='file'> File Name: od/models/neck/PAN.py</div><div id='m_class'> M Class Name: PAN</div><div id='n_method'> N Class Name: PAN</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: od/models/neck/PAN.py</div><div id='n_file'> N File Name: od/models/neck/PAN.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.channels_out = <a id="change">{
+            </a>&quotinner_p3&quot: inner_p3,
+            &quotinner_p4&quot: inner_p4,
+            &quotinner_p5&quot: inner_p5<a id="change">
+        }</a>
+        self.re_channels_out()
+
+        self.P3_size = P3_size
+        self.P4_size = P4_size
+        self.P5_size = P5_size
+        self.inner_p3 = self.channels_out[&quotinner_p3&quot]
+        self.inner_p4<a id="change"> = </a>self.channels_out[&quotinner_p4&quot]
+        self.inner_p5 = self.channels_out[&quotinner_p5&quot]
+        self.P3 = C3(self.P3_size, self.inner_p3, self.get_depth(3), False)
+        self.convP3 = Conv(self.inner_p3, self.inner_p3, 3, 2)</code></pre><h3>After Change</h3><pre><code class='java'>
+    def __init__(self, P3_size=256, P4_size=256, P5_size=512, channels_outs=[512, 1024], version=&quots&quot):
+        super(PAN, self).__init__()
+        self.version = str(version)
+        <a id="change">self.channels_outs = </a>channels_outs
+        gains = {
+                &quotn&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.25},
+                &quots&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.5},
+                &quotm&quot: {&quotgd&quot: 0.67, &quotgw&quot: 0.75},
+                &quotl&quot: {&quotgd&quot: 1, &quotgw&quot: 1},
+                &quotx&quot: {&quotgd&quot: 1.33, &quotgw&quot: 1.25}
+                }
+
+        if self.version.lower() in gains:
+            &#47&#47 only for yolov5
+            self.gd = gains[self.version.lower()][&quotgd&quot]  &#47&#47 depth gain
+            self.gw = gains[self.version.lower()][&quotgw&quot]  &#47&#47 width gain
+        else:
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.re_channels_out()
+
+        self.P3_size = P3_size
+        self.P4_size = P4_size
+        self.P5_size = P5_size
+
+        self.convP3 = Conv(self.P3_size, self.P3_size, 3, 2)
+        self.P4 = C3(self.P3_size + self.P4_size, <a id="change">self.channels_outs[0]</a>, self.get_depth(3), False)
+
+        self.convP4 = Conv(<a id="change">self.channels_outs[0]</a>, <a id="change">self.channels_outs[0]</a>, 3, 2)
+        self.P5 = C3(self.channels_outs[0] + self.P5_size, <a id="change">self.channels_outs[1]</a>, self.get_depth(3), False)
+
+        self.concat = Concat()
+        self.out_shape = [self.P3_size, <a id="change">self.channels_outs[0]</a>, self.channels_outs[1]]
+        print("PAN input channel size: P3 {}, P4 {}, P5 {}".format(self.P3_size, self.P4_size, self.P5_size))
+        print("PAN output channel size: PP3 {}, PP4 {}, PP5 {}".format(self.P3_size, self.channels_outs[0], <a id="change">self.channels_outs[1]</a>))
+
+    def get_depth(self, n):
+        return max(round(n * self.gd), 1) if n &gt; 1 else n</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/bobo-y/flexible-yolov5/commit/9fb058ef7b7925a243a436788f3f55dbb4b3e263#diff-6a24bb0986bc07ebe13306404d2f8e3a46f6660a66c6dc9e77f0561c3c56a901L21' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 622600</div><div id='project'> Project Name: bobo-y/flexible-yolov5</div><div id='commit'> Commit Name: 9fb058ef7b7925a243a436788f3f55dbb4b3e263</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: yl305237731@gmail.com</div><div id='file'> File Name: od/models/neck/PAN.py</div><div id='m_class'> M Class Name: PAN</div><div id='n_method'> N Class Name: PAN</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(8)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: od/models/neck/PAN.py</div><div id='n_file'> N File Name: od/models/neck/PAN.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 58</div><div id='n_start'> N Start Line: 21</div><div id='n_end'> N End Line: 53</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.channels_out<a id="change"> = </a><a id="change">{
+            </a>&quotinner_p4&quot: inner_p4,
+            &quotouter_p4&quot: outer_p4<a id="change">,
+        }</a>
+        self.re_channels_out()
+        self.concat = Concat()
+
+        self.P5_upsampled = nn.Upsample(scale_factor=2, mode=&quotnearest&quot)</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.C3_size = C3_size
+        self.C4_size = C4_size
+        self.C5_size = C5_size
+        <a id="change">self.channels_outs = </a>channel_outs
+        self.version = version
+        gains = {
+                &quotn&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.25},
+                &quots&quot: {&quotgd&quot: 0.33, &quotgw&quot: 0.5},
+                &quotm&quot: {&quotgd&quot: 0.67, &quotgw&quot: 0.75},
+                &quotl&quot: {&quotgd&quot: 1, &quotgw&quot: 1},
+                &quotx&quot: {&quotgd&quot: 1.33, &quotgw&quot: 1.25}
+                }
+
+        if self.version.lower() in gains:
+            &#47&#47 only for yolov5
+            self.gd = gains[self.version.lower()][&quotgd&quot]  &#47&#47 depth gain
+            self.gw = gains[self.version.lower()][&quotgw&quot]  &#47&#47 width gain
+        else:
+            self.gd = 0.33
+            self.gw = 0.5
+
+        self.re_channels_out()
+        self.concat = Concat()
+
+        self.P5 = Conv(self.C5_size, <a id="change">self.channels_outs[0]</a>, 1, 1)
+        self.P5_upsampled = nn.Upsample(scale_factor=2, mode=&quotnearest&quot)
+        self.conv1 = C3(<a id="change">self.channels_outs[0]</a> + self.C4_size, self.channels_outs[0], self.get_depth(3), False)
+
+        self.P4 = Conv(self.channels_outs[0], self.channels_outs[1], 1, 1)
+        self.P4_upsampled = nn.Upsample(scale_factor=2, mode=&quotnearest&quot)
+
+        self.P3 = C3(self.channels_outs[1] + self.C3_size, <a id="change">self.channels_outs[1]</a>, self.get_depth(3), False)
+
+
+        self.out_shape = {&quotP3_size&quot: self.channels_outs[1],
+                          &quotP4_size&quot: <a id="change">self.channels_outs[1]</a>,
+                          &quotP5_size&quot: <a id="change">self.channels_outs[0]</a>}
+        print("FPN input channel size: C3 {}, C4 {}, C5 {}".format(self.C3_size, self.C4_size, self.C5_size))
+        print("FPN output channel size: P3 {}, P4 {}, P5 {}".format(self.channels_outs[1], self.channels_outs[1],
+                                                                    <a id="change">self.channels_outs[0]</a>))
+
+
+    def get_depth(self, n):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/yl305237731/flexible-yolov5/commit/9fb058ef7b7925a243a436788f3f55dbb4b3e263#diff-fb1aadb98b8c4896803b1ae6a69af3dda54c0f3e3c1ac87aae0bff844349f63aL20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 622641</div><div id='project'> Project Name: yl305237731/flexible-yolov5</div><div id='commit'> Commit Name: 9fb058ef7b7925a243a436788f3f55dbb4b3e263</div><div id='time'> Time: 2022-07-02</div><div id='author'> Author: yl305237731@gmail.com</div><div id='file'> File Name: od/models/neck/FPN.py</div><div id='m_class'> M Class Name: PyramidFeatures</div><div id='n_method'> N Class Name: PyramidFeatures</div><div id='m_method'> M Method Name: __init__(6)</div><div id='n_method'> N Method Name: __init__(7)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: od/models/neck/FPN.py</div><div id='n_file'> N File Name: od/models/neck/FPN.py</div><div id='m_start'> M Start Line: 20</div><div id='m_end'> M End Line: 57</div><div id='n_start'> N Start Line: 23</div><div id='n_end'> N End Line: 62</div><BR>

@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+    super().__init__()
+    self.action_size, self.state_only, self.forward_kl = action_size, state_only, forward_kl
+    input_layer = nn.Linear(state_size if state_only else state_size + action_size, hidden_size)
+    self.discriminator = <a id="change">nn.Sequential(</a>input_layer, <a id="change">nn.Tanh()</a>, <a id="change">nn.Linear(</a>hidden_size, hidden_size<a id="change">)</a>, <a id="change">nn.Tanh()</a>, <a id="change">nn.Linear(</a>hidden_size, 1<a id="change">)</a>, nn.Sigmoid()<a id="change">)</a>
+
+  def forward(self, state, action):
+    D = self.discriminator(state if self.state_only else _join_state_action(state, action, self.action_size)).squeeze(dim=1)</code></pre><h3>After Change</h3><pre><code class='java'>
+  def __init__(self, state_size, action_size, hidden_size, state_only=False, forward_kl=False):
+    super().__init__()
+    self.action_size, self.state_only, self.forward_kl = action_size, state_only, forward_kl
+    self.discriminator = <a id="change">_create_fcnn(</a>state_size if state_only else state_size + action_size, hidden_size, 1, <a id="change">&quottanh&quot</a><a id="change">, final_activation_function=&quotsigmoid&quot, final_gain=nn.init.calculate_gain(&quotsigmoid&quot))</a>
+
+  def forward(self, state, action):
+    D = self.discriminator(state if self.state_only else _join_state_action(state, action, self.action_size)).squeeze(dim=1)</code></pre>

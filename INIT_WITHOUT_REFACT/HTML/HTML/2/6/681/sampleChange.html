@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        patch_dim = channels * patch_size * patch_size
+        self.to_patch_embedding = nn.Sequential(
+            Rearrange(&quotb c (h p1) (w p2) -&gt; b (h w) (p1 p2 c)&quot, p1=patch_size, p2=patch_size),
+            <a id="change">nn.Linear(</a>patch_dim, emb_dim<a id="change">)</a>,
+        )
+        &#47&#47Embedding
+        self.cls_token = nn.Parameter(torch.randn(1, 1, emb_dim))</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.fusions = nn.ModuleList(self.fusions)
+
+        &#47&#47Head
+        <a id="change">if type == "full"</a><a id="change">:
+            </a>self.head_depth = HeadDepth(resample_dim)
+            self.head_segmentation = HeadSeg(resample_dim, nclasses=nclasses)
+        elif type == "depth":
+            self.head_depth = HeadDepth(resample_dim)
+            self.head_segmentation<a id="change"> = </a>None
+        else:
+            self.head_depth = None
+            self.head_segmentation<a id="change"> = </a>HeadSeg(resample_dim, nclasses=nclasses)
+
+    def forward(self, img):
+        &#47&#47 x = self.to_patch_embedding(img)</code></pre>

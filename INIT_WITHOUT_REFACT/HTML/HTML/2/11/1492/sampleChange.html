@@ -2,23 +2,21 @@
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-                    (global_graph_out.size()[0], self.polyline_vec_shape),
-                    device=self.device
-                )
-                <a id="change">for </a>i, idx in enumerate(mask_polyline_indices)<a id="change">:
-                    aux_in</a><a id="change">[i]</a><a id="change"> = </a>global_graph_out[i, idx].squeeze(0)
-                    <a id="change">aux_gt[i] = </a>x[i, idx].squeeze(0)
-                aux_out = self.aux_mlp(aux_in)
+        &#47&#47 build activation layer
+        if self.with_activation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise ValueError(</a>&quot{} is currently not supported.&quot.format(
+                    self.activation)<a id="change">)</a>
+            <a id="change">if self.activation == &quotrelu&quot</a><a id="change">:
+                </a>self.activate = nn.ReLU(inplace=inplace)
 
-                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
-        sub_graph_out = self.subgraph(data)
-        x = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
-
-        <a id="change">if </a><a id="change">self.training and self.with_aux:
-            </a>mask_polyline_indices = [random.randint(0, time_step_len - 1) + i * time_step_len for i in
-                                     range(x.size()[0])]
-            x = x.view(-1, self.subgraph_width)
-            aux_gt<a id="change"> = </a>x[mask_polyline_indices]
-            x[mask_polyline_indices] = 0.0
-            x = x.view(-1, time_step_len, self.subgraph_width)
-</code></pre>
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(ConvModule, self).__init__()
+        assert conv_cfg is None or isinstance(conv_cfg, dict)
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        <a id="change">assert </a>act_cfg is None or isinstance(act_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg</code></pre>

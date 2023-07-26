@@ -1,0 +1,69 @@
+<html><h3>Pattern ID :1267
+</h3><img src='3677848.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+                hidden_units[i + 1]) for i in range(len(hidden_units) - 1)
+            ])
+        if self.use_bn:
+            self.bn_layers<a id="change"> = </a>nn.ModuleList(
+                [nn.BatchNorm1d(
+                    hidden_units[i + 1]) for i in range(<a id="change">len(</a>hidden_units<a id="change">)</a> - 1)
+                ])
+        self.activation_layers = nn.ModuleList(
+            [activation_gen(</code></pre><h3>After Change</h3><pre><code class='java'>
+        self.linear_layers = nn.ModuleList()
+        self.activation_layers = nn.ModuleList()
+        if self.use_bn:
+            self.bn_layers<a id="change"> = </a><a id="change">nn.ModuleList()</a>
+        
+        for i in range(len(hidden_units) - 1):
+            self.linear_layers.append(
+                nn.Linear(hidden_units[i], hidden_units[i + 1]))</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/ryantd/veloce/commit/74675f3569dcd22861151eae9245540bd891c826#diff-1fae5f29f685e022e7bee571c33f34a6d639ca10ff29fed7d4d103e75251f34cL20' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3677848</div><div id='project'> Project Name: ryantd/veloce</div><div id='commit'> Commit Name: 74675f3569dcd22861151eae9245540bd891c826</div><div id='time'> Time: 2022-01-04</div><div id='author'> Author: xiaoyu.zhai@hotmail.com</div><div id='file'> File Name: phetware/layer/core.py</div><div id='m_class'> M Class Name: DNN</div><div id='n_method'> N Class Name: DNN</div><div id='m_method'> M Method Name: __init__(11)</div><div id='n_method'> N Method Name: __init__(11)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: phetware/layer/core.py</div><div id='n_file'> N File Name: phetware/layer/core.py</div><div id='m_start'> M Start Line: 21</div><div id='m_end'> M End Line: 38</div><div id='n_start'> N Start Line: 20</div><div id='n_end'> N End Line: 37</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        &#47&#47 random crop sizes (for super-resoluting unets at the end of cascade?)
+
+        self.random_crop_sizes<a id="change"> = </a>cast_tuple(random_crop_sizes, <a id="change">len(</a>image_sizes<a id="change">)</a>)
+
+        &#47&#47 cascading ddpm related stuff
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        timesteps = cast_tuple(timesteps, num_unets)
+        beta_schedules = cast_tuple(beta_schedules, num_unets)
+
+        self.noise_schedulers<a id="change"> = </a><a id="change">nn.ModuleList(</a>[]<a id="change">)</a>
+
+        for timestep, beta_schedule in zip(timesteps, beta_schedules):
+            noise_scheduler = GaussianDiffusion(beta_schedule = beta_schedule, timesteps = timestep)
+            self.noise_schedulers.append(noise_scheduler)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/imagen-pytorch/commit/c468b4f125c03a65eed08d20e7950091bbb571a4#diff-edef3c5fe92797a22c0b8fc6cca1d57b4b84ef03dfdfe802ed9147e21fc88109L911' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3677844</div><div id='project'> Project Name: lucidrains/imagen-pytorch</div><div id='commit'> Commit Name: c468b4f125c03a65eed08d20e7950091bbb571a4</div><div id='time'> Time: 2022-05-25</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_class'> M Class Name: Imagen</div><div id='n_method'> N Class Name: Imagen</div><div id='m_method'> M Method Name: __init__(2)</div><div id='n_method'> N Method Name: __init__(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: imagen_pytorch/imagen_pytorch.py</div><div id='n_file'> N File Name: imagen_pytorch/imagen_pytorch.py</div><div id='m_start'> M Start Line: 933</div><div id='m_end'> M End Line: 1003</div><div id='n_start'> N Start Line: 961</div><div id='n_end'> N End Line: 1010</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.nc = nc  &#47&#47 number of classes
+        self.no = nc + 5  &#47&#47 number of outputs per anchor
+        self.nl = len(anchors)  &#47&#47 number of detection layers
+        self.na<a id="change"> = </a><a id="change">len(</a>anchors[0]<a id="change">)</a> * self.nl  &#47&#47 number of anchors
+        self.naxs = len(anchors[0])
+        self.grid = [torch.empty(1)] * self.nl  &#47&#47 init grid
+        self.anchor_grid = [torch.empty(1)] * self.nl  &#47&#47 init anchor grid</code></pre><h3>After Change</h3><pre><code class='java'>
+        anchors_ = torch.tensor(anchors).float().view(self.nl, -1, 2) / torch.tensor(self.stride).repeat(6, 1).T.reshape(3, 3, 2)
+        self.register_buffer(&quotanchors&quot, anchors_)  &#47&#47 shape(nl,na,2)
+
+        self.out_convs = <a id="change">nn.ModuleList()</a>
+        for in_channels in ch:
+            self.out_convs<a id="change"> += </a>[
+                nn.Conv2d(in_channels=in_channels, out_channels=(5+self.nc) * self.naxs, kernel_size=1)
+            ]
+</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/alessandromondin/yolov5m/commit/cb9b9fe4530bd72066881a1c742e4267308dc41e#diff-fada037ad086638e65c7ae77e3d223963e9afaa26326aab0ea718f4013176e43L146' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3677845</div><div id='project'> Project Name: alessandromondin/yolov5m</div><div id='commit'> Commit Name: cb9b9fe4530bd72066881a1c742e4267308dc41e</div><div id='time'> Time: 2022-12-18</div><div id='author'> Author: alessandromondin00@gmail.com</div><div id='file'> File Name: model.py</div><div id='m_class'> M Class Name: HEADS</div><div id='n_method'> N Class Name: HEADS</div><div id='m_method'> M Method Name: __init__(4)</div><div id='n_method'> N Method Name: __init__(5)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: model.py</div><div id='n_file'> N File Name: model.py</div><div id='m_start'> M Start Line: 146</div><div id='m_end'> M End Line: 164</div><div id='n_start'> N Start Line: 159</div><div id='n_end'> N End Line: 165</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+class MultiDilatedConv2d(nn.Module):
+    def __init__(self, num_features, kernel_size=(3,3), dilations=[(1,1),(2,2),(4,4)]):
+        self.num_dilations<a id="change"> = </a><a id="change">len(</a>dilations<a id="change">)</a>
+
+        for dilation in dilations:
+            self.net.append(nn.Conv2d(num_features, 1, kernel_size=kernel_size, stride=(1,1), dilation=dilation))
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        for idx, dilation in enumerate(dilations):
+            conv2d.append(nn.Conv2d(in_channels[idx], out_channels, kernel_size=kernel_size, stride=(1,1), dilation=dilation))
+        
+        self.conv2d<a id="change"> = </a><a id="change">nn.ModuleList(</a>conv2d<a id="change">)</a>
+
+    def forward(self, *input):
+        kernel_size = self.kernel_size
+        output = []</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/tky823/dnn-based_source_separation/commit/c6ede5a89e8f7a4747a9c9ff80fe721fe3e4cea4#diff-ead896e273fdbcf5c8f3a2cfbd8c95af50b268919d59e26568c480f7c48682c7L40' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 3677846</div><div id='project'> Project Name: tky823/dnn-based_source_separation</div><div id='commit'> Commit Name: c6ede5a89e8f7a4747a9c9ff80fe721fe3e4cea4</div><div id='time'> Time: 2021-03-11</div><div id='author'> Author: 40362510+tky823@users.noreply.github.com</div><div id='file'> File Name: src/models/d3net.py</div><div id='m_class'> M Class Name: MultiDilatedConv2d</div><div id='n_method'> N Class Name: MultiDilatedConv2d</div><div id='m_method'> M Method Name: __init__(5)</div><div id='n_method'> N Method Name: __init__(4)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: src/models/d3net.py</div><div id='n_file'> N File Name: src/models/d3net.py</div><div id='m_start'> M Start Line: 41</div><div id='m_end'> M End Line: 44</div><div id='n_start'> N Start Line: 62</div><div id='n_end'> N End Line: 73</div><BR>

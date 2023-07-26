@@ -1,75 +1,161 @@
 <html><h3>Pattern ID :1492
-</h3><img src='4396803.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+</h3><img src='4182264.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
 <script src="../../../../highlight.pack.js"></script> 
 <script>hljs.initHighlightingOnLoad();</script>
 <html><h3></h3><h3>Before Change</h3><pre><code class='java'>
-                    (global_graph_out.size()[0], self.polyline_vec_shape),
-                    device=self.device
-                )
-                <a id="change">for </a>i, idx in enumerate(mask_polyline_indices)<a id="change">:
-                    aux_in</a><a id="change">[i]</a><a id="change"> = </a>global_graph_out[i, idx].squeeze(0)
-                    <a id="change">aux_gt[i] = </a>x[i, idx].squeeze(0)
-                aux_out = self.aux_mlp(aux_in)
+        &#47&#47 build activation layer
+        if self.with_activation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise ValueError(</a>&quot{} is currently not supported.&quot.format(
+                    self.activation)<a id="change">)</a>
+            <a id="change">if self.activation == &quotrelu&quot</a><a id="change">:
+                </a>self.activate = nn.ReLU(inplace=inplace)
 
-                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
-        sub_graph_out = self.subgraph(data)
-        x = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(ConvModule, self).__init__()
+        assert conv_cfg is None or isinstance(conv_cfg, dict)
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        <a id="change">assert </a>act_cfg is None or isinstance(act_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/saic-vul/iterdet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL88' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4182264</div><div id='project'> Project Name: saic-vul/iterdet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        <a id="change">self.activation</a> = activation
+        self.inplace = inplace
+        self.order = order
+        assert isinstance(self.order, tuple) and len(self.order) == 3
+        assert set(order) == set([&quotconv&quot, &quotnorm&quot, &quotact&quot])
 
-        <a id="change">if </a><a id="change">self.training and self.with_aux:
-            </a>mask_polyline_indices = [random.randint(0, time_step_len - 1) + i * time_step_len for i in
-                                     range(x.size()[0])]
-            x = x.view(-1, self.subgraph_width)
-            aux_gt<a id="change"> = </a>x[mask_polyline_indices]
-            x[mask_polyline_indices] = 0.0
-            x = x.view(-1, time_step_len, self.subgraph_width)
-</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 4</div><BR><div id='size'>Non-data size: 8</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-predition/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL78' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4396803</div><div id='project'> Project Name: henry1iu/tnt-trajectory-predition</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: VectorNet</div><div id='n_method'> N Class Name: VectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 141</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.with_norm = norm_cfg is not None
+        self.with_activation = activation is not None
+        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
+        if bias == &quotauto&quot:
+            bias = False if self.with_norm else True
+        self.with_bias = bias
 
-            pred = self.traj_pred_mlp(global_graph_out[:, [0]].squeeze(1))
-            if self.with_aux:
-                <a id="change">aux_in</a> = torch.empty(
-                    (global_graph_out.size()[0], self.polyline_vec_shape),
-                    device=self.device
-                )
-                <a id="change">aux_gt</a> = torch.empty(
-                    (global_graph_out.size()[0], self.polyline_vec_shape),
-                    device=self.device
-                )
-                <a id="change">for </a>i, <a id="change">idx</a> in enumerate(mask_polyline_indices)<a id="change">:
-                    </a><a id="change">aux_in[i] = </a>global_graph_out[i, idx].squeeze(0)
-                    <a id="change">aux_gt[i]</a><a id="change"> = </a>x[i, idx].squeeze(0)
-                aux_out = self.aux_mlp(aux_in)
+        if self.with_norm and self.with_bias:
+            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
 
-                return pred, aux_out, aux_gt</code></pre><h3>After Change</h3><pre><code class='java'>
-        sub_graph_out = self.subgraph(data)
-        x = sub_graph_out.x.view(-1, time_step_len, self.subgraph_width)
+        &#47&#47 build convolution layer
+        self.conv = build_conv_layer(
+            conv_cfg,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        &#47&#47 export the attributes of self.conv to a higher level for convenience
+        self.in_channels = self.conv.in_channels
+        self.out_channels = self.conv.out_channels
+        self.kernel_size = self.conv.kernel_size
+        self.stride = self.conv.stride
+        self.padding = self.conv.padding
+        self.dilation = self.conv.dilation
+        self.transposed = self.conv.transposed
+        self.output_padding = self.conv.output_padding
+        self.groups = self.conv.groups
 
-        <a id="change">if </a><a id="change">self.training and self.with_aux:
-            </a>mask_polyline_indices = [random.randint(0, time_step_len - 1) + i * time_step_len for i in
-                                     range(x.size()[0])]
-            x = x.view(-1, self.subgraph_width)
-            aux_gt = x[mask_polyline_indices]
-            x[mask_polyline_indices] = 0.0
-            x<a id="change"> = </a>x.view(-1, time_step_len, self.subgraph_width)
+        &#47&#47 build normalization layers
+        if self.with_norm:
+            &#47&#47 norm layer is after conv layer
+            if order.index(&quotnorm&quot) &gt; order.index(&quotconv&quot):
+                norm_channels = out_channels
+            else:
+                norm_channels = in_channels
+            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
+            self.add_module(self.norm_name, norm)
 
-        &#47&#47 TODO: compute the adjacency matrix???
-        &#47&#47 reconstruct the batch global interaction graph data</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/henry1iu/tnt-trajectory-prediction/commit/d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca#diff-30a78fb4a0ae3bce4bc75278f5050fe453264ac4857acda73396888cdc4f7b0cL72' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4396802</div><div id='project'> Project Name: henry1iu/tnt-trajectory-prediction</div><div id='commit'> Commit Name: d5edc8d904cf69f92ff3c5f3acdfeb64c820ccca</div><div id='time'> Time: 2021-01-21</div><div id='author'> Author: jb@LIUs-MacBook-Pro.local</div><div id='file'> File Name: core/model/vectornet.py</div><div id='m_class'> M Class Name: VectorNet</div><div id='n_method'> N Class Name: VectorNet</div><div id='m_method'> M Method Name: forward(2)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: core/model/vectornet.py</div><div id='n_file'> N File Name: core/model/vectornet.py</div><div id='m_start'> M Start Line: 84</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 78</div><div id='n_end'> N End Line: 141</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        &#47&#47 build activation layer
+        if self.with_activation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise ValueError(</a>&quot{} is currently not supported.&quot.format(
+                    self.activation)<a id="change">)</a>
+            <a id="change">if self.activation == &quotrelu&quot</a><a id="change">:
+                </a>self.activate = nn.ReLU(inplace=inplace)
 
-        if self.context &gt; 1:
-            z = [x]
-            <a id="change">for </a><a id="change">d</a> in range(1, self.context // 2 + 1)<a id="change">:
-                </a><a id="change">z_u</a> = torch.zeros_like(x)
-                <a id="change">z_u[:, d:, :] = </a>x[:, :-d, :] &#47&#47 i-d
-                z.append(z_u)
-                <a id="change">z_d</a> = torch.zeros_like(x)
-                <a id="change">z_d[:, :-d, :]</a><a id="change"> = </a>x[:, d:, :] &#47&#47 i+d
-                z.append(z_d)
-            x = torch.cat(z, dim=2) &#47&#47 (B, N, C*width)
-</code></pre><h3>After Change</h3><pre><code class='java'>
-        B, N, C = x.shape
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(ConvModule, self).__init__()
+        assert conv_cfg is None or isinstance(conv_cfg, dict)
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        <a id="change">assert </a>act_cfg is None or isinstance(act_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/shinya7y/universenet/commit/050614a9b8528de4f8e453aa42d9265206738eb1#diff-f8d4c3911ab3aff77e544714b7ae6aa8fd0e6077cbbfb9afdf47074e12f4b59dL70' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4182263</div><div id='project'> Project Name: shinya7y/universenet</div><div id='commit'> Commit Name: 050614a9b8528de4f8e453aa42d9265206738eb1</div><div id='time'> Time: 2020-03-11</div><div id='author'> Author: xvjiarui0826@gmail.com</div><div id='file'> File Name: mmdet/models/utils/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmdet/models/utils/conv_module.py</div><div id='n_file'> N File Name: mmdet/models/utils/conv_module.py</div><div id='m_start'> M Start Line: 89</div><div id='m_end'> M End Line: 147</div><div id='n_start'> N Start Line: 88</div><div id='n_end'> N End Line: 143</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        <a id="change">self.activation</a> = activation
+        self.inplace = inplace
+        self.order = order
+        assert isinstance(self.order, tuple) and len(self.order) == 3
+        assert set(order) == set([&quotconv&quot, &quotnorm&quot, &quotact&quot])
 
-        x = self.contextize(x, self.context) &#47&#47 (B, N, C*context)
-        <a id="change">if </a><a id="change">self.mix_base &gt; 0 and x_base is not None:
-            </a>x_base<a id="change"> = </a>self.contextize(x_base, self.mix_base) &#47&#47 (B, N, 4*mix_base)
-            x = torch.cat((x_base, x), dim=2)
+        self.with_norm = norm_cfg is not None
+        self.with_activatation = activation is not None
+        &#47&#47 if the conv layer is before a norm layer, bias is unnecessary.
+        if bias == &quotauto&quot:
+            bias = False if self.with_norm else True
+        self.with_bias = bias
 
-        x = x.view(B*N, -1) &#47&#47 (B*N, C*width)</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/mxfold/mxfold2/commit/998dd44f054b5851de1d3b751eb20091d5bf5628#diff-c9a664b6ab969299efeb624a60d9f43a2f26d097fa73e50c22da2a6220cbabfaL209' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4396806</div><div id='project'> Project Name: mxfold/mxfold2</div><div id='commit'> Commit Name: 998dd44f054b5851de1d3b751eb20091d5bf5628</div><div id='time'> Time: 2019-11-11</div><div id='author'> Author: satoken@bio.keio.ac.jp</div><div id='file'> File Name: dnnfold/fold/layers.py</div><div id='m_class'> M Class Name: FCUnpairedLayer</div><div id='n_method'> N Class Name: FCUnpairedLayer</div><div id='m_method'> M Method Name: forward(3)</div><div id='n_method'> N Method Name: forward(2)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: dnnfold/fold/layers.py</div><div id='n_file'> N File Name: dnnfold/fold/layers.py</div><div id='m_start'> M Start Line: 212</div><div id='m_end'> M End Line: 223</div><div id='n_start'> N Start Line: 255</div><div id='n_end'> N End Line: 263</div><BR>
+        if self.with_norm and self.with_bias:
+            warnings.warn(&quotConvModule has norm and bias at the same time&quot)
+
+        &#47&#47 build convolution layer
+        self.conv = build_conv_layer(
+            conv_cfg,
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        &#47&#47 export the attributes of self.conv to a higher level for convenience
+        self.in_channels = self.conv.in_channels
+        self.out_channels = self.conv.out_channels
+        self.kernel_size = self.conv.kernel_size
+        self.stride = self.conv.stride
+        self.padding = self.conv.padding
+        self.dilation = self.conv.dilation
+        self.transposed = self.conv.transposed
+        self.output_padding = self.conv.output_padding
+        self.groups = self.conv.groups
+
+        &#47&#47 build normalization layers
+        if self.with_norm:
+            &#47&#47 norm layer is after conv layer
+            if order.index(&quotnorm&quot) &gt; order.index(&quotconv&quot):
+                norm_channels = out_channels
+            else:
+                norm_channels = in_channels
+            self.norm_name, norm = build_norm_layer(norm_cfg, norm_channels)
+            self.add_module(self.norm_name, norm)
+
+        &#47&#47 build activation layer
+        if self.with_activatation:
+            &#47&#47 TODO: introduce `act_cfg` and supports more activation layers
+            <a id="change">if self.activation not in [&quotrelu&quot]</a><a id="change">:
+                raise ValueError(
+                    </a>f&quot{self.activation} is currently not supported.&quot<a id="change">)</a>
+            <a id="change">if self.activation == &quotrelu&quot</a><a id="change">:
+                </a>self.activate = nn.ReLU(inplace=inplace)
+
+        &#47&#47 Use msra init by default
+        self.init_weights()</code></pre><h3>After Change</h3><pre><code class='java'>
+        super(ConvModule, self).__init__()
+        assert conv_cfg is None or isinstance(conv_cfg, dict)
+        assert norm_cfg is None or isinstance(norm_cfg, dict)
+        <a id="change">assert </a>act_cfg is None or isinstance(act_cfg, dict)
+        self.conv_cfg = conv_cfg
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/open-mmlab/mmaction2/commit/a1efe4863eae67e6768e73fe70e7435995c3ef3e#diff-aa84006bb10d2bd27253b25093e59b7543c166c12e649307fb8f257fdf86be56L66' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 4182261</div><div id='project'> Project Name: open-mmlab/mmaction2</div><div id='commit'> Commit Name: a1efe4863eae67e6768e73fe70e7435995c3ef3e</div><div id='time'> Time: 2020-03-16</div><div id='author'> Author: linjintao@sensetime.com</div><div id='file'> File Name: mmaction/models/common/conv_module.py</div><div id='m_class'> M Class Name: ConvModule</div><div id='n_method'> N Class Name: ConvModule</div><div id='m_method'> M Method Name: __init__(14)</div><div id='n_method'> N Method Name: __init__(14)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: mmaction/models/common/conv_module.py</div><div id='n_file'> N File Name: mmaction/models/common/conv_module.py</div><div id='m_start'> M Start Line: 85</div><div id='m_end'> M End Line: 143</div><div id='n_start'> N Start Line: 51</div><div id='n_end'> N End Line: 106</div><BR>

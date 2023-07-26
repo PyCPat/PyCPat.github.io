@@ -1,0 +1,81 @@
+<html><h3>Pattern ID :577
+</h3><img src='2197953.png'><BR><BR><BR><link rel="stylesheet" href="../../../../default.css">
+<script src="../../../../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList(<a id="change">[
+                </a>PreNorm(latent_dim, Attention(latent_dim, input_dim, dropout = attn_dropout), context_dim = input_dim),
+                <a id="change">PreNorm(latent_dim</a>, FeedForward(latent_dim, dropout = ff_dropout)<a id="change">)</a>,
+                PreNorm(latent_dim, Attention(latent_dim, dropout = attn_dropout)),
+                <a id="change">PreNorm(latent_dim</a>, FeedForward(latent_dim, dropout = ff_dropout)<a id="change">)</a>
+            ]))
+
+        self.to_logits = nn.Linear(latent_dim, num_classes)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_latent_attn = lambda: PreNorm(latent_dim, Attention(latent_dim, dropout = attn_dropout))
+        get_latent_ff = lambda: PreNorm(latent_dim, FeedForward(latent_dim, dropout = ff_dropout))
+
+        <a id="change">if </a>weight_tie_layers<a id="change">:
+            </a>get_cross_attn, get_cross_ff, get_latent_attn, get_latent_ff = map(cache_fn, (get_cross_attn, get_cross_ff, get_latent_attn, get_latent_ff))
+
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):</code></pre><div id='inPattern'>In pattern: SUPERPATTERN</div><BR><div id='frequency'>Frequency: 3</div><BR><div id='size'>Non-data size: 4</div><BR><h3>Instances</h3><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/f0455b6ff59331de8151bf659b62ddf97ac802bd#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L115' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2197953</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: f0455b6ff59331de8151bf659b62ddf97ac802bd</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_class'> M Class Name: Perceiver</div><div id='n_method'> N Class Name: Perceiver</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='n_file'> N File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 142</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+        self.query = nn.Parameter(torch.randn(dim))
+        self.attn_pool = Attention(dim = dim, dim_head = dim_head, heads = heads)
+
+        self.post_layers = nn.ModuleList(<a id="change">[
+            </a><a id="change">PreNorm(</a>dim, Attention(dim = dim, dim_head = dim_head, heads = heads, causal = causal)<a id="change">)</a>,
+            <a id="change">PreNorm(</a>dim, FeedForward(dim = dim, mult = ff_mult)<a id="change">)</a>
+        ])
+
+        self.to_logits = nn.Sequential(
+            Rearrange(&quotb d n -&gt; b n d&quot),</code></pre><h3>After Change</h3><pre><code class='java'>
+                PreNorm(dim, FeedForward(dim = dim, mult = ff_mult, groups = num_streams), groups = num_streams)
+            ]))
+
+        <a id="change">if </a>num_streams &gt; 1<a id="change">:
+            </a>self.query = nn.Parameter(torch.randn(dim))
+            self.attn_pool = Attention(dim = dim, dim_head = dim_head, heads = heads)
+
+        self.to_logits = nn.Sequential(</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/multistream-transformers/commit/efa311c95e37eb9d1adb03297f08bd322674c1a5#diff-e81141685efabebecc465bdbe0fb5f026c1b47e7c282daeaaf1d717b13d5d981L128' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2197952</div><div id='project'> Project Name: lucidrains/multistream-transformers</div><div id='commit'> Commit Name: efa311c95e37eb9d1adb03297f08bd322674c1a5</div><div id='time'> Time: 2021-07-31</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: multistream_transformers/multistream_transformers.py</div><div id='m_class'> M Class Name: MultistreamTransformer</div><div id='n_method'> N Class Name: MultistreamTransformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: multistream_transformers/multistream_transformers.py</div><div id='n_file'> N File Name: multistream_transformers/multistream_transformers.py</div><div id='m_start'> M Start Line: 149</div><div id='m_end'> M End Line: 166</div><div id='n_start'> N Start Line: 142</div><div id='n_end'> N End Line: 160</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+            shared_kv_proj = default(shared_kv_proj, attn.to_kv)
+            attn.to_kv = shared_kv_proj
+
+            self.layers.append(nn.ModuleList(<a id="change">[
+                </a>Residual(<a id="change">PreNorm(</a>dim, attn<a id="change">)</a>),
+                Residual(<a id="change">PreNorm(</a>dim, ff<a id="change">)</a>)<a id="change"></a>
+            ]))
+
+        &#47&#47 memory parameters
+</code></pre><h3>After Change</h3><pre><code class='java'>
+
+            attn, ff = map(lambda fn: Residual(PreNorm(dim, fn)), (attn, ff))
+
+            <a id="change">if </a>seq_len == 1<a id="change">:
+                </a>memory_is_empty = lambda *args, **kwargs: not exists(kwargs[&quotmemory&quot])
+                attn = SkipIf(memory_is_empty, attn)
+
+            self.layers.append(nn.ModuleList([</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/feedback-transformer-pytorch/commit/60f98187905b58c55f0a3061201d10a8f7d49122#diff-6b348c286a3e8b8e064ec9c64a1f61ec6d6b66e7f14bae4c1b91af070d30c72eL177' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2197955</div><div id='project'> Project Name: lucidrains/feedback-transformer-pytorch</div><div id='commit'> Commit Name: 60f98187905b58c55f0a3061201d10a8f7d49122</div><div id='time'> Time: 2021-02-03</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='m_class'> M Class Name: FeedbackTransformer</div><div id='n_method'> N Class Name: FeedbackTransformer</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='n_file'> N File Name: feedback_transformer_pytorch/feedback_transformer_pytorch.py</div><div id='m_start'> M Start Line: 204</div><div id='m_end'> M End Line: 213</div><div id='n_start'> N Start Line: 217</div><div id='n_end'> N End Line: 232</div><BR>'><BR><BR><BR><h3>Before Change</h3><pre><code class='java'>
+
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):
+            self.layers.append(nn.ModuleList(<a id="change">[
+                </a>PreNorm(latent_dim, Attention(latent_dim, input_dim, dropout = attn_dropout), context_dim = input_dim),
+                <a id="change">PreNorm(</a>latent_dim, FeedForward(latent_dim, dropout = ff_dropout)<a id="change">)</a>,
+                <a id="change">PreNorm(</a>latent_dim, Attention(latent_dim, dropout = attn_dropout)<a id="change">)</a>,
+                PreNorm(latent_dim, FeedForward(latent_dim, dropout = ff_dropout))<a id="change"></a>
+            ]))
+
+        self.to_logits = nn.Linear(latent_dim, num_classes)
+</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_latent_attn = lambda: PreNorm(latent_dim, Attention(latent_dim, dropout = attn_dropout))
+        get_latent_ff = lambda: PreNorm(latent_dim, FeedForward(latent_dim, dropout = ff_dropout))
+
+        <a id="change">if </a>weight_tie_layers<a id="change">:
+            </a>get_cross_attn, get_cross_ff, get_latent_attn, get_latent_ff = map(cache_fn, (get_cross_attn, get_cross_ff, get_latent_attn, get_latent_ff))
+
+        self.layers = nn.ModuleList([])
+        for _ in range(depth):</code></pre>'><BR><BR><BR><BR><div id='link'><a href='https://github.com/lucidrains/perceiver-pytorch/commit/f0455b6ff59331de8151bf659b62ddf97ac802bd#diff-3a107568743779cad64d2e3582fceaafb7b32d2fd87d09209dce56be844a44a4L91' target='_blank'>Link</a></div><div id='fragmentid'> Fragment ID: 2197954</div><div id='project'> Project Name: lucidrains/perceiver-pytorch</div><div id='commit'> Commit Name: f0455b6ff59331de8151bf659b62ddf97ac802bd</div><div id='time'> Time: 2021-03-04</div><div id='author'> Author: lucidrains@gmail.com</div><div id='file'> File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_class'> M Class Name: Perceiver</div><div id='n_method'> N Class Name: Perceiver</div><div id='m_method'> M Method Name: __init__(1)</div><div id='n_method'> N Method Name: __init__(1)</div><div id='m_parent_class'> M Parent Class: nn.Module</div><div id='n_parent_class'> N Parent Class: nn.Module</div><div id='m_file'> M File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='n_file'> N File Name: perceiver_pytorch/perceiver_pytorch.py</div><div id='m_start'> M Start Line: 115</div><div id='m_end'> M End Line: 120</div><div id='n_start'> N Start Line: 127</div><div id='n_end'> N End Line: 142</div><BR>

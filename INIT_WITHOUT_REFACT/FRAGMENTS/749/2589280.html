@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.pack.js"></script> 
+<script>hljs.initHighlightingOnLoad();</script>
+<html><h3></h3><h3>Before Change</h3><pre><code class='java'>
+        get_attn = lambda: SinkhornSelfAttention(dim, causal = causal, heads = heads, buckets = buckets, kv_buckets = kv_buckets, non_permutative = non_permutative, sinkhorn_iter = sinkhorn_iter, n_sortcut = n_sortcut, temperature = temperature, attn_dropout = attn_dropout, dropout = attn_layer_dropout, attn_sort_net = attn_sort_net)
+        get_ff = lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>get_attn<a id="change"> = </a>cache_fn(get_attn)
+            get_ff = cache_fn(get_ff)
+
+        for _ in range(depth):</code></pre><h3>After Change</h3><pre><code class='java'>
+        get_ff = lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+        get_attn_context = lambda: SinkhornSelfAttention(dim, context_only = True, heads = heads, buckets = buckets, kv_buckets = kv_buckets, non_permutative = non_permutative, sinkhorn_iter = sinkhorn_iter, n_sortcut = n_sortcut, temperature = temperature, attn_dropout = attn_dropout, dropout = attn_layer_dropout, attn_sort_net = attn_sort_net)
+        <a id="change">get_ff_context</a><a id="change"> = </a>lambda: FeedForward(dim, dropout = ff_dropout, glu = ff_glu)
+
+        <a id="change">if weight_tie</a><a id="change">:
+            </a>get_attn<a id="change">, get_attn_context, get_ff, get_ff_context = </a><a id="change">map(</a>cache_fn, (get_attn<a id="change">, get_attn_context, get_ff, get_ff_context</a>)<a id="change">)</a>
+
+        for _ in range(depth):
+            layers.append(nn.ModuleList([
+                PreNorm(nn.LayerNorm, dim, get_attn()),</code></pre>
